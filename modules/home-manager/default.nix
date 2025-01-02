@@ -3,7 +3,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules;
 in {
   imports = [inputs.home-manager.nixosModules.home-manager];
@@ -15,14 +19,17 @@ in {
     };
   };
   config = {
+    system = {
+      stateVersion = lib.mkDefault lib.versions.majorMinor lib.version;
+    };
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
-      extraSpecialArgs = {inherit inputs pkgs lib;};
+      extraSpecialArgs = {inherit inputs pkgs lib system;};
       backupFileExtension = "home-manager-backup";
       users = {
         ${cfg.users.user} = {
-          stateVersion = lib.mkDefault cfg.system.defaultVersion;
+          stateVersion = lib.mkDefault lib.versions.majorMinor lib.version;
           imports = [(import ./modules {inherit inputs pkgs lib;})];
         };
       };

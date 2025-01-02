@@ -25,7 +25,6 @@
     (import ./performance {inherit inputs pkgs lib;})
     (import ./security {inherit inputs pkgs lib;})
     (import ./shell {inherit inputs pkgs lib;})
-    (import ./system {inherit inputs pkgs lib;})
     (import ./themes {inherit inputs pkgs lib;})
     (import ./time {inherit inputs pkgs lib;})
     (import ./users {inherit inputs pkgs lib;})
