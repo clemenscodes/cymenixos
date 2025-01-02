@@ -33,6 +33,22 @@
     (import ./xdg {inherit inputs pkgs lib;})
   ];
   options = {
+    cymenixos = {
+      namespace = lib.mkOption {
+        type = lib.types.str;
+        internal = true;
+        readOnly = true;
+        visible = false;
+        default = "modules";
+      };
+      lib = lib.mkOption {
+        type = lib.types.attrs;
+        internal = true;
+        readOnly = true;
+        visible = false;
+        default = import ../lib {inherit pkgs;};
+      };
+    };
     modules = {
       enable = lib.mkEnableOption "Enable custom modules" // {default = false;};
     };
