@@ -15,7 +15,6 @@
   outputs = {
     self,
     nixpkgs,
-    cymenixos,
     ...
   } @ inputs: let
     system = "x86_64-linux";
@@ -27,23 +26,7 @@
     nixosConfigurations = {
       cymenixos = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
-        modules = [
-          cymenixos.nixosModules.${system}.default
-          {
-            modules = {
-              disk = {
-                enable = true;
-                device = "/dev/sda";
-              };
-              crypto = {
-                enable = true;
-                cardanix = {
-                  enable = true;
-                };
-              };
-            };
-          }
-        ];
+        modules = [./configuration.nix];
       };
     };
   };

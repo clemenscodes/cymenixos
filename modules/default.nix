@@ -3,7 +3,7 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: {
+}: {...}: {
   imports = [
     (import ./boot {inherit inputs pkgs lib;})
     (import ./config {inherit inputs pkgs lib;})
@@ -17,7 +17,7 @@
     (import ./gaming {inherit inputs pkgs lib;})
     (import ./gpu {inherit inputs pkgs lib;})
     (import ./hostname {inherit inputs pkgs lib;})
-    (import ./home-manager {inherit inputs pkgs;})
+    (import ./home-manager {inherit inputs pkgs lib;})
     (import ./io {inherit inputs pkgs lib;})
     (import ./locale {inherit inputs pkgs lib;})
     (import ./machine {inherit inputs pkgs lib;})
