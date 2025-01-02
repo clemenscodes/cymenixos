@@ -28,7 +28,7 @@
       efiSupport = false;
       device = "nodev";
       secureboot = {
-        enable = true;
+        enable = false;
       };
     };
     cpu = {
@@ -102,6 +102,7 @@
     };
     display = {
       enable = false;
+      gui = "wayland"; # or "headless"
       gtk = {
         enable = false;
       };
@@ -223,7 +224,7 @@
         enable = false;
       };
       torrent = {
-        enable = true;
+        enable = false;
         mullvadAccountSecretPath = null;
         mullvadDns = false;
       };

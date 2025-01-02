@@ -1,5 +1,5 @@
 {lib, ...}: {config, ...}: let
-  cfg = config.modules.boot;
+  cfg = config.modules.io;
 in {
   options = {
     modules = {
