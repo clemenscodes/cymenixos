@@ -21,7 +21,9 @@ in {
       };
     };
   };
-  nixpkgs = {
-    hostPlatform = system;
+  config = lib.mkIf cfg.enable {
+    nixpkgs = {
+      hostPlatform = system;
+    };
   };
 }
