@@ -30,8 +30,14 @@
         modules = [
           cymenixos.nixosModules.${system}.default
           ({...}: {
-            cardanix = {
+            modules = {
               enable = true;
+              crypto = {
+                enable = true;
+                cardanix = {
+                  enable = true;
+                };
+              };
             };
           })
         ];

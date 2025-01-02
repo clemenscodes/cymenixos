@@ -3,7 +3,7 @@
   pkgs,
   lib,
   ...
-}: {...}: {
+}: {config, ...}: {
   imports = [
     (import ./boot {inherit inputs pkgs lib;})
     (import ./config {inherit inputs pkgs lib;})
@@ -34,7 +34,10 @@
     (import ./xdg {inherit inputs pkgs lib;})
   ];
   options = {
-    modules = {
+    cymenixos = {
+      namespace = "modules";
+    };
+    ${config.cymenixos.namespace} = {
       enable = lib.mkEnableOption "Enable custom modules" // {default = true;};
     };
   };
