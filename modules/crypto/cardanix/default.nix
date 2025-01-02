@@ -3,7 +3,7 @@
   lib,
   ...
 }: {config, ...}: let
-  cymenixosLib = import ../../../lib {inherit lib;};
+  cymenixosLib = import ../../../lib {inherit lib config;};
   imports = [inputs.cardanix.nixosModules.x86_64-linux];
   module = "crypto";
   submodule = "cardanix";
@@ -37,4 +37,4 @@
     };
   };
 in
-  cymenixosLib.mkSubModule {inherit config imports module submodule declarations;}
+  cymenixosLib.mkSubModule {inherit imports module submodule declarations;}

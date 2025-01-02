@@ -1,5 +1,8 @@
-{lib, ...}: {
+{
+  lib,
   config,
+  ...
+}: {
   imports ? [],
   module,
   submodule,
