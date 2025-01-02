@@ -22,7 +22,7 @@ in {
       backupFileExtension = "home-manager-backup";
       users = {
         ${cfg.users.user} = {
-          inherit (config.system) stateVersion;
+          stateVersion = lib.mkDefault cfg.system.defaultVersion;
           imports = [(import ./modules {inherit inputs pkgs lib;})];
         };
       };

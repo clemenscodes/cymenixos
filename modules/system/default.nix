@@ -14,7 +14,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.system.enable) {
     system = {
-      stateVersion = cfg.system.defaultVersion;
+      stateVersion = lib.mkDefault cfg.system.defaultVersion;
     };
   };
 }
