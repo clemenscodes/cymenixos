@@ -1,6 +1,7 @@
 {
   inputs,
   lib,
+  config,
   ...
 }: let
   cymenixosLib = import ../../../lib {inherit lib;};
@@ -37,4 +38,4 @@
     };
   };
 in
-  cymenixosLib.mkSubModule {inherit imports module submodule declarations;}
+  cymenixosLib.mkSubModule {inherit config imports module submodule declarations;}
