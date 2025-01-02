@@ -36,5 +36,6 @@
       };
     };
   };
-in
-  cymenixosLib.mkSubModule {inherit imports module submodule declarations;}
+in {}
+# cymenixosLib.mkSubModule {inherit imports module submodule declarations;}
+
