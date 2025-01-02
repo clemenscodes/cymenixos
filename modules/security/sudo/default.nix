@@ -6,6 +6,7 @@ in {
     modules = {
       security = {
         sudo = {
+          enable = lib.mkEnableOption "Enable sudo configs" // {default = false;};
           noPassword = lib.mkOption {
             type = lib.types.bool;
             default = false;
@@ -15,7 +16,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.sudo.noPassword) {
+  config = lib.mkIf (cfg.enable && cfg.sudo.enable && cfg.sudo.noPassword) {
     security = {
       sudo = {
         extraRules = [
