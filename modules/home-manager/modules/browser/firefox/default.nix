@@ -30,7 +30,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.firefox.enable) {
     programs = {
       firefox = {
-        enable = cfg.firefox.enable;
+        inherit (cfg.firefox) enable;
         nativeMessagingHosts = [pkgs.gnome-browser-connector];
         policies = {
           DisableAppUpdate = true;

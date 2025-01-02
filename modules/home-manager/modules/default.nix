@@ -19,16 +19,16 @@ in {
     (import ./editor {inherit inputs pkgs lib;})
     (import ./explorer {inherit inputs pkgs lib;})
     (import ./fonts {inherit inputs pkgs lib;})
-    (import ./gaming {inherit inputs;})
+    (import ./gaming {inherit inputs pkgs lib;})
     (import ./media {inherit inputs pkgs lib;})
     (import ./monitoring {inherit inputs pkgs lib;})
     (import ./networking {inherit inputs pkgs lib;})
     (import ./operations {inherit inputs pkgs lib;})
     (import ./organization {inherit inputs pkgs lib;})
-    (import ./security {inherit inputs;})
+    (import ./security {inherit inputs pkgs lib;})
     (import ./shell {inherit inputs pkgs lib;})
     (import ./storage {inherit inputs pkgs lib;})
-    (import ./terminal {inherit pkgs;})
+    (import ./terminal {inherit inputs pkgs lib;})
     (import ./utils {inherit inputs pkgs lib;})
     (import ./xdg {inherit inputs pkgs lib;})
   ];
@@ -40,11 +40,10 @@ in {
   config = lib.mkIf (cfg.enable && osCfg.enable) {
     programs = {
       home-manager = {
-        enable = osCfg.enable && cfg.enable;
+        inherit (cfg) enable;
       };
     };
     home = {
-      inherit (osConfig.system) stateVersion;
       keyboard = {
         layout = osConfig.modules.locale.defaultLocale;
       };
