@@ -3,8 +3,8 @@
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
-    flake-utils = {
-      url = "github:numtide/flake-utils";
+    impermanence = {
+      url = "github:nix-community/impermanence";
     };
     disko = {
       url = "github:nix-community/disko";
@@ -13,9 +13,6 @@
           follows = "nixpkgs";
         };
       };
-    };
-    impermanence = {
-      url = "github:nix-community/impermanence";
     };
     nur = {
       url = "github:nix-community/NUR";
@@ -139,24 +136,17 @@
     };
   };
 
-  outputs = {
-    nixpkgs,
-    flake-utils,
-    ...
-  } @ inputs:
-    flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [inputs.cardanix.overlays.default];
-        };
-        inherit (pkgs) lib;
-      in {
-        nixosModules = {
-          default = import ./modules {inherit inputs pkgs lib;};
-        };
-        overlays = import ./overlays {inherit inputs nixpkgs system;};
-        formatter = pkgs.alejandra;
-      }
-    );
+  outputs = {nixpkgs, ...} @ inputs: let
+    system = "x86_64-linux";
+    pkgs = import nixpkgs {inherit system;};
+    lib = import ./lib {lib = pkgs.lib;};
+  in {
+    nixosModules = {
+      default = import ./modules {inherit inputs pkgs lib;};
+    };
+    overlays = {
+      default = import ./overlays;
+    };
+    formatter = pkgs.alejandra;
+  };
 }

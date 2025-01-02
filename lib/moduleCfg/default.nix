@@ -1,0 +1,1 @@
+module: config: config.${module}

@@ -19,16 +19,21 @@
     ...
   } @ inputs: let
     system = "x86_64-linux";
-    pkgs = import nixpkgs {inherit system;};
+    pkgs = import nixpkgs {
+      inherit system;
+      overlays = [cymenixos.overlays.default];
+    };
     inherit (pkgs) lib;
   in {
     nixosConfigurations = {
       cymenixos = lib.nixosSystem {
-        specialArgs = {inherit self inputs pkgs nixpkgs system;};
+        specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
         modules = [
           cymenixos.nixosModules.${system}.default
           ({...}: {
-            # additional configuration
+            cardanix = {
+              enable = true;
+            };
           })
         ];
       };

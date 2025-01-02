@@ -2,52 +2,37 @@
   inputs,
   lib,
   ...
-}: {
-  config,
-  system,
-  ...
 }: let
-  cfg = config.modules.crypto;
-in {
-  options = {
-    modules = {
-      crypto = {
-        cardanix = {
-          enable = lib.mkEnableOption "Enable cardanix" // {default = false;};
-        };
-      };
-    };
-  };
-  imports = [
-    inputs.cardanix.nixosModules.${system}
-  ];
-  config = lib.mkIf (cfg.enable && cfg.cardanix.enable) {
+  module = "cardanix";
+  imports = [inputs.cardanix.nixosModules.x86_64-linux];
+  declarations = {
     cardano = {
-      inherit (cfg.cardanix) enable;
+      enable = true;
       bech32 = {
-        inherit (cfg.cardanix) enable;
+        enable = true;
       };
       address = {
-        inherit (cfg.cardanix) enable;
+        enable = true;
       };
       cli = {
-        inherit (cfg.cardanix) enable;
+        enable = true;
       };
       node = {
-        inherit (cfg.cardanix) enable;
+        enable = true;
         submit-api = {
-          inherit (cfg.cardanix) enable;
+          enable = true;
         };
       };
       wallet = {
-        inherit (cfg.cardanix) enable;
+        enable = true;
       };
       db-sync = {
-        inherit (cfg.cardanix) enable;
+        enable = true;
       };
       daedalus = {
         enable = false;
       };
     };
   };
-}
+in
+  lib.mkModuleOption module imports declarations
