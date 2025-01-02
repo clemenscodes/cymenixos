@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  module = "cardanix";
+  module = "modules.crypto.cardanix";
   imports = [inputs.cardanix.nixosModules.x86_64-linux];
   declarations = {
     cardano = {
