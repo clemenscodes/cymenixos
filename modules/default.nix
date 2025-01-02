@@ -50,7 +50,7 @@
         default = import ../lib {inherit pkgs;};
       };
     };
-    ${config.cymenixos.namespace} = {
+    "${config.cymenixos.namespace}" = {
       enable = lib.mkEnableOption "Enable custom modules" // {default = true;};
     };
   };
