@@ -35,7 +35,20 @@
   ];
   options = {
     cymenixos = {
-      namespace = "modules";
+      namespace = lib.mkOption {
+        type = lib.types.str;
+        internal = true;
+        readonly = true;
+        visible = false;
+        default = "modules";
+      };
+      lib = lib.mkOption {
+        type = lib.types.attrs;
+        internal = true;
+        readonly = true;
+        visible = false;
+        default = import ../lib {inherit pkgs;};
+      };
     };
     ${config.cymenixos.namespace} = {
       enable = lib.mkEnableOption "Enable custom modules" // {default = true;};

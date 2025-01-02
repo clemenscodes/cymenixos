@@ -139,15 +139,12 @@
   outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
     pkgs = import nixpkgs {inherit system;};
-    lib = import ./lib {lib = pkgs.lib;};
+    inherit (pkgs) lib;
   in {
     nixosModules = {
       ${system} = {
         default = import ./modules {inherit inputs pkgs lib;};
       };
-    };
-    overlays = {
-      default = import ./overlays;
     };
     formatter = pkgs.alejandra;
   };
