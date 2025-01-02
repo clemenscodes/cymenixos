@@ -29,17 +29,19 @@
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
         modules = [
           cymenixos.nixosModules.${system}.default
-          # {
-          #   modules = {
-          #     enable = true;
-          #     crypto = {
-          #       enable = true;
-          #       cardanix = {
-          #         enable = true;
-          #       };
-          #     };
-          #   };
-          # }
+          {
+            modules = {
+              disk = {
+                enable = true;
+              };
+              crypto = {
+                enable = true;
+                cardanix = {
+                  enable = true;
+                };
+              };
+            };
+          }
         ];
       };
     };

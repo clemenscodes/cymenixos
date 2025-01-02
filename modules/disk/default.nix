@@ -72,31 +72,31 @@ in {
                 };
               };
             };
-            lvm_vg = {
-              pool = {
-                type = "lvm_vg";
-                lvs = {
-                  root = {
-                    size = "100%FREE";
-                    content = {
-                      type = "btrfs";
-                      extraArgs = ["-f"];
+          };
+        };
+        lvm_vg = {
+          pool = {
+            type = "lvm_vg";
+            lvs = {
+              root = {
+                size = "100%FREE";
+                content = {
+                  type = "btrfs";
+                  extraArgs = ["-f"];
 
-                      subvolumes = {
-                        "/root" = {
-                          mountpoint = "/";
-                        };
+                  subvolumes = {
+                    "/root" = {
+                      mountpoint = "/";
+                    };
 
-                        "/persist" = {
-                          mountOptions = ["subvol=persist" "noatime"];
-                          mountpoint = "/persist";
-                        };
+                    "/persist" = {
+                      mountOptions = ["subvol=persist" "noatime"];
+                      mountpoint = "/persist";
+                    };
 
-                        "/nix" = {
-                          mountOptions = ["subvol=nix" "noatime"];
-                          mountpoint = "/nix";
-                        };
-                      };
+                    "/nix" = {
+                      mountOptions = ["subvol=nix" "noatime"];
+                      mountpoint = "/nix";
                     };
                   };
                 };
