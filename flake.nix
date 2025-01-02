@@ -142,7 +142,9 @@
     lib = import ./lib {lib = pkgs.lib;};
   in {
     nixosModules = {
-      default = import ./modules {inherit inputs pkgs lib;};
+      ${system} = {
+        default = import ./modules {inherit inputs pkgs lib;};
+      };
     };
     overlays = {
       default = import ./overlays;
