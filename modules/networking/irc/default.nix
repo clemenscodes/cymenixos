@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
-  cfg = config.modules.networking;
-in {
+}: {...}: {
   imports = [
     (import ./weechat {inherit inputs pkgs lib;})
   ];

@@ -1,7 +1,10 @@
 {lib, ...}: {config, ...}: let
   cfg = config.modules;
   locale = config.modules.locale.defaultLocale;
-  utfLocale = "${locale}_${lib.toUpper locale}.UTF-8";
+  utfLocale =
+    if locale == "us"
+    then "en_US.UTF-8"
+    else "${locale}_${lib.toUpper locale}.UTF-8";
 in {
   options = {
     modules = {
@@ -9,7 +12,7 @@ in {
         enable = lib.mkEnableOption "Enable locale settings" // {default = false;};
         defaultLocale = lib.mkOption {
           type = lib.types.str;
-          default = "de";
+          default = "us";
         };
       };
     };

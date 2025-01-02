@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
-  cfg = config.modules;
-in {
+}: {...}: {
   imports = [
     (import ./auto-cpufreq {inherit inputs pkgs lib;})
     (import ./power {inherit inputs pkgs lib;})

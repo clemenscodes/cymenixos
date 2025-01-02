@@ -23,6 +23,11 @@
     };
     users = {
       enable = true;
+      user = "nixos";
+      name = "nixos";
+      wheel = false;
+      uid = 1000;
+      flake = ".local/src/cymenixos";
     };
     boot = {
       enable = false;
@@ -627,6 +632,175 @@
       defaultHostname = "cymenix";
     };
     io = {
+      enable = false;
+      android = {
+        enable = false;
+      };
+      fuse = {
+        enable = false;
+      };
+      printing = {
+        enable = false;
+      };
+      sound = {
+        enable = false;
+      };
+      udisks = {
+        enable = false;
+      };
+      xremap = {
+        enable = false;
+      };
+    };
+    locale = {
+      enable = false;
+      defaultLocale = "de";
+    };
+    machine = {
+      kind = "desktop";
+      name = "desktop";
+    };
+    networking = {
+      enable = false;
+      bluetooth = {
+        enable = false;
+      };
+      dbus = {
+        enable = false;
+      };
+      firewall = {
+        enable = false;
+      };
+      irc = {
+        enable = false;
+        weechat = {
+          enable = false;
+        };
+      };
+      mtr = {
+        enable = false;
+      };
+      stevenblack = {
+        enable = false;
+      };
+      torrent = {
+        enable = true;
+        mullvadAccountSecretPath = null;
+        mullvadDns = false;
+      };
+      upnp = {
+        enable = false;
+      };
+      vpn = {
+        enable = false;
+        thm = {
+          enable = false;
+          usernameFile = null;
+          passwordFile = null;
+        };
+      };
+      wireless = {
+        enable = false;
+        eduroam = {
+          enable = false;
+        };
+      };
+      wireshark = {
+        enable = false;
+      };
+    };
+    performance = {
+      enable = false;
+      auto-cpufreq = {
+        enable = false;
+      };
+      power = {
+        enable = false;
+      };
+      thermald = {
+        enable = false;
+      };
+      tlp = {
+        enable = false;
+      };
+    };
+    security = {
+      enable = false;
+      gnome-keyring = {
+        enable = false;
+      };
+      gnupg = {
+        enable = false;
+      };
+      hyprlock = {
+        enable = false;
+      };
+      polkit = {
+        enable = false;
+      };
+      rtkit = {
+        enable = false;
+      };
+      sops = {
+        enable = false;
+      };
+      ssh = {
+        enable = false;
+      };
+      sudo = {
+        enable = false;
+        noPassword = false;
+      };
+      swaylock = {
+        enable = false;
+      };
+      tpm = {
+        enable = false;
+      };
+    };
+    shell = {
+      enable = false;
+      console = {
+        enable = false;
+      };
+      environment = {
+        enable = false;
+      };
+      ld = {
+        enable = false;
+      };
+      zsh = {
+        enable = false;
+      };
+    };
+    themes = {
+      enable = false;
+      base = {
+        enable = false;
+      };
+      catppuccin = {
+        enable = false;
+        flavor = "macchiato";
+        accent = "blue";
+      };
+    };
+    time = {
+      enable = false;
+      defaultTimeZone = "Europe/Berlin";
+    };
+    virtualisation = {
+      enable = false;
+      docker = {
+        enable = false;
+      };
+      virt-manager = {
+        enable = false;
+      };
+    };
+    wsl = {
+      enable = false;
+    };
+    xdg = {
       enable = false;
     };
   };

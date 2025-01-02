@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
-  cfg = config.modules;
-in {
+}: {...}: {
   imports = [
     (import ./gnome-keyring {inherit inputs pkgs lib;})
     (import ./gnupg {inherit inputs pkgs lib;})

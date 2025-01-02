@@ -1,6 +1,5 @@
 {lib, ...}: {config, ...}: let
   cfg = config.modules.security;
-  isDesktop = config.modules.display.gui != "headless";
 in {
   options = {
     modules = {

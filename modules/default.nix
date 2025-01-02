@@ -3,7 +3,9 @@
   pkgs,
   lib,
   ...
-}: {...}: {
+}: {config, ...}: let
+  cfg = config.${config.cymenixos.namespace};
+in {
   imports = [
     (import ./boot {inherit inputs pkgs lib;})
     (import ./config {inherit inputs pkgs lib;})
@@ -49,7 +51,7 @@
         default = import ../lib {inherit pkgs;};
       };
     };
-    modules = {
+    ${cfg} = {
       enable = lib.mkEnableOption "Enable custom modules" // {default = false;};
     };
   };

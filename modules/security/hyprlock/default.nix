@@ -1,7 +1,5 @@
 {lib, ...}: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.users) user;
-  useHyprlock = config.home-manager.users.${user}.modules.display.lockscreen.hyprlock.enable;
 in {
   options = {
     modules = {
