@@ -1,8 +1,10 @@
 {
   pkgs,
+  lib,
+  ...
+}: {
   config,
   osConfig,
-  lib,
   ...
 }: let
   iconTheme = pkgs.catppuccin-papirus-folders.override {
@@ -20,7 +22,7 @@ in {
     modules = {
       display = {
         gtk = {
-          enable = lib.mkEnableOption "Enable GTK" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable GTK" // {default = false;};
         };
       };
     };
@@ -30,9 +32,9 @@ in {
       sessionVariables = {
         GTK_THEME = theme.name;
       };
-      packages = with pkgs; [
-        libsForQt5.breeze-icons
-        hicolor-icon-theme
+      packages = [
+        pkgs.libsForQt5.breeze-icons
+        pkgs.hicolor-icon-theme
       ];
       file = {
         ".icons/Papirus-Dark" = {

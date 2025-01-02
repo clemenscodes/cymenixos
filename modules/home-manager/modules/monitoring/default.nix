@@ -1,20 +1,18 @@
 {
+  inputs,
+  pkgs,
   lib,
-  config,
   ...
-}: let
-  cfg = config.modules;
-in
-  with lib; {
-    imports = [
-      ./btop
-      ./ncdu
-    ];
-    options = {
-      modules = {
-        monitoring = {
-          enable = mkEnableOption "Enable tools for monitoring the system" // {default = cfg.enable;};
-        };
+}: {...}: {
+  imports = [
+    (import ./btop {inherit inputs pkgs lib;})
+    (import ./ncdu {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      monitoring = {
+        enable = lib.mkEnableOption "Enable tools for monitoring the system" // {default = false;};
       };
     };
-  }
+  };
+}

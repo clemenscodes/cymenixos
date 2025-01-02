@@ -1,4 +1,4 @@
-{pkgs}:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "waybar-clock" ''
   clock=$(${pkgs.toybox}/bin/date '+%I')
   tooltip=$(echo)

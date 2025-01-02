@@ -1,4 +1,4 @@
-{pkgs}:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "waybar-powermenu" ''
   powermenu=$(echo)
   tooltip=$(echo)

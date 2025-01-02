@@ -1,25 +1,23 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.display;
-in
-  with lib; {
-    imports = [
-      ./rofi
-    ];
-    options = {
-      modules = {
-        display = {
-          launcher = {
-            enable = mkEnableOption "Enable launchers" // {default = cfg.enable;};
-            defaultLauncher = mkOption {
-              type = types.enum ["rofi"];
-              default = "rofi";
-            };
+}: {...}: {
+  imports = [
+    (import ./rofi {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      display = {
+        launcher = {
+          enable = lib.mkEnableOption "Enable launchers" // {default = false;};
+          defaultLauncher = lib.mkOption {
+            type = lib.types.enum ["rofi"];
+            default = "rofi";
           };
         };
       };
     };
-  }
+  };
+}

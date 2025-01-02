@@ -1,29 +1,31 @@
-{inputs}: {
-  system,
-  config,
+{
+  inputs,
   lib,
+  ...
+}: {
+  config,
+  system,
   ...
 }: let
   cfg = config.modules.editor;
-in
-  with lib; {
-    imports = [inputs.nvim.homeManagerModules.${system}.default];
-    options = {
-      modules = {
-        editor = {
-          nvim = {
-            enable = mkEnableOption "Enable nvim" // {default = cfg.enable;};
-          };
+in {
+  imports = [inputs.nvim.homeManagerModules.${system}.default];
+  options = {
+    modules = {
+      editor = {
+        nvim = {
+          enable = lib.mkEnableOption "Enable nvim" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.nvim.enable) {
-      modules = {
-        editor = {
-          nixvim = {
-            inherit (cfg.nvim) enable;
-          };
+  };
+  config = lib.mkIf (cfg.enable && cfg.nvim.enable) {
+    modules = {
+      editor = {
+        nixvim = {
+          inherit (cfg.nvim) enable;
         };
       };
     };
-  }
+  };
+}

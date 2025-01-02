@@ -1,33 +1,32 @@
 {
   pkgs,
   lib,
-  config,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.explorer;
 in {
   options = {
     modules = {
       explorer = {
         yazi = {
-          enable = lib.mkEnableOption "Enable yazi file browser" // {default = cfg.defaultExplorer == "yazi";};
+          enable = lib.mkEnableOption "Enable yazi file browser" // {default = false;};
         };
       };
     };
   };
   config = lib.mkIf (cfg.enable && cfg.yazi.enable) {
     home = {
-      packages = with pkgs; [
-        file
-        ffmpegthumbnailer
-        unar
-        poppler
-        jq
-        fd
-        ripgrep
-        fzf
-        zoxide
-        wl-clipboard
+      packages = [
+        pkgs.file
+        pkgs.ffmpegthumbnailer
+        pkgs.unar
+        pkgs.poppler
+        pkgs.jq
+        pkgs.fd
+        pkgs.ripgrep
+        pkgs.fzf
+        pkgs.zoxide
+        pkgs.wl-clipboard
       ];
       file = {
         ".config/yazi/plugins/smart-enter.yazi/init.lua" = {
@@ -61,7 +60,7 @@ in {
     };
     programs = {
       yazi = {
-        enable = cfg.yazi.enable;
+        inherit (cfg.yazi) enable;
         settings = {
           manager = {
             show_hidden = true;

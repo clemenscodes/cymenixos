@@ -1,25 +1,23 @@
-{inputs}: {
-  config,
+{
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.display;
-in
-  with lib; {
-    imports = [
-      (import ./hyprland {inherit inputs;})
-    ];
-    options = {
-      modules = {
-        display = {
-          compositor = {
-            enable = mkEnableOption "Enable the best compositor" // {default = cfg.enable;};
-            defaultCompositor = mkOption {
-              type = types.enum ["hyprland"];
-              default = "hyprland";
-            };
+}: {...}: {
+  imports = [
+    (import ./hyprland {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      display = {
+        compositor = {
+          enable = lib.mkEnableOption "Enable the best compositor" // {default = false;};
+          defaultCompositor = lib.mkOption {
+            type = lib.types.enum ["hyprland"];
+            default = "hyprland";
           };
         };
       };
     };
-  }
+  };
+}

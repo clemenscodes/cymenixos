@@ -1,8 +1,10 @@
 {
   pkgs,
+  lib,
+  ...
+}: {
   config,
   osConfig,
-  lib,
   ...
 }: let
   cfg = config.modules.display.lockscreen;

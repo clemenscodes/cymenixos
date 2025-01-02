@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.display.pdfviewer;
 in {
   options = {
@@ -10,7 +6,7 @@ in {
       display = {
         pdfviewer = {
           zathura = {
-            enable = lib.mkEnableOption "Enable zathura" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable zathura" // {default = false;};
           };
         };
       };

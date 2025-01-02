@@ -1,14 +1,18 @@
-{lib, ...}:
-with lib; {
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
-    ./pycharm
-    ./clion
+    (import ./pycharm {inherit inputs pkgs lib;})
+    (import ./clion {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       editor = {
         jetbrains = {
-          enable = mkEnableOption "Enables JetBrains products" // {default = false;};
+          enable = lib.mkEnableOption "Enables JetBrains products" // {default = false;};
         };
       };
     };

@@ -1,38 +1,39 @@
 {
   pkgs,
+  lib,
+  ...
+}: {
   config,
   osConfig,
-  lib,
   ...
 }: let
   cfg = config.modules.media.video;
   isDesktop = osConfig.modules.display.gui != "headless";
-in
-  with lib; {
-    options = {
-      modules = {
-        media = {
-          video = {
-            obs = {
-              enable = mkEnableOption "Enable OBS (open broadcast software)" // {default = cfg.enable && isDesktop;};
-            };
+in {
+  options = {
+    modules = {
+      media = {
+        video = {
+          obs = {
+            enable = lib.mkEnableOption "Enable OBS (open broadcast software)" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.obs.enable && isDesktop) {
-      programs = {
-        obs-studio = {
-          enable = cfg.obs.enable && isDesktop;
-          plugins = with pkgs.obs-studio-plugins; [
-            wlrobs
-            input-overlay
-            obs-pipewire-audio-capture
-            obs-vkcapture
-            obs-gstreamer
-            obs-vaapi
-          ];
-        };
+  };
+  config = lib.mkIf (cfg.enable && cfg.obs.enable && isDesktop) {
+    programs = {
+      obs-studio = {
+        inherit (cfg.obs) enable;
+        plugins = [
+          pkgs.obs-studio-plugins.wlrobs
+          pkgs.obs-studio-plugins.input-overlay
+          pkgs.obs-studio-plugins.obs-pipewire-audio-capture
+          pkgs.obs-studio-plugins.obs-vkcapture
+          pkgs.obs-studio-plugins.obs-gstreamer
+          pkgs.obs-studio-plugins.obs-vaapi
+        ];
       };
     };
-  }
+  };
+}

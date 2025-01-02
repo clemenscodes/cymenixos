@@ -1,33 +1,29 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display;
-in
-  with lib; {
-    imports = [
-      ./swaync
-    ];
-    options = {
-      modules = {
-        display = {
-          notifications = {
-            enable = mkEnableOption "Enable notifications" // {default = cfg.enable;};
-            defaultNotificationCenter = mkOption {
-              type = types.enum ["swaync"];
-              default = "swaync";
-            };
+in {
+  imports = [
+    (import ./swaync {inherit pkgs lib;})
+  ];
+  options = {
+    modules = {
+      display = {
+        notifications = {
+          enable = lib.mkEnableOption "Enable notifications" // {default = false;};
+          defaultNotificationCenter = lib.mkOption {
+            type = lib.types.enum ["swaync"];
+            default = "swaync";
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.notifications.enable) {
-      home = {
-        packages = with pkgs; [
-          libnotify
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.notifications.enable) {
+    home = {
+      packages = [pkgs.libnotify];
     };
-  }
+  };
+}

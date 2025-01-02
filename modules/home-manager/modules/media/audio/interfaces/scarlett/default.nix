@@ -1,26 +1,24 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.media.audio.interfaces;
-in
-  with lib; {
-    imports = [
-      ./alsa-scarlett-gui
-      ./scarlett2
-    ];
-    options = {
-      modules = {
-        media = {
-          audio = {
-            interfaces = {
-              scarlett = {
-                enable = mkEnableOption "Enable scarlett audio interfaces" // {default = cfg.enable;};
-              };
+}: {...}: {
+  imports = [
+    (import ./alsa-scarlett-gui {inherit inputs pkgs lib;})
+    (import ./scarlett2 {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      media = {
+        audio = {
+          interfaces = {
+            scarlett = {
+              enable = lib.mkEnableOption "Enable scarlett audio interfaces" // {default = false;};
             };
           };
         };
       };
     };
-  }
+  };
+}

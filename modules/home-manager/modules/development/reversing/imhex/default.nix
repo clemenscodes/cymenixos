@@ -1,26 +1,27 @@
 {
-  nixpkgs,
-  system,
-  config,
+  inputs,
   lib,
+  ...
+}: {
+  config,
+  system,
   ...
 }: let
   cfg = config.modules.development.reversing;
-  pkgs = import nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
     overlays = [
       (self: super: {
-        glfw = super.glfw.overrideAttrs (finalAttrs: previousAttrs:
-          with super; {
-            postPatch = lib.optionalString stdenv.isLinux ''
-              substituteInPlace src/wl_init.c \
-                --replace-fail "libxkbcommon.so.0" "${lib.getLib libxkbcommon}/lib/libxkbcommon.so.0" \
-                --replace-fail "libdecor-0.so.0" "${lib.getLib libdecor}/lib/libdecor-0.so.0" \
-                --replace-fail "libwayland-client.so.0" "${lib.getLib wayland}/lib/libwayland-client.so.0" \
-                --replace-fail "libwayland-cursor.so.0" "${lib.getLib wayland}/lib/libwayland-cursor.so.0" \
-                --replace-fail "libwayland-egl.so.1" "${lib.getLib wayland}/lib/libwayland-egl.so.1"
-            '';
-          });
+        glfw = super.glfw.overrideAttrs (finalAttrs: previousAttrs: {
+          postPatch = lib.optionalString super.stdenv.isLinux ''
+            substituteInPlace src/wl_init.c \
+              --replace-fail "libxkbcommon.so.0" "${lib.getLib super.libxkbcommon}/lib/libxkbcommon.so.0" \
+              --replace-fail "libdecor-0.so.0" "${lib.getLib super.libdecor}/lib/libdecor-0.so.0" \
+              --replace-fail "libwayland-client.so.0" "${lib.getLib super.wayland}/lib/libwayland-client.so.0" \
+              --replace-fail "libwayland-cursor.so.0" "${lib.getLib super.wayland}/lib/libwayland-cursor.so.0" \
+              --replace-fail "libwayland-egl.so.1" "${lib.getLib super.wayland}/lib/libwayland-egl.so.1"
+          '';
+        });
         imhex = super.imhex.overrideAttrs (finalAttrs: previousAttrs: let
           patterns_version = "1.35.3";
           patterns_src = super.fetchFromGitHub {
@@ -38,14 +39,14 @@
             rev = "v${version}";
             hash = "sha256-8vhOOHfg4D9B9yYgnGZBpcjAjuL4M4oHHax9ad5PJtA=";
           };
-          nativeBuildInputs = with super; [
-            autoPatchelfHook
-            cmake
-            llvm
-            python3
-            perl
-            pkg-config
-            rsync
+          nativeBuildInputs = [
+            super.autoPatchelfHook
+            super.cmake
+            super.llvm
+            super.python3
+            super.perl
+            super.pkg-config
+            super.rsync
           ];
           autoPatchelfIgnoreMissingDeps = ["*.hexpluglib"];
           appendRunpaths = [
@@ -60,22 +61,21 @@
       })
     ];
   };
-in
-  with lib; {
-    options = {
-      modules = {
-        development = {
-          reversing = {
-            imhex = {
-              enable = mkEnableOption "Enable imhex" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      development = {
+        reversing = {
+          imhex = {
+            enable = lib.mkEnableOption "Enable imhex" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.imhex.enable) {
-      home = {
-        packages = with pkgs; [imhex];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.imhex.enable) {
+    home = {
+      packages = [pkgs.imhex];
     };
-  }
+  };
+}

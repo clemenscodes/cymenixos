@@ -1,21 +1,19 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.development.gh;
-in
-  with lib; {
-    imports = [./gh-dash];
-    options = {
-      modules = {
-        development = {
-          gh = {
-            plugins = {
-              enable = mkEnableOption "Enable GitHub CLI plugins" // {default = cfg.enable;};
-            };
+}: {...}: {
+  imports = [(import ./gh-dash {inherit inputs pkgs lib;})];
+  options = {
+    modules = {
+      development = {
+        gh = {
+          plugins = {
+            enable = lib.mkEnableOption "Enable GitHub CLI plugins" // {default = false;};
           };
         };
       };
     };
-  }
+  };
+}

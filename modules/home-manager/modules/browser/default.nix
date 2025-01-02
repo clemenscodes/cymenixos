@@ -1,23 +1,26 @@
-{inputs}: {
+{
+  inputs,
+  pkgs,
   lib,
+  ...
+}: {
   config,
   osConfig,
   ...
-}:
-with lib; let
+}: let
   cfg = config.modules;
   isDesktop = osConfig.modules.display.gui != "headless";
 in {
   imports = [
-    ./chromium
-    (import ./firefox {inherit inputs;})
+    (import ./chromium {inherit inputs pkgs lib;})
+    (import ./firefox {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       browser = {
-        enable = mkEnableOption "Enables a cool browser" // {default = cfg.enable && isDesktop;};
-        defaultBrowser = mkOption {
-          type = types.str;
+        enable = lib.mkEnableOption "Enables a cool browser" // {default = false;};
+        defaultBrowser = lib.mkOption {
+          type = lib.types.str;
           default =
             if isDesktop
             then "brave"
@@ -26,7 +29,7 @@ in {
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.browser.enable) {
+  config = lib.mkIf (cfg.enable && cfg.browser.enable) {
     home = {
       sessionVariables = {
         BROWSER = cfg.browser.defaultBrowser;

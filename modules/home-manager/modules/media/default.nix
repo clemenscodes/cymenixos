@@ -1,26 +1,22 @@
 {
+  inputs,
+  pkgs,
   lib,
-  config,
-  osConfig,
   ...
-}: let
-  cfg = config.modules;
-  isDesktop = osConfig.modules.display.gui != "headless";
-in
-  with lib; {
-    imports = [
-      ./audio
-      ./communication
-      ./editing
-      ./games
-      ./music
-      ./video
-    ];
-    options = {
-      modules = {
-        media = {
-          enable = mkEnableOption "Enable media" // {default = cfg.enable && isDesktop;};
-        };
+}: {...}: {
+  imports = [
+    (import ./audio {inherit inputs pkgs lib;})
+    (import ./communication {inherit inputs pkgs lib;})
+    (import ./editing {inherit inputs pkgs lib;})
+    (import ./games {inherit inputs pkgs lib;})
+    (import ./music {inherit inputs pkgs lib;})
+    (import ./video {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      media = {
+        enable = lib.mkEnableOption "Enable media" // {default = false;};
       };
     };
-  }
+  };
+}

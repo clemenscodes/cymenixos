@@ -1,31 +1,32 @@
 {
-  nixpkgs,
+  inputs,
+  lib,
+  ...
+}: {
   system,
   config,
-  lib,
   ...
 }: let
   cfg = config.modules.development;
-  pkgs = import nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
       allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["postman"];
     };
   };
-in
-  with lib; {
-    options = {
-      modules = {
-        development = {
-          postman = {
-            enable = mkEnableOption "Enable postman support" // {default = false;};
-          };
+in {
+  options = {
+    modules = {
+      development = {
+        postman = {
+          enable = lib.mkEnableOption "Enable postman support" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.postman.enable) {
-      home = {
-        packages = with pkgs; [postman];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.postman.enable) {
+    home = {
+      packages = [pkgs.postman];
     };
-  }
+  };
+}

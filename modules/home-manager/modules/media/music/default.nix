@@ -1,24 +1,22 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.media;
-in
-  with lib; {
-    imports = [
-      ./dlplaylist
-      ./ncmpcpp
-      ./spotdl
-      ./spotify
-    ];
-    options = {
-      modules = {
-        media = {
-          music = {
-            enable = mkEnableOption "Enable music" // {default = cfg.enable;};
-          };
+}: {...}: {
+  imports = [
+    (import ./dlplaylist {inherit inputs pkgs lib;})
+    (import ./ncmpcpp {inherit inputs pkgs lib;})
+    (import ./spotdl {inherit inputs pkgs lib;})
+    (import ./spotify {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      media = {
+        music = {
+          enable = lib.mkEnableOption "Enable music" // {default = false;};
         };
       };
     };
-  }
+  };
+}

@@ -1,24 +1,22 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.editor;
-in
-  with lib; {
-    options = {
-      modules = {
-        editor = {
-          zed = {
-            enable = mkEnableOption "Enable zed" // {default = false;};
-          };
+in {
+  options = {
+    modules = {
+      editor = {
+        zed = {
+          enable = lib.mkEnableOption "Enable zed" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.zed.enable) {
-      home = {
-        packages = with pkgs; [zed-editor];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.zed.enable) {
+    home = {
+      packages = [pkgs.zed-editor];
     };
-  }
+  };
+}

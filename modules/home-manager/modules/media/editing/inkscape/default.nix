@@ -1,28 +1,24 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.media.editing;
-in
-  with lib; {
-    options = {
-      modules = {
-        media = {
-          editing = {
-            inkscape = {
-              enable = mkEnableOption "Enable inkscape" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      media = {
+        editing = {
+          inkscape = {
+            enable = lib.mkEnableOption "Enable inkscape" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.inkscape.enable) {
-      home = {
-        packages = with pkgs; [
-          inkscape-with-extensions
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.inkscape.enable) {
+    home = {
+      packages = [pkgs.inkscape-with-extensions];
     };
-  }
+  };
+}

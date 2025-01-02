@@ -1,10 +1,8 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}:
-with lib; let
+}: {config, ...}: let
   cfg = config.modules.media.audio.interfaces.scarlett;
 
   scarlett2 = pkgs.stdenv.mkDerivation {
@@ -24,12 +22,12 @@ with lib; let
       hash = "sha256-yhmXVfys300NwZ8UJ7WvOyNkGP3OkIVoRaToF+SenQA=";
     };
 
-    buildInputs = with pkgs; [
-      gnumake
-      gcc
-      alsa-lib
-      openssl
-      pkg-config
+    buildInputs = [
+      pkgs.gnumake
+      pkgs.gcc
+      pkgs.alsa-lib
+      pkgs.openssl
+      pkgs.pkg-config
     ];
 
     buildPhase = ''
@@ -50,7 +48,7 @@ in {
           interfaces = {
             scarlett = {
               scarlett2 = {
-                enable = mkEnableOption "Enable scarlett2" // {default = cfg.enable;};
+                enable = lib.mkEnableOption "Enable scarlett2" // {default = false;};
               };
             };
           };
@@ -58,7 +56,7 @@ in {
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.scarlett2.enable) {
+  config = lib.mkIf (cfg.enable && cfg.scarlett2.enable) {
     home = {
       packages = [scarlett2];
     };

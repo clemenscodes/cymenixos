@@ -1,4 +1,4 @@
-{pkgs}:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "waybar-swaync" ''
   sleep 0.3
   ${pkgs.swaynotificationcenter}/bin/swaync-client --inhibitor-add xdg-desktop-portal-hyprland

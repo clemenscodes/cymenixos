@@ -1,15 +1,18 @@
 {
+  inputs,
   lib,
+  ...
+}: {
   config,
-  nixpkgs,
   system,
   ...
-}:
-with lib; let
+}: let
   cfg = config.modules.editor.jetbrains;
-  pkgs = import nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
-    config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+    };
   };
 in {
   options = {
@@ -17,17 +20,15 @@ in {
       editor = {
         jetbrains = {
           clion = {
-            enable = mkEnableOption "Enable CLion" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable CLion" // {default = false;};
           };
         };
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.clion.enable) {
+  config = lib.mkIf (cfg.enable && cfg.clion.enable) {
     home = {
-      packages = with pkgs; [
-        jetbrains.clion
-      ];
+      packages = [pkgs.jetbrains.clion];
     };
   };
 }

@@ -4,7 +4,6 @@
     toolbar = true;
     bookmarks = [
       (import ./cybersecurity)
-      (import ./games)
     ];
   }
 ]

@@ -1,25 +1,23 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.display;
-in
-  with lib; {
-    imports = [
-      ./waybar
-    ];
-    options = {
-      modules = {
-        display = {
-          bar = {
-            enable = mkEnableOption "Enable a cool bar" // {default = cfg.enable;};
-            defaultBar = mkOption {
-              type = types.enum ["waybar"];
-              default = "waybar";
-            };
+}: {...}: {
+  imports = [
+    (import ./waybar {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      display = {
+        bar = {
+          enable = lib.mkEnableOption "Enable a cool bar" // {default = false;};
+          defaultBar = lib.mkOption {
+            type = lib.types.enum ["waybar"];
+            default = "waybar";
           };
         };
       };
     };
-  }
+  };
+}

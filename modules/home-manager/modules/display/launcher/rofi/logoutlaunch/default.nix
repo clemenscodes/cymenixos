@@ -1,4 +1,4 @@
-{pkgs}:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "logoutlaunch" ''
   dir="$HOME/.config/rofi/powermenu"
   theme='style'

@@ -1,22 +1,20 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.media;
-in
-  with lib; {
-    imports = [
-      ./discord
-      ./element
-    ];
-    options = {
-      modules = {
-        media = {
-          communication = {
-            enable = mkEnableOption "Enable communication" // {default = cfg.enable;};
-          };
+}: {...}: {
+  imports = [
+    (import ./discord {inherit inputs pkgs lib;})
+    (import ./element {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      media = {
+        communication = {
+          enable = lib.mkEnableOption "Enable communication" // {default = false;};
         };
       };
     };
-  }
+  };
+}

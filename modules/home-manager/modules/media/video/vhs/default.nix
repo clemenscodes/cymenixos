@@ -1,28 +1,24 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.media.video;
-in
-  with lib; {
-    options = {
-      modules = {
-        media = {
-          video = {
-            vhs = {
-              enable = mkEnableOption "Enable vhs to record terminal outputs" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      media = {
+        video = {
+          vhs = {
+            enable = lib.mkEnableOption "Enable vhs to record terminal outputs" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.vhs.enable) {
-      home = {
-        packages = with pkgs; [
-          vhs
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.vhs.enable) {
+    home = {
+      packages = [pkgs.vhs];
     };
-  }
+  };
+}

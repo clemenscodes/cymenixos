@@ -1,26 +1,22 @@
 {
   pkgs,
   lib,
-  config,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.explorer;
-in
-  with lib; {
-    options = {
-      modules = {
-        explorer = {
-          dolphin = {
-            enable = mkEnableOption "Enable dolphin file browser" // {default = cfg.defaultExplorer == "dolphin";};
-          };
+in {
+  options = {
+    modules = {
+      explorer = {
+        dolphin = {
+          enable = lib.mkEnableOption "Enable dolphin file browser" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.dolphin.enable) {
-      home = {
-        packages = with pkgs; [
-          dolphin
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.dolphin.enable) {
+    home = {
+      packages = [pkgs.dolphin];
     };
-  }
+  };
+}

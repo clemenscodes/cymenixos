@@ -1,9 +1,8 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display;
   kvantum = pkgs.catppuccin-kvantum.override {
     accent = "blue";
@@ -14,19 +13,19 @@ in {
     modules = {
       display = {
         qt = {
-          enable = lib.mkEnableOption "Enable Qt" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable Qt" // {default = false;};
         };
       };
     };
   };
   config = lib.mkIf (cfg.enable && cfg.qt.enable) {
     home = {
-      packages = with pkgs; [
-        libsForQt5.qtstyleplugin-kvantum
-        libsForQt5.qt5ct
-        libsForQt5.qt5.qtwayland
-        catppuccin-qt5ct
-        qt6.qtwayland
+      packages = [
+        pkgs.libsForQt5.qtstyleplugin-kvantum
+        pkgs.libsForQt5.qt5ct
+        pkgs.libsForQt5.qt5.qtwayland
+        pkgs.catppuccin-qt5ct
+        pkgs.qt6.qtwayland
         kvantum
       ];
       sessionVariables = {

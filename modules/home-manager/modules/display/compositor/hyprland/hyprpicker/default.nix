@@ -1,28 +1,26 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display.compositor.hyprland;
-in
-  with lib; {
-    options = {
-      modules = {
-        display = {
-          compositor = {
-            hyprland = {
-              hyprpicker = {
-                enable = mkEnableOption "Enable hyprpicker" // {default = cfg.enable;};
-              };
+in {
+  options = {
+    modules = {
+      display = {
+        compositor = {
+          hyprland = {
+            hyprpicker = {
+              enable = lib.mkEnableOption "Enable hyprpicker" // {default = false;};
             };
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.hyprpicker.enable) {
-      home = {
-        packages = [pkgs.hyprpicker];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.hyprpicker.enable) {
+    home = {
+      packages = [pkgs.hyprpicker];
     };
-  }
+  };
+}

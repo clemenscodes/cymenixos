@@ -1,28 +1,24 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.media.editing;
-in
-  with lib; {
-    options = {
-      modules = {
-        media = {
-          editing = {
-            gimp = {
-              enable = mkEnableOption "Enable GIMP" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      media = {
+        editing = {
+          gimp = {
+            enable = lib.mkEnableOption "Enable GIMP" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.gimp.enable) {
-      home = {
-        packages = with pkgs; [
-          gimp
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.gimp.enable) {
+    home = {
+      packages = [pkgs.gimp];
     };
-  }
+  };
+}

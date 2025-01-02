@@ -1,26 +1,24 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.display;
-in
-  with lib; {
-    imports = [
-      ./wayvnc
-      ./tigervnc
-    ];
-    options = {
-      modules = {
-        display = {
-          vnc = {
-            enable = mkEnableOption "Enable VNC" // {default = cfg.enable;};
-            defaultVNC = mkOption {
-              type = types.enum ["wayvnc" "tigervnc"];
-              default = "wayvnc";
-            };
+}: {...}: {
+  imports = [
+    (import ./wayvnc {inherit inputs pkgs lib;})
+    (import ./tigervnc {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      display = {
+        vnc = {
+          enable = lib.mkEnableOption "Enable VNC" // {default = false;};
+          defaultVNC = lib.mkOption {
+            type = lib.types.enum ["wayvnc" "tigervnc"];
+            default = "wayvnc";
           };
         };
       };
     };
-  }
+  };
+}

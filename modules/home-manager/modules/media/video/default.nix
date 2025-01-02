@@ -1,24 +1,22 @@
 {
+  inputs,
+  pkgs,
   lib,
-  config,
   ...
-}: let
-  cfg = config.modules.media;
-in
-  with lib; {
-    imports = [
-      ./mpv
-      ./mpris
-      ./obs
-      ./vhs
-    ];
-    options = {
-      modules = {
-        media = {
-          video = {
-            enable = mkEnableOption "Enable video" // {default = cfg.enable;};
-          };
+}: {...}: {
+  imports = [
+    (import ./mpv {inherit inputs pkgs lib;})
+    (import ./mpris {inherit inputs pkgs lib;})
+    (import ./obs {inherit inputs pkgs lib;})
+    (import ./vhs {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      media = {
+        video = {
+          enable = lib.mkEnableOption "Enable video" // {default = false;};
         };
       };
     };
-  }
+  };
+}

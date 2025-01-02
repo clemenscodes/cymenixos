@@ -1,6 +1,7 @@
 {
   pkgs,
   osConfig,
+  ...
 }: let
   corectrlHandle =
     if osConfig.modules.gpu.amd.corectrl.enable

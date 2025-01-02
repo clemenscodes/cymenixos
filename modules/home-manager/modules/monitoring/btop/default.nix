@@ -1,15 +1,11 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.monitoring;
 in {
   options = {
     modules = {
       monitoring = {
         btop = {
-          enable = lib.mkEnableOption "Enable btop monitoring" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable btop monitoring" // {default = false;};
         };
       };
     };
@@ -17,7 +13,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.btop.enable) {
     programs = {
       btop = {
-        enable = cfg.btop.enable;
+        inherit (cfg.btop) enable;
         settings = {
           vim_keys = true;
         };

@@ -1,26 +1,22 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.monitoring;
-in
-  with lib; {
-    options = {
-      modules = {
-        monitoring = {
-          ncdu = {
-            enable = mkEnableOption "Enable ncdu disk usage monitoring" // {default = cfg.enable;};
-          };
+in {
+  options = {
+    modules = {
+      monitoring = {
+        ncdu = {
+          enable = lib.mkEnableOption "Enable ncdu disk usage monitoring" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.ncdu.enable) {
-      home = {
-        packages = with pkgs; [
-          ncdu
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.ncdu.enable) {
+    home = {
+      packages = [pkgs.ncdu];
     };
-  }
+  };
+}

@@ -1,25 +1,23 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.display;
-in
-  with lib; {
-    imports = [
-      ./swayimg
-    ];
-    options = {
-      modules = {
-        display = {
-          imageviewer = {
-            enable = mkEnableOption "Enable image viewer" // {default = cfg.enable;};
-            defaultImageViewer = mkOption {
-              type = types.enum ["swayimg"];
-              default = "swayimg";
-            };
+}: {...}: {
+  imports = [
+    (import ./swayimg {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      display = {
+        imageviewer = {
+          enable = lib.mkEnableOption "Enable image viewer" // {default = false;};
+          defaultImageViewer = lib.mkOption {
+            type = lib.types.enum ["swayimg"];
+            default = "swayimg";
           };
         };
       };
     };
-  }
+  };
+}

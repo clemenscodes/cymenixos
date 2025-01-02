@@ -1,28 +1,26 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display;
-in
-  with lib; {
-    options = {
-      modules = {
-        display = {
-          cursor = {
-            enable = mkEnableOption "Enable a cool cursor" // {default = cfg.enable;};
-          };
+in {
+  options = {
+    modules = {
+      display = {
+        cursor = {
+          enable = lib.mkEnableOption "Enable a cool cursor" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.cursor.enable) {
-      home = {
-        pointerCursor = {
-          name = "catppuccin-macchiato-blue-cursors";
-          package = pkgs.catppuccin-cursors.macchiatoBlue;
-          size = 16;
-        };
+  };
+  config = lib.mkIf (cfg.enable && cfg.cursor.enable) {
+    home = {
+      pointerCursor = {
+        name = "catppuccin-macchiato-blue-cursors";
+        package = pkgs.catppuccin-cursors.macchiatoBlue;
+        size = 16;
       };
     };
-  }
+  };
+}

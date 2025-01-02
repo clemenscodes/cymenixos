@@ -1,26 +1,24 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display.vnc;
-in
-  with lib; {
-    options = {
-      modules = {
-        display = {
-          vnc = {
-            tigervnc = {
-              enable = mkEnableOption "Enable tigervnc" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      display = {
+        vnc = {
+          tigervnc = {
+            enable = lib.mkEnableOption "Enable tigervnc" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.tigervnc.enable) {
-      home = {
-        packages = with pkgs; [tigervnc];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.tigervnc.enable) {
+    home = {
+      packages = [pkgs.tigervnc];
     };
-  }
+  };
+}

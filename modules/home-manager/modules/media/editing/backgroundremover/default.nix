@@ -1,28 +1,24 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.media.editing;
-in
-  with lib; {
-    options = {
-      modules = {
-        media = {
-          editing = {
-            backgroundremover = {
-              enable = mkEnableOption "Enable backgroundremover" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      media = {
+        editing = {
+          backgroundremover = {
+            enable = lib.mkEnableOption "Enable backgroundremover" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.backgroundremover.enable) {
-      home = {
-        packages = with pkgs; [
-          backgroundremover
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.backgroundremover.enable) {
+    home = {
+      packages = [pkgs.backgroundremover];
     };
-  }
+  };
+}

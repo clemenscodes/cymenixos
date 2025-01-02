@@ -1,11 +1,12 @@
 {
   pkgs,
-  config,
-  osConfig,
   lib,
   ...
+}: {
+  config,
+  osConfig,
+  ...
 }: let
-  inherit (pkgs) hyprlock hypridle;
   hyprlockExe = lib.getExe hyprlock;
   cfg = config.modules.display.lockscreen;
   font_family = "${osConfig.modules.fonts.defaultFont}";
@@ -18,6 +19,7 @@
   '';
   brillo = lib.getExe pkgs.brillo;
   timeout = 300;
+  inherit (pkgs) hyprlock hypridle;
 in {
   options = {
     modules = {

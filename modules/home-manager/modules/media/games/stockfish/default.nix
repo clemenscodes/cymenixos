@@ -1,28 +1,24 @@
 {
   pkgs,
   lib,
-  config,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.media.games;
-in
-  with lib; {
-    options = {
-      modules = {
-        media = {
-          games = {
-            stockfish = {
-              enable = mkEnableOption "Enable stockfish engine" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      media = {
+        games = {
+          stockfish = {
+            enable = lib.mkEnableOption "Enable stockfish engine" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.stockfish.enable) {
-      home = {
-        packages = with pkgs; [
-          stockfish
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.stockfish.enable) {
+    home = {
+      packages = [pkgs.stockfish];
     };
-  }
+  };
+}

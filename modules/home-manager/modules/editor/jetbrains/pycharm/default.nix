@@ -1,15 +1,18 @@
 {
+  inputs,
   lib,
+  ...
+}: {
   config,
-  nixpkgs,
   system,
   ...
-}:
-with lib; let
+}: let
   cfg = config.modules.editor.jetbrains;
-  pkgs = import nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
-    config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+    };
   };
 in {
   options = {
@@ -17,17 +20,15 @@ in {
       editor = {
         jetbrains = {
           pycharm = {
-            enable = mkEnableOption "Enable PyCharm" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable PyCharm" // {default = false;};
           };
         };
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.pycharm.enable) {
+  config = lib.mkIf (cfg.enable && cfg.pycharm.enable) {
     home = {
-      packages = with pkgs; [
-        jetbrains.pycharm-community
-      ];
+      packages = [pkgs.pycharm-community];
     };
   };
 }

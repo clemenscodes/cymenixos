@@ -1,8 +1,11 @@
-{...}: {
+{
+  inputs,
   pkgs,
+  lib,
+  ...
+}: {
   config,
   osConfig,
-  lib,
   ...
 }: let
   displayCfg = config.modules.display;
@@ -37,17 +40,17 @@
   isLaptop = machine == "laptop";
 in {
   imports = [
-    ./hyprshade
-    ./hyprpicker
-    ./hyprsunset
-    ./xwayland
+    (import ./hyprshade {inherit inputs pkgs lib;})
+    (import ./hyprpicker {inherit inputs pkgs lib;})
+    (import ./hyprsunset {inherit inputs pkgs lib;})
+    (import ./xwayland {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       display = {
         compositor = {
           hyprland = {
-            enable = lib.mkEnableOption "Enable anime titties" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable anime titties" // {default = false;};
           };
         };
       };
@@ -61,8 +64,8 @@ in {
         pkgs.swww
         pkgs.wl-clipboard
         pkgs.cliphist
-        (lib.mkIf isLaptop (import ./lidhandle {inherit pkgs;}))
-        (import ./wallpaper {inherit pkgs;})
+        (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
+        (import ./wallpaper {inherit inputs pkgs lib;})
       ];
     };
     wayland = {

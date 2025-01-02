@@ -1,28 +1,21 @@
-{inputs}: {
+{
+  inputs,
+  pkgs,
   lib,
-  config,
-  ...
-}: let
-  cfg = config.modules;
-in
-  with lib; {
-    imports = [
-      (import ./android {inherit inputs;})
-      ./c
-      ./corepack
-      ./direnv
-      ./gh
-      ./git
-      ./node
-      ./pentesting
-      ./postman
-      ./reversing
-    ];
-    options = {
-      modules = {
-        development = {
-          enable = mkEnableOption "Enable development tools" // {default = false;};
-        };
+}: {...}: {
+  imports = [
+    (import ./direnv {inherit inputs pkgs lib;})
+    (import ./gh {inherit inputs pkgs lib;})
+    (import ./git {inherit inputs pkgs lib;})
+    (import ./pentesting {inherit inputs pkgs lib;})
+    (import ./postman {inherit inputs pkgs lib;})
+    (import ./reversing {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      development = {
+        enable = lib.mkEnableOption "Enable development tools" // {default = false;};
       };
     };
-  }
+  };
+}

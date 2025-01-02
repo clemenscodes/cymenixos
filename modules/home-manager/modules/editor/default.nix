@@ -1,33 +1,33 @@
-{inputs}: {
-  config,
+{
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules;
-in
-  with lib; {
-    imports = [
-      ./jetbrains
-      (import ./nvim {inherit inputs;})
-      ./vscode
-      ./zed
-    ];
-    options = {
-      modules = {
-        editor = {
-          enable = mkEnableOption "Enable the best text editor" // {default = cfg.enable;};
-          defaultEditor = mkOption {
-            type = types.str;
-            default = "nvim";
-          };
+in {
+  imports = [
+    (import ./jetbrains {inherit inputs pkgs lib;})
+    (import ./nvim {inherit inputs pkgs lib;})
+    (import ./vscode {inherit inputs pkgs lib;})
+    (import ./zed {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      editor = {
+        enable = lib.mkEnableOption "Enable the best text editor" // {default = false;};
+        defaultEditor = lib.mkOption {
+          type = lib.types.str;
+          default = "nvim";
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.editor.enable) {
-      home = {
-        sessionVariables = {
-          EDITOR = cfg.editor.defaultEditor;
-        };
+  };
+  config = lib.mkIf (cfg.enable && cfg.editor.enable) {
+    home = {
+      sessionVariables = {
+        EDITOR = cfg.editor.defaultEditor;
       };
     };
-  }
+  };
+}

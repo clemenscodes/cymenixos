@@ -1,9 +1,8 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.media.video;
 in {
   options = {
@@ -11,7 +10,7 @@ in {
       media = {
         video = {
           mpv = {
-            enable = lib.mkEnableOption "Enable mpv" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable mpv" // {default = false;};
           };
         };
       };
@@ -19,9 +18,9 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.mpv.enable) {
     programs = {
-      mpv = with pkgs; {
-        enable = cfg.enable;
-        package = mpv.override {scripts = [mpvScripts.mpris];};
+      mpv = {
+        inherit (cfg.mpv) enable;
+        package = pkgs.mpv.override {scripts = [pkgs.mpvScripts.mpris];};
         bindings = {
           l = "seek 5";
           h = "seek -5";

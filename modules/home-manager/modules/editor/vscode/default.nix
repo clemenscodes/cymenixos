@@ -1,12 +1,14 @@
 {
-  nixpkgs,
-  system,
-  config,
+  inputs,
   lib,
+  ...
+}: {
+  config,
+  system,
   ...
 }: let
   cfg = config.modules.editor;
-  pkgs = import nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
       allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["vscode"];
@@ -19,35 +21,34 @@
   codevim = pkgs.writeShellScriptBin "codevim" ''
     nix run github:clemenscodes/codevim -- "$@"
   '';
-in
-  with lib; {
-    imports = [
-      ./keybindings.nix
-      ./settings.nix
-      ./extensions.nix
-      ./launcher.nix
-    ];
-    options = {
-      modules = {
-        editor = {
-          vscode = {
-            enable = mkEnableOption "Enable VSCode" // {default = false;};
-            proprietary = mkEnableOption "Use proprietary variant instead of Codium" // {default = false;};
-          };
-        };
-      };
-    };
-    config = mkIf (cfg.enable && cfg.vscode.enable) {
-      home = {
-        packages = [codevim];
-      };
-      programs = {
+in {
+  imports = [
+    (import ./keybindings.nix {inherit inputs pkgs lib;})
+    (import ./settings.nix {inherit inputs pkgs lib;})
+    (import ./extensions.nix {inherit inputs pkgs lib;})
+    (import ./launcher.nix {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      editor = {
         vscode = {
-          enable = cfg.vscode.enable;
-          package = code;
-          enableExtensionUpdateCheck = true;
-          enableUpdateCheck = true;
+          enable = lib.mkEnableOption "Enable VSCode" // {default = false;};
+          proprietary = lib.mkEnableOption "Use proprietary variant instead of Codium" // {default = false;};
         };
       };
     };
-  }
+  };
+  config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
+    home = {
+      packages = [codevim];
+    };
+    programs = {
+      vscode = {
+        inherit (cfg.vscode) enable;
+        package = code;
+        enableExtensionUpdateCheck = true;
+        enableUpdateCheck = true;
+      };
+    };
+  };
+}

@@ -1,4 +1,4 @@
-{pkgs}:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "lockout" ''
   if pgrep -x "${pkgs.swaylock}/bin/swaylock" > /dev/null; then
     exit 0

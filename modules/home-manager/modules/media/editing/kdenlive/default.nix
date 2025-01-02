@@ -1,29 +1,27 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.media.editing;
-in
-  with lib; {
-    options = {
-      modules = {
-        media = {
-          editing = {
-            kdenlive = {
-              enable = mkEnableOption "Enable kdenlive" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      media = {
+        editing = {
+          kdenlive = {
+            enable = lib.mkEnableOption "Enable kdenlive" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.kdenlive.enable) {
-      home = {
-        packages = with pkgs; [
-          glaxnimate
-          kdenlive
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.kdenlive.enable) {
+    home = {
+      packages = [
+        pkgs.glaxnimate
+        pkgs.kdenlive
+      ];
     };
-  }
+  };
+}

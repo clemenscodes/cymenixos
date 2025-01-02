@@ -1,15 +1,19 @@
-{lib, ...}:
-with lib; {
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {...}: {
   imports = [
-    ./ghidra
-    ./ida
-    ./imhex
+    (import ./ghidra {inherit inputs pkgs lib;})
+    (import ./ida {inherit inputs pkgs lib;})
+    (import ./imhex {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       development = {
         reversing = {
-          enable = mkEnableOption "Enable reversing support" // {default = false;};
+          enable = lib.mkEnableOption "Enable reversing support" // {default = false;};
         };
       };
     };

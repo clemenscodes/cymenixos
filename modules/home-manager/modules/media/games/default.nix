@@ -1,21 +1,19 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.media;
-in
-  with lib; {
-    imports = [
-      ./stockfish
-    ];
-    options = {
-      modules = {
-        media = {
-          games = {
-            enable = mkEnableOption "Enable games" // {default = cfg.enable;};
-          };
+}: {...}: {
+  imports = [
+    (import ./stockfish {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      media = {
+        games = {
+          enable = lib.mkEnableOption "Enable games" // {default = false;};
         };
       };
     };
-  }
+  };
+}

@@ -1,21 +1,21 @@
 {
-  config,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.media.audio;
-in
-  with lib; {
-    imports = [./scarlett];
-    options = {
-      modules = {
-        media = {
-          audio = {
-            interfaces = {
-              enable = mkEnableOption "Enable audio interfaces" // {default = cfg.enable;};
-            };
+}: {...}: {
+  imports = [
+    (import ./scarlett {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      media = {
+        audio = {
+          interfaces = {
+            enable = lib.mkEnableOption "Enable audio interfaces" // {default = false;};
           };
         };
       };
     };
-  }
+  };
+}

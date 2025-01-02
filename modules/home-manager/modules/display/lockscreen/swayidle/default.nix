@@ -1,29 +1,27 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display.lockscreen;
-in
-  with lib; {
-    options = {
-      modules = {
-        display = {
-          lockscreen = {
-            swayidle = {
-              enable = mkEnableOption "Enable swayidle" // {default = false;};
-            };
+in {
+  options = {
+    modules = {
+      display = {
+        lockscreen = {
+          swayidle = {
+            enable = lib.mkEnableOption "Enable swayidle" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.swayidle.enable) {
-      home = {
-        packages = with pkgs; [
-          swayidle
-          (import ./detectidle {inherit pkgs;})
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.swayidle.enable) {
+    home = {
+      packages = [
+        pkgs.swayidle
+        (import ./detectidle {inherit pkgs;})
+      ];
     };
-  }
+  };
+}

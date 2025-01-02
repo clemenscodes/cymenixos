@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.development.gh.plugins;
 in {
   options = {
@@ -11,7 +7,7 @@ in {
         gh = {
           plugins = {
             gh-dash = {
-              enable = lib.mkEnableOption "Enable the GitHub CLI dashboard plugin" // {default = cfg.enable;};
+              enable = lib.mkEnableOption "Enable the GitHub CLI dashboard plugin" // {default = false;};
             };
           };
         };

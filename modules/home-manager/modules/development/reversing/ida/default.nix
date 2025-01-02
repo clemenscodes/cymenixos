@@ -1,8 +1,10 @@
 {
-  nixpkgs,
-  system,
-  config,
+  inputs,
   lib,
+  ...
+}: {
+  config,
+  system,
   ...
 }: let
   cfg = config.modules.development.reversing;
@@ -23,29 +25,31 @@
       '';
     };
   };
-  pkgs = import nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
       allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["ida-free"];
     };
     overlays = [ps3IdaOverlay];
   };
-in
-  with lib; {
-    options = {
-      modules = {
-        development = {
-          reversing = {
-            ida = {
-              enable = mkEnableOption "Enable IDA free" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      development = {
+        reversing = {
+          ida = {
+            enable = lib.mkEnableOption "Enable IDA free" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.ida.enable) {
-      home = {
-        packages = with pkgs; [ida-free ps3ida];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.ida.enable) {
+    home = {
+      packages = [
+        pkgs.ida-free
+        pkgs.ps3ida
+      ];
     };
-  }
+  };
+}

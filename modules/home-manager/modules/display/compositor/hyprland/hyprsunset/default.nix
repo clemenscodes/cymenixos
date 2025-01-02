@@ -1,28 +1,26 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display.compositor.hyprland;
-in
-  with lib; {
-    options = {
-      modules = {
-        display = {
-          compositor = {
-            hyprland = {
-              hyprsunset = {
-                enable = mkEnableOption "Enable hyprsunset" // {default = cfg.enable;};
-              };
+in {
+  options = {
+    modules = {
+      display = {
+        compositor = {
+          hyprland = {
+            hyprsunset = {
+              enable = lib.mkEnableOption "Enable hyprsunset" // {default = false;};
             };
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.hyprsunset.enable) {
-      home = {
-        packages = [pkgs.hyprsunset];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.hyprsunset.enable) {
+    home = {
+      packages = [pkgs.hyprsunset];
     };
-  }
+  };
+}

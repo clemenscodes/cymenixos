@@ -1,12 +1,14 @@
 {
-  nixpkgs,
+  inputs,
+  lib,
+  ...
+}: {
   system,
   config,
-  lib,
   ...
 }: let
   cfg = config.modules.display.pdfviewer;
-  pkgs = import nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
       allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["calibre" "unrar"];
@@ -19,22 +21,21 @@
       })
     ];
   };
-in
-  with lib; {
-    options = {
-      modules = {
-        display = {
-          pdfviewer = {
-            calibre = {
-              enable = mkEnableOption "Enable calibre" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      display = {
+        pdfviewer = {
+          calibre = {
+            enable = lib.mkEnableOption "Enable calibre" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.calibre.enable) {
-      home = {
-        packages = with pkgs; [calibre];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.calibre.enable) {
+    home = {
+      packages = [pkgs.calibre];
     };
-  }
+  };
+}

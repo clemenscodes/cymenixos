@@ -1,16 +1,15 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.development;
 in {
   options = {
     modules = {
       development = {
         git = {
-          enable = lib.mkEnableOption "Enable Git" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable Git" // {default = false;};
           userName = lib.mkOption {
             type = lib.types.str;
             default = null;
@@ -25,9 +24,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.git.enable) {
     home = {
-      packages = with pkgs; [
-        gitflow
-      ];
+      packages = [pkgs.gitflow];
     };
     programs = {
       lazygit = {

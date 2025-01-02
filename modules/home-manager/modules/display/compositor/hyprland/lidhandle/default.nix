@@ -1,4 +1,4 @@
-{pkgs}:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "lidhandle" ''
   state=$1
   count_monitors=$(${pkgs.hyprland}/bin/hyprctl monitors | grep -c '^Monitor')

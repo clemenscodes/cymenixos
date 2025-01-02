@@ -1,22 +1,20 @@
 {
-  lib,
-  config,
   pkgs,
+  lib,
   ...
-}:
-with lib; let
+}: {config, ...}: let
   cfg = config.modules.browser;
 in {
   options = {
     modules = {
       browser = {
         chromium = {
-          enable = mkEnableOption "Enable chromium" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable chromium" // {default = false;};
         };
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.chromium.enable) {
+  config = lib.mkIf (cfg.enable && cfg.chromium.enable) {
     programs = {
       chromium = {
         enable = cfg.chromium.enable;

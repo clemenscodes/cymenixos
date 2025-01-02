@@ -1,16 +1,17 @@
 {
-  nixpkgs,
+  inputs,
   lib,
-  system,
+  ...
+}: {
   config,
   osConfig,
+  system,
   ...
-}:
-with lib; let
-  pkgs = import nixpkgs {
+}: let
+  pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
-      allowUnfreePredicate = pkg: builtins.elem (getName pkg) ["spotify"];
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["spotify"];
     };
   };
   cfg = config.modules.media.music;
@@ -21,13 +22,13 @@ in {
       media = {
         music = {
           spotify = {
-            enable = mkEnableOption "Enable spotify" // {default = cfg.enable && isDesktop;};
+            enable = lib.mkEnableOption "Enable spotify" // {default = false;};
           };
         };
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.spotify.enable && isDesktop) {
+  config = lib.mkIf (cfg.enable && cfg.spotify.enable && isDesktop) {
     home = {
       packages = [pkgs.spotify];
     };

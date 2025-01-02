@@ -1,28 +1,24 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.display.imageviewer;
-in
-  with lib; {
-    options = {
-      modules = {
-        display = {
-          imageviewer = {
-            swayimg = {
-              enable = mkEnableOption "Enable swayimg" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      display = {
+        imageviewer = {
+          swayimg = {
+            enable = lib.mkEnableOption "Enable swayimg" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.swayimg.enable) {
-      home = {
-        packages = with pkgs; [
-          swayimg
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.swayimg.enable) {
+    home = {
+      packages = [pkgs.swayimg];
     };
-  }
+  };
+}
