@@ -20,12 +20,12 @@ in {
   };
   config = {
     system = {
-      stateVersion = lib.mkDefault lib.versions.majorMinor lib.version;
+      stateVersion = lib.mkDefault (lib.versions.majorMinor lib.version);
     };
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
-      extraSpecialArgs = {inherit inputs pkgs lib system;};
+      extraSpecialArgs = {inherit inputs pkgs system;};
       backupFileExtension = "home-manager-backup";
       users = {
         ${cfg.users.user} = {
