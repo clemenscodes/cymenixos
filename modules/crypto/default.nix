@@ -3,9 +3,9 @@
   pkgs,
   lib,
   ...
-}: {...}: {
+}: {config, ...}: {
   imports = [
-    (import ./cardanix {inherit inputs pkgs lib;})
+    (import ./cardanix {inherit config inputs pkgs lib;})
     (import ./ledger-live {inherit inputs pkgs lib;})
     (import ./monero {inherit inputs pkgs lib;})
     (import ./nanominer {inherit inputs pkgs lib;})
