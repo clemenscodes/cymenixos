@@ -1,33 +1,31 @@
 {
   pkgs,
   lib,
-  config,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.networking.irc;
-in
-  with lib; {
-    options = {
-      modules = {
-        networking = {
-          irc = {
-            pidgin = {
-              enable = mkEnableOption "Enable pidgin" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      networking = {
+        irc = {
+          pidgin = {
+            enable = lib.mkEnableOption "Enable pidgin" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.pidgin.enable) {
-      programs = {
-        pidgin = {
-          inherit (cfg.pidgin) enable;
-          plugins = with pkgs.pidginPackages; [
-            pidgin-otr
-            purple-discord
-            pidgin-indicator
-          ];
-        };
+  };
+  config = lib.mkIf (cfg.enable && cfg.pidgin.enable) {
+    programs = {
+      pidgin = {
+        inherit (cfg.pidgin) enable;
+        plugins = [
+          pkgs.pidginPackages.pidgin-otr
+          pkgs.pidginPackages.purple-discord
+          pkgs.pidginPackages.pidgin-indicator
+        ];
       };
     };
-  }
+  };
+}

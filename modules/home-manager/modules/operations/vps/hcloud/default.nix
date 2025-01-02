@@ -1,28 +1,24 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.operations.vps;
-in
-  with lib; {
-    options = {
-      modules = {
-        operations = {
-          vps = {
-            hcloud = {
-              enable = mkEnableOption "Enable hcloud" // {default = cfg.enable;};
-            };
+in {
+  options = {
+    modules = {
+      operations = {
+        vps = {
+          hcloud = {
+            enable = lib.mkEnableOption "Enable hcloud" // {default = false;};
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.hcloud.enable) {
-      home = {
-        packages = with pkgs; [
-          hcloud
-        ];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.hcloud.enable) {
+    home = {
+      packages = [pkgs.hcloud];
     };
-  }
+  };
+}

@@ -1,26 +1,27 @@
 {
   pkgs,
   lib,
+  ...
+}: {
   config,
   osConfig,
   ...
 }: let
   cfg = config.modules.organization;
   isDesktop = osConfig.modules.display.gui != "headless";
-in
-  with lib; {
-    options = {
-      modules = {
-        organization = {
-          libreoffice = {
-            enable = mkEnableOption "Enable libreoffice" // {default = cfg.enable && isDesktop;};
-          };
+in {
+  options = {
+    modules = {
+      organization = {
+        libreoffice = {
+          enable = lib.mkEnableOption "Enable libreoffice" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.libreoffice.enable && isDesktop) {
-      home = {
-        packages = with pkgs; [libreoffice];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.libreoffice.enable && isDesktop) {
+    home = {
+      packages = [pkgs.libreoffice];
     };
-  }
+  };
+}

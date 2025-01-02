@@ -1,12 +1,16 @@
-{lib, ...}:
-with lib; {
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {...}: {
   imports = [
-    ./vps
+    (import ./vps {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       operations = {
-        enable = mkEnableOption "Enable operations" // {default = false;};
+        enable = lib.mkEnableOption "Enable operations" // {default = false;};
       };
     };
   };

@@ -1,23 +1,19 @@
 {
-  config,
-  osConfig,
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
-  cfg = config.modules.networking;
-  osCfg = osConfig.modules.networking;
-in
-  with lib; {
-    imports = [
-      ./blueman
-    ];
-    options = {
-      modules = {
-        networking = {
-          bluetooth = {
-            enable = mkEnableOption "Enable bluetooth" // {default = osCfg.bluetooth.enable && cfg.enable;};
-          };
+}: {...}: {
+  imports = [
+    (import ./blueman {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      networking = {
+        bluetooth = {
+          enable = lib.mkEnableOption "Enable bluetooth" // {default = false;};
         };
       };
     };
-  }
+  };
+}

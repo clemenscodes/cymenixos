@@ -1,11 +1,12 @@
 {
   pkgs,
   lib,
+  ...
+}: {
   config,
   osConfig,
   ...
-}:
-with lib; let
+}: let
   cfg = config.modules.organization;
   hasSecretsEnabled = osConfig.modules.security.sops.enable && config.modules.security.sops.enable;
 in {
@@ -13,78 +14,77 @@ in {
     modules = {
       organization = {
         email = {
-          enable = mkEnableOption "Enable E-Mail support using neomutt" // {default = hasSecretsEnabled && cfg.enable;};
-          accounts = mkOption {
-            type = with types;
-              listOf (submodule {
-                options = {
-                  address = mkOption {
-                    type = str;
-                  };
-                  primary = mkOption {
-                    type = bool;
-                  };
-                  realName = mkOption {
-                    type = str;
-                  };
-                  userName = mkOption {
-                    type = str;
-                  };
-                  smtpHost = mkOption {
-                    type = str;
-                  };
-                  smtpPort = mkOption {
-                    type = int;
-                  };
-                  imapHost = mkOption {
-                    type = str;
-                  };
-                  imapPort = mkOption {
-                    type = int;
-                  };
-                  secretName = mkOption {
-                    type = str;
-                  };
+          enable = lib.mkEnableOption "Enable E-Mail support using neomutt" // {default = false;};
+          accounts = lib.mkOption {
+            type = lib.types.listOf (lib.types.submodule {
+              options = {
+                address = lib.mkOption {
+                  type = lib.types.str;
                 };
-              });
+                primary = lib.mkOption {
+                  type = lib.types.bool;
+                };
+                realName = lib.mkOption {
+                  type = lib.types.str;
+                };
+                userName = lib.mkOption {
+                  type = lib.types.str;
+                };
+                smtpHost = lib.mkOption {
+                  type = lib.types.str;
+                };
+                smtpPort = lib.mkOption {
+                  type = lib.types.int;
+                };
+                imapHost = lib.mkOption {
+                  type = lib.types.str;
+                };
+                imapPort = lib.mkOption {
+                  type = lib.types.int;
+                };
+                secretName = lib.mkOption {
+                  type = lib.types.str;
+                };
+              };
+            });
             default = [];
           };
         };
       };
     };
   };
-  config = mkIf (hasSecretsEnabled && cfg.enable && cfg.email.enable) {
+  config = lib.mkIf (hasSecretsEnabled && cfg.enable && cfg.email.enable) {
     home = {
-      packages = with pkgs; [
-        abook
-        lynx
-        openssl
-        mailcap
+      packages = [
+        pkgs.abook
+        pkgs.lynx
+        pkgs.openssl
+        pkgs.mailcap
       ];
     };
     services = {
       mbsync = {
-        enable = cfg.email.enable;
+        inherit (cfg.email) enable;
         configFile = "${config.home.homeDirectory}/.config/isyncrc";
         frequency = "*:*:0/10";
       };
       imapnotify = {
-        enable = cfg.email.enable;
+        inherit (cfg.email) enable;
       };
     };
     xdg = {
       configFile = {
-        "neomutt/mailcap" = with pkgs; {
+        "neomutt/mailcap" = {
           text = ''
             text/plain; $EDITOR %s ;
-            text/html; ${zathura}/bin/zathura %s ; nametemplate=%s.html
-            text/html; ${lynx}/bin/lynx -assume_charset=%{charset} -display_charset=utf-8 -dump -width=1024 %s; nametemplate=%s.html; copiousoutput;
-            image/*; ${zathura}/bin/zathura %s ;
-            video/*; ${util-linux}/bin/setsid ${mpv}/bin/mpv --quiet %s &; copiousoutput
-            audio/*; ${mpv}/bin/mpv %s ;
-            application/pdf; ${zathura}/bin/zathura %s ;
-            application/pgp-encrypted; ${gnupg}/bin/gpg -d '%s'; copiousoutput;
-            application/pgp-keys; ${gnupg}/bin/gpg --import '%s'; copiousoutput;
+            text/html; ${pkgs.zathura}/bin/zathura %s ; nametemplate=%s.html
+            text/html; ${pkgs.lynx}/bin/lynx -assume_charset=%{charset} -display_charset=utf-8 -dump -width=1024 %s; nametemplate=%s.html; copiousoutput;
+            image/*; ${pkgs.zathura}/bin/zathura %s ;
+            video/*; ${pkgs.util-linux}/bin/setsid ${pkgs.mpv}/bin/mpv --quiet %s &; copiousoutput
+            audio/*; ${pkgs.mpv}/bin/mpv %s ;
+            application/pdf; ${pkgs.zathura}/bin/zathura %s ;
+            application/pgp-encrypted; ${pkgs.gnupg}/bin/gpg -d '%s'; copiousoutput;
+            application/pgp-keys; ${pkgs.gnupg}/bin/gpg --import '%s'; copiousoutput;
             application/x-subrip; $EDITOR %s ;
           '';
         };
@@ -105,10 +105,7 @@ in {
         }: let
           pw = "${pkgs.bat}/bin/bat ${config.sops.secrets.${secretName}.path} --style=plain";
         in {
-          primary = primary;
-          address = address;
-          userName = userName;
-          realName = realName;
+          inherit primary address userName realName;
           passwordCommand = pw;
           imapnotify = {
             boxes = ["Inbox"];
@@ -117,7 +114,7 @@ in {
             onNotifyPost = ''${pkgs.notmuch}/bin/notmuch new && ${pkgs.libnotify}/bin/notify-send "===> 📬 <===" "Mail received"'';
           };
           mbsync = {
-            enable = cfg.email.enable;
+            inherit (cfg.email) enable;
             create = "both";
             expunge = "both";
             patterns = ["*"];
@@ -132,20 +129,20 @@ in {
             };
           };
           notmuch = {
-            enable = cfg.email.enable;
+            inherit (cfg.email) enable;
             neomutt = {
-              enable = cfg.email.enable;
+              inherit (cfg.email) enable;
             };
           };
           neomutt = {
-            enable = cfg.email.enable;
+            inherit (cfg.email) enable;
             sendMailCommand = "${pkgs.msmtp}/bin/msmtp -a ${address}";
             extraConfig = ''
               set sort = reverse-date
             '';
           };
           msmtp = {
-            enable = cfg.email.enable;
+            inherit (cfg.email) enable;
             extraConfig = {
               auth = "on";
               passwordeval = ''"${pw}"'';
@@ -169,41 +166,6 @@ in {
       in {
         maildirBasePath = "${config.xdg.dataHome}/mail";
         accounts = let
-          emailConfigs = [
-            {
-              address = "horn_clemens@t-online.de";
-              primary = true;
-              realName = "Clemens Horn";
-              userName = "horn_clemens@t-online.de";
-              smtpHost = "securesmtp.t-online.de";
-              smtpPort = 465;
-              imapHost = "secureimap.t-online.de";
-              imapPort = 993;
-              secretName = "email/horn_clemens@t-online.de/password";
-            }
-            {
-              address = "me@clemenshorn.com";
-              primary = false;
-              realName = "Clemens Horn";
-              userName = "me@clemenshorn.com";
-              smtpHost = "box.clemenshorn.com";
-              smtpPort = 465;
-              imapHost = "box.clemenshorn.com";
-              imapPort = 993;
-              secretName = "email/me@clemenshorn.com/password";
-            }
-            {
-              address = "clemens.horn@mni.thm.de";
-              primary = false;
-              realName = "Clemens Horn";
-              userName = "chrn48";
-              smtpHost = "mailgate.thm.de";
-              smtpPort = 465;
-              imapHost = "mailgate.thm.de";
-              imapPort = 993;
-              secretName = "email/clemens.horn@mni.thm.de/password";
-            }
-          ];
           mkAccount = config: {
             "${config.address}" = mkEmailAccount {
               inherit (config) primary address realName userName smtpHost smtpPort imapHost imapPort secretName;
@@ -211,18 +173,18 @@ in {
           };
           mergeAttrs = attrs: builtins.foldl' (acc: attr: acc // attr) {} attrs;
         in
-          mergeAttrs (map mkAccount emailConfigs);
+          mergeAttrs (map mkAccount cfg.email.accounts);
       };
     };
     programs = {
       msmtp = {
-        enable = cfg.email.enable;
+        inherit (cfg.email) enable;
       };
       mbsync = {
-        enable = cfg.email.enable;
+        inherit (cfg.email) enable;
       };
       notmuch = {
-        enable = cfg.email.enable;
+        inherit (cfg.email) enable;
         maildir = {
           synchronizeFlags = true;
         };
@@ -243,7 +205,7 @@ in {
         };
       };
       neomutt = {
-        enable = cfg.email.enable;
+        inherit (cfg.email) enable;
         sidebar = {
           enable = true;
           width = 22;
@@ -468,128 +430,128 @@ in {
             action = "sidebar-toggle-visible";
           }
         ];
-        macros = [
-          {
-            map = ["index" "pager"];
-            key = "i1";
-            action = "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/horn_clemens@t-online.de<enter><change-folder>!<enter>;<check-stats>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "i2";
-            action = "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/clemens.horn@mni.thm.de<enter><change-folder>!<enter>;<check-stats>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "i3";
-            action = "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/me@clemenshorn.com<enter><change-folder>!<enter>;<check-stats>";
-          }
-          {
-            map = ["browser"];
-            key = "h";
-            action = "<change-dir><kill-line>..<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "gi";
-            action = "<change-folder>=Inbox<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Mi";
-            action = ";<save-message>=Inbox<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Ci";
-            action = ";<copy-message>=Inbox<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "gd";
-            action = "<change-folder>=Drafts<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Md";
-            action = ";<save-message>=Drafts<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Cd";
-            action = ";<copy-message>=Drafts<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "gj";
-            action = "<change-folder>=Junk<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Mj";
-            action = ";<save-message>=Junk<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Cj";
-            action = ";<copy-message>=Junk<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "gt";
-            action = "<change-folder>=Trash<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Mt";
-            action = ";<save-message>=Trash<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Ct";
-            action = ";<copy-message>=Trash<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "gs";
-            action = "<change-folder>=Sent<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Ms";
-            action = ";<save-message>=Sent<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Cs";
-            action = ";<copy-message>=Sent<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "ga";
-            action = "<change-folder>=Archive<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Ma";
-            action = ";<save-message>=Archive<enter>";
-          }
-          {
-            map = ["index" "pager"];
-            key = "Ca";
-            action = ";<copy-message>=Archive<enter>";
-          }
-          {
-            map = ["index"];
-            key = "A";
-            action = ''<limit>all\n'';
-          }
-          {
-            map = ["index"];
-            key = ''\Cr'';
-            action = ''<tag-pattern>~N<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>'';
-          }
-        ];
+        macros = let
+          inherit (cfg.email) accounts;
+          generateAction = address: "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/${address}<enter><change-folder>!<enter>;<check-stats>";
+          inboxes = lib.listToAttrs (
+            lib.zipAttrsWith (
+              i: account: {
+                map = ["index" "pager"];
+                key = "i${toString (i + 1)}";
+                action = generateAction account.address;
+              }
+            ) (lib.range 1 (builtins.length accounts))
+            accounts
+          );
+        in
+          inboxes
+          ++ [
+            {
+              map = ["browser"];
+              key = "h";
+              action = "<change-dir><kill-line>..<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "gi";
+              action = "<change-folder>=Inbox<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Mi";
+              action = ";<save-message>=Inbox<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Ci";
+              action = ";<copy-message>=Inbox<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "gd";
+              action = "<change-folder>=Drafts<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Md";
+              action = ";<save-message>=Drafts<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Cd";
+              action = ";<copy-message>=Drafts<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "gj";
+              action = "<change-folder>=Junk<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Mj";
+              action = ";<save-message>=Junk<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Cj";
+              action = ";<copy-message>=Junk<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "gt";
+              action = "<change-folder>=Trash<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Mt";
+              action = ";<save-message>=Trash<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Ct";
+              action = ";<copy-message>=Trash<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "gs";
+              action = "<change-folder>=Sent<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Ms";
+              action = ";<save-message>=Sent<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Cs";
+              action = ";<copy-message>=Sent<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "ga";
+              action = "<change-folder>=Archive<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Ma";
+              action = ";<save-message>=Archive<enter>";
+            }
+            {
+              map = ["index" "pager"];
+              key = "Ca";
+              action = ";<copy-message>=Archive<enter>";
+            }
+            {
+              map = ["index"];
+              key = "A";
+              action = ''<limit>all\n'';
+            }
+            {
+              map = ["index"];
+              key = ''\Cr'';
+              action = ''<tag-pattern>~N<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>'';
+            }
+          ];
         settings = {
           send_charset = ''"us-ascii:utf-8"'';
           mailcap_path = ''"$HOME/.config/neomutt/mailcap"'';

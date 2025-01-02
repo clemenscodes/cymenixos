@@ -1,25 +1,22 @@
 {
   pkgs,
-  config,
-  osConfig,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.networking;
-in
-  with lib; {
-    options = {
-      modules = {
-        networking = {
-          wireshark = {
-            enable = mkEnableOption "Enable wireshark" // {default = osConfig.modules.networking.wireshark.enable;};
-          };
+in {
+  options = {
+    modules = {
+      networking = {
+        wireshark = {
+          enable = lib.mkEnableOption "Enable wireshark" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.wireshark.enable) {
-      home = {
-        packages = with pkgs; [wireshark];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.wireshark.enable) {
+    home = {
+      packages = [pkgs.wireshark];
     };
-  }
+  };
+}

@@ -1,26 +1,27 @@
 {
   pkgs,
   lib,
+  ...
+}: {
   config,
   osConfig,
   ...
 }: let
   cfg = config.modules.organization;
   isDesktop = osConfig.modules.display.gui != "headless";
-in
-  with lib; {
-    options = {
-      modules = {
-        organization = {
-          zotero = {
-            enable = mkEnableOption "Enable zotero" // {default = cfg.enable && isDesktop;};
-          };
+in {
+  options = {
+    modules = {
+      organization = {
+        zotero = {
+          enable = lib.mkEnableOption "Enable zotero" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.zotero.enable && isDesktop) {
-      home = {
-        packages = with pkgs; [zotero];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.zotero.enable && isDesktop) {
+    home = {
+      packages = [pkgs.zotero];
     };
-  }
+  };
+}

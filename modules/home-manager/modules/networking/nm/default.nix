@@ -1,31 +1,27 @@
 {
   pkgs,
-  config,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.networking;
-in
-  with lib; {
-    options = {
-      modules = {
-        networking = {
-          nm = {
-            enable = mkEnableOption "Enable network-manager applet" // {default = cfg.enable;};
-          };
+in {
+  options = {
+    modules = {
+      networking = {
+        nm = {
+          enable = lib.mkEnableOption "Enable network-manager applet" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.nm.enable) {
-      home = {
-        packages = with pkgs; [
-          networkmanagerapplet
-        ];
-      };
-      services = {
-        network-manager-applet = {
-          enable = cfg.nm.enable;
-        };
+  };
+  config = lib.mkIf (cfg.enable && cfg.nm.enable) {
+    home = {
+      packages = [pkgs.networkmanagerapplet];
+    };
+    services = {
+      network-manager-applet = {
+        inherit (cfg.nm) enable;
       };
     };
-  }
+  };
+}

@@ -1,39 +1,37 @@
-{
-  lib,
-  config,
-  ...
-}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.networking.irc;
-in
-  with lib; {
-    options = {
-      modules = {
-        networking = {
-          irc = {
-            irssi = {
-              enable = mkEnableOption "Enable irssi" // {default = cfg.enable;};
+in {
+  options = {
+    modules = {
+      networking = {
+        irc = {
+          irssi = {
+            enable = lib.mkEnableOption "Enable irssi" // {default = false;};
+            nick = lib.mkOption {
+              type = lib.types.str;
+              description = "The nick to use for IRC";
             };
           };
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.irssi.enable) {
-      programs = {
-        irssi = {
-          inherit (cfg.irssi) enable;
-          networks = {
-            liberachat = {
-              nick = "derefd";
-              server = {
-                address = "irc.libera.chat";
-                port = 6697;
-                autoConnect = true;
-              };
-              channels = {
-              };
+  };
+  config = lib.mkIf (cfg.enable && cfg.irssi.enable) {
+    programs = {
+      irssi = {
+        inherit (cfg.irssi) enable;
+        networks = {
+          liberachat = {
+            inherit (cfg.irssi) nick;
+            server = {
+              address = "irc.libera.chat";
+              port = 6697;
+              autoConnect = true;
             };
+            channels = {};
           };
         };
       };
     };
-  }
+  };
+}

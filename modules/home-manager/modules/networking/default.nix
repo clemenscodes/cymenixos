@@ -1,25 +1,21 @@
 {
+  inputs,
+  pkgs,
   lib,
-  config,
-  osConfig,
   ...
-}: let
-  cfg = config.modules;
-  osCfg = osConfig.modules;
-in
-  with lib; {
-    imports = [
-      ./bluetooth
-      ./irc
-      ./nm
-      ./proxy
-      ./wireshark
-    ];
-    options = {
-      modules = {
-        networking = {
-          enable = mkEnableOption "Enable networking" // {default = osCfg.networking.enable && cfg.enable;};
-        };
+}: {...}: {
+  imports = [
+    (import ./bluetooth {inherit inputs pkgs lib;})
+    (import ./irc {inherit inputs pkgs lib;})
+    (import ./nm {inherit inputs pkgs lib;})
+    (import ./proxy {inherit inputs pkgs lib;})
+    (import ./wireshark {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      networking = {
+        enable = lib.mkEnableOption "Enable networking" // {default = false;};
       };
     };
-  }
+  };
+}

@@ -1,22 +1,20 @@
 {
+  inputs,
+  pkgs,
   lib,
-  config,
   ...
-}: let
-  cfg = config.modules;
-in
-  with lib; {
-    imports = [
-      ./calcurse
-      ./email
-      ./libreoffice
-      ./zotero
-    ];
-    options = {
-      modules = {
-        organization = {
-          enable = mkEnableOption "Enable tools for organization" // {default = cfg.enable;};
-        };
+}: {...}: {
+  imports = [
+    (import ./calcurse {inherit inputs pkgs lib;})
+    (import ./email {inherit inputs pkgs lib;})
+    (import ./libreoffice {inherit inputs pkgs lib;})
+    (import ./zotero {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      organization = {
+        enable = lib.mkEnableOption "Enable tools for organization" // {default = false;};
       };
     };
-  }
+  };
+}
