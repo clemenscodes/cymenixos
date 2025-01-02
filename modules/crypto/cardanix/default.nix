@@ -1,9 +1,9 @@
 {
   inputs,
-  pkgs,
+  lib,
   ...
 }: let
-  cymenixosLib = import ../../../lib {inherit pkgs;};
+  cymenixosLib = import ../../../lib {inherit lib;};
   imports = [inputs.cardanix.nixosModules.x86_64-linux];
   module = "crypto";
   submodule = "cardanix";
