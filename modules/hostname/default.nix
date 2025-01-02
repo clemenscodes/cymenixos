@@ -4,7 +4,7 @@ in {
   options = {
     modules = {
       hostname = {
-        enable = lib.mkEnableOption "Enable hostname" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable hostname" // {default = false;};
         defaultHostname = lib.mkOption {
           type = lib.types.str;
           default = "cymenix";

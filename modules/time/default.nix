@@ -4,7 +4,7 @@ in {
   options = {
     modules = {
       time = {
-        enable = lib.mkEnableOption "Enable time settings" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable time settings" // {default = false;};
         defaultTimeZone = lib.mkOption {
           type = lib.types.str;
           default = "Europe/Berlin";

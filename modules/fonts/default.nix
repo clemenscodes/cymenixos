@@ -13,7 +13,7 @@ in {
   options = {
     modules = {
       fonts = {
-        enable = lib.mkEnableOption "Enable fonts" // {default = cfg.display.gui != "headless";};
+        enable = lib.mkEnableOption "Enable fonts" // {default = false;};
         defaultFont = lib.mkOption {
           type = lib.types.str;
           default = sansSerif;

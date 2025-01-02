@@ -9,7 +9,7 @@ in {
     modules = {
       gaming = {
         gamemode = {
-          enable = lib.mkEnableOption "Enable gamemode" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable gamemode" // {default = false;};
         };
       };
     };

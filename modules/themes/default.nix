@@ -13,7 +13,7 @@ in {
   options = {
     modules = {
       themes = {
-        enable = lib.mkEnableOption "Enable slick themes" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable slick themes" // {default = false;};
         defaultTheme = lib.mkOption {
           type = lib.types.enum ["catppuccin" "base"];
           default = "catppuccin";

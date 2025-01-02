@@ -9,7 +9,7 @@ in {
     modules = {
       shell = {
         ld = {
-          enable = lib.mkEnableOption "Enable nix-ld to fix many binary errors" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable nix-ld to fix many binary errors" // {default = false;};
         };
       };
     };

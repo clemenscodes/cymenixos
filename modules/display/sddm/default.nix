@@ -9,7 +9,7 @@ in {
     modules = {
       display = {
         sddm = {
-          enable = lib.mkEnableOption "Enable a swag sddm login manager" // {default = cfg.enable && cfg.hyprland.enable;};
+          enable = lib.mkEnableOption "Enable a swag sddm login manager" // {default = false;};
         };
       };
     };

@@ -12,7 +12,7 @@ in {
   options = {
     modules = {
       xdg = {
-        enable = lib.mkEnableOption "Enable XDG" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable XDG" // {default = false;};
       };
     };
   };

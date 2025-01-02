@@ -11,7 +11,7 @@ in {
   options = {
     modules = {
       wsl = {
-        enable = lib.mkEnableOption "Enable WSL support" // {default = cfg.machine.kind == "wsl";};
+        enable = lib.mkEnableOption "Enable WSL support" // {default = false;};
       };
     };
   };

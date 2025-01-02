@@ -5,7 +5,7 @@ in {
     modules = {
       display = {
         hyprland = {
-          enable = lib.mkEnableOption "Enable anime titties" // {default = cfg.enable && cfg.gui == "wayland";};
+          enable = lib.mkEnableOption "Enable anime titties" // {default = false;};
         };
       };
     };

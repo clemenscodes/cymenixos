@@ -5,7 +5,7 @@ in {
     modules = {
       display = {
         gtk = {
-          enable = lib.mkEnableOption "Enable GTK" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable GTK" // {default = false;};
         };
       };
     };

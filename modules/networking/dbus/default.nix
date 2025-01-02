@@ -5,7 +5,7 @@ in {
     modules = {
       networking = {
         dbus = {
-          enable = lib.mkEnableOption "Enable inter-process-communication via dbus" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable inter-process-communication via dbus" // {default = false;};
         };
       };
     };

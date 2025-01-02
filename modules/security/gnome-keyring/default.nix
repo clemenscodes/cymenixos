@@ -6,7 +6,7 @@ in {
     modules = {
       security = {
         gnome-keyring = {
-          enable = lib.mkEnableOption "Enable gnome-keyring" // {default = cfg.enable && isDesktop;};
+          enable = lib.mkEnableOption "Enable gnome-keyring" // {default = false;};
         };
       };
     };

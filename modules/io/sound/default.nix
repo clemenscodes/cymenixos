@@ -10,7 +10,7 @@ in {
     modules = {
       io = {
         sound = {
-          enable = lib.mkEnableOption "Enable sound services" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable sound services" // {default = false;};
         };
       };
     };

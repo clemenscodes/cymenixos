@@ -5,7 +5,7 @@ in {
     modules = {
       cpu = {
         intel = {
-          enable = lib.mkEnableOption "Enable Intel CPU settings" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable Intel CPU settings" // {default = false;};
         };
       };
     };

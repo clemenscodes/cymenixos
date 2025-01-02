@@ -33,6 +33,7 @@
             modules = {
               disk = {
                 enable = true;
+                device = "/dev/sda";
               };
               crypto = {
                 enable = true;

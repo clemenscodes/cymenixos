@@ -6,12 +6,12 @@ in {
   options = {
     modules = {
       users = {
-        enable = mkEnableOption "Enable user settings" // {default = cfg.enable;};
+        enable = mkEnableOption "Enable user settings" // {default = false;};
         user = mkOption {
           type = types.str;
           default = "nixos";
         };
-        wheel = mkEnableOption "Add user to wheel group" // {default = cfg.enable;};
+        wheel = mkEnableOption "Add user to wheel group" // {default = false;};
         name = mkOption {
           type = types.str;
           default = cfg.users.user;

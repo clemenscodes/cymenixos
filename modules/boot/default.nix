@@ -15,7 +15,7 @@ in {
   options = {
     modules = {
       boot = {
-        enable = lib.mkEnableOption "Enable bootloader" // {default = cfg.enable && isDesktop;};
+        enable = lib.mkEnableOption "Enable bootloader" // {default = false;};
         efiSupport = lib.mkEnableOption "Enable UEFI" // {default = false;};
         device = lib.mkOption {
           type = lib.types.str;

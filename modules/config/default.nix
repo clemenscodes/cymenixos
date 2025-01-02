@@ -17,11 +17,11 @@ in {
   options = {
     modules = {
       config = {
-        enable = lib.mkEnableOption "Enable common configurations" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable common configurations" // {default = false;};
       };
     };
   };
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (cfg.enable && cfg.config.enable) {
     nixpkgs = {
       hostPlatform = system;
     };

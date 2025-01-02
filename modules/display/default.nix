@@ -15,7 +15,7 @@ in {
   options = {
     modules = {
       display = {
-        enable = lib.mkEnableOption "Enable display configuration" // {default = cfg.display.gui != "headless";};
+        enable = lib.mkEnableOption "Enable display configuration" // {default = false;};
         gui = lib.mkOption {
           type = lib.types.enum ["wayland" "headless"];
           default =

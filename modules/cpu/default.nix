@@ -13,13 +13,13 @@ in {
   options = {
     modules = {
       cpu = {
-        enable = lib.mkEnableOption "Enable CPU configuration" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable CPU configuration" // {default = false;};
         vendor = lib.mkOption {
           type = lib.types.enum ["intel" "amd"];
           default = "intel";
         };
         msr = {
-          enable = lib.mkEnableOption "Enable MSR" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable MSR" // {default = false;};
         };
       };
     };

@@ -9,7 +9,7 @@ in {
     modules = {
       shell = {
         zsh = {
-          enable = lib.mkEnableOption "Enable zsh" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable zsh" // {default = false;};
         };
       };
     };

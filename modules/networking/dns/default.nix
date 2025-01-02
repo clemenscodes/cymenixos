@@ -5,7 +5,7 @@ in {
     modules = {
       networking = {
         dns = {
-          enable = lib.mkEnableOption "Enable additional DNS servers" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable additional DNS servers" // {default = false;};
         };
       };
     };

@@ -5,7 +5,7 @@ in {
     modules = {
       cpu = {
         amd = {
-          enable = lib.mkEnableOption "Enable AMD CPU settings" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable AMD CPU settings" // {default = false;};
         };
       };
     };

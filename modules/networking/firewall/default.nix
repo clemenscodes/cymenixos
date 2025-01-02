@@ -5,7 +5,7 @@ in {
     modules = {
       networking = {
         firewall = {
-          enable = lib.mkEnableOption "Enable firewall" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable firewall" // {default = false;};
         };
       };
     };

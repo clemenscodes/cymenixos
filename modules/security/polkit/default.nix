@@ -12,7 +12,7 @@ in {
     modules = {
       security = {
         polkit = {
-          enable = lib.mkEnableOption "Enable policy kit" // {default = cfg.enable && isDesktop;};
+          enable = lib.mkEnableOption "Enable policy kit" // {default = false;};
         };
       };
     };

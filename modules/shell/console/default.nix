@@ -5,7 +5,7 @@ in {
     modules = {
       shell = {
         console = {
-          enable = lib.mkEnableOption "Enable a neat console configuration" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable a neat console configuration" // {default = false;};
         };
       };
     };

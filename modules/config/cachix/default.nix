@@ -9,7 +9,7 @@ in {
     modules = {
       config = {
         cachix = {
-          enable = lib.mkEnableOption "Enable common cachix options" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable common cachix options" // {default = false;};
           token = lib.mkOption {
             type = lib.types.path;
             default = null;

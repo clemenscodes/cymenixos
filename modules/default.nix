@@ -51,7 +51,7 @@
       };
     };
     modules = {
-      enable = lib.mkEnableOption "Enable custom modules" // {default = true;};
+      enable = lib.mkEnableOption "Enable custom modules" // {default = false;};
     };
     # "${config.cymenixos.namespace}" = {
     #   enable = lib.mkEnableOption "Enable custom modules" // {default = true;};

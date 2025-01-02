@@ -5,7 +5,7 @@ in {
     modules = {
       display = {
         qt = {
-          enable = lib.mkEnableOption "Enable qt" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable qt" // {default = false;};
         };
       };
     };

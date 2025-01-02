@@ -14,7 +14,7 @@ in {
     modules = {
       config = {
         nix = {
-          enable = lib.mkEnableOption "Enable common nix options" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable common nix options" // {default = false;};
         };
       };
     };

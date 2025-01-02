@@ -7,7 +7,7 @@ in {
     modules = {
       security = {
         swaylock = {
-          enable = lib.mkEnableOption "Enable swaylock PAM" // {default = useSwaylock;};
+          enable = lib.mkEnableOption "Enable swaylock PAM" // {default = false;};
         };
       };
     };

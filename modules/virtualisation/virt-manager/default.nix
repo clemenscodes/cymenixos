@@ -5,7 +5,7 @@ in {
     modules = {
       virtualisation = {
         virt-manager = {
-          enable = lib.mkEnableOption "Enable virt-manager" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable virt-manager" // {default = false;};
         };
       };
     };

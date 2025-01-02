@@ -7,7 +7,7 @@ in {
       gpu = {
         amd = {
           corectrl = {
-            enable = lib.mkEnableOption "Enable corectrl for AMD GPUs" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable corectrl for AMD GPUs" // {default = false;};
           };
         };
       };

@@ -5,7 +5,7 @@ in {
     modules = {
       networking = {
         mtr = {
-          enable = lib.mkEnableOption "Enable mtr (mytraceroute)" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable mtr (mytraceroute)" // {default = false;};
         };
       };
     };

@@ -6,7 +6,7 @@ in {
     modules = {
       virtualisation = {
         docker = {
-          enable = lib.mkEnableOption "Enable docker" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable docker" // {default = false;};
         };
       };
     };

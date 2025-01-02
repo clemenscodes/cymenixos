@@ -9,7 +9,7 @@ in {
     modules = {
       gaming = {
         steam = {
-          enable = lib.mkEnableOption "Enable steam" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable steam" // {default = false;};
         };
       };
     };

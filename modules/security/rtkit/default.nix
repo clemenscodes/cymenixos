@@ -6,7 +6,7 @@ in {
     modules = {
       security = {
         rtkit = {
-          enable = lib.mkEnableOption "Enable realtime kit" // {default = cfg.enable && io;};
+          enable = lib.mkEnableOption "Enable realtime kit" // {default = false;};
         };
       };
     };

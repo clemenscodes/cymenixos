@@ -21,7 +21,7 @@ in
     options = {
       modules = {
         development = {
-          enable = mkEnableOption "Enable development tools" // {default = cfg.enable;};
+          enable = mkEnableOption "Enable development tools" // {default = false;};
         };
       };
     };

@@ -13,7 +13,7 @@ in {
     modules = {
       networking = {
         irc = {
-          enable = lib.mkEnableOption "Enable irc" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable irc" // {default = false;};
         };
       };
     };

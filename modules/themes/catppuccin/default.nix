@@ -11,7 +11,7 @@ in {
     modules = {
       themes = {
         catppuccin = {
-          enable = lib.mkEnableOption "Enable catppuccin theme" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable catppuccin theme" // {default = false;};
           flavor = lib.mkOption {
             type = lib.types.enum [
               "latte"

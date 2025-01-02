@@ -11,7 +11,7 @@ in {
     modules = {
       security = {
         gnupg = {
-          enable = lib.mkEnableOption "Enable gnupg" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable gnupg" // {default = false;};
         };
       };
     };

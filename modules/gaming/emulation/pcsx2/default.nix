@@ -24,7 +24,7 @@ in {
       gaming = {
         emulation = {
           pcsx2 = {
-            enable = lib.mkEnableOption "Enable pcsx2 emulation (PlayStation 2)" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable pcsx2 emulation (PlayStation 2)" // {default = false;};
           };
         };
       };

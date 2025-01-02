@@ -15,7 +15,7 @@ in {
   options = {
     modules = {
       shell = {
-        enable = lib.mkEnableOption "Enable shell configuration" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable shell configuration" // {default = false;};
         defaultShell = lib.mkOption {
           type = lib.types.enum [pkgs.zsh];
           default = pkgs.zsh;

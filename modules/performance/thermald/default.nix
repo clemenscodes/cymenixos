@@ -5,7 +5,7 @@ in {
     modules = {
       performance = {
         thermald = {
-          enable = lib.mkEnableOption "Enable an efficient temperature management" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable an efficient temperature management" // {default = false;};
         };
       };
     };

@@ -5,7 +5,7 @@ in {
     modules = {
       networking = {
         stevenblack = {
-          enable = lib.mkEnableOption "Enable stevenblack" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable stevenblack" // {default = false;};
         };
       };
     };

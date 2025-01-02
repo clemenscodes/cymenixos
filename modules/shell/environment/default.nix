@@ -9,7 +9,7 @@ in {
     modules = {
       shell = {
         environment = {
-          enable = lib.mkEnableOption "Enable basic environment settings" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable basic environment settings" // {default = false;};
         };
       };
     };

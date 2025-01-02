@@ -9,7 +9,7 @@ in {
     modules = {
       security = {
         tpm = {
-          enable = lib.mkEnableOption "Enable tpm" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable tpm" // {default = false;};
         };
       };
     };

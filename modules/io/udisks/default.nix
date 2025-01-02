@@ -10,7 +10,7 @@ in {
     modules = {
       io = {
         udisks = {
-          enable = lib.mkEnableOption "Enable udisks service to automatically mount usb devices" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable udisks service to automatically mount usb devices" // {default = false;};
         };
       };
     };

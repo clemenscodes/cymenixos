@@ -5,7 +5,7 @@ in {
     modules = {
       performance = {
         power = {
-          enable = lib.mkEnableOption "Enable an efficient power management" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable an efficient power management" // {default = false;};
         };
       };
     };

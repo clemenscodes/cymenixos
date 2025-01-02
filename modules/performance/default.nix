@@ -15,7 +15,7 @@ in {
   options = {
     modules = {
       performance = {
-        enable = lib.mkEnableOption "Enable performance tweaks" // {default = cfg.machine.kind == "laptop";};
+        enable = lib.mkEnableOption "Enable performance tweaks" // {default = false;};
       };
     };
   };

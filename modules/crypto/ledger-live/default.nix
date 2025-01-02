@@ -9,7 +9,7 @@ in {
     modules = {
       crypto = {
         ledger-live = {
-          enable = lib.mkEnableOption "Enable ledger-live" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable ledger-live" // {default = false;};
         };
       };
     };

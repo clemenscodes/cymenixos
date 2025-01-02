@@ -6,7 +6,7 @@ in {
   options = {
     modules = {
       locale = {
-        enable = lib.mkEnableOption "Enable locale settings" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable locale settings" // {default = false;};
         defaultLocale = lib.mkOption {
           type = lib.types.str;
           default = "de";

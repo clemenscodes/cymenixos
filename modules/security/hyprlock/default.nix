@@ -7,7 +7,7 @@ in {
     modules = {
       security = {
         hyprlock = {
-          enable = lib.mkEnableOption "Enable hyprlock PAM" // {default = useHyprlock;};
+          enable = lib.mkEnableOption "Enable hyprlock PAM" // {default = false;};
         };
       };
     };

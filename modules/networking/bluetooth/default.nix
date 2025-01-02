@@ -11,7 +11,7 @@ in {
     modules = {
       networking = {
         bluetooth = {
-          enable = lib.mkEnableOption "Enable bluetooth" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable bluetooth" // {default = false;};
         };
       };
     };

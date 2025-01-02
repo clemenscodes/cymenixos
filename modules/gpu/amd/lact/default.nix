@@ -11,7 +11,7 @@ in {
       gpu = {
         amd = {
           lact = {
-            enable = lib.mkEnableOption "Enable LACT AMDGPU Control daemon" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable LACT AMDGPU Control daemon" // {default = false;};
           };
         };
       };

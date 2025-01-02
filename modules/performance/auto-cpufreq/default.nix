@@ -9,7 +9,7 @@ in {
     modules = {
       performance = {
         auto-cpufreq = {
-          enable = lib.mkEnableOption "Enable auto-cpufreq" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable auto-cpufreq" // {default = false;};
         };
       };
     };

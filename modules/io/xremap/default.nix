@@ -10,7 +10,7 @@ in {
     modules = {
       io = {
         xremap = {
-          enable = lib.mkEnableOption "Enable xremap system service" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable xremap system service" // {default = false;};
         };
       };
     };

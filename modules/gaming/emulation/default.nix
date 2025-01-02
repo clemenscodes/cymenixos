@@ -14,7 +14,7 @@ in {
     modules = {
       gaming = {
         emulation = {
-          enable = lib.mkEnableOption "Enable emulation" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable emulation" // {default = false;};
         };
       };
     };

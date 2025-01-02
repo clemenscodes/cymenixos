@@ -6,7 +6,7 @@ in {
     modules = {
       security = {
         ssh = {
-          enable = lib.mkEnableOption "Enable SSH" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable SSH" // {default = false;};
         };
       };
     };

@@ -4,7 +4,7 @@ in {
   options = {
     modules = {
       system = {
-        enable = lib.mkEnableOption "Enable system settings" // {default = cfg.enable;};
+        enable = lib.mkEnableOption "Enable system settings" // {default = false;};
         defaultVersion = lib.mkOption {
           type = lib.types.str;
           default = lib.versions.majorMinor lib.version;

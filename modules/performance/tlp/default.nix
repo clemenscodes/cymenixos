@@ -5,7 +5,7 @@ in {
     modules = {
       performance = {
         tlp = {
-          enable = lib.mkEnableOption "Enable battery life optimizations" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable battery life optimizations" // {default = false;};
         };
       };
     };

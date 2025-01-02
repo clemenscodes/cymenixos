@@ -5,7 +5,7 @@ in {
     modules = {
       gaming = {
         gamescope = {
-          enable = lib.mkEnableOption "Enable gamescope" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable gamescope" // {default = false;};
         };
       };
     };

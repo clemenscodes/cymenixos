@@ -16,7 +16,7 @@ in
     options = {
       modules = {
         home-manager = {
-          enable = mkEnableOption "Enable home-manager" // {default = cfg.enable;};
+          enable = mkEnableOption "Enable home-manager" // {default = false;};
         };
       };
     };

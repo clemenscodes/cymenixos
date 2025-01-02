@@ -16,7 +16,7 @@ in {
   options = {
     modules = {
       io = {
-        enable = lib.mkEnableOption "Enable IO" // {default = cfg.display.gui != "headless";};
+        enable = lib.mkEnableOption "Enable IO" // {default = false;};
       };
     };
   };

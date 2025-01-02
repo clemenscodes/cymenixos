@@ -6,7 +6,7 @@ in {
     modules = {
       themes = {
         base = {
-          enable = mkEnableOption "Enable base theme" // {default = cfg.enable;};
+          enable = mkEnableOption "Enable base theme" // {default = false;};
           background = mkOption {
             type = types.str;
             default = "282828";
