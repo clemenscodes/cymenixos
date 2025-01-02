@@ -3,7 +3,7 @@
 in {
   options = {
     modules = {
-      boot = {
+      io = {
         fuse = {
           enable = lib.mkEnableOption "Enable fuse" // {default = false;};
         };
