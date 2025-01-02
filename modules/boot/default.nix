@@ -5,7 +5,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  isDesktop = config.modules.display.gui != "headless";
   inherit (cfg.boot) efiSupport device;
 in {
   imports = [
@@ -23,7 +22,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.boot.enable && isDesktop) {
+  config = lib.mkIf (cfg.enable && cfg.boot.enable) {
     environment = {
       systemPackages = [
         pkgs.ntfs3g
