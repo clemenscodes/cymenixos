@@ -1,6 +1,4 @@
-{lib, ...}: {config, ...}: let
-  cfg = config.modules.cpu;
-in {
+{lib, ...}: {...}: {
   options = {
     modules = {
       cpu = {

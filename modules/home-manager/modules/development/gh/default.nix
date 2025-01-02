@@ -19,7 +19,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.gh.enable) {
     programs = {
       gh = {
-        enable = cfg.gh.enable;
+        inherit (cfg.gh) enable;
         settings = {
           version = 1;
           editor = config.modules.editor.defaultEditor;

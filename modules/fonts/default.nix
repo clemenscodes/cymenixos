@@ -3,12 +3,12 @@
   lib,
   ...
 }: {config, ...}: let
-  size = 8;
+  cfg = config.modules;
   font = "VictorMono";
   monospace = "${font} Nerd Font Mono";
   sansSerif = "${font} Nerd Font";
   serif = "${font} Nerd Font";
-  cfg = config.modules;
+  size = 8;
 in {
   options = {
     modules = {
@@ -27,12 +27,8 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.fonts.enable) {
     fonts = {
-      packages = with pkgs.nerd-fonts; [
-        iosevka
-        victor-mono
-      ];
       fontconfig = {
-        enable = cfg.fonts.enable;
+        inherit (cfg.fonts) enable;
         defaultFonts = {
           monospace = ["${monospace}"];
           sansSerif = ["${sansSerif}"];
@@ -40,8 +36,12 @@ in {
         };
       };
       fontDir = {
-        enable = cfg.fonts.enable;
+        inherit (cfg.fonts) enable;
       };
+      packages = [
+        pkgs.nerd-fonts.iosevka
+        pkgs.nerd-fonts.victor-mono
+      ];
     };
   };
 }

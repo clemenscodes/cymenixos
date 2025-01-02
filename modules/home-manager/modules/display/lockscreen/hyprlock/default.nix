@@ -34,7 +34,10 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.hyprlock.enable) {
     home = {
-      packages = [hyprlock hypridle];
+      packages = [
+        hyprlock
+        hypridle
+      ];
     };
     programs = {
       hyprlock = {

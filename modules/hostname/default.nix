@@ -1,6 +1,4 @@
-{lib, ...}: {config, ...}: let
-  cfg = config.modules;
-in {
+{lib, ...}: {...}: {
   options = {
     modules = {
       hostname = {

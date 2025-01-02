@@ -13,8 +13,8 @@ in {
   config = lib.mkIf (cfg.enable && cfg.direnv.enable) {
     programs = {
       direnv = {
-        enable = cfg.direnv.enable;
-        enableZshIntegration = config.modules.shell.zsh.enable;
+        inherit (cfg.direnv) enable;
+        enableZshIntegration = lib.mkIf config.modules.shell.enable config.modules.shell.zsh.enable;
         config = {
           global = {
             warn_timeout = "100h";
@@ -22,7 +22,7 @@ in {
           };
         };
         nix-direnv = {
-          enable = cfg.direnv.enable;
+          inherit (cfg.direnv) enable;
         };
       };
     };

@@ -1,6 +1,4 @@
-{lib, ...}: {config, ...}: let
-  cfg = config.modules.gaming.emulation;
-in {
+{lib, ...}: {...}: {
   options = {
     modules = {
       gaming = {

@@ -19,7 +19,6 @@ in {
     (import ./editor {inherit inputs pkgs lib;})
     (import ./explorer {inherit inputs pkgs lib;})
     (import ./fonts {inherit inputs pkgs lib;})
-    (import ./gaming {inherit inputs pkgs lib;})
     (import ./media {inherit inputs pkgs lib;})
     (import ./monitoring {inherit inputs pkgs lib;})
     (import ./networking {inherit inputs pkgs lib;})

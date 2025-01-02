@@ -110,14 +110,6 @@
         };
       };
     };
-    ps3-nix = {
-      url = "github:clemenscodes/ps3-nix";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
-        };
-      };
-    };
     cardanix = {
       url = "github:clemenscodes/cardanix";
       inputs = {

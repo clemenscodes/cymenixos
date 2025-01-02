@@ -14,7 +14,7 @@
       explorer = {
         enable = lib.mkEnableOption "Enable a file explorer" // {default = false;};
         defaultExplorer = lib.mkOption {
-          type = lib.types.enum ["lf" "yazi"];
+          type = lib.types.enum ["lf" "yazi" "dolphin"];
           default = "yazi";
         };
       };

@@ -18,11 +18,11 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.secureboot.enable) {
     environment = {
-      systemPackages = with pkgs; [sbctl];
+      systemPackages = [pkgs.sbctl];
     };
     boot = {
       lanzaboote = {
-        enable = true;
+        inherit (cfg.secureboot) enable;
         pkiBundle = "/etc/secureboot";
       };
     };

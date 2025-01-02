@@ -17,7 +17,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.gh-dash.enable) {
     programs = {
       gh-dash = {
-        enable = cfg.gh-dash.enable;
+        inherit (cfg.gh-dash) enable;
       };
     };
   };
