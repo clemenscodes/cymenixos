@@ -3,7 +3,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules;
 in {
   imports = [
@@ -16,5 +20,8 @@ in {
         enable = lib.mkEnableOption "Enable common configurations" // {default = cfg.enable;};
       };
     };
+  };
+  nixpkgs = {
+    hostPlatform = system;
   };
 }
