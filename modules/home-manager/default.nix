@@ -29,8 +29,10 @@ in {
       backupFileExtension = "home-manager-backup";
       users = {
         ${cfg.users.user} = {
-          stateVersion = lib.mkDefault (lib.versions.majorMinor lib.version);
           imports = [(import ./modules {inherit inputs pkgs lib;})];
+          home = {
+            stateVersion = lib.mkDefault (lib.versions.majorMinor lib.version);
+          };
         };
       };
     };
