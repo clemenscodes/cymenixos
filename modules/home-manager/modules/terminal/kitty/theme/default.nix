@@ -1,7 +1,6 @@
-{
+{lib, ...}: {
   config,
   osConfig,
-  lib,
   ...
 }: let
   cfg = config.modules.terminal;

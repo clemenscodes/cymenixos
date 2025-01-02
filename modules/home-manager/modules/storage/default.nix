@@ -1,6 +1,11 @@
-{lib, ...}: {
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {...}: {
   imports = [
-    ./rclone
+    (import ./rclone {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {

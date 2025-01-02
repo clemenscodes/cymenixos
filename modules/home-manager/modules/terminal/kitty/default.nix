@@ -1,17 +1,16 @@
-{
+{lib, ...}: {
   config,
   osConfig,
-  lib,
   ...
 }: let
   cfg = config.modules.terminal;
 in {
-  imports = [./theme];
+  imports = [(import ./theme {inherit lib;})];
   options = {
     modules = {
       terminal = {
         kitty = {
-          enable = lib.mkEnableOption "Enable kitty" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable kitty" // {default = false;};
         };
       };
     };
@@ -19,7 +18,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.kitty.enable) {
     programs = {
       kitty = {
-        enable = cfg.kitty.enable;
+        inherit (cfg.kitty) enable;
         shellIntegration = {
           enableZshIntegration = config.modules.shell.zsh.enable;
         };

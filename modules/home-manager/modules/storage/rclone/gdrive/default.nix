@@ -1,9 +1,8 @@
 {
-  config,
-  lib,
   pkgs,
+  lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.storage;
   mountGoogleDrive = pkgs.writeShellScriptBin "mount-gdrive" ''
     RCLONE_HOME="$XDG_CONFIG_HOME/rclone"

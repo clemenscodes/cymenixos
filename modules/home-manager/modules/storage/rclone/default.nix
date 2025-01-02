@@ -1,13 +1,13 @@
 {
-  config,
-  lib,
+  inputs,
   pkgs,
+  lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.storage;
 in {
   imports = [
-    ./gdrive
+    (import ./gdrive {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
@@ -20,7 +20,10 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.rclone.enable) {
     home = {
-      packages = [pkgs.rclone pkgs.rclone-browser];
+      packages = [
+        pkgs.rclone
+        pkgs.rclone-browser
+      ];
     };
   };
 }

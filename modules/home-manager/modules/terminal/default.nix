@@ -1,31 +1,31 @@
-{pkgs, ...}: {
-  config,
+{
+  inputs,
+  pkgs,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules;
-in
-  with lib; {
-    imports = [
-      (import ./ghostty {inherit pkgs;})
-      ./kitty
-    ];
-    options = {
-      modules = {
-        terminal = {
-          enable = mkEnableOption "Enable a great terminal" // {default = cfg.enable;};
-          defaultTerminal = mkOption {
-            type = types.enum ["kitty" "ghostty"];
-            default = "kitty";
-          };
+in {
+  imports = [
+    (import ./ghostty {inherit inputs pkgs lib;})
+    (import ./kitty {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      terminal = {
+        enable = lib.mkEnableOption "Enable a great terminal" // {default = false;};
+        defaultTerminal = lib.mkOption {
+          type = lib.types.enum ["kitty" "ghostty"];
+          default = "kitty";
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.terminal.enable) {
-      home = {
-        sessionVariables = {
-          TERMINAL = cfg.terminal.defaultTerminal;
-        };
+  };
+  config = lib.mkIf (cfg.enable && cfg.terminal.enable) {
+    home = {
+      sessionVariables = {
+        TERMINAL = cfg.terminal.defaultTerminal;
       };
     };
-  }
+  };
+}

@@ -1,8 +1,10 @@
 {
   pkgs,
+  lib,
+  ...
+}: {
   config,
   osConfig,
-  lib,
   ...
 }: let
   cfg = config.modules.security;
@@ -10,20 +12,19 @@
     if osConfig.modules.display.gui == "headless"
     then pkgs.bitwarden-cli
     else pkgs.bitwarden-desktop;
-in
-  with lib; {
-    options = {
-      modules = {
-        security = {
-          bitwarden = {
-            enable = mkEnableOption "Enable bitwarden" // {default = false;};
-          };
+in {
+  options = {
+    modules = {
+      security = {
+        bitwarden = {
+          enable = lib.mkEnableOption "Enable bitwarden" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.bitwarden.enable) {
-      home = {
-        packages = [bitwardenPackage];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.bitwarden.enable) {
+    home = {
+      packages = [bitwardenPackage];
     };
-  }
+  };
+}

@@ -1,42 +1,40 @@
 {
   pkgs,
   lib,
-  config,
   ...
-}: let
+}: {config, ...}: let
   sshagent = pkgs.writeShellScriptBin "sshagent" ''
     eval "$(${pkgs.openssh}/bin/ssh-agent -s)" && ${pkgs.openssh}/bin/ssh-add
   '';
   cfg = config.modules.security;
-in
-  with lib; {
-    options = {
-      modules = {
-        security = {
-          ssh = {
-            enable = mkEnableOption "Enable SSH" // {default = false;};
-          };
+in {
+  options = {
+    modules = {
+      security = {
+        ssh = {
+          enable = lib.mkEnableOption "Enable SSH" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.ssh.enable) {
-      home = {
-        packages = with pkgs; [
-          gnome-keyring
-          sshagent
+  };
+  config = lib.mkIf (cfg.enable && cfg.ssh.enable) {
+    home = {
+      packages = [
+        pkgs.gnome-keyring
+        sshagent
+      ];
+    };
+    services = {
+      gnome-keyring = {
+        inherit (cfg.ssh) enable;
+        components = [
+          "ssh"
+          "secrets"
         ];
       };
-      services = {
-        gnome-keyring = {
-          enable = cfg.ssh.enable;
-          components = [
-            "ssh"
-            "secrets"
-          ];
-        };
-        ssh-agent = {
-          enable = cfg.ssh.enable;
-        };
+      ssh-agent = {
+        inherit (cfg.ssh) enable;
       };
     };
-  }
+  };
+}

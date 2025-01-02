@@ -1,22 +1,20 @@
-{inputs}: {
+{
+  inputs,
+  pkgs,
   lib,
-  config,
   ...
-}: let
-  cfg = config.modules;
-in
-  with lib; {
-    imports = [
-      ./bitwarden
-      ./ssh
-      ./gpg
-      (import ./sops {inherit inputs;})
-    ];
-    options = {
-      modules = {
-        security = {
-          enable = mkEnableOption "Enable tools for security" // {default = cfg.enable;};
-        };
+}: {...}: {
+  imports = [
+    (import ./bitwarden {inherit inputs pkgs lib;})
+    (import ./ssh {inherit inputs pkgs lib;})
+    (import ./gpg {inherit inputs pkgs lib;})
+    (import ./sops {inherit inputs pkgs lib;})
+  ];
+  options = {
+    modules = {
+      security = {
+        enable = lib.mkEnableOption "Enable tools for security" // {default = false;};
       };
     };
-  }
+  };
+}
