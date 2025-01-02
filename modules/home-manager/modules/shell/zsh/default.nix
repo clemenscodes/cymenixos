@@ -1,6 +1,8 @@
 {
-  lib,
   pkgs,
+  lib,
+  ...
+}: {
   config,
   osConfig,
   ...
@@ -23,7 +25,7 @@ in {
     modules = {
       shell = {
         zsh = {
-          enable = lib.mkEnableOption "Enable a great zsh" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable a great zsh" // {default = false;};
         };
       };
     };
@@ -62,7 +64,7 @@ in {
     };
     programs = {
       zsh = {
-        enable = cfg.zsh.enable;
+        inherit (cfg.zsh) enable;
         enableCompletion = true;
         syntaxHighlighting = {
           enable = true;
@@ -83,12 +85,12 @@ in {
           ];
         };
         dotDir = ".config/zsh";
-        shellAliases = with pkgs; {
+        shellAliases = {
           sudo = "sudo ";
           update = "cd $MOON && git pull origin $(git_current_branch)";
           src = "omz reload";
           ssh = "kitten ssh";
-          ls = "${eza}/bin/eza";
+          ls = "${pkgs.eza}/bin/eza";
           ne = "${explorer} $MOON";
           nehm = "${explorer} $MOON/nix/modules/home-manager/modules";
           nenvim = "${explorer} $MOON/nix/modules/home-manager/modules/editor/nixvim";

@@ -1,15 +1,11 @@
-{
-  lib,
-  config,
-  ...
-}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.utils;
 in {
   options = {
     modules = {
       utils = {
         fzf = {
-          enable = lib.mkEnableOption "Enable fzf" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable fzf" // {default = false;};
         };
       };
     };
@@ -17,7 +13,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.fzf.enable) {
     programs = {
       fzf = {
-        enable = cfg.fzf.enable;
+        inherit (cfg.fzf) enable;
       };
     };
   };

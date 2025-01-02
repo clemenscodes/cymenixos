@@ -1,24 +1,22 @@
 {
   pkgs,
   lib,
-  config,
   ...
-}:
-with lib; let
+}: {config, ...}: let
   cfg = config.modules.utils;
 in {
   options = {
     modules = {
       utils = {
         unzip = {
-          enable = mkEnableOption "Enable unzip" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable unzip" // {default = false;};
         };
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.unzip.enable) {
+  config = lib.mkIf (cfg.enable && cfg.unzip.enable) {
     home = {
-      packages = with pkgs; [unzip];
+      packages = [pkgs.unzip];
     };
   };
 }

@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}:
-with lib; let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.shell.multiplexers;
 in {
   options = {
@@ -11,16 +6,16 @@ in {
       shell = {
         multiplexers = {
           zellij = {
-            enable = mkEnableOption "Enable zellij" // {default = cfg.enable;};
+            enable = lib.mkEnableOption "Enable zellij" // {default = false;};
           };
         };
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.zellij.enable) {
+  config = lib.mkIf (cfg.enable && cfg.zellij.enable) {
     programs = {
       zellij = {
-        enable = cfg.zellij.enable;
+        inherit (cfg.zellij) enable;
         enableZshIntegration = config.modules.shell.zsh.enable;
       };
     };

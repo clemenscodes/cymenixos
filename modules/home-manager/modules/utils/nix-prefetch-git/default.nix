@@ -1,24 +1,22 @@
 {
   pkgs,
   lib,
-  config,
   ...
-}:
-with lib; let
+}: {config, ...}: let
   cfg = config.modules.utils;
 in {
   options = {
     modules = {
       utils = {
         nix-prefetch-git = {
-          enable = mkEnableOption "Enable nix-prefetch-git" // {default = cfg.enable;};
+          enable = lib.mkEnableOption "Enable nix-prefetch-git" // {default = false;};
         };
       };
     };
   };
-  config = mkIf (cfg.enable && cfg.nix-prefetch-git.enable) {
+  config = lib.mkIf (cfg.enable && cfg.nix-prefetch-git.enable) {
     home = {
-      packages = with pkgs; [nix-prefetch-git];
+      packages = [pkgs.nix-prefetch-git];
     };
   };
 }

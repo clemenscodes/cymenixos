@@ -1,5 +1,4 @@
-{pkgs}:
-with pkgs;
-  writeShellScriptBin "sw" ''
-    buildprofile && nixdiff && switch && clean "$@"
-  ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "sw" ''
+  buildprofile && nixdiff && switch && clean "$@"
+''

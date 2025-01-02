@@ -1,24 +1,22 @@
 {
-  config,
-  lib,
   pkgs,
+  lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.shell;
-in
-  with lib; {
-    options = {
-      modules = {
-        shell = {
-          nom = {
-            enable = mkEnableOption "Enable the nix output monitor" // {default = cfg.enable;};
-          };
+in {
+  options = {
+    modules = {
+      shell = {
+        nom = {
+          enable = lib.mkEnableOption "Enable the nix output monitor" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.nom.enable) {
-      home = {
-        packages = with pkgs; [nix-output-monitor];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.nom.enable) {
+    home = {
+      packages = [pkgs.nix-output-monitor];
     };
-  }
+  };
+}

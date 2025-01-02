@@ -1,14 +1,18 @@
-{lib, ...}:
-with lib; {
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {...}: {
   imports = [
-    ./tmux
-    ./zellij
+    (import ./tmux {inherit inputs pkgs lib;})
+    (import ./zellij {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       shell = {
         multiplexers = {
-          enable = mkEnableOption "Enable terminal multiplexers" // {default = false;};
+          enable = lib.mkEnableOption "Enable terminal multiplexers" // {default = false;};
         };
       };
     };

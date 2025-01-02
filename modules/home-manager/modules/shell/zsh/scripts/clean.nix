@@ -1,5 +1,4 @@
-{pkgs}:
-with pkgs;
-  writeShellScriptBin "clean" ''
-    rm -rf $FLAKE/result "$@"
-  ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "clean" ''
+  rm -rf $FLAKE/result "$@"
+''

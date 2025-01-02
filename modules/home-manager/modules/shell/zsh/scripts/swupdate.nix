@@ -1,5 +1,4 @@
-{pkgs}:
-with pkgs;
-  writeShellScriptBin "swupdate" ''
-    update && sw "$@"
-  ''
+{pkgs, ...}:
+pkgs.writeShellScriptBin "swupdate" ''
+  update && sw "$@"
+''

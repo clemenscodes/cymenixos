@@ -1,24 +1,22 @@
 {
-  config,
-  lib,
   pkgs,
+  lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.shell;
-in
-  with lib; {
-    options = {
-      modules = {
-        shell = {
-          nvd = {
-            enable = mkEnableOption "Enable nix version diffs" // {default = cfg.enable;};
-          };
+in {
+  options = {
+    modules = {
+      shell = {
+        nvd = {
+          enable = lib.mkEnableOption "Enable nix version diffs" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.nvd.enable) {
-      home = {
-        packages = with pkgs; [nvd];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.nvd.enable) {
+    home = {
+      packages = [pkgs.nvd];
     };
-  }
+  };
+}

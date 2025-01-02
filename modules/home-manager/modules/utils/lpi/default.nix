@@ -1,26 +1,26 @@
 {
-  pkgs,
-  config,
-  lib,
   inputs,
+  pkgs,
+  lib,
   ...
-}: let
-  lpi = inputs.lpi.packages.${pkgs.system}.default;
+}: {config, ...}: let
   cfg = config.modules.utils;
-in
-  with lib; {
-    options = {
-      modules = {
-        utils = {
-          lpi = {
-            enable = mkEnableOption "Enable lpi to load project information" // {default = cfg.enable;};
-          };
+in {
+  options = {
+    modules = {
+      utils = {
+        lpi = {
+          enable = lib.mkEnableOption "Enable lpi to load project information" // {default = false;};
         };
       };
     };
-    config = mkIf (cfg.enable && cfg.lpi.enable) {
-      home = {
-        packages = with pkgs; [moon lpi];
-      };
+  };
+  config = lib.mkIf (cfg.enable && cfg.lpi.enable) {
+    home = {
+      packages = [
+        pkgs.moon
+        inputs.lpi.packages.${pkgs.system}.default
+      ];
     };
-  }
+  };
+}

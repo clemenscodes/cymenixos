@@ -1,26 +1,21 @@
-{
-  config,
-  lib,
-  ...
-}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.shell;
-in
-  with lib; {
-    options = {
-      modules = {
-        shell = {
-          zoxide = {
-            enable = mkEnableOption "Enable zoxide" // {default = cfg.enable;};
-          };
-        };
-      };
-    };
-    config = mkIf (cfg.enable && cfg.zoxide.enable) {
-      programs = {
+in {
+  options = {
+    modules = {
+      shell = {
         zoxide = {
-          enable = cfg.zoxide.enable;
-          enableZshIntegration = cfg.zsh.enable;
+          enable = lib.mkEnableOption "Enable zoxide" // {default = false;};
         };
       };
     };
-  }
+  };
+  config = lib.mkIf (cfg.enable && cfg.zoxide.enable) {
+    programs = {
+      zoxide = {
+        inherit (cfg.zoxide) enable;
+        enableZshIntegration = cfg.zsh.enable;
+      };
+    };
+  };
+}
