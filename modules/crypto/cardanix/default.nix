@@ -3,9 +3,9 @@
   lib,
   ...
 }: let
+  imports = [inputs.cardanix.nixosModules.x86_64-linux];
   module = "crypto";
   submodule = "cardanix";
-  imports = [inputs.cardanix.nixosModules.x86_64-linux];
   declarations = {
     cardano = {
       enable = true;
@@ -36,4 +36,4 @@
     };
   };
 in
-  lib.mkSubModuleOption module submodule imports declarations
+  lib.mkSubModule {inherit imports module submodule declarations;}

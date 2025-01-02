@@ -1,5 +1,10 @@
-{lib, ...}: module: submodule: imports: declarations: ({config, ...}: let
-  cfg = config.${config.cymenixos.namespace};
+{lib, ...}: {
+  imports ? [],
+  module,
+  submodule,
+  declarations,
+}: ({config, ...}: let
+  cfg = config.${config.cymenixos.namespace}.${module};
 in {
   inherit imports;
   options = {
@@ -11,5 +16,5 @@ in {
       };
     };
   };
-  config = lib.mkIf cfg.enable declarations;
+  config = lib.mkIf cfg.${submodule}.enable declarations;
 })
