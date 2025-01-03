@@ -19,6 +19,7 @@
     };
     users = {
       enable = true;
+      wheel = true;
       user = "nixos";
     };
     boot = {

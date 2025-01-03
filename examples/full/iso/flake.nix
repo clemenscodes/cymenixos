@@ -27,7 +27,7 @@
       cymenixos = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
         modules = [
-          ../configuration.nix
+          ./configuration.nix
           ({modulesPath, ...}: {
             imports = [(modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")];
             modules = {
