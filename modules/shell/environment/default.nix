@@ -35,9 +35,9 @@ in {
       services = {
         copy-nix-config = {
           description = "Copy read-only reference to flake into a writable path to allow changing configuration";
+          wantedBy = ["multi-user.target"];
           serviceConfig = {
             Type = "oneshot";
-            wantedBy = ["multi-user.target"];
             ExecStart = "${cymenixos.packages.${system}.default}/bin/copyro /etc/flake /home/${config.modules.users.user}/.local/src/cymenix";
           };
         };
