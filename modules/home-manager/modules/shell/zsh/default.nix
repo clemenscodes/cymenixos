@@ -49,8 +49,7 @@ in {
         (import ./scripts/tracewarning.nix {inherit pkgs;})
       ];
       sessionVariables = {
-        MOON = "${config.home.homeDirectory}/${flake}";
-        FLAKE = "${config.home.homeDirectory}/${flake}/nix";
+        FLAKE = "${config.home.homeDirectory}/${flake}";
         NIXOS_OZONE_WL = 1;
         ANDROID_USER_HOME = "$HOME/.local/share/android";
         CARGO_HOME = "$HOME/.local/share/cargo";
