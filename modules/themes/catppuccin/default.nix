@@ -4,7 +4,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.themes;
-  isDesktop = config.modules.display.gui != "headless";
 in {
   imports = [
     inputs.catppuccin.nixosModules.catppuccin
@@ -48,7 +47,7 @@ in {
     };
   };
   config = {
-    catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable && isDesktop) {
+    catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable) {
       inherit (cfg.catppuccin) enable flavor accent;
     };
   };

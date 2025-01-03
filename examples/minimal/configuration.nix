@@ -13,6 +13,7 @@
       kind = "desktop";
     };
     display = {
+      enable = true;
       gui = "headless";
     };
     disk = {
