@@ -129,10 +129,8 @@
     pkgs = import nixpkgs {inherit system;};
     inherit (pkgs) lib;
   in {
-    nixosModules = {
-      ${system} = {
-        default = import ./modules {inherit inputs pkgs lib;};
-      };
+    formatter = {
+      ${system} = pkgs.alejandra;
     };
     packages = {
       ${system} = {
@@ -153,7 +151,12 @@
           };
           qemu-run-iso = pkgs.writeShellApplication {
             name = "qemu-run-iso";
-            runtimeInputs = with pkgs; [fd qemu_kvm pipewire pipewire.jack];
+            runtimeInputs = [
+              pkgs.fd
+              pkgs.qemu_kvm
+              pkgs.pipewire
+              pkgs.pipewire.jack
+            ];
 
             text = ''
               if fd --type file --has-results 'nixos-.*\.iso' result/iso 2> /dev/null; then
@@ -184,7 +187,6 @@
           };
           copyro = pkgs.writeShellApplication {
             name = "copyro";
-            runtimeInputs = with pkgs; [disko];
             text = ''
               SOURCE_DIR=$1
               DEST_DIR=$2
@@ -234,6 +236,7 @@
           };
       };
     };
+
     devShells = {
       ${system} = {
         default = pkgs.mkShell {
@@ -241,6 +244,14 @@
         };
       };
     };
-    formatter.${system} = pkgs.alejandra;
+
+    nixosModules = {
+      ${system} = {
+        default = import ./modules {
+          inherit inputs pkgs lib;
+          cymenixos = self;
+        };
+      };
+    };
   };
 }

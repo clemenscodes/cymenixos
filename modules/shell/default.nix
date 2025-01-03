@@ -2,13 +2,12 @@
   inputs,
   pkgs,
   lib,
+  cymenixos,
   ...
-}: {config, ...}: let
-  cfg = config.modules;
-in {
+}: {...}: {
   imports = [
     (import ./console {inherit inputs pkgs lib;})
-    (import ./environment {inherit inputs pkgs lib;})
+    (import ./environment {inherit inputs pkgs lib cymenixos;})
     (import ./ld {inherit inputs pkgs lib;})
     (import ./zsh {inherit inputs pkgs lib;})
   ];

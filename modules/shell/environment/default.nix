@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  cymenixos,
   ...
 }: {
   self,
@@ -28,10 +29,7 @@ in {
       };
       localBinInPath = true;
       homeBinInPath = true;
-      systemPackages = [
-        pkgs.neovim
-        self.packages.${system}.copyro
-      ];
+      systemPackages = [pkgs.neovim];
     };
     systemd = {
       services = {
@@ -40,7 +38,7 @@ in {
           serviceConfig = {
             Type = "oneshot";
             wantedBy = ["multi-user.target"];
-            ExecStart = "${lib.getExe self.packages.${system}.copyro} /etc/flake /home/${config.modules.users.user}/.local/src/cymenix";
+            ExecStart = "${cymenixos.packages.${system}.default}/bin/copyro /etc/flake /home/${config.modules.users.user}/.local/src/cymenix";
           };
         };
       };
