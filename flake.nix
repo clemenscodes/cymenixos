@@ -139,14 +139,14 @@
             name = "build-system";
             runtimeInputs = [pkgs.nix-output-monitor];
             text = ''
-              nom build .#nixosConfigurations.cymenixos.config.system.build.toplevel --show-trace
+              nom build .#nixosConfigurations.nixos.config.system.build.toplevel --show-trace
             '';
           };
           build-iso = pkgs.writeShellApplication {
             name = "build-iso";
             runtimeInputs = [pkgs.nix-output-monitor];
             text = ''
-              nom build .#nixosConfigurations.cymenixos.config.system.build.isoImage --show-trace
+              nom build .#nixosConfigurations.nixos.config.system.build.isoImage --show-trace
             '';
           };
           qemu-run-iso = pkgs.writeShellApplication {

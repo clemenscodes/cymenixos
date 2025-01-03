@@ -24,7 +24,7 @@
     inherit (pkgs) lib;
   in {
     nixosConfigurations = {
-      cymenixos = nixpkgs.lib.nixosSystem {
+      nixos = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
         modules = [
           ./configuration.nix
