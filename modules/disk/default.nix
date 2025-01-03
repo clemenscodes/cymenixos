@@ -13,12 +13,20 @@ in {
         device = lib.mkOption {
           type = lib.types.str;
           description = "The device to install the filesystem on using disko";
-          example = "/dev/sdc";
+          example = "/dev/vda";
         };
       };
     };
   };
   config = lib.mkIf (cfg.enable && cfg.disk.enable) {
+    fileSystems = {
+      "/persist" = {
+        neededForBoot = true;
+      };
+      "/var/log" = {
+        neededForBoot = true;
+      };
+    };
     disko = {
       devices = {
         disk = {
@@ -45,6 +53,7 @@ in {
                 };
                 efi = {
                   priority = 2;
+                  label = "boot";
                   type = "EF00";
                   size = "512M";
                   content = {
@@ -55,8 +64,8 @@ in {
                   };
                 };
                 luks = {
-                  priority = 5;
                   size = "100%";
+                  label = "luks";
                   content = {
                     type = "luks";
                     name = "root";
@@ -79,24 +88,38 @@ in {
             type = "lvm_vg";
             lvs = {
               root = {
-                size = "100%FREE";
+                size = "100%";
                 content = {
                   type = "btrfs";
-                  extraArgs = ["-f"];
-
+                  extraArgs = ["-L" "nixos" "-f"];
                   subvolumes = {
                     "/root" = {
                       mountpoint = "/";
+                      mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
-
-                    "/persist" = {
-                      mountOptions = ["subvol=persist" "noatime"];
-                      mountpoint = "/persist";
+                    "/home" = {
+                      mountpoint = "/home";
+                      mountOptions = ["subvol=home" "compress=zstd" "noatime"];
                     };
-
                     "/nix" = {
-                      mountOptions = ["subvol=nix" "noatime"];
                       mountpoint = "/nix";
+                      mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
+                    };
+                    "/persist" = {
+                      mountpoint = "/persist";
+                      mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
+                    };
+                    "/log" = {
+                      mountpoint = "/var/log";
+                      mountOptions = ["subvol=log" "compress=zstd" "noatime"];
+                    };
+                    "/swap" = {
+                      mountpoint = "/swap";
+                      swap = {
+                        swapfile = {
+                          size = "64G";
+                        };
+                      };
                     };
                   };
                 };

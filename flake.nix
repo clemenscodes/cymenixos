@@ -135,105 +135,18 @@
     packages = {
       ${system} = {
         default = let
-          build-system = pkgs.writeShellApplication {
-            name = "build-system";
-            runtimeInputs = [pkgs.nix-output-monitor];
-            text = ''
-              nom build .#nixosConfigurations.nixos.config.system.build.toplevel --show-trace
-            '';
-          };
-          build-iso = pkgs.writeShellApplication {
-            name = "build-iso";
-            runtimeInputs = [pkgs.nix-output-monitor];
-            text = ''
-              nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
-            '';
-          };
-          qemu-run-iso = pkgs.writeShellApplication {
-            name = "qemu-run-iso";
-            runtimeInputs = [
-              pkgs.fd
-              pkgs.qemu_kvm
-              pkgs.pipewire
-              pkgs.pipewire.jack
-            ];
-
-            text = ''
-              if fd --type file --has-results 'nixos-.*\.iso' result/iso 2> /dev/null; then
-                echo "Symlinking the existing iso image for qemu:"
-                ln -sfv result/iso/nixos-*.iso result-iso
-                echo
-              else
-                echo "No iso file exists to run, please build one first, example:"
-                echo "  nix build -L .#nixosConfigurations.airgap-boot.config.system.build.isoImage"
-                exit
-              fi
-
-              # To disallow a network nic, pass: -nic none
-              LD_LIBRARY_PATH="${pkgs.pipewire.jack}/lib" qemu-kvm \
-                -smp 8 \
-                -m 16G \
-                -drive file=result-iso,format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on \
-                -device ahci,id=achi0 \
-                -device virtio-vga-gl -display sdl,gl=on,show-cursor=off \
-                -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1 \
-                -device intel-hda \
-                -device hda-duplex,audiodev=audio0 \
-                -audiodev pipewire,id=audio0 \
-                "$@"
-            '';
-          };
-          copyro = pkgs.writeShellApplication {
-            name = "copyro";
-            text = ''
-              SOURCE_DIR=$1
-              DEST_DIR=$2
-
-              if [ ! -d "$DEST_DIR" ]; then
-                echo "Destination does not exist. Starting copy process."
-
-                copy_directory() {
-                  local src
-                  local dest
-
-                  src="$1"
-                  dest="$2"
-
-                  mkdir -p "$dest"
-
-                  for item in "$src"/*; do
-                    [ -e "$item" ] || continue
-                    local dest_item
-                    dest_item="$dest/$(basename "$item")"
-                    if [ -d "$item" ]; then
-                      copy_directory "$item" "$dest_item"
-                    elif [ -f "$item" ]; then
-                      cp "$item" "$dest_item"
-                    fi
-                  done
-                }
-
-                copy_directory "$SOURCE_DIR" "$DEST_DIR"
-
-                find "$DEST_DIR" -type d -exec chmod 755 {} \;
-                find "$DEST_DIR" -type f -exec chmod 644 {} \;
-
-                echo "Copy process completed successfully."
-              else
-                echo "Destination already exists. No action taken."
-              fi
-            '';
-          };
+          packages = import ./pkgs {inherit pkgs;};
         in
           pkgs.stdenv.mkDerivation {
             name = "cymenixos-scripts";
             phases = "installPhase";
             installPhase = ''
               mkdir -p $out/bin
-              ln -s ${build-system}/bin/build-system $out/bin
-              ln -s ${build-iso}/bin/build-iso $out/bin
-              ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
-              ln -s ${copyro}/bin/copyro $out/bin
+              ln -s ${packages.build-system}/bin/build-system $out/bin
+              ln -s ${packages.build-iso}/bin/build-iso $out/bin
+              ln -s ${packages.install-cymenixos}/bin/install-cymenixos $out/bin
+              ln -s ${packages.qemu-run-iso}/bin/qemu-run-iso $out/bin
+              ln -s ${packages.copyro}/bin/copyro $out/bin
             '';
           };
       };
