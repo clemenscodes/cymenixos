@@ -29,7 +29,10 @@ in {
       };
       localBinInPath = true;
       homeBinInPath = true;
-      systemPackages = [pkgs.neovim];
+      systemPackages = [
+        pkgs.neovim
+        cymenixos.packages.${system}.default
+      ];
     };
     systemd = {
       user = {

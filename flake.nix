@@ -216,6 +216,10 @@
                 }
 
                 copy_directory "$SOURCE_DIR" "$DEST_DIR"
+
+                find "$DEST_DIR" -type d -exec chmod 755 {} \;
+                find "$DEST_DIR" -type f -exec chmod 644 {} \;
+
                 echo "Copy process completed successfully."
               else
                 echo "Destination already exists. No action taken."
