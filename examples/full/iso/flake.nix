@@ -29,7 +29,12 @@
         modules = [
           ../configuration.nix
           ({modulesPath, ...}: {
-            imports = [(modulesPath + "/installer/cd-dvd/installation-cd-graphical-gnome.nix")];
+            imports = [(modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")];
+            modules = {
+              disk = {
+                enable = lib.mkForce false;
+              };
+            };
           })
         ];
       };
