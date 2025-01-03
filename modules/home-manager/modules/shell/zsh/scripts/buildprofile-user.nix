@@ -3,7 +3,7 @@
   username,
   ...
 }:
-pkgs.writeShellScriptBin "buildprofile" ''
+pkgs.writeShellScriptBin "buildprofile-user" ''
   sudo nb \
     --profile /nix/var/nix/profiles/system \
     $FLAKE/#nixosConfigurations.${username}.config.system.build.toplevel \

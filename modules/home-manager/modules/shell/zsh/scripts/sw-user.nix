@@ -1,4 +1,4 @@
 {pkgs, ...}:
-pkgs.writeShellScriptBin "sw" ''
+pkgs.writeShellScriptBin "sw-user" ''
   buildprofile-user && nixdiff && switch && clean "$@"
 ''
