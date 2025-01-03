@@ -169,12 +169,7 @@
                 exit
               fi
 
-              if [ "$#" = 0 ]; then
-                echo "Not passing through any host devices; see the README.md if you would like to do that."
-              fi
-
               # To disallow a network nic, pass: -nic none
-              # See README.md for additional args to pass through a host device
               LD_LIBRARY_PATH="${pkgs.pipewire.jack}/lib" qemu-kvm \
                 -smp 8 \
                 -m 16G \
@@ -182,6 +177,9 @@
                 -device ahci,id=achi0 \
                 -device virtio-vga-gl -display sdl,gl=on,show-cursor=off \
                 -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1 \
+                -device intel-hda \
+                -device hda-duplex,audiodev=audio0 \
+                -audiodev pipewire,id=audio0 \
                 "$@"
             '';
           };
