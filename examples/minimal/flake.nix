@@ -6,8 +6,7 @@
     cymenixos = {
       url = "github:clemenscodes/cymenixos";
       inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
+        nixpkgs = { follows = "nixpkgs";
         };
       };
     };

@@ -46,8 +46,8 @@
                 user = "nixos";
               };
               boot = {
-                enable = false;
-                efiSupport = false;
+                enable = true;
+                efiSupport = true;
                 inherit (config.modules.disk) device;
               };
               cpu = {
@@ -211,6 +211,7 @@
               users = {
                 ${config.modules.users.user} = {
                   modules = {
+                    enable = true;
                     browser = {
                       enable = true;
                       defaultBrowser = "brave";

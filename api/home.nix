@@ -3,6 +3,7 @@
     users = {
       ${config.modules.users.user} = {
         modules = {
+          enable = false;
           browser = {
             enable = false;
             defaultBrowser = "brave";
@@ -66,6 +67,18 @@
               enable = false;
               hyprland = {
                 enable = false;
+                hyprpicker = {
+                  enable = false;
+                };
+                hyprshade = {
+                  enable = false;
+                };
+                hyprsunset = {
+                  enable = false;
+                };
+                xwayland = {
+                  enable = false;
+                };
               };
             };
             cursor = {
