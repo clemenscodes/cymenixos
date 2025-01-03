@@ -10,6 +10,7 @@
 }: let
   cfg = config.modules;
 in {
+  imports = [inputs.home-manager.nixosModules.home-manager];
   options = {
     modules = {
       home-manager = {
@@ -18,7 +19,6 @@ in {
     };
   };
   config = {
-    imports = [inputs.home-manager.nixosModules.home-manager];
     system = {
       stateVersion = lib.mkDefault (lib.versions.majorMinor lib.version);
     };

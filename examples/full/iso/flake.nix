@@ -26,7 +26,12 @@
     nixosConfigurations = {
       cymenixos = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
-        modules = [./configuration.nix];
+        modules = [
+          ../configuration.nix
+          ({modulesPath, ...}: {
+            imports = [(modulesPath + "/installer/cd-dvd/installation-cd-graphical-gnome.nix")];
+          })
+        ];
       };
     };
   };
