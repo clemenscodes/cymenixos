@@ -56,7 +56,6 @@
           };
           display = {
             enable = false;
-            gui = "gui";
             bar = {
               enable = false;
               waybar = {

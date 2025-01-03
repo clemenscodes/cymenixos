@@ -13,7 +13,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.starship.enable) {
     programs = {
       starship = {
-        inherit (cfg.startship) enable;
+        inherit (cfg.starship) enable;
         enableZshIntegration = cfg.zsh.enable;
         settings = {
           add_newline = false;
