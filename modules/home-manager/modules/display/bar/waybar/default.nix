@@ -44,7 +44,7 @@ in {
     };
     programs = {
       waybar = {
-        enable = cfg.waybar.enable;
+        inherit (cfg.waybar) enable;
         systemd = {
           enable = false;
         };

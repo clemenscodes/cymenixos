@@ -58,13 +58,6 @@
       defaultFont = "VictorMono Nerd Font";
       size = 8;
     };
-    gpu = {
-      enable = true;
-      vendor = "amd";
-      amd = {
-        enable = true;
-      };
-    };
     home-manager = {
       enable = true;
     };
@@ -194,6 +187,12 @@
                   enable = true;
                 };
               };
+            };
+          };
+          media = {
+            enable = true;
+            music = {
+              enable = true;
             };
           };
           display = {
