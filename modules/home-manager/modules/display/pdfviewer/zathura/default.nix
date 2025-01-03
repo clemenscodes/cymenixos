@@ -13,11 +13,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.zathura.enable) {
-    catppuccin = {
-      zathura = {
-        enable = false;
-      };
-    };
     programs = {
       zathura = {
         enable = cfg.zathura.enable;

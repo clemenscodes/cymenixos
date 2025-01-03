@@ -9,20 +9,15 @@
   ];
   modules = {
     enable = true;
+    machine = {
+      kind = "desktop";
+    };
+    display = {
+      gui = "headless";
+    };
     disk = {
       enable = true;
       device = "/dev/sda";
-    };
-    config = {
-      enable = true;
-      nix = {
-        enable = true;
-      };
-    };
-    users = {
-      enable = true;
-      wheel = true;
-      user = "nixos";
     };
     boot = {
       enable = true;
@@ -40,6 +35,19 @@
     locale = {
       enable = true;
       defaultLocale = "de";
+    };
+    themes = {
+      enable = true;
+      catppuccin = {
+        enable = true;
+        flavor = "macchiato";
+        accent = "blue";
+      };
+    };
+    users = {
+      enable = true;
+      wheel = true;
+      user = "nixos";
     };
     shell = {
       enable = true;
@@ -89,18 +97,10 @@
         enable = true;
       };
     };
-    machine = {
-      kind = "desktop";
-    };
-    display = {
-      gui = "headless";
-    };
-    themes = {
+    config = {
       enable = true;
-      catppuccin = {
+      nix = {
         enable = true;
-        flavor = "macchiato";
-        accent = "blue";
       };
     };
   };
