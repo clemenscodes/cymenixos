@@ -32,13 +32,15 @@ in {
       systemPackages = [pkgs.neovim];
     };
     systemd = {
-      services = {
-        copy-nix-config = {
-          description = "Copy read-only reference to flake into a writable path to allow changing configuration";
-          wantedBy = ["multi-user.target"];
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${cymenixos.packages.${system}.default}/bin/copyro /etc/flake /home/${config.modules.users.user}/.local/src/cymenix";
+      user = {
+        services = {
+          copy-nix-config = {
+            description = "Copy read-only reference to flake into a writable path to allow changing configuration";
+            wantedBy = ["default.target"];
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = "${cymenixos.packages.${system}.default}/bin/copyro /etc/flake /home/${config.modules.users.user}/.local/src/cymenix";
+            };
           };
         };
       };
