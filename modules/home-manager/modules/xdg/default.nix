@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   config,
   osConfig,
   ...
@@ -23,15 +27,21 @@ in {
         enable = true;
         createDirectories = true;
         music = "${home}/music";
-        documents = "${local}/share/documents";
-        pictures = "${local}/share/images";
-        videos = "${local}/share/videos";
-        desktop = "${local}/share/desktop";
-        download = "${local}/share/downloads";
-        publicShare = "${local}/share/public";
-        templates = "${local}/share/templates";
         extraConfig = {
           XDG_BIN_HOME = "${local}/bin";
+        };
+      };
+      mimeApps = {
+        enable = true;
+      };
+      portal = {
+        enable = true;
+        xdgOpenUsePortal = true;
+        extraPortals = [pkgs.xdg-desktop-portal-gtk];
+        config = {
+          common = {
+            default = "*";
+          };
         };
       };
       dataFile = {

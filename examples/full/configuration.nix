@@ -79,9 +79,6 @@
       sound = {
         enable = true;
       };
-      udisks = {
-        enable = true;
-      };
       xremap = {
         enable = true;
       };
@@ -170,15 +167,6 @@
       enable = true;
       defaultTimeZone = "Europe/Berlin";
     };
-    virtualisation = {
-      enable = true;
-      docker = {
-        enable = true;
-      };
-      virt-manager = {
-        enable = true;
-      };
-    };
     xdg = {
       enable = true;
     };
@@ -209,11 +197,6 @@
                 };
               };
             };
-            git = {
-              enable = true;
-              userName = "Clemens Horn"; # Must be set when git is enabled
-              userEmail = "clemens.horn@mni.thm.de"; # Must be set when git is enabled
-            };
           };
           display = {
             enable = true;
@@ -227,6 +210,18 @@
               enable = true;
               hyprland = {
                 enable = true;
+                hyprpicker = {
+                  enable = true;
+                };
+                hyprshade = {
+                  enable = true;
+                };
+                hyprsunset = {
+                  enable = true;
+                };
+                xwayland = {
+                  enable = true;
+                };
               };
             };
             cursor = {
@@ -244,6 +239,7 @@
             };
             launcher = {
               enable = true;
+              defaultLauncher = "rofi";
               rofi = {
                 enable = true;
               };
@@ -293,66 +289,6 @@
           fonts = {
             enable = true;
           };
-          media = {
-            enable = true;
-            audio = {
-              enable = true;
-              audacity = {
-                enable = true;
-              };
-              interfaces = {
-                enable = true;
-                scarlett = {
-                  enable = true;
-                  alsa-scarlett-gui = {
-                    enable = true;
-                  };
-                  scarlett2 = {
-                    enable = true;
-                  };
-                };
-              };
-            };
-            communication = {
-              enable = true;
-              discord = {
-                enable = true;
-              };
-              element = {
-                enable = true;
-              };
-            };
-            editing = {
-              enable = true;
-              davinci = {
-                enable = true;
-              };
-              gstreamer = {
-                enable = true;
-              };
-            };
-            music = {
-              enable = true;
-              dlplaylist = {
-                enable = true;
-              };
-              ncmpcpp = {
-                enable = true;
-              };
-            };
-            video = {
-              enable = true;
-              mpris = {
-                enable = true;
-              };
-              mpv = {
-                enable = true;
-              };
-              obs = {
-                enable = true;
-              };
-            };
-          };
           monitoring = {
             enable = true;
             btop = {
@@ -372,16 +308,6 @@
             };
             nm = {
               enable = true;
-            };
-          };
-          organization = {
-            enable = true;
-            calcurse = {
-              enable = true;
-            };
-            email = {
-              enable = false;
-              accounts = [];
             };
           };
           security = {
@@ -417,25 +343,6 @@
               enable = true;
             };
           };
-          storage = {
-            enable = true;
-            rclone = {
-              enable = true;
-              gdrive = {
-                enable = false;
-                mount = "gdrive";
-                crypt = null; # "${cfg.rclone.gdrive.mount}_crypt";
-                config = null; #"${cfg.rclone.gdrive.mount}.conf";
-                storage = null; #"$HOME/.local/share/storage/${cfg.rclone.gdrive.mount}";
-                sync = null; #"$HOME/.local/share/sync/${cfg.rclone.gdrive.mount}";
-                clientId = null;
-                clientSecret = null;
-                token = null;
-                encryption_password = null;
-                encryption_salt = null;
-              };
-            };
-          };
           terminal = {
             enable = true;
             defaultTerminal = "kitty";
@@ -455,9 +362,6 @@
               enable = true;
             };
             lpi = {
-              enable = true;
-            };
-            lsusb = {
               enable = true;
             };
             nix-prefetch-git = {

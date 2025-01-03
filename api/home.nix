@@ -96,6 +96,7 @@
             };
             launcher = {
               enable = false;
+              defaultLauncher = "rofi";
               rofi = {
                 enable = false;
               };

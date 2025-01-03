@@ -39,6 +39,15 @@ in {
         grub = {
           enable = lib.mkForce true;
           inherit efiSupport device;
+          efiInstallAsRemovable = true;
+          enableCryptodisk = true;
+          copyKernels = true;
+          mirroredBoots = [
+            {
+              path = "/boot";
+              devices = [device];
+            }
+          ];
         };
       };
       extraModulePackages = with config.boot.kernelPackages; [

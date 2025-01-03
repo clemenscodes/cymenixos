@@ -173,12 +173,51 @@
               # To disallow a network nic, pass: -nic none
               # See README.md for additional args to pass through a host device
               LD_LIBRARY_PATH="${pkgs.pipewire.jack}/lib" qemu-kvm \
-                -smp 2 \
-                -m 4G \
+                -smp 8 \
+                -m 16G \
                 -drive file=result-iso,format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on \
                 -device ahci,id=achi0 \
+                -device virtio-vga-gl -display sdl,gl=on,show-cursor=off \
                 -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1 \
                 "$@"
+            '';
+          };
+          copyro = pkgs.writeShellApplication {
+            name = "copyro";
+            runtimeInputs = with pkgs; [disko];
+            text = ''
+              SOURCE_DIR=$1
+              DEST_DIR=$2
+
+              if [ ! -d "$DEST_DIR" ]; then
+                echo "Destination does not exist. Starting copy process."
+
+                copy_directory() {
+                  local src
+                  local dest
+
+                  src="$1"
+                  dest="$2"
+
+                  mkdir -p "$dest"
+
+                  for item in "$src"/*; do
+                    [ -e "$item" ] || continue
+                    local dest_item
+                    dest_item="$dest/$(basename "$item")"
+                    if [ -d "$item" ]; then
+                      copy_directory "$item" "$dest_item"
+                    elif [ -f "$item" ]; then
+                      cp "$item" "$dest_item"
+                    fi
+                  done
+                }
+
+                copy_directory "$SOURCE_DIR" "$DEST_DIR"
+                echo "Copy process completed successfully."
+              else
+                echo "Destination already exists. No action taken."
+              fi
             '';
           };
         in
@@ -190,6 +229,7 @@
               ln -s ${build-system}/bin/build-system $out/bin
               ln -s ${build-iso}/bin/build-iso $out/bin
               ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
+              ln -s ${copyro}/bin/copyro $out/bin
             '';
           };
       };
