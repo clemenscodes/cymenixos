@@ -48,7 +48,7 @@ in {
     catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable && isDesktop) {
       inherit (cfg.catppuccin) enable flavor accent;
     };
-    home-manager = {
+    home-manager = lib.mkIf (config.modules.home-manager.enable && isDesktop) {
       users = {
         ${config.modules.users.user} = {
           imports = [inputs.catppuccin.homeManagerModules.catppuccin];
