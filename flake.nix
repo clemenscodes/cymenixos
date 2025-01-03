@@ -146,7 +146,7 @@
             name = "build-iso";
             runtimeInputs = [pkgs.nix-output-monitor];
             text = ''
-              nom build .#nixosConfigurations.nixos.config.system.build.isoImage --show-trace
+              nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
             '';
           };
           qemu-run-iso = pkgs.writeShellApplication {

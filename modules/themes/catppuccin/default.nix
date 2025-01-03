@@ -6,7 +6,10 @@
   cfg = config.modules.themes;
   isDesktop = config.modules.display.gui != "headless";
 in {
-  imports = [inputs.catppuccin.nixosModules.catppuccin];
+  imports = [
+    inputs.catppuccin.nixosModules.catppuccin
+    (import ./home-manager {inherit inputs lib;})
+  ];
   options = {
     modules = {
       themes = {
@@ -47,16 +50,6 @@ in {
   config = {
     catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable && isDesktop) {
       inherit (cfg.catppuccin) enable flavor accent;
-    };
-    home-manager = lib.mkIf (config.modules.home-manager.enable && isDesktop) {
-      users = {
-        ${config.modules.users.user} = {
-          imports = [inputs.catppuccin.homeManagerModules.catppuccin];
-          catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable && isDesktop) {
-            inherit (cfg.catppuccin) enable flavor accent;
-          };
-        };
-      };
     };
   };
 }
