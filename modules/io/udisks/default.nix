@@ -4,7 +4,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.io;
-  isDesktop = config.modules.display.gui != "headless";
 in {
   options = {
     modules = {
@@ -18,20 +17,18 @@ in {
   config = lib.mkIf (cfg.enable && cfg.udisks.enable) {
     services = {
       udisks2 = {
-        enable = cfg.udisks.enable;
+        inherit (cfg.udisks) enable;
       };
     };
-    home-manager = lib.mkIf (config.modules.home-manager.enable && isDesktop) {
+    home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${config.modules.users.user} = {
           home = {
-            packages = with pkgs; [
-              udiskie
-            ];
+            packages = [pkgs.udiskie];
           };
           services = {
             udiskie = {
-              enable = cfg.udisks.enable;
+              inherit (cfg.udisks) enable;
               tray = "auto";
             };
           };

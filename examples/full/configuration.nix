@@ -74,9 +74,6 @@
     };
     io = {
       enable = true;
-      fuse = {
-        enable = true;
-      };
       sound = {
         enable = true;
       };
@@ -212,15 +209,6 @@
               hyprland = {
                 enable = true;
                 hyprpicker = {
-                  enable = true;
-                };
-                hyprshade = {
-                  enable = true;
-                };
-                hyprsunset = {
-                  enable = true;
-                };
-                xwayland = {
                   enable = true;
                 };
               };

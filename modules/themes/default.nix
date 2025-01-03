@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
-  cfg = config.modules;
-in {
+}: {...}: {
   imports = [
     (import ./base {inherit inputs pkgs lib;})
     (import ./catppuccin {inherit inputs pkgs lib;})

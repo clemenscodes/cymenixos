@@ -34,6 +34,16 @@ in {
           flake = inputs.nixpkgs;
         };
       };
+      settings = {
+        auto-optimise-store = true;
+        builders-use-substitutes = true;
+        keep-going = true;
+        allowed-users = ["@wheel"];
+        trusted-users = ["@wheel"];
+        experimental-features = ["nix-command" "flakes" "fetch-closure"];
+        substituters = ["https://nix-community.cachix.org"];
+        trusted-public-keys = ["nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="];
+      };
       gc = {
         automatic = lib.mkDefault false;
         dates = "weekly";
@@ -42,29 +52,11 @@ in {
       optimise = {
         automatic = true;
       };
-      daemonCPUSchedPolicy = "idle";
-      daemonIOSchedClass = "idle";
       extraOptions = ''
         accept-flake-config = true
       '';
-      settings = {
-        auto-optimise-store = true;
-        builders-use-substitutes = true;
-        keep-going = true;
-        allowed-users = ["@wheel"];
-        trusted-users = ["@wheel"];
-        experimental-features = [
-          "nix-command"
-          "flakes"
-          "fetch-closure"
-        ];
-        substituters = [
-          "https://nix-community.cachix.org"
-        ];
-        trusted-public-keys = [
-          "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        ];
-      };
+      daemonCPUSchedPolicy = "idle";
+      daemonIOSchedClass = "idle";
     };
   };
 }

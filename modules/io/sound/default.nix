@@ -4,7 +4,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.io;
-  isDesktop = config.modules.display.gui != "headless";
 in {
   options = {
     modules = {
@@ -18,26 +17,26 @@ in {
   config = lib.mkIf (cfg.enable && cfg.sound.enable) {
     services = {
       pipewire = {
-        enable = cfg.sound.enable;
+        inherit (cfg.sound) enable;
         audio = {
-          enable = cfg.sound.enable;
+          inherit (cfg.sound) enable;
         };
         wireplumber = {
-          enable = cfg.sound.enable;
+          inherit (cfg.sound) enable;
         };
         alsa = {
-          enable = cfg.sound.enable;
+          inherit (cfg.sound) enable;
           support32Bit = cfg.sound.enable;
         };
         pulse = {
-          enable = cfg.sound.enable;
+          inherit (cfg.sound) enable;
         };
         jack = {
-          enable = cfg.sound.enable;
+          inherit (cfg.sound) enable;
         };
       };
     };
-    home-manager = lib.mkIf (config.modules.home-manager.enable && isDesktop) {
+    home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${config.modules.users.user} = {
           home = {

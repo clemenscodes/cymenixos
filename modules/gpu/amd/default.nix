@@ -36,7 +36,7 @@ in {
         (import ./gpu-usage-waybar {inherit inputs pkgs lib;})
       ];
       variables = {
-        # OCL_ICD_VENDORS = "${rocmPackages.clr.icd}/etc/OpenCL/vendors/";
+        OCL_ICD_VENDORS = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors/";
       };
     };
     boot = {
@@ -51,9 +51,13 @@ in {
         videoDrivers = [driver];
       };
     };
-    systemd.tmpfiles.rules = [
-      # "L+    /opt/rocm/hip   -    -    -     -    ${rocmPackages.clr}"
-    ];
+    systemd = {
+      tmpfiles = {
+        rules = [
+          "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+        ];
+      };
+    };
     hardware = {
       graphics = {
         enable = true;
@@ -61,9 +65,9 @@ in {
           pkgs.amdvlk
           pkgs.mesa
           pkgs.mesa.drivers
-          # rocmPackages.clr
-          # rocmPackages.clr.icd
-          # rocmPackages.rocm-runtime
+          pkgs.rocmPackages.clr
+          pkgs.rocmPackages.clr.icd
+          pkgs.rocmPackages.rocm-runtime
         ];
         extraPackages32 = [
           pkgs.driversi686Linux.amdvlk

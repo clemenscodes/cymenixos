@@ -13,7 +13,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.printing.enable) {
     services = {
       printing = {
-        enable = cfg.printing.enable;
+        inherit (cfg.printing) enable;
       };
     };
   };

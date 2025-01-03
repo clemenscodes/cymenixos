@@ -10,6 +10,7 @@
   ...
 }: let
   cfg = config.modules.shell;
+  inherit (config.modules.users) user flake;
 in {
   options = {
     modules = {
@@ -42,7 +43,7 @@ in {
             wantedBy = ["default.target"];
             serviceConfig = {
               Type = "oneshot";
-              ExecStart = "${cymenixos.packages.${system}.default}/bin/copyro /etc/flake /home/${config.modules.users.user}/.local/src/cymenix";
+              ExecStart = "${cymenixos.packages.${system}.default}/bin/copyro /etc/flake /home/${user}/${flake}";
             };
           };
         };

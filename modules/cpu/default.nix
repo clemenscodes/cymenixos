@@ -29,7 +29,7 @@ in {
       cpu = {
         x86 = {
           msr = {
-            enable = cfg.cpu.msr.enable;
+            inherit (cfg.cpu.msr) enable;
           };
         };
       };
