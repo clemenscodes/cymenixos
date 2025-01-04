@@ -39,7 +39,7 @@ in {
           description = user;
           group = user;
           hashedPasswordFile = mkIf cfg.security.sops.enable (config.sops.secrets.password.path);
-          initialHashedPassword = mkIf (!cfg.security.sops.enable && !cfg.users.isIso) user;
+          initialHashedPassword = mkIf (!cfg.security.sops.enable && !cfg.users.isIso) "";
           extraGroups = [
             (mkIf cfg.users.wheel "wheel")
             (mkIf cfg.crypto.cardanix.enable "cardano-node")
