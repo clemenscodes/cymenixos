@@ -55,7 +55,13 @@
         shift
       fi
 
-      CONFIG=''${1:-$FLAKE#nixos}
+
+      CONFIG="$FLAKE#nixos"
+
+      if [ "$#" -ge 1 ]; then
+        CONFIG="$1"
+      fi
+
       DEVICE=$(resolve_config_value "$CONFIG" "config.modules.disk.device")
 
       if [ "$DRY_RUN" == true ]; then
