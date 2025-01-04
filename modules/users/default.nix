@@ -37,18 +37,16 @@ in {
           isNormalUser = true;
           description = user;
           group = user;
-          hashedPasswordFile =
-            if cfg.security.sops.enable
-            then config.sops.secrets.password.path
-            else null;
-          initialPassword =
-            if (!cfg.security.sops.enable)
-            then user
-            else null;
           extraGroups = [
             (mkIf cfg.users.wheel "wheel")
             (mkIf cfg.crypto.cardanix.enable "cardano-node")
           ];
+        };
+        ${user} = mkIf cfg.security.sops.enable {
+          hashedPasswordFile = config.sops.secrets.password.path;
+        };
+        ${user} = mkIf (!cfg.security.sops.enable) {
+          initialPassword = user;
         };
       };
       groups = {
