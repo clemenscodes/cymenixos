@@ -38,7 +38,7 @@ in {
           description = user;
           group = user;
           hashedPasswordFile = mkIf config.modules.security.sops.enable (config.sops.secrets.password.path);
-          initialHashedPassword = mkIf (!config.modules.security.sops.enable && !config.users.user.nixos == "") lib.mkDefault user;
+          initialHashedPassword = mkIf (!config.modules.security.sops.enable && !config.users.user.nixos == "") user;
           extraGroups = [
             (mkIf cfg.users.wheel "wheel")
             (mkIf cfg.crypto.cardanix.enable "cardano-node")
