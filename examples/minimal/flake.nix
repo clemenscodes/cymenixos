@@ -33,6 +33,14 @@
         modules = [
           ./configuration.nix
           (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
+          ({...}: {
+            modules = {
+              iso = {
+                enable = true;
+                fast = true;
+              };
+            };
+          })
         ];
       };
     };
