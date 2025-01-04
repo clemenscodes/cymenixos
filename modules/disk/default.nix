@@ -4,6 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
+  inherit (cfg.disk) luksDisk;
 in {
   imports = [inputs.disko.nixosModules.default];
   options = {
@@ -14,6 +15,12 @@ in {
           type = lib.types.str;
           description = "The device to install the filesystem on using disko";
           example = "/dev/vda";
+        };
+        luksDisk = lib.mkOption {
+          type = lib.types.str;
+          description = "The name of the luks disk";
+          default = "luks";
+          example = "root";
         };
       };
     };
@@ -60,7 +67,7 @@ in {
                   label = "luks";
                   content = {
                     type = "luks";
-                    name = "root";
+                    name = luksDisk;
                     askPassword = true;
                     settings = {
                       allowDiscards = false;
@@ -79,7 +86,7 @@ in {
           pool = {
             type = "lvm_vg";
             lvs = {
-              root = {
+              ${luksDisk} = {
                 size = "100%";
                 content = {
                   type = "btrfs";
