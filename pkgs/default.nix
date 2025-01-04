@@ -21,11 +21,11 @@
         echo "Usage: $0 [--dry-run] [config]"
         echo "  --dry-run    Run in dry-run mode"
         echo "  [config]     Nix flake output for disko-install (default: $FLAKE#nixos)"
-        exit 1
       }
 
       error() {
         echo "Error: Invalid config or $1 not found."
+        usage
         exit 1
       }
 
@@ -44,8 +44,9 @@
         echo "$value"
       }
 
-      if [ "$#" -lt 1 ]; then
+      if [ "$1" = "--help" ]; then
         usage
+        exit 0
       fi
 
       DRY_RUN=false
@@ -54,17 +55,15 @@
         shift
       fi
 
-      MODE="format"
-
       CONFIG=''${1:-$FLAKE#nixos}
       DEVICE=$(resolve_config_value "$CONFIG" "config.modules.disk.device")
 
       if [ "$DRY_RUN" == true ]; then
         echo "Running in dry-run mode..."
-        disko-install --dry-run --mode "$MODE" -f "$CONFIG" --disk main "$DEVICE"
+        disko-install --dry-run --mode format -f "$CONFIG" --disk main "$DEVICE"
       else
         echo "Running in actual mode (requires sudo)..."
-        sudo disko-install --mode "$MODE" -f "$CONFIG" --disk main "$DEVICE"
+        sudo disko-install --mode format -f "$CONFIG" --disk main "$DEVICE"
       fi
     '';
   };
