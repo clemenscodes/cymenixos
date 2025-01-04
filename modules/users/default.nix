@@ -25,6 +25,7 @@ in {
           default = ".local/src/${cfg.hostname.defaultHostname}";
           description = "Where the flake will be, relative to the users home directory";
         };
+        isIso = mkEnableOption "Use user from iso module instead" // {default = false;};
       };
     };
   };
@@ -37,8 +38,8 @@ in {
           isNormalUser = true;
           description = user;
           group = user;
-          hashedPasswordFile = mkIf config.modules.security.sops.enable (config.sops.secrets.password.path);
-          initialHashedPassword = mkIf (!config.modules.security.sops.enable && !config.users.users.nixos.initialHashedPassword == "") user;
+          hashedPasswordFile = mkIf cfg.security.sops.enable (config.sops.secrets.password.path);
+          initialHashedPassword = mkIf (!cfg.security.sops.enable && !cfg.users.isIso) user;
           extraGroups = [
             (mkIf cfg.users.wheel "wheel")
             (mkIf cfg.crypto.cardanix.enable "cardano-node")
