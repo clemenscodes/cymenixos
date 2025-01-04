@@ -9,7 +9,11 @@
     enable = true;
     disk = {
       enable = true;
-      device = "/dev/sda";
+      device = "/dev/vda";
+    };
+    machine = {
+      kind = "desktop";
+      name = "desktop";
     };
     config = {
       enable = true;
@@ -78,10 +82,7 @@
       enable = true;
       defaultLocale = "de";
     };
-    machine = {
-      kind = "desktop";
-      name = "desktop";
-    };
+
     networking = {
       enable = true;
       bluetooth = {

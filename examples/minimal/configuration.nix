@@ -4,9 +4,7 @@
   system,
   ...
 }: {
-  imports = [
-    inputs.cymenixos.nixosModules.${system}.default
-  ];
+  imports = [inputs.cymenixos.nixosModules.${system}.default];
   modules = {
     enable = true;
     machine = {
@@ -18,7 +16,7 @@
     };
     disk = {
       enable = true;
-      device = "/dev/sda";
+      device = "/dev/vda";
     };
     boot = {
       enable = true;

@@ -9,6 +9,8 @@
 in {
   imports = [
     (import ./secureboot {inherit inputs pkgs lib;})
+    "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
+    "${inputs.nixpkgs}/nixos/modules/profiles/all-hardware.nix"
   ];
   options = {
     modules = {
@@ -50,8 +52,28 @@ in {
           ];
         };
       };
+      kernelModules = [
+        "kvm-intel"
+        "kvm-amd"
+        "v4l2loopback"
+      ];
+      initrd = {
+        availableKernelModules = [
+          "ohci_pci"
+          "ohci_hcd"
+          "ehci_pci"
+          "ehci_hcd"
+          "xhci_pci"
+          "xhci_hcd"
+          "uas"
+          "usb_storage"
+          "usbhid"
+          "ahci"
+          "nvme"
+          "sr_mod"
+        ];
+      };
       extraModulePackages = [config.boot.kernelPackages.v4l2loopback.out];
-      kernelModules = ["v4l2loopback"];
       extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
       '';

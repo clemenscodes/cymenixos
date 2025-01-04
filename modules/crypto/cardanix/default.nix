@@ -2,39 +2,50 @@
   inputs,
   lib,
   ...
-}: {config, ...}: let
-  cymenixosLib = import ../../../lib {inherit lib config;};
-  imports = [inputs.cardanix.nixosModules.x86_64-linux];
-  module = "crypto";
-  submodule = "cardanix";
-  declarations = {
+}: {
+  config,
+  system,
+  ...
+}: let
+  cfg = config.modules.crypto;
+in {
+  imports = [inputs.cardanix.nixosModules.${system}];
+  options = {
+    modules = {
+      crypto = {
+        cardanix = {
+          enable = lib.mkEnableOption "Enable cardanix" // {default = false;};
+        };
+      };
+    };
+  };
+  config = lib.mkIf (cfg.enable && cfg.cardanix.enable) {
     cardano = {
-      enable = true;
+      inherit (cfg.cardanix) enable;
       bech32 = {
-        enable = true;
+        inherit (cfg.cardanix) enable;
       };
       address = {
-        enable = true;
+        inherit (cfg.cardanix) enable;
       };
       cli = {
-        enable = true;
+        inherit (cfg.cardanix) enable;
       };
       node = {
-        enable = true;
+        inherit (cfg.cardanix) enable;
         submit-api = {
-          enable = true;
+          inherit (cfg.cardanix) enable;
         };
       };
       wallet = {
-        enable = true;
+        inherit (cfg.cardanix) enable;
       };
       db-sync = {
-        enable = true;
+        inherit (cfg.cardanix) enable;
       };
       daedalus = {
         enable = false;
       };
     };
   };
-in
-  cymenixosLib.mkSubModule {inherit imports module submodule declarations;}
+}

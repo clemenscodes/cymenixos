@@ -32,14 +32,7 @@
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
         modules = [
           ./configuration.nix
-          ({modulesPath, ...}: {
-            imports = [(modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")];
-            modules = {
-              disk = {
-                enable = lib.mkForce false;
-              };
-            };
-          })
+          (import ../../modules/iso {inherit inputs lib;})
         ];
       };
     };
