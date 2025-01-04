@@ -87,19 +87,31 @@ in {
                   subvolumes = {
                     "/" = {
                       mountpoint = "/";
-                      mountOptions = ["compress=zstd" "noatime"];
+                      mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
                     "/home" = {
                       mountpoint = "/home";
-                      mountOptions = ["compress=zstd" "noatime"];
+                      mountOptions = ["subvol=home" "compress=zstd" "noatime"];
                     };
                     "/nix" = {
                       mountpoint = "/nix";
-                      mountOptions = ["compress=zstd" "noatime"];
+                      mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
                     };
-                    "/var/log" = {
+                    "/persist" = {
+                      mountpoint = "/persist";
+                      mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
+                    };
+                    "/log" = {
                       mountpoint = "/var/log";
-                      mountOptions = ["compress=zstd" "noatime"];
+                      mountOptions = ["subvol=log" "compress=zstd" "noatime"];
+                    };
+                    "/swap" = {
+                      mountpoint = "/swap";
+                      swap = {
+                        swapfile = {
+                          size = "64G";
+                        };
+                      };
                     };
                   };
                 };
@@ -111,6 +123,9 @@ in {
     };
     fileSystems = {
       "/var/log" = {
+        neededForBoot = true;
+      };
+      "/persist" = {
         neededForBoot = true;
       };
     };
