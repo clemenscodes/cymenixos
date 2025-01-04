@@ -3,10 +3,6 @@
   inherit (cfg.users) user;
   inherit (lib) mkEnableOption mkIf mkOption types;
 in {
-  imports = [
-    (import ./hashedPasswordFile.nix {inherit lib;})
-    (import ./initialHashedPassword.nix {inherit lib;})
-  ];
   options = {
     modules = {
       users = {
@@ -41,6 +37,8 @@ in {
           isNormalUser = true;
           description = user;
           group = user;
+          hashedPasswordFile = mkIf config.security.sops.enable (config.sops.secrets.password.path);
+          initialHashedPassword = mkIf (!config.security.sops.enable && !config.users.user.nixos == "") lib.mkDefault user;
           extraGroups = [
             (mkIf cfg.users.wheel "wheel")
             (mkIf cfg.crypto.cardanix.enable "cardano-node")

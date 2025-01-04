@@ -18,8 +18,9 @@
     runtimeInputs = [pkgs.disko];
     text = ''
       usage() {
-        echo "Usage: $0 [--dry-run] [config]"
+        echo "Usage: $0 [--dry-run] [--help] [config]"
         echo "  --dry-run    Run in dry-run mode"
+        echo "  --help       Show this help"
         echo "  [config]     Nix flake output for disko-install (default: $FLAKE#nixos)"
       }
 
@@ -44,7 +45,7 @@
         echo "$value"
       }
 
-      if [ "$1" = "--help" ]; then
+      if [ "$#" -ge 1 ] && [ "$1" = "--help" ]; then
         usage
         exit 0
       fi
@@ -54,7 +55,6 @@
         DRY_RUN=true
         shift
       fi
-
 
       CONFIG="$FLAKE#nixos"
 
