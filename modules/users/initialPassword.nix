@@ -2,17 +2,12 @@
   cfg = config.modules;
   inherit (cfg.users) user;
 in {
-  config = lib.mkIf (cfg.enable && cfg.users.enable) {
+  config = lib.mkIf (cfg.enable && cfg.users.enable && !cfg.security.sops.enable) {
     users = {
-      mutableUsers = true;
-      defaultUserShell = lib.mkIf cfg.shell.enable cfg.shell.defaultShell;
       users = {
-        ${user} = lib.mkIf (!cfg.security.sops.enable) {
+        ${user} = {
           initialPassword = user;
         };
-      };
-      groups = {
-        ${user} = {};
       };
     };
   };
