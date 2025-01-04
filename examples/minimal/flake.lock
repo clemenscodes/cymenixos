@@ -1126,11 +1126,11 @@
         "xremap-flake": "xremap-flake"
       },
       "locked": {
-        "lastModified": 1735912322,
-        "narHash": "sha256-h2ctVFramc62+FW36IaTC6iwlJUBqGckR01oS0t1dl8=",
+        "lastModified": 1735986356,
+        "narHash": "sha256-vZL8QrkHjxzH1Ba7WUKMiVjbSHwHk5VWbYX3PNVh2i4=",
         "owner": "clemenscodes",
         "repo": "cymenixos",
-        "rev": "ed3d0c88c295f49e5d9a072d2219d981a4bc8910",
+        "rev": "c7d87c778a7cd3c05ba7de86f936b2034884eb2c",
         "type": "github"
       },
       "original": {
@@ -5971,11 +5971,11 @@
     },
     "nixpkgs_21": {
       "locked": {
-        "lastModified": 1735471104,
-        "narHash": "sha256-0q9NGQySwDQc7RhAV2ukfnu7Gxa5/ybJ2ANT8DQrQrs=",
+        "lastModified": 1735834308,
+        "narHash": "sha256-dklw3AXr3OGO4/XT1Tu3Xz9n/we8GctZZ75ZWVqAVhk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "88195a94f390381c6afcdaa933c2f6ff93959cb4",
+        "rev": "6df24922a1400241dae323af55f30e4318a6ca65",
         "type": "github"
       },
       "original": {

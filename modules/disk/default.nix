@@ -19,14 +19,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.disk.enable) {
-    fileSystems = {
-      "/persist" = {
-        neededForBoot = true;
-      };
-      "/var/log" = {
-        neededForBoot = true;
-      };
-    };
     disko = {
       devices = {
         disk = {
@@ -115,6 +107,11 @@ in {
             };
           };
         };
+      };
+    };
+    fileSystems = {
+      "/var/log" = {
+        neededForBoot = true;
       };
     };
   };

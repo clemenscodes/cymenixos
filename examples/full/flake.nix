@@ -32,7 +32,7 @@
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
         modules = [
           ./configuration.nix
-          (import ../../lib/iso {inherit inputs lib;})
+          (import ../../modules/iso {inherit inputs lib;})
         ];
       };
     };
