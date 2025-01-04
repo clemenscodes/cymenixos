@@ -32,7 +32,7 @@
         specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
         modules = [
           ./configuration.nix
-          (import ../../modules/iso {inherit inputs lib;})
+          (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
         ];
       };
     };

@@ -6,7 +6,7 @@ in {
     users = {
       users = {
         ${user} = {
-          hashedPasswordFile = config.sops.secrets.password.path;
+          hashedPasswordFile = lib.mkDefault config.sops.secrets.password.path;
         };
       };
     };
