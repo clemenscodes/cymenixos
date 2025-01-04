@@ -126,12 +126,16 @@
     ...
   } @ inputs: let
     system = "x86_64-linux";
-    pkgs = import nixpkgs {inherit system;};
+    pkgs = import nixpkgs {
+      inherit system;
+      overlays = [(import ./overlays/grub2.nix)];
+    };
     inherit (pkgs) lib;
   in {
     formatter = {
       ${system} = pkgs.alejandra;
     };
+
     packages = {
       ${system} = {
         default = let
@@ -149,6 +153,7 @@
               ln -s ${packages.copyro}/bin/copyro $out/bin
             '';
           };
+        grub2 = pkgs.grub2;
       };
     };
 
