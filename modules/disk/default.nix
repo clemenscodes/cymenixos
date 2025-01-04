@@ -36,6 +36,32 @@ in {
               type = "gpt";
               efiGptPartitionFirst = false;
               partitions = {
+                bios = {
+                  priority = 1;
+                  type = "EF02";
+                  size = "1M";
+                  content = {
+                    type = "filesystem";
+                    format = "vfat";
+                    mountpoint = null;
+                  };
+                  hybrid = {
+                    mbrPartitionType = "0x0c";
+                    mbrBootableFlag = false;
+                  };
+                };
+                efi = {
+                  priority = 2;
+                  label = "boot";
+                  type = "EF00";
+                  size = "512M";
+                  content = {
+                    type = "filesystem";
+                    format = "vfat";
+                    mountpoint = "/boot";
+                    mountOptions = ["umask=0077"];
+                  };
+                };
                 luks = {
                   size = "100%";
                   label = "luks";
@@ -60,32 +86,6 @@ in {
           pool = {
             type = "lvm_vg";
             lvs = {
-              bios = {
-                priority = 1;
-                type = "EF02";
-                size = "1M";
-                content = {
-                  type = "filesystem";
-                  format = "vfat";
-                  mountpoint = null;
-                };
-                hybrid = {
-                  mbrPartitionType = "0x0c";
-                  mbrBootableFlag = false;
-                };
-              };
-              efi = {
-                priority = 2;
-                label = "boot";
-                type = "EF00";
-                size = "512M";
-                content = {
-                  type = "filesystem";
-                  format = "vfat";
-                  mountpoint = "/boot";
-                  mountOptions = ["umask=0077"];
-                };
-              };
               ${luksDisk} = {
                 size = "100%";
                 content = {
