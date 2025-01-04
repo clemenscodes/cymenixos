@@ -6,7 +6,7 @@ in {
     users = {
       users = {
         ${user} = {
-          initialPassword = lib.mkDefault user;
+          initialHashedPassword = lib.mkDefault user;
         };
       };
     };

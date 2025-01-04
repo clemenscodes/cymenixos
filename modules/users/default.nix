@@ -4,8 +4,8 @@
   inherit (lib) mkEnableOption mkIf mkOption types;
 in {
   imports = [
-    (import ./initialPassword.nix {inherit lib;})
     (import ./hashedPasswordFile.nix {inherit lib;})
+    (import ./initialHashedPassword.nix {inherit lib;})
   ];
   options = {
     modules = {
