@@ -11,7 +11,6 @@
 in {
   config = lib.mkIf (cfg.enable && cfg.boot.enable && !cfg.users.isIso) {
     boot = {
-      kernelPackages = lib.mkDefault pkgs.linuxPackages_xanmod_latest;
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         grub = {
           extraGrubInstallArgs = ["--modules=${modules}"];
