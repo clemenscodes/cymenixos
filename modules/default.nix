@@ -7,7 +7,7 @@
 }: {...}: {
   imports = [
     (import ./boot {inherit inputs pkgs lib;})
-    (import ./config {inherit inputs pkgs lib;})
+    (import ./config {inherit inputs pkgs lib cymenixos;})
     (import ./cpu {inherit inputs pkgs lib;})
     (import ./crypto {inherit inputs pkgs lib;})
     (import ./databases {inherit inputs pkgs lib;})

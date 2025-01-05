@@ -2,10 +2,12 @@
   inputs,
   pkgs,
   lib,
+  cymenixos,
   ...
 }: {
-  config,
   self,
+  config,
+  system,
   ...
 }: let
   cfg = config.modules.config;
@@ -20,6 +22,21 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
+    environment = {
+      etc = {
+        "nix/inputs/nixpkgs" = {
+          source = "${pkgs.path}";
+        };
+      };
+    };
+    nixpkgs = {
+      inherit pkgs;
+      overlays = cymenixos.overlays.${system}.default;
+      hostPlatform = system;
+      flake = {
+        source = pkgs.path;
+      };
+    };
     nix = {
       nixPath = ["nixpkgs=${pkgs.path}"];
       registry = {
@@ -33,6 +50,9 @@ in {
           };
           flake = inputs.nixpkgs;
         };
+      };
+      channel = {
+        enable = false;
       };
       settings = {
         auto-optimise-store = true;
