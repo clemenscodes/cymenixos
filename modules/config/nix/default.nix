@@ -34,7 +34,7 @@ in {
       overlays = cymenixos.overlays.${system}.default;
       hostPlatform = system;
       flake = {
-        source = pkgs.path;
+        source = lib.mkForce pkgs.path;
       };
     };
     nix = {
