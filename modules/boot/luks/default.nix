@@ -9,18 +9,6 @@
   stub = "${config.boot.loader.efi.efiSysMountPoint}/EFI/BOOT/BOOTX64.EFI";
   inherit (lib) escapeShellArg;
 in {
-  options = {
-    modules = {
-      boot = {
-        enable = lib.mkEnableOption "Enable bootloader" // {default = false;};
-        efiSupport = lib.mkEnableOption "Enable UEFI" // {default = false;};
-        device = lib.mkOption {
-          type = lib.types.str;
-          default = "nodev";
-        };
-      };
-    };
-  };
   config = lib.mkIf (cfg.enable && cfg.boot.enable && !cfg.users.isIso) {
     boot = {
       kernelPackages = lib.mkDefault pkgs.linuxPackages_xanmod_latest;
