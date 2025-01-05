@@ -1,21 +1,21 @@
-{pkgs, ...}: {
-  build-system = pkgs.writeShellApplication {
+final: prev: let
+  build-system = prev.writeShellApplication {
     name = "build-system";
-    runtimeInputs = [pkgs.nix-output-monitor];
+    runtimeInputs = [prev.nix-output-monitor];
     text = ''
       nom build .#nixosConfigurations.nixos.config.system.build.toplevel --show-trace
     '';
   };
-  build-iso = pkgs.writeShellApplication {
+  build-iso = prev.writeShellApplication {
     name = "build-iso";
-    runtimeInputs = [pkgs.nix-output-monitor];
+    runtimeInputs = [prev.nix-output-monitor];
     text = ''
       nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
     '';
   };
-  cymenixos-install = pkgs.writeShellApplication {
+  cymenixos-install = prev.writeShellApplication {
     name = "cymenixos-install";
-    runtimeInputs = [pkgs.disko];
+    runtimeInputs = [prev.disko];
     text = ''
       usage() {
         echo "Usage: $0 [--dry-run] [--help] [config]"
@@ -73,13 +73,13 @@
       fi
     '';
   };
-  qemu-run-iso = pkgs.writeShellApplication {
+  qemu-run-iso = prev.writeShellApplication {
     name = "qemu-run-iso";
     runtimeInputs = [
-      pkgs.fd
-      pkgs.qemu_kvm
-      pkgs.pipewire
-      pkgs.pipewire.jack
+      prev.fd
+      prev.qemu_kvm
+      prev.pipewire
+      prev.pipewire.jack
     ];
 
     text = ''
@@ -104,7 +104,7 @@
       fi
 
       # Always try to boot from disk first, fallback to ISO if disk fails
-      LD_LIBRARY_PATH="${pkgs.pipewire.jack}/lib" qemu-kvm \
+      LD_LIBRARY_PATH="${prev.pipewire.jack}/lib" qemu-kvm \
           -smp 8 \
           -m 16G \
           -drive file="$DISK",format=qcow2,if=virtio,id=disk,index=0 \
@@ -119,7 +119,7 @@
           "$@"
     '';
   };
-  copyro = pkgs.writeShellApplication {
+  copyro = prev.writeShellApplication {
     name = "copyro";
     text = ''
       SOURCE_DIR=$1
@@ -158,6 +158,19 @@
       else
         echo "Destination already exists. No action taken."
       fi
+    '';
+  };
+in {
+  cymenixos-scripts = prev.stdenv.mkDerivation {
+    name = "cymenixos-scripts";
+    phases = "installPhase";
+    installPhase = ''
+      mkdir -p $out/bin
+      ln -s ${build-system}/bin/build-system $out/bin
+      ln -s ${build-iso}/bin/build-iso $out/bin
+      ln -s ${cymenixos-install}/bin/cymenixos-install $out/bin
+      ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
+      ln -s ${copyro}/bin/copyro $out/bin
     '';
   };
 }

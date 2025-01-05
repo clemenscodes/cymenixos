@@ -29,11 +29,8 @@ in {
     nix = {
       nixPath = ["nixpkgs=${pkgs.path}"];
       registry = {
-        self = {
-          flake = self;
-        };
         nixpkgs = {
-          flake = "${pkgs.path}";
+          flake = self;
         };
       };
       channel = {

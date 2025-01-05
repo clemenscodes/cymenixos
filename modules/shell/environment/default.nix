@@ -1,12 +1,10 @@
 {
   pkgs,
   lib,
-  cymenixos,
   ...
 }: {
   self,
   config,
-  system,
   ...
 }: let
   cfg = config.modules.shell;
@@ -32,7 +30,7 @@ in {
       homeBinInPath = true;
       systemPackages = [
         pkgs.neovim
-        cymenixos.packages.${system}.default
+        pkgs.cymenixos-scripts
       ];
     };
     systemd = {
@@ -43,7 +41,7 @@ in {
             wantedBy = ["default.target"];
             serviceConfig = {
               Type = "oneshot";
-              ExecStart = "${cymenixos.packages.${system}.default}/bin/copyro /etc/flake /home/${user}/${flake}";
+              ExecStart = "${pkgs.cymenixos-scripts}/bin/copyro /etc/flake /home/${user}/${flake}";
             };
           };
         };

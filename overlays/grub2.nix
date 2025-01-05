@@ -109,8 +109,10 @@ final: prev: let
       zfsSupport = true;
       zfs = final.zfs;
     };
-in {
   grub2_efi = grub2_efi_argon.overrideAttrs (attrs: {
     postInstall = attrs.postInstall + ''ln -s ${grub2_argon}/lib/grub/${grub2_argon.grubTarget} $out/lib/grub'';
   });
+in {
+  grub2 = grub2_efi;
+  inherit grub2_efi;
 }

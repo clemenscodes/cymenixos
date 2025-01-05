@@ -128,7 +128,7 @@
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
-      overlays = [(import ./overlays/grub2.nix)];
+      overlays = [] ++ (import ./overlays);
     };
     inherit (pkgs) lib;
   in {
@@ -137,24 +137,7 @@
     };
 
     packages = {
-      ${system} = {
-        default = let
-          packages = import ./pkgs {inherit pkgs;};
-        in
-          pkgs.stdenv.mkDerivation {
-            name = "cymenixos-scripts";
-            phases = "installPhase";
-            installPhase = ''
-              mkdir -p $out/bin
-              ln -s ${packages.build-system}/bin/build-system $out/bin
-              ln -s ${packages.build-iso}/bin/build-iso $out/bin
-              ln -s ${packages.cymenixos-install}/bin/cymenixos-install $out/bin
-              ln -s ${packages.qemu-run-iso}/bin/qemu-run-iso $out/bin
-              ln -s ${packages.copyro}/bin/copyro $out/bin
-            '';
-          };
-        inherit (pkgs) grub2 grub2_efi;
-      };
+      ${system} = pkgs;
     };
 
     overlays = {
@@ -166,7 +149,7 @@
     devShells = {
       ${system} = {
         default = pkgs.mkShell {
-          nativeBuildInputs = [self.packages.${system}.default];
+          nativeBuildInputs = [pkgs.cymenixos-scripts];
         };
       };
     };
