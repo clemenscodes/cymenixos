@@ -1,5 +1,4 @@
 {
-  inputs,
   pkgs,
   lib,
   cymenixos,
@@ -22,13 +21,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
-    environment = {
-      etc = {
-        "nix/inputs/nixpkgs" = {
-          source = "${pkgs.path}";
-        };
-      };
-    };
     nixpkgs = {
       inherit pkgs;
       overlays = cymenixos.overlays.${system}.default;
@@ -41,11 +33,7 @@ in {
           flake = self;
         };
         nixpkgs = {
-          from = {
-            id = "nixpkgs";
-            type = "indirect";
-          };
-          flake = inputs.nixpkgs;
+          flake = "${pkgs.path}";
         };
       };
       channel = {
