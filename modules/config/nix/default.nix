@@ -45,7 +45,7 @@ in {
             id = "nixpkgs";
             type = "indirect";
           };
-          flake = pkgs.path;
+          flake = inputs.nixpkgs;
         };
       };
       channel = {
