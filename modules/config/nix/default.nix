@@ -22,15 +22,14 @@ in {
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
     nixpkgs = {
       hostPlatform = system;
+      flake = {
+        source = self.outPath;
+      };
     };
     nix = {
       nixPath = ["nixpkgs=${pkgs.path}"];
       registry = {
         nixpkgs = {
-          from = {
-            id = "nixpkgs";
-            type = "indirect";
-          };
           flake = self;
         };
       };
