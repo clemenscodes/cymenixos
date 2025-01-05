@@ -18,6 +18,13 @@ in {
     isoImage = lib.mkIf cfg.iso.fast {
       squashfsCompression = "gzip -Xcompression-level 1";
     };
+    system = {
+      installer = {
+        channel = {
+          enable = false;
+        };
+      };
+    };
     modules = {
       disk = {
         enable = lib.mkForce false;
