@@ -13,8 +13,8 @@
       nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
     '';
   };
-  install-cymenixos = pkgs.writeShellApplication {
-    name = "install-cymenixos";
+  cymenixos-install = pkgs.writeShellApplication {
+    name = "cymenixos-install";
     runtimeInputs = [pkgs.disko];
     text = ''
       usage() {

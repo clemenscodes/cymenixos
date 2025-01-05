@@ -4,8 +4,8 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  grub = pkgs.grub2_efi;
-  modules = "part_gpt luks2 mdraid1x cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 argon2 btrfs true";
+  grub = pkgs.grub2;
+  modules = "part_gpt luks2 mdraid1x cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 argon2 btrfs zfs true";
   stub = "${config.boot.loader.efi.efiSysMountPoint}/EFI/BOOT/BOOTX64.EFI";
   inherit (lib) escapeShellArg;
 in {

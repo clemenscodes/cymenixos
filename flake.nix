@@ -148,12 +148,12 @@
               mkdir -p $out/bin
               ln -s ${packages.build-system}/bin/build-system $out/bin
               ln -s ${packages.build-iso}/bin/build-iso $out/bin
-              ln -s ${packages.install-cymenixos}/bin/install-cymenixos $out/bin
+              ln -s ${packages.cymenixos-install}/bin/cymenixos-install $out/bin
               ln -s ${packages.qemu-run-iso}/bin/qemu-run-iso $out/bin
               ln -s ${packages.copyro}/bin/copyro $out/bin
             '';
           };
-        grub2 = pkgs.grub2;
+        inherit (pkgs) grub2;
       };
     };
 
