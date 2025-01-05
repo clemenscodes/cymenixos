@@ -63,56 +63,22 @@ final: prev: let
     "--disable-silent-rules"
     "--disable-werror"
   ];
-  grub2_efi_argon =
-    (prev.grub2.overrideAttrs (attrs: {
-      inherit version src patches;
-
-      nativeBuildInputs = (builtins.filter (x: x.name != "autoreconf-hook") attrs.nativeBuildInputs) ++ (with final; [autoconf automake]);
-
-      preConfigure =
-        builtins.replaceStrings ["patchShebangs ."] [
-          ''
-            patchShebangs .
-
-            ./bootstrap --no-git --gnulib-srcdir=${gnulib}
-          ''
-        ]
-        attrs.preConfigure;
-
-      configureFlags = attrs.configureFlags ++ argonConfigureFlags;
-    }))
-    .override {
-      efiSupport = true;
-      zfsSupport = true;
-      zfs = final.zfs;
-    };
-
-  grub2_argon =
-    (prev.grub2.overrideAttrs (attrs: {
-      inherit version src patches;
-
-      nativeBuildInputs = (builtins.filter (x: x.name != "autoreconf-hook") attrs.nativeBuildInputs) ++ (with final; [autoconf automake]);
-
-      preConfigure =
-        builtins.replaceStrings ["patchShebangs ."] [
-          ''
-            patchShebangs .
-
-            ./bootstrap --no-git --gnulib-srcdir=${gnulib}
-          ''
-        ]
-        attrs.preConfigure;
-
-      configureFlags = attrs.configureFlags ++ argonConfigureFlags;
-    }))
-    .override {
-      zfsSupport = true;
-      zfs = final.zfs;
-    };
-  grub2_efi = grub2_efi_argon.overrideAttrs (attrs: {
-    postInstall = attrs.postInstall + ''ln -s ${grub2_argon}/lib/grub/${grub2_argon.grubTarget} $out/lib/grub'';
-  });
 in {
-  grub2 = grub2_efi;
-  inherit grub2_efi;
+  grub2 = prev.grub2.overrideAttrs (attrs: {
+    inherit version src patches;
+
+    nativeBuildInputs = (builtins.filter (x: x.name != "autoreconf-hook") attrs.nativeBuildInputs) ++ (with final; [autoconf automake]);
+
+    preConfigure =
+      builtins.replaceStrings ["patchShebangs ."] [
+        ''
+          patchShebangs .
+
+          ./bootstrap --no-git --gnulib-srcdir=${gnulib}
+        ''
+      ]
+      attrs.preConfigure;
+
+    configureFlags = attrs.configureFlags ++ argonConfigureFlags;
+  });
 }
