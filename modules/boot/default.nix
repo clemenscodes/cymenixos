@@ -51,7 +51,7 @@ in {
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           mirroredBoots = [
             {
-              path = "/boot";
+              path = config.boot.loader.efi.efiSysMountPoint;
               devices = [device];
             }
           ];
