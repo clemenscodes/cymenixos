@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  cymenixos,
   ...
 }: {
   self,
@@ -22,14 +21,16 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
     nixpkgs = {
-      inherit pkgs;
-      overlays = cymenixos.overlays.${system}.default;
       hostPlatform = system;
     };
     nix = {
       nixPath = ["nixpkgs=${pkgs.path}"];
       registry = {
         nixpkgs = {
+          from = {
+            id = "nixpkgs";
+            type = "indirect";
+          };
           flake = self;
         };
       };
