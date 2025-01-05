@@ -10,7 +10,7 @@
     settings = {
       allowDiscards = false;
     };
-    extraFormatArgs = ["--pkbdf argon2id"];
+    extraFormatArgs = ["--pbkdf argon2id"];
     extraOpenArgs = ["--timeout 60"];
   };
   inherit (cfg.disk) enable device luksDisk swapsize;
