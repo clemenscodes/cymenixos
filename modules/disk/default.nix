@@ -34,8 +34,8 @@ in {
         swapsize = lib.mkOption {
           type = lib.types.int;
           description = "The size for the swapfile in G";
-          default = "16";
-          example = "64";
+          default = 16;
+          example = 64;
         };
       };
     };
@@ -121,7 +121,7 @@ in {
                           mountpoint = "/swap";
                           swap = {
                             swapfile = {
-                              size = "${swapsize}G";
+                              size = "${builtins.toString swapsize}G";
                             };
                           };
                         };
