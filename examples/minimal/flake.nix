@@ -20,6 +20,7 @@
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
+      overlays = [] ++ inputs.cymenixos.overlays.${system}.default;
     };
     inherit (pkgs) lib;
   in {

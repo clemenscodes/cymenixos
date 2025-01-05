@@ -153,7 +153,7 @@
               ln -s ${packages.copyro}/bin/copyro $out/bin
             '';
           };
-        inherit (pkgs) grub2;
+        inherit (pkgs) grub2 grub2_efi;
       };
     };
 

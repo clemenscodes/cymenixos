@@ -51,20 +51,25 @@ final: prev: let
       sha256 = "sha256-I+1Yl0DVBDWFY3+EUPbE6FTdWsKH81DLP/2lGPVJtLI=";
     })
   ];
-in {
-  grub2_efi =
+
+  gnulib = final.fetchgit {
+    url = "https://git.savannah.gnu.org/r/gnulib.git";
+    rev = "06b2e943be39284783ff81ac6c9503200f41dba3";
+    sha256 = "sha256-xhxN8Tw15ENAMSE/cTkigl5yHR3T2d7B1RMFqiMvmxU=";
+  };
+
+  argonConfigureFlags = [
+    "--disable-nls"
+    "--disable-silent-rules"
+    "--disable-werror"
+  ];
+  grub2_efi_argon =
     (prev.grub2.overrideAttrs (attrs: {
       inherit version src patches;
 
       nativeBuildInputs = (builtins.filter (x: x.name != "autoreconf-hook") attrs.nativeBuildInputs) ++ (with final; [autoconf automake]);
 
-      preConfigure = let
-        gnulib = final.fetchgit {
-          url = "https://git.savannah.gnu.org/r/gnulib.git";
-          rev = "06b2e943be39284783ff81ac6c9503200f41dba3";
-          sha256 = "sha256-xhxN8Tw15ENAMSE/cTkigl5yHR3T2d7B1RMFqiMvmxU=";
-        };
-      in
+      preConfigure =
         builtins.replaceStrings ["patchShebangs ."] [
           ''
             patchShebangs .
@@ -74,13 +79,7 @@ in {
         ]
         attrs.preConfigure;
 
-      configureFlags =
-        attrs.configureFlags
-        ++ [
-          "--disable-nls"
-          "--disable-silent-rules"
-          "--disable-werror"
-        ];
+      configureFlags = attrs.configureFlags ++ argonConfigureFlags;
     }))
     .override {
       efiSupport = true;
@@ -88,19 +87,13 @@ in {
       zfs = final.zfs;
     };
 
-  grub2 =
+  grub2_argon =
     (prev.grub2.overrideAttrs (attrs: {
       inherit version src patches;
 
       nativeBuildInputs = (builtins.filter (x: x.name != "autoreconf-hook") attrs.nativeBuildInputs) ++ (with final; [autoconf automake]);
 
-      preConfigure = let
-        gnulib = final.fetchgit {
-          url = "https://git.savannah.gnu.org/r/gnulib.git";
-          rev = "06b2e943be39284783ff81ac6c9503200f41dba3";
-          sha256 = "sha256-xhxN8Tw15ENAMSE/cTkigl5yHR3T2d7B1RMFqiMvmxU=";
-        };
-      in
+      preConfigure =
         builtins.replaceStrings ["patchShebangs ."] [
           ''
             patchShebangs .
@@ -110,18 +103,18 @@ in {
         ]
         attrs.preConfigure;
 
-      configureFlags =
-        attrs.configureFlags
-        ++ [
-          "--disable-nls"
-          "--disable-silent-rules"
-          "--disable-werror"
-        ];
-
-      postInstall = attrs.postInstall + ''ln -s ${final.grub2_efi}/lib/grub/${final.grub2_efi.grubTarget} $out/lib/grub'';
+      configureFlags = attrs.configureFlags ++ argonConfigureFlags;
     }))
     .override {
       zfsSupport = true;
       zfs = final.zfs;
     };
+in {
+  grub2 = grub2_argon.overrideAttrs (attrs: {
+    postInstall = attrs.postInstall + ''ln -s ${grub2_efi_argon}/lib/grub/${grub2_efi_argon.grubTarget} $out/lib/grub'';
+  });
+
+  grub2_efi = grub2_efi_argon.overrideAttrs (attrs: {
+    postInstall = attrs.postInstall + ''ln -s ${grub2_argon}/lib/grub/${grub2_argon.grubTarget} $out/lib/grub'';
+  });
 }
