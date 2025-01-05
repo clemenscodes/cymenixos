@@ -29,6 +29,15 @@ in {
       nixPath = ["nixpkgs=${cymenixos.outPath}"];
       registry = {
         nixpkgs = {
+          from = {
+            id = "nixpkgs";
+            type = "indirect";
+          };
+          to = {
+            type = "github";
+            owner = "clemenscodes";
+            repo = "cymenixos";
+          };
           flake = cymenixos;
         };
       };
