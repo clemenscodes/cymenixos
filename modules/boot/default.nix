@@ -5,14 +5,11 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  grub = pkgs.grub2_efi;
-  modules = "part_gpt luks2 mdraid1x cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 argon2 btrfs true";
-  stub = "${config.boot.loader.efi.efiSysMountPoint}/EFI/BOOT/BOOTX64.EFI";
   inherit (cfg.boot) efiSupport device;
-  inherit (lib) escapeShellArg;
 in {
   imports = [
     (import ./secureboot {inherit inputs pkgs lib;})
+    (import ./luks {inherit inputs pkgs lib;})
     "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
     "${inputs.nixpkgs}/nixos/modules/profiles/all-hardware.nix"
   ];
@@ -55,23 +52,6 @@ in {
               devices = [device];
             }
           ];
-          extraGrubInstallArgs = ["--modules=${modules}"];
-          extraInstallCommands = ''
-            grub_tmp=$(mktemp -d -t grub.conf.XXXXXXXX)
-            trap 'rm -rf -- "$grub_tmp"' EXIT
-            cat <<EOS >"$grub_tmp/grub.cfg"
-              cryptomount -u $(${pkgs.utillinux}/bin/blkid -o value -s UUID ${escapeShellArg config.boot.initrd.luks.devices.${cfg.disk.luksDisk}.device})
-              set root=(crypto0)
-              set prefix=(crypto0)/boot/grub
-            EOS
-            mkdir -p ${escapeShellArg (builtins.dirOf stub)}
-            ${grub}/bin/grub-mkimage \
-              -p '(crypto0)/boot/grub' \
-              -O ${grub.grubTarget} \
-              -c $grub_tmp/grub.cfg \
-              -o ${escapeShellArg stub} \
-              ${modules}
-          '';
         };
       };
       kernelModules = [
