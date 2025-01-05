@@ -101,6 +101,14 @@ in {
                           mountpoint = "/";
                           mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                         };
+                        "/boot" = {
+                          mountpoint = "/boot";
+                          mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
+                        };
+                        "/boot/efi" = {
+                          mountpoint = "/boot/efi";
+                          mountOptions = ["subvol=efi" "compress=zstd" "noatime"];
+                        };
                         "/home" = {
                           mountpoint = "/home";
                           mountOptions = ["subvol=home" "compress=zstd" "noatime"];
