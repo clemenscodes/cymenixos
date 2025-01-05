@@ -45,6 +45,7 @@ in {
           efiInstallAsRemovable = true;
           enableCryptodisk = true;
           copyKernels = true;
+          gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           mirroredBoots = [
             {
