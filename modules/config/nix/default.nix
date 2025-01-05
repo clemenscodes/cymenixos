@@ -23,7 +23,7 @@ in {
     nixpkgs = {
       hostPlatform = system;
       flake = {
-        source = cymenixos.outPath;
+        source = lib.mkForce cymenixos.outPath;
       };
     };
     nix = {
