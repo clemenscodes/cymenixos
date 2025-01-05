@@ -157,6 +157,12 @@
       };
     };
 
+    overlays = {
+      ${system} = {
+        default = import ./overlays;
+      };
+    };
+
     devShells = {
       ${system} = {
         default = pkgs.mkShell {
