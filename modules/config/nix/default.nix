@@ -4,7 +4,6 @@
   cymenixos,
   ...
 }: {
-  self,
   config,
   system,
   ...
@@ -31,7 +30,7 @@ in {
       nixPath = ["nixpkgs=${pkgs.path}"];
       registry = {
         nixpkgs = {
-          flake = self;
+          flake = cymenixos;
         };
       };
       channel = {
