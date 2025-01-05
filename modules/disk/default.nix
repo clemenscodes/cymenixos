@@ -4,15 +4,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  luksCfg = {
-    type = "luks";
-    askPassword = true;
-    settings = {
-      allowDiscards = false;
-    };
-    extraFormatArgs = ["--pbkdf argon2id"];
-    extraOpenArgs = ["--timeout 60"];
-  };
   inherit (cfg.disk) enable device luksDisk swapsize;
 in {
   imports = [inputs.disko.nixosModules.default];
@@ -51,13 +42,46 @@ in {
               type = "gpt";
               efiGptPartitionFirst = false;
               partitions = {
+                bios = {
+                  priority = 1;
+                  type = "EF02";
+                  size = "1M";
+                  label = "bios";
+                  content = {
+                    type = "filesystem";
+                    format = "vfat";
+                    mountpoint = null;
+                  };
+                  hybrid = {
+                    mbrPartitionType = "0x0c";
+                    mbrBootableFlag = false;
+                  };
+                };
+                efi = {
+                  priority = 2;
+                  label = "efi";
+                  type = "EF00";
+                  size = "512M";
+                  content = {
+                    type = "filesystem";
+                    format = "vfat";
+                    mountpoint = config.boot.loader.efi.efiSysMountPoint;
+                    mountOptions = ["umask=0077"];
+                  };
+                };
                 luks = {
                   size = "100%";
                   label = "luks";
                   type = "8309"; # Linux LUKS partition type
                   content = {
                     name = luksDisk;
-                    inherit (luksCfg) type askPassword settings extraFormatArgs extraOpenArgs;
+                    type = "luks";
+                    askPassword = true;
+                    settings = {
+                      allowDiscards = false;
+                    };
+                    extraFormatArgs = ["--pbkdf argon2id"];
+                    extraOpenArgs = ["--timeout 60"];
                     content = {
                       type = "btrfs";
                       extraArgs = ["-L" "nixos" "-f"];
@@ -65,14 +89,6 @@ in {
                         "/" = {
                           mountpoint = "/";
                           mountOptions = ["subvol=root" "compress=zstd" "noatime"];
-                        };
-                        "/boot" = {
-                          mountpoint = "/boot";
-                          mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
-                        };
-                        "/boot/efi" = {
-                          mountpoint = "/boot/efi";
-                          mountOptions = ["subvol=efi" "compress=zstd" "noatime"];
                         };
                         "/home" = {
                           mountpoint = "/home";
@@ -110,12 +126,6 @@ in {
     };
     fileSystems = {
       "/var/log" = {
-        neededForBoot = true;
-      };
-      "/boot" = {
-        neededForBoot = true;
-      };
-      "/boot/efi" = {
         neededForBoot = true;
       };
       "/persist" = {

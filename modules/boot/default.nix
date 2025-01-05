@@ -56,6 +56,9 @@ in {
             }
           ];
         };
+        efi = {
+          efiSysMountPoint = "/boot/efi";
+        };
       };
       kernelModules = [
         "kvm-intel"
