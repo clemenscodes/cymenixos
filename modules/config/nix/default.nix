@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  cymenixos,
   ...
 }: {
   self,
@@ -23,7 +24,7 @@ in {
     nixpkgs = {
       hostPlatform = system;
       flake = {
-        source = self.outPath;
+        source = cymenixos.outPath;
       };
     };
     nix = {
