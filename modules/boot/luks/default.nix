@@ -13,6 +13,7 @@ in {
     boot = {
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         grub = {
+          enableCryptodisk = true;
           extraGrubInstallArgs = ["--modules=${modules}"];
           extraInstallCommands = ''
             grub_tmp=$(mktemp -d -t grub.conf.XXXXXXXX)
