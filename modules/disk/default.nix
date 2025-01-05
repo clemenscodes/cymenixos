@@ -51,41 +51,6 @@ in {
               type = "gpt";
               efiGptPartitionFirst = false;
               partitions = {
-                # bios = {
-                #   priority = 1;
-                #   type = "EF02";
-                #   size = "1M";
-                #   label = "bios";
-                #   content = {
-                #     inherit (luksCfg) type askPassword settings extraFormatArgs extraOpenArgs;
-                #     name = "${luksDisk}-bios";
-                #     content = {
-                #       type = "filesystem";
-                #       format = "vfat";
-                #       mountpoint = null;
-                #     };
-                #   };
-                #   hybrid = {
-                #     mbrPartitionType = "0x0c";
-                #     mbrBootableFlag = false;
-                #   };
-                # };
-                # efi = {
-                #   priority = 2;
-                #   label = "efi";
-                #   type = "EF00";
-                #   size = "512M";
-                #   content = {
-                #     inherit (luksCfg) type askPassword settings extraFormatArgs extraOpenArgs;
-                #     name = "${luksDisk}-efi";
-                #     content = {
-                #       type = "filesystem";
-                #       format = "vfat";
-                #       mountpoint = "/boot";
-                #       mountOptions = ["umask=0077"];
-                #     };
-                #   };
-                # };
                 luks = {
                   size = "100%";
                   label = "luks";
@@ -145,6 +110,12 @@ in {
     };
     fileSystems = {
       "/var/log" = {
+        neededForBoot = true;
+      };
+      "/boot" = {
+        neededForBoot = true;
+      };
+      "/boot/efi" = {
         neededForBoot = true;
       };
       "/persist" = {

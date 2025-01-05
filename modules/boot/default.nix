@@ -33,6 +33,8 @@ in {
         pkgs.gparted
         pkgs.parted
         pkgs.xorg.xhost
+        pkgs.grub2
+        pkgs.grub2_efi
       ];
     };
     boot = {
