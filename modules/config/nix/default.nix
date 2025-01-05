@@ -1,5 +1,4 @@
 {
-  pkgs,
   lib,
   cymenixos,
   ...
@@ -27,7 +26,7 @@ in {
       };
     };
     nix = {
-      nixPath = ["nixpkgs=${pkgs.path}"];
+      nixPath = ["nixpkgs=${cymenixos.outPath}"];
       registry = {
         nixpkgs = {
           flake = cymenixos;
