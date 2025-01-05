@@ -33,9 +33,6 @@ in {
       inherit pkgs;
       overlays = cymenixos.overlays.${system}.default;
       hostPlatform = system;
-      flake = {
-        source = lib.mkForce pkgs.path;
-      };
     };
     nix = {
       nixPath = ["nixpkgs=${pkgs.path}"];
@@ -48,7 +45,7 @@ in {
             id = "nixpkgs";
             type = "indirect";
           };
-          flake = inputs.nixpkgs;
+          flake = pkgs.path;
         };
       };
       channel = {
