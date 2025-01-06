@@ -49,10 +49,10 @@ in {
           hideMounts = true;
           directories = [
             "/var/log"
-            "/var/lib/bluetooth"
             "/var/lib/nixos"
             "/var/lib/systemd/coredump"
-            "/etc/NetworkManager/system-connections"
+            (lib.mkIf cfg.networking.enable "/etc/NetworkManager/system-connections")
+            (lib.mkIf cfg.networking.enable && cfg.networking.bluetooth.enable "/var/lib/bluetooth")
             {
               directory = "/var/lib/colord";
               user = "colord";
@@ -79,28 +79,20 @@ in {
               "/persist/home" = {
                 allowOther = true;
                 directories = [
-                  "Downloads"
-                  "Music"
-                  "Pictures"
-                  "Documents"
-                  "Videos"
-                  ".ssh"
-                  ".cache/BraveSoftware"
-                  ".config/gnupg"
-                  ".config/BraveBrowser"
-                  ".config/Bitwarden"
-                  ".config/Mullvad VPN"
-                  ".config/obs-studio"
-                  ".config/qBittorrent"
-                  ".local/share/keyrings"
-                  ".local/share/direnv"
-                  ".local/share/mail"
+                  (lib.mkIf (homeCfg.xdg.enable) "Downloads")
+                  (lib.mkIf (homeCfg.xdg.enable) "Music")
+                  (lib.mkIf (homeCfg.xdg.enable) "Pictures")
+                  (lib.mkIf (homeCfg.xdg.enable) "Documents")
+                  (lib.mkIf (homeCfg.xdg.enable) "Videos")
                   ".local/src"
                   ".local/bin"
-                  {
+                  ".local/share/keyrings"
+                  (lib.mkIf (homeCfg.development.direnv.enable) ".local/share/direnv")
+                  (lib.mkIf (cfg.security.enable && cfg.security.ssh.enable && homeCfg.security.enable && homeCfg.security.ssh.enable) ".ssh")
+                  (lib.mkIf (cfg.gaming.enable && cfg.gaming.steam.enable) {
                     directory = ".local/share/Steam";
                     method = "symlink";
-                  }
+                  })
                   (lib.mkIf (homeCfg.storage.enable && homeCfg.storage.rclone.enable && homeCfg.storage.rclone.gdrive.enable) homeCfg.storage.rclone.gdrive.sync)
                 ];
               };
