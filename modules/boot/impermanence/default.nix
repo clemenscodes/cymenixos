@@ -70,6 +70,14 @@ in {
         };
       };
     };
+    systemd = {
+      tmpfiles = {
+        rules = [
+          "d /persist/home/ 0777 root root -"
+          (lib.mkIf cfg.home-manager.enable "d /persist/home/${user} 0770 ${user} ${user}-")
+        ];
+      };
+    };
     home-manager = lib.mkIf cfg.home-manager.enable {
       users = {
         ${user} = {
