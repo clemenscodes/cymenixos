@@ -16,7 +16,7 @@ final: prev: {
     };
     btrfs-swap-resume-offset = prev.writeShellApplication {
       name = "btrfs-swap-resume-offset";
-      runtimeInputs = [prev.btrfs];
+      runtimeInputs = [prev.btrfs-progs];
       text = ''
         btrfs inspect-internal map-swapfile -r /swap/swapfile
       '';
