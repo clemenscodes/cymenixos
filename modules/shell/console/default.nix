@@ -13,7 +13,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.console.enable) {
     console = {
       earlySetup = cfg.console.enable;
-      keyMap = config.modules.locale.defaultLocale;
+      useXkbConfig = cfg.console.enable;
     };
   };
 }
