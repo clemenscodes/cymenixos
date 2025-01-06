@@ -15,6 +15,14 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.hyprland.enable && cfg.sddm.enable) {
+    environment = {
+      systemPackages = [
+        pkgs.libsForQt5.qt5.qtquickcontrols2
+        pkgs.libsForQt5.qt5.qtsvg
+        pkgs.libsForQt5.qt5.qtgraphicaleffects
+        pkgs.catppuccin-cursors.macchiatoBlue
+      ];
+    };
     services = {
       displayManager = {
         defaultSession = "hyprland";
@@ -32,10 +40,6 @@ in {
             pkgs.kdePackages.plasma5support
             pkgs.kdePackages.qtsvg
             pkgs.kdePackages.qtvirtualkeyboard
-            pkgs.libsForQt5.qt5.qtquickcontrols2
-            pkgs.libsForQt5.qt5.qtsvg
-            pkgs.libsForQt5.qt5.qtgraphicaleffects
-            pkgs.catppuccin-cursors.macchiatoBlue
           ];
           settings = {
             Theme = lib.mkForce {
