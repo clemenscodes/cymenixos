@@ -74,6 +74,8 @@ in {
                   label = "luks";
                   content = {
                     name = luksDisk;
+                    type = "luks";
+                    askPassword = true;
                     settings = {
                       allowDiscards = false;
                     };
