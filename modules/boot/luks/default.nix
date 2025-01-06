@@ -14,7 +14,7 @@ in {
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         grub = {
           enableCryptodisk = true;
-          extraGrubInstallArgs = ["--efi-directory=/boot/efi" "--modules=${modules}"];
+          extraGrubInstallArgs = ["--efi-directory=/boot" "--modules=${modules}"];
           extraInstallCommands = ''
             grub_tmp=$(mktemp -d -t grub.conf.XXXXXXXX)
             trap 'rm -rf -- "$grub_tmp"' EXIT
