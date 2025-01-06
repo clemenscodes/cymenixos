@@ -12,9 +12,11 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && enable) {
-    xserver = {
-      xkb = {
-        layout = config.modules.locale.defaultLocale;
+    services = {
+      xserver = {
+        xkb = {
+          layout = config.modules.locale.defaultLocale;
+        };
       };
     };
     console = {
