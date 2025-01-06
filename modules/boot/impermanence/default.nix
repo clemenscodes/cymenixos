@@ -101,7 +101,7 @@ in {
                     directory = ".local/share/Steam";
                     method = "symlink";
                   }
-                  (lib.mkIf (cfg.storage.enable && cfg.storage.rclone.enable && config.storage.rclone.gdrive.enable) homeCfg.storage.rclone.gdrive.sync)
+                  (lib.mkIf (homeCfg.storage.enable && homeCfg.storage.rclone.enable && homeCfg.storage.rclone.gdrive.enable) homeCfg.storage.rclone.gdrive.sync)
                 ];
               };
             };
