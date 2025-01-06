@@ -102,9 +102,8 @@ in {
                   type = "btrfs";
                   extraArgs = ["-L" "nixos" "-f"];
                   subvolumes = {
-                    "/" = {
+                    "/root" = {
                       mountpoint = "/";
-                      mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
                     "/home" = {
                       mountpoint = "/home";
