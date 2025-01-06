@@ -60,7 +60,9 @@ in {
       persistence = {
         ${persistPath} = {
           enable = true;
+          hideMounts = true;
           directories = [
+            "/boot"
             "/etc/nixos"
             "/var/log"
             "/var/lib/nixos"
