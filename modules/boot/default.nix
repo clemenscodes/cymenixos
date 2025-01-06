@@ -8,6 +8,7 @@
   inherit (cfg.boot) efiSupport device hibernation swapResumeOffset;
 in {
   imports = [
+    (import ./impermanence {inherit inputs pkgs lib;})
     (import ./secureboot {inherit inputs pkgs lib;})
     (import ./luks {inherit inputs pkgs lib;})
     "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"

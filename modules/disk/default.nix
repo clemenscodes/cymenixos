@@ -82,36 +82,50 @@ in {
                     extraFormatArgs = ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
                     content = {
-                      type = "btrfs";
-                      extraArgs = ["-L" "nixos" "-f"];
-                      subvolumes = {
-                        "/" = {
-                          mountpoint = "/";
-                          mountOptions = ["subvol=root" "compress=zstd" "noatime"];
-                        };
-                        "/home" = {
-                          mountpoint = "/home";
-                          mountOptions = ["subvol=home" "compress=zstd" "noatime"];
-                        };
-                        "/nix" = {
-                          mountpoint = "/nix";
-                          mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
-                        };
-                        "/persist" = {
-                          mountpoint = "/persist";
-                          mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
-                        };
-                        "/log" = {
-                          mountpoint = "/var/log";
-                          mountOptions = ["subvol=log" "compress=zstd" "noatime"];
-                        };
-                        "/swap" = {
-                          mountpoint = "/swap";
-                          swap = {
-                            swapfile = {
-                              size = "${builtins.toString swapsize}G";
-                            };
-                          };
+                      type = "lvm_pv";
+                      vg = "root_vg";
+                    };
+                  };
+                };
+              };
+            };
+          };
+        };
+        lvm_vg = {
+          root_vg = {
+            type = "lvm_vg";
+            lvs = {
+              root = {
+                size = "100%";
+                content = {
+                  type = "btrfs";
+                  extraArgs = ["-L" "nixos" "-f"];
+                  subvolumes = {
+                    "/" = {
+                      mountpoint = "/";
+                      mountOptions = ["subvol=root" "compress=zstd" "noatime"];
+                    };
+                    "/home" = {
+                      mountpoint = "/home";
+                      mountOptions = ["subvol=home" "compress=zstd" "noatime"];
+                    };
+                    "/nix" = {
+                      mountpoint = "/nix";
+                      mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
+                    };
+                    "/persist" = {
+                      mountpoint = "/persist";
+                      mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
+                    };
+                    "/log" = {
+                      mountpoint = "/var/log";
+                      mountOptions = ["subvol=log" "compress=zstd" "noatime"];
+                    };
+                    "/swap" = {
+                      mountpoint = "/swap";
+                      swap = {
+                        swapfile = {
+                          size = "${builtins.toString swapsize}G";
                         };
                       };
                     };

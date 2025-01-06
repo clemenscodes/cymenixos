@@ -178,9 +178,6 @@
       android = {
         enable = false;
       };
-      fuse = {
-        enable = false;
-      };
       printing = {
         enable = false;
       };
