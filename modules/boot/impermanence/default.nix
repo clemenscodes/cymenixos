@@ -6,7 +6,6 @@
   cfg = config.modules;
   homeCfg = config.home-manager.users.${user}.modules;
   inherit (cfg.users) user;
-  # linkFileToPersist = file: "L ${file} - - - - ${persistPath}/${file}";
   inherit (cfg.boot.impermanence) persistPath;
 in {
   imports = [inputs.impermanence.nixosModules.impermanence];
@@ -42,6 +41,8 @@ in {
             btrfs subvolume delete "$1"
           }
 
+          delete_subvolume_recursively /btrfs_tmp/root
+
           btrfs subvolume create /btrfs_tmp/root
           umount /btrfs_tmp
         '';
@@ -54,7 +55,6 @@ in {
           hideMounts = true;
           directories = [
             "/etc/nixos"
-            "/etc/adjtime"
             "/var/log"
             "/var/lib/nixos"
             "/var/lib/systemd/coredump"
@@ -64,6 +64,7 @@ in {
           ];
           files = [
             "/etc/machine-id"
+            "/etc/adjtime"
             {
               file = "/var/keys/secret_file";
               parentDirectory = {mode = "u=rwx,g=,o=";};
@@ -80,35 +81,11 @@ in {
         '';
       };
     };
-    # environment = {
-    #   etc = {
-    #     nixos = {
-    #       source = "${persistPath}/etc/nixos";
-    #     };
-    #     NIXOS = {
-    #       source = "${persistPath}/etc/NIXOS";
-    #     };
-    #     machine-id = {
-    #       source = "${persistPath}/etc/machine-id";
-    #     };
-    #     adjtime = {
-    #       source = "${persistPath}/etc/adjtime";
-    #     };
-    #     "NetworkManager/system-connections" = {
-    #       source = "${persistPath}/etc/NetworkManager/system-connections";
-    #     };
-    #   };
-    # };
     systemd = {
       tmpfiles = {
         rules = [
           "d ${persistPath}/home/ 0777 root root -"
           (lib.mkIf cfg.home-manager.enable "d ${persistPath}/home/${user} 0770 ${user} ${user}-")
-          # (lib.mkIf (cfg.networking.enable) (linkFileToPersist "/var/lib/NetworkManager/secret_key"))
-          # (lib.mkIf (cfg.networking.enable) (linkFileToPersist "/var/lib/NetworkManager/seen-bssids"))
-          # (lib.mkIf (cfg.networking.enable) (linkFileToPersist "/var/lib/NetworkManager/timestamps"))
-          # (lib.mkIf (cfg.networking.enable && cfg.networking.bluetooth.enable) (linkFileToPersist "/var/lib/bluetooth"))
-          # (lib.mkIf (cfg.virtualisation.enable && cfg.virtualisation.docker.enable) (linkFileToPersist "/var/lib/docker"))
         ];
       };
     };
