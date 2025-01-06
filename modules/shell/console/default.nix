@@ -21,7 +21,6 @@ in {
     };
     console = {
       earlySetup = enable;
-      keyMap = config.modules.locale.defaultLocale;
       useXkbConfig = enable;
     };
   };
