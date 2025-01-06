@@ -51,8 +51,8 @@ in {
             "/var/log"
             "/var/lib/nixos"
             "/var/lib/systemd/coredump"
-            (lib.mkIf cfg.networking.enable "/etc/NetworkManager/system-connections")
-            (lib.mkIf cfg.networking.enable && cfg.networking.bluetooth.enable "/var/lib/bluetooth")
+            (lib.mkIf (cfg.networking.enable) "/etc/NetworkManager/system-connections")
+            (lib.mkIf (cfg.networking.enable && cfg.networking.bluetooth.enable) "/var/lib/bluetooth")
             {
               directory = "/var/lib/colord";
               user = "colord";
