@@ -5,6 +5,7 @@
 }: {config, ...}: let
   cfg = config.modules;
   inherit (cfg.disk) enable device luksDisk swapsize;
+  inherit (cfg.boot.impermanence) persistPath;
 in {
   imports = [inputs.disko.nixosModules.default];
   options = {
@@ -113,8 +114,8 @@ in {
                       mountpoint = "/nix";
                       mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
                     };
-                    "/persist" = {
-                      mountpoint = "/persist";
+                    "${persistPath}" = {
+                      mountpoint = "${persistPath}";
                       mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
                     };
                     "/swap" = {
@@ -137,7 +138,7 @@ in {
       "/var/log" = {
         neededForBoot = true;
       };
-      "/persist" = {
+      "${persistPath}" = {
         neededForBoot = true;
       };
     };

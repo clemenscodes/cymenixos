@@ -53,7 +53,7 @@ in {
     };
     boot = {
       kernelPackages = lib.mkDefault pkgs.linuxPackages_xanmod_latest;
-      supportedFilesystems = ["ext4" "ntfs" "exfat" "btrfs"];
+      supportedFilesystems = ["btrfs" "vfat"];
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         grub = {
           enable = lib.mkForce true;
