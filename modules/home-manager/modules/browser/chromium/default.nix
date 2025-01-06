@@ -17,7 +17,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.chromium.enable) {
     programs = {
       chromium = {
-        enable = cfg.chromium.enable;
+        inherit (cfg.chromium) enable;
         package = pkgs.brave;
         commandLineArgs = [
           "--enable-features=UseOzonePlatform"

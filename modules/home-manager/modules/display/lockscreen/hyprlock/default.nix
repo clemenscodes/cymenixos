@@ -17,7 +17,7 @@
       ${pkgs.systemd}/bin/systemctl suspend
     fi
   '';
-  brillo = lib.getExe pkgs.brillo;
+  brightness = lib.getExe pkgs.brightnessctl;
   timeout = 300;
   inherit (pkgs) hyprlock hypridle;
 in {
@@ -127,8 +127,8 @@ in {
             }
             {
               timeout = (timeout / 2) - 10;
-              on-timeout = "${brillo} -O; ${brillo} -u 1000000 -S 10";
-              on-resume = "${brillo} -I -u 500000";
+              on-timeout = "${brightness} set 10%-";
+              on-resume = "${brightness} set 100%";
             }
             {
               timeout = timeout - 30;

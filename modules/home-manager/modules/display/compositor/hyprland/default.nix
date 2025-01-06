@@ -255,18 +255,6 @@ in {
             ];
           };
           extraConfig = let
-            machineConfig =
-              if machine == "desktop"
-              then ''
-                monitor = DP-1,1920x1080@240,1920x0,1
-                workspace = 1, monitor:DP-1, default:true, persistent:true
-                workspace = 2, monitor:DP-1, persistent:true
-                workspace = 3, monitor:DP-1, persistent:true
-              ''
-              else ''
-                monitor = eDP-1,1920x1080,0x0,1
-                workspace = 1, monitor:eDP-1, default:true, persistent:true
-              '';
             waybar =
               if useWaybar
               then "exec-once = waybar-watch"
@@ -360,7 +348,7 @@ in {
               ''
               else "";
           in ''
-            ${machineConfig}
+            monitor = , preferred, auto, 1
 
             env = XCURSOR_SIZE,24
             env = XDG_SESSION_TYPE,wayland

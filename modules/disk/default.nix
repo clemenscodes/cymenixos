@@ -75,8 +75,6 @@ in {
                   type = "8309"; # Linux LUKS partition type
                   content = {
                     name = luksDisk;
-                    type = "luks";
-                    askPassword = true;
                     settings = {
                       allowDiscards = false;
                     };
@@ -130,6 +128,15 @@ in {
       };
       "/persist" = {
         neededForBoot = true;
+      };
+    };
+    services = {
+      btrfs = {
+        autoScrub = {
+          enable = true;
+          interval = "weekly";
+          fileSystems = ["/"];
+        };
       };
     };
   };

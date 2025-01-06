@@ -14,6 +14,13 @@ final: prev: {
         nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
       '';
     };
+    btrfs-swap-resume-offset = prev.writeShellApplication {
+      name = "btrfs-swap-resume-offset";
+      runtimeInputs = [prev.btrfs];
+      text = ''
+        btrfs inspect-internal map-swapfile -r /swap/swapfile
+      '';
+    };
     cymenixos-install = prev.writeShellApplication {
       name = "cymenixos-install";
       runtimeInputs = [prev.disko];
@@ -172,6 +179,7 @@ final: prev: {
         ln -s ${cymenixos-install}/bin/cymenixos-install $out/bin
         ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
         ln -s ${copyro}/bin/copyro $out/bin
+        ln -s ${btrfs-swap-resume-offset}/bin/btrfs-swap-resume-offset $out/bin
       '';
     };
 }

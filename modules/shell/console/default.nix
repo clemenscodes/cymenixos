@@ -1,5 +1,6 @@
 {lib, ...}: {config, ...}: let
   cfg = config.modules.shell;
+  inherit (cfg.console) enable;
 in {
   options = {
     modules = {
@@ -10,10 +11,16 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.console.enable) {
+  config = lib.mkIf (cfg.enable && enable) {
+    xserver = {
+      xkb = {
+        layout = config.modules.locale.defaultLocale;
+      };
+    };
     console = {
-      earlySetup = cfg.console.enable;
-      useXkbConfig = cfg.console.enable;
+      earlySetup = enable;
+      keyMap = config.modules.locale.defaultLocale;
+      useXkbConfig = enable;
     };
   };
 }

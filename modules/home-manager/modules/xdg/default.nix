@@ -20,15 +20,11 @@ in {
   config = lib.mkIf (osCfg.enable && cfg.enable && cfg.xdg.enable) {
     xdg = {
       inherit (cfg.xdg) enable;
-      userDirs = let
-        home = config.home.homeDirectory;
-        local = "${home}/.local";
-      in {
+      userDirs = {
         enable = true;
         createDirectories = true;
-        music = "${home}/music";
         extraConfig = {
-          XDG_BIN_HOME = "${local}/bin";
+          XDG_BIN_HOME = "${config.home.homeDirectory}/.local/bin";
         };
       };
       mimeApps = {

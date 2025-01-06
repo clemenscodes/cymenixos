@@ -5,7 +5,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.boot) efiSupport device;
+  inherit (cfg.boot) efiSupport device hibernation swapResumeOffset;
 in {
   imports = [
     (import ./secureboot {inherit inputs pkgs lib;})
@@ -21,6 +21,20 @@ in {
         device = lib.mkOption {
           type = lib.types.str;
           default = "nodev";
+        };
+        hibernation = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = ''
+            Enable hibernation using swap. Do not enable this until you have installed the system onto a disk.
+            Calculate the resume offset for btrfs swap on the installed disk using `btrfs inspect-internal map-swapfile -r /swap/swapfile`.
+            Then set the option modules.boot.hibernation to true and modules.boot.swapResumeOffset to that value.
+          '';
+        };
+        swapResumeOffset = lib.mkOption {
+          type = lib.types.int;
+          default = null;
+          description = "The result of running ${lib.getExe pkgs.btrfs-swap-resume-offset} on an installed system.";
         };
       };
     };
@@ -65,6 +79,10 @@ in {
         "kvm-amd"
         "v4l2loopback"
       ];
+      kernelParams = lib.mkIf hibernation [
+        "resume_offset=${swapResumeOffset}"
+      ];
+      resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       initrd = {
         availableKernelModules = [
           "ohci_pci"

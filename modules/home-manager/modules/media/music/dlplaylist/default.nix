@@ -8,13 +8,12 @@
   ...
 }: let
   dlplaylist = pkgs.writeShellScriptBin "dlplaylist" ''
-    playlist_url=$1
     dest=${
       if osConfig.modules.wsl.enable
       then "$WINMUSIC"
       else "$XDG_MUSIC_DIR"
     }
-    ${pkgs.yt-dlp}/bin/yt-dlp  --yes-playlist -o "$dest/%(title)s.%(ext)s" -f 'bestaudio/best' --extract-audio --audio-format opus $playlist_url
+    ${pkgs.yt-dlp}/bin/yt-dlp  --yes-playlist -o "$dest/%(title)s.%(ext)s" -f 'bestaudio/best' --extract-audio --audio-format opus --cookies-from-browser ${config.modules.browser.defaultBrowser} "$@"
   '';
   cfg = config.modules.media.music;
 in {
