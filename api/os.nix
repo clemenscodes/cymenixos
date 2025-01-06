@@ -30,6 +30,8 @@
       secureboot = {
         enable = false;
       };
+      hibernation = false;
+      swapResumeOffset = 533760;
     };
     cpu = {
       enable = false;

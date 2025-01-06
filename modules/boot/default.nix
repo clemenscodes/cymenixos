@@ -34,6 +34,7 @@ in {
         swapResumeOffset = lib.mkOption {
           type = lib.types.int;
           default = null;
+          example = 533760;
           description = "The result of running ${lib.getExe pkgs.btrfs-swap-resume-offset} on an installed system.";
         };
       };
@@ -78,7 +79,7 @@ in {
         "v4l2loopback"
       ];
       kernelParams = lib.mkIf hibernation [
-        "resume_offset=${swapResumeOffset}"
+        "resume_offset=${builtins.toString swapResumeOffset}"
       ];
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       initrd = {
