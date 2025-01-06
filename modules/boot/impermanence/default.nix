@@ -104,11 +104,11 @@ in {
         rules = [
           "d ${persistPath}/home/ 0777 root root -"
           (lib.mkIf cfg.home-manager.enable "d ${persistPath}/home/${user} 0770 ${user} ${user}-")
-          (lib.mkIf (cfg.networking.enable) linkFileToPersist "/var/lib/NetworkManager/secret_key")
-          (lib.mkIf (cfg.networking.enable) linkFileToPersist "/var/lib/NetworkManager/seen-bssids")
-          (lib.mkIf (cfg.networking.enable) linkFileToPersist "/var/lib/NetworkManager/timestamps")
-          (lib.mkIf (cfg.networking.enable && cfg.networking.bluetooth.enable) linkFileToPersist "/var/lib/bluetooth")
-          (lib.mkIf (cfg.virtualisation.enable && cfg.virtualisation.docker.enable) linkFileToPersist "/var/lib/docker")
+          (lib.mkIf (cfg.networking.enable) (linkFileToPersist "/var/lib/NetworkManager/secret_key"))
+          (lib.mkIf (cfg.networking.enable) (linkFileToPersist "/var/lib/NetworkManager/seen-bssids"))
+          (lib.mkIf (cfg.networking.enable) (linkFileToPersist "/var/lib/NetworkManager/timestamps"))
+          (lib.mkIf (cfg.networking.enable && cfg.networking.bluetooth.enable) (linkFileToPersist "/var/lib/bluetooth"))
+          (lib.mkIf (cfg.virtualisation.enable && cfg.virtualisation.docker.enable) (linkFileToPersist "/var/lib/docker"))
         ];
       };
     };
