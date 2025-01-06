@@ -30,8 +30,6 @@
       enable = true;
       efiSupport = true;
       inherit (config.modules.disk) device;
-      hibernation = true;
-      swapResumeOffset = 533760;
     };
     cpu = {
       enable = true;
