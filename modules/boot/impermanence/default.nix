@@ -42,7 +42,7 @@ in {
           delete_subvolume_recursively() {
             IFS=$'\n'
             for subvolume in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
-              delete_subvolume_recursively "/btrfs_tmp/$subvolume"
+              delete_subvolume_recursively "/btrfs_tmp/old_roots/$subvolume"
             done
             btrfs subvolume delete "$1"
           }
@@ -60,7 +60,6 @@ in {
       persistence = {
         ${persistPath} = {
           enable = true;
-          hideMounts = true;
           directories = [
             "/etc/nixos"
             "/var/log"
@@ -78,6 +77,23 @@ in {
               parentDirectory = {mode = "u=rwx,g=,o=";};
             }
           ];
+          users = {
+            ${user} = {
+              directories = [
+                (lib.mkIf (homeCfg.xdg.enable) "Downloads")
+                (lib.mkIf (homeCfg.xdg.enable) "Music")
+                (lib.mkIf (homeCfg.xdg.enable) "Pictures")
+                (lib.mkIf (homeCfg.xdg.enable) "Documents")
+                (lib.mkIf (homeCfg.xdg.enable) "Videos")
+                ".local/src"
+                ".local/bin"
+                ".local/share/keyrings"
+                (lib.mkIf (homeCfg.development.direnv.enable) ".local/share/direnv")
+                (lib.mkIf (cfg.security.enable && cfg.security.ssh.enable && homeCfg.security.enable && homeCfg.security.ssh.enable) ".ssh")
+                (lib.mkIf (homeCfg.storage.enable && homeCfg.storage.rclone.enable && homeCfg.storage.rclone.gdrive.enable) homeCfg.storage.rclone.gdrive.sync)
+              ];
+            };
+          };
         };
       };
     };
@@ -95,37 +111,6 @@ in {
           "d ${persistPath}/home/ 0777 root root -"
           (lib.mkIf cfg.home-manager.enable "d ${persistPath}/home/${user} 0770 ${user} ${user}-")
         ];
-      };
-    };
-    home-manager = lib.mkIf cfg.home-manager.enable {
-      users = {
-        ${user} = {
-          imports = [inputs.impermanence.nixosModules.home-manager.impermanence];
-          home = {
-            persistence = {
-              "${persistPath}/home" = {
-                allowOther = true;
-                directories = [
-                  (lib.mkIf (homeCfg.xdg.enable) "Downloads")
-                  (lib.mkIf (homeCfg.xdg.enable) "Music")
-                  (lib.mkIf (homeCfg.xdg.enable) "Pictures")
-                  (lib.mkIf (homeCfg.xdg.enable) "Documents")
-                  (lib.mkIf (homeCfg.xdg.enable) "Videos")
-                  ".local/src"
-                  ".local/bin"
-                  ".local/share/keyrings"
-                  (lib.mkIf (homeCfg.development.direnv.enable) ".local/share/direnv")
-                  (lib.mkIf (cfg.security.enable && cfg.security.ssh.enable && homeCfg.security.enable && homeCfg.security.ssh.enable) ".ssh")
-                  (lib.mkIf (cfg.gaming.enable && cfg.gaming.steam.enable) {
-                    directory = ".local/share/Steam";
-                    method = "symlink";
-                  })
-                  (lib.mkIf (homeCfg.storage.enable && homeCfg.storage.rclone.enable && homeCfg.storage.rclone.gdrive.enable) homeCfg.storage.rclone.gdrive.sync)
-                ];
-              };
-            };
-          };
-        };
       };
     };
   };
