@@ -72,7 +72,6 @@ in {
                 luks = {
                   size = "100%";
                   label = "luks";
-                  type = "8309"; # Linux LUKS partition type
                   content = {
                     name = luksDisk;
                     settings = {

@@ -1,4 +1,5 @@
 {
+  pkgs,
   lib,
   cymenixos,
   ...
@@ -20,6 +21,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
     nixpkgs = {
+      inherit pkgs;
       hostPlatform = system;
       flake = {
         source = lib.mkForce cymenixos.outPath;
