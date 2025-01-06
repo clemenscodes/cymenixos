@@ -104,6 +104,7 @@ in {
                   subvolumes = {
                     "/root" = {
                       mountpoint = "/";
+                      mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
                     "/home" = {
                       mountpoint = "/home";
