@@ -54,7 +54,6 @@ in {
           hideMounts = true;
           directories = [
             "/etc/nixos"
-            "/etc/NIXOS"
             "/etc/adjtime"
             "/var/log"
             "/var/lib/nixos"
