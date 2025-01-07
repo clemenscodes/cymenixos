@@ -159,7 +159,7 @@ in {
               in {
                 "/var/log" = {
                   inherit snapshot_create;
-                  subvolume = "/";
+                  subvolume = "/var/log";
                   snapshot_dir = "/snapshots/logs";
                 };
                 ${persistPath} = {
