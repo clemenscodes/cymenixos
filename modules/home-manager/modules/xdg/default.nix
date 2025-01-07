@@ -20,9 +20,9 @@
     name = "wallpapers";
     src = pkgs.fetchFromGitHub {
       owner = "orangci";
-      repo = "walls-catppuccin-mocha";
-      rev = "c5e8c84af804ac0d291ca21b3ebf9129f7292470";
-      hash = "sha256-/Zj+bmqmWWGvH0Gr3QgV5+ApuW/7GBDM4IIdkYU+M+Y=";
+      repo = "walls";
+      rev = "886dd0786cea003f9e94a1054137e7cbd8fd7428";
+      hash = "sha256-GjP7ASUjfL9kqIx+/dhGkiBm1QmjwWn80bqhi3Vp6vM=";
     };
     installPhase = ''
       mkdir -p $out
