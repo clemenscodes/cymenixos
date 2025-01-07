@@ -29,7 +29,7 @@ in {
         "swappy/config" = {
           text = ''
             [Default]
-            save_dir=${config.xdg.dataHome}/images/screenshots
+            save_dir=${config.xdg.userDirs.extraConfig.XDG_SCREENSHOT_DIR}
           '';
         };
       };
