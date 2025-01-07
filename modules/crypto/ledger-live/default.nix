@@ -18,7 +18,7 @@ in {
     environment = {
       systemPackages = [pkgs.ledger-live-desktop];
       persistence = {
-        ${config.modules.boot.persistPath} = {
+        ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.user} = {
               directories = [".config/Ledger Live"];
