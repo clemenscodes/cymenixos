@@ -22,13 +22,13 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.boot.enable && !cfg.users.isIso) {
+  config = lib.mkIf (cfg.enable && cfg.boot.enable) {
     programs = {
       fuse = {
         userAllowOther = lib.mkForce true;
       };
     };
-    boot = {
+    boot = lib.mkIf (!cfg.users.isIso) {
       initrd = {
         postDeviceCommands = lib.mkAfter ''
           mkdir -p /btrfs_tmp
@@ -80,7 +80,7 @@ in {
         '';
       };
     };
-    systemd = {
+    systemd = lib.mkIf (!cfg.users.isIso) {
       tmpfiles = {
         rules = [
           "d ${persistPath}/home/ 0777 root root -"
