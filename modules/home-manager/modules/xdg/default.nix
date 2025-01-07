@@ -83,7 +83,7 @@ in {
           XDG_SCREENSHOT_DIR = "${config.xdg.userDirs.pictures}/screenshots";
           XDG_WALLPAPER_DIR = "${config.xdg.userDirs.pictures}/wallpaper";
           XDG_SVG_DIR = "${config.xdg.userDirs.pictures}/svg";
-          XDG_ISO_DIR = "${config.xdg.userDirs.public}/isos";
+          XDG_ISO_DIR = "${config.xdg.userDirs.publicShare}/isos";
           XDG_NOTE_DIR = "${config.xdg.userDirs.documents}/notes";
         };
       };

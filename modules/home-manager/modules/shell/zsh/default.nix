@@ -8,7 +8,6 @@
   ...
 }: let
   cfg = config.modules.shell;
-  user = osConfig.modules.users.user;
   username = osConfig.modules.users.name;
   flake = osConfig.modules.users.flake;
   machine = osConfig.modules.machine.name;
@@ -19,7 +18,7 @@
     then "lfcd"
     else if useYazi
     then "yazicd"
-    else "${explorer}";
+    else "cd";
 in {
   options = {
     modules = {
@@ -49,18 +48,17 @@ in {
         (import ./scripts/tracewarning.nix {inherit pkgs;})
       ];
       sessionVariables = {
-        FLAKE = "${config.home.homeDirectory}/${flake}";
         NIXOS_OZONE_WL = 1;
-        ANDROID_USER_HOME = "$HOME/.local/share/android";
-        CARGO_HOME = "$HOME/.local/share/cargo";
-        GOPATH = "$HOME/.local/share/go";
-        MBSYNCRC = "$HOME/.config/mbsync/config";
-        M2_HOME = "$HOME/.local/share/m2";
-        CUDA_CACHE_PATH = "$HOME/.cache/nv";
-        WINEPREFIX = "$HOME/.local/share/wine";
-        LD_LIBRARY_PATH = "/run/opengl-driver/lib:$LD_LIBRARY_PATH";
-        JAVA_HOME = "/etc/profiles/per-user/${user}";
+        FLAKE = "${config.home.homeDirectory}/${flake}";
         EXPLORER = "${explorer}";
+        ANDROID_USER_HOME = "${config.xdg.dataHome}/android";
+        CARGO_HOME = "${config.xdg.dataHome}/cargo";
+        GOPATH = "${config.xdg.dataHome}/go";
+        MBSYNCRC = "${config.xdg.configHome}/mbsync/config";
+        M2_HOME = "${config.xdg.dataHome}/m2";
+        CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
+        WINEPREFIX = "${config.xdg.dataHome}/wine";
+        LD_LIBRARY_PATH = lib.mkIf osConfig.modules.gpu.amd.enable "/run/opengl-driver/lib:$LD_LIBRARY_PATH";
       };
     };
     programs = {
@@ -88,22 +86,20 @@ in {
         dotDir = ".config/zsh";
         shellAliases = {
           sudo = "sudo ";
-          update = "cd $MOON && git pull origin $(git_current_branch)";
+          update = "cd $FLAKE && git pull origin $(git_current_branch)";
           src = "omz reload";
           ssh = "kitten ssh";
           ls = "${pkgs.eza}/bin/eza";
-          ne = "${explorer} $MOON";
-          nehm = "${explorer} $MOON/nix/modules/home-manager/modules";
-          nenvim = "${explorer} $MOON/nix/modules/home-manager/modules/editor/nixvim";
-          notes = "${explorer} $MOON/notes";
+          ne = "${explorer} $FLAKE";
           nix-repl-flake = ''nix repl --expr "builtins.getFlake \"$PWD\""'';
+          notes = "${explorer} $XDG_NOTE_DIR";
           V = "${explorer} $XDG_VIDEOS_DIR";
           D = "${explorer} $XDG_DOWNLOAD_DIR";
           M = "${explorer} $XDG_MUSIC_DIR";
           I = "${explorer} $XDG_PICTURES_DIR";
-          S = "${explorer} $XDG_PICTURES_DIR/screenshots";
+          S = "${explorer} $XDG_SCREENSHOT_DIR";
           docs = "${explorer} $XDG_DOCUMENTS_DIR";
-          isos = "${explorer} $XDG_DATA_HOME/isos";
+          isos = "${explorer} $XDG_ISO_DIR";
           rr = "${explorer} $HOME/.local/src";
           ma = "${explorer} $HOME/.local/src/master/semester/1";
         };
@@ -142,31 +138,35 @@ in {
             zle -N zle-line-init
             echo -ne '\e[5 q'
             preexec() { echo -ne '\e[5 q' ;}
-            lfcd () {
-                tmp="$(mktemp -uq)"
-                trap 'rm -f $tmp >/dev/null 2>&1' HUP INT QUIT TERM PWR EXIT
-                lf -last-dir-path="$tmp" "$@"
-                if [ -f "$tmp" ]; then
-                    dir="$(cat "$tmp")"
-                    [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
-                fi
-            }
-            yazicd () {
-              local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
-              yazi "$@" --cwd-file="$tmp"
-              if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-              	cd -- "$cwd"
-              fi
-              rm -f -- "$tmp"
-            }
-            bindkey -s '^o' '${explorer}\n'
             autoload edit-command-line; zle -N edit-command-line
             bindkey '^e' edit-command-line
             bindkey -M vicmd '^[[P' vi-delete-char
             bindkey -M vicmd '^e' edit-command-line
             bindkey -M visual '^[[P' vi-delete
-            eval "$(direnv hook zsh)"
             export ZSH_CACHE_DIR
+            ${
+              lib.mkIf cfg.explorer.enable ''
+                lfcd () {
+                    tmp="$(mktemp -uq)"
+                    trap 'rm -f $tmp >/dev/null 2>&1' HUP INT QUIT TERM PWR EXIT
+                    lf -last-dir-path="$tmp" "$@"
+                    if [ -f "$tmp" ]; then
+                        dir="$(cat "$tmp")"
+                        [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
+                    fi
+                }
+                yazicd () {
+                  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+                  yazi "$@" --cwd-file="$tmp"
+                  if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+                  	cd -- "$cwd"
+                  fi
+                  rm -f -- "$tmp"
+                }
+                bindkey -s '^o' '${explorer}\n'
+              ''
+            }
+            ${lib.mkIf cfg.development.direnv.enable ''eval "$(direnv hook zsh)"''}
           '';
         profileExtra =
           /*
