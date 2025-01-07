@@ -4,6 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
+  inherit (cfg.boot) bootPath;
   inherit (cfg.disk) enable device luksDisk swapsize;
   inherit (cfg.boot.impermanence) persistPath;
 in {
@@ -66,7 +67,7 @@ in {
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint = config.boot.loader.efi.efiSysMountPoint;
+                    mountpoint = "${bootPath}/efi";
                     mountOptions = ["umask=0077"];
                   };
                 };
@@ -106,8 +107,8 @@ in {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
-                    "${cfg.boot.bootPath}" = {
-                      mountpoint = "${cfg.boot.bootPath}";
+                    "${bootPath}" = {
+                      mountpoint = "${bootPath}";
                       mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
                     };
                     "/nix" = {
