@@ -5,7 +5,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.security;
-  isDesktop = config.modules.display.gui != "headless";
   polkitagent = import ./polkitagent {inherit inputs pkgs lib;};
 in {
   options = {
@@ -17,7 +16,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.polkit.enable && isDesktop) {
+  config = lib.mkIf (cfg.enable && cfg.polkit.enable) {
     environment = {
       systemPackages = [polkitagent];
     };

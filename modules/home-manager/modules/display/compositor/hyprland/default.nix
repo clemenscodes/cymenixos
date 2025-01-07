@@ -362,6 +362,8 @@ in {
             bind = CTRL ALT_L, V, submap,reset
             submap = reset
 
+            exec-once = ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
+            exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME
             exec-once = wl-paste --type text --watch cliphist store
             exec-once = wl-paste --type image --watch cliphist store
             exec-once = polkitagent
