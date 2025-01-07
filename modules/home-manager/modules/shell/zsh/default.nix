@@ -145,7 +145,8 @@ in {
             bindkey -M visual '^[[P' vi-delete
             export ZSH_CACHE_DIR
             ${
-              lib.mkIf cfg.explorer.enable ''
+              if cfg.explorer.enable
+              then ''
                 lfcd () {
                     tmp="$(mktemp -uq)"
                     trap 'rm -f $tmp >/dev/null 2>&1' HUP INT QUIT TERM PWR EXIT
@@ -165,8 +166,13 @@ in {
                 }
                 bindkey -s '^o' '${explorer}\n'
               ''
+              else ""
             }
-            ${lib.mkIf cfg.development.direnv.enable ''eval "$(direnv hook zsh)"''}
+            ${
+              if cfg.development.direnv.enable
+              then ''eval "$(direnv hook zsh)"''
+              else ""
+            }
           '';
         profileExtra =
           /*
