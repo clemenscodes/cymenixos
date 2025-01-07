@@ -14,6 +14,13 @@ final: prev: {
         nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
       '';
     };
+    build-test-iso = prev.writeShellApplication {
+      name = "build-iso";
+      runtimeInputs = [prev.nix-output-monitor];
+      text = ''
+        nom build .#nixosConfigurations.test.config.system.build.isoImage --show-trace
+      '';
+    };
     write-iso-to-device = prev.writeShellApplication rec {
       name = "write-iso-to-device";
       runtimeInputs = [prev.nix-output-monitor];
@@ -29,6 +36,18 @@ final: prev: {
           exit 0
         fi
 
+        if [ "$#" -ge 1 ]; then
+          DEVICE="$1"
+        else
+          echo "Error: no device was specified"
+          echo "Insert USB and run lsblk to see available devices"
+          exit 1
+        fi
+
+        echo "Building ISO..."
+
+        ${build-iso}/bin/build-iso
+
         ISO="result-iso"
 
         if fd --type file --has-results 'nixos-.*\.iso' result/iso 2> /dev/null; then
@@ -38,14 +57,6 @@ final: prev: {
           echo "No iso file exists to run, please build one first, example:"
           echo "${build-iso}/bin/build-iso"
           exit
-        fi
-
-        if [ "$#" -ge 1 ]; then
-          DEVICE="$1"
-        else
-          echo "Error: no device was specified"
-          echo "Insert USB and run lsblk to see available devices"
-          exit 1
         fi
 
         echo "Installing $ISO to $DEVICE"
@@ -224,6 +235,7 @@ final: prev: {
         mkdir -p $out/bin
         ln -s ${build-system}/bin/build-system $out/bin
         ln -s ${build-iso}/bin/build-iso $out/bin
+        ln -s ${build-test-iso}/bin/build-test-iso $out/bin
         ln -s ${write-iso-to-device}/bin/write-iso-to-device $out/bin
         ln -s ${cymenixos-install}/bin/cymenixos-install $out/bin
         ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin

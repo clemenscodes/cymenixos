@@ -33,7 +33,7 @@ in {
               -p '${biosPrefix}' \
               -O ${pkgs.grub2.grubTarget} \
               -c $grub_tmp/grub.cfg \
-              -o ${biosPrefix}/core.img \
+              -o /boot/grub/core.img \
               ${modules}
 
             grub_tmp=$(mktemp -d -t grub.conf.XXXXXXXX)
