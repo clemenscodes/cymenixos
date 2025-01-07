@@ -20,7 +20,7 @@ in {
     environment = {
       systemPackages = [pkgs.python311Packages.ds4drv];
       persistence = {
-        ${config.boot.impermanence.persistPath} = {
+        ${config.modules.boot.impermanence.persistPath} = {
           directories = ["/var/lib/bluetooth"];
         };
       };
