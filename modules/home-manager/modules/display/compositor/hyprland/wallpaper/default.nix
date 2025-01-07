@@ -15,15 +15,14 @@
   };
 in
   pkgs.writeShellScriptBin "wallpaper" ''
-    while : ; do
+    while true; do
       wallpapers=($(echo "$(for file in $(ls "${wallpapers}/"); do echo $file; done)" | shuf))
       echo "Currently there are ''${#wallpapers[@]} wallpapers installed"
-      for wallpaper in $wallpapers; do
-        echo "Setting wallpaper to $wallpaper"
-        ${pkgs.swww}/bin/swww img "$wallpaper"
+      for wallpaper in "''${#wallpapers[@]}"; do
+        echo "Setting wallpaper to ${wallpapers}/$wallpaper"
+        ${pkgs.swww}/bin/swww img "${wallpapers}/$wallpaper"
         echo "Setting random wallpaper $wallpaper to $XDG_WALLPAPER_DIR/random"
-        rm "$XDG_WALLPAPER_DIR/random"
-        cp "$wallpaper" "$XDG_WALLPAPER_DIR/random"
+        ln -sf "${wallpapers}/$wallpaper" "$XDG_WALLPAPER_DIR/random"
         sleep 3600
       done
     done
