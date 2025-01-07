@@ -28,23 +28,29 @@ in {
         userAllowOther = lib.mkForce true;
       };
     };
-    boot = lib.mkIf (!cfg.users.isIso) {
+    boot = {
       initrd = {
         postDeviceCommands = lib.mkAfter ''
           mkdir -p /btrfs_tmp
           mount /dev/root_vg/root /btrfs_tmp
 
+          if [[ -e /btrfs_tmp/root ]]; then
+            mkdir -p /btrfs_tmp/snapshots
+            timestamp=$(date --date="@$(stat -c %Y /btrfs_tmp/root)" "+%Y-%m-%-d_%H:%M:%S")
+            mv /btrfs_tmp/root "/btrfs_tmp/snapshots/$timestamp"
+          fi
+
           delete_subvolume_recursively() {
             IFS=$'\n'
-            for subvolume in $(btrfs subvolume list -o "$1" | cut -f9- -d' '); do
-              delete_subvolume_recursively "$1/$subvolume"
+            for subvolume in $(btrfs subvolume list -o "$1" | cut -f 9- -d ' '); do
+              delete_subvolume_recursively "/btrfs_tmp/snapshots/$subvolume"
             done
             btrfs subvolume delete "$1"
           }
 
-          if [[ -d /btrfs_tmp/root ]]; then
-            delete_subvolume_recursively /btrfs_tmp/root
-          fi
+          for subvolume in $(find /btrfs_tmp/snapshots/ -maxdepth 1 -mtime +30); do
+            delete_subvolume_recursively "$subvolume"
+          done
 
           btrfs subvolume create /btrfs_tmp/root
           umount /btrfs_tmp

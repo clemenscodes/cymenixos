@@ -157,11 +157,6 @@ in {
               volume = let
                 snapshot_create = "always";
               in {
-                "/" = {
-                  inherit snapshot_create;
-                  subvolume = "/";
-                  snapshot_dir = "/snapshots/root";
-                };
                 "/var/log" = {
                   inherit snapshot_create;
                   subvolume = "/";
@@ -194,6 +189,15 @@ in {
       };
       "${persistPath}" = {
         neededForBoot = true;
+      };
+    };
+    systemd = {
+      tmpfiles = {
+        rules = [
+          "d /snapshots 0755 root root"
+          "d /snapshots/persist 0755 root root"
+          "d /snapshots/logs 0755 root root"
+        ];
       };
     };
   };
