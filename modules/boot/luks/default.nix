@@ -29,7 +29,7 @@ in {
               set prefix=${biosPrefix}
             EOS
 
-            ${pkgs.grub2_efi}/bin/grub-mkimage \
+            ${pkgs.grub2}/bin/grub-mkimage \
               -p '${biosPrefix}' \
               -O ${pkgs.grub2.grubTarget} \
               -c $grub_tmp/grub.cfg \
