@@ -133,6 +133,7 @@ final: prev: {
         SOURCE_DIR=$1
         DEST_DIR=$2
 
+        # Check if the destination directory exists and if writable
         if [ ! -d "$DEST_DIR" ]; then
           echo "Destination does not exist. Starting copy process."
 
@@ -143,7 +144,11 @@ final: prev: {
             src="$1"
             dest="$2"
 
-            mkdir -p "$dest"
+            # Attempt to create the directory and handle permission error
+            if ! mkdir -p "$dest"; then
+              echo "Permission denied while creating $dest. Exiting successfully."
+              exit 0
+            fi
 
             for item in "$src"/*; do
               [ -e "$item" ] || continue
@@ -152,7 +157,9 @@ final: prev: {
               if [ -d "$item" ]; then
                 copy_directory "$item" "$dest_item"
               elif [ -f "$item" ]; then
-                cp "$item" "$dest_item"
+                if ! cp "$item" "$dest_item"; then
+                  echo "Permission denied while copying $item. Skipping."
+                fi
               fi
             done
           }
@@ -164,6 +171,10 @@ final: prev: {
 
           echo "Copy process completed successfully."
         else
+          if [ ! -w "$DEST_DIR" ]; then
+            echo "Destination already exists but permission denied. Exiting successfully."
+            exit 0
+          fi
           echo "Destination already exists. No action taken."
         fi
       '';
