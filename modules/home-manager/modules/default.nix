@@ -49,6 +49,12 @@ in {
       username = user;
       homeDirectory = "/home/${user}";
       sessionPath = ["${config.home.homeDirectory}/.local/bin"];
+      activation = {
+        rmUnusedNix = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
+          rm -rf ${config.home.homeDirectory}/.nix-defexpr
+          rm -rf ${config.home.homeDirectory}/.nix-profile
+        '';
+      };
       file = {
         ".local/src/README.md" = {
           text = ''
