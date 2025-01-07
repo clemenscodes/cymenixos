@@ -28,8 +28,7 @@ in {
     home = {
       file = {
         ".face" = {
-          source = ./assets/face;
-          recursive = true;
+          source = ./assets/face/.face;
         };
         "${config.xdg.userDirs.extraConfig.XDG_NOTE_DIR}/README.md" = {
           text = ''
