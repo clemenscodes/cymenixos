@@ -26,7 +26,7 @@
     };
     installPhase = ''
       mkdir -p $out
-      cp -r $src $out
+      cp -r $src/* $out
       rm $out/README.md
     '';
   };
