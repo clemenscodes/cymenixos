@@ -34,27 +34,7 @@
         modules = [
           ./configuration.nix
           (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
-          ({...}: let
-            dependencies =
-              [
-                self.nixosConfigurations.your-machine.config.system.build.toplevel
-                self.nixosConfigurations.your-machine.config.system.build.diskoScript
-                self.nixosConfigurations.your-machine.config.system.build.diskoScript.drvPath
-                self.nixosConfigurations.your-machine.pkgs.stdenv.drvPath
-                self.nixosConfigurations.your-machine.pkgs.perlPackages.ConfigIniFiles
-                self.nixosConfigurations.your-machine.pkgs.perlPackages.FileSlurp
-                (self.nixosConfigurations.your-machine.pkgs.closureInfo {rootPaths = [];}).drvPath
-              ]
-              ++ builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
-            closureInfo = pkgs.closureInfo {rootPaths = dependencies;};
-          in {
-            environment = {
-              etc = {
-                "install-closure" = {
-                  source = "${closureInfo}/store-paths";
-                };
-              };
-            };
+          ({...}: {
             modules = {
               iso = {
                 enable = true;

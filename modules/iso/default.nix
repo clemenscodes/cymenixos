@@ -1,23 +1,23 @@
 {
   inputs,
+  pkgs,
   lib,
   ...
 }: {
   self,
   config,
-  pkgs,
   ...
 }: let
   cfg = config.modules;
   dependencies =
     [
-      config.system.build.toplevel
-      config.system.build.diskoScript
-      config.system.build.diskoScript.drvPath
-      pkgs.stdenv.drvPath
-      pkgs.perlPackages.ConfigIniFiles
-      pkgs.perlPackages.FileSlurp
-      (pkgs.closureInfo {rootPaths = [];}).drvPath
+      self.nixosConfigurations.iso.config.system.build.toplevel
+      self.nixosConfigurations.iso.config.system.build.diskoScript
+      self.nixosConfigurations.iso.config.system.build.diskoScript.drvPath
+      self.nixosConfigurations.iso.pkgs.stdenv.drvPath
+      self.nixosConfigurations.iso.pkgs.perlPackages.ConfigIniFiles
+      self.nixosConfigurations.iso.pkgs.perlPackages.FileSlurp
+      (self.nixosConfigurations.iso.pkgs.closureInfo {rootPaths = [];}).drvPath
     ]
     ++ builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
   closureInfo = pkgs.closureInfo {rootPaths = dependencies;};
