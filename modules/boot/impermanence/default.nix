@@ -29,7 +29,9 @@ in {
           imports = [inputs.impermanence.homeManagerModules.impermanence];
           home = {
             persistence = {
-              allowOther = true;
+              "${persistPath}${config.home-manager.users.${user}.home.homeDirectory}" = {
+                allowOther = true;
+              };
             };
           };
         };
