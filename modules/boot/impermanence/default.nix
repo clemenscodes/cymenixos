@@ -23,20 +23,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.boot.enable && !cfg.users.isIso) {
-    home-manager = lib.mkIf cfg.home-manager.enable {
-      users = {
-        ${user} = {
-          imports = [inputs.impermanence.homeManagerModules.impermanence];
-          home = {
-            persistence = {
-              "${persistPath}${config.home-manager.users.${user}.home.homeDirectory}" = {
-                allowOther = true;
-              };
-            };
-          };
-        };
-      };
-    };
     programs = {
       fuse = {
         userAllowOther = lib.mkForce true;

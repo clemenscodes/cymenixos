@@ -13,6 +13,7 @@
   user = osConfig.modules.users.user;
 in {
   imports = [
+    inputs.impermanence.homeManagerModules.impermanence
     (import ./browser {inherit inputs pkgs lib;})
     (import ./development {inherit inputs pkgs lib;})
     (import ./display {inherit inputs pkgs lib;})
@@ -45,6 +46,7 @@ in {
     home = {
       persistence = {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+          allowOther = true;
           directories = [
             ".local/src"
             ".local/bin"
