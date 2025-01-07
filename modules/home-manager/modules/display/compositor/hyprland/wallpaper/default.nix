@@ -18,7 +18,7 @@ in
     while true; do
       wallpapers=($(echo "$(for file in $(ls "${wallpapers}/"); do echo $file; done)" | shuf))
       echo "Currently there are ''${#wallpapers[@]} wallpapers installed"
-      for wallpaper in "''${#wallpapers[@]}"; do
+      for wallpaper in "''${wallpapers[@]}"; do
         echo "Setting wallpaper to ${wallpapers}/$wallpaper"
         ${pkgs.swww}/bin/swww img "${wallpapers}/$wallpaper"
         echo "Setting random wallpaper $wallpaper to $XDG_WALLPAPER_DIR/random"
