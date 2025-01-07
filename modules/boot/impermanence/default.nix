@@ -15,7 +15,9 @@ in {
         impermanence = {
           persistPath = lib.mkOption {
             type = lib.types.str;
+            description = "Where the persistent subvolume will be mounted";
             default = "/persist";
+            example = "/persistence";
           };
         };
       };

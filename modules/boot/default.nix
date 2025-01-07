@@ -5,7 +5,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.boot) efiSupport device hibernation swapResumeOffset;
+  inherit (cfg.boot) bootPath efiSupport device hibernation swapResumeOffset;
 in {
   imports = [
     (import ./impermanence {inherit inputs pkgs lib;})
@@ -22,6 +22,11 @@ in {
         device = lib.mkOption {
           type = lib.types.str;
           default = "nodev";
+        };
+        bootPath = lib.mkOption {
+          type = lib.types.str;
+          default = "/boot";
+          description = "Where the boot partition will be mounted";
         };
         hibernation = lib.mkOption {
           type = lib.types.bool;
@@ -65,13 +70,13 @@ in {
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           mirroredBoots = [
             {
-              path = "/boot";
+              path = bootPath;
               devices = [device];
             }
           ];
         };
         efi = {
-          efiSysMountPoint = "/boot";
+          efiSysMountPoint = "${bootPath}/efi";
         };
       };
       kernelModules = [

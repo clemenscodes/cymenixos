@@ -66,7 +66,7 @@ in {
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint = "/boot";
+                    mountpoint = config.boot.loader.efi.efiSysMountPoint;
                     mountOptions = ["umask=0077"];
                   };
                 };
@@ -105,6 +105,10 @@ in {
                     "/root" = {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
+                    };
+                    "${cfg.boot.bootPath}" = {
+                      mountpoint = "${cfg.boot.bootPath}";
+                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
                     };
                     "/nix" = {
                       mountpoint = "/nix";
