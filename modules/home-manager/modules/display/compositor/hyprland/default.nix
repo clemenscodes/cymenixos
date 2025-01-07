@@ -364,6 +364,7 @@ in {
             exec-once = wl-paste --type text --watch cliphist store
             exec-once = wl-paste --type image --watch cliphist store
             exec-once = polkitagent
+            exec-once = ${pkgs.swww}/bin/swww-daemon
             exec-once = wallpaper
 
             windowrulev2 = float,class:^(org.kde.polkit-kde-authentication-agent-1)$
