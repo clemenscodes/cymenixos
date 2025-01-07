@@ -1,7 +1,11 @@
-{pkgs, ...}:
+{
+  pkgs,
+  config,
+  ...
+}:
 pkgs.writeShellScriptBin "wallpaper" ''
   while : ; do
-    wallpapers=($(echo "$(for file in $(ls $XDG_WALLPAPER_DIR); do echo $file; done)" | grep /nix))
+    wallpapers=($(echo "$(for file in $(ls ${config.xdg.userDirs.extraConfig.XDG_WALLPAPER_DIR}); do echo $file; done)" | grep /nix))
     echo "Currently there are ''${#wallpapers[@]} wallpapers installed"
     for wallpaper in $(shuf -e "''${wallpapers[@]}"); do
       echo "Setting wallpaper to $wallpaper"

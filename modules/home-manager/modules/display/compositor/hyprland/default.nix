@@ -65,7 +65,7 @@ in {
         pkgs.wl-clipboard
         pkgs.cliphist
         (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
-        (import ./wallpaper {inherit inputs pkgs lib;})
+        (import ./wallpaper {inherit inputs pkgs lib config;})
       ];
     };
     wayland = {
