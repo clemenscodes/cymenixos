@@ -107,13 +107,21 @@ in {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
-                    "${bootPath}" = {
-                      mountpoint = "${bootPath}";
-                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
+                    "/var/log" = {
+                      mountpoint = "/var/log";
+                      mountOptions = ["subvol=logs" "compress=zstd" "noatime"];
+                    };
+                    "/snapshots" = {
+                      mountpoint = "/snapshots";
+                      mountOptions = ["subvol=snapshots" "compress=zstd" "noatime"];
                     };
                     "/nix" = {
                       mountpoint = "/nix";
                       mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
+                    };
+                    "${bootPath}" = {
+                      mountpoint = "${bootPath}";
+                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
                     };
                     "${persistPath}" = {
                       mountpoint = "${persistPath}";
@@ -135,21 +143,57 @@ in {
         };
       };
     };
-    fileSystems = {
-      "/var/log" = {
-        neededForBoot = true;
-      };
-      "${persistPath}" = {
-        neededForBoot = true;
-      };
-    };
     services = {
+      btrbk = {
+        instances = {
+          btrbk = {
+            onCalendar = "hourly";
+            settings = {
+              timestamp_format = "long";
+              snapshot_preserve_min = "1w";
+              snapshot_preserve = "4w";
+              preserve_day_of_week = "sunday";
+              preserve_hour_of_day = "0";
+              volume = let
+                snapshot_create = "always";
+              in {
+                "/" = {
+                  inherit snapshot_create;
+                  subvolume = "/";
+                  snapshot_dir = "/snapshots/root";
+                };
+                "/var/log" = {
+                  inherit snapshot_create;
+                  subvolume = "/";
+                  snapshot_dir = "/snapshots/logs";
+                };
+                ${persistPath} = {
+                  inherit snapshot_create;
+                  subvolume = "/persist";
+                  snapshot_dir = "/snapshots/persist";
+                };
+              };
+            };
+          };
+        };
+      };
       btrfs = {
         autoScrub = {
           enable = true;
           interval = "weekly";
           fileSystems = ["/"];
         };
+      };
+    };
+    fileSystems = {
+      "/var/log" = {
+        neededForBoot = true;
+      };
+      "/snapshots" = {
+        neededForBoot = true;
+      };
+      "${persistPath}" = {
+        neededForBoot = true;
       };
     };
   };
