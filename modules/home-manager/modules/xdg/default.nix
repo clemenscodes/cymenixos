@@ -19,7 +19,7 @@
   wallpapers = pkgs.stdenv.mkDerivation {
     name = "wallpapers";
     src = pkgs.fetchFromGitHub {
-      owner = "orangci";
+      owner = "clemenscodes";
       repo = "walls";
       rev = "886dd0786cea003f9e94a1054137e7cbd8fd7428";
       hash = "sha256-GjP7ASUjfL9kqIx+/dhGkiBm1QmjwWn80bqhi3Vp6vM=";
