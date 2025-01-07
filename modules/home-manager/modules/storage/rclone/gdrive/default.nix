@@ -154,7 +154,7 @@ in {
         GDRIVE_SYNC = cfg.rclone.gdrive.sync;
       };
       persistence = {
-        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [cfg.rclone.gdrive.sync];
         };
       };

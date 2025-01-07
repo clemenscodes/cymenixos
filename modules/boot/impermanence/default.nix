@@ -27,6 +27,11 @@ in {
       users = {
         ${user} = {
           imports = [inputs.impermanence.homeManagerModules.impermanence];
+          home = {
+            persistence = {
+              allowOther = true;
+            };
+          };
         };
       };
     };

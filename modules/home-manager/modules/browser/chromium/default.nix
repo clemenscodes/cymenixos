@@ -21,7 +21,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.chromium.enable) {
     home = {
       persistence = {
-        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
             ".cache/BraveSoftware"
             ".config/BraveSoftware"

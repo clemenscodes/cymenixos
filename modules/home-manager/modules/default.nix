@@ -44,7 +44,7 @@ in {
     };
     home = {
       persistence = {
-        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
             ".local/src"
             ".local/bin"
