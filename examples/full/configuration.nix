@@ -74,6 +74,9 @@
       sound = {
         enable = true;
       };
+      udisks = {
+        enable = true;
+      };
       xremap = {
         enable = true;
       };
@@ -82,7 +85,6 @@
       enable = true;
       defaultLocale = "de";
     };
-
     networking = {
       enable = true;
       bluetooth = {

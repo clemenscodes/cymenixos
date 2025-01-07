@@ -14,6 +14,44 @@ final: prev: {
         nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
       '';
     };
+    write-iso-to-device = prev.writeShellApplication rec {
+      name = "write-iso-to-device";
+      runtimeInputs = [prev.nix-output-monitor];
+      text = ''
+        usage() {
+          echo "Usage: ${name} [--help] DEVICE"
+          echo "  --help  Show this help"
+          echo "  DEVICE  The device to write the iso to (e.g: /dev/sdc)"
+        }
+
+        if [ "$#" -ge 1 ] && [ "$1" = "--help" ]; then
+          usage
+          exit 0
+        fi
+
+        ISO="result-iso"
+
+        if fd --type file --has-results 'nixos-.*\.iso' result/iso 2> /dev/null; then
+          echo "Symlinking the existing iso image for writing to a device"
+          ln -sfv result/iso/nixos-*.iso "$ISO"
+        else
+          echo "No iso file exists to run, please build one first, example:"
+          echo "${build-iso}/bin/build-iso"
+          exit
+        fi
+
+        if [ "$#" -ge 1 ]; then
+          DEVICE="$1"
+        else
+          echo "Error: no device was specified"
+          echo "Insert USB and run lsblk to see available devices"
+          exit 1
+        fi
+
+        echo "Installing $ISO to $DEVICE"
+        sudo dd bs=4M status=progress oflag=direct conv=fsync if="$ISO" of="$DEVICE"
+      '';
+    };
     btrfs-swap-resume-offset = prev.writeShellApplication {
       name = "btrfs-swap-resume-offset";
       runtimeInputs = [prev.btrfs-progs];
@@ -21,12 +59,12 @@ final: prev: {
         btrfs inspect-internal map-swapfile -r /swap/swapfile
       '';
     };
-    cymenixos-install = prev.writeShellApplication {
+    cymenixos-install = prev.writeShellApplication rec {
       name = "cymenixos-install";
       runtimeInputs = [prev.disko];
       text = ''
         usage() {
-          echo "Usage: $0 [--dry-run] [--help] [config]"
+          echo "Usage: ${name} [--dry-run] [--help] [config]"
           echo "  --dry-run    Run in dry-run mode"
           echo "  --help       Show this help"
           echo "  [config]     Nix flake output for disko-install (default: $FLAKE#nixos)"
@@ -96,10 +134,9 @@ final: prev: {
         if fd --type file --has-results 'nixos-.*\.iso' result/iso 2> /dev/null; then
           echo "Symlinking the existing iso image for qemu:"
           ln -sfv result/iso/nixos-*.iso "$ISO"
-          echo
         else
           echo "No iso file exists to run, please build one first, example:"
-          echo "  nix build -L .#nixosConfigurations.airgap-boot.config.system.build.isoImage"
+          echo "${build-iso}/bin/build-iso"
           exit
         fi
 
@@ -187,6 +224,7 @@ final: prev: {
         mkdir -p $out/bin
         ln -s ${build-system}/bin/build-system $out/bin
         ln -s ${build-iso}/bin/build-iso $out/bin
+        ln -s ${write-iso-to-device}/bin/write-iso-to-device $out/bin
         ln -s ${cymenixos-install}/bin/cymenixos-install $out/bin
         ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
         ln -s ${copyro}/bin/copyro $out/bin
