@@ -145,7 +145,7 @@ in {
             bindkey -M visual '^[[P' vi-delete
             export ZSH_CACHE_DIR
             ${
-              if cfg.explorer.enable
+              if config.modules.explorer.enable
               then ''
                 lfcd () {
                     tmp="$(mktemp -uq)"
@@ -169,7 +169,7 @@ in {
               else ""
             }
             ${
-              if cfg.development.direnv.enable
+              if config.modules.development.direnv.enable
               then ''eval "$(direnv hook zsh)"''
               else ""
             }
