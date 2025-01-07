@@ -55,6 +55,11 @@ in {
   };
   config = lib.mkIf (hasSecretsEnabled && cfg.enable && cfg.email.enable) {
     home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [".local/share/mail"];
+        };
+      };
       packages = [
         pkgs.abook
         pkgs.lynx

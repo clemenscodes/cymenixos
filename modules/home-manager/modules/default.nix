@@ -43,6 +43,19 @@ in {
       };
     };
     home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [
+            ".local/src"
+            ".local/bin"
+            ".local/share/keyrings"
+            (lib.mkIf (osConfig.modules.gaming.enable && osConfig.modules.gaming.steam.enable) {
+              directory = ".local/share/Steam";
+              method = "symlink";
+            })
+          ];
+        };
+      };
       keyboard = {
         layout = osConfig.modules.locale.defaultLocale;
       };

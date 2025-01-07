@@ -2,7 +2,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  osConfig,
+  config,
+  ...
+}: let
   cfg = config.modules.security;
 in {
   options = {
@@ -15,6 +19,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.gpg.enable) {
+    home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [".config/gnupg"];
+        };
+      };
+    };
     services = {
       gpg-agent = {
         inherit (cfg.gpg) enable;

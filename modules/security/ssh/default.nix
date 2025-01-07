@@ -19,12 +19,7 @@ in {
     };
     services = {
       openssh = {
-        inherit (cfg.ssh) enable;
         ports = [sshPort];
-        settings = {
-          PermitRootLogin = "prohibit-password";
-          PasswordAuthentication = true;
-        };
       };
     };
   };

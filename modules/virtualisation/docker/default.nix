@@ -12,6 +12,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.docker.enable) {
+    environment = {
+      persistence = {
+        ${config.boot.impermanence.persistPath} = {
+          directories = ["/var/lib/docker"];
+        };
+      };
+    };
     virtualisation = {
       docker = {
         inherit (cfg.docker) enable;

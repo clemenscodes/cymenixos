@@ -24,6 +24,11 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.bitwarden.enable) {
     home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [".config/Bitwarden"];
+        };
+      };
       packages = [bitwardenPackage];
     };
   };

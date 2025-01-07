@@ -40,6 +40,19 @@ in {
   };
   config = lib.mkIf (osCfg.enable && cfg.enable && cfg.xdg.enable) {
     home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [
+            desktop
+            documents
+            downloads
+            music
+            pictures
+            public
+            videos
+          ];
+        };
+      };
       file = {
         ".face" = {
           source = ./assets/face/.face;

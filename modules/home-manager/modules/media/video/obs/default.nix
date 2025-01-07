@@ -22,6 +22,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.obs.enable && isDesktop) {
+    home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [".config/obs-studio"];
+        };
+      };
+    };
     programs = {
       obs-studio = {
         inherit (cfg.obs) enable;

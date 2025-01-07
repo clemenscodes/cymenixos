@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{lib, ...}: {
+  osConfig,
+  config,
+  ...
+}: let
   cfg = config.modules.development;
 in {
   options = {
@@ -11,6 +15,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.direnv.enable) {
+    home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [".local/share/direnv"];
+        };
+      };
+    };
     programs = {
       direnv = {
         inherit (cfg.direnv) enable;

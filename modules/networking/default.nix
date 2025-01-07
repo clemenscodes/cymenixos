@@ -29,6 +29,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.networking.enable) {
+    environment = {
+      persistence = {
+        ${config.boot.impermanence.persistPath} = {
+          directories = ["/etc/NetworkManager/system-connections"];
+        };
+      };
+    };
     networking = {
       hostName = config.modules.hostname.defaultHostname;
       networkmanager = {

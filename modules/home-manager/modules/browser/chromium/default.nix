@@ -2,7 +2,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  osConfig,
+  config,
+  ...
+}: let
   cfg = config.modules.browser;
 in {
   options = {
@@ -15,6 +19,16 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.chromium.enable) {
+    home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [
+            ".cache/BraveSoftware"
+            ".config/BraveSoftware"
+          ];
+        };
+      };
+    };
     programs = {
       chromium = {
         inherit (cfg.chromium) enable;

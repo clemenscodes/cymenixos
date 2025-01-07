@@ -27,6 +27,20 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.torrent.enable) {
+    environment = {
+      persistence = {
+        ${config.modules.boot.persistPath} = {
+          users = {
+            ${config.modules.users.user} = {
+              directories = [
+                ".config/Mullvad VPN"
+                ".config/qBittorrent"
+              ];
+            };
+          };
+        };
+      };
+    };
     networking = lib.mkIf (cfg.torrent.mullvadDns) {
       inherit nameservers;
     };

@@ -17,6 +17,15 @@ in {
   config = lib.mkIf (cfg.ledger-live.enable) {
     environment = {
       systemPackages = [pkgs.ledger-live-desktop];
+      persistence = {
+        ${config.modules.boot.persistPath} = {
+          users = {
+            ${config.modules.users.user} = {
+              directories = [".config/Ledger Live"];
+            };
+          };
+        };
+      };
     };
     hardware = {
       ledger = {

@@ -19,6 +19,11 @@ in {
   config = lib.mkIf (cfg.enable && cfg.bluetooth.enable) {
     environment = {
       systemPackages = [pkgs.python311Packages.ds4drv];
+      persistence = {
+        ${config.boot.impermanence.persistPath} = {
+          directories = ["/var/lib/bluetooth"];
+        };
+      };
     };
     boot = {
       kernelParams = ["btusb.enable_autosuspend=n"];

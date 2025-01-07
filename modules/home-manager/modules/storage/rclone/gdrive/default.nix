@@ -2,7 +2,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  osConfig,
+  config,
+  ...
+}: let
   cfg = config.modules.storage;
   mountGoogleDrive = pkgs.writeShellScriptBin "mount-gdrive" ''
     RCLONE_HOME="$XDG_CONFIG_HOME/rclone"
@@ -148,6 +152,11 @@ in {
       sessionVariables = {
         GDRIVE_STORAGE = cfg.rclone.gdrive.storage;
         GDRIVE_SYNC = cfg.rclone.gdrive.sync;
+      };
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [cfg.rclone.gdrive.sync];
+        };
       };
     };
     programs = {

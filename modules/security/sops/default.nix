@@ -25,6 +25,15 @@ in {
         pkgs.age
         pkgs.ssh-to-age
       ];
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          users = {
+            ${config.modules.users.user} = {
+              files = [config.sops.age.keyFile];
+            };
+          };
+        };
+      };
     };
     sops = {
       age = {

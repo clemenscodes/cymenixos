@@ -2,7 +2,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  osConfig,
+  config,
+  ...
+}: let
   sshagent = pkgs.writeShellScriptBin "sshagent" ''
     eval "$(${pkgs.openssh}/bin/ssh-agent -s)" && ${pkgs.openssh}/bin/ssh-add
   '';
@@ -23,6 +27,11 @@ in {
         pkgs.gnome-keyring
         sshagent
       ];
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}/${config.home.homeDirectory}" = {
+          directories = [".ssh"];
+        };
+      };
     };
     services = {
       gnome-keyring = {
