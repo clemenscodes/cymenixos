@@ -33,7 +33,7 @@ in {
               -p '${biosPrefix}' \
               -O ${pkgs.grub2.grubTarget} \
               -c $grub_tmp/grub.cfg \
-              -o /boot/grub/core.img \
+              -o /boot/grub/${pkgs.grub2.grubTarget}/core.img \
               ${modules}
 
             grub_tmp=$(mktemp -d -t grub.conf.XXXXXXXX)
@@ -52,7 +52,7 @@ in {
               -p '${efiPrefix}' \
               -O ${pkgs.grub2_efi.grubTarget} \
               -c $grub_tmp/grub.cfg \
-              -o ${escapeShellArg stub} \
+              -o /boot/grub/${pkgs.grub2_efi.grubTarget}/core.img \
               ${modules}
           '';
         };
