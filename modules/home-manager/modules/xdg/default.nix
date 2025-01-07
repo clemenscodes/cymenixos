@@ -16,6 +16,20 @@
   pictures = "Pictures";
   public = "Public";
   videos = "Videos";
+  wallpapers = pkgs.stdenv.mkDerivation {
+    name = "wallpapers";
+    src = pkgs.fetchFromGitHub {
+      owner = "orangci";
+      repo = "walls-catppuccin-mocha";
+      rev = "c5e8c84af804ac0d291ca21b3ebf9129f7292470";
+      hash = "sha256-/Zj+bmqmWWGvH0Gr3QgV5+ApuW/7GBDM4IIdkYU+M+Y=";
+    };
+    installPhase = ''
+      mkdir -p $out
+      mv $src $out
+      rm $out/README.md
+    '';
+  };
 in {
   options = {
     modules = {
@@ -47,7 +61,7 @@ in {
           '';
         };
         "${config.xdg.userDirs.extraConfig.XDG_WALLPAPER_DIR}" = {
-          source = ./assets/wallpaper;
+          source = "${wallpapers}";
           recursive = true;
         };
         "${config.xdg.userDirs.extraConfig.XDG_SVG_DIR}" = {
