@@ -34,7 +34,17 @@
         modules = [
           ./configuration.nix
           (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
-          ({...}: {
+          ({config, ...}: {
+            isoImage = {
+              includeSystemBuildDependencies = true;
+              storeContents = [config.system.build.toplevel];
+              contents = [
+                {
+                  source = ./configuration.nix;
+                  target = "/configuration.nix";
+                }
+              ];
+            };
             modules = {
               iso = {
                 enable = true;

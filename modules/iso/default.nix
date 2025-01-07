@@ -19,7 +19,6 @@ in {
       squashfsCompression = "gzip -Xcompression-level 1";
     };
     system = {
-      includeBuildDependencies = true;
       installer = {
         channel = {
           enable = false;
