@@ -80,7 +80,7 @@ in {
         '';
       };
     };
-    systemd = lib.mkIf (!cfg.users.isIso) {
+    systemd = {
       tmpfiles = {
         rules = [
           "d ${persistPath}/home/ 0777 root root -"
