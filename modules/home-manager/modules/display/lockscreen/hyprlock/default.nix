@@ -51,7 +51,7 @@ in {
           background = [
             {
               monitor = "";
-              path = "$XDG_DATA_HOME/images/wallpaper/car.jpeg";
+              path = "$XDG_WALLPAPER_DIR/random";
               blur_passes = "0";
               color = "$base";
               ignore_empty_input = true;
@@ -117,8 +117,8 @@ in {
           general = {
             lock_cmd = "pidof ${hyprlockExe} || ${hyprlockExe}";
             before_sleep_cmd = "${pkgs.systemd}bin/loginctl lock-session";
-            ignore_dbus_inhibit = false; # whether to ignore dbus-sent idle-inhibit requests (used by e.g. firefox or steam)
-            ignore_systemd_inhibit = false; # whether to ignore systemd-inhibit --what=idle inhibitors
+            ignore_dbus_inhibit = false;
+            ignore_systemd_inhibit = false;
           };
           listener = [
             {

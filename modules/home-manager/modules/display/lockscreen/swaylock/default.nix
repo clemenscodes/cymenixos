@@ -44,7 +44,7 @@ in {
             grace = 5;
             grace-no-mouse = true;
             grace-no-touch = true;
-            image = "${config.xdg.dataHome}/images/wallpaper/ring.jpeg";
+            image = "${config.xdg.userDirs.extraConfig.XDG_WALLPAPER_DIR}/random";
             font = "${osConfig.modules.fonts.defaultFont}";
             effect-blur = "20x6";
             effect-vignette = "1:1";
