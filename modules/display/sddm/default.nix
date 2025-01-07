@@ -49,5 +49,14 @@ in {
         };
       };
     };
+    security = {
+      pam = {
+        services = {
+          sddm = {
+            enableGnomeKeyring = config.modules.security.gnome-keyring.enable;
+          };
+        };
+      };
+    };
   };
 }
