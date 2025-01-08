@@ -32,26 +32,18 @@ in {
   };
   config = mkIf (cfg.enable && cfg.users.enable) {
     environment = {
-      # etc = {
-      #   group = {
-      #     source = "${persistPath}/etc/group";
-      #   };
-      #   passwd = {
-      #     source = "${persistPath}/etc/passwd";
-      #   };
-      #   shadow = {
-      #     source = "${persistPath}/etc/shadow";
-      #   };
-      # };
-      persistence = {
-        ${persistPath} = {
-          files = [
-            "/etc/group"
-            "/etc/passwd"
-            "/etc/shadow"
-          ];
+      etc = {
+        shadow = {
+          source = "${persistPath}/etc/shadow";
         };
       };
+      # persistence = {
+      #   ${persistPath} = {
+      #     files = [
+      #       "/etc/shadow"
+      #     ];
+      #   };
+      # };
     };
     users = {
       mutableUsers = true;
