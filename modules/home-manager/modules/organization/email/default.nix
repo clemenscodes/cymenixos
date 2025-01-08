@@ -439,10 +439,10 @@ in {
           inherit (cfg.email) accounts;
           generateAction = address: "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/${address}<enter><change-folder>!<enter>;<check-stats>";
           inboxes = lib.listToAttrs (
-            lib.zipAttrsWith (
-              i: account: {
+            lib.mapAttrsToList (
+              key: account: {
                 map = ["index" "pager"];
-                key = "i${toString (i + 1)}";
+                key = "i${toString (builtins.indexOf accounts account) + 1}";
                 action = generateAction account.address;
               }
             )
