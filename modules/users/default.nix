@@ -36,6 +36,12 @@ in {
         shadow = {
           source = "${persistPath}/etc/shadow";
         };
+        group = {
+          source = "${persistPath}/etc/group";
+        };
+        passwd = {
+          source = "${persistPath}/etc/passwd";
+        };
       };
     };
     users = {
