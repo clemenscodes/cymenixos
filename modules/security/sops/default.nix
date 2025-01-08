@@ -17,7 +17,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.sops.enable) {
+  config = {
     environment = {
       systemPackages = [
         (import ./setupsops.nix {inherit inputs pkgs lib;})
@@ -25,7 +25,7 @@ in {
         pkgs.age
         pkgs.ssh-to-age
       ];
-      persistence = {
+      persistence = lib.mkIf (cfg.enable && cfg.sops.enable) {
         ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.user} = {
@@ -38,7 +38,7 @@ in {
         };
       };
     };
-    sops = {
+    sops = lib.mkIf (cfg.enable && cfg.sops.enable) {
       age = {
         keyFile = "/home/${user}/.config/sops/age/keys.txt";
         sshKeyPaths = ["/home/${user}/.ssh/id_ed25519"];
