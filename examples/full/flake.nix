@@ -29,8 +29,9 @@
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
           ./configuration.nix
-          ./hardware-configuration.nix
-          ./secrets.nix
+          # uncomment after installing initial config
+          # ./hardware-configuration.nix 
+          # ./secrets.nix
         ];
       };
       iso = nixpkgs.lib.nixosSystem {
