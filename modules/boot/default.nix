@@ -5,12 +5,11 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.boot) bootPath efiSupport device hibernation swapResumeOffset;
+  inherit (cfg.boot) device hibernation swapResumeOffset;
 in {
   imports = [
     (import ./impermanence {inherit inputs pkgs lib;})
     (import ./secureboot {inherit inputs pkgs lib;})
-    (import ./luks {inherit inputs pkgs lib;})
     "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
     "${inputs.nixpkgs}/nixos/modules/profiles/all-hardware.nix"
   ];
@@ -22,11 +21,6 @@ in {
         device = lib.mkOption {
           type = lib.types.str;
           default = "nodev";
-        };
-        bootPath = lib.mkOption {
-          type = lib.types.str;
-          default = "/boot";
-          description = "Where the boot partition will be mounted";
         };
         hibernation = lib.mkOption {
           type = lib.types.bool;
@@ -61,15 +55,14 @@ in {
       supportedFilesystems = ["btrfs" "vfat"];
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         grub = {
-          enable = lib.mkForce true;
-          inherit efiSupport device;
+          inherit device;
+          enable = true;
+          efiSupport = true;
           efiInstallAsRemovable = true;
+          enableCryptodisk = true;
           copyKernels = true;
           gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
-        };
-        efi = {
-          efiSysMountPoint = "${bootPath}/efi";
         };
       };
       kernelModules = ["v4l2loopback"];
