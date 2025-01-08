@@ -72,11 +72,7 @@ in {
           efiSysMountPoint = "${bootPath}/efi";
         };
       };
-      kernelModules = [
-        "kvm-intel"
-        "kvm-amd"
-        "v4l2loopback"
-      ];
+      kernelModules = ["v4l2loopback"];
       kernelParams = lib.mkIf hibernation [
         "resume_offset=${builtins.toString swapResumeOffset}"
       ];
