@@ -2,6 +2,7 @@
   cfg = config.modules;
   inherit (cfg.users) user;
   inherit (lib) mkEnableOption mkIf mkOption types;
+  inherit (cfg.boot.impermanence) persistPath;
 in {
   options = {
     modules = {
@@ -30,19 +31,30 @@ in {
     };
   };
   config = mkIf (cfg.enable && cfg.users.enable) {
-    # environment = {
-    #   persistence = {
-    #     ${config.modules.boot.impermanence.persistPath} = {
-    #       files = [
-    #         "/etc/group"
-    #         "/etc/passwd"
-    #         "/etc/shadow"
-    #       ];
-    #     };
-    #   };
-    # };
+    environment = {
+      etc = {
+        group = {
+          source = "${persistPath}/etc/group";
+        };
+        passwd = {
+          source = "${persistPath}/etc/passwd";
+        };
+        shadow = {
+          source = "${persistPath}/etc/shadow";
+        };
+      };
+      persistence = {
+        ${persistPath} = {
+          files = [
+            "/etc/group"
+            "/etc/passwd"
+            "/etc/shadow"
+          ];
+        };
+      };
+    };
     users = {
-      mutableUsers = !cfg.security.sops.enable;
+      mutableUsers = true;
       defaultUserShell = mkIf cfg.shell.enable cfg.shell.defaultShell;
       users = {
         ${user} = {
