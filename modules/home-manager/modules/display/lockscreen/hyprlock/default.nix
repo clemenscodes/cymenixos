@@ -54,7 +54,6 @@ in {
               path = "$XDG_WALLPAPER_DIR/random";
               blur_passes = "0";
               color = "$base";
-              ignore_empty_input = true;
             }
           ];
           label = [

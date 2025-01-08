@@ -37,13 +37,6 @@ in {
           source = "${persistPath}/etc/shadow";
         };
       };
-      # persistence = {
-      #   ${persistPath} = {
-      #     files = [
-      #       "/etc/shadow"
-      #     ];
-      #   };
-      # };
     };
     users = {
       mutableUsers = true;
