@@ -155,7 +155,7 @@ in {
       };
       persistence = {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
-          directories = [cfg.rclone.gdrive.sync];
+          directories = [".local/share/sync/${cfg.rclone.gdrive.mount}"];
         };
       };
     };
