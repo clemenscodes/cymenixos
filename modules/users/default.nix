@@ -30,19 +30,19 @@ in {
     };
   };
   config = mkIf (cfg.enable && cfg.users.enable) {
-    environment = {
-      persistence = {
-        ${config.modules.boot.impermanence.persistPath} = {
-          files = [
-            "/etc/group"
-            "/etc/passwd"
-            "/etc/shadow"
-          ];
-        };
-      };
-    };
+    # environment = {
+    #   persistence = {
+    #     ${config.modules.boot.impermanence.persistPath} = {
+    #       files = [
+    #         "/etc/group"
+    #         "/etc/passwd"
+    #         "/etc/shadow"
+    #       ];
+    #     };
+    #   };
+    # };
     users = {
-      mutableUsers = true;
+      mutableUsers = !cfg.security.sops.enable;
       defaultUserShell = mkIf cfg.shell.enable cfg.shell.defaultShell;
       users = {
         ${user} = {
