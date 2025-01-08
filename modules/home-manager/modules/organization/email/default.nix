@@ -438,16 +438,13 @@ in {
         macros = let
           inherit (cfg.email) accounts;
           generateAction = address: "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/${address}<enter><change-folder>!<enter>;<check-stats>";
-          inboxes = lib.listToAttrs (
-            lib.mapAttrsToList (
-              key: account: {
-                map = ["index" "pager"];
-                key = "i${toString (builtins.indexOf accounts account) + 1}";
-                action = generateAction account.address;
-              }
-            )
-            accounts
-          );
+          inboxes =
+            lib.map (account: {
+              action = generateAction account.address;
+              map = ["index" "pager"];
+              key = "i${toString (builtins.indexOf accounts account) + 1}";
+            })
+            accounts;
         in
           inboxes
           ++ [
