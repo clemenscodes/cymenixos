@@ -14,7 +14,9 @@ in {
     security = {
       pam = {
         services = {
-          hyprlock = {};
+          hyprlock = {
+            enableGnomeKeyring = true;
+          };
         };
       };
     };

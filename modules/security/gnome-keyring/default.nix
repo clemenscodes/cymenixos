@@ -15,6 +15,7 @@ in {
       gnome = {
         gnome-keyring = {
           inherit (cfg.gnome-keyring) enable;
+          components = ["pkcs11" "secrets" "ssh"];
         };
       };
     };
