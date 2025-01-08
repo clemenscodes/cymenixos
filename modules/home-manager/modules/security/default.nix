@@ -18,7 +18,7 @@
     };
   };
   config = lib.mkIf osConfig.modules.security.gnome-keyring.enable {
-    servics = {
+    services = {
       gnome-keyring = {
         enable = true;
         components = ["pkcs11" "secrets" "ssh"];
