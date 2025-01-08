@@ -24,7 +24,7 @@ in {
             ${config.modules.users.user} = {
               directories = [
                 {
-                  path = ".config/gnupg";
+                  directory = ".config/gnupg";
                   mode = "0700";
                 }
               ];

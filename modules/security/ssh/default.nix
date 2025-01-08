@@ -19,7 +19,7 @@ in {
             ${config.modules.users.user} = {
               directories = [
                 {
-                  path = ".ssh";
+                  directory = ".ssh";
                   mode = "0700";
                 }
               ];
