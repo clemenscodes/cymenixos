@@ -15,7 +15,7 @@ final: prev: {
       '';
     };
     build-test-iso = prev.writeShellApplication {
-      name = "build-iso";
+      name = "build-test-iso";
       runtimeInputs = [prev.nix-output-monitor];
       text = ''
         nom build .#nixosConfigurations.test.config.system.build.isoImage --show-trace
