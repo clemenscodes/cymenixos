@@ -442,7 +442,7 @@ in {
             lib.map (account: {
               action = generateAction account.address;
               map = ["index" "pager"];
-              key = "i${toString (builtins.indexOf accounts account) + 1}";
+              key = "i${toString (lib.elemIndex account accounts) + 1}";
             })
             accounts;
         in
