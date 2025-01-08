@@ -214,6 +214,11 @@
                 };
               };
             };
+            git = {
+              enable = true;
+              userName = "Clemens Horn";
+              userEmail = "clemens.horn@mni.thm.de";
+            };
           };
           display = {
             enable = true;

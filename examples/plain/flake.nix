@@ -27,17 +27,13 @@
     nixosConfigurations = {
       nixos = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};
-        modules = [
-          ./configuration.nix
-          ./hardware-configuration.nix
-          ./secrets.nix
-        ];
+        modules = [./configuration.nix];
       };
       iso = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
           ./configuration.nix
-          (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
+          (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
           ({...}: {
             modules = {
               iso = {
@@ -51,7 +47,7 @@
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
           ./configuration.nix
-          (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
+          (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
           ({...}: {
             modules = {
               iso = {

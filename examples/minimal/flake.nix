@@ -30,7 +30,21 @@
         modules = [./configuration.nix];
       };
       iso = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit self inputs pkgs lib nixpkgs system;};
+        specialArgs = {inherit self inputs nixpkgs system;};
+        modules = [
+          ./configuration.nix
+          (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
+          ({...}: {
+            modules = {
+              iso = {
+                enable = true;
+              };
+            };
+          })
+        ];
+      };
+      test = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
           ./configuration.nix
           (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
