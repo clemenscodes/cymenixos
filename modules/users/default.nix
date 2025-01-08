@@ -26,7 +26,7 @@ in {
           description = "Where the flake will be, relative to the users home directory";
         };
         isIso = mkEnableOption "Use user from iso module instead" // {default = false;};
-        initalHashedPassword = mkOption {
+        initialHashedPassword = mkOption {
           type = types.str;
           default = "";
           description = "The inital hashed password for the user";
