@@ -12,6 +12,22 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.ssh.enable) {
+    environment = {
+      persistence = {
+        "${config.modules.boot.impermanence.persistPath}" = {
+          users = {
+            ${config.modules.users.user} = {
+              directories = [
+                {
+                  path = ".ssh";
+                  mode = "0700";
+                }
+              ];
+            };
+          };
+        };
+      };
+    };
     networking = {
       firewall = {
         allowedTCPPorts = [sshPort];

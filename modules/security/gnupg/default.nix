@@ -17,6 +17,22 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.gnupg.enable) {
+    environment = {
+      persistence = {
+        "${config.modules.boot.impermanence.persistPath}" = {
+          users = {
+            ${config.modules.users.user} = {
+              directories = [
+                {
+                  path = ".config/gnupg";
+                  mode = "0700";
+                }
+              ];
+            };
+          };
+        };
+      };
+    };
     programs = {
       gnupg = {
         agent = {
