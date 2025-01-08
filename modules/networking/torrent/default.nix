@@ -30,6 +30,9 @@ in {
     environment = {
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
+          directories = [
+            "/etc/mullvad-vpn"
+          ];
           users = {
             ${config.modules.users.user} = {
               directories = [
