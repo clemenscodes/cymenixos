@@ -29,7 +29,10 @@ in {
         ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.user} = {
-              directories = [".config/sops"];
+              directories = [
+                ".config/sops"
+                ".config/sops-nix"
+              ];
             };
           };
         };
