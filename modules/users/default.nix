@@ -27,7 +27,7 @@ in {
         };
         isIso = mkEnableOption "Use user from iso module instead" // {default = false;};
         initialHashedPassword = mkOption {
-          type = types.str;
+          type = types.nullOr types.str;
           default = "";
           description = "The inital hashed password for the user";
         };
