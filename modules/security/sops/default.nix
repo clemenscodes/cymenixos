@@ -6,6 +6,7 @@
 }: {config, ...}: let
   cfg = config.modules.security;
   inherit (config.modules.users) user;
+  inherit (config.modules.boot.impermanence) persistPath;
 in {
   imports = [inputs.sops-nix.nixosModules.sops];
   options = {
@@ -26,9 +27,9 @@ in {
         pkgs.ssh-to-age
       ];
       persistence = lib.mkIf (cfg.enable && cfg.sops.enable) {
-        ${config.modules.boot.impermanence.persistPath} = {
+        ${persistPath} = {
           users = {
-            ${config.modules.users.user} = {
+            ${user} = {
               directories = [
                 ".config/sops"
                 ".config/sops-nix"
@@ -40,8 +41,8 @@ in {
     };
     sops = lib.mkIf (cfg.enable && cfg.sops.enable) {
       age = {
-        keyFile = "/home/${user}/.config/sops/age/keys.txt";
-        sshKeyPaths = ["/home/${user}/.ssh/id_ed25519"];
+        keyFile = "${persistPath}/home/${user}/.config/sops/age/keys.txt";
+        sshKeyPaths = ["${persistPath}/home/${user}/.ssh/id_ed25519"];
       };
     };
   };

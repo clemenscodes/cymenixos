@@ -8,6 +8,8 @@
   ...
 }: let
   cfg = config.modules.security;
+  home = config.home.homeDirectory;
+  inherit (osConfig.modules.boot.impermanence) persistPath;
 in {
   imports = [inputs.sops-nix.homeManagerModule];
   options = {
@@ -22,9 +24,9 @@ in {
   config = lib.mkIf (osConfig.modules.security.sops.enable && cfg.enable && cfg.sops.enable) {
     sops = {
       age = {
-        keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
         generateKey = true;
-        sshKeyPaths = ["${config.home.homeDirectory}/.ssh/id_ed25519"];
+        keyFile = "${persistPath}/${home}/sops/age/keys.txt";
+        sshKeyPaths = ["${persistPath}/${home}/.ssh/id_ed25519"];
       };
     };
   };
