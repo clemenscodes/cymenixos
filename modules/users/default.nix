@@ -33,15 +33,11 @@ in {
     environment = {
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
-          users = {
-            ${config.modules.users.user} = {
-              files = [
-                "/etc/group"
-                "/etc/passwd"
-                "/etc/shadow"
-              ];
-            };
-          };
+          files = [
+            "/etc/group"
+            "/etc/passwd"
+            "/etc/shadow"
+          ];
         };
       };
     };
