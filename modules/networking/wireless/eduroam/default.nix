@@ -15,7 +15,6 @@ in {
   config = lib.mkIf (cfg.enable && cfg.eduroam.enable) {
     networking = {
       wireless = lib.mkIf config.modules.security.sops.enable {
-        secretsFile = config.sops.secrets.wifi.path;
         networks = {
           eduroam = {
             priority = 3;
