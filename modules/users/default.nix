@@ -32,17 +32,17 @@ in {
   };
   config = mkIf (cfg.enable && cfg.users.enable) {
     environment = {
-      etc = {
-        group = {
-          source = "${persistPath}/etc/group";
-        };
-        passwd = {
-          source = "${persistPath}/etc/passwd";
-        };
-        shadow = {
-          source = "${persistPath}/etc/shadow";
-        };
-      };
+      # etc = {
+      #   group = {
+      #     source = "${persistPath}/etc/group";
+      #   };
+      #   passwd = {
+      #     source = "${persistPath}/etc/passwd";
+      #   };
+      #   shadow = {
+      #     source = "${persistPath}/etc/shadow";
+      #   };
+      # };
       persistence = {
         ${persistPath} = {
           files = [
