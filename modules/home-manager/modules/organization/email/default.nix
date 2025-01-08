@@ -445,7 +445,7 @@ in {
                 key = "i${toString (i + 1)}";
                 action = generateAction account.address;
               }
-            ) (lib.range 1 (builtins.length accounts))
+            )
             accounts
           );
         in
