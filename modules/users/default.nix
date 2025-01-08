@@ -46,7 +46,7 @@ in {
       };
     };
     users = {
-      mutableUsers = !cfg.security.sops.enable;
+      mutableUsers = true;
       defaultUserShell = mkIf cfg.shell.enable cfg.shell.defaultShell;
       users = {
         ${user} = {

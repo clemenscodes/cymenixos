@@ -29,7 +29,7 @@ in {
         ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.user} = {
-              files = [config.sops.age.keyFile];
+              directories = [".config/sops"];
             };
           };
         };
