@@ -2,7 +2,6 @@
   cfg = config.modules;
   inherit (cfg.users) user;
   inherit (lib) mkEnableOption mkIf mkOption types;
-  inherit (cfg.boot.impermanence) persistPath;
 in {
   options = {
     modules = {
@@ -27,33 +26,23 @@ in {
           description = "Where the flake will be, relative to the users home directory";
         };
         isIso = mkEnableOption "Use user from iso module instead" // {default = false;};
+        initalHashedPassword = mkOption {
+          type = types.str;
+          default = "";
+          description = "The inital hashed password for the user";
+        };
       };
     };
   };
   config = mkIf (cfg.enable && cfg.users.enable) {
-    environment = {
-      etc = {
-        shadow = {
-          source = "${persistPath}/etc/shadow";
-        };
-        group = {
-          source = "${persistPath}/etc/group";
-        };
-        passwd = {
-          source = "${persistPath}/etc/passwd";
-        };
-      };
-    };
     users = {
-      mutableUsers = true;
       defaultUserShell = mkIf cfg.shell.enable cfg.shell.defaultShell;
       users = {
         ${user} = {
           isNormalUser = true;
           description = user;
           group = user;
-          hashedPasswordFile = mkIf cfg.security.sops.enable (config.sops.secrets.password.path);
-          initialHashedPassword = mkIf (!cfg.security.sops.enable && !cfg.users.isIso) "";
+          initialHashedPassword = lib.mkForce cfg.users.initialHashedPassword;
           extraGroups = [
             (mkIf cfg.users.wheel "wheel")
             (mkIf cfg.crypto.cardanix.enable "cardano-node")
