@@ -19,8 +19,6 @@ final: prev: {
         url = "https://marc.info/?l=grub-devel&m=146193404929072&q=mbox";
         sha256 = "00wa1q5adiass6i0x7p98vynj9vsz1w0gn1g4dgz89v35mpyw2bi";
       })
-
-      # argon2 patches from AUR: https://aur.archlinux.org/packages/grub-improved-luks2-git
       (prev.fetchpatch {
         name = "argon_1.patch";
         url = "https://aur.archlinux.org/cgit/aur.git/plain/argon_1.patch?h=grub-improved-luks2-git";

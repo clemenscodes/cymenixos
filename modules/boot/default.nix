@@ -55,22 +55,25 @@ in {
       supportedFilesystems = ["btrfs" "vfat"];
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         grub = {
-          inherit device;
+          inherit efiSupport device;
           enable = true;
-          efiSupport = true;
           enableCryptodisk = true;
           copyKernels = true;
+          efiInstallAsRemovable = false;
+          fsIdentifier = "label";
           gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
-          mirroredBoots = [
+          extraGrubInstallArgs = ["--modules=nativedisk ahci part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2"];
+          mirroredBoots = lib.mkForce [
             {
               path = "/boot";
               devices = [device];
             }
           ];
-        };
-        efi = {
-          canTouchEfiVariables = true;
+          efi = {
+            efiSysMountPoint = "/boot/efi";
+            canTouchEfiVariables = efiSupport;
+          };
         };
       };
       kernelModules = ["v4l2loopback"];

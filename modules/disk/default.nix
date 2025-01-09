@@ -66,7 +66,7 @@ in {
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint = "/boot";
+                    mountpoint = "/boot/efi";
                     mountOptions = ["umask=0077"];
                   };
                 };
@@ -104,6 +104,10 @@ in {
                     "/root" = {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
+                    };
+                    "/boot" = {
+                      mountpoint = "/boot";
+                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
                     };
                     "/var/log" = {
                       mountpoint = "/var/log";
