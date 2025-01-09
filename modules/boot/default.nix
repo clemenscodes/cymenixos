@@ -65,7 +65,7 @@ in {
           mirroredBoots = [
             {
               path = "/boot";
-              devices = [cfg.device];
+              devices = [device];
             }
           ];
         };
