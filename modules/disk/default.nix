@@ -43,7 +43,7 @@ in {
               type = "gpt";
               efiGptPartitionFirst = false;
               partitions = {
-                bios = {
+                bios = lib.mkIf cfg.modules.boot.efiSupport {
                   priority = 1;
                   type = "EF02";
                   size = "1M";
@@ -58,7 +58,7 @@ in {
                     mbrBootableFlag = false;
                   };
                 };
-                efi = {
+                efi = lib.mkIf cfg.modules.boot.efiSupport {
                   priority = 2;
                   label = "efi";
                   type = "EF00";
