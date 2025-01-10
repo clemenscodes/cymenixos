@@ -16,14 +16,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.sound.enable) {
-    hardware = {
-      pulseaudio = {
-        inherit (cfg.sound) enable;
-      };
-    };
-    sound = {
-      inherit (cfg.sound) enable;
-    };
     services = {
       pipewire = {
         inherit (cfg.sound) enable;
