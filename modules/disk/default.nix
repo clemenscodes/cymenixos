@@ -80,7 +80,7 @@ in {
                     settings = {
                       allowDiscards = false;
                     };
-                    extraFormatArgs = ["--pbkdf pbkdf2"];
+                    extraFormatArgs = ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
                     content = {
                       type = "lvm_pv";

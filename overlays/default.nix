@@ -1,1 +1,4 @@
-[(import ./cymenixos-scripts.nix)]
+[
+  (import ./cymenixos-scripts.nix)
+  (import ./grub2.nix)
+]

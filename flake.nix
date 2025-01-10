@@ -137,7 +137,9 @@
     };
 
     packages = {
-      ${system} = pkgs;
+      ${system} = {
+        inherit (pkgs) grub2;
+      };
     };
 
     overlays = {
