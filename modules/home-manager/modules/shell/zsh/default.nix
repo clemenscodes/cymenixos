@@ -43,7 +43,7 @@ in {
         (import ./scripts/ns.nix {inherit pkgs config;})
         (import ./scripts/sw.nix {inherit pkgs;})
         (import ./scripts/sw-user.nix {inherit pkgs;})
-        (import ./scripts/switch.nix {inherit pkgs;})
+        (import ./scripts/switch.nix {inherit pkgs osConfig;})
         (import ./scripts/swupdate.nix {inherit pkgs;})
         (import ./scripts/tracewarning.nix {inherit pkgs;})
       ];

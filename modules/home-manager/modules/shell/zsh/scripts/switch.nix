@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  osConfig,
+  ...
+}: let
   write-grub-menu-entries = pkgs.writeShellApplication {
     name = "write-grub-menu-entries";
     text = ''
@@ -52,12 +56,17 @@
 in
   pkgs.writeShellApplication {
     name = "switch";
-    text = ''
-      SWITCH_SCRIPT="$FLAKE/result/bin/switch-to-configuration"
-      TMP_SCRIPT=$(mktemp -d)
-      cp "$SWITCH_SCRIPT" "$TMP_SCRIPT"
-      sed -i "s|export INSTALL_BOOTLOADER=.*|export INSTALL_BOOTLOADER='${write-grub-menu-entries}/bin/write-grub-menu-entries'|" "$TMP_SCRIPT/switch-to-configuration"
-      sudo "$TMP_SCRIPT/switch-to-configuration" switch "$@"
-      rm -rf "$TMP_SCRIPT"
-    '';
+    text =
+      if osConfig.modules.boot.libreboot
+      then ''
+        SWITCH_SCRIPT="$FLAKE/result/bin/switch-to-configuration"
+        TMP_SCRIPT=$(mktemp -d)
+        cp "$SWITCH_SCRIPT" "$TMP_SCRIPT"
+        sed -i "s|export INSTALL_BOOTLOADER=.*|export INSTALL_BOOTLOADER='${write-grub-menu-entries}/bin/write-grub-menu-entries'|" "$TMP_SCRIPT/switch-to-configuration"
+        sudo "$TMP_SCRIPT/switch-to-configuration" switch "$@"
+        rm -rf "$TMP_SCRIPT"
+      ''
+      else ''
+        sudo $FLAKE/result/bin/switch-to-configuration switch "$@"
+      '';
   }
