@@ -54,10 +54,10 @@ in
     name = "switch";
     text = ''
       SWITCH_SCRIPT="$FLAKE/result/bin/switch-to-configuration"
-      TMP_SCRIPT=$(mktemp)
+      TMP_SCRIPT=$(mktemp -d)
       cp "$SWITCH_SCRIPT" "$TMP_SCRIPT"
-      sed -i "s|export INSTALL_BOOTLOADER=.*|export INSTALL_BOOTLOADER='${write-grub-menu-entries}/bin/write-grub-menu-entries'|" "$TMP_SCRIPT"
-      sudo "$TMP_SCRIPT" switch "$@"
-      rm "$TMP_SCRIPT"
+      sed -i "s|export INSTALL_BOOTLOADER=.*|export INSTALL_BOOTLOADER='${write-grub-menu-entries}/bin/write-grub-menu-entries'|" "$TMP_SCRIPT/switch-to-configuration"
+      sudo "$TMP_SCRIPT/switch-to-configuration" switch "$@"
+      rm -rf "$TMP_SCRIPT"
     '';
   }
