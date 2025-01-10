@@ -5,7 +5,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.boot) efiSupport device hibernation swapResumeOffset;
+  inherit (cfg.boot) libreboot efiSupport device hibernation swapResumeOffset;
 in {
   imports = [
     (import ./impermanence {inherit inputs pkgs lib;})
@@ -18,6 +18,7 @@ in {
       boot = {
         enable = lib.mkEnableOption "Enable bootloader" // {default = false;};
         efiSupport = lib.mkEnableOption "Enable UEFI" // {default = false;};
+        libreboot = lib.mkEnableOption "Force installing grub, ignoring error that no bios partition is available." // {default = false;};
         device = lib.mkOption {
           type = lib.types.str;
           default = "nodev";
@@ -71,7 +72,10 @@ in {
       supportedFilesystems = ["btrfs" "vfat"];
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         efi = {
-          efiSysMountPoint = "/boot/efi";
+          efiSysMountPoint =
+            if efiSupport
+            then "/boot/efi"
+            else "/boot";
           canTouchEfiVariables = efiSupport;
         };
         grub = {
@@ -84,6 +88,7 @@ in {
           gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           extraGrubInstallArgs = ["--modules=part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2"];
+          forceInstall = libreboot;
           extraFiles =
             if efiSupport
             then {

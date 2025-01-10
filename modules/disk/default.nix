@@ -43,7 +43,7 @@ in {
               type = "gpt";
               efiGptPartitionFirst = false;
               partitions = {
-                bios = {
+                bios = lib.mkIf (!cfg.boot.libreboot) {
                   priority = 1;
                   type = "EF02";
                   size = "1M";
