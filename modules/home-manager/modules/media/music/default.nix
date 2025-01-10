@@ -3,10 +3,14 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: 
-let cfg = config.modules.media;
-inherit (osConfig.modules.users) user;
-{
+}: {
+  osConfig,
+  config,
+  ...
+}: let
+  cfg = config.modules.media;
+  inherit (osConfig.modules.users) user;
+in {
   imports = [
     (import ./dlplaylist {inherit inputs pkgs lib;})
     (import ./ncmpcpp {inherit inputs pkgs lib;})
@@ -59,5 +63,5 @@ inherit (osConfig.modules.users) user;
         };
       };
     };
-  }
+  };
 }
