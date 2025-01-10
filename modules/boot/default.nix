@@ -44,7 +44,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
     system = {
       build = {
-        inherit grub;
+        grub = lib.mkForce grub;
       };
     };
     environment = {
@@ -82,7 +82,7 @@ in {
         };
         grub = {
           inherit efiSupport device;
-          enable = true;
+          enable = lib.mkForce true;
           enableCryptodisk = true;
           copyKernels = true;
           efiInstallAsRemovable = false;
