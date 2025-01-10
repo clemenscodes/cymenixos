@@ -91,7 +91,7 @@ in {
             }
             (lib.mkIf efiSupport {
               inherit (config.boot.loader.efi) efiSysMountPoint;
-              path = "/boot";
+              path = "/boot/efi";
               devices = ["nodev"];
             })
           ];
