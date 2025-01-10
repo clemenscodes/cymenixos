@@ -4,6 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.io;
+  inherit (config.modules.users) user;
 in {
   options = {
     modules = {
@@ -15,6 +16,11 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.sound.enable) {
+    hardware = {
+      pulseaudio = {
+        inherit (cfg.sound) enable;
+      };
+    };
     services = {
       pipewire = {
         inherit (cfg.sound) enable;
@@ -36,13 +42,18 @@ in {
         };
       };
     };
+    users = {
+      users = {
+        ${user} = {
+          extraGroups = ["audio" "sound"];
+        };
+      };
+    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
-        ${config.modules.users.user} = {
+        ${user} = {
           home = {
-            packages = with pkgs; [
-              pwvucontrol
-            ];
+            packages = [pkgs.pwvucontrol];
           };
         };
       };
