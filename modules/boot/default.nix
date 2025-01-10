@@ -83,7 +83,7 @@ in {
           fsIdentifier = "label";
           gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
-          extraGrubInstallArgs = ["--modules=ahci part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2"];
+          extraGrubInstallArgs = ["--modules=part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2"];
           mirroredBoots = lib.mkForce [
             {
               path = "/boot";
