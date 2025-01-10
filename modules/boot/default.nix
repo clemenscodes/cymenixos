@@ -5,7 +5,8 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.boot) device hibernation swapResumeOffset;
+  inherit (cfg.boot) efiSupport device hibernation swapResumeOffset;
+  grub = import ./grub {inherit pkgs;};
 in {
   imports = [
     (import ./impermanence {inherit inputs pkgs lib;})
@@ -41,6 +42,11 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
+    system = {
+      build = {
+        inherit grub;
+      };
+    };
     environment = {
       systemPackages = [
         pkgs.ntfs3g
@@ -52,35 +58,6 @@ in {
     };
     boot = {
       kernelPackages = lib.mkDefault pkgs.linuxPackages_xanmod_latest;
-      supportedFilesystems = ["btrfs" "vfat"];
-      loader = lib.mkIf (!cfg.boot.secureboot.enable) {
-        grub = {
-          inherit efiSupport device;
-          enable = true;
-          enableCryptodisk = true;
-          copyKernels = true;
-          efiInstallAsRemovable = false;
-          fsIdentifier = "label";
-          gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
-          gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
-          extraGrubInstallArgs = ["--modules=nativedisk ahci part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2"];
-          mirroredBoots = lib.mkForce [
-            {
-              path = "/boot";
-              devices = [device];
-            }
-          ];
-          efi = {
-            efiSysMountPoint = "/boot/efi";
-            canTouchEfiVariables = efiSupport;
-          };
-        };
-      };
-      kernelModules = ["v4l2loopback"];
-      kernelParams = lib.mkIf hibernation [
-        "resume_offset=${builtins.toString swapResumeOffset}"
-      ];
-      resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       initrd = {
         availableKernelModules = [
           "ohci_pci"
@@ -97,6 +74,40 @@ in {
           "sr_mod"
         ];
       };
+      supportedFilesystems = ["btrfs" "vfat"];
+      loader = lib.mkIf (!cfg.boot.secureboot.enable) {
+        efi = {
+          efiSysMountPoint = "/boot/efi";
+          canTouchEfiVariables = efiSupport;
+        };
+        grub = {
+          inherit efiSupport device;
+          enable = true;
+          enableCryptodisk = true;
+          copyKernels = true;
+          efiInstallAsRemovable = false;
+          fsIdentifier = "label";
+          gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
+          gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
+          extraGrubInstallArgs = ["--modules=nativedisk ahci part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2"];
+          mirroredBoots = lib.mkForce [
+            {
+              path = "/boot";
+              devices = [device];
+            }
+            (lib.mkIf efiSupport {
+              inherit (config.boot.loader.efi) efiSysMountPoint;
+              path = "/boot";
+              devices = ["nodev"];
+            })
+          ];
+        };
+      };
+      kernelParams = lib.mkIf hibernation [
+        "resume_offset=${builtins.toString swapResumeOffset}"
+      ];
+      resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
+      kernelModules = ["v4l2loopback"];
       extraModulePackages = [config.boot.kernelPackages.v4l2loopback.out];
       extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1

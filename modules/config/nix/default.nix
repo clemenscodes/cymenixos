@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   lib,
   cymenixos,
@@ -28,9 +29,16 @@ in {
       };
     };
     nix = {
-      nixPath = ["nixpkgs=${cymenixos.outPath}"];
+      nixPath = ["nixpkgs=${pkgs.path}"];
       registry = {
         nixpkgs = {
+          from = {
+            id = "nixpkgs";
+            type = "indirect";
+          };
+          flake = inputs.nixpkgs;
+        };
+        cymenixos = {
           from = {
             id = "nixpkgs";
             type = "indirect";
