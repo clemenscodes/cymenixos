@@ -2,7 +2,6 @@
   inputs,
   pkgs,
   lib,
-  cymenixos,
   ...
 }: {
   config,
@@ -34,18 +33,6 @@ in {
             type = "indirect";
           };
           flake = inputs.nixpkgs;
-        };
-        cymenixos = {
-          from = {
-            id = "nixpkgs";
-            type = "indirect";
-          };
-          to = {
-            type = "github";
-            owner = "clemenscodes";
-            repo = "cymenixos";
-          };
-          flake = cymenixos;
         };
       };
       channel = {
