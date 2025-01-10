@@ -84,7 +84,7 @@ in {
                     extraOpenArgs = ["--timeout 60"];
                     content = {
                       type = "lvm_pv";
-                      vg = "root_vg";
+                      vg = "grubcrypt";
                     };
                   };
                 };
@@ -93,10 +93,10 @@ in {
           };
         };
         lvm_vg = {
-          root_vg = {
+          grubcrypt = {
             type = "lvm_vg";
             lvs = {
-              root = {
+              rootvol = {
                 size = "100%";
                 content = {
                   type = "btrfs";
