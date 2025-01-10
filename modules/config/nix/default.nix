@@ -24,9 +24,6 @@ in {
     nixpkgs = {
       inherit pkgs;
       hostPlatform = system;
-      flake = {
-        source = lib.mkForce cymenixos.outPath;
-      };
     };
     nix = {
       nixPath = ["nixpkgs=${pkgs.path}"];
