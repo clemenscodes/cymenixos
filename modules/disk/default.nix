@@ -4,7 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.disk) enable device luksDisk swapsize;
+  inherit (cfg.disk) enable device luksDisk vg lvm_volume swapsize;
   inherit (cfg.boot.impermanence) persistPath;
 in {
   imports = [inputs.disko.nixosModules.default];
@@ -22,6 +22,18 @@ in {
           description = "The name of the luks disk";
           default = "luks";
           example = "root";
+        };
+        vg = lib.mkOption {
+          type = lib.types.str;
+          description = "The name of the lvm volume group. Defaults to grubcrypt to support libreboot by default";
+          default = "grubcrypt";
+          example = "root_vg";
+        };
+        lvm_volume = lib.mkOption {
+          type = lib.types.str;
+          description = "The name of the main volume in lvm. Defaults to rootvol to support libreboot by default";
+          default = "rootvol";
+          example = "bootvol";
         };
         swapsize = lib.mkOption {
           type = lib.types.int;
@@ -84,7 +96,7 @@ in {
                     extraOpenArgs = ["--timeout 60"];
                     content = {
                       type = "lvm_pv";
-                      vg = "grubcrypt";
+                      inherit vg;
                     };
                   };
                 };
@@ -93,16 +105,16 @@ in {
           };
         };
         lvm_vg = {
-          grubcrypt = {
+          ${vg} = {
             type = "lvm_vg";
             lvs = {
-              rootvol = {
+              ${lvm_volume} = {
                 size = "100%";
                 content = {
                   type = "btrfs";
                   extraArgs = ["-L" "nixos" "-f"];
                   subvolumes = {
-                    "/" = {
+                    "/root" = {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };

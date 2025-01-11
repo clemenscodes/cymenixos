@@ -32,7 +32,7 @@ in {
       initrd = {
         postDeviceCommands = lib.mkAfter ''
           mkdir -p /btrfs_tmp
-          mount /dev/root_vg/root /btrfs_tmp
+          mount /dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume} /btrfs_tmp
 
           if [[ -e /btrfs_tmp/root ]]; then
             mkdir -p /btrfs_tmp/snapshots/roots
