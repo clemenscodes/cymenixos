@@ -101,7 +101,7 @@ in {
             if efiSupport
             then "/boot/efi"
             else "/boot";
-          canTouchEfiVariables = efiSupport;
+          canTouchEfiVariables = lib.mkForce false;
         };
         grub = {
           inherit efiSupport device;
