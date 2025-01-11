@@ -68,11 +68,6 @@ in {
         };
         # Known vulnerability. See
         # https://security.stackexchange.com/questions/110639/how-exploitable-is-the-recent-useroaming-ssh-vulnerability
-        extraConfig = ''
-          Host *
-            UseRoaming no
-          GSSAPIAuthentication no
-        '';
         moduliFile = pkgs.runCommand "filterModuliFile" {} ''
           awk '$5 >= 3071' "${config.programs.ssh.package}/etc/ssh/moduli" >"$out"
         '';
