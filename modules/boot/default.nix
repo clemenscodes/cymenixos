@@ -123,7 +123,7 @@ in {
             {
               path = "/boot";
               devices = [
-                (lib.mkIf biosSupport device)
+                (lib.mkIf (biosSupport || libreboot) device)
                 (lib.mkIf efiSupport "nodev")
               ];
               inherit (config.boot.loader.efi) efiSysMountPoint;
