@@ -12,6 +12,7 @@
     disk = {
       enable = true;
       device = "/dev/sda";
+      luksDisk = "luks";
       swapsize = 64;
     };
     machine = {
@@ -31,6 +32,7 @@
     };
     boot = {
       enable = true;
+      biosSupport = true;
       efiSupport = true;
       inherit (config.modules.disk) device;
       hibernation = false;

@@ -17,11 +17,17 @@
     disk = {
       enable = true;
       device = "/dev/vda";
+      luksDisk = "luks";
+      swapsize = 16;
     };
     boot = {
       enable = true;
+      biosSupport = true;
       efiSupport = true;
+      libreboot = false;
       inherit (config.modules.disk) device;
+      hibernation = false;
+      swapResumeOffset = 533760;
     };
     hostname = {
       enable = true;

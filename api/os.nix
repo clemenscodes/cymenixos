@@ -4,6 +4,8 @@
     disk = {
       enable = true;
       device = "/dev/sda";
+      luksDisk = "luks";
+      swapsize = 16;
     };
     config = {
       enable = true;
@@ -25,13 +27,15 @@
     };
     boot = {
       enable = false;
+      biosSupport = false;
       efiSupport = false;
+      libreboot = false;
       device = "nodev";
+      hibernation = false;
+      swapResumeOffset = 533760;
       secureboot = {
         enable = false;
       };
-      hibernation = false;
-      swapResumeOffset = 533760;
     };
     cpu = {
       enable = false;

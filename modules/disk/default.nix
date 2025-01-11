@@ -43,7 +43,7 @@ in {
               type = "gpt";
               efiGptPartitionFirst = false;
               partitions = {
-                bios = lib.mkIf (!cfg.boot.libreboot) {
+                bios = lib.mkIf (cfg.boot.biosSupport && !cfg.boot.libreboot) {
                   priority = 1;
                   type = "EF02";
                   size = "1M";
@@ -58,7 +58,7 @@ in {
                     mbrBootableFlag = false;
                   };
                 };
-                efi = lib.mkIf cfg.boot.efiSupport {
+                efi = lib.mkIf (cfg.boot.efiSupport && !cfg.boot.libreboot) {
                   priority = 2;
                   label = "efi";
                   type = "EF00";
