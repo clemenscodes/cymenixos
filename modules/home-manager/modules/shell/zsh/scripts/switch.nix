@@ -67,6 +67,6 @@ in
         rm -rf "$TMP_SCRIPT"
       ''
       else ''
-        sudo $FLAKE/result/bin/switch-to-configuration switch "$@"
+        sudo "$FLAKE/result/bin/switch-to-configuration" switch "$@"
       '';
   }
