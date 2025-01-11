@@ -6,6 +6,7 @@
   cfg = config.modules;
   inherit (cfg.disk) enable device luksDisk vg lvm_volume swapsize;
   inherit (cfg.boot.impermanence) persistPath;
+  useSteam = cfg.gaming.enable && cfg.gaming.steam.enable;
 in {
   imports = [inputs.disko.nixosModules.default];
   options = {
@@ -146,7 +147,7 @@ in {
                         };
                       };
                     };
-                    "/steam" = lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable) {
+                    "/steam" = lib.mkIf useSteam {
                       mountpoint = "/home/${config.modules.users.user}/.local/share/Steam";
                       mountOptions = ["subvol=steam" "compress=zstd" "noatime"];
                     };
@@ -209,6 +210,9 @@ in {
         neededForBoot = true;
       };
       "${persistPath}" = {
+        neededForBoot = true;
+      };
+      "/steam" = lib.mkIf useSteam {
         neededForBoot = true;
       };
     };
