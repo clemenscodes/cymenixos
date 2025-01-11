@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules.security;
   sshPort = 22;
   inherit (config.modules.boot.impermanence) persistPath;
@@ -75,11 +79,11 @@ in {
         ];
       };
     };
-  };
-  systemd = {
-    user = {
-      tmpfiles = {
-        rules = ["d %h/.config/ssh 700 - - - -"];
+    systemd = {
+      user = {
+        tmpfiles = {
+          rules = ["d %h/.config/ssh 700 - - - -"];
+        };
       };
     };
   };
