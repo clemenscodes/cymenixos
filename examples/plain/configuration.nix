@@ -29,6 +29,7 @@
       enable = true;
       wheel = true;
       user = "nixos";
+      initialHashedPassword = "";
     };
     boot = {
       enable = true;

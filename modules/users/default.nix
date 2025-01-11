@@ -37,6 +37,7 @@ in {
   config = mkIf (cfg.enable && cfg.users.enable) {
     users = {
       defaultUserShell = mkIf cfg.shell.enable cfg.shell.defaultShell;
+      allowNoPasswordLogin = true;
       users = {
         ${user} = {
           isNormalUser = true;

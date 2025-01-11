@@ -26,9 +26,15 @@ in {
     services = {
       displayManager = {
         defaultSession = "hyprland";
+        autoLogin = {
+          inherit (config.modules.users) user;
+        };
         sddm = {
           inherit (cfg.sddm) enable;
           package = pkgs.kdePackages.sddm;
+          autoLogin = {
+            relogin = true;
+          };
           enableHidpi = true;
           wayland = {
             enable = cfg.gui == "wayland";

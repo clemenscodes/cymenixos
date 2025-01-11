@@ -24,6 +24,7 @@
       wheel = false;
       uid = 1000;
       flake = ".local/src/cymenixos";
+      initialHashedPassword = "";
     };
     boot = {
       enable = false;

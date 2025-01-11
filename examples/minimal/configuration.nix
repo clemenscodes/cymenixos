@@ -53,6 +53,7 @@
       enable = true;
       wheel = true;
       user = "nixos";
+      initialHashedPassword = "";
     };
     shell = {
       enable = true;
