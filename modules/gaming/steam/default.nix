@@ -15,6 +15,24 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.steam.enable) {
+    home-manager = lib.mkIf config.modules.home-manager.enable {
+      users = {
+        ${config.modules.users.user} = {
+          home = {
+            persistence = {
+              "${config.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+                directories = [
+                  {
+                    directory = ".local/share/Steam";
+                    method = "symlink";
+                  }
+                ];
+              };
+            };
+          };
+        };
+      };
+    };
     environment = {
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
