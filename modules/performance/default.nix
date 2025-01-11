@@ -24,17 +24,7 @@
       };
     };
     services = {
-      "autovt@tty1" = {
-        enable = false;
-      };
-    };
-    services = {
       "getty@tty7" = {
-        enable = false;
-      };
-    };
-    services = {
-      "autovt@tty7" = {
         enable = false;
       };
     };
