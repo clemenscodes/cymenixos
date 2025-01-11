@@ -4,6 +4,8 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.gaming;
+  inherit (config.modules.boot.impermanence) persistPath;
+  inherit (config.modules.users) user;
 in {
   options = {
     modules = {
@@ -20,7 +22,7 @@ in {
         ${config.modules.users.user} = {
           home = {
             persistence = {
-              "${config.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+              "${persistPath}/home/${user}" = {
                 directories = [
                   {
                     directory = ".local/share/Steam";
@@ -35,9 +37,9 @@ in {
     };
     environment = {
       persistence = {
-        ${config.modules.boot.impermanence.persistPath} = {
+        ${persistPath} = {
           users = {
-            ${config.modules.users.user} = {
+            ${user} = {
               directories = [".steam"];
             };
           };
