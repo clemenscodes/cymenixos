@@ -1,10 +1,25 @@
 {
   inputs,
-  pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.gaming;
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    config = {
+      allowUnfreePredicate = pkg:
+        builtins.elem (lib.getName pkg) [
+          "steam"
+          "steam-original"
+          "steam-run"
+          "steam-unwrapped"
+        ];
+    };
+  };
   wine = pkgs.wineWowPackages.unstableFull;
 in {
   imports = [

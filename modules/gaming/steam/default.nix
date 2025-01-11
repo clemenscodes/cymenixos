@@ -37,7 +37,7 @@ in {
           openFirewall = cfg.steam.enable;
         };
         extest = {
-          enable = cfg.steam.enable;
+          inherit (cfg.steam) enable;
         };
         package = pkgs.steam;
         extraPackages = [

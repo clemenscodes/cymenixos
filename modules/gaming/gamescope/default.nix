@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules.gaming;
 in {
   options = {
@@ -14,6 +18,7 @@ in {
     programs = {
       gamescope = {
         inherit (cfg.gamescope) enable;
+        package = pkgs.gamescope;
       };
     };
   };
