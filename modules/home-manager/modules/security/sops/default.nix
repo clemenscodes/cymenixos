@@ -25,7 +25,7 @@ in {
     sops = {
       age = {
         generateKey = true;
-        keyFile = "${persistPath}/${home}/sops/age/keys.txt";
+        keyFile = "${persistPath}/${home}/.config/sops/age/keys.txt";
         sshKeyPaths = ["${persistPath}/${home}/.ssh/id_ed25519"];
       };
     };
