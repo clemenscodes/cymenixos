@@ -213,6 +213,9 @@ in {
         neededForBoot = true;
       };
       "/steam" = lib.mkIf useSteam {
+        device = "/dev/${vg}/${lvm_volume}";
+        fsType = "btrfs";
+        options = ["subvol=steam,compress=zstd,noatime"];
         neededForBoot = true;
       };
     };
