@@ -19,12 +19,7 @@
   };
   config = lib.mkIf (config.modules.enable && config.modules.performance.enable) {
     services = {
-      "getty@tty1" = {
-        enable = false;
-      };
-    };
-    services = {
-      "getty@tty7" = {
+      getty = {
         enable = false;
       };
     };
