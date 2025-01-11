@@ -152,13 +152,16 @@ in {
             onCalendar = "hourly";
             settings = {
               timestamp_format = "long";
-              snapshot_preserve_min = "1w";
-              snapshot_preserve = "4w";
-              preserve_day_of_week = "sunday";
-              preserve_hour_of_day = "0";
+              snapshot_preserve_min = "1d";
+              snapshot_preserve = "2d";
               volume = let
                 snapshot_create = "always";
               in {
+                "/boot" = {
+                  inherit snapshot_create;
+                  subvolume = "/boot";
+                  snapshot_dir = "/snapshots/boots";
+                };
                 "/var/log" = {
                   inherit snapshot_create;
                   subvolume = "/var/log";
@@ -199,6 +202,7 @@ in {
           "d /snapshots 0755 root root"
           "d /snapshots/persist 0755 root root"
           "d /snapshots/logs 0755 root root"
+          "d /snapshots/boots 0755 root root"
         ];
       };
     };
