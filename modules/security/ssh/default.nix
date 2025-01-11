@@ -17,6 +17,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.ssh.enable) {
+    systemd = {
+      user = {
+        tmpfiles = {
+          rules = ["d %h/.config/ssh 700 - - - -"];
+        };
+      };
+    };
     fileSystems = {
       "/etc/ssh" = {
         depends = [persistPath];
@@ -77,13 +84,6 @@ in {
             type = "ed25519";
           }
         ];
-      };
-    };
-    systemd = {
-      user = {
-        tmpfiles = {
-          rules = ["d %h/.config/ssh 700 - - - -"];
-        };
       };
     };
   };
