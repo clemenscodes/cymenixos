@@ -116,8 +116,8 @@ in {
           extraFiles = lib.mkIf (!libreboot) {
             "grub/${pkgs.grub2.grubTarget}/argon2.mod" = lib.mkIf biosSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2.grubTarget}/argon2.mod";
             "grub/${pkgs.grub2.grubTarget}/argon2.module" = lib.mkIf biosSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2.grubTarget}/argon2.module";
-            "grub/${pkgs.grub2_efi.grubTarget}/argon2.mod" = lib.mkIf efiSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2_efi.grubTarget}/argon2.mod";
-            "grub/${pkgs.grub2_efi.grubTarget}/argon2.module" = lib.mkIf efiSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2_efi.grubTarget}/argon2.module";
+            "grub/${pkgs.grub2_efi.grubTarget}/argon2.mod" = lib.mkIf efiSupport "${pkgs.grub2_efi}/lib/grub/${pkgs.grub2_efi.grubTarget}/argon2.mod";
+            "grub/${pkgs.grub2_efi.grubTarget}/argon2.module" = lib.mkIf efiSupport "${pkgs.grub2_efi}/lib/grub/${pkgs.grub2_efi.grubTarget}/argon2.module";
           };
           mirroredBoots = lib.mkForce [
             {
