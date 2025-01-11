@@ -3,7 +3,7 @@
   pkgs,
   lib,
   ...
-}: {...}: {
+}: {config, ...}: {
   imports = [
     (import ./auto-cpufreq {inherit inputs pkgs lib;})
     (import ./power {inherit inputs pkgs lib;})
@@ -17,25 +17,27 @@
       };
     };
   };
-  config = {
-    services = {
-      "getty@tty1" = {
-        enable = false;
+  config = lib.mkIf config.modules.performance.enable {
+    systemd = {
+      services = {
+        "getty@tty1" = {
+          enable = false;
+        };
       };
-    };
-    services = {
-      "autovt@tty1" = {
-        enable = false;
+      services = {
+        "autovt@tty1" = {
+          enable = false;
+        };
       };
-    };
-    services = {
-      "getty@tty7" = {
-        enable = false;
+      services = {
+        "getty@tty7" = {
+          enable = false;
+        };
       };
-    };
-    services = {
-      "autovt@tty7" = {
-        enable = false;
+      services = {
+        "autovt@tty7" = {
+          enable = false;
+        };
       };
     };
   };
