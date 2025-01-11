@@ -146,6 +146,10 @@ in {
                         };
                       };
                     };
+                    "/steam" = lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable) {
+                      mountpoint = "/home/${config.modules.users.user}/.local/share/Steam";
+                      mountOptions = ["subvol=steam" "compress=zstd" "noatime"];
+                    };
                   };
                 };
               };
