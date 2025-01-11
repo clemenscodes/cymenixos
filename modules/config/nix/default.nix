@@ -25,7 +25,7 @@ in {
       hostPlatform = system;
     };
     nix = {
-      registry = lib.mapAttrs (_: value: {flake = value;}) (lib.filterAttrs (_: v: lib.isType "flake" v) inputs);
+      registry = lib.mapAttrs (_: value: {flake = value;}) inputs;
       nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
       channel = {
         enable = false;
