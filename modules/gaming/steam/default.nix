@@ -20,7 +20,7 @@ in {
         ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.user} = {
-              directories = [".local/share/Steam"];
+              directories = [".steam"];
             };
           };
         };
