@@ -20,6 +20,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.virtualisation.enable) {
+    environment = {
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = ["/var/lib/libvirt"];
+        };
+      };
+    };
     virtualisation = {
       libvirtd = {
         inherit (cfg.virtualisation) enable;

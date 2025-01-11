@@ -1,6 +1,7 @@
 {lib, ...}: {config, ...}: let
   cfg = config.modules.security;
   sshPort = 22;
+  inherit (config.modules.boot.impermanence) persistPath;
 in {
   options = {
     modules = {
@@ -12,9 +13,21 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.ssh.enable) {
+    fileSystems = {
+      "/etc/ssh" = {
+        depends = [persistPath];
+        neededForBoot = true;
+      };
+    };
     environment = {
       persistence = {
-        "${config.modules.boot.impermanence.persistPath}" = {
+        "${persistPath}" = {
+          directories = [
+            {
+              directory = "/etc/ssh";
+              mode = "0700";
+            }
+          ];
           users = {
             ${config.modules.users.user} = {
               directories = [
@@ -39,8 +52,34 @@ in {
         ports = [sshPort];
         settings = {
           PermitRootLogin = "prohibit-password";
-          PasswordAuthentication = true;
+          PasswordAuthentication = false;
+          KbdInteractiveAuthentication = false;
         };
+        # Known vulnerability. See
+        # https://security.stackexchange.com/questions/110639/how-exploitable-is-the-recent-useroaming-ssh-vulnerability
+        extraConfig = ''
+          Host *
+            UseRoaming no
+          GSSAPIAuthentication no
+        '';
+        moduliFile = pkgs.runCommand "filterModuliFile" {} ''
+          awk '$5 >= 3071' "${config.programs.ssh.package}/etc/ssh/moduli" >"$out"
+        '';
+        hostKeys = [
+          {
+            comment = "${config.networking.hostName}.local";
+            path = "/etc/ssh/ssh_host_ed25519_key";
+            rounds = 100;
+            type = "ed25519";
+          }
+        ];
+      };
+    };
+  };
+  systemd = {
+    user = {
+      tmpfiles = {
+        rules = ["d %h/.config/ssh 700 - - - -"];
       };
     };
   };

@@ -14,6 +14,8 @@ in {
     services = {
       dbus = {
         enable = cfg.dbus.enable;
+        packages = [pkgs.dconf pkgs.gcr pkgs.udisks2];
+        implementation = "broker";
       };
     };
   };

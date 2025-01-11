@@ -25,28 +25,21 @@ in {
       hostPlatform = system;
     };
     nix = {
-      nixPath = ["nixpkgs=${pkgs.path}"];
-      registry = {
-        nixpkgs = {
-          from = {
-            id = "nixpkgs";
-            type = "indirect";
-          };
-          flake = inputs.nixpkgs;
-        };
-      };
+      registry = lib.mapAttrs (_: value: {flake = value;}) (lib.filterAttrs (_: v: lib.isType "flake" v) inputs);
+      nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
       channel = {
         enable = false;
       };
       settings = {
+        flake-registry = "/etc/nix/registry.json";
         auto-optimise-store = true;
         builders-use-substitutes = true;
         keep-going = true;
         allowed-users = ["@wheel"];
         trusted-users = ["@wheel"];
-        experimental-features = ["nix-command" "flakes" "fetch-closure"];
         substituters = ["https://nix-community.cachix.org"];
         trusted-public-keys = ["nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="];
+        experimental-features = ["nix-command" "flakes" "fetch-closure"];
       };
       gc = {
         automatic = lib.mkDefault false;
@@ -61,6 +54,11 @@ in {
       '';
       daemonCPUSchedPolicy = "idle";
       daemonIOSchedClass = "idle";
+    };
+    system = {
+      autoUpgrade = {
+        enable = false;
+      };
     };
   };
 }

@@ -15,6 +15,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.time.enable) {
     time = {
       timeZone = cfg.time.defaultTimeZone;
+      hardwareClockInLocalTime = true;
     };
   };
 }

@@ -16,11 +16,16 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.tpm.enable) {
     environment = {
-      systemPackages = [pkgs.tpm2-tools];
+      systemPackages = [
+        pkgs.tpm2-tools
+        pkgs.tpm2-tss
+        pkgs.tpm2-abrmd
+      ];
     };
     security = {
       tpm2 = {
         inherit (cfg.tpm) enable;
+        applyUdevRules = true;
         pkcs11 = {
           inherit (cfg.tpm) enable;
         };

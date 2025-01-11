@@ -5,6 +5,7 @@
 }: {config, ...}: let
   cfg = config.modules.io;
   inherit (config.modules.users) user;
+  inherit (config.modules.boot.impermanence) persistPath;
 in {
   options = {
     modules = {
@@ -16,6 +17,15 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.sound.enable) {
+    environment = {
+      persistence = {
+        ${persistPath} = {
+          enable = true;
+          hideMounts = true;
+          directories = ["/var/lib/pipewire"];
+        };
+      };
+    };
     services = {
       pipewire = {
         inherit (cfg.sound) enable;
@@ -34,6 +44,44 @@ in {
         };
         jack = {
           inherit (cfg.sound) enable;
+        };
+      };
+      pulseaudio = {
+        enable = lib.mkForce false;
+      };
+    };
+    programs = {
+      dconf = {
+        enable = true;
+      };
+    };
+    environment = {
+      systemPackages = [
+        pkgs.alsa-utils
+        pkgs.pavucontrol
+        pkgs.easyeffects
+        pkgs.pulseaudio
+        pkgs.at-spi2-core
+      ];
+    };
+    systemd = {
+      user = {
+        services = {
+          easyeffects = {
+            wantedBy = ["graphical-session.target"];
+            unitConfig = {
+              Description = "Easyeffects daemon";
+              Requires = ["dbus.service"];
+              After = ["graphical-session-pre.target"];
+              PartOf = ["graphical-session.target" "pipewire.service"];
+            };
+            serviceConfig = {
+              ExecStart = "${pkgs.easyeffects}/bin/easyeffects --gapplication-service";
+              ExecStop = "${pkgs.easyeffects}/bin/easyeffects --quit";
+              Restart = "on-failure";
+              RestartSec = 5;
+            };
+          };
         };
       };
     };

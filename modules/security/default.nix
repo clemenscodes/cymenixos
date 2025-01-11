@@ -15,6 +15,7 @@
     (import ./sudo {inherit inputs pkgs lib;})
     (import ./swaylock {inherit inputs pkgs lib;})
     (import ./tpm {inherit inputs pkgs lib;})
+    (import ./yubikey {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {

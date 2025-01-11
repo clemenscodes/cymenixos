@@ -143,6 +143,9 @@ in {
       };
     };
     services = {
+      lvm = {
+        enable = true;
+      };
       btrbk = {
         instances = {
           btrbk = {

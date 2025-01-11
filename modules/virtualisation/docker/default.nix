@@ -22,6 +22,10 @@ in {
     virtualisation = {
       docker = {
         inherit (cfg.docker) enable;
+        autoPrune = {
+          enable = true;
+        };
+        enableOnBoot = lib.mkDefault false;
       };
     };
     users = {

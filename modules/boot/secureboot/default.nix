@@ -19,6 +19,11 @@ in {
   config = lib.mkIf (cfg.enable && cfg.secureboot.enable) {
     environment = {
       systemPackages = [pkgs.sbctl];
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = [config.booot.lanzaboote.pkiBundle];
+        };
+      };
     };
     boot = {
       lanzaboote = {
