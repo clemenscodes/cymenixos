@@ -89,7 +89,7 @@ in {
             ];
           };
         };
-        initLua = pkgs.writeText "init.lua" ''
+        initLua = "${pkgs.writeText "init.lua" ''
           require("smart-enter"):setup {
            open_multi = true,
           }
@@ -102,7 +102,7 @@ in {
           THEME.git.modified = ui.Style():fg("blue")
           THEME.git.deleted = ui.Style():fg("red"):bold()
           require("git"):setup()
-        '';
+        ''}";
         plugins = {
           inherit (plugins) full-border git smart-enter smart-paste smart-switch smart-tab;
         };
