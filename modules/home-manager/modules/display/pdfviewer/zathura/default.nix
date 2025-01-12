@@ -41,6 +41,11 @@ in {
     };
     xdg = {
       mimeApps = {
+        associations = {
+          added = {
+            "application/pdf" = ["zathura.desktop"];
+          };
+        };
         defaultApplications = {
           "application/pdf" = ["zathura.desktop"];
         };
