@@ -48,6 +48,14 @@ in {
             "image/bmp" = ["swayimg.desktop"];
             "image/tiff" = ["swayimg.desktop"];
           };
+          removed = {
+            "image/jpeg" = ["swappy.desktop" "brave-browser.desktop"];
+            "image/png" = ["swappy.desktop" "brave-browser.desktop"];
+            "image/gif" = ["swappy.desktop" "brave-browser.desktop"];
+            "image/webp" = ["swappy.desktop" "brave-browser.desktop"];
+            "image/bmp" = ["swappy.desktop" "brave-browser.desktop"];
+            "image/tiff" = ["swappy.desktop" "brave-browser.desktop"];
+          };
         };
         defaultApplications = {
           "image/jpeg" = ["swayimg.desktop"];
