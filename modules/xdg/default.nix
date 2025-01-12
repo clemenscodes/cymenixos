@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules;
 in {
   options = {
@@ -24,6 +28,17 @@ in {
       };
       icons = {
         inherit (cfg.xdg) enable;
+      };
+      mime = {
+        inherit (cfg.xdg) enable;
+      };
+      portal = {
+        xdgOpenUsePortal = true;
+        extraPortals = lib.mkForce [
+          pkgs.gnome-keyring
+          pkgs.xdg-desktop-portal-hyprland
+          pkgs.xdg-desktop-portal-kde
+        ];
       };
     };
   };

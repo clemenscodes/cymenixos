@@ -113,21 +113,20 @@ in {
           XDG_NOTE_DIR = "${config.xdg.userDirs.documents}/notes";
         };
       };
-      mime = {
-        enable = false;
-      };
       mimeApps = {
         inherit (cfg.xdg) enable;
       };
       portal = {
         inherit (cfg.xdg) enable;
+        xdgOpenUsePortal = true;
         extraPortals = [
           pkgs.xdg-desktop-portal-hyprland
           pkgs.xdg-desktop-portal-wlr
         ];
         config = {
           common = {
-            default = "hyprland";
+            default = "hyprland;gtk";
+            "org.freedesktop.impl.portal.FileChooser" = "kde";
           };
         };
       };
