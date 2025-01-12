@@ -58,6 +58,11 @@ in {
           manager = {
             prepend_keymap = [
               {
+                on = ["!"];
+                run = '''shell "$SHELL" --block''''';
+                desc = "Open shell here";
+              }
+              {
                 on = ["l"];
                 run = "plugin smart-enter";
                 desc = "Enter the child directory, or open the file";
@@ -76,6 +81,22 @@ in {
                 on = ["2"];
                 run = "plugin smart-switch --args=1";
                 desc = "Switch or create tab 2";
+              }
+              {
+                on = ["<C-n>"];
+                run = "shell '${pkgs.ripdrap}/bin/ripdrag $@ -x 2>/dev/null &' --confirm";
+              }
+              {
+                on = ["g" "r"];
+                run = "shell '${pkgs.yazi}/bin/ya emit cd $(git rev-parse --show-toplevel)'";
+              }
+              {
+                on = ["k"];
+                run = "plugin arrow --args=-1";
+              }
+              {
+                on = ["j"];
+                run = "plugin arrow --args=1";
               }
             ];
           };
@@ -98,9 +119,39 @@ in {
           THEME.git.modified = ui.Style():fg("blue")
           THEME.git.deleted = ui.Style():fg("red"):bold()
           require("git"):setup()
+
+          Status:children_add(function()
+          	local h = cx.active.current.hovered
+          	if h == nil or ya.target_family() ~= "unix" then
+          		return ""
+          	end
+          
+          	return ui.Line {
+          		ui.Span(ya.user_name(h.cha.uid) or tostring(h.cha.uid)):fg("magenta"),
+          		":",
+          		ui.Span(ya.group_name(h.cha.gid) or tostring(h.cha.gid)):fg("magenta"),
+          		" ",
+          	}
+          end, 500, Status.RIGHT)
+
+          Header:children_add(function()
+          	if ya.target_family() ~= "unix" then
+          		return ""
+          	end
+          	return ui.Span(ya.user_name() .. "@" .. ya.host_name() .. ":"):fg("blue")
+          end, 500, Header.LEFT)
         '';
         plugins = {
-          inherit (plugins) full-border git smart-enter smart-paste smart-switch smart-tab;
+          inherit
+            (plugins)
+            arrow
+            full-border
+            git
+            smart-enter
+            smart-paste
+            smart-switch
+            smart-tab
+            ;
         };
       };
     };

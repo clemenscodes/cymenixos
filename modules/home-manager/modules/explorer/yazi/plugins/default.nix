@@ -1,4 +1,5 @@
 {pkgs, ...}: {
+  arrow = import ./arrow.nix {inherit pkgs;};
   full-border = import ./full-border.nix {inherit pkgs;};
   git = import ./git.nix {inherit pkgs;};
   smart-enter = import ./smart-enter.nix {inherit pkgs;};
