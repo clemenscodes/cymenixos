@@ -36,21 +36,6 @@ in {
             }
           '';
         };
-        ".config/yazi/plugins/smart-enter.yazi/init.lua" = {
-          text =
-            /*
-            lua
-            */
-            ''
-              --- @sync entry
-              return {
-              	entry = function()
-              		local h = cx.active.current.hovered
-              		ya.manager_emit(h and h.cha.is_dir and "enter" or "open", { hovered = true })
-              	end,
-              }
-            '';
-        };
         ".config/yazi/plugins/full-border.yazi/init.lua" = {
           text =
             /*
@@ -100,11 +85,84 @@ in {
               return { setup = setup }
             '';
         };
+        ".config/yazi/plugins/smart-enter.yazi/init.lua" = {
+          text =
+            /*
+            lua
+            */
+            ''
+              --- @sync entry
+              return {
+              	entry = function()
+              		local h = cx.active.current.hovered
+              		ya.manager_emit(h and h.cha.is_dir and "enter" or "open", { hovered = true })
+              	end,
+              }
+            '';
+        };
+        ".config/yazi/plugins/smart-paste.yazi/init.lua" = {
+          text =
+            /*
+            lua
+            */
+            ''
+              --- @sync entry
+              return {
+              	entry = function()
+              		local h = cx.active.current.hovered
+              		if h and h.cha.is_dir then
+              			ya.manager_emit("enter", {})
+              			ya.manager_emit("paste", {})
+              			ya.manager_emit("leave", {})
+              		else
+              			ya.manager_emit("paste", {})
+              		end
+              	end,
+              }
+            '';
+        };
+        ".config/yazi/plugins/smart-tab.yazi/init.lua" = {
+          text =
+            /*
+            lua
+            */
+            ''
+              --- @sync entry
+              return {
+              	entry = function()
+              		local h = cx.active.current.hovered
+              		ya.manager_emit("tab_create", h and h.cha.is_dir and { h.url } or { current = true })
+              	end,
+              }
+            '';
+        };
+        ".config/yazi/plugins/smart-switch.yazi/init.lua" = {
+          text =
+            /*
+            lua
+            */
+            ''
+              --- @sync entry
+              local function entry(_, job)
+              	local cur = cx.active.current
+              	for _ = #cx.tabs, job.args[1] do
+              		ya.manager_emit("tab_create", { cur.cwd })
+              		if cur.hovered then
+              			ya.manager_emit("reveal", { cur.hovered.url })
+              		end
+              	end
+              	ya.manager_emit("tab_switch", { job.args[1] })
+              end
+
+              return { entry = entry }
+            '';
+        };
       };
     };
     programs = {
       yazi = {
         inherit (cfg.yazi) enable;
+        enableZshIntegration = config.modules.shell.zsh.enable;
         settings = {
           manager = {
             show_hidden = true;
@@ -114,14 +172,36 @@ in {
             manager = {
               prepend_keymap = [
                 {
+                  on = ["!"];
+                  run = "shell $SHELL --block";
+                  desc = "Open shell here";
+                }
+                {
                   on = ["l"];
                   run = "plugin smart-enter";
                   desc = "Enter the child directory, or open the file";
                 }
                 {
-                  on = ["!"];
-                  run = "shell $SHELL --block";
-                  desc = "Open shell here";
+                  on = ["p"];
+                  run = "plugin smart-paste";
+                  desc = "Paste into the hovered directory or CWD";
+                }
+                {
+                  on = ["t"];
+                  run = "plugin smart-tab";
+                  desc = "Create a tab and enter the hovered directory";
+                }
+                {
+                  on = ["2"];
+                  run = "plugin smart-switch --args=1";
+                  desc = "Switch or create tab 2";
+                }
+                {
+                  on = ["y"];
+                  run = ''
+
+                  '';
+                  desc = "Switch or create tab 2";
                 }
               ];
             };

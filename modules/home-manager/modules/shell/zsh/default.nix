@@ -17,7 +17,7 @@
     if useLf
     then "lfcd"
     else if useYazi
-    then "yazicd"
+    then "yy"
     else "cd";
 in {
   options = {
@@ -158,14 +158,6 @@ in {
                         dir="$(cat "$tmp")"
                         [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
                     fi
-                }
-                yazicd () {
-                  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
-                  yazi "$@" --cwd-file="$tmp"
-                  if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-                  	cd -- "$cwd"
-                  fi
-                  rm -f -- "$tmp"
                 }
                 bindkey -s '^o' '${explorer}\n'
               ''
