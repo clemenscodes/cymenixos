@@ -119,6 +119,7 @@ in {
       portal = {
         inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
+        extraPortals = [pkgs.xdg-desktop-portal-hyprland];
         config = {
           common = {
             default = "*";

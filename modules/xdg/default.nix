@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {config, ...}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules;
 in {
   options = {
@@ -31,10 +27,6 @@ in {
       };
       portal = {
         enable = cfg.display.gui != "headless";
-        extraPortals = [
-          pkgs.xdg-desktop-portal-hyprland
-          pkgs.xdg-desktop-portal
-        ];
         wlr = {
           enable = lib.mkForce cfg.display.gui == "wayland";
         };
