@@ -84,7 +84,7 @@ in {
               }
               {
                 on = ["<C-n>"];
-                run = "shell '${pkgs.ripdrap}/bin/ripdrag $@ -x 2>/dev/null &' --confirm";
+                run = "shell '${pkgs.ripdrag}/bin/ripdrag $@ -x 2>/dev/null &' --confirm";
               }
               {
                 on = ["g" "r"];
@@ -97,6 +97,10 @@ in {
               {
                 on = ["j"];
                 run = "plugin arrow --args=1";
+              }
+              {
+                on = ["<C-y>"];
+                run = "plugin wl-clipboard";
               }
             ];
           };
@@ -125,7 +129,7 @@ in {
           	if h == nil or ya.target_family() ~= "unix" then
           		return ""
           	end
-          
+
           	return ui.Line {
           		ui.Span(ya.user_name(h.cha.uid) or tostring(h.cha.uid)):fg("magenta"),
           		":",
@@ -140,6 +144,8 @@ in {
           	end
           	return ui.Span(ya.user_name() .. "@" .. ya.host_name() .. ":"):fg("blue")
           end, 500, Header.LEFT)
+
+          require("starship"):setup()
         '';
         plugins = {
           inherit
@@ -151,6 +157,8 @@ in {
             smart-paste
             smart-switch
             smart-tab
+            starship
+            wl-clipboard
             ;
         };
       };

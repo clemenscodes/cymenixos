@@ -6,4 +6,6 @@
   smart-paste = import ./smart-paste.nix {inherit pkgs;};
   smart-switch = import ./smart-switch.nix {inherit pkgs;};
   smart-tab = import ./smart-tab.nix {inherit pkgs;};
+  starship = import ./starship.nix {inherit pkgs;};
+  wl-clipboard = import ./wl-clipboard.nix {inherit pkgs;};
 }
