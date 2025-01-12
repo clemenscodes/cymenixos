@@ -62,7 +62,7 @@ in {
       persistence = {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
-            config.accounts.email.maildirBasePath
+            ".local/share/mail"
             (lib.mkIf cfg.email.thunderbird.enable ".thunderbird")
           ];
         };

@@ -23,6 +23,11 @@ in {
           enable = true;
           hideMounts = true;
           directories = ["/var/lib/pipewire"];
+          users = {
+            ${user} = {
+              directories = [".local/state/wireplumber"];
+            };
+          };
         };
       };
     };
