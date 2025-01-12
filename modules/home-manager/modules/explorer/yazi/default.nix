@@ -28,6 +28,12 @@ in {
         pkgs.fzf
         pkgs.zoxide
         pkgs.wl-clipboard
+        pkgs.exiftool
+        pkgs.mediainfo
+        pkgs.miller
+        pkgs.glow
+        pkgs.hexyl
+        pkgs.eza
       ];
     };
     programs = {
@@ -40,6 +46,29 @@ in {
             show_symlink = false;
           };
           plugin = {
+            prepend_previewers = [
+              {
+                name = "*.md";
+                run = "glow";
+              }
+              {
+                mime = "text/csv";
+                run = "miller";
+              }
+              {
+                mime = "audio/*";
+                run = "exifaudio";
+              }
+
+              {
+                name = "*/";
+                run = "eza-preview";
+              }
+              {
+                name = "*";
+                run = "hexyl";
+              }
+            ];
             prepend_fetchers = [
               {
                 id = "git";
@@ -59,7 +88,7 @@ in {
             prepend_keymap = [
               {
                 on = ["!"];
-                run = '''shell "$SHELL" --block''''';
+                run = "shell $SHELL --block";
                 desc = "Open shell here";
               }
               {
@@ -101,6 +130,11 @@ in {
               {
                 on = ["<C-y>"];
                 run = "plugin wl-clipboard";
+              }
+              {
+                on = ["E"];
+                run = "plugin eza-preview";
+                desc = "Toggle tree/list dir preview";
               }
             ];
           };
@@ -147,20 +181,7 @@ in {
 
           require("starship"):setup()
         '';
-        plugins = {
-          inherit
-            (plugins)
-            arrow
-            full-border
-            git
-            smart-enter
-            smart-paste
-            smart-switch
-            smart-tab
-            starship
-            wl-clipboard
-            ;
-        };
+        inherit plugins;
       };
     };
   };
