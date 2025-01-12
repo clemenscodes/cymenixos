@@ -113,6 +113,9 @@ in {
           XDG_NOTE_DIR = "${config.xdg.userDirs.documents}/notes";
         };
       };
+      mime = {
+        enable = false;
+      };
       mimeApps = {
         inherit (cfg.xdg) enable;
       };
