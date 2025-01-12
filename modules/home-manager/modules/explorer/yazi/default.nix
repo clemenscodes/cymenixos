@@ -59,11 +59,8 @@ in {
                 mime = "audio/*";
                 run = "exifaudio";
               }
-
-              {
-                name = "*/";
-                run = "eza-preview";
-              }
+            ];
+            append_previewers = [
               {
                 name = "*";
                 run = "hexyl";
