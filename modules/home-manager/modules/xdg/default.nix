@@ -119,14 +119,10 @@ in {
       portal = {
         inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
-        extraPortals = [
-          pkgs.xdg-desktop-portal-hyprland
-          pkgs.xdg-desktop-portal-wlr
-        ];
+        extraPortals = [pkgs.xdg-desktop-portal-hyprland];
         config = {
           common = {
             default = "hyprland;gtk";
-            "org.freedesktop.impl.portal.FileChooser" = "kde";
           };
         };
       };

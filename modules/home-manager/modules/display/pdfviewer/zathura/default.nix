@@ -45,6 +45,9 @@ in {
           added = {
             "application/pdf" = ["zathura.desktop"];
           };
+          removed = {
+            "application/pdf" = ["brave-browser.desktop"];
+          };
         };
         defaultApplications = {
           "application/pdf" = ["zathura.desktop"];
