@@ -9,6 +9,7 @@
 }: let
   cfg = config.modules.organization;
   hasSecretsEnabled = osConfig.modules.security.sops.enable && config.modules.security.sops.enable;
+  inherit (osConfig.modules.users) user;
 in {
   options = {
     modules = {
@@ -84,7 +85,8 @@ in {
       thunderbird = {
         inherit (cfg.email.thunderbird) enable;
         profiles = {
-          ${osConfig.modules.users.user} = {
+          ${user} = {
+            isDefault = true;
             search = {
               default = "DuckDuckGo";
               privateDefault = "DuckDuckGo";
@@ -137,6 +139,7 @@ in {
           };
           thunderbird = {
             inherit (cfg.email.thunderbird) enable;
+            profiles = [user] 
           };
           mbsync = {
             inherit (cfg.email) enable;
