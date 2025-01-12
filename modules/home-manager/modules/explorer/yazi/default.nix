@@ -133,6 +133,11 @@ in {
                 run = "plugin eza-preview";
                 desc = "Toggle tree/list dir preview";
               }
+              {
+                on = ["d"];
+                run = "shell --confirm 'rm -rf $@'";
+                desc = "Remove files instantly";
+              }
             ];
           };
           input = {
