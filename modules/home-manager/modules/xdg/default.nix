@@ -93,7 +93,6 @@ in {
     };
     xdg = {
       inherit (cfg.xdg) enable;
-
       userDirs = {
         inherit (cfg.xdg) enable;
         createDirectories = true;
@@ -120,7 +119,6 @@ in {
       portal = {
         inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
-        extraPortals = [pkgs.xdg-desktop-portal-gtk];
         config = {
           common = {
             default = "*";

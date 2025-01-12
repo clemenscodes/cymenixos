@@ -4,10 +4,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  waylandPkgs =
-    if cfg.display.gui == "wayland"
-    then [pkgs.xdg-desktop-portal-wlr]
-    else [];
 in {
   options = {
     modules = {
@@ -35,12 +31,10 @@ in {
       };
       portal = {
         enable = cfg.display.gui != "headless";
-        extraPortals =
-          waylandPkgs
-          ++ [
-            pkgs.xdg-desktop-portal-gtk
-            pkgs.xdg-desktop-portal
-          ];
+        extraPortals = [
+          pkgs.xdg-desktop-portal-hyprland
+          pkgs.xdg-desktop-portal
+        ];
         wlr = {
           enable = lib.mkForce cfg.display.gui == "wayland";
         };
