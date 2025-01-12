@@ -139,7 +139,7 @@ in {
           };
           thunderbird = {
             inherit (cfg.email.thunderbird) enable;
-            profiles = [user] 
+            profiles = [user];
           };
           mbsync = {
             inherit (cfg.email) enable;
