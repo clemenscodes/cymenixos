@@ -26,6 +26,9 @@ in {
         };
       };
     };
+    sound = {
+      inherit (cfg.sound) enable;
+    };
     services = {
       pipewire = {
         inherit (cfg.sound) enable;
