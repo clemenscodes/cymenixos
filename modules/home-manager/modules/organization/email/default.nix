@@ -15,6 +15,9 @@ in {
       organization = {
         email = {
           enable = lib.mkEnableOption "Enable E-Mail support using neomutt" // {default = false;};
+          thunderbird = {
+            enable = lib.mkEnableOption "Enable thunderbird" // {default = false;};
+          };
           accounts = lib.mkOption {
             type = lib.types.listOf (lib.types.submodule {
               options = {
@@ -57,7 +60,7 @@ in {
     home = {
       persistence = {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
-          directories = [".local/share/mail"];
+          directories = [config.accounts.email.maildirBasePath];
         };
       };
       packages = [
@@ -75,6 +78,11 @@ in {
       };
       imapnotify = {
         inherit (cfg.email) enable;
+      };
+    };
+    programs = {
+      thunderbird = {
+        inherit (cfg.email.thunderbird) enable;
       };
     };
     xdg = {
@@ -117,6 +125,9 @@ in {
             enable = true;
             onNotify = "${pkgs.isync}/bin/mbsync -a";
             onNotifyPost = ''${pkgs.notmuch}/bin/notmuch new && ${pkgs.libnotify}/bin/notify-send "===> 📬 <===" "Mail received"'';
+          };
+          thunderbird = {
+            inherit (cfg.email.thunderbird) enable;
           };
           mbsync = {
             inherit (cfg.email) enable;
