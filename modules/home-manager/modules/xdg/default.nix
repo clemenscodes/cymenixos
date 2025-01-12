@@ -93,8 +93,9 @@ in {
     };
     xdg = {
       inherit (cfg.xdg) enable;
+
       userDirs = {
-        enable = true;
+        inherit (cfg.xdg) enable;
         createDirectories = true;
         desktop = "${config.home.homeDirectory}/${desktop}";
         documents = "${config.home.homeDirectory}/${documents}";
@@ -114,10 +115,10 @@ in {
         };
       };
       mimeApps = {
-        enable = true;
+        inherit (cfg.xdg) enable;
       };
       portal = {
-        enable = true;
+        inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
         extraPortals = [pkgs.xdg-desktop-portal-gtk];
         config = {

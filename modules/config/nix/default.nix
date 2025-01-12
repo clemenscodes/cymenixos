@@ -20,6 +20,9 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
+    environment = {
+      defaultPackages = lib.mkForce [];
+    };
     nixpkgs = {
       inherit pkgs;
       hostPlatform = system;

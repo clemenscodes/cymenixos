@@ -21,6 +21,18 @@ in {
       autostart = {
         inherit (cfg.xdg) enable;
       };
+      terminal-exec = {
+        inherit (cfg.xdg) enable;
+      };
+      sounds = {
+        inherit (cfg.xdg) enable;
+      };
+      menus = {
+        inherit (cfg.xdg) enable;
+      };
+      icons = {
+        inherit (cfg.xdg) enable;
+      };
       portal = {
         enable = cfg.display.gui != "headless";
         extraPortals =

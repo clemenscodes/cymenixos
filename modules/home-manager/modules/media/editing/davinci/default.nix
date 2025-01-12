@@ -30,19 +30,5 @@ in {
     home = {
       packages = [pkgs.davinci-resolve];
     };
-    xdg = {
-      desktopEntries = {
-        resolve = {
-          name = "Davinci Resolve";
-          genericName = "Video Editor";
-          exec = "env QT_QPA_PLATFORM=xcb ${pkgs.davinci-resolve}/bin/davinci-resolve %u";
-          icon = "DV_Resolve";
-          terminal = false;
-          type = "Application";
-          categories = ["AudioVideo"];
-          mimeType = ["application/x-resolveproj"];
-        };
-      };
-    };
   };
 }

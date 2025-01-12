@@ -20,5 +20,44 @@ in {
     home = {
       packages = [pkgs.swayimg];
     };
+    xdg = {
+      mimeApps = {
+        desktopEntries = {
+          swayimg = {
+            name = "Swayimg";
+            genericName = "Image Viewer";
+            exec = "swayimg %U";
+            icon = "swayimg";
+            terminal = false;
+            mimeType = [
+              "image/jpeg"
+              "image/png"
+              "image/gif"
+              "image/webp"
+              "image/bmp"
+              "image/tiff"
+            ];
+          };
+        };
+        associations = {
+          added = {
+            "image/jpeg" = ["swayimg.desktop"];
+            "image/png" = ["swayimg.desktop"];
+            "image/gif" = ["swayimg.desktop"];
+            "image/webp" = ["swayimg.desktop"];
+            "image/bmp" = ["swayimg.desktop"];
+            "image/tiff" = ["swayimg.desktop"];
+          };
+        };
+        defaultApplications = {
+          "image/jpeg" = ["swayimg.desktop"];
+          "image/png" = ["swayimg.desktop"];
+          "image/gif" = ["swayimg.desktop"];
+          "image/webp" = ["swayimg.desktop"];
+          "image/bmp" = ["swayimg.desktop"];
+          "image/tiff" = ["swayimg.desktop"];
+        };
+      };
+    };
   };
 }

@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules.shell;
   inherit (cfg.console) enable;
 in {
@@ -14,6 +18,7 @@ in {
   config = lib.mkIf (cfg.enable && enable) {
     services = {
       xserver = {
+        excludePackages = [pkgs.xterm];
         xkb = {
           layout = config.modules.locale.defaultLocale;
         };

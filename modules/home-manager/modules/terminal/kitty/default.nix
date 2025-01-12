@@ -35,5 +35,17 @@ in {
         };
       };
     };
+    xdg = {
+      mimeApps = {
+        associations = {
+          added = {
+            "x-scheme-handler/http" = ["brave.desktop"];
+          };
+        };
+        defaultApplications = {
+          "text/html" = ["brave.desktop"];
+        };
+      };
+    };
   };
 }

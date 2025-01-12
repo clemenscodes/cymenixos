@@ -435,11 +435,9 @@ in {
       };
     };
     xdg = {
-      enable = cfg.firefox.enable;
       mimeApps = {
-        enable = cfg.firefox.enable;
         associations = {
-          added = {
+          added = lib.mkIf (cfg.defaultBrowser == "firefox") {
             "x-scheme-handler/http" = ["firefox.desktop"];
             "x-scheme-handler/https" = ["firefox.desktop"];
             "x-scheme-handler/chrome" = ["firefox.desktop"];
@@ -452,7 +450,7 @@ in {
             "application/x-extension-xht" = ["firefox.desktop"];
           };
         };
-        defaultApplications = {
+        defaultApplications = lib.mkIf (cfg.defaultBrowser == "firefox") {
           "x-scheme-handler/http" = ["firefox.desktop"];
           "x-scheme-handler/https" = ["firefox.desktop"];
           "x-scheme-handler/chrome" = ["firefox.desktop"];

@@ -15,7 +15,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.zathura.enable) {
     programs = {
       zathura = {
-        enable = cfg.zathura.enable;
+        inherit (cfg.zathura) enable;
         options = {
           sandbox = "none";
           statusbar-h-padding = 0;
@@ -40,23 +40,9 @@ in {
       };
     };
     xdg = {
-      enable = true;
       mimeApps = {
-        enable = true;
         defaultApplications = {
           "application/pdf" = ["zathura.desktop"];
-        };
-      };
-      desktopEntries = {
-        zathura = {
-          name = "Zathura";
-          type = "Application";
-          genericName = "PDF Viewer";
-          exec = "zathura %U";
-          icon = "org.pwmt.zathura";
-          terminal = false;
-          categories = ["Viewer"];
-          mimeType = ["application/pdf"];
         };
       };
     };
