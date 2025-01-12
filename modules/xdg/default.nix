@@ -25,12 +25,6 @@ in {
       icons = {
         inherit (cfg.xdg) enable;
       };
-      portal = {
-        enable = cfg.display.gui != "headless";
-        wlr = {
-          enable = lib.mkForce cfg.display.gui == "wayland";
-        };
-      };
     };
   };
 }
