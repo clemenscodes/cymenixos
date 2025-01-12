@@ -83,6 +83,15 @@ in {
     programs = {
       thunderbird = {
         inherit (cfg.email.thunderbird) enable;
+        profiles = {
+          ${osConfig.modules.users.user} = {
+            search = {
+              default = "DuckDuckGo";
+              privateDefault = "DuckDuckGo";
+              order = ["DuckDuckGo"];
+            };
+          };
+        };
       };
     };
     xdg = {
