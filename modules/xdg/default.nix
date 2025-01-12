@@ -25,6 +25,9 @@ in {
       icons = {
         inherit (cfg.xdg) enable;
       };
+      portal = {
+        enable = false;
+      };
     };
   };
 }
