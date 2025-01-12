@@ -37,11 +37,6 @@ in {
       '';
       blacklistedKernelModules = ["snd_pcsp"];
     };
-    hardware = {
-      alsa = {
-        enable = true;
-      };
-    };
     services = {
       pipewire = {
         inherit (cfg.sound) enable;
