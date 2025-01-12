@@ -61,7 +61,10 @@ in {
     home = {
       persistence = {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
-          directories = [config.accounts.email.maildirBasePath];
+          directories = [
+            config.accounts.email.maildirBasePath
+            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird")
+          ];
         };
       };
       packages = [
