@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules;
 in {
   options = {
@@ -26,7 +30,11 @@ in {
         inherit (cfg.xdg) enable;
       };
       portal = {
-        enable = false;
+        extraPortals = lib.mkForce [
+          pkgs.xdg-desktop-portal
+          pkgs.xdg-desktop-portal-wlr
+          pkgs.xdg-desktop-portal-hyprland
+        ];
       };
     };
   };
