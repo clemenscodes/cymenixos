@@ -21,24 +21,24 @@ in {
       packages = [pkgs.swayimg];
     };
     xdg = {
-      mimeApps = {
-        desktopEntries = {
-          swayimg = {
-            name = "Swayimg";
-            genericName = "Image Viewer";
-            exec = "swayimg %U";
-            icon = "swayimg";
-            terminal = false;
-            mimeType = [
-              "image/jpeg"
-              "image/png"
-              "image/gif"
-              "image/webp"
-              "image/bmp"
-              "image/tiff"
-            ];
-          };
+      desktopEntries = {
+        swayimg = {
+          name = "Swayimg";
+          genericName = "Image Viewer";
+          exec = "swayimg %U";
+          icon = "swayimg";
+          terminal = false;
+          mimeType = [
+            "image/jpeg"
+            "image/png"
+            "image/gif"
+            "image/webp"
+            "image/bmp"
+            "image/tiff"
+          ];
         };
+      };
+      mimeApps = {
         associations = {
           added = {
             "image/jpeg" = ["swayimg.desktop"];
