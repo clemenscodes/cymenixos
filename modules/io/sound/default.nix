@@ -31,6 +31,12 @@ in {
         };
       };
     };
+    boot = {
+      extraModprobeConfig = ''
+        options snd slots=snd-hda-intel
+      '';
+      blacklistedKernelModules = ["snd_pcsp"];
+    };
     sound = {
       inherit (cfg.sound) enable;
     };
