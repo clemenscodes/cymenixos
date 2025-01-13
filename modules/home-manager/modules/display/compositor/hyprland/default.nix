@@ -353,9 +353,11 @@ in {
             thunderbird =
               if useEmail && useThunderbird
               then let
-                birdtray = pkgs.birdtray.overrideAttrs (_: {cmakeFlags = ["-DOPT_THUNDERBIRD_CMDLINE=${pkgs.thunderbird}/bin/thunderbird"];});
+                birdtray = pkgs.birdtray.overrideAttrs (_: {
+                  cmakeFlags = [''-DOPT_THUNDERBIRD_CMDLINE="/usr/bin/env MOZ_ENABLE_WAYLAND=0 ${pkgs.thunderbird}/bin/thunderbird"''];
+                });
               in ''
-                exec-once = ${birdtray}/bin/birdtray
+                exec-once = ${birdtray}/bin/birdtray -s
               ''
               else "";
           in ''
