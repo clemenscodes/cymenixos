@@ -63,12 +63,7 @@ in {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
             ".local/share/mail"
-            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/ImapMail")
-          ];
-          files = [
-            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/prefs.js")
-            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/user.js")
-            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/logins.json")
+            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird")
           ];
         };
       };
@@ -95,11 +90,6 @@ in {
         profiles = {
           ${user} = {
             isDefault = true;
-            search = {
-              default = "DuckDuckGo";
-              privateDefault = "DuckDuckGo";
-              order = ["DuckDuckGo"];
-            };
           };
         };
       };
