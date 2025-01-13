@@ -63,7 +63,10 @@ in {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
             ".local/share/mail"
-            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird")
+            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/ImapMail")
+            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/prefs.js")
+            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/user.js")
+            (lib.mkIf cfg.email.thunderbird.enable ".thunderbird/${user}/logins.json")
           ];
         };
       };
