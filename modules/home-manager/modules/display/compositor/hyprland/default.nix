@@ -24,6 +24,7 @@
   useBtop = config.modules.monitoring.btop.enable;
   useCalcurse = config.modules.organization.calcurse.enable;
   useEmail = config.modules.organization.email.enable;
+  useThunderbird = config.modules.organization.email.thunderbird.enable;
   useLf = config.modules.explorer.lf.enable;
   useYazi = config.modules.explorer.yazi.enable;
   useNvim = config.modules.editor.nixvim.enable;
@@ -185,6 +186,7 @@ in {
               (lib.mkIf (useKitty && useLf) "$mod, R, exec, kitty lf")
               (lib.mkIf (useKitty && useYazi) "$mod, R, exec, kitty yazi")
               (lib.mkIf (useKitty && useEmail) "$mod, E, exec, kitty neomutt")
+              (lib.mkIf (useKitty && useEmail && useThunderbird) "$mod SHIFT, E, exec, ${pkgs.thunderbird}/bin/thunderbird")
               (lib.mkIf (useKitty && useBtop) "$mod SHIFT, R, exec, kitty btop")
               (lib.mkIf (useKitty && useNcmpcpp) "$mod, M, exec, kitty ncmpcpp")
               (lib.mkIf (useKitty && useCalcurse) "$mod SHIFT, K, exec, kitty calcurse")
@@ -348,6 +350,14 @@ in {
                 exec-once = udiskie &
               ''
               else "";
+            thunderbird =
+              if useEmail && useThunderbird
+              then let
+                birdtray = pkgs.birdtray.overrideAttrs (_: {cmakeFlags = ["-DOPT_THUNDERBIRD_CMDLINE=${pkgs.thunderbird}/bin/thunderbird"];});
+              in ''
+                exec-once = ${birdtray}/bin/birdtray
+              ''
+              else "";
           in ''
             monitor = , preferred, auto, 1
 
@@ -379,6 +389,7 @@ in {
             ${swayidle}
             ${swayaudioidle}
             ${udiskie}
+            ${thunderbird}
             ${ssh}
             ${firefox}
             ${davinci}
