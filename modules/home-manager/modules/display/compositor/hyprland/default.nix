@@ -350,10 +350,10 @@ in {
                 exec-once = udiskie &
               ''
               else "";
-            thunderbird =
+            email =
               if useEmail && useThunderbird
               then ''
-                exec-once = ${lib.getExe thunderbird}
+                exec-once = ${lib.getExe pkgs.thunderbird}
               ''
               else "";
           in ''
@@ -387,7 +387,7 @@ in {
             ${swayidle}
             ${swayaudioidle}
             ${udiskie}
-            ${thunderbird}
+            ${email}
             ${ssh}
             ${firefox}
             ${davinci}
