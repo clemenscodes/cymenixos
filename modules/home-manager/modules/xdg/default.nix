@@ -123,6 +123,7 @@ in {
         config = {
           common = {
             default = "hyprland;gtk";
+            "org.freedesktop.portal.OpenURI" = "gtk";
           };
         };
       };

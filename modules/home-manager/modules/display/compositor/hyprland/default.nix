@@ -60,7 +60,6 @@ in {
   config = lib.mkIf (cfg.enable && cfg.hyprland.enable) {
     home = {
       packages = [
-        pkgs.xdg-desktop-portal-hyprland
         pkgs.brightnessctl
         pkgs.swww
         pkgs.wl-clipboard
