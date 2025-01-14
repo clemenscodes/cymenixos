@@ -137,7 +137,7 @@ in {
 
             bind = [
               "$mod, F, fullscreen"
-              "$mod, Q, ${lib.getExe close-window}"
+              "$mod, Q, exec, ${lib.getExe close-window}"
               "$mod, C, exec, hyprctl reload"
               "$mod, W, exec, ${config.modules.browser.defaultBrowser}"
               "$mod SHIFT, C, exit"
