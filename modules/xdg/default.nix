@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules;
 in {
   options = {
@@ -27,6 +31,14 @@ in {
       };
       mime = {
         inherit (cfg.xdg) enable;
+      };
+      portal = {
+        enable = true;
+        xdgOpenUsePortal = true;
+        extraPortals = [
+          pkgs.xdg-desktop-portal
+          pkgs.xdg-desktop-portal-gtk
+        ];
       };
     };
   };

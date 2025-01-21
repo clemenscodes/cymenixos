@@ -59,6 +59,10 @@ in {
                 mime = "audio/*";
                 run = "exifaudio";
               }
+              {
+                name = "*.bin";
+                run = "hexyl";
+              }
             ];
             append_previewers = [
               {

@@ -253,7 +253,7 @@ in {
               };
             };
             tray = {
-              icon-size = "24";
+              icon-size = "48 ";
               spacing = 10;
               interval = 1;
               show-passive-items = true;

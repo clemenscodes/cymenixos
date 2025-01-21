@@ -24,6 +24,7 @@
   useBtop = config.modules.monitoring.btop.enable;
   useCalcurse = config.modules.organization.calcurse.enable;
   useEmail = config.modules.organization.email.enable;
+  useThunderbird = config.modules.organization.email.thunderbird.enable;
   useLf = config.modules.explorer.lf.enable;
   useYazi = config.modules.explorer.yazi.enable;
   useNvim = config.modules.editor.nixvim.enable;
@@ -38,6 +39,13 @@
   useUdiskie = osConfig.modules.io.udisks.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   isLaptop = machine == "laptop";
+  close-window = pkgs.writeShellScriptBin "close-window" ''
+    if [ "$(${pkgs.hyprland}/bin/hyprctl activewindow -j | ${lib.getExe pkgs.jq} -r ".class")" = "Steam" ]; then
+        ${lib.getExe pkgs.xdotool} getactivewindow windowunmap
+    else
+        ${pkgs.hyprland}/bin/hyprctl dispatch killactive ""
+    fi
+  '';
 in {
   imports = [
     (import ./hyprshade {inherit inputs pkgs lib;})
@@ -59,7 +67,6 @@ in {
   config = lib.mkIf (cfg.enable && cfg.hyprland.enable) {
     home = {
       packages = [
-        pkgs.xdg-desktop-portal-hyprland
         pkgs.brightnessctl
         pkgs.swww
         pkgs.wl-clipboard
@@ -130,7 +137,7 @@ in {
 
             bind = [
               "$mod, F, fullscreen"
-              "$mod, Q, killactive"
+              "$mod, Q, exec, ${lib.getExe close-window}"
               "$mod, C, exec, hyprctl reload"
               "$mod, W, exec, ${config.modules.browser.defaultBrowser}"
               "$mod SHIFT, C, exit"
@@ -185,6 +192,7 @@ in {
               (lib.mkIf (useKitty && useLf) "$mod, R, exec, kitty lf")
               (lib.mkIf (useKitty && useYazi) "$mod, R, exec, kitty yazi")
               (lib.mkIf (useKitty && useEmail) "$mod, E, exec, kitty neomutt")
+              (lib.mkIf (useKitty && useEmail && useThunderbird) "$mod SHIFT, E, exec, ${pkgs.thunderbird}/bin/thunderbird")
               (lib.mkIf (useKitty && useBtop) "$mod SHIFT, R, exec, kitty btop")
               (lib.mkIf (useKitty && useNcmpcpp) "$mod, M, exec, kitty ncmpcpp")
               (lib.mkIf (useKitty && useCalcurse) "$mod SHIFT, K, exec, kitty calcurse")
@@ -222,6 +230,12 @@ in {
               (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessDown, exec, brightnessctl set 5%-")
               (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessUp, exec, brightnessctl set 5%+")
               (lib.mkIf (useMusic && useKitty) ", XF86AudioAudioMedia, exec, kitty ncmpcpp")
+
+              "$mod, P, togglespecialworkspace, magic"
+              "$mod, P, movetoworkspace, +0"
+              "$mod, P, togglespecialworkspace, magic"
+              "$mod, P, movetoworkspace, special:magic"
+              "$mod, P, togglespecialworkspace, magic"
             ];
 
             bindl = lib.mkIf isLaptop [

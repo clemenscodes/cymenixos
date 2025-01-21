@@ -119,10 +119,16 @@ in {
       portal = {
         inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
-        extraPortals = [pkgs.xdg-desktop-portal-hyprland];
+        extraPortals = [
+          pkgs.xdg-desktop-portal
+          pkgs.xdg-desktop-portal-gtk
+          pkgs.xdg-desktop-portal-wlr
+          pkgs.xdg-desktop-portal-hyprland
+        ];
         config = {
           common = {
             default = "hyprland;gtk";
+            "org.freedesktop.portal.OpenURI" = "gtk";
           };
         };
       };

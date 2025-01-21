@@ -90,11 +90,6 @@ in {
         profiles = {
           ${user} = {
             isDefault = true;
-            search = {
-              default = "DuckDuckGo";
-              privateDefault = "DuckDuckGo";
-              order = ["DuckDuckGo"];
-            };
           };
         };
       };
