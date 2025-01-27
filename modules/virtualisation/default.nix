@@ -53,6 +53,13 @@ in {
         inherit (cfg.virtualisation) enable;
       };
     };
+    users = {
+      users = {
+        ${config.modules.users.name} = {
+          extraGroups = ["usb"];
+        };
+      };
+    };
     home-manager = lib.mkIf (cfg.home-manager.enable && isDesktop) {
       users = {
         ${user} = {
