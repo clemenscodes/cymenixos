@@ -82,13 +82,17 @@ in {
           util-linux
           disko
         ])
-        ++ (lib.optional config.modules.airgap.cardano.enable [
-          bech32
-          cardano-address
-          cardano-cli
-          orchestrator-cli
-          cc-sign
-        ]);
+        ++ (
+          if config.modules.airgap.cardano.enable
+          then [
+            bech32
+            cardano-address
+            cardano-cli
+            orchestrator-cli
+            cc-sign
+          ]
+          else []
+        );
     };
   };
 }
