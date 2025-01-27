@@ -10,11 +10,11 @@
 }: let
   cfg = config.modules;
   capkgs = inputs.capkgs.packages.${system};
-  bech32 = capkgs.bech32-input-output-hk-cardano-node-10-1-3-36871ba;
-  cardano-address = capkgs.cardano-address-cardano-foundation-cardano-wallet-v2024-11-18-9eb5f59;
-  cardano-cli = capkgs.cardano-cli-input-output-hk-cardano-node-10-1-3-36871ba;
-  inherit (inputs.credential-manager.packages.${system}) orchestrator-cli cc-sign;
-  inherit (inputs.disko.packages.${system}) disko;
+  bech32 = capkgs.bech32-input-output-hk-cardano-node-10-1-4-1f63dbf;
+  cardano-address = capkgs.cardano-address-cardano-foundation-cardano-wallet-v2025-01-09-6965d18;
+  cardano-cli = capkgs.cardano-cli-input-output-hk-cardano-node-10-1-4-1f63dbf;
+  cc-sign = capkgs.cc-sign-IntersectMBO-credential-manager-0-1-2-0-081cc8c;
+  orchestrator-cli = capkgs.orchestrator-cli-IntersectMBO-credential-manager-0-1-2-0-081cc8c;
 in {
   options = {
     modules = {

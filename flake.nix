@@ -124,11 +124,6 @@
     capkgs = {
       url = "github:input-output-hk/capkgs";
     };
-
-    # Required image signing tooling
-    credential-manager = {
-      url = "github:IntersectMBO/credential-manager";
-    };
   };
 
   outputs = {
