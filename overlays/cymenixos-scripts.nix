@@ -123,9 +123,11 @@ final: prev: {
 
         if [ "$DRY_RUN" == true ]; then
           echo "Running in dry-run mode..."
+          echo "Would run disko-install --dry-run --mode format -f $CONFIG --disk main $DEVICE"
           disko-install --dry-run --mode format -f "$CONFIG" --disk main "$DEVICE"
         else
           echo "Running in actual mode (requires sudo)..."
+          echo "Running sudo disko-install --mode format -f $CONFIG --disk main $DEVICE"
           sudo disko-install --mode format -f "$CONFIG" --disk main "$DEVICE"
         fi
       '';
