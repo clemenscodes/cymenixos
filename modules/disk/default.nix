@@ -138,7 +138,7 @@ in {
                       mountpoint = "${persistPath}";
                       mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
                     };
-                    "/swap" = {
+                    "/swap" = lib.mkIf (!config.modules.airgap.enable) {
                       mountpoint = "/swap";
                       swap = {
                         swapfile = {

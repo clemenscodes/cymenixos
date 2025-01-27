@@ -6,6 +6,7 @@
   ...
 }: {...}: {
   imports = [
+    (import ./airgap {inherit inputs pkgs lib;})
     (import ./boot {inherit inputs pkgs lib;})
     (import ./config {inherit inputs pkgs lib cymenixos;})
     (import ./cpu {inherit inputs pkgs lib;})
