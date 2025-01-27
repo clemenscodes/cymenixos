@@ -1507,11 +1507,11 @@
         "xremap-flake": "xremap-flake"
       },
       "locked": {
-        "lastModified": 1737986581,
-        "narHash": "sha256-ls6OhLkNy+6JXEh+CmjDGvVGLJxww7vQUdx/ksHmj0E=",
+        "lastModified": 1737986697,
+        "narHash": "sha256-Y25I4czHoCKqE9lCPOpgrVl3J3HqMvLzzwTaVSTIsdo=",
         "owner": "clemenscodes",
         "repo": "cymenixos",
-        "rev": "acbd7e09208c8e1fe120998529ab42ce6f6e3f59",
+        "rev": "cdeb1a32fffde1cbdf84b28f7966e7c3bda891ab",
         "type": "github"
       },
       "original": {
@@ -8446,11 +8446,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1737970470,
-        "narHash": "sha256-R+/T3QVMwXTNW2QuIXib779tZleBVALPAWN3tsQdl3E=",
+        "lastModified": 1737981140,
+        "narHash": "sha256-8FB6RfgVzHLXDNAZ09+3Fdhul6N9jIaCI58jhK7ggEw=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "a24cde29c270187c2df80b5b53e187256b2f4968",
+        "rev": "3f261af20f127f5694a897d57861edf3dcde20e4",
         "type": "github"
       },
       "original": {
