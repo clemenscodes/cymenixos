@@ -15,7 +15,7 @@
     };
     disk = {
       enable = true;
-      device = "/dev/sda";
+      device = "/dev/sdc";
       luksDisk = "luks";
       swapsize = 64;
     };
