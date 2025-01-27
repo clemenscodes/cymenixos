@@ -82,6 +82,33 @@ in {
                     mountOptions = ["umask=0077"];
                   };
                 };
+                public = lib.mkIf (cfg.airgap.enable) {
+                  priority = 3;
+                  size = "256M";
+                  content = {
+                    type = "filesystem";
+                    format = "vfat";
+                    mountpoint = "/public";
+                    mountOptions = ["umask=0000"];
+                  };
+                };
+                private = lib.mkIf (cfg.airgap.enable) {
+                  priority = 4;
+                  size = "256M";
+                  content = {
+                    type = "luks";
+                    name = "private";
+                    askPassword = true;
+                    settings = {
+                      allowDiscards = true;
+                    };
+                    content = {
+                      type = "filesystem";
+                      format = "vfat";
+                      mountpoint = "/private";
+                    };
+                  };
+                };
                 luks = {
                   size = "100%";
                   label = "luks";
