@@ -322,6 +322,9 @@
             unzip = {
               enable = true;
             };
+            lsusb = {
+              enable = true;
+            };
             zip = {
               enable = true;
             };

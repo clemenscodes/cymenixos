@@ -164,7 +164,7 @@ final: prev: {
         # Always try to boot from disk first, fallback to ISO if disk fails
         LD_LIBRARY_PATH="${prev.pipewire.jack}/lib" qemu-kvm \
             -smp 8 \
-            -m 16G \
+            -m 32G \
             -drive file="$DISK",format=qcow2,if=virtio,id=disk,index=0 \
             -drive file="$ISO",format=raw,if=none,media=cdrom,id=cd,index=1,readonly=on \
             -device ahci,id=achi0 \
