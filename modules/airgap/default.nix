@@ -44,10 +44,5 @@ in {
         '';
       };
     };
-    modules = {
-      networking = {
-        enable = lib.mkForce false;
-      };
-    };
   };
 }
