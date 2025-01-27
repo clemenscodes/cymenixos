@@ -15,7 +15,7 @@ in {
       };
     };
     networking = {
-      hostName = lib.mkDefault cfg.defaultHostname;
+      hostName = lib.mkDefault cfg.hostname.defaultHostname;
       enableIPv6 = lib.mkForce false;
       interfaces = lib.mkForce {};
       useDHCP = lib.mkForce false;
