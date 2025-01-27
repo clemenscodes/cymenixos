@@ -168,17 +168,6 @@
       ${config.modules.users.user} = {
         modules = {
           enable = true;
-          development = {
-            enable = true;
-            direnv = {
-              enable = true;
-            };
-            git = {
-              enable = true;
-              userName = "Clemens Horn";
-              userEmail = "clemens.horn@mni.thm.de";
-            };
-          };
           display = {
             enable = true;
             bar = {
@@ -265,6 +254,9 @@
             enable = true;
             video = {
               enable = true;
+              mpv = {
+                enable = true;
+              };
               obs = {
                 enable = true;
               };
@@ -281,9 +273,6 @@
           };
           security = {
             enable = true;
-            bitwarden = {
-              enable = true;
-            };
             gpg = {
               enable = true;
             };
@@ -324,13 +313,7 @@
             fzf = {
               enable = true;
             };
-            lpi = {
-              enable = true;
-            };
             ripgrep = {
-              enable = true;
-            };
-            tldr = {
               enable = true;
             };
             unzip = {
