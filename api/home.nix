@@ -4,6 +4,9 @@
       ${config.modules.users.user} = {
         modules = {
           enable = false;
+          airgap = {
+            enable = false;
+          };
           browser = {
             enable = false;
             defaultBrowser = "brave";

@@ -118,6 +118,17 @@
         };
       };
     };
+
+    # For fetch-closure shrunk release packages with minimal eval time and dependency sizes
+    # Currently x86_64-linux only
+    capkgs = {
+      url = "github:input-output-hk/capkgs";
+    };
+
+    # Required image signing tooling
+    credential-manager = {
+      url = "github:IntersectMBO/credential-manager";
+    };
   };
 
   outputs = {
