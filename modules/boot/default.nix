@@ -90,7 +90,7 @@ in {
           "net.core.default_qdisc" = "cake";
         };
       };
-      supportedFilesystems = ["btrfs" "vfat"];
+      supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       tmp = {
         useTmpfs = lib.mkDefault true;
         cleanOnBoot = lib.mkDefault (!config.boot.tmp.useTmpfs);
