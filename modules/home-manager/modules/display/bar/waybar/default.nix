@@ -189,7 +189,7 @@ in {
               "custom/clock"
             ];
             "image#logo" = {
-              path = "${config.xdg.dataHome}/images/svg/nix-snowflake.svg";
+              path = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               size = height - 12;
               on-click = "sleep 0.3; ${pkgs.rofi-wayland}/bin/rofi -show drun";
             };
