@@ -35,6 +35,32 @@ in {
       users = {
         isIso = true;
       };
+      networking = {
+        enable = true;
+        dbus = {
+          enable = true;
+        };
+        firewall = {
+          enable = true;
+        };
+        wireless = {
+          enable = true;
+        };
+      };
+    };
+    home-manager = {
+      users = {
+        ${config.modules.users.user} = {
+          modules = {
+            networking = {
+              enable = true;
+              nm = {
+                enable = true;
+              };
+            };
+          };
+        };
+      };
     };
   };
 }
