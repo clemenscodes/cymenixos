@@ -118,7 +118,9 @@
         };
       };
     };
-
+    templates = {
+      url = "github:NixOS/templates";
+    };
     # For fetch-closure shrunk release packages with minimal eval time and dependency sizes
     # Currently x86_64-linux only
     capkgs = {
