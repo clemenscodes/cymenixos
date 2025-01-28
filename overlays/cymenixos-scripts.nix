@@ -132,7 +132,7 @@ final: prev: {
         fi
       '';
     };
-    qemu-run-iso = prev.writeShellApplication {
+    qemu-run-iso = prev.writeShellApplication rec {
       name = "qemu-run-iso";
       runtimeInputs = [
         prev.fd
@@ -157,24 +157,33 @@ final: prev: {
 
         # Create the disk if it doesn't exist
         if [ ! -f "$DISK" ]; then
-            echo "Disk not found. Creating a new disk and booting from ISO for installation..."
-            qemu-img create -f qcow2 "$DISK" 64G
+          echo "Disk not found. Creating a new disk and booting from ISO for installation..."
+          qemu-img create -f qcow2 "$DISK" 64G
+        fi
+
+        if [ "$#" = 0 ]; then
+          echo "Not passing through any host devices"
+          echo "It is recommended to passthrough the USB device"
+          echo "eg. '${name} -usb -device qemu-xhci -device usb-host,hostbus=<HOSTBUS>,hostaddr=<HOSTADDR>'"
+          echo "where HOSTBUS and HOSTADDR can be identified via 'lsusb'"
+          echo "If this fails, ensure your user has the group usb"
+          echo "Otherwise you may run 'chmod 666 /dev/bus/usb/<HOSTBUS>/<HOSTADDR>' to grant access to the USB device"
         fi
 
         # Always try to boot from disk first, fallback to ISO if disk fails
         LD_LIBRARY_PATH="${prev.pipewire.jack}/lib" qemu-kvm \
-            -smp 8 \
-            -m 32G \
-            -drive file="$DISK",format=qcow2,if=virtio,id=disk,index=0 \
-            -drive file="$ISO",format=raw,if=none,media=cdrom,id=cd,index=1,readonly=on \
-            -device ahci,id=achi0 \
-            -device virtio-vga-gl -display sdl,gl=on,show-cursor=off \
-            -device ide-cd,bus=achi0.0,drive=cd,id=cd1 \
-            -device intel-hda \
-            -device hda-duplex,audiodev=audio0 \
-            -audiodev pipewire,id=audio0 \
-            -boot order=cd,menu=on \
-            "$@"
+          -smp 8 \
+          -m 16G \
+          -drive file="$DISK",format=qcow2,if=virtio,id=disk,index=0 \
+          -drive file="$ISO",format=raw,if=none,media=cdrom,id=cd,index=1,readonly=on \
+          -device ahci,id=achi0 \
+          -device virtio-vga-gl -display sdl,gl=on,show-cursor=off \
+          -device ide-cd,bus=achi0.0,drive=cd,id=cd1 \
+          -device intel-hda \
+          -device hda-duplex,audiodev=audio0 \
+          -audiodev pipewire,id=audio0 \
+          -boot order=cd,menu=on \
+          "$@"
       '';
     };
     copyro = prev.writeShellApplication {
