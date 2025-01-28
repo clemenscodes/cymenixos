@@ -102,6 +102,9 @@ in {
                     settings = {
                       allowDiscards = true;
                     };
+                    postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
+                    extraFormatArgs = ["--pbkdf argon2id"];
+                    extraOpenArgs = ["--timeout 60"];
                     content = {
                       type = "filesystem";
                       format = "vfat";
@@ -119,6 +122,7 @@ in {
                     settings = {
                       allowDiscards = false;
                     };
+                    postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
                     extraFormatArgs = ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
                     content = {
