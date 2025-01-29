@@ -102,7 +102,7 @@ in {
               colorArg = "always";
               pager = "";
               useConfig = false;
-              externalDiffCommand = "";
+              externalDiffCommand = "${pkgs.difftastic}/bin/difft --color=always";
             };
             commit = {
               signOff = false;
