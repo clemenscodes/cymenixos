@@ -48,7 +48,7 @@ in {
             btrfs subvolume delete "$1"
           }
 
-          for subvolume in $(find /btrfs_tmp/snapshots/roots -maxdepth 1 -mtime +30); do
+          for subvolume in $(find /btrfs_tmp/snapshots/roots -maxdepth 1 -mtime +7); do
             delete_subvolume_recursively "$subvolume"
           done
 
