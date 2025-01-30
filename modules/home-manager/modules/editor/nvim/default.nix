@@ -8,8 +8,8 @@
   ...
 }: let
   cfg = config.modules.editor;
+  nvim = inputs.cymenixvim.packages.${system}.default;
 in {
-  imports = [inputs.nvim.homeManagerModules.${system}.default];
   options = {
     modules = {
       editor = {
@@ -20,10 +20,15 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.nvim.enable) {
-    modules = {
-      editor = {
-        nixvim = {
-          inherit (cfg.nvim) enable;
+    home = {
+      packages = [inputs.cymenixvim.packages.${system}.default];
+    };
+    programs = {
+      zsh = {
+        shellAliases = {
+          nvim = "${nvim}/bin/nvim";
+          vim = "${nvim}/bin/nvim";
+          vi = "${nvim}/bin/nvim";
         };
       };
     };

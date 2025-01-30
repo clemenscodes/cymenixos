@@ -46,8 +46,8 @@
         };
       };
     };
-    nvim = {
-      url = "github:cymenix/nvim";
+    cymenixvim = {
+      url = "github:clemenscodes/cymenixvim";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
