@@ -27,7 +27,7 @@
   useThunderbird = config.modules.organization.email.thunderbird.enable;
   useLf = config.modules.explorer.lf.enable;
   useYazi = config.modules.explorer.yazi.enable;
-  useNvim = config.modules.editor.nixvim.enable;
+  useNvim = config.modules.editor.nvim.enable;
   useFirefox = config.modules.browser.firefox.enable;
   useDavinci = config.modules.media.editing.davinci.enable;
   useBlueman = config.modules.networking.bluetooth.blueman.enable;
