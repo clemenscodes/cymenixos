@@ -151,9 +151,6 @@
       steam = {
         enable = false;
       };
-      umu = {
-        enable = false;
-      };
     };
     gpu = {
       enable = false;

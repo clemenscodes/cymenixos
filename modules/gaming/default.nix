@@ -28,7 +28,6 @@ in {
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
     (import ./steam {inherit inputs pkgs lib;})
-    (import ./umu {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
