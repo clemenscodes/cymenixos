@@ -50,6 +50,7 @@ in {
     programs = {
       steam = {
         inherit (cfg.steam) enable;
+        package = pkgs.steam;
         protontricks = {
           inherit (cfg.steam) enable;
         };
@@ -68,7 +69,9 @@ in {
         extest = {
           inherit (cfg.steam) enable;
         };
-        package = pkgs.steam;
+        platformOptimizations = {
+          inherit (cfg.steam) enable;
+        };
         extraPackages = [
           pkgs.xorg.libXcursor
           pkgs.xorg.libXi
