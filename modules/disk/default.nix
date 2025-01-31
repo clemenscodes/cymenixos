@@ -246,7 +246,6 @@ in {
           "d /snapshots/persist 0755 root root"
           "d /snapshots/logs 0755 root root"
           "d /snapshots/boots 0755 root root"
-          "d /snapshots/roots 0755 root root"
         ];
       };
     };
