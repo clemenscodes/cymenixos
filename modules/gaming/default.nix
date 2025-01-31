@@ -25,7 +25,6 @@ in {
   imports = [
     inputs.nix-gaming.nixosModules.pipewireLowLatency
     inputs.nix-gaming.nixosModules.platformOptimizations
-    inputs.nix-gaming.nixosModules.steamCompat
     (import ./emulation {inherit inputs pkgs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
