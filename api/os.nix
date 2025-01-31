@@ -298,6 +298,9 @@
       tpm = {
         enable = false;
       };
+      yubikey = {
+        enable = false;
+      };
     };
     shell = {
       enable = false;
