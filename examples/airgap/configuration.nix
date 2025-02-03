@@ -134,6 +134,9 @@
       tpm = {
         enable = true;
       };
+      yubikey = {
+        enable = true;
+      };
     };
     shell = {
       enable = true;
@@ -320,6 +323,9 @@
               enable = true;
             };
             unzip = {
+              enable = true;
+            };
+            lsusb = {
               enable = true;
             };
             zip = {
