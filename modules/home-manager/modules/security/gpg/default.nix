@@ -21,6 +21,11 @@ in {
         enableSshSupport = cfg.ssh.enable;
         enableZshIntegration = config.modules.shell.zsh.enable;
         pinentryPackage = pkgs.pinentry-gnome3;
+        maxCacheTtl = 120;
+        defaultCacheTtl = 60;
+        extraConfig = ''
+          ttyname $GPG_TTY
+        '';
       };
     };
     programs = {
