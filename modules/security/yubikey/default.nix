@@ -28,6 +28,7 @@
   yubikey-gpg-setup = pkgs.writeShellApplication {
     name = "yubikey-gpg-setup";
     runtimeInputs = [pkgs.gnupg];
+    excludeShellChecks = ["SC2086"];
     text = ''
       IDENTITY="yubikey"
       KEY_TYPE="rsa4096"
