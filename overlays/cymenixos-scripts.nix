@@ -193,6 +193,60 @@ final: prev: {
         IDENTITY="YubiKey"
         KEY_TYPE="rsa4096"
         EXPIRATION="2y"
+        GNUPGHOME="''${GNUPGHOME:-$HOME/.gnupg}"
+        PUBLIC_KEY_DEST="''${GNUPGHOME}"
+        PASSPHRASE_FILE=""
+
+        usage() {
+            echo "Usage: $0 [options]"
+            echo "Options:"
+            echo "  --identity NAME       Set the identity name (default: $IDENTITY)"
+            echo "  --key-type TYPE       Set the key type (default: $KEY_TYPE)"
+            echo "  --expiration TIME     Set the expiration time (default: $EXPIRATION)"
+            echo "  --gnupg-home DIR      Set the GnuPG home directory (default: $GNUPGHOME)"
+            echo "  --public-key-dest DIR Set the public key export destination (default: $PUBLIC_KEY_DEST)"
+            echo "  --passphrase-file FILE Export the certify passphrase to the specified file"
+            echo "  --help                Display this help message"
+            exit 1
+        }
+
+        while [[ "$#" -gt 0 ]]; do
+            case "$1" in
+                --identity)
+                    IDENTITY="$2"
+                    shift 2
+                    ;;
+                --key-type)
+                    KEY_TYPE="$2"
+                    shift 2
+                    ;;
+                --expiration)
+                    EXPIRATION="$2"
+                    shift 2
+                    ;;
+                --gnupg-home)
+                    GNUPGHOME="$2"
+                    shift 2
+                    ;;
+                --public-key-dest)
+                    PUBLIC_KEY_DEST="$2"
+                    shift 2
+                    ;;
+                --passphrase-file)
+                    PASSPHRASE_FILE="$2"
+                    shift 2
+                    ;;
+                --help)
+                    usage
+                    ;;
+                *)
+                    echo "Unknown option: $1"
+                    usage
+                    ;;
+            esac
+        done
+
+        mkdir -p "$GNUPGHOME"
 
         echo "Generating passphrase"
 
@@ -204,6 +258,12 @@ final: prev: {
 
         echo "passphrase: $CERTIFY_PASS"
 
+        if [[ -n "$PASSPHRASE_FILE" ]]; then
+            echo "Exporting passphrase to $PASSPHRASE_FILE"
+            echo "$CERTIFY_PASS" > "$PASSPHRASE_FILE"
+            chmod 600 "$PASSPHRASE_FILE"  # Restrict access to the passphrase file
+        fi
+
         echo "Creating certify key"
 
         echo "$CERTIFY_PASS" | gpg --batch --passphrase-fd 0 --quick-generate-key "$IDENTITY" "$KEY_TYPE" cert never
@@ -213,9 +273,9 @@ final: prev: {
 
         echo "Creating subkeys"
 
-        for SUBKEY in sign encrypt auth ; do \
-          echo "$CERTIFY_PASS" | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 \
-              --quick-add-key "$KEYFP" "$KEY_TYPE" "$SUBKEY" "$EXPIRATION"
+        for SUBKEY in sign encrypt auth ; do
+            echo "$CERTIFY_PASS" | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 \
+                --quick-add-key "$KEYFP" "$KEY_TYPE" "$SUBKEY" "$EXPIRATION"
         done
 
         gpg -K
@@ -232,10 +292,10 @@ final: prev: {
 
         echo "Exporting public key"
 
-        gpg --output "$GNUPGHOME/$KEYID-$(date +%F).asc" \
+        gpg --output "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc" \
             --armor --export "$KEYID"
 
-        sudo chmod 0444 "$GNUPGHOME"/*.asc
+        sudo chmod 0444 "$PUBLIC_KEY_DEST"/*.asc
       '';
     };
     copyro = prev.writeShellApplication {
