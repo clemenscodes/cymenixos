@@ -55,7 +55,7 @@ in {
       useDHCP = lib.mkForce false;
       useNetworkd = lib.mkForce false;
       dhcpcd = {
-        enable = lib.mkforce false;
+        enable = lib.mkForce false;
         allowInterfaces = lib.mkForce [];
       };
       resolvconf = {
