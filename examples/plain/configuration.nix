@@ -4,9 +4,7 @@
   system,
   ...
 }: {
-  imports = [
-    inputs.cymenixos.nixosModules.${system}.default
-  ];
+  imports = [inputs.cymenixos.nixosModules.${system}.default];
   modules = {
     enable = true;
     disk = {
