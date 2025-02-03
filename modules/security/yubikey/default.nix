@@ -118,36 +118,36 @@
 
       echo "Creating certify key"
 
-      echo "$CERTIFY_PASS" | gpg --batch --passphrase-fd 0 --quick-generate-key "$IDENTITY" "$KEY_TYPE" cert never
+      echo $CERTIFY_PASS | gpg --batch --passphrase-fd 0 --quick-generate-key $IDENTITY $KEY_TYPE cert never
 
-      KEYID=$(gpg -k --with-colons "$IDENTITY" | awk -F: '/^pub:/ { print $5; exit }')
-      KEYFP=$(gpg -k --with-colons "$IDENTITY" | awk -F: '/^fpr:/ { print $10; exit }')
+      KEYID=$(gpg -k --with-colons $IDENTITY | awk -F: '/^pub:/ { print $5; exit }')
+      KEYFP=$(gpg -k --with-colons $IDENTITY | awk -F: '/^fpr:/ { print $10; exit }')
 
       echo "Creating subkeys"
 
       for SUBKEY in sign encrypt auth ; do
-          echo "$CERTIFY_PASS" | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 \
-              --quick-add-key "$KEYFP" "$KEY_TYPE" "$SUBKEY" "$EXPIRATION"
+          echo $CERTIFY_PASS | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 \
+              --quick-add-key $KEYFP $KEY_TYPE $SUBKEY $EXPIRATION
       done
 
       gpg -K
 
       echo "Creating backup keys"
 
-      echo "$CERTIFY_PASS" | gpg --output "$GNUPGHOME/$KEYID-Certify.key" \
+      echo $CERTIFY_PASS | gpg --output "$GNUPGHOME/$KEYID-Certify.key" \
           --batch --pinentry-mode=loopback --passphrase-fd 0 \
           --armor --export-secret-keys "$KEYID"
 
-      echo "$CERTIFY_PASS" | gpg --output "$GNUPGHOME/$KEYID-Subkeys.key" \
+      echo $CERTIFY_PASS | gpg --output "$GNUPGHOME/$KEYID-Subkeys.key" \
           --batch --pinentry-mode=loopback --passphrase-fd 0 \
           --armor --export-secret-subkeys "$KEYID"
 
       echo "Exporting public key"
 
-      gpg --output "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc" \
+      gpg --output $PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc \
           --armor --export "$KEYID"
 
-      sudo chmod 0444 "$PUBLIC_KEY_DEST"/*.asc
+      sudo chmod 0444 $PUBLIC_KEY_DEST/*.asc
 
       echo "Generating pins"
 
@@ -170,8 +170,8 @@
 
       if [[ -n "$ADMIN_PIN_FILE" ]]; then
           echo "Exporting admin pin to $ADMIN_PIN_FILE"
-          echo "$ADMIN_PIN" > "$ADMIN_PIN_FILE"
-          chmod 600 "$ADMIN_PIN_FILE"
+          echo $ADMIN_PIN > $ADMIN_PIN_FILE
+          chmod 600 $ADMIN_PIN_FILE
       fi
 
       echo "Updating user pin to $USER_PIN"
@@ -186,8 +186,8 @@
 
       if [[ -n "$USER_PIN_FILE" ]]; then
           echo "Exporting user pin to $USER_PIN_FILE"
-          echo "$USER_PIN" > "$USER_PIN_FILE"
-          chmod 600 "$USER_PIN_FILE"
+          echo $USER_PIN > $USER_PIN_FILE
+          chmod 600 $USER_PIN_FILE
       fi
 
       echo "Setting smart card attributes"
@@ -206,7 +206,7 @@
 
       echo "Transferring signature key"
 
-      gpg --command-fd=0 --pinentry-mode=loopback --edit-key "$KEYID" <<EOF
+      gpg --command-fd=0 --pinentry-mode=loopback --edit-key $KEYID <<EOF
       key 1
       keytocard
       1
@@ -217,7 +217,7 @@
 
       echo "Transferring encryption key"
 
-      gpg --command-fd=0 --pinentry-mode=loopback --edit-key "$KEYID" <<EOF
+      gpg --command-fd=0 --pinentry-mode=loopback --edit-key $KEYID <<EOF
       key 2
       keytocard
       2
@@ -228,7 +228,7 @@
 
       echo "Transferring authentication key"
 
-      gpg --command-fd=0 --pinentry-mode=loopback --edit-key "$KEYID" <<EOF
+      gpg --command-fd=0 --pinentry-mode=loopback --edit-key $KEYID <<EOF
       key 3
       keytocard
       3
