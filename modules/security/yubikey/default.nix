@@ -56,7 +56,6 @@ in {
       gnupg = {
         agent = {
           inherit (cfg.yubikey) enable;
-          enableSSHSupport = true;
         };
       };
     };
