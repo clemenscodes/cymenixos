@@ -118,6 +118,9 @@
     capkgs = {
       url = "github:input-output-hk/capkgs";
     };
+    yubikey-guide = {
+      url = "github:drduh/YubiKey-Guide";
+    };
   };
 
   outputs = {

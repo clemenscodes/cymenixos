@@ -1,9 +1,30 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
 }: {config, ...}: let
   cfg = config.modules.security;
+  viewYubikeyGuide = pkgs.writeShellScriptBin "view-yubikey-guide" ''
+    viewer="$(type -P xdg-open || true)"
+    if [ -z "$viewer" ]; then
+      viewer="${pkgs.glow}/bin/glow -p"
+    fi
+    exec $viewer "${inputs.yubikey-guide}/README.md"
+  '';
+  shortcut = pkgs.makeDesktopItem {
+    name = "yubikey-guide";
+    icon = "${pkgs.yubikey-manager-qt}/share/icons/hicolor/128x128/apps/ykman.png";
+    desktopName = "drduh's YubiKey Guide";
+    genericName = "Guide to using YubiKey for GnuPG and SSH";
+    comment = "Open the guide in a reader program";
+    categories = ["Documentation"];
+    exec = "${viewYubikeyGuide}/bin/view-yubikey-guide";
+  };
+  yubikeyGuide = pkgs.symlinkJoin {
+    name = "yubikey-guide";
+    paths = [viewYubikeyGuide shortcut];
+  };
 in {
   options = {
     modules = {
@@ -47,7 +68,16 @@ in {
         pkgs.yubikey-personalization-gui
         pkgs.yubico-piv-tool
         pkgs.yubioath-flutter
+        yubikeyGuide
       ];
+    };
+    system = {
+      activationScripts = {
+        yubikey-guide = ''
+          ln -sf ${yubikeyGuide}/share/applications/${yubikeyGuide.name} /home/${config.modules.users.name}/Desktop
+          ln -sfT ${inputs.yubikey-guide} /home/${config.modules.users.name}/Documents/YubiKey-Guide
+        '';
+      };
     };
   };
 }

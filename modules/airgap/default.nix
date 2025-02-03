@@ -91,7 +91,11 @@ in {
         (with pkgs; [
           cfssl
           cryptsetup
+          pgdump
+          paperkey
+          rng-tools
           gnupg
+          pcsctools
           jq
           lvm2
           openssl
