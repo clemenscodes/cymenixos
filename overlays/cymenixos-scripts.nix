@@ -230,8 +230,12 @@ final: prev: {
             --batch --pinentry-mode=loopback --passphrase-fd 0 \
             --armor --export-secret-subkeys "$KEYID"
 
+        echo "Exporting public key"
+
         gpg --output "$GNUPGHOME/$KEYID-$(date +%F).asc" \
             --armor --export "$KEYID"
+
+        sudo chmod 0444 "$GNUPGHOME"/*.asc
       '';
     };
     copyro = prev.writeShellApplication {
