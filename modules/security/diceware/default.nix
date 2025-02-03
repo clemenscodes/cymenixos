@@ -91,5 +91,18 @@ in {
         dicewareWebApp
       ];
     };
+    system = {
+      activationScripts = {
+        yubikey-guide = let
+          homeDir = "/home/${config.modules.users.name}/";
+          desktopDir = homeDir + "Desktop/";
+          documentsDir = homeDir + "Documents/";
+        in ''
+          mkdir -p ${desktopDir} ${documentsDir}
+          chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
+          ln -sf ${dicewareWebApp}/share/applications/${dicewareWebApp.name} ${desktopDir}
+        '';
+      };
+    };
   };
 }

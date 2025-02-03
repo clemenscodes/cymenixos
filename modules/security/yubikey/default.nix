@@ -72,7 +72,14 @@ in {
     };
     system = {
       activationScripts = {
-        yubikey-guide = ''
+        yubikey-guide = let
+          homeDir = "/home/${config.modules.users.name}/";
+          desktopDir = homeDir + "Desktop/";
+          documentsDir = homeDir + "Documents/";
+        in ''
+          mkdir -p ${desktopDir} ${documentsDir}
+          chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
+          ln -sf ${yubikeyGuide}/share/applications/yubikey-guide.desktop ${desktopDir}
           ln -sfT ${inputs.yubikey-guide} /home/${config.modules.users.name}/Documents/YubiKey-Guide
         '';
       };
