@@ -93,7 +93,7 @@ in {
     };
     system = {
       activationScripts = {
-        yubikey-guide = let
+        diceware = let
           homeDir = "/home/${config.modules.users.name}/";
           desktopDir = homeDir + "Desktop/";
           documentsDir = homeDir + "Documents/";
