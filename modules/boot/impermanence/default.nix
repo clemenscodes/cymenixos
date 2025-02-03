@@ -40,7 +40,6 @@ in {
 
           btrfs subvolume create /btrfs_tmp/root
           umount /btrfs_tmp
-          mount -o subvol=root /dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume} /mnt-root
         '';
       };
     };
