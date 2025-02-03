@@ -59,7 +59,7 @@ in {
         allowInterfaces = lib.mkForce [];
       };
       resolvconf = {
-        enable = lib.mkforce false;
+        enable = lib.mkForce false;
       };
       networkmanager = {
         enable = lib.mkForce false;
