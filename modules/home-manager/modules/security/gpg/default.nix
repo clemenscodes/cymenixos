@@ -53,20 +53,6 @@ in {
           armor = true;
           use-agent = true;
           throw-keyids = true;
-          # Uncomment and set the following options if needed:
-          # default-key = "0xFF00000000000001";
-          # trusted-key = "0xFF00000000000001";
-          # group = "keygroup = 0xFF00000000000003 0xFF00000000000002 0xFF00000000000001";
-          # keyserver = "hkps://keys.openpgp.org";
-          # keyserver-options = {
-          #   http-proxy = "http://127.0.0.1:8118";
-          #   http-proxy = "socks5-hostname://127.0.0.1:9050";
-          # };
-          # auto-key-locate = "wkd,dane,local";
-          # auto-key-retrieve = true;
-          # trust-model = "tofu+pgp";
-          # list-options = "show-unusable-subkeys";
-          # verbose = true;
         };
       };
     };

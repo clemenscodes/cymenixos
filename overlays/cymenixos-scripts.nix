@@ -186,6 +186,54 @@ final: prev: {
           "$@"
       '';
     };
+    create-gpg-keys = prev.writeShellApplication {
+      name = "create-gpg-keys";
+      runtimeInputs = [prev.gnupg];
+      text = ''
+        IDENTITY="YubiKey"
+        KEY_TYPE="rsa4096"
+        EXPIRATION="2y"
+
+        echo "Generating passphrase"
+
+        RANDOM_ENTROPY=$(head -c 1000 /dev/urandom | LC_ALL=C tr -dc 'A-Z1-9' | head -c 1000)
+        FILTERED_ENTROPY=$(echo "$RANDOM_ENTROPY" | tr -d "1IOS5U")
+        TRIMMED_ENTROPY=$(echo "$FILTERED_ENTROPY" | fold -w 30 | head -1)
+        SPLIT_ENTROPY=$(echo "$TRIMMED_ENTROPY" | sed "-es/./ /"{1..26..5})
+        CERTIFY_PASS=$(echo "$SPLIT_ENTROPY" | cut -c2- | tr " " "-")
+
+        echo "passphrase: $CERTIFY_PASS"
+
+        echo "Creating certify key"
+
+        echo "$CERTIFY_PASS" | gpg --batch --passphrase-fd 0 --quick-generate-key "$IDENTITY" "$KEY_TYPE" cert never
+
+        KEYID=$(gpg -k --with-colons "$IDENTITY" | awk -F: '/^pub:/ { print $5; exit }')
+        KEYFP=$(gpg -k --with-colons "$IDENTITY" | awk -F: '/^fpr:/ { print $10; exit }')
+
+        echo "Creating subkeys"
+
+        for SUBKEY in sign encrypt auth ; do \
+          echo "$CERTIFY_PASS" | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 \
+              --quick-add-key "$KEYFP" "$KEY_TYPE" "$SUBKEY" "$EXPIRATION"
+        done
+
+        gpg -K
+
+        echo "Creating backup keys"
+
+        echo "$CERTIFY_PASS" | gpg --output "$GNUPGHOME/$KEYID-Certify.key" \
+            --batch --pinentry-mode=loopback --passphrase-fd 0 \
+            --armor --export-secret-keys "$KEYID"
+
+        echo "$CERTIFY_PASS" | gpg --output "$GNUPGHOME/$KEYID-Subkeys.key" \
+            --batch --pinentry-mode=loopback --passphrase-fd 0 \
+            --armor --export-secret-subkeys "$KEYID"
+
+        gpg --output "$GNUPGHOME/$KEYID-$(date +%F).asc" \
+            --armor --export "$KEYID"
+      '';
+    };
     copyro = prev.writeShellApplication {
       name = "copyro";
       text = ''
@@ -252,6 +300,7 @@ final: prev: {
         ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
         ln -s ${copyro}/bin/copyro $out/bin
         ln -s ${btrfs-swap-resume-offset}/bin/btrfs-swap-resume-offset $out/bin
+        ln -s ${create-gpg-keys}/bin/create-gpg-keys $out/bin
       '';
     };
 }
