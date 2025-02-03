@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
@@ -22,7 +23,7 @@
     };
     patches = [
       # Include changes published on https://secure.research.vt.edu/diceware/
-      ./patches/diceware-vt.patch
+      "${inputs.yubikey-guide}/diceware-vt.patch"
     ];
     buildPhase = ''
       cp -a . $out
