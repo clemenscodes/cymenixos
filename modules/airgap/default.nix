@@ -38,11 +38,29 @@ in {
         enable = lib.mkForce false;
       };
     };
+    boot = {
+      initrd = {
+        network = {
+          enable = lib.mkForce false;
+        };
+      };
+    };
     networking = {
+      firewall = {
+        enable = true;
+      };
       hostName = lib.mkDefault cfg.hostname.defaultHostname;
       enableIPv6 = lib.mkForce false;
       interfaces = lib.mkForce {};
       useDHCP = lib.mkForce false;
+      useNetworkd = lib.mkForce false;
+      dhcpcd = {
+        enable = lib.mkforce false;
+        allowInterfaces = lib.mkForce [];
+      };
+      resolvconf = {
+        enable = lib.mkforce false;
+      };
       networkmanager = {
         enable = lib.mkForce false;
       };
