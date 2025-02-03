@@ -34,9 +34,12 @@ in {
           mkdir -p /btrfs_tmp
           mount /dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume} /btrfs_tmp
 
-          if btrfs subvolume list /btrfs_tmp | grep -q 'root'; then
-            btrfs subvolume delete /btrfs_tmp/root
-          fi
+          while read subvolume; do
+              echo "Deleting /$subvolume subvolume"
+              btrfs subvolume delete "/btrfs_tmp/$subvolume"
+          done &&
+          echo "Deleting /root subvolume" &&
+          btrfs subvolume delete /btrfs_tmp/root
 
           btrfs subvolume create /btrfs_tmp/root
           umount /btrfs_tmp
