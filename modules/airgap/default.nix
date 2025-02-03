@@ -94,6 +94,7 @@ in {
           pgpdump
           paperkey
           rng-tools
+          ent
           gnupg
           pcsctools
           jq
