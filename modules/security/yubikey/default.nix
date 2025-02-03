@@ -254,6 +254,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.yubikey.enable) {
+    boot = {
+      initrd = {
+        luks = {
+          yubikeySupport = cfg.yubikey.enable;
+        };
+      };
+    };
     hardware = {
       gpgSmartcards = {
         inherit (cfg.yubikey) enable;
@@ -268,6 +275,9 @@ in {
       };
     };
     programs = {
+      yubikey-touch-detector = {
+        inherit (cfg.yubikey) enable;
+      };
       ssh = {
         startAgent = false;
       };
@@ -275,6 +285,11 @@ in {
         agent = {
           inherit (cfg.yubikey) enable;
         };
+      };
+    };
+    services = {
+      yubikey-agent = {
+        inherit (cfg.yubikey) enable;
       };
     };
     environment = {
