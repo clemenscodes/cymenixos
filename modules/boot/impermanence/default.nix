@@ -33,8 +33,14 @@ in {
         postDeviceCommands = lib.mkAfter ''
           mkdir -p /btrfs_tmp
           mount /dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume} /btrfs_tmp
+
+          if btrfs subvolume list /btrfs_tmp | grep -q 'root'; then
+            btrfs subvolume delete /btrfs_tmp/root
+          fi
+
           btrfs subvolume create /btrfs_tmp/root
           umount /btrfs_tmp
+          mount -o subvol=root /dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume} /mnt-root
         '';
       };
     };
