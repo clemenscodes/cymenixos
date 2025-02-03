@@ -163,8 +163,8 @@
       gpg --command-fd=0 --pinentry-mode=loopback --change-pin <<EOF
       3
       12345678
-      "$ADMIN_PIN"
-      "$ADMIN_PIN"
+      $ADMIN_PIN
+      $ADMIN_PIN
       q
       EOF
 
@@ -179,8 +179,8 @@
       gpg --command-fd=0 --pinentry-mode=loopback --change-pin <<EOF
       1
       123456
-      "$USER_PIN"
-      "$USER_PIN"
+      $USER_PIN
+      $USER_PIN
       q
       EOF
 
@@ -195,8 +195,8 @@
       gpg --command-fd=0 --pinentry-mode=loopback --edit-card <<EOF
       admin
       login
-      "$IDENTITY"
-      "$ADMIN_PIN"
+      $IDENTITY
+      $ADMIN_PIN
       quit
       EOF
 
@@ -210,8 +210,8 @@
       key 1
       keytocard
       1
-      "$CERTIFY_PASS"
-      "$ADMIN_PIN"
+      $CERTIFY_PASS
+      $ADMIN_PIN
       save
       EOF
 
@@ -221,8 +221,8 @@
       key 2
       keytocard
       2
-      "$CERTIFY_PASS"
-      "$ADMIN_PIN"
+      $CERTIFY_PASS
+      $ADMIN_PIN
       save
       EOF
 
@@ -232,8 +232,8 @@
       key 3
       keytocard
       3
-      "$CERTIFY_PASS"
-      "$ADMIN_PIN"
+      $CERTIFY_PASS
+      $ADMIN_PIN
       save
       EOF
 
