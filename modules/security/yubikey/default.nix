@@ -42,16 +42,15 @@
       usage() {
           echo "Usage: $0 [options]"
           echo "Options:"
-          echo "  --identity NAME       Set the identity name (default: $IDENTITY)"
-          echo "  --key-type TYPE       Set the key type (default: $KEY_TYPE)"
-          echo "  --expiration TIME     Set the expiration time (default: $EXPIRATION)"
-          echo "  --gnupg-home DIR      Set the GnuPG home directory (default: $GNUPGHOME)"
-          echo "  --public-key-dest DIR Set the public key export destination (default: $PUBLIC_KEY_DEST)"
+          echo "  --identity NAME        Set the identity name (default: $IDENTITY)"
+          echo "  --key-type TYPE        Set the key type (default: $KEY_TYPE)"
+          echo "  --expiration TIME      Set the expiration time (default: $EXPIRATION)"
+          echo "  --gnupg-home DIR       Set the GnuPG home directory (default: $GNUPGHOME)"
+          echo "  --public-key-dest DIR  Set the public key export destination (default: $PUBLIC_KEY_DEST)"
           echo "  --passphrase-file FILE Export the certify passphrase to the specified file"
-          echo "  --admin-pin-file FILE Export the admin pin to the specified file"
-          echo "  --user-pin-file FILE Export the user pin to the specified file"
-          echo "  --passphrase-file FILE Export the certify passphrase to the specified file"
-          echo "  --help                Display this help message"
+          echo "  --admin-pin-file FILE  Export the admin pin to the specified file"
+          echo "  --user-pin-file FILE   Export the user pin to the specified file"
+          echo "  --help                 Display this help message"
           exit 1
       }
 
