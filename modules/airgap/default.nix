@@ -91,7 +91,7 @@ in {
         (with pkgs; [
           cfssl
           cryptsetup
-          pgdump
+          pgpdump
           paperkey
           rng-tools
           gnupg
