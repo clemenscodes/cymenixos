@@ -5,6 +5,7 @@
   ...
 }: {...}: {
   imports = [
+    (import ./diceware {inherit inputs pkgs lib;})
     (import ./gnome-keyring {inherit inputs pkgs lib;})
     (import ./gnupg {inherit inputs pkgs lib;})
     (import ./hyprlock {inherit inputs pkgs lib;})

@@ -267,6 +267,11 @@
     };
     security = {
       enable = false;
+      diceware = {
+        enable = true;
+        addr = "localhost";
+        port = 8080;
+      };
       gnome-keyring = {
         enable = false;
       };
