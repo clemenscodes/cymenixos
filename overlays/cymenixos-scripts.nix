@@ -246,118 +246,6 @@ final: prev: {
           "$@"
       '';
     };
-    create-gpg-keys = prev.writeShellApplication {
-      name = "create-gpg-keys";
-      runtimeInputs = [prev.gnupg];
-      text = ''
-        IDENTITY="YubiKey"
-        KEY_TYPE="rsa4096"
-        EXPIRATION="2y"
-        GNUPGHOME="''${GNUPGHOME:-$HOME/.gnupg}"
-        PUBLIC_KEY_DEST="''${GNUPGHOME}"
-        PASSPHRASE_FILE=""
-
-        usage() {
-            echo "Usage: $0 [options]"
-            echo "Options:"
-            echo "  --identity NAME       Set the identity name (default: $IDENTITY)"
-            echo "  --key-type TYPE       Set the key type (default: $KEY_TYPE)"
-            echo "  --expiration TIME     Set the expiration time (default: $EXPIRATION)"
-            echo "  --gnupg-home DIR      Set the GnuPG home directory (default: $GNUPGHOME)"
-            echo "  --public-key-dest DIR Set the public key export destination (default: $PUBLIC_KEY_DEST)"
-            echo "  --passphrase-file FILE Export the certify passphrase to the specified file"
-            echo "  --help                Display this help message"
-            exit 1
-        }
-
-        while [[ "$#" -gt 0 ]]; do
-            case "$1" in
-                --identity)
-                    IDENTITY="$2"
-                    shift 2
-                    ;;
-                --key-type)
-                    KEY_TYPE="$2"
-                    shift 2
-                    ;;
-                --expiration)
-                    EXPIRATION="$2"
-                    shift 2
-                    ;;
-                --gnupg-home)
-                    GNUPGHOME="$2"
-                    shift 2
-                    ;;
-                --public-key-dest)
-                    PUBLIC_KEY_DEST="$2"
-                    shift 2
-                    ;;
-                --passphrase-file)
-                    PASSPHRASE_FILE="$2"
-                    shift 2
-                    ;;
-                --help)
-                    usage
-                    ;;
-                *)
-                    echo "Unknown option: $1"
-                    usage
-                    ;;
-            esac
-        done
-
-        mkdir -p "$GNUPGHOME"
-
-        echo "Generating passphrase"
-
-        RANDOM_ENTROPY=$(head -c 1000 /dev/urandom | LC_ALL=C tr -dc 'A-Z1-9' | head -c 1000)
-        FILTERED_ENTROPY=$(echo "$RANDOM_ENTROPY" | tr -d "1IOS5U")
-        TRIMMED_ENTROPY=$(echo "$FILTERED_ENTROPY" | fold -w 30 | head -1)
-        SPLIT_ENTROPY=$(echo "$TRIMMED_ENTROPY" | sed "-es/./ /"{1..26..5})
-        CERTIFY_PASS=$(echo "$SPLIT_ENTROPY" | cut -c2- | tr " " "-")
-
-        echo "passphrase: $CERTIFY_PASS"
-
-        if [[ -n "$PASSPHRASE_FILE" ]]; then
-            echo "Exporting passphrase to $PASSPHRASE_FILE"
-            echo "$CERTIFY_PASS" > "$PASSPHRASE_FILE"
-            chmod 600 "$PASSPHRASE_FILE"  # Restrict access to the passphrase file
-        fi
-
-        echo "Creating certify key"
-
-        echo "$CERTIFY_PASS" | gpg --batch --passphrase-fd 0 --quick-generate-key "$IDENTITY" "$KEY_TYPE" cert never
-
-        KEYID=$(gpg -k --with-colons "$IDENTITY" | awk -F: '/^pub:/ { print $5; exit }')
-        KEYFP=$(gpg -k --with-colons "$IDENTITY" | awk -F: '/^fpr:/ { print $10; exit }')
-
-        echo "Creating subkeys"
-
-        for SUBKEY in sign encrypt auth ; do
-            echo "$CERTIFY_PASS" | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 \
-                --quick-add-key "$KEYFP" "$KEY_TYPE" "$SUBKEY" "$EXPIRATION"
-        done
-
-        gpg -K
-
-        echo "Creating backup keys"
-
-        echo "$CERTIFY_PASS" | gpg --output "$GNUPGHOME/$KEYID-Certify.key" \
-            --batch --pinentry-mode=loopback --passphrase-fd 0 \
-            --armor --export-secret-keys "$KEYID"
-
-        echo "$CERTIFY_PASS" | gpg --output "$GNUPGHOME/$KEYID-Subkeys.key" \
-            --batch --pinentry-mode=loopback --passphrase-fd 0 \
-            --armor --export-secret-subkeys "$KEYID"
-
-        echo "Exporting public key"
-
-        gpg --output "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc" \
-            --armor --export "$KEYID"
-
-        sudo chmod 0444 "$PUBLIC_KEY_DEST"/*.asc
-      '';
-    };
     copyro = prev.writeShellApplication {
       name = "copyro";
       text = ''
@@ -424,7 +312,6 @@ final: prev: {
         ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
         ln -s ${copyro}/bin/copyro $out/bin
         ln -s ${btrfs-swap-resume-offset}/bin/btrfs-swap-resume-offset $out/bin
-        ln -s ${create-gpg-keys}/bin/create-gpg-keys $out/bin
       '';
     };
 }

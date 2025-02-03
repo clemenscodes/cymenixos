@@ -32,6 +32,9 @@ in {
       gpg = {
         inherit (cfg.gpg) enable;
         homedir = "${config.xdg.configHome}/gnupg";
+        scdaemonSettings = {
+          disable-ccid = true;
+        };
         settings = {
           personal-cipher-preferences = "AES256 AES192 AES";
           personal-digest-preferences = "SHA512 SHA384 SHA256";

@@ -6,10 +6,6 @@
 }: {config, ...}: let
   cfg = config.modules.security;
   inherit (config.modules.users) user;
-  gpgAgentConf = pkgs.runCommand "gpg-agent.conf" {} ''
-    sed '/pinentry-program/d' ${inputs.drduhConfig}/gpg-agent.conf > $out
-    echo "pinentry-program ${pkgs.pinentry.curses}/bin/pinentry" >> $out
-  '';
 in {
   options = {
     modules = {
