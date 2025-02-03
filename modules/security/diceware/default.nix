@@ -91,12 +91,5 @@ in {
         dicewareWebApp
       ];
     };
-    system = {
-      activationScripts = {
-        diceware = ''
-          ln -sf ${dicewareWebApp}/share/applications/${dicewareWebApp.name} /home/${config.modules.users.name}/Desktop
-        '';
-      };
-    };
   };
 }

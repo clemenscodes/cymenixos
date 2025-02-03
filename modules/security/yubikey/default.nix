@@ -73,7 +73,6 @@ in {
     system = {
       activationScripts = {
         yubikey-guide = ''
-          ln -sf ${yubikeyGuide}/share/applications/${yubikeyGuide.name} /home/${config.modules.users.name}/Desktop
           ln -sfT ${inputs.yubikey-guide} /home/${config.modules.users.name}/Documents/YubiKey-Guide
         '';
       };

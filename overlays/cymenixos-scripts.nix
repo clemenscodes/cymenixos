@@ -132,7 +132,7 @@ final: prev: {
         fi
       '';
     };
-    qemu-run-iso = prev.writeShellApplication rec {
+    qemu-run-iso = prev.writeShellApplication {
       name = "qemu-run-iso";
       runtimeInputs = [
         prev.fd
@@ -140,40 +140,99 @@ final: prev: {
         prev.pipewire
         prev.pipewire.jack
       ];
-
+      excludeShellChecks = ["SC2086"];
       text = ''
         ISO="result-iso"
+        DISK="vm.qcow2"
+        CPU=8
+        MEMORY=16G
+        USB_ARGS=""
+        HOSTBUS=""
+        HOSTADDR=""
 
-        if fd --type file --has-results 'nixos-.*\.iso' result/iso 2> /dev/null; then
-          echo "Symlinking the existing iso image for qemu:"
+        usage() {
+          echo "Usage: $0 [OPTIONS]"
+          echo ""
+          echo "Options:"
+          echo "  --cpu <num>       Set the number of CPU cores (default: 8)"
+          echo "  --memory <size>   Set the memory allocated to VM (default: 16G)"
+          echo "  --hostbus <num>   USB passthrough: specify the USB bus number"
+          echo "  --hostaddr <num>  USB passthrough: specify the USB device address"
+          echo "  --help            Show this help message and exit"
+          echo ""
+          echo "Example:"
+          echo "  $0 --cpu 4 --memory 8G --hostbus 1 --hostaddr 2"
+          echo ""
+          echo "To find HOSTBUS and HOSTADDR, run 'lsusb'"
+          exit 0
+        }
+
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --cpu)
+              CPU="$2"
+              shift 2
+              ;;
+            --memory)
+              MEMORY="$2"
+              shift 2
+              ;;
+            --hostbus)
+              HOSTBUS="$2"
+              PADDED_HOSTBUS=$(printf "%03d" "$HOSTBUS")
+              shift 2
+              ;;
+            --hostaddr)
+              HOSTADDR="$2"
+              PADDED_HOSTADDR=$(printf "%03d" "$HOSTADDR")
+              shift 2
+              ;;
+            --help)
+              usage
+              ;;
+            *)
+              echo "Unknown argument: $1"
+              usage
+              ;;
+          esac
+        done
+
+        if fd --type file --has-results 'nixos-.*\.iso' result/iso 2>/dev/null; then
+          echo "Symlinking the existing ISO image for QEMU:"
           ln -sfv result/iso/nixos-*.iso "$ISO"
         else
-          echo "No iso file exists to run, please build one first, example:"
-          echo "${build-iso}/bin/build-iso"
-          exit
+          echo "No ISO file exists to run. Please build one first, example:"
+          echo "\${build-iso}/bin/build-iso"
+          exit 1
         fi
 
-        DISK="vm.qcow2"
-
-        # Create the disk if it doesn't exist
         if [ ! -f "$DISK" ]; then
           echo "Disk not found. Creating a new disk and booting from ISO for installation..."
           qemu-img create -f qcow2 "$DISK" 64G
         fi
 
-        if [ "$#" = 0 ]; then
+        if [[ -n "$HOSTBUS" && -n "$HOSTADDR" ]]; then
+          USB_PATH="/dev/bus/usb/$PADDED_HOSTBUS/$PADDED_HOSTADDR"
+          echo "Passing through USB device at bus $HOSTBUS, address $HOSTADDR"
+
+          if [ -e "$USB_PATH" ]; then
+            echo "Applying chmod to allow access..."
+            sudo chmod 666 "$USB_PATH"
+            USB_ARGS="-usb -device qemu-xhci -device usb-host,hostbus=$HOSTBUS,hostaddr=$HOSTADDR"
+          else
+            echo "Warning: USB device $USB_PATH not found! Skipping USB passthrough."
+          fi
+        else
           echo "Not passing through any host devices"
           echo "It is recommended to passthrough the USB device"
-          echo "eg. '${name} -usb -device qemu-xhci -device usb-host,hostbus=<HOSTBUS>,hostaddr=<HOSTADDR>'"
+          echo "eg. '$0 --hostbus <HOSTBUS> --hostaddr <HOSTADDR>'"
           echo "where HOSTBUS and HOSTADDR can be identified via 'lsusb'"
-          echo "If this fails, ensure your user has the group usb"
-          echo "Otherwise you may run 'chmod 666 /dev/bus/usb/<HOSTBUS>/<HOSTADDR>' to grant access to the USB device"
+          echo "If this fails, ensure your user has the 'usb' group or use 'chmod 666' on the device"
         fi
 
-        # Always try to boot from disk first, fallback to ISO if disk fails
         LD_LIBRARY_PATH="${prev.pipewire.jack}/lib" qemu-kvm \
-          -smp 8 \
-          -m 16G \
+          -smp "$CPU" \
+          -m "$MEMORY" \
           -drive file="$DISK",format=qcow2,if=virtio,id=disk,index=0 \
           -drive file="$ISO",format=raw,if=none,media=cdrom,id=cd,index=1,readonly=on \
           -device ahci,id=achi0 \
@@ -183,6 +242,7 @@ final: prev: {
           -device hda-duplex,audiodev=audio0 \
           -audiodev pipewire,id=audio0 \
           -boot order=cd,menu=on \
+          $USB_ARGS \
           "$@"
       '';
     };
