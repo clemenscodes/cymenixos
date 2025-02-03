@@ -109,6 +109,9 @@
     };
     security = {
       enable = true;
+      diceware = {
+        enable = true;
+      };
       gnome-keyring = {
         enable = true;
       };
