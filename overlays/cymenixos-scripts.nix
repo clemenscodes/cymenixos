@@ -140,7 +140,7 @@ final: prev: {
         prev.pipewire
         prev.pipewire.jack
       ];
-      excludeShellChecks = ["SC2046" "SC2086"];
+      excludeShellChecks = ["SC2086"];
       text = ''
         ISO="result-iso"
         DISK="vm.qcow2"
