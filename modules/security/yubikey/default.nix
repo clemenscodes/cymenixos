@@ -189,7 +189,7 @@
       gpg --import "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
 
       echo "Re-importing the subkeys..."
-      gpg --import "$SUBKEY_DEST/$KEYID-Subkeys.key"
+      gpg --import "$SUBKEYS_DEST/$KEYID-Subkeys.key"
 
       echo "Generating pins"
 
