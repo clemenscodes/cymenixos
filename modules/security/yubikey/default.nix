@@ -71,6 +71,8 @@
       EXPIRATION="2y"
       GNUPGHOME="''${GNUPGHOME:-$HOME/config/gnupg}"
       PUBLIC_KEY_DEST="''${GNUPGHOME}"
+      PRIVATE_KEY_DEST="''${GNUPGHOME}"
+      SUBKEYS_DEST="''${GNUPGHOME}"
       KEYID_FILE=""
       KEYFP_FILE=""
       PASSPHRASE_FILE=""
@@ -85,6 +87,8 @@
           echo "  --expiration TIME      Set the expiration time (default: $EXPIRATION)"
           echo "  --gnupg-home DIR       Set the GnuPG home directory (default: $GNUPGHOME)"
           echo "  --public-key-dest DIR  Set the public key export destination (default: $PUBLIC_KEY_DEST)"
+          echo "  --private-key-dest DIR Set the private key export destination (default: $PRIVATE_KEY_DEST)"
+          echo "  --subkeys-dest DIR     Set the subkeys export destination (default: $SUBKEYS_DEST)"
           echo "  --key-id-file FILE     Export the key id to the specified file"
           echo "  --key-fp-file FILE     Export the key fingerprint to the specified file"
           echo "  --passphrase-file FILE Export the certify passphrase to the specified file"
@@ -101,6 +105,8 @@
               --expiration) EXPIRATION="$2" shift 2 ;;
               --gnupg-home) GNUPGHOME="$2" shift 2 ;;
               --public-key-dest) PUBLIC_KEY_DEST="$2" shift 2 ;;
+              --private-key-dest) PRIVATE_KEY_DEST="$2" shift 2 ;;
+              --subkeys-dest) SUBKEYS_DEST="$2" shift 2 ;;
               --key-id-file) KEYID_FILE="$2" shift 2 ;;
               --key-fp-file) KEYID_FILE="$2" shift 2 ;;
               --passphrase-file) PASSPHRASE_FILE="$2" shift 2 ;;
@@ -161,11 +167,11 @@
 
       echo "Backing up keys"
 
-      echo $CERTIFY_PASS | gpg --output "$GNUPGHOME/$KEYID-Certify.key" \
+      echo $CERTIFY_PASS | gpg --output "$PRIVATE_KEY_DEST/$KEYID-Certify.key" \
           --batch --pinentry-mode=loopback --passphrase-fd 0 \
           --armor --export-secret-keys "$KEYID"
 
-      echo $CERTIFY_PASS | gpg --output "$GNUPGHOME/$KEYID-Subkeys.key" \
+      echo $CERTIFY_PASS | gpg --output "$SUBKEYS_DEST/$KEYID-Subkeys.key" \
           --batch --pinentry-mode=loopback --passphrase-fd 0 \
           --armor --export-secret-subkeys "$KEYID"
 
@@ -181,6 +187,9 @@
 
       echo "Re-importing the public key for verification..."
       gpg --import "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
+
+      echo "Re-importing the subkeys..."
+      gpg --import "$SUBKEY_DEST/$KEYID-Subkeys.key"
 
       echo "Generating pins"
 
