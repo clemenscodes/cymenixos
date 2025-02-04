@@ -4,7 +4,9 @@
   lib,
   ...
 }: {config, ...}: let
+  inherit (config.modules.boot.impermanence) persistPath;
   cfg = config.modules.security;
+  homeDirectory = "/home/${config.modules.users.name}";
   viewYubikeyGuide = pkgs.writeShellScriptBin "view-yubikey-guide" ''
     viewer="$(type -P xdg-open || true)"
     if [ -z "$viewer" ]; then
@@ -242,12 +244,72 @@
       gpg -K
     '';
   };
+  yubikey-up = let
+    yubikeyIds = lib.concatStringsSep " " (
+      lib.mapAttrsToList (name: id: "[${name}]=\"${builtins.toString id}\"") cfg.yubikey.identifiers
+    );
+  in
+    pkgs.writeShellApplication {
+      name = "yubikey-up";
+      runtimeInputs = builtins.attrValues {inherit (pkgs) gawk yubikey-manager;};
+      text = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        serial=$(ykman list | awk '{print $NF}')
+        # If it got unplugged before we ran, just don't bother
+        if [ -z "$serial" ]; then
+          # FIXME(yubikey): Warn probably
+          exit 0
+        fi
+
+        declare -A serials=(${yubikeyIds})
+
+        key_name=""
+        for key in "''${!serials[@]}"; do
+          if [[ $serial == "''${serials[$key]}" ]]; then
+            key_name="$key"
+          fi
+        done
+
+        if [ -z "$key_name" ]; then
+          echo WARNING: Unidentified yubikey with serial "$serial" . Won\'t link an SSH key.
+          exit 0
+        fi
+
+        echo "Creating links to ${homeDirectory}/id_$key_name"
+        ln -sf "${homeDirectory}/.ssh/id_$key_name" ${homeDirectory}/.ssh/id_yubikey
+        ln -sf "${homeDirectory}/.ssh/id_$key_name.pub" ${homeDirectory}/.ssh/id_yubikey.pub
+      '';
+    };
+  yubikey-down = pkgs.writeShellApplication {
+    name = "yubikey-down";
+    text = ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      rm ${homeDirectory}/.ssh/id_yubikey
+      rm ${homeDirectory}/.ssh/id_yubikey.pub
+    '';
+  };
 in {
   options = {
     modules = {
       security = {
         yubikey = {
           enable = lib.mkEnableOption "Enable yubikey" // {default = false;};
+          identifiers = lib.mkOption {
+            default = {};
+            type = lib.types.attrsOf lib.types.int;
+            description = "Attrset of Yubikey serial numbers. NOTE: Yubico's 'Security Key' products do not use unique serial number therefore, the scripts in this module are unable to distinguish between multiple 'Security Key' devices and instead will detect a Security Key serial number as the string \"[FIDO]\". This means you can only use a single Security Key but can still mix it with YubiKey 4 and 5 devices.";
+            example = lib.literalExample ''
+              {
+                foo = 12345678;
+                bar = 87654321;
+                baz = "[FIDO]";
+              }
+            '';
+          };
         };
       };
     };
@@ -269,8 +331,78 @@ in {
       pcscd = {
         inherit (cfg.yubikey) enable;
       };
+      yubikey-agent = {
+        inherit (cfg.yubikey) enable;
+      };
       udev = {
         packages = [pkgs.yubikey-personalization];
+        extraRules = ''
+          # Link/unlink ssh key on yubikey add/remove
+          # SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="1050", RUN+="${lib.getBin yubikey-up}/bin/yubikey-up"
+          # NOTE: Yubikey 4 has a ID_VENDOR_ID on remove, but not Yubikey 5 BIO, whereas both have a HID_NAME.
+          # Yubikey 5 HID_NAME uses "YubiKey" whereas Yubikey 4 uses "Yubikey", so matching on "Yubi" works for both
+          # SUBSYSTEM=="hid", ACTION=="remove", ENV{HID_NAME}=="Yubico Yubi*", RUN+="${lib.getBin yubikey-down}/bin/yubikey-down"
+
+          ##
+          # Yubikey 4
+          ##
+
+          # Lock the device if you remove the yubikey (use udevadm monitor -p to debug)
+          # #ENV{ID_MODEL_ID}=="0407", # This doesn't match all the newer keys
+          # FIXME(yubikey): We only want this to happen if we're undocked, so we need to see how that works. We probably need to run a
+          # script that does smarter checks
+          # ACTION=="remove",\
+          #  ENV{ID_BUS}=="usb",\
+          #  ENV{ID_VENDOR_ID}=="1050",\
+          #  ENV{ID_VENDOR}=="Yubico",\
+          #  RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+
+          ##
+          # Yubikey 5 BIO
+          #
+          # NOTE: The remove event for the bio doesn't include the ID_VENDOR_ID for some reason, but we can use the
+          # hid name instead. Some HID_NAME might be "Yubico YubiKey OTP+FIDO+CCID" or "Yubico YubiKey FIDO", etc so just
+          # match on "Yubico YubiKey"
+          ##
+
+          # SUBSYSTEM=="hid",\
+          #  ACTION=="remove",\
+          #  ENV{HID_NAME}=="Yubico YubiKey FIDO",\
+          #  RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+
+          # FIXME(yubikey): Change this so it only wakes up the screen to the login screen, xset cmd doesn't work
+          # SUBSYSTEM=="hid",\
+          #  ACTION=="add",\
+          #  ENV{HID_NAME}=="Yubico YubiKey FIDO",\
+          #  RUN+="${pkgs.systemd}/bin/loginctl activate 1"
+          #  #RUN+="${lib.getBin pkgs.xorg.xset}/bin/xset dpms force on"
+        '';
+      };
+    };
+    security = {
+      pam = {
+        services = {
+          login = {
+            u2fAuth = true;
+          };
+          sudo = {
+            u2fAuth = true;
+            sshAgentAuth = cfg.ssh.enable;
+          };
+        };
+        u2f = {
+          inherit (cfg.yubikey) enable;
+          settings = {
+            cue = true;
+            authFile = "${homeDirectory}/.config/Yubico/u2f_keys";
+          };
+        };
+        yubico = {
+          inherit (cfg.yubikey) enable;
+          debug = true;
+          mode = "challenge-response";
+          id = lib.mapAttrsToList (name: id: "${builtins.toString id}") cfg.yubikey.serials;
+        };
       };
     };
     programs = {
@@ -286,11 +418,6 @@ in {
         };
       };
     };
-    services = {
-      yubikey-agent = {
-        inherit (cfg.yubikey) enable;
-      };
-    };
     environment = {
       systemPackages = [
         pkgs.yubikey-manager
@@ -299,9 +426,21 @@ in {
         pkgs.yubikey-personalization-gui
         pkgs.yubico-piv-tool
         pkgs.yubioath-flutter
+        pkgs.pam_u2f
         yubikeyGuide
         yubikey-gpg-setup
+        yubikey-up
+        yubikey-down
       ];
+      persistence = {
+        "${persistPath}" = {
+          users = {
+            ${config.modules.users.user} = {
+              directories = [".config/Yubico"];
+            };
+          };
+        };
+      };
     };
     system = {
       activationScripts = {
