@@ -8,15 +8,11 @@
   cfg = config.modules.security;
   homeDirectory = "/home/${config.modules.users.name}";
   viewYubikeyGuide = pkgs.writeShellScriptBin "view-yubikey-guide" ''
-    viewer="$(type -P xdg-open || true)"
-    if [ -z "$viewer" ]; then
-      viewer="${pkgs.glow}/bin/glow -p"
-    fi
-    exec $viewer "${inputs.yubikey-guide}/README.md"
+    exec ${pkgs.glow}/bin/glow -p"${inputs.yubikey-guide}/README.md"
   '';
   shortcut = pkgs.makeDesktopItem {
     name = "yubikey-guide";
-    icon = "${pkgs.yubikey-manager-qt}/share/icons/hicolor/128x128/apps/ykman.png";
+    icon = "${pkgs.yubioath-flutter}/share/icons/com.yubico.yubioath.png";
     desktopName = "drduh's YubiKey Guide";
     genericName = "Guide to using YubiKey for GnuPG and SSH";
     comment = "Open the guide in a reader program";
@@ -404,12 +400,9 @@ in {
     environment = {
       systemPackages = [
         pkgs.yubikey-manager
-        pkgs.yubikey-manager-qt
-        pkgs.yubikey-personalization
-        pkgs.yubikey-personalization-gui
+        pkgs.yubioath-flutter
         pkgs.yubico-piv-tool
         pkgs.yubico-pam
-        pkgs.yubioath-flutter
         pkgs.pam_u2f
         yubikeyGuide
         yubikey-gpg-setup
