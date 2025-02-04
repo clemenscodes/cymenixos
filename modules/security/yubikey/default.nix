@@ -28,6 +28,7 @@
     paths = [viewYubikeyGuide shortcut];
   };
   yubikey-pubkey-url = pkgs.writeShellApplication {
+    name = "yubikey-pubkey-url";
     runtimeInputs = [pkgs.gnupg];
     text = ''
       PUBLIC_KEY_URL=""
