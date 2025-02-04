@@ -189,7 +189,7 @@
       gpg --import "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
 
       echo "Re-importing the subkeys..."
-      gpg --import "$SUBKEYS_DEST/$KEYID-Subkeys.key"
+      echo $CERTIFY_PASS | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 --import "$SUBKEYS_DEST/$KEYID-Subkeys.key"
 
       echo "Generating pins"
 
