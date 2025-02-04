@@ -27,6 +27,42 @@
     name = "yubikey-guide";
     paths = [viewYubikeyGuide shortcut];
   };
+  yubikey-pubkey-url = pkgs.writeShellApplication {
+    runtimeInputs = [pkgs.gnupg];
+    text = ''
+      PUBLIC_KEY_URL=""
+
+      usage() {
+          echo "Usage: $0 --public-key-url URL"
+          echo "Options:"
+          echo "  --public-key-url URL   Set the public key URL on the YubiKey"
+          echo "  --help                 Display this help message"
+          exit 1
+      }
+
+      while [[ "$#" -gt 0 ]]; do
+          case "$1" in
+              --public-key-url) PUBLIC_KEY_URL="$2"; shift 2 ;;
+              --help) usage ;;
+              *) echo "Unknown option: $1"; usage ;;
+          esac
+      done
+
+      if [[ -z "$PUBLIC_KEY_URL" ]]; then
+          echo "Error: --public-key-url must be specified."
+          usage
+      fi
+
+      echo "Setting public key URL on YubiKey to $PUBLIC_KEY_URL..."
+      gpg --command-fd=0 --pinentry-mode=loopback --edit-card <<EOF
+      admin
+      url $PUBLIC_KEY_URL
+      quit
+      EOF
+
+      echo "Public key URL set successfully!"
+    '';
+  };
   yubikey-gpg-setup = pkgs.writeShellApplication {
     name = "yubikey-gpg-setup";
     runtimeInputs = [pkgs.gnupg];
@@ -58,45 +94,16 @@
 
       while [[ "$#" -gt 0 ]]; do
           case "$1" in
-              --identity)
-                  IDENTITY="$2"
-                  shift 2
-                  ;;
-              --key-type)
-                  KEY_TYPE="$2"
-                  shift 2
-                  ;;
-              --expiration)
-                  EXPIRATION="$2"
-                  shift 2
-                  ;;
-              --gnupg-home)
-                  GNUPGHOME="$2"
-                  shift 2
-                  ;;
-              --public-key-dest)
-                  PUBLIC_KEY_DEST="$2"
-                  shift 2
-                  ;;
-              --passphrase-file)
-                  PASSPHRASE_FILE="$2"
-                  shift 2
-                  ;;
-              --admin-pin-file)
-                  ADMIN_PIN_FILE="$2"
-                  shift 2
-                  ;;
-              --user-pin-file)
-                  USER_PIN_FILE="$2"
-                  shift 2
-                  ;;
-              --help)
-                  usage
-                  ;;
-              *)
-                  echo "Unknown option: $1"
-                  usage
-                  ;;
+              --identity) IDENTITY="$2" shift 2 ;;
+              --key-type) KEY_TYPE="$2" shift 2 ;;
+              --expiration) EXPIRATION="$2" shift 2 ;;
+              --gnupg-home) GNUPGHOME="$2" shift 2 ;;
+              --public-key-dest) PUBLIC_KEY_DEST="$2" shift 2 ;;
+              --passphrase-file) PASSPHRASE_FILE="$2" shift 2 ;;
+              --admin-pin-file) ADMIN_PIN_FILE="$2" shift 2 ;;
+              --user-pin-file) USER_PIN_FILE="$2" shift 2 ;;
+              --help) usage ;;
+              *) echo "Unknown option: $1" usage ;;
           esac
       done
 
@@ -150,6 +157,12 @@
           --armor --export "$KEYID"
 
       sudo chmod 0444 $PUBLIC_KEY_DEST/*.asc
+
+      echo "Deleting master secret key from local keyring..."
+      gpg --batch --yes --delete-secret-keys "$KEYID"
+
+      echo "Re-importing the public key for verification..."
+      gpg --import "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
 
       echo "Generating pins"
 
@@ -401,6 +414,7 @@ in {
         yubikey-gpg-setup
         yubikey-up
         yubikey-down
+        yubikey-pubkey-url
       ];
       persistence = {
         "${persistPath}" = {
