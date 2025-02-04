@@ -8,7 +8,7 @@
   cfg = config.modules.security;
   homeDirectory = "/home/${config.modules.users.name}";
   viewYubikeyGuide = pkgs.writeShellScriptBin "view-yubikey-guide" ''
-    exec ${pkgs.glow}/bin/glow -p"${inputs.yubikey-guide}/README.md"
+    exec ${pkgs.glow}/bin/glow -p "${inputs.yubikey-guide}/README.md"
   '';
   shortcut = pkgs.makeDesktopItem {
     name = "yubikey-guide";
