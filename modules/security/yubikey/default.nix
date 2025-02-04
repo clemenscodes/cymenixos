@@ -32,10 +32,10 @@
     runtimeInputs = [pkgs.gnupg];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      IDENTITY="yubikey"
+      IDENTITY="yubikey <yubikey@example.com>"
       KEY_TYPE="rsa4096"
       EXPIRATION="2y"
-      GNUPGHOME="''${GNUPGHOME:-$HOME/.gnupg}"
+      GNUPGHOME="''${GNUPGHOME:-$HOME/config/gnupg}"
       PUBLIC_KEY_DEST="''${GNUPGHOME}"
       PASSPHRASE_FILE=""
       ADMIN_PIN_FILE=""
@@ -115,7 +115,7 @@
       if [[ -n "$PASSPHRASE_FILE" ]]; then
           echo "Exporting passphrase to $PASSPHRASE_FILE"
           echo "$CERTIFY_PASS" > "$PASSPHRASE_FILE"
-          chmod 600 "$PASSPHRASE_FILE"  # Restrict access to the passphrase file
+          chmod 600 "$PASSPHRASE_FILE"
       fi
 
       echo "Creating certify key"
@@ -134,7 +134,7 @@
 
       gpg -K
 
-      echo "Creating backup keys"
+      echo "Backing up keys"
 
       echo $CERTIFY_PASS | gpg --output "$GNUPGHOME/$KEYID-Certify.key" \
           --batch --pinentry-mode=loopback --passphrase-fd 0 \
