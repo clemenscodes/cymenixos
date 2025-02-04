@@ -389,22 +389,22 @@ in {
     };
     security = {
       pam = {
-        services = {
-          login = {
-            u2fAuth = true;
-          };
-          sudo = {
-            u2fAuth = true;
-            sshAgentAuth = cfg.ssh.enable;
-          };
-        };
-        u2f = {
-          inherit (cfg.yubikey) enable;
-          settings = {
-            cue = true;
-            authFile = "${homeDirectory}/.config/Yubico/u2f_keys";
-          };
-        };
+        # services = {
+        #   login = {
+        #     u2fAuth = true;
+        #   };
+        #   sudo = {
+        #     u2fAuth = true;
+        #     sshAgentAuth = cfg.ssh.enable;
+        #   };
+        # };
+        # u2f = {
+        #   inherit (cfg.yubikey) enable;
+        #   settings = {
+        #     cue = true;
+        #     authFile = "${homeDirectory}/.config/Yubico/u2f_keys";
+        #   };
+        # };
         yubico = {
           inherit (cfg.yubikey) enable;
           debug = true;
