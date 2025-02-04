@@ -406,7 +406,10 @@ in {
         "${persistPath}" = {
           users = {
             ${config.modules.users.user} = {
-              directories = [".config/Yubico"];
+              directories = [
+                ".config/Yubico"
+                ".local/share/com.yubico.authenticator"
+              ];
             };
           };
         };
