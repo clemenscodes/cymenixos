@@ -136,10 +136,14 @@
       KEYID=$(gpg -k --with-colons $IDENTITY | awk -F: '/^pub:/ { print $5; exit }')
       KEYFP=$(gpg -k --with-colons $IDENTITY | awk -F: '/^fpr:/ { print $10; exit }')
 
+      echo "Key id: $KEYID"
+
       if [[ -n "$KEYID_FILE" ]]; then
           echo "Exporting key id to $KEYID_FILE"
           echo "$KEYID" > "$KEYID_FILE"
       fi
+
+      echo "Key fingerprint: $KEYFP"
 
       if [[ -n "$KEYFP_FILE" ]]; then
           echo "Exporting key fingerprint to $KEYFP_FILE"
@@ -173,7 +177,7 @@
       sudo chmod 0444 $PUBLIC_KEY_DEST/*.asc
 
       echo "Deleting master secret key from local keyring..."
-      gpg --batch --yes --delete-secret-keys "$KEYID"
+      gpg --batch --yes --delete-secret-keys "$KEYFP"
 
       echo "Re-importing the public key for verification..."
       gpg --import "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
