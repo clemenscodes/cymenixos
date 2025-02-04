@@ -17,6 +17,7 @@
     genericName = "Guide to using YubiKey for GnuPG and SSH";
     comment = "Open the guide in a reader program";
     categories = ["Documentation"];
+    terminal = true;
     exec = "${viewYubikeyGuide}/bin/view-yubikey-guide";
   };
   yubikeyGuide = pkgs.symlinkJoin {
