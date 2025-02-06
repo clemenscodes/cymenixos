@@ -18,7 +18,7 @@
     fi
   '';
   brightness = lib.getExe pkgs.brightnessctl;
-  timeout = 300;
+  timeout = 3000;
   inherit (pkgs) hyprlock hypridle;
 in {
   options = {
