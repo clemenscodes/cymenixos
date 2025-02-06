@@ -167,9 +167,6 @@ in {
           inherit (cfg.yubikey.pam) enable;
           settings = {
             cue = true;
-            debug = true;
-            origin = "pam://${config.modules.hostname.defaultHostname}";
-            authFile = pkgs.writeText "u2f-mappings" (lib.concatStrings ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
           };
         };
       };
@@ -216,8 +213,10 @@ in {
           homeDir = "/home/${config.modules.users.name}/";
           desktopDir = homeDir + "Desktop/";
           documentsDir = homeDir + "Documents/";
+          u2f_keys = pkgs.writeText "u2f_keys" (lib.concatStrings ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
         in ''
-          mkdir -p ${desktopDir} ${documentsDir}
+          mkdir -p ${desktopDir} ${documentsDir} ${homeDir}/.config/Yubico
+          ln -s ${u2f_keys} ${homeDir}/.config/Yubico/u2f_keys
           chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
           ln -sf ${yubikeyGuide}/share/applications/yubikey-guide.desktop ${desktopDir}
           ln -sfT ${inputs.yubikey-guide} /home/${config.modules.users.name}/Documents/YubiKey-Guide
