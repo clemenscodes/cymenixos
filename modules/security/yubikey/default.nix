@@ -210,16 +210,16 @@ in {
     system = {
       activationScripts = {
         yubikey-guide = let
-          homeDir = "/home/${config.modules.users.name}/";
-          desktopDir = homeDir + "Desktop/";
-          documentsDir = homeDir + "Documents/";
+          homeDir = "/home/${config.modules.users.name}";
+          desktopDir = "${homeDir}/Desktop";
+          documentsDir = "${homeDir}/Documents";
           u2f_keys = pkgs.writeText "u2f_keys" (lib.concatStrings ([config.modules.users.name ":"] ++ cfg.yubikey.pam.u2f-mappings));
         in ''
           mkdir -p ${desktopDir} ${documentsDir} ${homeDir}/.config/Yubico
-          ln -s ${u2f_keys} ${homeDir}/.config/Yubico/u2f_keys
           chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
+          ln -sf ${u2f_keys} ${homeDir}/.config/Yubico/u2f_keys
           ln -sf ${yubikeyGuide}/share/applications/yubikey-guide.desktop ${desktopDir}
-          ln -sfT ${inputs.yubikey-guide} /home/${config.modules.users.name}/Documents/YubiKey-Guide
+          ln -sfT ${inputs.yubikey-guide} ${documentsDir}/YubiKey-Guide
         '';
       };
     };
