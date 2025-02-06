@@ -213,7 +213,7 @@ in {
           homeDir = "/home/${config.modules.users.name}/";
           desktopDir = homeDir + "Desktop/";
           documentsDir = homeDir + "Documents/";
-          u2f_keys = pkgs.writeText "u2f_keys" (lib.concatStrings ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
+          u2f_keys = pkgs.writeText "u2f_keys" (lib.concatStrings ([config.modules.users.name ":"] ++ cfg.yubikey.pam.u2f-mappings));
         in ''
           mkdir -p ${desktopDir} ${documentsDir} ${homeDir}/.config/Yubico
           ln -s ${u2f_keys} ${homeDir}/.config/Yubico/u2f_keys
