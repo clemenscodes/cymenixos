@@ -418,7 +418,7 @@ in {
             cue = true;
             interactive = true;
             debug = true;
-            authFile = pkgs.writeText "u2f-mappings" (lib.concatStrings [config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings);
+            authFile = pkgs.writeText "u2f-mappings" (lib.concatStrings ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
           };
         };
         # yubico = {
