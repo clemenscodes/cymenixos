@@ -405,13 +405,13 @@ in {
         #     authFile = "${homeDirectory}/.config/Yubico/u2f_keys";
         #   };
         # };
-        yubico = {
-          inherit (cfg.yubikey) enable;
-          debug = true;
-          mode = "challenge-response";
-          control = "required";
-          id = lib.mapAttrsToList (name: id: "${builtins.toString id}") cfg.yubikey.serials;
-        };
+        # yubico = {
+        #   inherit (cfg.yubikey) enable;
+        #   debug = true;
+        #   mode = "challenge-response";
+        #   control = "required";
+        #   id = lib.mapAttrsToList (name: id: "${builtins.toString id}") cfg.yubikey.serials;
+        # };
       };
     };
     programs = {
