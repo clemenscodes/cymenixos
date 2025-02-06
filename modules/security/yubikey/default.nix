@@ -286,7 +286,7 @@
   };
   yubikey-up = let
     yubikeyIds = lib.concatStringsSep " " (
-      lib.mapAttrsToList (name: id: "[${name}]=\"${builtins.toString id}\"") cfg.yubikey.identifiers
+      lib.mapAttrsToList (name: id: "[${name}]=\"${builtins.toString id}\"") cfg.yubikey.pam.identifiers
     );
   in
     pkgs.writeShellApplication {
@@ -332,17 +332,31 @@ in {
       security = {
         yubikey = {
           enable = lib.mkEnableOption "Enable yubikey" // {default = false;};
-          identifiers = lib.mkOption {
-            default = {};
-            type = lib.types.attrsOf lib.types.int;
-            description = "Attrset of Yubikey serial numbers. NOTE: Yubico's 'Security Key' products do not use unique serial number therefore, the scripts in this module are unable to distinguish between multiple 'Security Key' devices and instead will detect a Security Key serial number as the string \"[FIDO]\". This means you can only use a single Security Key but can still mix it with YubiKey 4 and 5 devices.";
-            example = lib.literalExample ''
-              {
-                foo = 12345678;
-                bar = 87654321;
-                baz = "[FIDO]";
-              }
-            '';
+          pam = {
+            enable = lib.mkEnableOption "Enable yubikey PAM" // {default = false;};
+            u2f-mappings = lib.mkOption {
+              default = [];
+              type = lib.types.listOf lib.types.str;
+              description = "The list of u2f mappings for pam auth";
+              example = lib.literalExample ''
+                [
+                  ":<KeyHandle1>,<UserKey1>,<CoseType1>,<Options1>"
+                  ":<KeyHandle2>,<UserKey2>,<CoseType2>,<Options2>"
+                ]
+              '';
+            };
+            identifiers = lib.mkOption {
+              default = {};
+              type = lib.types.attrsOf lib.types.int;
+              description = "Attrset of Yubikey serial numbers. NOTE: Yubico's 'Security Key' products do not use unique serial number therefore, the scripts in this module are unable to distinguish between multiple 'Security Key' devices and instead will detect a Security Key serial number as the string \"[FIDO]\". This means you can only use a single Security Key but can still mix it with YubiKey 4 and 5 devices.";
+              example = lib.literalExample ''
+                {
+                  foo = 12345678;
+                  bar = 87654321;
+                  baz = "[FIDO]";
+                }
+              '';
+            };
           };
         };
       };
@@ -388,29 +402,31 @@ in {
       };
     };
     security = {
-      pam = {
-        # services = {
-        #   login = {
-        #     u2fAuth = true;
-        #   };
-        #   sudo = {
-        #     u2fAuth = true;
-        #     sshAgentAuth = cfg.ssh.enable;
-        #   };
-        # };
-        # u2f = {
-        #   inherit (cfg.yubikey) enable;
-        #   settings = {
-        #     cue = true;
-        #     authFile = "${homeDirectory}/.config/Yubico/u2f_keys";
-        #   };
-        # };
+      pam = lib.mkIf cfg.yubikey.pam.enable {
+        services = {
+          login = {
+            u2fAuth = true;
+          };
+          sudo = {
+            u2fAuth = true;
+            sshAgentAuth = cfg.ssh.enable;
+          };
+        };
+        u2f = {
+          inherit (cfg.yubikey.pam) enable;
+          settings = {
+            cue = true;
+            interactive = true;
+            debug = true;
+            authFile = pkgs.writeText "u2f-mappings" (lib.concatStrings [config.modules.users.name] ++ cfg.u2f-mappings);
+          };
+        };
         # yubico = {
-        #   inherit (cfg.yubikey) enable;
+        #   inherit (cfg.yubikey.pam) enable;
         #   debug = true;
         #   mode = "challenge-response";
-        #   control = "required";
-        #   id = lib.mapAttrsToList (name: id: "${builtins.toString id}") cfg.yubikey.serials;
+        #   control = "sufficient";
+        #   # id = lib.mapAttrsToList (name: id: "${builtins.toString id}") cfg.yubikey.pam.identifiers;
         # };
       };
     };
