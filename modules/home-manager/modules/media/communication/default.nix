@@ -7,6 +7,7 @@
   imports = [
     (import ./discord {inherit inputs pkgs lib;})
     (import ./element {inherit inputs pkgs lib;})
+    (import ./teams {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {

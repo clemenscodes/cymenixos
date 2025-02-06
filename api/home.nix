@@ -221,6 +221,9 @@
               element = {
                 enable = false;
               };
+              teams = {
+                enable = false;
+              };
             };
             editing = {
               enable = false;
