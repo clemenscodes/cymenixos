@@ -167,8 +167,8 @@ in {
           inherit (cfg.yubikey.pam) enable;
           settings = {
             cue = true;
-            interactive = true;
             debug = true;
+            origin = "pam://${config.modules.hostname.defaultHostname}";
             authFile = pkgs.writeText "u2f-mappings" (lib.concatStrings ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
           };
         };
