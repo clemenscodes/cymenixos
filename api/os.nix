@@ -305,6 +305,11 @@
       };
       yubikey = {
         enable = false;
+        pam = {
+          enable = false;
+          u2f-mappings = [];
+          identifiers = [];
+        };
       };
     };
     shell = {
