@@ -51,13 +51,12 @@ pkgs.writeShellScriptBin "logoutlaunch" ''
     elif [[ $1 == '--reboot' ]]; then
       ${pkgs.systemd}/bin/systemctl reboot
     elif [[ $1 == '--hibernate' ]]; then
-      lockout
+      ${pkgs.systemd}/bin/loginctl lock-session
       sleep 1
       ${pkgs.systemd}/bin/systemctl hibernate
     elif [[ $1 == '--suspend' ]]; then
       ${pkgs.mpc-cli}/bin/mpc -q pause
-      ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-      lockout
+      ${pkgs.systemd}/bin/loginctl lock-session
       sleep 1
       ${pkgs.systemd}/bin/systemctl suspend
     elif [[ $1 == '--logout' ]]; then
