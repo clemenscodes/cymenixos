@@ -26,7 +26,7 @@ in {
       packages = [pkgs.teams-for-linux];
       persistence = {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
-          # directories = [".config/teams"];
+          directories = [".config/teams-for-linux"];
         };
       };
     };
