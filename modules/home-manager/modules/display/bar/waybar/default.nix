@@ -12,6 +12,7 @@
   isLaptop = osConfig.modules.machine.kind == "laptop";
   isNvidia = osConfig.modules.gpu.nvidia.enable;
   isAmd = osConfig.modules.gpu.amd.enable;
+  useYubi = osConfig.modules.security.yubikey.enable;
   useEmail = config.modules.organization.email.enable;
   useMusic = config.modules.media.music.enable;
   useHyprland = config.modules.display.compositor.hyprland.enable;
@@ -40,6 +41,7 @@ in {
         (import ./waybar-swaync {inherit inputs pkgs lib;})
         (import ./waybar-toggle {inherit inputs pkgs lib;})
         (import ./waybar-watch {inherit inputs pkgs lib;})
+        (import ./waybar-yubikey {inherit inputs pkgs lib;})
       ];
     };
     programs = {
@@ -64,6 +66,7 @@ in {
               (lib.mkIf useMusic "mpd")
             ];
             modules-right = [
+              (lib.mkIf useYubi "custom/yubikey")
               (lib.mkIf useEmail "custom/mail")
               "disk"
               "memory"
@@ -88,6 +91,10 @@ in {
               server = "/run/user/${builtins.toString osConfig.modules.users.uid}/mpd/socket";
               tooltip-format = "MPD (connected)";
               tooltip-format-disconnected = "MPD (disconnected)";
+            };
+            "custom/yubikey" = {
+              exec = "waybar-yubikey";
+              return-type = "json";
             };
             "custom/mail" = lib.mkIf useEmail {
               format = "{}";
