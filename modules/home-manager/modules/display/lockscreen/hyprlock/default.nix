@@ -44,7 +44,7 @@ in {
         inherit (cfg.hyprlock) enable;
         settings = {
           general = {
-            grace = 5;
+            grace = 0;
             disable_loading_bar = true;
             hide_cursor = true;
           };
