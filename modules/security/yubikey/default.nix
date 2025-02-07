@@ -33,9 +33,13 @@
   in
     pkgs.writeShellApplication {
       name = "yubikey-up";
-      runtimeInputs = [pkgs.yubikey-manager];
+      runtimeInputs = [
+        pkgs.yubikey-manager
+        pkgs.libnotify
+      ];
       text = ''
         serial=$(ykman list | awk '{print $NF}')
+        notify-send "Yubikey inserted" "serial $serial"
         # If it got unplugged before we ran, just don't bother
         if [ -z "$serial" ]; then
           # FIXME(yubikey): Warn probably
@@ -57,13 +61,15 @@
         fi
 
         echo "Creating links to ${homeDirectory}/id_$key_name"
-        ln -sf "${homeDirectory}/.ssh/id_$key_name" ${homeDirectory}/.ssh/id_yubikey
-        ln -sf "${homeDirectory}/.ssh/id_$key_name.pub" ${homeDirectory}/.ssh/id_yubikey.pub
+        # ln -sf "${homeDirectory}/.ssh/id_$key_name" ${homeDirectory}/.ssh/id_yubikey
+        # ln -sf "${homeDirectory}/.ssh/id_$key_name.pub" ${homeDirectory}/.ssh/id_yubikey.pub
       '';
     };
   yubikey-down = pkgs.writeShellApplication {
     name = "yubikey-down";
+    runtimeInputs = [pkgs.libnotify];
     text = ''
+      notify-send "Yubikey removed"
       rm ${homeDirectory}/.ssh/id_yubikey
       rm ${homeDirectory}/.ssh/id_yubikey.pub
     '';
@@ -144,11 +150,8 @@ in {
            ENV{ID_VENDOR}=="Yubico",\
            RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
 
-          # Link/unlink ssh key on yubikey add/remove
-          # SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="1050", RUN+="${lib.getBin yubikey-up}/bin/yubikey-up"
-          # NOTE: Yubikey 4 has a ID_VENDOR_ID on remove, but not Yubikey 5 BIO, whereas both have a HID_NAME.
-          # Yubikey 5 HID_NAME uses "YubiKey" whereas Yubikey 4 uses "Yubikey", so matching on "Yubi" works for both
-          # SUBSYSTEM=="hid", ACTION=="remove", ENV{HID_NAME}=="Yubico Yubi*", RUN+="${lib.getBin yubikey-down}/bin/yubikey-down"
+          SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="1050", RUN+="${lib.getBin yubikey-up}/bin/yubikey-up"
+          SUBSYSTEM=="hid", ACTION=="remove", ENV{HID_NAME}=="Yubico Yubi*", RUN+="${lib.getBin yubikey-down}/bin/yubikey-down"
         '';
       };
     };
