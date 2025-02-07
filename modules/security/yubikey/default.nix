@@ -155,7 +155,7 @@ in {
             ENV{ID_MODEL_ID}=="0407",\
             ENV{ID_VENDOR_ID}=="1050",\
             ENV{ID_VENDOR}=="Yubico",\
-            RUN+="${yubikey-down}/bin/yubikey-down;"
+            RUN+="${yubikey-down}/bin/yubikey-down"
         '';
       };
     };
