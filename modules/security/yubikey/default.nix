@@ -143,19 +143,21 @@ in {
       udev = {
         packages = [pkgs.yubikey-personalization];
         extraRules = ''
+          # Run script when YubiKey is added
           ACTION=="add",\
-            ENV{ID_BUS}=="usb",\
-            ENV{ID_MODEL_ID}=="0407",\
+            SUBSYSTEM=="usb",\
             ENV{ID_VENDOR_ID}=="1050",\
+            ENV{ID_MODEL_ID}=="0407",\
             ENV{ID_VENDOR}=="Yubico",\
-            RUN+="${yubikey-up}/bin/yubikey-up"
+            RUN+="${pkgs.yubikey-up}/bin/yubikey-up"
 
+          # Run script when YubiKey is removed
           ACTION=="remove",\
-            ENV{ID_BUS}=="usb",\
-            ENV{ID_MODEL_ID}=="0407",\
+            SUBSYSTEM=="usb",\
             ENV{ID_VENDOR_ID}=="1050",\
+            ENV{ID_MODEL_ID}=="0407",\
             ENV{ID_VENDOR}=="Yubico",\
-            RUN+="${yubikey-down}/bin/yubikey-down"
+            RUN+="${pkgs.yubikey-down}/bin/yubikey-down"
         '';
       };
     };
