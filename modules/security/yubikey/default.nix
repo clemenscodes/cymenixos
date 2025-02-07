@@ -149,7 +149,7 @@ in {
             ENV{ID_VENDOR_ID}=="1050",\
             ENV{ID_MODEL_ID}=="0407",\
             ENV{ID_VENDOR}=="Yubico",\
-            RUN+="${pkgs.yubikey-up}/bin/yubikey-up"
+            RUN+="${yubikey-up}/bin/yubikey-up"
 
           # Run script when YubiKey is removed
           ACTION=="remove",\
@@ -157,7 +157,7 @@ in {
             ENV{ID_VENDOR_ID}=="1050",\
             ENV{ID_MODEL_ID}=="0407",\
             ENV{ID_VENDOR}=="Yubico",\
-            RUN+="${pkgs.yubikey-down}/bin/yubikey-down"
+            RUN+="${yubikey-down}/bin/yubikey-down"
         '';
       };
     };
