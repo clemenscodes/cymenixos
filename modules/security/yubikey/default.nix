@@ -66,11 +66,13 @@
     };
   yubikey-down = pkgs.writeShellApplication {
     name = "yubikey-down";
-    runtimeInputs = [pkgs.libnotify];
+    runtimeInputs = [
+      pkgs.libnotify
+    ];
     text = ''
       notify-send "Yubikey" "removed"
-      rm ${homeDirectory}/.ssh/id_yubikey
-      rm ${homeDirectory}/.ssh/id_yubikey.pub
+      # rm ${homeDirectory}/.ssh/id_yubikey
+      # rm ${homeDirectory}/.ssh/id_yubikey.pub
       ${pkgs.systemd}/bin/loginctl lock-sessions
     '';
   };
@@ -144,18 +146,33 @@ in {
         packages = [pkgs.yubikey-personalization];
         extraRules = ''
           ACTION=="add",\
-            ENV{ID_BUS}=="usb",\
-            ENV{ID_VENDOR_ID}=="1050",\
-            ENV{ID_MODEL_ID}=="0403|0407",\
-            ENV{ID_VENDOR}=="Yubico",\
-            RUN+="${yubikey-up}/bin/yubikey-up"
+           ENV{ID_BUS}=="usb",\
+           ENV{ID_VENDOR_ID}=="1050",\
+           ENV{ID_MODEL_ID}=="0403|0407",\
+           ENV{ID_VENDOR}=="Yubico",\
+           RUN+="${yubikey-up}/bin/yubikey-up"
+
+          ACTION=="add",\
+           ENV{ID_BUS}=="usb",\
+           ENV{ID_VENDOR_ID}=="1050",\
+           ENV{ID_MODEL_ID}=="0403|0407",\
+           ENV{ID_VENDOR}=="Yubico",\
+           RUN+="${pkgs.libnotify}/bin/notify-send Yubikey inserted"
+
 
           ACTION=="remove",\
-            ENV{ID_BUS}=="usb",\
-            ENV{ID_VENDOR_ID}=="1050",\
-            ENV{ID_MODEL_ID}=="0403|0407",\
-            ENV{ID_VENDOR}=="Yubico",\
-            RUN+="${yubikey-down}/bin/yubikey-down"
+           ENV{ID_BUS}=="usb",\
+           ENV{ID_VENDOR_ID}=="1050",\
+           ENV{ID_MODEL_ID}=="0403|0407",\
+           ENV{ID_VENDOR}=="Yubico",\
+           RUN+="${yubikey-down}/bin/yubikey-down"
+
+          ACTION=="remove",\
+           ENV{ID_BUS}=="usb",\
+           ENV{ID_MODEL_ID}=="0403|0407",\
+           ENV{ID_VENDOR_ID}=="1050",\
+           ENV{ID_VENDOR}=="Yubico",\
+           RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
         '';
       };
     };
