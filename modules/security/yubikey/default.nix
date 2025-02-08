@@ -38,7 +38,6 @@
         pkgs.libnotify
       ];
       text = ''
-        echo "up" >> ${homeDirectory}/up
         serial=$(ykman list | awk '{print $NF}')
 
         if [ -z "$serial" ]; then
@@ -59,7 +58,7 @@
           exit 0
         fi
 
-        echo "Creating links to ${homeDirectory}/id_$key_name"
+        echo "Creating links to ${homeDirectory}/.ssh/id_$key_name"
         # ln -sf "${homeDirectory}/.ssh/id_$key_name" ${homeDirectory}/.ssh/id_yubikey
         # ln -sf "${homeDirectory}/.ssh/id_$key_name.pub" ${homeDirectory}/.ssh/id_yubikey.pub
       '';
@@ -70,9 +69,8 @@
       pkgs.libnotify
     ];
     text = ''
-      echo "down" >> ${homeDirectory}/down
-      # rm ${homeDirectory}/.ssh/id_yubikey
-      # rm ${homeDirectory}/.ssh/id_yubikey.pub
+      rm ${homeDirectory}/.ssh/id_yubikey
+      rm ${homeDirectory}/.ssh/id_yubikey.pub
       ${pkgs.systemd}/bin/loginctl lock-sessions
     '';
   };
