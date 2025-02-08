@@ -38,8 +38,8 @@
         pkgs.libnotify
       ];
       text = ''
+        echo "up" >> ${homeDirectory}/up
         serial=$(ykman list | awk '{print $NF}')
-        notify-send "Yubikey inserted" "serial $serial"
 
         if [ -z "$serial" ]; then
           exit 0
@@ -70,7 +70,7 @@
       pkgs.libnotify
     ];
     text = ''
-      notify-send "Yubikey" "removed"
+      echo "down" >> ${homeDirectory}/down
       # rm ${homeDirectory}/.ssh/id_yubikey
       # rm ${homeDirectory}/.ssh/id_yubikey.pub
       ${pkgs.systemd}/bin/loginctl lock-sessions
@@ -152,27 +152,12 @@ in {
            ENV{ID_VENDOR}=="Yubico",\
            RUN+="${yubikey-up}/bin/yubikey-up"
 
-          ACTION=="add",\
-           ENV{ID_BUS}=="usb",\
-           ENV{ID_VENDOR_ID}=="1050",\
-           ENV{ID_MODEL_ID}=="0403|0407",\
-           ENV{ID_VENDOR}=="Yubico",\
-           RUN+="${pkgs.libnotify}/bin/notify-send Yubikey inserted"
-
-
           ACTION=="remove",\
            ENV{ID_BUS}=="usb",\
            ENV{ID_VENDOR_ID}=="1050",\
            ENV{ID_MODEL_ID}=="0403|0407",\
            ENV{ID_VENDOR}=="Yubico",\
            RUN+="${yubikey-down}/bin/yubikey-down"
-
-          ACTION=="remove",\
-           ENV{ID_BUS}=="usb",\
-           ENV{ID_MODEL_ID}=="0403|0407",\
-           ENV{ID_VENDOR_ID}=="1050",\
-           ENV{ID_VENDOR}=="Yubico",\
-           RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
         '';
       };
     };
