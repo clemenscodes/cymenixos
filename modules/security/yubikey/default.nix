@@ -26,6 +26,7 @@
   };
   yubikey-pubkey-url = import ./yubikey-pubkey-url.nix {inherit pkgs;};
   yubikey-gpg-setup = import ./yubikey-gpg-setup.nix {inherit pkgs;};
+  yubikey-reset = import ./yubikey-reset.nix {inherit pkgs;};
   yubikey-up = let
     yubikeyIds = lib.concatStringsSep " " (
       lib.mapAttrsToList (name: id: "[${name}]=\"${builtins.toString id}\"") cfg.yubikey.pam.identifiers
@@ -81,6 +82,7 @@
       yubikey-gpg-setup
       yubikey-up
       yubikey-down
+      yubikey-reset
     ];
   };
 in {
