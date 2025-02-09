@@ -128,7 +128,9 @@ pkgs.writeShellApplication {
     gpg --batch --yes --delete-secret-keys "$KEYFP"
 
     echo "Re-importing the subkeys..."
-    gpg --import "$SUBKEYS"
+    echo $CERTIFY_PASS | gpg \
+      --batch --pinentry-mode=loopback --passphrase-fd 0 \
+      --import "$SUBKEYS"
 
     echo "Generating pins"
 
