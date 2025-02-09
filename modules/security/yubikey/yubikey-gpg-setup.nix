@@ -33,6 +33,20 @@ pkgs.writeShellApplication {
         echo "  --admin-pin-file FILE  Export the admin pin to the specified file"
         echo "  --user-pin-file FILE   Export the user pin to the specified file"
         echo "  --help                 Display this help message"
+        echo
+        echo "Example: $0 \"
+        echo "  --identity Yubikey <yubikey@example.com"
+        echo "  --key-type rsa4096"
+        echo "  --expiration 2y"
+        echo "  --gnupg-home $GNUPGHOME"
+        echo "  --public-key-dest /public/gpg"
+        echo "  --private-key-dest /private/gpg"
+        echo "  --subkeys-dest /private/gpg"
+        echo "  --key-id-file /private/gpg/keyid"
+        echo "  --key-fp-file /private/gpg/keyfp"
+        echo "  --passphrase-file /private/gpg/passphrase"
+        echo "  --admin-pin-file /private/gpg/admin-pin"
+        echo "  --user-pin-file /private/gpg/user-pin"
         exit 1
     }
 
@@ -126,6 +140,9 @@ pkgs.writeShellApplication {
 
     echo "Deleting master secret key from local keyring..."
     gpg --batch --yes --delete-secret-keys "$KEYFP"
+
+    echo "Re-importing the public key..."
+    gpg --import "$PUBLIC_KEY"
 
     echo "Re-importing the subkeys..."
     echo $CERTIFY_PASS | gpg \
