@@ -8,6 +8,6 @@ pkgs.stdenv.mkDerivation {
   phases = "installPhase";
   installPhase = ''
     mkdir -p $out
-    ln -sf ${plugins}/git.yazi/* $out
+    ln -sf ${plugins}/smart-enter.yazi/* $out
   '';
 }
