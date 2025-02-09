@@ -69,8 +69,8 @@
       pkgs.libnotify
     ];
     text = ''
-      rm ${homeDirectory}/.ssh/id_yubikey
-      rm ${homeDirectory}/.ssh/id_yubikey.pub
+      # rm ${homeDirectory}/.ssh/id_yubikey
+      # rm ${homeDirectory}/.ssh/id_yubikey.pub
       ${pkgs.systemd}/bin/loginctl lock-sessions
     '';
   };
