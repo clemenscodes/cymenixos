@@ -91,11 +91,6 @@
     };
     lpi = {
       url = "github:cymenix/lpi";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
-        };
-      };
     };
     cardanix = {
       url = "github:clemenscodes/cardanix";
@@ -108,8 +103,6 @@
     templates = {
       url = "github:NixOS/templates";
     };
-    # For fetch-closure shrunk release packages with minimal eval time and dependency sizes
-    # Currently x86_64-linux only
     capkgs = {
       url = "github:input-output-hk/capkgs";
     };
