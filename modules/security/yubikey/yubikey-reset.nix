@@ -8,7 +8,7 @@ pkgs.writeShellApplication {
   excludeShellChecks = ["SC2046" "SC2086"];
   text = ''
     echo "WARNING: This will reset your YubiKey to factory settings!"
-    read -pr "Are you sure? Type 'RESET' to continue: " confirm
+    read -r -p "Are you sure? Type 'RESET' to continue: " confirm
     if [[ "$confirm" != "RESET" ]]; then
       echo "Aborting..."
       exit 1
