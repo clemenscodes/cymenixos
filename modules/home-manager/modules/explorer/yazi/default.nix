@@ -109,7 +109,7 @@ in {
               }
               {
                 on = ["2"];
-                run = "plugin smart-switch --args=1";
+                run = "plugin smart-switch '1'";
                 desc = "Switch or create tab 2";
               }
               {
@@ -122,11 +122,11 @@ in {
               }
               {
                 on = ["k"];
-                run = "plugin arrow --args=-1";
+                run = "plugin arrow '-1'";
               }
               {
                 on = ["j"];
-                run = "plugin arrow --args=1";
+                run = "plugin arrow '1'";
               }
               {
                 on = ["<C-y>"];

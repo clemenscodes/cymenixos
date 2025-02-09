@@ -20,6 +20,6 @@ in
     phases = "installPhase";
     installPhase = ''
       mkdir -p $out
-      ln -sf ${initLua} $out/init.lua
+      ln -sf ${initLua} $out/main.lua
     '';
   }
