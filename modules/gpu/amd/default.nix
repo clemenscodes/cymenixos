@@ -3,7 +3,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.gpu;
   driver = "amdgpu";
 in {
@@ -33,7 +37,7 @@ in {
         pkgs.glmark2
         pkgs.libva-utils
         pkgs.vulkan-tools
-        (import ./gpu-usage-waybar {inherit inputs pkgs lib;})
+        inputs.gpu-usage-waybar.packags.${system}.gpu-usage-waybar
       ];
       variables = {
         OCL_ICD_VENDORS = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors/";

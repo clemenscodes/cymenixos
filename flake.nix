@@ -109,6 +109,9 @@
     yubikey-guide = {
       url = "github:drduh/YubiKey-Guide";
     };
+    gpu-usage-waybar = {
+      url =  "github:cymenix/gpu-usage-waybar";
+    };
   };
 
   outputs = {
