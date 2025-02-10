@@ -95,6 +95,16 @@ in {
           enable = lib.mkEnableOption "Enable yubikey" // {default = false;};
           pam = {
             enable = lib.mkEnableOption "Enable yubikey PAM" // {default = false;};
+            token-ids = lib.mkOption {
+              default = [];
+              type = lib.types.listOf lib.types.str;
+              description = "The list of yubikey token ids, string of length 12";
+              example = lib.literalExample ''
+                [
+                  "cccccbuhdrlf"
+                ]
+              '';
+            };
             u2f-mappings = lib.mkOption {
               default = [];
               type = lib.types.listOf lib.types.str;
@@ -171,7 +181,6 @@ in {
           };
           sudo = {
             u2fAuth = true;
-            sshAgentAuth = cfg.ssh.enable;
           };
         };
         u2f = {
@@ -179,6 +188,12 @@ in {
           settings = {
             cue = true;
           };
+        };
+        yubico = {
+          inherit (cfg.yubikey.pam) enable;
+          mode = "challenge-response";
+          control = "sufficient"; # change to "required" to force password + touch every time
+          id = lib.mapAttrsToList (_: id: "\"${builtins.toString id}\"") cfg.yubikey.pam.identifiers;
         };
       };
     };
@@ -232,6 +247,20 @@ in {
           ln -sf ${yubikeyGuide}/share/applications/yubikey-guide.desktop ${desktopDir}
           ln -sfT ${inputs.yubikey-guide} ${documentsDir}/YubiKey-Guide
         '';
+      };
+    };
+    home-manager = lib.mkIf config.modules.home-manager.enable {
+      users = {
+        ${config.modules.users.name} = {
+          pam = {
+            yubico = {
+              authorizedYubiKeys = {
+                ids = cfg.yubikeys.pam.token-ids;
+                path = ".config/Yubico/authorized_yubikeys";
+              };
+            };
+          };
+        };
       };
     };
   };
