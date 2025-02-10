@@ -33,6 +33,20 @@ pkgs.writeShellApplication {
         echo "  --admin-pin-file FILE  Export the admin pin to the specified file"
         echo "  --user-pin-file FILE   Export the user pin to the specified file"
         echo "  --help                 Display this help message"
+        echo
+        echo "Example: $0 \\"
+        echo "  --identity Yubikey <yubikey@example.com \\"
+        echo "  --key-type rsa4096 \\"
+        echo "  --expiration 2y \\"
+        echo "  --gnupg-home $GNUPGHOME \\"
+        echo "  --public-key-dest /public/gpg \\"
+        echo "  --private-key-dest /private/gpg \\"
+        echo "  --subkeys-dest /private/gpg \\"
+        echo "  --key-id-file /private/gpg/keyid \\"
+        echo "  --key-fp-file /private/gpg/keyfp \\"
+        echo "  --passphrase-file /private/gpg/passphrase \\"
+        echo "  --admin-pin-file /private/gpg/admin-pin \\"
+        echo "  --user-pin-file /private/gpg/user-pin \\"
         exit 1
     }
 
@@ -46,7 +60,7 @@ pkgs.writeShellApplication {
             --private-key-dest) PRIVATE_KEY_DEST="$2" shift 2 ;;
             --subkeys-dest) SUBKEYS_DEST="$2" shift 2 ;;
             --key-id-file) KEYID_FILE="$2" shift 2 ;;
-            --key-fp-file) KEYID_FILE="$2" shift 2 ;;
+            --key-fp-file) KEYFP_FILE="$2" shift 2 ;;
             --passphrase-file) PASSPHRASE_FILE="$2" shift 2 ;;
             --admin-pin-file) ADMIN_PIN_FILE="$2" shift 2 ;;
             --user-pin-file) USER_PIN_FILE="$2" shift 2 ;;
@@ -105,29 +119,35 @@ pkgs.writeShellApplication {
 
     echo "Backing up keys"
 
-    echo $CERTIFY_PASS | gpg --output "$PRIVATE_KEY_DEST/$KEYID-Certify.key" \
+    CERTIFY_KEY="$PRIVATE_KEY_DEST/$KEYID-Certify.key"
+    SUBKEYS="$SUBKEYS_DEST/$KEYID-Subkeys.key"
+    PUBLIC_KEY="$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
+
+    echo $CERTIFY_PASS | gpg --output "$CERTIFY_KEY" \
         --batch --pinentry-mode=loopback --passphrase-fd 0 \
         --armor --export-secret-keys "$KEYID"
 
-    echo $CERTIFY_PASS | gpg --output "$SUBKEYS_DEST/$KEYID-Subkeys.key" \
+    echo $CERTIFY_PASS | gpg --output "$SUBKEYS" \
         --batch --pinentry-mode=loopback --passphrase-fd 0 \
         --armor --export-secret-subkeys "$KEYID"
 
     echo "Exporting public key"
 
-    gpg --output $PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc \
+    gpg --output "$PUBLIC_KEY" \
         --armor --export "$KEYID"
 
-    sudo chmod 0444 $PUBLIC_KEY_DEST/*.asc
+    sudo chmod 0444 "$PUBLIC_KEY"
 
     echo "Deleting master secret key from local keyring..."
     gpg --batch --yes --delete-secret-keys "$KEYFP"
 
-    echo "Re-importing the public key for verification..."
-    gpg --import "$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
+    echo "Re-importing the public key..."
+    gpg --import "$PUBLIC_KEY"
 
     echo "Re-importing the subkeys..."
-    echo $CERTIFY_PASS | gpg --batch --pinentry-mode=loopback --passphrase-fd 0 --import "$SUBKEYS_DEST/$KEYID-Subkeys.key"
+    echo $CERTIFY_PASS | gpg \
+      --batch --pinentry-mode=loopback --passphrase-fd 0 \
+      --import "$SUBKEYS"
 
     echo "Generating pins"
 

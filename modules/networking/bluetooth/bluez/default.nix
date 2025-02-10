@@ -99,7 +99,6 @@ in
                 simple-agent \
                 test-adapter \
                 test-device \
-                test-thermometer \
                 list-devices \
                 monitor-bluetooth \
                 ; do
