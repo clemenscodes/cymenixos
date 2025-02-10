@@ -34,10 +34,7 @@
   in
     pkgs.writeShellApplication {
       name = "yubikey-up";
-      runtimeInputs = [
-        pkgs.yubikey-manager
-        pkgs.libnotify
-      ];
+      runtimeInputs = [pkgs.yubikey-manager];
       text = ''
         serial=$(ykman list | awk '{print $NF}')
 
@@ -59,19 +56,24 @@
           exit 0
         fi
 
-        echo "Creating links to ${homeDirectory}/.ssh/id_$key_name"
-        # ln -sf "${homeDirectory}/.ssh/id_$key_name" ${homeDirectory}/.ssh/id_yubikey
-        # ln -sf "${homeDirectory}/.ssh/id_$key_name.pub" ${homeDirectory}/.ssh/id_yubikey.pub
+        echo "Checking and creating links to ${homeDirectory}/.ssh/id_$key_name"
+        if [ -f "${homeDirectory}/.ssh/id_$key_name" ]; then
+          ln -sf "${homeDirectory}/.ssh/id_$key_name" ${homeDirectory}/.ssh/id_yubikey
+        fi
+        if [ -f "${homeDirectory}/.ssh/id_$key_name.pub" ]; then
+          ln -sf "${homeDirectory}/.ssh/id_$key_name.pub" ${homeDirectory}/.ssh/id_yubikey.pub
+        fi
       '';
     };
   yubikey-down = pkgs.writeShellApplication {
     name = "yubikey-down";
-    runtimeInputs = [
-      pkgs.libnotify
-    ];
     text = ''
-      # rm ${homeDirectory}/.ssh/id_yubikey
-      # rm ${homeDirectory}/.ssh/id_yubikey.pub
+      if [ -f "${homeDirectory}/.ssh/id_yubikey" ]; then
+        rm ${homeDirectory}/.ssh/id_yubikey
+      fi
+      if [ -f "${homeDirectory}/.ssh/id_yubikey.pub" ]; then
+        rm ${homeDirectory}/.ssh/id_yubikey.pub
+      fi
       ${pkgs.systemd}/bin/loginctl lock-sessions
     '';
   };
