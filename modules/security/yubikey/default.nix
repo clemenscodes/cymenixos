@@ -187,9 +187,9 @@ in {
         u2f = {
           inherit (cfg.yubikey.pam) enable;
           control = "sufficient";
-          authFile = u2f_keys;
           settings = {
             cue = true;
+            authfile = u2f_keys;
           };
         };
         yubico = {
@@ -230,6 +230,7 @@ in {
           users = {
             ${config.modules.users.user} = {
               directories = [
+                ".yubico"
                 ".config/Yubico"
                 ".local/share/com.yubico.authenticator"
               ];
@@ -260,7 +261,6 @@ in {
             yubico = {
               authorizedYubiKeys = {
                 ids = cfg.yubikey.pam.token-ids;
-                path = ".config/Yubico/authorized_yubikeys";
               };
             };
           };
