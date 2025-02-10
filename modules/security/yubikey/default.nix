@@ -87,6 +87,7 @@
       yubikey-reset
     ];
   };
+  u2f_keys = pkgs.writeText "u2f_keys" (builtins.concatStringsSep ":" ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
 in {
   options = {
     modules = {
@@ -185,6 +186,8 @@ in {
         };
         u2f = {
           inherit (cfg.yubikey.pam) enable;
+          control = "sufficient";
+          authFile = u2f_keys;
           settings = {
             cue = true;
           };
@@ -241,11 +244,10 @@ in {
           homeDir = "/home/${config.modules.users.name}";
           desktopDir = "${homeDir}/Desktop";
           documentsDir = "${homeDir}/Documents";
-          u2f_keys = pkgs.writeText "u2f_keys" (builtins.concatStringsSep ":" ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
         in ''
           mkdir -p ${desktopDir} ${documentsDir} ${homeDir}/.config/Yubico
           chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
-          ln -sf ${u2f_keys} ${homeDir}/.config/Yubico/u2f_keys
+          # ln -sf ${u2f_keys} ${homeDir}/.config/Yubico/u2f_keys
           ln -sf ${yubikeyGuide}/share/applications/yubikey-guide.desktop ${desktopDir}
           ln -sfT ${inputs.yubikey-guide} ${documentsDir}/YubiKey-Guide
         '';
