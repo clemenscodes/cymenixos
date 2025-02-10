@@ -248,7 +248,6 @@ in {
         in ''
           mkdir -p ${desktopDir} ${documentsDir} ${homeDir}/.config/Yubico
           chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
-          # ln -sf ${u2f_keys} ${homeDir}/.config/Yubico/u2f_keys
           ln -sf ${yubikeyGuide}/share/applications/yubikey-guide.desktop ${desktopDir}
           ln -sfT ${inputs.yubikey-guide} ${documentsDir}/YubiKey-Guide
         '';
