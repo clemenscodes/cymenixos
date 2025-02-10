@@ -255,7 +255,7 @@ in {
           pam = {
             yubico = {
               authorizedYubiKeys = {
-                ids = cfg.yubikeys.pam.token-ids;
+                ids = cfg.yubikey.pam.token-ids;
                 path = ".config/Yubico/authorized_yubikeys";
               };
             };
