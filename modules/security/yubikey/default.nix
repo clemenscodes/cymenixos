@@ -213,6 +213,8 @@ in {
     environment = {
       systemPackages = [
         pkgs.yubikey-manager
+        pkgs.yubikey-personalization
+        pkgs.yubikey-touch-detector
         pkgs.yubioath-flutter
         pkgs.yubico-piv-tool
         pkgs.yubico-pam
