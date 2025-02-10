@@ -224,7 +224,8 @@ in {
           homeDir = "/home/${config.modules.users.name}";
           desktopDir = "${homeDir}/Desktop";
           documentsDir = "${homeDir}/Documents";
-          u2f_keys = pkgs.writeText "u2f_keys" (lib.concatStrings ([config.modules.users.name ":"] ++ [(lib.concatStrings (cfg.yubikey.pam.u2f-mappings ++ [" "]))]));
+
+          u2f_keys = pkgs.writeText "u2f_keys" (lib.concatStrings ([config.modules.users.name ":"] ++ [(lib.concatStringsSep " " cfg.yubikey.pam.u2f-mappings)]));
         in ''
           mkdir -p ${desktopDir} ${documentsDir} ${homeDir}/.config/Yubico
           chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
