@@ -37,6 +37,7 @@
   useSsh = config.modules.security.ssh.enable;
   useTorrent = osConfig.modules.networking.torrent.enable;
   useUdiskie = osConfig.modules.io.udisks.enable;
+  useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   isLaptop = machine == "laptop";
   close-window = pkgs.writeShellScriptBin "close-window" ''
@@ -362,6 +363,12 @@ in {
                 exec-once = udiskie &
               ''
               else "";
+            yubikey =
+              if useYubikey
+              then ''
+                exec-once = ${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify
+              ''
+              else "";
           in ''
             monitor = , preferred, auto, 1
 
@@ -401,6 +408,7 @@ in {
             ${torrent}
             ${hypridle}
             ${hyprsunset}
+            ${yubikey}
           '';
         };
       };

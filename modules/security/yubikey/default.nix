@@ -201,9 +201,6 @@ in {
       };
     };
     programs = {
-      yubikey-touch-detector = {
-        inherit (cfg.yubikey) enable;
-      };
       ssh = {
         startAgent = false;
       };
