@@ -37,36 +37,36 @@ pkgs.writeShellApplication {
         echo "  --help                 Display this help message"
         echo
         echo "Example: $0 \\"
-        echo "  --identity Yubikey <yubikey@example.com \\"
+        echo "  --identity \"Yubikey <yubikey@example.com>\" \\"
         echo "  --key-type rsa4096 \\"
         echo "  --expiration 2y \\"
         echo "  --gnupg-home $GNUPGHOME \\"
-        echo "  --public-key-dest /public/gpg \\"
-        echo "  --private-key-dest /private/gpg \\"
-        echo "  --subkeys-dest /private/gpg \\"
-        echo "  --key-id-file /private/gpg/keyid \\"
-        echo "  --key-fp-file /private/gpg/keyfp \\"
-        echo "  --passphrase-file /private/gpg/passphrase \\"
-        echo "  --admin-pin-file /private/gpg/admin-pin \\"
-        echo "  --user-pin-file /private/gpg/user-pin \\"
+        echo "  --public-key-dest ./gpg/public \\"
+        echo "  --private-key-dest ./gpg/private \\"
+        echo "  --subkeys-dest ./gpg/private \\"
+        echo "  --key-id-file ./gpg/private/keyid \\"
+        echo "  --key-fp-file ./gpg/private/keyfp \\"
+        echo "  --passphrase-file ./gpg/private/passphrase \\"
+        echo "  --admin-pin-file ./gpg/private/admin-pin \\"
+        echo "  --user-pin-file ./gpg/private/user-pin \\"
         echo "  --force \\"
         exit 1
     }
 
     while [[ "$#" -gt 0 ]]; do
         case "$1" in
-            --identity) IDENTITY="$2" shift 2 ;;
-            --key-type) KEY_TYPE="$2" shift 2 ;;
-            --expiration) EXPIRATION="$2" shift 2 ;;
-            --gnupg-home) GNUPGHOME="$2" shift 2 ;;
-            --public-key-dest) PUBLIC_KEY_DEST="$2" shift 2 ;;
-            --private-key-dest) PRIVATE_KEY_DEST="$2" shift 2 ;;
-            --subkeys-dest) SUBKEYS_DEST="$2" shift 2 ;;
-            --key-id-file) KEYID_FILE="$2" shift 2 ;;
-            --key-fp-file) KEYFP_FILE="$2" shift 2 ;;
-            --passphrase-file) PASSPHRASE_FILE="$2" shift 2 ;;
-            --admin-pin-file) ADMIN_PIN_FILE="$2" shift 2 ;;
-            --user-pin-file) USER_PIN_FILE="$2" shift 2 ;;
+            --identity) IDENTITY="$2"; shift 2 ;;
+            --key-type) KEY_TYPE="$2"; shift 2 ;;
+            --expiration) EXPIRATION="$2"; shift 2 ;;
+            --gnupg-home) GNUPGHOME="$2"; shift 2 ;;
+            --public-key-dest) PUBLIC_KEY_DEST="$2"; shift 2 ;;
+            --private-key-dest) PRIVATE_KEY_DEST="$2"; shift 2 ;;
+            --subkeys-dest) SUBKEYS_DEST="$2"; shift 2 ;;
+            --key-id-file) KEYID_FILE="$2"; shift 2 ;;
+            --key-fp-file) KEYFP_FILE="$2"; shift 2 ;;
+            --passphrase-file) PASSPHRASE_FILE="$2"; shift 2 ;;
+            --admin-pin-file) ADMIN_PIN_FILE="$2"; shift 2 ;;
+            --user-pin-file) USER_PIN_FILE="$2"; shift 2 ;;
             --force) FORCE=1; shift ;;
             --help) usage ;;
             *) echo "Unknown option: $1" usage ;;
