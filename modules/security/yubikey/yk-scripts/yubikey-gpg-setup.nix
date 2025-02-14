@@ -188,7 +188,7 @@ pkgs.writeShellApplication {
 
     echo "Updating admin pin to $ADMIN_PIN"
 
-    ykman openpgp access change-admin-pin -P 12345678 -n $ADMIN_PIN
+    ykman openpgp access change-admin-pin -a 12345678 -n $ADMIN_PIN
 
     if [[ -n "$ADMIN_PIN_FILE" ]]; then
         mkdir -p "$(dirname "$ADMIN_PIN_FILE")"
