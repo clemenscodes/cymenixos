@@ -78,18 +78,26 @@ pkgs.writeShellApplication {
     ykman config usb --enable OPENPGP --force || echo "Failed enabling OPENPGP application over USB"
     ykman openpgp reset --force || echo "Failed resetting OPENPGP application over USB"
 
-    echo "WARNING: This will delete your gpg keys with identity $IDENTITY"
+    KEY_EXISTS=$(gpg --batch --list-secret-keys --with-colons | grep -q "$IDENTITY"; echo $?)
 
-    if [[ "$FORCE" != 1 ]]; then
-      read -r -p "Are you sure? Type 'DELETE' to continue: " confirm
-      if [[ "$confirm" != "DELETE" ]]; then
-        echo "Aborting..."
-        exit 1
-      fi
+    if [[ "$FORCE" -eq 0 && "$KEY_EXISTS" -eq 0 ]]; then
+        read -r -p "Are you sure you want to delete GPG keys with identity $IDENTITY? Type 'DELETE' to continue: " confirm
+        if [[ "$confirm" != "DELETE" ]]; then
+            echo "Aborting..."
+            exit 1
+        fi
     fi
 
-    gpg --batch --delete-secret-keys --yes $IDENTITY || echo "No secret gpg keys with identity $IDENTITY exist"
-    gpg --batch --delete-keys --yes $IDENTITY || echo "No gpg keys with identity $IDENTITY exist"
+    if [[ "$KEY_EXISTS" -eq 0 ]]; then
+        echo "Deleting GPG keys with identity $IDENTITY"
+        gpg --batch --yes --delete-secret-keys "$IDENTITY" || echo "No secret GPG key found for identity $IDENTITY"
+        gpg --batch --yes --delete-keys "$IDENTITY" || echo "No GPG key found for identity $IDENTITY"
+        echo "GPG keys for $IDENTITY have been deleted."
+    else
+        echo "No GPG keys found for $IDENTITY. Continuing anyway..."
+    fi
+
+    echo "WARNING: This will delete your gpg keys with identity $IDENTITY"
 
     mkdir -p "$GNUPGHOME"
 
