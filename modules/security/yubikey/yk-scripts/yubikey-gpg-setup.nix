@@ -67,7 +67,7 @@ pkgs.writeShellApplication {
             --passphrase-file) PASSPHRASE_FILE="$2" shift 2 ;;
             --admin-pin-file) ADMIN_PIN_FILE="$2" shift 2 ;;
             --user-pin-file) USER_PIN_FILE="$2" shift 2 ;;
-            --force) FORCE=1 shift ;;
+            --force) FORCE=1; shift ;;
             --help) usage ;;
             *) echo "Unknown option: $1" usage ;;
         esac
