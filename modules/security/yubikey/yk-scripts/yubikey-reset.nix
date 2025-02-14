@@ -14,7 +14,7 @@ pkgs.writeShellApplication {
       exit 1
     fi
 
-    ykman config mode --force OTP+FIDO+CCID || echo "Setting modes to FIDO+CCID failed"
+    ykman config mode "OTP+FIDO+CCID" --force || echo "Setting modes to FIDO+CCID failed"
 
     echo "Resetting OATH (TOTP/HOTP)..."
     ykman oath reset --force || echo "OATH reset failed or not supported"
@@ -35,7 +35,6 @@ pkgs.writeShellApplication {
     ykman config usb --force --disable OATH || echo "Disabling OATH over USB failed"
     ykman config usb --force --disable PIV || echo "Disabling PIV over USB failed"
     ykman config usb --force --disable OPENPGP || echo "Disabling OPENPGP over USB failed"
-    ykman config usb --force --disable HSMAUTH || echo "Disabling OPENPGP over USB failed"
 
     echo "Resetting OTP slot 1"
     ykman otp delete 1 --force
