@@ -16,6 +16,7 @@ pkgs.writeShellApplication {
     PASSPHRASE_FILE=""
     ADMIN_PIN_FILE=""
     USER_PIN_FILE=""
+    FORCE=0
 
     usage() {
         echo "Usage: $0 [options]"
@@ -32,6 +33,7 @@ pkgs.writeShellApplication {
         echo "  --passphrase-file FILE Export the certify passphrase to the specified file"
         echo "  --admin-pin-file FILE  Export the admin pin to the specified file"
         echo "  --user-pin-file FILE   Export the user pin to the specified file"
+        echo "  --force                Force deleting of GPG keys with given identity"
         echo "  --help                 Display this help message"
         echo
         echo "Example: $0 \\"
@@ -47,6 +49,7 @@ pkgs.writeShellApplication {
         echo "  --passphrase-file /private/gpg/passphrase \\"
         echo "  --admin-pin-file /private/gpg/admin-pin \\"
         echo "  --user-pin-file /private/gpg/user-pin \\"
+        echo "  --force \\"
         exit 1
     }
 
@@ -64,10 +67,24 @@ pkgs.writeShellApplication {
             --passphrase-file) PASSPHRASE_FILE="$2" shift 2 ;;
             --admin-pin-file) ADMIN_PIN_FILE="$2" shift 2 ;;
             --user-pin-file) USER_PIN_FILE="$2" shift 2 ;;
+            --force) FORCE=1 shift ;;
             --help) usage ;;
             *) echo "Unknown option: $1" usage ;;
         esac
     done
+
+    echo "WARNING: This will delete your gpg keys with identity $IDENTITY"
+
+    if [[ "$FORCE" != 1 ]]; then
+      read -r -p "Are you sure? Type 'DELETE' to continue: " confirm
+      if [[ "$confirm" != "DELETE" ]]; then
+        echo "Aborting..."
+        exit 1
+      fi
+    fi
+
+    gpg --delete-secret-keys --yes $IDENTITYS || echo "No secret gpg keys with identity $IDENTITY exist"
+    gpg --delete-keys --yes $IDENTITY || echo "No gpg keys with identity $IDENTITY exist"
 
     echo "Enabling OPENPGP application over USB"
 
@@ -171,7 +188,7 @@ pkgs.writeShellApplication {
 
     echo "Updating admin pin to $ADMIN_PIN"
 
-    ykman openpgp access change-pin -P 12345678 -n $ADMIN_PIN
+    ykman openpgp access change-admin-pin -P 12345678 -n $ADMIN_PIN
 
     if [[ -n "$ADMIN_PIN_FILE" ]]; then
         mkdir -p "$(dirname "$ADMIN_PIN_FILE")"
