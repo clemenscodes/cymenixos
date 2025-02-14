@@ -14,6 +14,8 @@ pkgs.writeShellApplication {
       exit 1
     fi
 
+    ykman config mode --force OTP+FIDO+CCID || echo "Setting modes to FIDO+CCID failed"
+
     echo "Resetting OATH (TOTP/HOTP)..."
     ykman oath reset --force || echo "OATH reset failed or not supported"
 
@@ -25,8 +27,6 @@ pkgs.writeShellApplication {
 
     echo "Disabling all NFC functions... "
     ykman config nfc --force --disable-all || echo "Disabling all applications over NFC failed"
-
-    ykman config mode --force FIDO+CCID || echo "Setting modes to FIDO+CCID failed"
 
     echo "Disabling all USB functions... "
     ykman config usb --force --enable OTP || echo "Enabling OTP over USB failed"
