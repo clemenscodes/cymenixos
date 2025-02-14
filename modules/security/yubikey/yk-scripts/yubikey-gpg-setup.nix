@@ -83,7 +83,7 @@ pkgs.writeShellApplication {
       fi
     fi
 
-    gpg --delete-secret-keys --yes $IDENTITYS || echo "No secret gpg keys with identity $IDENTITY exist"
+    gpg --delete-secret-keys --yes $IDENTITY || echo "No secret gpg keys with identity $IDENTITY exist"
     gpg --delete-keys --yes $IDENTITY || echo "No gpg keys with identity $IDENTITY exist"
 
     echo "Enabling OPENPGP application over USB"
