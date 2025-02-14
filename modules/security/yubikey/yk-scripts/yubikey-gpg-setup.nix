@@ -96,9 +96,16 @@ pkgs.writeShellApplication {
         fingerprints=$(gpg --fingerprint $key_id | grep -oP '=\s*([A-F0-9]{4}\s*){9}[A-F0-9]{4}' | tr -d ' =')
 
         for fingerprint in $fingerprints; do
-          echo "Deleting key with fingerprint: $fingerprint"
-          gpg --batch --yes --delete-secret-keys "$fingerprint" || echo "No secret GPG key found with fingerprint $fingerprint"
-          gpg --batch --yes --delete-keys "$fingerprint" || echo "No GPG key found with fingerprint $fingerprint"
+          if gpg --list-secret-keys "$fingerprint" &>/dev/null; then
+              echo "Deleting secret key with fingerprint: $fingerprint"
+              gpg --batch --yes --delete-secret-keys "$fingerprint" || echo "No secret GPG key found with fingerprint $fingerprint"
+          fi
+
+          # Überprüfe, ob der öffentliche Schlüssel existiert
+          if gpg --list-keys "$fingerprint" &>/dev/null; then
+              echo "Deleting key with fingerprint: $fingerprint"
+              gpg --batch --yes --delete-keys "$fingerprint" || echo "No GPG key found with fingerprint $fingerprint"
+          fi
         done
 
         echo "GPG keys for $IDENTITY have been deleted."
