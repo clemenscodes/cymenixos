@@ -243,12 +243,15 @@ pkgs.writeShellApplication {
     gpg -K
 
     echo "Requiring touch for OpenPGP authentication... "
-    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force aut on
+    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force aut Cached-Fixed
 
     echo "Requiring touch for OpenPGP encryption... "
-    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force enc on
+    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force enc Cached-Fixed
 
     echo "Requiring touch for OpenPGP signing... "
-    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force sig on
+    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force sig Cached-Fixed
+
+    echo "Setting openpgp retries"
+    ykman openpgp access set-retries --admin-pin $ADMIN_PIN --force 3 0 3
   '';
 }

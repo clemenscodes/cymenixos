@@ -14,9 +14,6 @@ pkgs.writeShellApplication {
       exit 1
     fi
 
-    echo "Resetting FIDO (WebAuthn/U2F)..."
-    ykman fido reset --force || echo "FIDO reset failed or not supported"
-
     echo "Resetting OATH (TOTP/HOTP)..."
     ykman oath reset --force || echo "OATH reset failed or not supported"
 
@@ -32,12 +29,20 @@ pkgs.writeShellApplication {
     ykman config mode --force FIDO+CCID || echo "Setting modes to FIDO+CCID failed"
 
     echo "Disabling all USB functions... "
-    ykman config usb --force --disable OTP || echo "Disabling OTP over USB failed"
+    ykman config usb --force --enable OTP || echo "Enabling OTP over USB failed"
+    ykman config usb --force --enable FIDO2 || echo "Enabling FIDO2 over USB failed"
     ykman config usb --force --disable U2F || echo "Disabling U2F over USB failed"
-    ykman config usb --force --disable FIDO2 || echo "Disabling FIDO2 over USB failed"
     ykman config usb --force --disable OATH || echo "Disabling OATH over USB failed"
     ykman config usb --force --disable PIV || echo "Disabling PIV over USB failed"
     ykman config usb --force --disable OPENPGP || echo "Disabling OPENPGP over USB failed"
     ykman config usb --force --disable HSMAUTH || echo "Disabling OPENPGP over USB failed"
+
+    echo "Resetting OTP slot 1"
+    ykman otp delete 1 --force
+    ykman otp yubiotp 1 --generate-private-id --generate-key --serial-public-id --force
+
+    echo "Resetting OTP slot 2"
+    ykman otp delete 2 --force
+    ykman otp chalresp 2 --generate --force
   '';
 }
