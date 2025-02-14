@@ -80,6 +80,8 @@ pkgs.writeShellApplication {
 
     KEY_EXISTS=$(gpg --batch --list-secret-keys --with-colons | grep -q "$IDENTITY"; echo $?)
 
+    echo "WARNING: This will delete your gpg keys with identity $IDENTITY"
+
     if [[ "$FORCE" -eq 0 && "$KEY_EXISTS" -eq 0 ]]; then
         read -r -p "Are you sure you want to delete GPG keys with identity $IDENTITY? Type 'DELETE' to continue: " confirm
         if [[ "$confirm" != "DELETE" ]]; then
@@ -90,16 +92,19 @@ pkgs.writeShellApplication {
 
     if [[ "$KEY_EXISTS" -eq 0 ]]; then
         echo "Deleting GPG keys with identity $IDENTITY"
-        KEYID=$(gpg --list-keys --with-colons | grep '^pub' | cut -d: -f5)
-        KEYFP=$(gpg --fingerprint $KEYID | grep -oP '=\s*([A-F0-9]{4}\s*){9}[A-F0-9]{4}' | tr -d ' =')
-        gpg --batch --yes --delete-secret-keys "$KEYFP" || echo "No secret GPG key found with fingerprint $KEYFP"
-        gpg --batch --yes --delete-keys "$KEYFP" || echo "No GPG key found with fingerprint $KEYFP"
+        key_id=$(gpg --list-keys --with-colons | grep '^pub' | cut -d: -f5)
+        fingerprints=$(gpg --fingerprint $key_id | grep -oP '=\s*([A-F0-9]{4}\s*){9}[A-F0-9]{4}' | tr -d ' =')
+
+        for fingerprint in $fingerprints; do
+          echo "Deleting key with fingerprint: $fingerprint"
+          gpg --batch --yes --delete-secret-keys "$fingerprint" || echo "No secret GPG key found with fingerprint $fingerprint"
+          gpg --batch --yes --delete-keys "$fingerprint" || echo "No GPG key found with fingerprint $fingerprint"
+        done
+
         echo "GPG keys for $IDENTITY have been deleted."
     else
         echo "No GPG keys found for $IDENTITY. Continuing anyway..."
     fi
-
-    echo "WARNING: This will delete your gpg keys with identity $IDENTITY"
 
     mkdir -p "$GNUPGHOME"
 
