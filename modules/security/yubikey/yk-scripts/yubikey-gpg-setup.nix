@@ -270,6 +270,6 @@ pkgs.writeShellApplication {
     ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force sig Cached-Fixed
 
     echo "Setting openpgp retries"
-    ykman openpgp access set-retries --admin-pin $ADMIN_PIN --force 3 0 3
+    ykman openpgp access set-retries --admin-pin $ADMIN_PIN --force 3 3 3
   '';
 }
