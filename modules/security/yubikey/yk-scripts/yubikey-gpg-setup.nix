@@ -49,7 +49,7 @@ pkgs.writeShellApplication {
         echo "  --passphrase-file ./gpg/private/passphrase \\"
         echo "  --admin-pin-file ./gpg/private/admin-pin \\"
         echo "  --user-pin-file ./gpg/private/user-pin \\"
-        echo "  --force \\"
+        echo "  --force"
         exit 1
     }
 
@@ -90,8 +90,10 @@ pkgs.writeShellApplication {
 
     if [[ "$KEY_EXISTS" -eq 0 ]]; then
         echo "Deleting GPG keys with identity $IDENTITY"
-        gpg --batch --yes --delete-secret-keys "$IDENTITY" || echo "No secret GPG key found for identity $IDENTITY"
-        gpg --batch --yes --delete-keys "$IDENTITY" || echo "No GPG key found for identity $IDENTITY"
+        KEYID=$(gpg --list-keys --with-colons | grep '^pub' | cut -d: -f5)
+        KEYFP=$(gpg --fingerprint $KEYID | grep -oP '=\s*([A-F0-9]{4}\s*){9}[A-F0-9]{4}' | tr -d ' =')
+        gpg --batch --yes --delete-secret-keys "$KEYFP" || echo "No secret GPG key found with fingerprint $KEYFP"
+        gpg --batch --yes --delete-keys "$KEYFP" || echo "No GPG key found with fingerprint $KEYFP"
         echo "GPG keys for $IDENTITY have been deleted."
     else
         echo "No GPG keys found for $IDENTITY. Continuing anyway..."
