@@ -73,6 +73,11 @@ pkgs.writeShellApplication {
         esac
     done
 
+    echo "Enabling OPENPGP application over USB"
+
+    ykman config usb --enable OPENPGP --force || echo "Failed enabling OPENPGP application over USB"
+    ykman openpgp reset --force || echo "Failed resetting OPENPGP application over USB"
+
     echo "WARNING: This will delete your gpg keys with identity $IDENTITY"
 
     if [[ "$FORCE" != 1 ]]; then
@@ -85,10 +90,6 @@ pkgs.writeShellApplication {
 
     gpg --delete-secret-keys --yes $IDENTITY || echo "No secret gpg keys with identity $IDENTITY exist"
     gpg --delete-keys --yes $IDENTITY || echo "No gpg keys with identity $IDENTITY exist"
-
-    echo "Enabling OPENPGP application over USB"
-
-    ykman config usb --enable OPENPGP --force || echo "Failed enabling OPENPGP over USB"
 
     mkdir -p "$GNUPGHOME"
 
