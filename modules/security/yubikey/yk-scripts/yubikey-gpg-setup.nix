@@ -97,14 +97,11 @@ pkgs.writeShellApplication {
 
         for fingerprint in $fingerprints; do
           if gpg --list-secret-keys "$fingerprint" &>/dev/null; then
-              echo "Deleting secret key with fingerprint: $fingerprint"
-              gpg --batch --yes --delete-secret-keys "$fingerprint" || echo "No secret GPG key found with fingerprint $fingerprint"
+              gpg --batch --yes --delete-secret-keys "$fingerprint" &>/dev/null && echo "Secret GPG key deleted with fingerprint $fingerprint"
           fi
 
-          # Überprüfe, ob der öffentliche Schlüssel existiert
           if gpg --list-keys "$fingerprint" &>/dev/null; then
-              echo "Deleting key with fingerprint: $fingerprint"
-              gpg --batch --yes --delete-keys "$fingerprint" || echo "No GPG key found with fingerprint $fingerprint"
+              gpg --batch --yes --delete-keys "$fingerprint" &>/dev/null && echo "GPG key deleted with fingerprint $fingerprint"
           fi
         done
 
