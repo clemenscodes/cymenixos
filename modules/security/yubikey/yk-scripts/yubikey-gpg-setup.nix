@@ -69,6 +69,10 @@ pkgs.writeShellApplication {
         esac
     done
 
+    echo "Enabling OPENPGP application over USB"
+
+    ykman config usb --enable OPENPGP --force || echo "Failed enabling OPENPGP over USB"
+
     mkdir -p "$GNUPGHOME"
 
     echo "Generating passphrase"
@@ -82,6 +86,7 @@ pkgs.writeShellApplication {
     echo "passphrase: $CERTIFY_PASS"
 
     if [[ -n "$PASSPHRASE_FILE" ]]; then
+        mkdir -p "$(dirname "$PASSPHRASE_FILE")"
         echo "Exporting passphrase to $PASSPHRASE_FILE"
         echo "$CERTIFY_PASS" > "$PASSPHRASE_FILE"
         chmod 600 "$PASSPHRASE_FILE"
@@ -97,6 +102,7 @@ pkgs.writeShellApplication {
     echo "Key id: $KEYID"
 
     if [[ -n "$KEYID_FILE" ]]; then
+        mkdir -p "$(dirname "$KEYID_FILE")"
         echo "Exporting key id to $KEYID_FILE"
         echo "$KEYID" > "$KEYID_FILE"
     fi
@@ -104,6 +110,7 @@ pkgs.writeShellApplication {
     echo "Key fingerprint: $KEYFP"
 
     if [[ -n "$KEYFP_FILE" ]]; then
+        mkdir -p "$(dirname "$KEYFP_FILE")"
         echo "Exporting key fingerprint to $KEYFP_FILE"
         echo "$KEYFP" > "$KEYFP_FILE"
     fi
@@ -122,6 +129,10 @@ pkgs.writeShellApplication {
     CERTIFY_KEY="$PRIVATE_KEY_DEST/$KEYID-Certify.key"
     SUBKEYS="$SUBKEYS_DEST/$KEYID-Subkeys.key"
     PUBLIC_KEY="$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
+
+    mkdir -p "$(dirname "$CERTIFY_KEY")"
+    mkdir -p "$(dirname "$SUBKEYS")"
+    mkdir -p "$(dirname "$PUBLIC_KEY")"
 
     echo $CERTIFY_PASS | gpg --output "$CERTIFY_KEY" \
         --batch --pinentry-mode=loopback --passphrase-fd 0 \
@@ -160,15 +171,10 @@ pkgs.writeShellApplication {
 
     echo "Updating admin pin to $ADMIN_PIN"
 
-    gpg --command-fd=0 --pinentry-mode=loopback --change-pin <<EOF
-    3
-    12345678
-    $ADMIN_PIN
-    $ADMIN_PIN
-    q
-    EOF
+    ykman openpgp access change-pin -P 12345678 -n $ADMIN_PIN
 
     if [[ -n "$ADMIN_PIN_FILE" ]]; then
+        mkdir -p "$(dirname "$ADMIN_PIN_FILE")"
         echo "Exporting admin pin to $ADMIN_PIN_FILE"
         echo $ADMIN_PIN > $ADMIN_PIN_FILE
         chmod 600 $ADMIN_PIN_FILE
@@ -176,15 +182,10 @@ pkgs.writeShellApplication {
 
     echo "Updating user pin to $USER_PIN"
 
-    gpg --command-fd=0 --pinentry-mode=loopback --change-pin <<EOF
-    1
-    123456
-    $USER_PIN
-    $USER_PIN
-    q
-    EOF
+    ykman openpgp access change-pin -P 123456 -n $USER_PIN
 
     if [[ -n "$USER_PIN_FILE" ]]; then
+        mkdir -p "$(dirname "$USER_PIN_FILE")"
         echo "Exporting user pin to $USER_PIN_FILE"
         echo $USER_PIN > $USER_PIN_FILE
         chmod 600 $USER_PIN_FILE
@@ -240,5 +241,14 @@ pkgs.writeShellApplication {
     echo "Verifying transfers"
 
     gpg -K
+
+    echo "Requiring touch for OpenPGP authentication... "
+    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force aut on
+
+    echo "Requiring touch for OpenPGP encryption... "
+    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force enc on
+
+    echo "Requiring touch for OpenPGP signing... "
+    ykman openpgp keys set-touch --admin-pin $ADMIN_PIN --force sig on
   '';
 }
