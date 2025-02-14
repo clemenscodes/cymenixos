@@ -88,8 +88,8 @@ pkgs.writeShellApplication {
       fi
     fi
 
-    gpg --delete-secret-keys --yes $IDENTITY || echo "No secret gpg keys with identity $IDENTITY exist"
-    gpg --delete-keys --yes $IDENTITY || echo "No gpg keys with identity $IDENTITY exist"
+    gpg --batch --delete-secret-keys --yes $IDENTITY || echo "No secret gpg keys with identity $IDENTITY exist"
+    gpg --batch --delete-keys --yes $IDENTITY || echo "No gpg keys with identity $IDENTITY exist"
 
     mkdir -p "$GNUPGHOME"
 
