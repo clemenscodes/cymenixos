@@ -59,24 +59,5 @@ in {
         };
       };
     };
-    home = {
-      file = {
-        ".config/gnupg/dirmngr.conf" = {
-          text = ''
-            # Keyserver URL
-            keyserver hkps://keys.openpgp.org
-            keyserver hkps://keys.mailvelope.com
-            keyserver hkps://keyserver.ubuntu.com:443
-            keyserver hkps://pgpkeys.eu
-            keyserver hkps://pgp.circl.lu
-            keyserver hkp://zkaan2xfbuxia2wpf7ofnkbz6r5zdbbvxbunvp5g2iebopbfc4iqmbad.onion
-            auto-key-locate wkd,dane,local
-            auto-key-retrieve
-            trust-model tofu+pgp
-            list-options show-unusable-subkeys
-          '';
-        };
-      };
-    };
   };
 }
