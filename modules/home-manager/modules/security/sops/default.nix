@@ -23,6 +23,9 @@ in {
   };
   config = lib.mkIf (osConfig.modules.security.sops.enable && cfg.enable && cfg.sops.enable) {
     sops = {
+      gnupg = {
+        home = "${home}/.config/gnupg";
+      };
       age = {
         generateKey = true;
         keyFile = "${persistPath}/${home}/.config/sops/age/keys.txt";
