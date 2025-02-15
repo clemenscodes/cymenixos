@@ -18,6 +18,10 @@ in {
             type = lib.types.str;
             default = null;
           };
+          gpgFingerprint = lib.mkOption {
+            type = lib.types.str;
+            default = null;
+          };
         };
       };
     };
@@ -373,12 +377,9 @@ in {
           credential = {
             helper = "libsecret";
           };
-          user = {
-            signingkey = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
-          };
           gpg = {
             program = "gpg2";
-            format = "ssh";
+            format = "openpgp";
           };
           init = {
             defaultBranch = "main";
