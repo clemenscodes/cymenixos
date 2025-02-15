@@ -44,10 +44,9 @@ in {
         home = "${persistPath}/home/${user}/.config/gnupg";
         sshKeyPaths = [];
       };
-      # age = {
-      #   keyFile = "${persistPath}/home/${user}/.config/sops/age/keys.txt";
-      #   sshKeyPaths = ["${persistPath}/home/${user}/.ssh/id_ed25519"];
-      # };
+      age = {
+        sshKeyPaths = [];
+      };
     };
   };
 }
