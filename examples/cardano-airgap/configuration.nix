@@ -32,7 +32,7 @@
     users = {
       enable = true;
       wheel = true;
-      user = "nixos";
+      user = "airgap";
       initialHashedPassword = "";
     };
     boot = {
@@ -139,6 +139,21 @@
       };
       yubikey = {
         enable = true;
+        pam = {
+          enable = true;
+          identifiers = {
+            sequwitie = 31631244;
+            matcha = 31861924;
+          };
+          token-ids = [
+            "vvcccbudlijr" # sequwitie
+            "vvcccbuhdrlf" # matcha
+          ];
+          u2f-mappings = [
+            "BIy34cqfJbjqbGflC1sK064geZZm9ma8PEcv+lNyBcy9PPQuJx1jlYTfx6wBdtyST4a493/hy/bCvjtygHM8cg==,zvs4JcxffM814ItVLiVmNoMAL7rf1W/ZxLFbA9xkf1CEWiHI7LGdQVIp4NiOzTHMZFUobJwN4emnmGcrR3zKGg==,es256,+presence" # sequwitie
+            "CarFQoS8nmADi4K6oPpsNLl4BQ4pqF0sZYp+KeKWaKzWaEWev3wT606xOlnvdSJlUPqucF0oSY/O+alZQXMCrA==,B2uXsDd9qv3Rd73WFGqkeE08zL0IW2VUFCoxYPDnXbA0WLGGcwY+Eab7Wg8g/YDuD9JIRcEh7O+vbkKK0rvFqw==,es256,+presence" # matcha
+          ];
+        };
       };
     };
     shell = {

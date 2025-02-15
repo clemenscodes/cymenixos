@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules.io;
 in {
   options = {
@@ -22,16 +26,19 @@ in {
       printing = {
         inherit (cfg.printing) enable;
         browsing = true;
-        listenAddresses = ["*:631"];
-        allowFrom = ["all"];
+        listenAddresses = ["127.0.0.1:631"];
+        allowFrom = ["127.0.0.1"];
         defaultShared = true;
+        drivers = [pkgs.hplip];
+        openFirewall = true;
       };
     };
-    networking = {
-      firewall = {
-        allowedUDPPorts = [631];
-        allowedTCPPorts = [631];
-      };
+    environment = {
+      systemPackages = [
+        pkgs.hplip
+        pkgs.cups
+        pkgs.system-config-printer
+      ];
     };
   };
 }
