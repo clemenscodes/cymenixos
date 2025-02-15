@@ -26,6 +26,7 @@
   };
   yubikey-pubkey-url = import ./yk-scripts/yubikey-pubkey-url.nix {inherit pkgs;};
   yubikey-gpg-setup = import ./yk-scripts/yubikey-gpg-setup.nix {inherit pkgs;};
+  yubikey-ssh-setup = import ./yk-scripts/yubikey-ssh-setup.nix {inherit pkgs;};
   yubikey-reset = import ./yk-scripts/yubikey-reset.nix {inherit pkgs;};
   yubikey-up = let
     yubikeyIds = lib.concatStringsSep " " (
@@ -82,6 +83,7 @@
     paths = [
       yubikey-pubkey-url
       yubikey-gpg-setup
+      yubikey-ssh-setup
       yubikey-up
       yubikey-down
       yubikey-reset
@@ -150,9 +152,6 @@ in {
     };
     services = {
       pcscd = {
-        inherit (cfg.yubikey) enable;
-      };
-      yubikey-agent = {
         inherit (cfg.yubikey) enable;
       };
       udev = {
