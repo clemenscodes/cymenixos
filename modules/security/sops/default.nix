@@ -42,6 +42,7 @@ in {
     sops = lib.mkIf (cfg.enable && cfg.sops.enable) {
       gnupg = {
         home = "${persistPath}/home/${user}/.config/gnupg";
+        sshKeyPaths = [];
       };
       # age = {
       #   keyFile = "${persistPath}/home/${user}/.config/sops/age/keys.txt";

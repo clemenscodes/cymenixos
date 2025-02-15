@@ -25,6 +25,7 @@ in {
     sops = {
       gnupg = {
         home = "${persistPath}/${home}/.config/gnupg";
+        sshKeyPaths = [];
       };
       # age = {
       #   generateKey = true;
