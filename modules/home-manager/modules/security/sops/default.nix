@@ -23,12 +23,10 @@ in {
   };
   config = lib.mkIf (osConfig.modules.security.sops.enable && cfg.enable && cfg.sops.enable) {
     sops = {
-      gnupg = {
-        home = "${persistPath}/${home}/.config/gnupg";
-        sshKeyPaths = [];
-      };
       age = {
-        sshKeyPaths = [];
+        generateKey = true;
+        keyFile = "${persistPath}/${home}/.config/sops/age/keys.txt";
+        sshKeyPaths = ["${persistPath}/${home}/.ssh/id_ed25519"];
       };
     };
   };
