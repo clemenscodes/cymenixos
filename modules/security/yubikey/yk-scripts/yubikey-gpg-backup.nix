@@ -30,8 +30,8 @@ pkgs.writeShellApplication {
         echo "  --admin-pin-file ./gpg/private/admin-pin \\"
         echo "  --user-pin-file ./gpg/private/user-pin \\"
         echo "  --subkeys-file ./gpg/private/subkeys.key \\"
-        echo "  --public-key-file ./gpg/public/public-key.asc
-        echo "  --identity-file ./gpg/public/identity
+        echo "  --public-key-file ./gpg/public/public-key.asc \\"
+        echo "  --identity-file ./gpg/public/identity"
         exit 1
     }
 
