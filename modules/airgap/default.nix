@@ -69,13 +69,8 @@ in {
       };
     };
     services = {
-      systemd-timesyncd = {
+      timesyncd = {
         enable = lib.mkForce false;
-      };
-      systemd = {
-        timedated = {
-          enable = lib.mkForce true;
-        };
       };
       udev = {
         extraRules = ''

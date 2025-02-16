@@ -64,6 +64,8 @@ in {
       username = user;
       homeDirectory = "/home/${user}";
       sessionPath = ["${config.home.homeDirectory}/.local/bin"];
+      extraOutputsToInstall = ["doc" "info" "devdoc"];
+      preferXdgDirectories = true;
       activation = {
         rmUnusedNix = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
           rm -rf ${config.home.homeDirectory}/.nix-defexpr
