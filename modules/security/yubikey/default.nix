@@ -26,6 +26,7 @@
   };
   yubikey-pubkey-url = import ./yk-scripts/yubikey-pubkey-url.nix {inherit pkgs;};
   yubikey-gpg-setup = import ./yk-scripts/yubikey-gpg-setup.nix {inherit pkgs;};
+  yubikey-gpg-backup = import ./yk-scripts/yubikey-gpg-backup.nix {inherit pkgs;};
   yubikey-ssh-setup = import ./yk-scripts/yubikey-ssh-setup.nix {inherit pkgs;};
   yubikey-reset = import ./yk-scripts/yubikey-reset.nix {inherit pkgs;};
   yubikey-up = let
@@ -83,6 +84,7 @@
     paths = [
       yubikey-pubkey-url
       yubikey-gpg-setup
+      yubikey-gpg-backup
       yubikey-ssh-setup
       yubikey-up
       yubikey-down

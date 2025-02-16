@@ -110,7 +110,9 @@ pkgs.writeShellApplication {
         echo "No GPG keys found for $IDENTITY. Continuing anyway..."
     fi
 
-    mkdir -p "$GNUPGHOME"
+    mkdir -p "$GNUPGHOME" "$PUBLIC_KEY_DEST" "$PRIVATE_KEY_DEST"
+
+    echo "$IDENTITY" > $PUBLIC_KEY_DEST/identity
 
     echo "Generating passphrase"
 
