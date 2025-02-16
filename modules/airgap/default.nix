@@ -69,6 +69,17 @@ in {
       };
     };
     services = {
+      ntpd = {
+        enable = lib.mkForce false;
+      };
+      systemd-timesyncd = {
+        enable = lib.mkForce false;
+      };
+      systemd = {
+        timedated = {
+          enable = lib.mkForce true;
+        };
+      };
       udev = {
         extraRules = ''
           SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
