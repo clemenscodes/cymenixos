@@ -132,7 +132,7 @@
       };
       sudo = {
         enable = true;
-        noPassword = true;
+        noPassword = false;
       };
       tpm = {
         enable = true;

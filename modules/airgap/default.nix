@@ -69,9 +69,6 @@ in {
       };
     };
     services = {
-      ntpd = {
-        enable = lib.mkForce false;
-      };
       systemd-timesyncd = {
         enable = lib.mkForce false;
       };
