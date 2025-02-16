@@ -51,6 +51,12 @@ in {
           background = "dark";
           color = "always";
         };
+        signing = lib.mkIf cfg.git.signing.enable {
+          signByDefault = true;
+          format = "openpgp";
+          gpgPath = "${pkgs.gnupg}/bin/gpg2";
+          key = cfg.git.signing.gpgFingerprint;
+        };
         extraConfig = {
           core = {
             whitespace = "trailing-space,space-before-tab";
@@ -60,18 +66,8 @@ in {
           credential = {
             helper = "libsecret";
           };
-          gpg = {
-            program = "${pkgs.gnupg}/bin/gpg2";
-            format = "openpgp";
-          };
           init = {
             defaultBranch = "main";
-          };
-          user = lib.mkIf cfg.git.signing.enable {
-            signingkey = cfg.git.signing.gpgFingerprint;
-          };
-          commit = {
-            gpgsign = cfg.git.signing.enable;
           };
           pull = {
             rebase = false;
