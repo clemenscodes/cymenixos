@@ -54,7 +54,7 @@ in {
         signing = lib.mkIf cfg.git.signing.enable {
           signByDefault = true;
           format = "openpgp";
-          gpgPath = "${pkgs.gnupg}/bin/gpg2";
+          signer = "${pkgs.gnupg}/bin/gpg2";
           key = cfg.git.signing.gpgFingerprint;
         };
         extraConfig = {
