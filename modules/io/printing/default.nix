@@ -29,6 +29,22 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.printing.enable) {
+    users = {
+      users = {
+        ${config.modules.users.name} = {
+          extraGroups = [
+            "scanner"
+            "lp"
+          ];
+        };
+      };
+    };
+    hardware = {
+      sane = {
+        inherit (cfg.printing) enable;
+        extraBackends = [unfreePkgs.hplipWithPlugin];
+      };
+    };
     services = {
       avahi = {
         inherit (cfg.printing) enable;
@@ -45,7 +61,7 @@ in {
         listenAddresses = ["127.0.0.1:631"];
         allowFrom = ["127.0.0.1"];
         defaultShared = true;
-        drivers = [pkgs.hplip];
+        drivers = [unfreePkgs.hplipWithPlugin];
         openFirewall = true;
       };
     };
