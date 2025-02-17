@@ -16,5 +16,10 @@ in {
     time = {
       timeZone = cfg.time.defaultTimeZone;
     };
+    services = {
+      localtimed = {
+        inherit (cfg.time) enable;
+      };
+    };
   };
 }

@@ -63,6 +63,30 @@ in {
       };
     };
     hardware = {
+      amdgpu = {
+        amdvlk = {
+          enable = true;
+          support32bit = {
+            enable = true;
+          };
+          supportExperimental = {
+            enable = true;
+          };
+          settings = {
+            AllowVkPipelineCachingToDisk = 1;
+            EnableVmAlwaysValid = 1;
+            IFH = 0;
+            IdleAfterSubmitGpuMask = 1;
+            ShaderCacheMode = 1;
+          };
+        };
+        initrd = {
+          enable = true;
+        };
+        opencl = {
+          enable = true;
+        };
+      };
       graphics = {
         enable = true;
         extraPackages = [
