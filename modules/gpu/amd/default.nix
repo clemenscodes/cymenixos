@@ -66,7 +66,7 @@ in {
       amdgpu = {
         amdvlk = {
           enable = true;
-          support32bit = {
+          support32Bit = {
             enable = true;
           };
           supportExperimental = {
