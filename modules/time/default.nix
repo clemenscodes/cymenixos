@@ -9,16 +9,17 @@ in {
           type = lib.types.str;
           default = "Europe/Berlin";
         };
+        useLocalTime = lib.mkEnableOption "Enable localtimed service" // {default = false;};
       };
     };
   };
   config = lib.mkIf (cfg.enable && cfg.time.enable) {
     time = {
-      timeZone = cfg.time.defaultTimeZone;
+      timeZone = lib.mkDefault cfg.time.defaultTimeZone;
     };
     services = {
       localtimed = {
-        inherit (cfg.time) enable;
+        enable = cfg.time.useLocalTime;
       };
     };
   };
