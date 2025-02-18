@@ -15,14 +15,15 @@ pkgs.writeShellApplication {
     usage() {
         echo "Usage: $0 [options]"
         echo "Options:"
-        echo "  --gnupg-home DIR       Set the GnuPG home directory (default: $GNUPGHOME)"
-        echo "  --passphrase-file FILE Path to the passphrase file"
-        echo "  --admin-pin-file FILE  Path to the admin pin file"
-        echo "  --user-pin-file FILE   Path to the user pin file"
-        echo "  --subkeys-file FILE    Path to the subkeys file"
-        echo "  --public-key-file FILE Path to the public key file"
-        echo "  --identity-file FILE   Path to the indentity file (name and email)"
-        echo "  --help                 Display this help message"
+        echo "  --gnupg-home DIR        Set the GnuPG home directory (default: $GNUPGHOME)"
+        echo "  --passphrase-file FILE  Path to the passphrase file"
+        echo "  --admin-pin-file FILE   Path to the admin pin file"
+        echo "  --user-pin-file FILE    Path to the user pin file"
+        echo "  --subkeys-file FILE     Path to the subkeys file"
+        echo "  --public-key-file FILE  Path to the public key file"
+        echo "  --private-key-file FILE Path to the private key file"
+        echo "  --identity-file FILE    Path to the indentity file (name and email)"
+        echo "  --help                  Display this help message"
         echo
         echo "Example: $0 \\"
         echo "  --gnupg-home ~/.config/gnupg \\"
@@ -31,6 +32,7 @@ pkgs.writeShellApplication {
         echo "  --user-pin-file ./gpg/private/user-pin \\"
         echo "  --subkeys-file ./gpg/private/subkeys.key \\"
         echo "  --public-key-file ./gpg/public/public-key.asc \\"
+        echo "  --private-key-file ./gpg/private/private-key.key\\"
         echo "  --identity-file ./gpg/public/identity"
         exit 1
     }
@@ -42,6 +44,7 @@ pkgs.writeShellApplication {
             --admin-pin-file) ADMIN_PIN_FILE="$2"; shift 2 ;;
             --user-pin-file) USER_PIN_FILE="$2"; shift 2 ;;
             --subkeys-file) SUBKEYS_FILE="$2"; shift 2 ;;
+            --private-key-file) PRIVATE_KEY_FILE="$2"; shift 2 ;;
             --public-key-file) PUBLIC_KEY_FILE="$2"; shift 2 ;;
             --identity-file) IDENTITY_FILE="$2"; shift 2 ;;
             --help) usage ;;
@@ -49,7 +52,7 @@ pkgs.writeShellApplication {
         esac
     done
 
-    if [[ -z "$PASSPHRASE_FILE" || -z "$ADMIN_PIN_FILE" || -z "$USER_PIN_FILE" || -z "$SUBKEYS_FILE" || -z "$PUBLIC_KEY_FILE" || -z "$IDENTITY_FILE" ]]; then
+    if [[ -z "$PASSPHRASE_FILE" || -z "$ADMIN_PIN_FILE" || -z "$USER_PIN_FILE" || -z "$SUBKEYS_FILE" || -z "$PUBLIC_KEY_FILE" || -z "$PRIVATE_KEY_FILE"  || -z "$IDENTITY_FILE" ]]; then
         echo "Missing required arguments."
         usage
     fi
@@ -62,21 +65,25 @@ pkgs.writeShellApplication {
     IDENTITY=$(cat "$IDENTITY_FILE")
     echo "Identity: $IDENTITY"
 
+    CERTIFY_PASS=$(cat "$PASSPHRASE_FILE")
+
+    echo "Importing private key"
+    echo "$CERTIFY_PASS" | gpg --homedir "$GNUPGHOME" --batch --pinentry-mode=loopback --passphrase-fd 0 --import "$PRIVATE_KEY_FILE"
+
     echo "Importing public key"
     gpg --homedir "$GNUPGHOME" --import "$PUBLIC_KEY_FILE"
 
     echo "Importing subkeys"
-    CERTIFY_PASS=$(cat "$PASSPHRASE_FILE")
     echo "$CERTIFY_PASS" | gpg --homedir "$GNUPGHOME" --batch --pinentry-mode=loopback --passphrase-fd 0 --import "$SUBKEYS_FILE"
 
     echo "Setting up YubiKey pins"
     ADMIN_PIN=$(cat "$ADMIN_PIN_FILE")
     USER_PIN=$(cat "$USER_PIN_FILE")
 
-    echo "Updating admin pin"
+    echo "Updating admin pin to $ADMIN_PIN"
     ykman openpgp access change-admin-pin -a 12345678 -n "$ADMIN_PIN"
 
-    echo "Updating user pin"
+    echo "Updating user pin to $USER_PIN"
     ykman openpgp access change-pin -P 123456 -n "$USER_PIN"
 
     echo "Setting smart card attributes"
@@ -88,27 +95,45 @@ pkgs.writeShellApplication {
     quit
     EOF
 
-    echo "Transferring keys to YubiKey"
+    echo "Verifying results"
+
+    gpg --card-status
+
     KEYID=$(gpg --homedir "$GNUPGHOME" --list-keys --with-colons | awk -F: '/^pub:/ { print $5; exit }')
 
-    gpg --homedir "$GNUPGHOME" --command-fd=0 --pinentry-mode=loopback --edit-key "$KEYID" <<EOF
+    echo "Transferring signature key"
+
+    gpg --command-fd=0 --pinentry-mode=loopback --edit-key $KEYID <<EOF
     key 1
     keytocard
     1
     $CERTIFY_PASS
     $ADMIN_PIN
+    EOF
+
+    echo "Transferring encryption key"
+
+    gpg --command-fd=0 --pinentry-mode=loopback --edit-key $KEYID <<EOF
     key 2
     keytocard
     2
     $CERTIFY_PASS
     $ADMIN_PIN
+    EOF
+
+    echo "Transferring authentication key"
+
+    gpg --command-fd=0 --pinentry-mode=loopback --edit-key $KEYID <<EOF
     key 3
     keytocard
     3
     $CERTIFY_PASS
     $ADMIN_PIN
-    save
     EOF
+
+    echo "Verifying transfers"
+
+    gpg -K
 
     echo "Configuring touch and retry settings"
     echo "Requiring touch for OpenPGP authentication..."

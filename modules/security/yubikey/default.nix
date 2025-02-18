@@ -27,6 +27,7 @@
   yubikey-pubkey-url = import ./yk-scripts/yubikey-pubkey-url.nix {inherit pkgs;};
   yubikey-gpg-setup = import ./yk-scripts/yubikey-gpg-setup.nix {inherit pkgs;};
   yubikey-gpg-backup = import ./yk-scripts/yubikey-gpg-backup.nix {inherit pkgs;};
+  yubikey-update-gpg-stubs = import ./yk-scripts/yubikey-update-gpg-stubs.nix {inherit pkgs;};
   yubikey-ssh-setup = import ./yk-scripts/yubikey-ssh-setup.nix {inherit pkgs;};
   yubikey-reset = import ./yk-scripts/yubikey-reset.nix {inherit pkgs;};
   yubikey-up = let
@@ -36,8 +37,13 @@
   in
     pkgs.writeShellApplication {
       name = "yubikey-up";
-      runtimeInputs = [pkgs.yubikey-manager];
+      runtimeInputs = [
+        pkgs.yubikey-manager
+        yubikey-update-gpg-stubs
+      ];
       text = ''
+        yubikey-update-gpg-stubs
+
         serial=$(ykman list | awk '{print $NF}')
 
         if [ -z "$serial" ]; then
@@ -85,6 +91,7 @@
       yubikey-pubkey-url
       yubikey-gpg-setup
       yubikey-gpg-backup
+      yubikey-update-gpg-stubs
       yubikey-ssh-setup
       yubikey-up
       yubikey-down
