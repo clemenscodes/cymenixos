@@ -151,7 +151,7 @@
           ];
           u2f-mappings = [
             "BIy34cqfJbjqbGflC1sK064geZZm9ma8PEcv+lNyBcy9PPQuJx1jlYTfx6wBdtyST4a493/hy/bCvjtygHM8cg==,zvs4JcxffM814ItVLiVmNoMAL7rf1W/ZxLFbA9xkf1CEWiHI7LGdQVIp4NiOzTHMZFUobJwN4emnmGcrR3zKGg==,es256,+presence" # sequwitie
-            "CarFQoS8nmADi4K6oPpsNLl4BQ4pqF0sZYp+KeKWaKzWaEWev3wT606xOlnvdSJlUPqucF0oSY/O+alZQXMCrA==,B2uXsDd9qv3Rd73WFGqkeE08zL0IW2VUFCoxYPDnXbA0WLGGcwY+Eab7Wg8g/YDuD9JIRcEh7O+vbkKK0rvFqw==,es256,+presence" # matcha
+            "PvMKJy6Uqzqkb+YXyRhOnLn3rj+d1unpIZ3hnXE0rwfCnKePv5qfa8QFFq7sFIioq8lKvtN2kdYDLvC7+FRiFg==,iDqLO5PXwW3frmeWeZwyzCjLnTey+dC7DIz6OfCsMgNC1sAkiEnbnR1EK+Dt0V7frD5h3iopxrf6QdC8Tg37cg==,es256,+presence"
           ];
         };
       };
