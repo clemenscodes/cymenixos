@@ -46,7 +46,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
     boot = {
-      kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+      kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
       kernelModules = ["tcp_bpr" "v4l2loopback"];
       kernel = {
         sysctl = {
