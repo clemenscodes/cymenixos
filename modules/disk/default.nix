@@ -246,8 +246,6 @@ in {
           "d /snapshots/persist 0755 root root"
           "d /snapshots/logs 0755 root root"
           "d /snapshots/boots 0755 root root"
-          (lib.mkIf (cfg.security.gnupg.enable) "d ${persistPath}/root 0755 root root")
-          (lib.mkIf (cfg.security.gnupg.enable) "d ${persistPath}/root/.gnupg 0755 root root")
         ];
       };
     };

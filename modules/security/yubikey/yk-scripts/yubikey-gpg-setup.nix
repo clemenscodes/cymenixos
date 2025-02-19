@@ -78,6 +78,14 @@ pkgs.writeShellApplication {
     ykman config usb --enable OPENPGP --force || echo "Failed enabling OPENPGP application over USB"
     ykman openpgp reset --force || echo "Failed resetting OPENPGP application over USB"
 
+    echo "Setting up KDF"
+
+    gpg --command-fd=0 --pinentry-mode=loopback --card-edit <<EOF
+    admin
+    kdf-setup
+    12345678
+    EOF
+
     KEY_EXISTS=$(gpg --batch --list-secret-keys --with-colons | grep -q "$IDENTITY"; echo $?)
 
     echo "WARNING: This will delete your gpg keys with identity $IDENTITY"
@@ -163,15 +171,22 @@ pkgs.writeShellApplication {
 
     gpg -K
 
+    echo "Generating revocation certificate"
+
+    PUBLIC_KEY="$PUBLIC_KEY_DEST/$KEYID-$(date +%F)-Public.asc"
+    REVOCATION_CERT="$PRIVATE_KEY_DEST/$KEYID-Revocation.asc"
+    CERTIFY_KEY="$PRIVATE_KEY_DEST/$KEYID-Certify.asc"
+    SUBKEYS="$SUBKEYS_DEST/$KEYID-Subkeys.asc"
+
+    mkdir -p "$(dirname "$CERTIFY_KEY")" "$(dirname "$SUBKEYS")" "$(dirname "$PUBLIC_KEY")"
+
+    echo $CERTIFY_PASS | gpg --output "$REVOCATION_CERT" \
+        --batch --pinentry-mode=loopback --passphrase-fd 0 \
+        --gen-revoke "$KEYID"
+
+    echo "Revocation certificate saved to $REVOCATION_CERT"
+
     echo "Backing up keys"
-
-    CERTIFY_KEY="$PRIVATE_KEY_DEST/$KEYID-Certify.key"
-    SUBKEYS="$SUBKEYS_DEST/$KEYID-Subkeys.key"
-    PUBLIC_KEY="$PUBLIC_KEY_DEST/$KEYID-$(date +%F).asc"
-
-    mkdir -p "$(dirname "$CERTIFY_KEY")"
-    mkdir -p "$(dirname "$SUBKEYS")"
-    mkdir -p "$(dirname "$PUBLIC_KEY")"
 
     echo $CERTIFY_PASS | gpg --output "$CERTIFY_KEY" \
         --batch --pinentry-mode=loopback --passphrase-fd 0 \

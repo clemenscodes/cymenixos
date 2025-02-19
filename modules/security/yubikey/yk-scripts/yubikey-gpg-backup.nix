@@ -61,6 +61,14 @@ pkgs.writeShellApplication {
     ykman config usb --enable OPENPGP --force || echo "Failed enabling OPENPGP application over USB"
     ykman openpgp reset --force || echo "Failed resetting OPENPGP application over USB"
 
+    echo "Setting up KDF"
+
+    gpg --command-fd=0 --pinentry-mode=loopback --card-edit <<EOF
+    admin
+    kdf-setup
+    12345678
+    EOF
+
     echo "Reading identity from file"
     IDENTITY=$(cat "$IDENTITY_FILE")
     echo "Identity: $IDENTITY"
