@@ -152,6 +152,7 @@ in {
         luks = {
           yubikeySupport = cfg.yubikey.enable;
           gpgSupport = cfg.gnupg.enable;
+          fido2Support = cfg.yubikey.enable;
         };
       };
     };
