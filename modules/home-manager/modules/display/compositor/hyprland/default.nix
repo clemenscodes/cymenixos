@@ -39,6 +39,7 @@
   useUdiskie = osConfig.modules.io.udisks.enable;
   useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
+  useNewsboat = config.modules.media.rss.newsboat.enable;
   isLaptop = machine == "laptop";
   close-window = pkgs.writeShellScriptBin "close-window" ''
     if [ "$(${pkgs.hyprland}/bin/hyprctl activewindow -j | ${lib.getExe pkgs.jq} -r ".class")" = "Steam" ]; then
@@ -197,6 +198,7 @@ in {
               (lib.mkIf (useKitty && useBtop) "$mod SHIFT, R, exec, kitty btop")
               (lib.mkIf (useKitty && useNcmpcpp) "$mod, M, exec, kitty ncmpcpp")
               (lib.mkIf (useKitty && useCalcurse) "$mod SHIFT, K, exec, kitty calcurse")
+              (lib.mkIf useNewsboat "$mod SHIFT, N, exec, kitty newsboat")
               (lib.mkIf useWaybar "$mod, B, exec, waybar-toggle")
               (lib.mkIf useWaybar "$mod SHIFT, B, exec, waybar-reload")
               (lib.mkIf useSwaync "$mod, N, exec, swaync-client -t -sw")

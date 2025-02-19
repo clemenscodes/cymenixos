@@ -270,6 +270,12 @@
                 enable = false;
               };
             };
+            rss = {
+              enable = false;
+              newsboat = {
+                enable = false;
+              };
+            };
             video = {
               enable = false;
               mpris = {
