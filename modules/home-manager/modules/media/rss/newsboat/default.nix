@@ -23,6 +23,21 @@ in {
             url = "https://news.ycombinator.com/rss";
           }
         ];
+        extraConfig = ''
+          unbind-key h
+          unbind-key j
+          unbind-key k
+          unbind-key l
+          unbind-key g # bound to `sort` by default
+          unbind-key G # bound to `rev-sort` by default
+
+          bind-key h quit
+          bind-key j down
+          bind-key k up
+          bind-key l open
+          bind-key g home
+          bind-key G end
+        '';
       };
     };
   };
