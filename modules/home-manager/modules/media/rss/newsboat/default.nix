@@ -18,9 +18,14 @@ in {
         inherit (cfg.newsboat) enable;
         urls = [
           {
-            tags = ["news"];
+            tags = ["tech"];
             title = "Hacker News";
             url = "https://news.ycombinator.com/rss";
+          }
+          {
+            tags = ["tech"];
+            title = "Hacker Noon";
+            url = "https://hackernoon.com/feed";
           }
         ];
         extraConfig = ''
