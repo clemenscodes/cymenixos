@@ -57,6 +57,32 @@ in {
           use-agent = true;
           throw-keyids = true;
         };
+        publicKeys = let
+          debianKeyring = pkgs.stdenv.mkDerivation rec {
+            pname = "debian-keyring";
+            version = "2024.09.22";
+
+            src = pkgs.fetchurl {
+              url = "http://ftp.debian.org/debian/pool/main/d/debian-keyring/debian-keyring_${version}_all.deb";
+              sha256 = "sha256-LtCt7zCWIT8cJWqj46IXjXc1q0QKUCoYQRbQ7pQtVss=";
+            };
+
+            nativeBuildInputs = [pkgs.dpkg];
+
+            unpackPhase = ''
+              dpkg-deb -x $src $out
+            '';
+
+            installPhase = ''
+              mkdir -p $out/share/keyrings
+              cp -r $out/usr/share/keyrings/* $out/share/keyrings/
+            '';
+          };
+          debianDevelopers = {
+            source = "${debianKeyring}/share/keyrings/debian-keyring.gpg";
+            trust = "ultimate";
+          };
+        in [debianDevelopers];
       };
     };
   };
