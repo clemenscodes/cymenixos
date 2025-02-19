@@ -101,6 +101,10 @@ in {
                     askPassword = true;
                     settings = {
                       allowDiscards = true;
+                      crypttabExtraOpts = [
+                        (lib.mkIf cfg.security.yubikey.enable "fido2-device=auto")
+                        "token-timeout=60"
+                      ];
                     };
                     postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
                     extraFormatArgs = ["--pbkdf argon2id"];
@@ -121,6 +125,10 @@ in {
                     askPassword = true;
                     settings = {
                       allowDiscards = false;
+                      crypttabExtraOpts = [
+                        (lib.mkIf cfg.security.yubikey.enable "fido2-device=auto")
+                        "token-timeout=60"
+                      ];
                     };
                     postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
                     extraFormatArgs = ["--pbkdf argon2id"];
