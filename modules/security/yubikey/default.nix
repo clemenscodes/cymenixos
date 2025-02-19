@@ -151,6 +151,7 @@ in {
         kernelModules = ["vfat" "nls_cp437" "nls_iso8859-1" "usbhid"];
         luks = {
           yubikeySupport = cfg.yubikey.enable;
+          gpgSupport = cfg.gnupg.enable;
         };
       };
     };
