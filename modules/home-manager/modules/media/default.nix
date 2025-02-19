@@ -10,6 +10,7 @@
     (import ./editing {inherit inputs pkgs lib;})
     (import ./games {inherit inputs pkgs lib;})
     (import ./music {inherit inputs pkgs lib;})
+    (import ./rss {inherit inputs pkgs lib;})
     (import ./video {inherit inputs pkgs lib;})
   ];
   options = {
