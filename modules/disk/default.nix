@@ -213,6 +213,34 @@ in {
         };
       };
     };
+    boot = lib.mkIf cfg.security.yubkey.enable {
+      initrd = {
+        kernelModules = ["vfat" "nls_cp437" "nls_iso8859-1" "usbhid"];
+        luks = {
+          yubikeySupport = cfg.security.yubikey.enable;
+          devices = let
+            inherit (cfg.disk) luksDisk cryptStorage;
+          in {
+            ${luksDisk} = {
+              device = "/dev/disk/by-partlabel/${luksDisk}";
+              yubikey = {
+                slot = 2;
+                twoFactor = true;
+                gracePeriod = 60;
+                iterationStep = 0;
+                keyLength = 64;
+                saltLength = 16;
+                storage = {
+                  device = "/dev/disk/by-partlabel/${cryptStorage}";
+                  fsType = "vfat";
+                  path = "/crypt-storage/default";
+                };
+              };
+            };
+          };
+        };
+      };
+    };
     services = {
       lvm = {
         enable = true;
