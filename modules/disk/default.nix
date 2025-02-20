@@ -4,7 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.disk) enable device luksDisk vg lvm_volume swapsize;
+  inherit (cfg.disk) enable device luksDisk cryptStorage vg lvm_volume swapsize;
   inherit (cfg.boot.impermanence) persistPath;
 in {
   imports = [inputs.disko.nixosModules.default];
@@ -19,9 +19,15 @@ in {
         };
         luksDisk = lib.mkOption {
           type = lib.types.str;
-          description = "The name of the luks disk";
+          description = "The name of the luks partition";
           default = "luks";
           example = "root";
+        };
+        cryptStorage = lib.mkOption {
+          type = lib.types.str;
+          description = "The name of the crypt storage partition";
+          default = "crypt";
+          example = "salt";
         };
         vg = lib.mkOption {
           type = lib.types.str;
@@ -82,8 +88,22 @@ in {
                     mountOptions = ["umask=0077"];
                   };
                 };
-                public = lib.mkIf (cfg.airgap.enable) {
+                ${cryptStorage} = lib.mkIf cfg.security.yubikey.enable {
                   priority = 3;
+                  label = "${cryptStorage}";
+                  size = "4M";
+                  content = {
+                    type = "filesystem";
+                    format = "vfat";
+                    mountpoint = "/crypt";
+                    postCreateHook = ''
+                      # Run code here to store the salt on this partition
+                      mkdir -p /crypt/crypt-storage
+                    '';
+                  };
+                };
+                public = lib.mkIf (cfg.airgap.enable) {
+                  priority = 4;
                   size = "256M";
                   content = {
                     type = "filesystem";
@@ -93,7 +113,7 @@ in {
                   };
                 };
                 private = lib.mkIf (cfg.airgap.enable) {
-                  priority = 4;
+                  priority = 5;
                   size = "256M";
                   content = {
                     type = "luks";
@@ -116,9 +136,9 @@ in {
                     };
                   };
                 };
-                luks = {
+                ${luksDisk} = {
                   size = "100%";
-                  label = "luks";
+                  label = luksDisk;
                   content = {
                     name = luksDisk;
                     type = "luks";
