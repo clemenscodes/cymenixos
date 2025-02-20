@@ -108,14 +108,14 @@ in {
                         if [ -z ''${IN_DISKO_TEST+x} ]; then
                           set +x
                           echo "Enter password for ${config.device}: "
-                          IFS= read -r -s password
+                          IFS= read -r -s USER_PASSWORD
                           echo "Enter password for ${config.device} again to be safe: "
-                          IFS= read -r -s password_check
-                          export password
-                          [ "$password" = "$password_check" ]
+                          IFS= read -r -s USER_PASSWORD_CHECK
+                          export USER_PASSWORD
+                          [ "$USER_PASSWORD" = "$USER_PASSWORD_CHECK" ]
                           set -x
                         else
-                          export password=disko
+                          export USER_PASSWORD=disko
                         fi
                       }
 
@@ -133,7 +133,7 @@ in {
                       KEY_LENGTH=${builtins.toString keySize}
                       ITERATIONS=${builtins.toString iterations}
 
-                      LUKS_KEY="$(echo -n $USER_PASSPHRASE | pbkdf2-sha512 $(($KEY_LENGTH / 8)) $ITERATIONS $RESPONSE | rbtohex)"
+                      LUKS_KEY="$(echo -n $USER_PASSWORD | pbkdf2-sha512 $(($KEY_LENGTH / 8)) $ITERATIONS $RESPONSE | rbtohex)"
 
                       mkdir -p "$MOUNT_POINT/crypt-storage"
                       echo -ne "$SALT\n$ITERATIONS" > "$MOUNT_POINT/crypt-storage/default"
@@ -174,7 +174,12 @@ in {
                       allowDiscards = true;
                       fallbackToPassword = true;
                     };
-                    postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
+                    postMountHook = ''
+                      dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
+                      if [ -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}" ]; then
+                        rm -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}"
+                      fi
+                    '';
                     extraFormatArgs =
                       if cfg.security.yubikey.enable
                       then defaultLuksFormatArgs
@@ -202,7 +207,12 @@ in {
                       allowDiscards = true;
                       fallbackToPassword = true;
                     };
-                    postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
+                    postMountHook = ''
+                      dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
+                      if [ -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}" ]; then
+                        rm -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}"
+                      fi
+                    '';
                     extraFormatArgs =
                       if cfg.security.yubikey.enable
                       then defaultLuksFormatArgs
