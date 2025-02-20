@@ -6,6 +6,13 @@
   cfg = config.modules;
   inherit (cfg.disk) enable device luksDisk cryptStorage vg lvm_volume swapsize;
   inherit (cfg.boot.impermanence) persistPath;
+  slot = 2;
+  keySize = 512;
+  saltLength = 16;
+  iterations = 1000000;
+  cipher = "aes-xts-plain64";
+  hash = "sha512";
+  defaultLuksFormatArgs = ["--cipher=${cipher}" "--hash=${hash}" "--key-size=${builtins.toString keySize}"];
 in {
   imports = [inputs.disko.nixosModules.default];
   options = {
@@ -97,15 +104,46 @@ in {
                     format = "vfat";
                     mountpoint = "/crypt";
                     postCreateHook = ''
+                      askPassword() {
+                        if [ -z ''${IN_DISKO_TEST+x} ]; then
+                          set +x
+                          echo "Enter password for ${config.device}: "
+                          IFS= read -r -s password
+                          echo "Enter password for ${config.device} again to be safe: "
+                          IFS= read -r -s password_check
+                          export password
+                          [ "$password" = "$password_check" ]
+                          set -x
+                        else
+                          export password=disko
+                        fi
+                      }
+
                       CRYPT_PARTITION="/dev/disk/by-partlabel/${cryptStorage}"
                       MOUNT_POINT="/mnt/crypt-storage"
                       mkdir -p "$MOUNT_POINT"
                       mount "$CRYPT_PARTITION" "$MOUNT_POINT"
-                      SALT_LENGTH=16
+
+                      SALT_LENGTH=${builtins.toString saltLength}
                       SALT="$(dd if=/dev/random bs=1 count=$SALT_LENGTH 2>/dev/null | rbtohex)"
-                      ITERATIONS=1000000
+
+                      CHALLENGE="$(echo -n $SALT | openssl dgst -binary -${hash} | rbtohex)"
+                      RESPONSE=$(ykchalresp -${builtins.toString slot} -x $CHALLENGE 2>/dev/null)
+
+                      KEY_LENGTH=${builtins.toString keySize}
+                      ITERATIONS=${builtins.toString iterations}
+
+                      LUKS_KEY="$(echo -n $USER_PASSPHRASE | pbkdf2-sha512 $(($KEY_LENGTH / 8)) $ITERATIONS $RESPONSE | rbtohex)"
+
                       mkdir -p "$MOUNT_POINT/crypt-storage"
                       echo -ne "$SALT\n$ITERATIONS" > "$MOUNT_POINT/crypt-storage/default"
+
+                      echo -n "$LUKS_KEY" | hextorb > "$MOUNT_POINT/crypt-storage/key"
+
+                      until askPassword; do
+                        echo "Passwords did not match, please try again."
+                      done
+
                       umount "$MOUNT_POINT"
                       rmdir "$MOUNT_POINT"
                     '';
@@ -127,12 +165,20 @@ in {
                   content = {
                     type = "luks";
                     name = "private";
-                    askPassword = true;
+                    askPassword = !cfg.security.yubikey.enable;
                     settings = {
+                      keyFile =
+                        if cfg.security.yubikey.enable
+                        then "/crypt/crypt-storage/key"
+                        else null;
                       allowDiscards = true;
+                      fallbackToPassword = true;
                     };
                     postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
-                    extraFormatArgs = ["--pbkdf argon2id"];
+                    extraFormatArgs =
+                      if cfg.security.yubikey.enable
+                      then defaultLuksFormatArgs
+                      else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
                     content = {
                       type = "filesystem";
@@ -147,12 +193,20 @@ in {
                   content = {
                     name = luksDisk;
                     type = "luks";
-                    askPassword = true;
+                    askPassword = !cfg.security.yubikey.enable;
                     settings = {
-                      allowDiscards = false;
+                      keyFile =
+                        if cfg.security.yubikey.enable
+                        then "/crypt/crypt-storage/key"
+                        else null;
+                      allowDiscards = true;
+                      fallbackToPassword = true;
                     };
                     postMountHook = "dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null";
-                    extraFormatArgs = ["--pbkdf argon2id"];
+                    extraFormatArgs =
+                      if cfg.security.yubikey.enable
+                      then defaultLuksFormatArgs
+                      else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
                     content = {
                       type = "lvm_pv";
@@ -225,12 +279,11 @@ in {
             ${luksDisk} = {
               device = "/dev/disk/by-partlabel/${luksDisk}";
               yubikey = {
-                slot = 2;
+                inherit slot saltLength;
                 twoFactor = true;
                 gracePeriod = 60;
                 iterationStep = 0;
-                keyLength = 64;
-                saltLength = 16;
+                keyLength = keySize / 8;
                 storage = {
                   device = "/dev/disk/by-partlabel/${cryptStorage}";
                   fsType = "vfat";
