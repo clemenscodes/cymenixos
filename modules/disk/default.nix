@@ -97,8 +97,17 @@ in {
                     format = "vfat";
                     mountpoint = "/crypt";
                     postCreateHook = ''
-                      # Run code here to store the salt on this partition
-                      mkdir -p /crypt/crypt-storage
+                      CRYPT_PARTITION="/dev/disk/by-partlabel/${cryptStorage}"
+                      MOUNT_POINT="/mnt/crypt-storage"
+                      mkdir -p "$MOUNT_POINT"
+                      mount "$CRYPT_PARTITION" "$MOUNT_POINT"
+                      SALT_LENGTH=16
+                      SALT="$(dd if=/dev/random bs=1 count=$SALT_LENGTH 2>/dev/null | rbtohex)"
+                      ITERATIONS=1000000
+                      mkdir -p "$MOUNT_POINT/crypt-storage"
+                      echo -ne "$SALT\n$ITERATIONS" > "$MOUNT_POINT/crypt-storage/default"
+                      umount "$MOUNT_POINT"
+                      rmdir "$MOUNT_POINT"
                     '';
                   };
                 };

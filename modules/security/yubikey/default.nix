@@ -24,6 +24,27 @@
     name = "yubikey-guide";
     paths = [viewYubikeyGuide shortcut];
   };
+  pbkdf2Sha512 = pkgs.stdenv.mkDerivation rec {
+    name = "pbkdf2-sha512";
+    version = "latest";
+    buildInputs = [pkgs.openssl];
+    src = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/NixOS/nixpkgs/master/nixos/modules/system/boot/pbkdf2-sha512.c";
+      sha256 = "0ky414spzpndiifk7wca3q3l9gzs1ksn763dmy48xdn3q0i75s9r";
+    };
+    unpackPhase = ":";
+    buildPhase = "cc -O3 -I${pkgs.openssl.dev}/include -L${pkgs.openssl.out}/lib ${src} -o pbkdf2-sha512 -lcrypto";
+    installPhase = ''
+      mkdir -p $out/bin
+      install -m755 pbkdf2-sha512 $out/bin/pbkdf2-sha512
+    '';
+  };
+  rbtohex = pkgs.writeShellScriptBin "rbtohex" ''
+    ( od -An -vtx1 | tr -d ' \n' )
+  '';
+  hextorb = pkgs.writeShellScriptBin "hextorb" ''
+    ( tr '[:lower:]' '[:upper:]' | sed -e 's/\([0-9A-F]\{2\}\)/\\\\\\x\1/gI'| xargs printf )
+  '';
   yubikey-pubkey-url = import ./yk-scripts/yubikey-pubkey-url.nix {inherit pkgs;};
   yubikey-gpg-setup = import ./yk-scripts/yubikey-gpg-setup.nix {inherit pkgs;};
   yubikey-gpg-backup = import ./yk-scripts/yubikey-gpg-backup.nix {inherit pkgs;};
@@ -96,6 +117,9 @@
       yubikey-up
       yubikey-down
       yubikey-reset
+      pbkdf2Sha512
+      rbtohex
+      hextorb
     ];
   };
   u2f_keys = pkgs.writeText "u2f_keys" (builtins.concatStringsSep ":" ([config.modules.users.name] ++ cfg.yubikey.pam.u2f-mappings));
@@ -146,7 +170,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.yubikey.enable) {
-    
     hardware = {
       gpgSmartcards = {
         inherit (cfg.yubikey) enable;
