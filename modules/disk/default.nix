@@ -183,8 +183,8 @@ in {
                     };
                     postMountHook = ''
                       dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
-                      if [ -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}" ]; then
-                        rm -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}"
+                      if [ -f "${keyFile}" ]; then
+                        rm -f "${keyFile}"
                       fi
                     '';
                     extraFormatArgs =
@@ -216,8 +216,8 @@ in {
                     };
                     postMountHook = ''
                       dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
-                      if [ -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}" ]; then
-                        rm -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}"
+                      if [ -f "${keyFile}" ]; then
+                        rm -f "${keyFile}"
                       fi
                     '';
                     extraFormatArgs =
