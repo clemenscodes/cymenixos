@@ -13,6 +13,7 @@
   iterations = 1000000;
   cipher = "aes-xts-plain64";
   hash = "sha512";
+  keyFile = "/tmp/luks.key";
   defaultLuksFormatArgs = ["--cipher=${cipher}" "--hash=${hash}" "--key-size=${builtins.toString keySize}"];
 in {
   imports = [inputs.disko.nixosModules.default];
@@ -146,7 +147,7 @@ in {
                       set +x
 
                       echo -ne "$SALT\n$ITERATIONS" > "$MOUNT_POINT/crypt-storage/default"
-                      echo -n "$LUKS_KEY" | hextorb > "$MOUNT_POINT/crypt-storage/key"
+                      echo -n "$LUKS_KEY" | hextorb > "${keyFile}"
 
                       set -x
 
@@ -175,15 +176,15 @@ in {
                     settings = {
                       keyFile =
                         if cfg.security.yubikey.enable
-                        then "/crypt/crypt-storage/key"
+                        then keyFile
                         else null;
                       allowDiscards = true;
                       fallbackToPassword = true;
                     };
                     postMountHook = ''
                       dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
-                      if [ -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}" ]; then
-                        rm -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}"
+                      if [ -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}" ]; then
+                        rm -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}"
                       fi
                     '';
                     extraFormatArgs =
@@ -208,15 +209,15 @@ in {
                     settings = {
                       keyFile =
                         if cfg.security.yubikey.enable
-                        then "/crypt/crypt-storage/key"
+                        then keyFile
                         else null;
                       allowDiscards = true;
                       fallbackToPassword = true;
                     };
                     postMountHook = ''
                       dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
-                      if [ -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}" ]; then
-                        rm -f "''${cfg.security.yubikey.enable ? "/crypt/crypt-storage/key" : ""}"
+                      if [ -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}" ]; then
+                        rm -f "''${cfg.security.yubikey.enable ? "${keyFile}" : ""}"
                       fi
                     '';
                     extraFormatArgs =
