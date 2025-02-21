@@ -148,6 +148,8 @@ in {
                         response=$(${pkgs.yubikey-personalization}/bin/ykchalresp -${builtins.toString slot} -x $challenge 2>/dev/null)
                         luks_key="$(echo -n $USER_PASSWORD | pbkdf2-sha512 $(($key_length / 8)) $iterations $response | rbtohex)"
                         echo -ne "$salt\n$iterations" > "$MOUNT_POINT/crypt-storage/default"
+                        cp "$MOUNT_POINT/crypt-storage/default" "$MOUNT_POINT/crypt-storage/private"
+                        cp "$MOUNT_POINT/crypt-storage/default" "$MOUNT_POINT/crypt-storage/${luksDisk}"
                         echo -n "$luks_key" | hextorb > "${keyFile}"
                         set -x
                       }
@@ -279,7 +281,7 @@ in {
           yubikeySupport = cfg.security.yubikey.enable;
           devices = let
             inherit (cfg.disk) luksDisk cryptStorage;
-            yubikey = {
+            mkYubikey = partition: {
               inherit slot saltLength;
               twoFactor = true;
               gracePeriod = 60;
@@ -287,18 +289,23 @@ in {
               storage = {
                 device = "/dev/disk/by-partlabel/${cryptStorage}";
                 fsType = "vfat";
-                path = "/crypt-storage/default";
+                path = "/crypt-storage/${partition}";
               };
             };
           in {
-            ${luksDisk} = {
+            ${luksDisk} = let
+              yubikey = mkYubikey luksDisk;
+            in {
               device = "/dev/disk/by-partlabel/${luksDisk}";
               inherit yubikey;
             };
-            private = lib.mkIf (cfg.airgap.enable) {
-              device = "/dev/disk/by-partlabel/private";
-              inherit yubikey;
-            };
+            private = let
+              yubikey = mkYubikey "private";
+            in
+              lib.mkIf (cfg.airgap.enable) {
+                device = "/dev/disk/by-partlabel/private";
+                inherit yubikey;
+              };
           };
         };
       };
