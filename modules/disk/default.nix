@@ -130,17 +130,13 @@ in {
                       mkdir -p "$MOUNT_POINT"
                       mount "$CRYPT_PARTITION" "$MOUNT_POINT"
 
-                      set +x
-
                       SALT_LENGTH=${builtins.toString saltLength}
                       SALT="$(dd if=/dev/random bs=1 count=$SALT_LENGTH 2>/dev/null | rbtohex)"
                       CHALLENGE="$(echo -n $SALT | ${pkgs.openssl}/bin/openssl dgst -binary -${hash} | rbtohex)"
-                      RESPONSE=$(${pkgs.yubikey-personalization}/bin/ykchalresp -${builtins.toString slot} -x $CHALLENGE 2>/dev/null)
+                      RESPONSE="$(${pkgs.yubikey-manager}/bin/ykman otp calculate ${builtins.toString slot} $CHALLENGE)"
                       KEY_LENGTH=${builtins.toString keySize}
                       ITERATIONS=${builtins.toString iterations}
                       LUKS_KEY="$(echo -n $USER_PASSWORD | pbkdf2-sha512 $(($KEY_LENGTH / 8)) $ITERATIONS $RESPONSE | rbtohex)"
-
-                      set -x
 
                       mkdir -p "$MOUNT_POINT/crypt-storage"
 
@@ -181,7 +177,6 @@ in {
                         then keyFile
                         else null;
                       allowDiscards = true;
-                      fallbackToPassword = true;
                     };
                     extraFormatArgs =
                       if cfg.security.yubikey.enable
@@ -208,7 +203,6 @@ in {
                         then keyFile
                         else null;
                       allowDiscards = true;
-                      fallbackToPassword = true;
                     };
                     extraFormatArgs =
                       if cfg.security.yubikey.enable
@@ -282,7 +276,6 @@ in {
               inherit slot saltLength;
               twoFactor = true;
               gracePeriod = 60;
-              iterationStep = 0;
               keyLength = keySize / 8;
               storage = {
                 device = "/dev/disk/by-partlabel/${cryptStorage}";

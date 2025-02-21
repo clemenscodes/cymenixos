@@ -103,7 +103,6 @@
       if [ -f "${homeDirectory}/.ssh/id_yubikey.pub" ]; then
         rm ${homeDirectory}/.ssh/id_yubikey.pub
       fi
-      ${pkgs.systemd}/bin/loginctl lock-sessions
     '';
   };
   yubikey-scripts = pkgs.symlinkJoin {
