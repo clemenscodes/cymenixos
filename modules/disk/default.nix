@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   lib,
   ...
 }: {config, ...}: let
@@ -128,21 +129,26 @@ in {
                       mkdir -p "$MOUNT_POINT"
                       mount "$CRYPT_PARTITION" "$MOUNT_POINT"
 
+                      set +x
+
                       SALT_LENGTH=${builtins.toString saltLength}
                       SALT="$(dd if=/dev/random bs=1 count=$SALT_LENGTH 2>/dev/null | rbtohex)"
-
-                      CHALLENGE="$(echo -n $SALT | openssl dgst -binary -${hash} | rbtohex)"
-                      RESPONSE=$(ykchalresp -${builtins.toString slot} -x $CHALLENGE 2>/dev/null)
-
+                      CHALLENGE="$(echo -n $SALT | ${pkgs.openssl}/bin/openssl dgst -binary -${hash} | rbtohex)"
+                      RESPONSE=$(${pkgs.yubikey-personalization}/bin/ykchalresp -${builtins.toString slot} -x $CHALLENGE 2>/dev/null)
                       KEY_LENGTH=${builtins.toString keySize}
                       ITERATIONS=${builtins.toString iterations}
-
                       LUKS_KEY="$(echo -n $USER_PASSWORD | pbkdf2-sha512 $(($KEY_LENGTH / 8)) $ITERATIONS $RESPONSE | rbtohex)"
+
+                      set -x
 
                       mkdir -p "$MOUNT_POINT/crypt-storage"
 
+                      set +x
+
                       echo -ne "$SALT\n$ITERATIONS" > "$MOUNT_POINT/crypt-storage/default"
                       echo -n "$LUKS_KEY" | hextorb > "$MOUNT_POINT/crypt-storage/key"
+
+                      set -x
 
                       umount "$MOUNT_POINT"
                       rmdir "$MOUNT_POINT"
