@@ -107,9 +107,9 @@ in {
                       askPassword() {
                         if [ -z ''${IN_DISKO_TEST+x} ]; then
                           set +x
-                          echo "Enter password for ${config.device}: "
+                          echo "Enter password for ${device}: "
                           IFS= read -r -s USER_PASSWORD
-                          echo "Enter password for ${config.device} again to be safe: "
+                          echo "Enter password for ${device} again to be safe: "
                           IFS= read -r -s USER_PASSWORD_CHECK
                           export USER_PASSWORD
                           [ "$USER_PASSWORD" = "$USER_PASSWORD_CHECK" ]
@@ -118,6 +118,10 @@ in {
                           export USER_PASSWORD=disko
                         fi
                       }
+
+                      until askPassword; do
+                        echo "Passwords did not match, please try again."
+                      done
 
                       CRYPT_PARTITION="/dev/disk/by-partlabel/${cryptStorage}"
                       MOUNT_POINT="/mnt/crypt-storage"
@@ -136,13 +140,9 @@ in {
                       LUKS_KEY="$(echo -n $USER_PASSWORD | pbkdf2-sha512 $(($KEY_LENGTH / 8)) $ITERATIONS $RESPONSE | rbtohex)"
 
                       mkdir -p "$MOUNT_POINT/crypt-storage"
+
                       echo -ne "$SALT\n$ITERATIONS" > "$MOUNT_POINT/crypt-storage/default"
-
                       echo -n "$LUKS_KEY" | hextorb > "$MOUNT_POINT/crypt-storage/key"
-
-                      until askPassword; do
-                        echo "Passwords did not match, please try again."
-                      done
 
                       umount "$MOUNT_POINT"
                       rmdir "$MOUNT_POINT"
