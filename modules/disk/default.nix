@@ -129,23 +129,17 @@ in {
                       MOUNT_POINT="/mnt/crypt-storage"
                       mkdir -p "$MOUNT_POINT"
                       mount "$CRYPT_PARTITION" "$MOUNT_POINT"
+                      mkdir -p "$MOUNT_POINT/crypt-storage"
 
                       SALT_LENGTH=${builtins.toString saltLength}
                       SALT="$(dd if=/dev/random bs=1 count=$SALT_LENGTH 2>/dev/null | rbtohex)"
-                      CHALLENGE="$(echo -n $SALT | ${pkgs.openssl}/bin/openssl dgst -binary -${hash} | rbtohex)"
-                      RESPONSE="$(${pkgs.yubikey-manager}/bin/ykman otp calculate ${builtins.toString slot} $CHALLENGE)"
+                      CHALLENGE="$(echo -n $SALT | ${pkgs.openssl}/bin/openssl dgst -binary -sha512 | rbtohex)"
+                      RESPONSE=$(${pkgs.yubikey-personalization}/bin/ykchalresp -${builtins.toString slot} -x $CHALLENGE 2>/dev/null)
                       KEY_LENGTH=${builtins.toString keySize}
                       ITERATIONS=${builtins.toString iterations}
                       LUKS_KEY="$(echo -n $USER_PASSWORD | pbkdf2-sha512 $(($KEY_LENGTH / 8)) $ITERATIONS $RESPONSE | rbtohex)"
-
-                      mkdir -p "$MOUNT_POINT/crypt-storage"
-
-                      set +x
-
                       echo -ne "$SALT\n$ITERATIONS" > "$MOUNT_POINT/crypt-storage/default"
                       echo -n "$LUKS_KEY" | hextorb > "${keyFile}"
-
-                      set -x
 
                       umount "$MOUNT_POINT"
                       rmdir "$MOUNT_POINT"
@@ -163,33 +157,33 @@ in {
                     mountOptions = ["umask=0000"];
                   };
                 };
-                private = lib.mkIf (cfg.airgap.enable) {
-                  priority = 5;
-                  size = "256M";
-                  label = "private";
-                  content = {
-                    type = "luks";
-                    name = "private";
-                    askPassword = !cfg.security.yubikey.enable;
-                    settings = {
-                      keyFile =
-                        if cfg.security.yubikey.enable
-                        then keyFile
-                        else null;
-                      allowDiscards = true;
-                    };
-                    extraFormatArgs =
-                      if cfg.security.yubikey.enable
-                      then defaultLuksFormatArgs
-                      else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
-                    extraOpenArgs = ["--timeout 60"];
-                    content = {
-                      type = "filesystem";
-                      format = "vfat";
-                      mountpoint = "/private";
-                    };
-                  };
-                };
+                # private = lib.mkIf (cfg.airgap.enable) {
+                #   priority = 5;
+                #   size = "256M";
+                #   label = "private";
+                #   content = {
+                #     type = "luks";
+                #     name = "private";
+                #     askPassword = !cfg.security.yubikey.enable;
+                #     settings = {
+                #       keyFile =
+                #         if cfg.security.yubikey.enable
+                #         then keyFile
+                #         else null;
+                #       allowDiscards = true;
+                #     };
+                #     extraFormatArgs =
+                #       if cfg.security.yubikey.enable
+                #       then defaultLuksFormatArgs
+                #       else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
+                #     extraOpenArgs = ["--timeout 60"];
+                #     content = {
+                #       type = "filesystem";
+                #       format = "vfat";
+                #       mountpoint = "/private";
+                #     };
+                #   };
+                # };
                 ${luksDisk} = {
                   size = "100%";
                   label = luksDisk;
@@ -288,10 +282,10 @@ in {
               device = "/dev/disk/by-partlabel/${luksDisk}";
               inherit yubikey;
             };
-            private = lib.mkIf (cfg.airgap.enable) {
-              device = "/dev/disk/by-partlabel/private";
-              inherit yubikey;
-            };
+            # private = lib.mkIf (cfg.airgap.enable) {
+            #   device = "/dev/disk/by-partlabel/private";
+            #   inherit yubikey;
+            # };
           };
         };
       };
