@@ -97,10 +97,7 @@ in {
       };
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         efi = {
-          efiSysMountPoint =
-            if efiSupport
-            then "/boot/efi"
-            else "/boot";
+          efiSysMountPoint = "/boot";
           canTouchEfiVariables = lib.mkForce false;
         };
         grub = {

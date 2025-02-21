@@ -93,7 +93,7 @@ in {
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint = "/boot/efi";
+                    mountpoint = "/boot";
                     mountOptions = ["umask=0077"];
                   };
                 };
@@ -239,10 +239,6 @@ in {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
-                    "/boot" = {
-                      mountpoint = "/boot";
-                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
-                    };
                     "/var/log" = {
                       mountpoint = "/var/log";
                       mountOptions = ["subvol=logs" "compress=zstd" "noatime"];
@@ -322,11 +318,6 @@ in {
               volume = let
                 snapshot_create = "always";
               in {
-                "/boot" = {
-                  inherit snapshot_create;
-                  subvolume = "/boot";
-                  snapshot_dir = "/snapshots/boots";
-                };
                 "/var/log" = {
                   inherit snapshot_create;
                   subvolume = "/var/log";
