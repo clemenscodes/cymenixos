@@ -159,6 +159,7 @@ in {
                 public = lib.mkIf (cfg.airgap.enable) {
                   priority = 4;
                   size = "256M";
+                  label = "public";
                   content = {
                     type = "filesystem";
                     format = "vfat";
@@ -169,6 +170,7 @@ in {
                 private = lib.mkIf (cfg.airgap.enable) {
                   priority = 5;
                   size = "256M";
+                  label = "private";
                   content = {
                     type = "luks";
                     name = "private";
@@ -181,12 +183,6 @@ in {
                       allowDiscards = true;
                       fallbackToPassword = true;
                     };
-                    postMountHook = ''
-                      dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
-                      if [ -f "${keyFile}" ]; then
-                        rm -f "${keyFile}"
-                      fi
-                    '';
                     extraFormatArgs =
                       if cfg.security.yubikey.enable
                       then defaultLuksFormatArgs
@@ -214,12 +210,6 @@ in {
                       allowDiscards = true;
                       fallbackToPassword = true;
                     };
-                    postMountHook = ''
-                      dmsetup ls --target crypt --exec 'cryptsetup close' 2> /dev/null"
-                      if [ -f "${keyFile}" ]; then
-                        rm -f "${keyFile}"
-                      fi
-                    '';
                     extraFormatArgs =
                       if cfg.security.yubikey.enable
                       then defaultLuksFormatArgs
@@ -292,21 +282,26 @@ in {
           yubikeySupport = cfg.security.yubikey.enable;
           devices = let
             inherit (cfg.disk) luksDisk cryptStorage;
+            yubikey = {
+              inherit slot saltLength;
+              twoFactor = true;
+              gracePeriod = 60;
+              iterationStep = 0;
+              keyLength = keySize / 8;
+              storage = {
+                device = "/dev/disk/by-partlabel/${cryptStorage}";
+                fsType = "vfat";
+                path = "/crypt-storage/default";
+              };
+            };
           in {
             ${luksDisk} = {
               device = "/dev/disk/by-partlabel/${luksDisk}";
-              yubikey = {
-                inherit slot saltLength;
-                twoFactor = true;
-                gracePeriod = 60;
-                iterationStep = 0;
-                keyLength = keySize / 8;
-                storage = {
-                  device = "/dev/disk/by-partlabel/${cryptStorage}";
-                  fsType = "vfat";
-                  path = "/crypt-storage/default";
-                };
-              };
+              inherit yubikey;
+            };
+            private = lib.mkIf (cfg.airgap.enable) {
+              device = "/dev/disk/by-partlabel/private";
+              inherit yubikey;
             };
           };
         };
