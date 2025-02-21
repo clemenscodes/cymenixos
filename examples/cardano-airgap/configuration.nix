@@ -55,9 +55,9 @@
       };
     };
     gpu = {
-      enable = false;
+      enable = true;
       amd = {
-        enable = false;
+        enable = true;
       };
     };
     crypto = {
