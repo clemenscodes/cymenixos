@@ -14,7 +14,7 @@ in {
       };
     };
   };
-  config = lib.mkIf cfg.disk.gparted.enable {
+  config = lib.mkIf cfg.utils.gparted.enable {
     xdg = {
       desktopEntries = {
         gparted = {
