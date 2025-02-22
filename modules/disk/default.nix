@@ -5,15 +5,9 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  inherit (cfg.disk) enable device luksDisk cryptStorage vg lvm_volume swapsize;
   inherit (cfg.boot.impermanence) persistPath;
-  slot = 2;
-  keySize = 512;
-  saltLength = 16;
-  iterations = 1000000;
-  cipher = "aes-xts-plain64";
-  hash = "sha512";
-  keyFile = "/tmp/luks.key";
+  inherit (cfg.disk) enable device luksDisk cryptStorage vg lvm_volume swapsize;
+  inherit (cfg.disk.luks) slot keySize saltLength iterations cipher hash keyFile;
   defaultLuksFormatArgs = ["--cipher=${cipher}" "--hash=${hash}" "--key-size=${builtins.toString keySize}"];
 in {
   imports = [inputs.disko.nixosModules.default];
@@ -55,6 +49,43 @@ in {
           description = "The size for the swapfile in G";
           default = 16;
           example = 64;
+        };
+        luks = {
+          slot = lib.mkOption {
+            type = lib.types.int;
+            default = 2;
+            description = "LUKS key slot number to use for encryption";
+          };
+          keySize = lib.mkOption {
+            type = lib.types.int;
+            default = 512;
+            description = "Key size in bits for LUKS encryption";
+          };
+          saltLength = lib.mkOption {
+            type = lib.types.int;
+            default = 16;
+            description = "PBKDF2 salt length in bytes";
+          };
+          iterations = lib.mkOption {
+            type = lib.types.int;
+            default = 1000000;
+            description = "Number of PBKDF2 iterations for key derivation";
+          };
+          cipher = lib.mkOption {
+            type = lib.types.str;
+            default = "aes-xts-plain64";
+            description = "Cryptographic cipher to use for disk encryption";
+          };
+          hash = lib.mkOption {
+            type = lib.types.str;
+            default = "sha512";
+            description = "Hash algorithm for PBKDF2 key derivation";
+          };
+          keyFile = lib.mkOption {
+            type = lib.types.str;
+            default = "/tmp/luks.key";
+            description = "Temporary key file path for LUKS operations";
+          };
         };
       };
     };

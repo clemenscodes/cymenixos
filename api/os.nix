@@ -6,6 +6,15 @@
       device = "/dev/sda";
       luksDisk = "luks";
       swapsize = 16;
+      luks = {
+        slot = 2;
+        keySize = 512;
+        saltLength = 16;
+        iterations = 1000000;
+        cipher = "aes-xts-plain64";
+        hash = "sha512";
+        keyFile = "/tmp/luks.key";
+      };
     };
     config = {
       enable = true;
