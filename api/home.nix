@@ -378,6 +378,7 @@
             };
             gpg = {
               enable = false;
+              enableDebianKeyring = false;
             };
             sops = {
               enable = false;
