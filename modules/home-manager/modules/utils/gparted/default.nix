@@ -25,7 +25,7 @@ in {
           exec = "sudo -E ${pkgs.gparted}/bin/gparted %f";
           terminal = false;
           icon = "${pkgs.gparted}/share/icons/hicolor/scalable/apps/gparted.svg";
-          categories = ["GNOME" "System" "Filesystem"];
+          categories = ["GTK" "GNOME" "System" "Filesystem"];
           startupNotify = true;
         };
       };
