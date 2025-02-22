@@ -26,7 +26,6 @@ in {
           terminal = false;
           icon = "${pkgs.gparted}/share/icons/hicolor/scalable/apps/gparted.svg";
           categories = ["GNOME" "System" "Filesystem"];
-          keywords = ["Partition"];
           startupNotify = true;
         };
       };
