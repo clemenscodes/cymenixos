@@ -94,17 +94,9 @@
     };
     cardanix = {
       url = "github:clemenscodes/cardanix";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
-        };
-      };
     };
     templates = {
       url = "github:NixOS/templates";
-    };
-    capkgs = {
-      url = "github:input-output-hk/capkgs";
     };
     yubikey-guide = {
       url = "github:drduh/YubiKey-Guide";
