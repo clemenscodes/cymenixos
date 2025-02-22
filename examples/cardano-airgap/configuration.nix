@@ -346,6 +346,9 @@
             fzf = {
               enable = true;
             };
+            gparted = {
+              enable = true;
+            };
             ripgrep = {
               enable = true;
             };

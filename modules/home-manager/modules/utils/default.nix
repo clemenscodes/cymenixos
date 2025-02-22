@@ -7,6 +7,7 @@
   imports = [
     (import ./bat {inherit inputs pkgs lib;})
     (import ./fzf {inherit inputs pkgs lib;})
+    (import ./gparted {inherit inputs pkgs lib;})
     (import ./lpi {inherit inputs pkgs lib;})
     (import ./lsusb {inherit inputs pkgs lib;})
     (import ./nix-prefetch-github {inherit inputs pkgs lib;})

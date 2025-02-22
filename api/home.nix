@@ -451,6 +451,9 @@
             fzf = {
               enable = false;
             };
+            gparted = {
+              enable = false;
+            };
             lpi = {
               enable = false;
             };
