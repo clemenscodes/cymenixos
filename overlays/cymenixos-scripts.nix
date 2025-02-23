@@ -21,11 +21,25 @@ final: prev: {
         nom build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
       '';
     };
+    build-offline-iso = prev.writeShellApplication {
+      name = "build-offline-iso";
+      runtimeInputs = [prev.nix-output-monitor];
+      text = ''
+        nom build .#nixosConfigurations.offline-iso.config.system.build.isoImage --show-trace
+      '';
+    };
     build-test-iso = prev.writeShellApplication {
       name = "build-test-iso";
       runtimeInputs = [prev.nix-output-monitor];
       text = ''
         nom build .#nixosConfigurations.test.config.system.build.isoImage --show-trace
+      '';
+    };
+    build-test-offline-iso = prev.writeShellApplication {
+      name = "build-test-offline-iso";
+      runtimeInputs = [prev.nix-output-monitor];
+      text = ''
+        nom build .#nixosConfigurations.offline-test.config.system.build.isoImage --show-trace
       '';
     };
     write-iso-to-device = prev.writeShellApplication rec {
@@ -319,7 +333,9 @@ final: prev: {
         build-system
         build-offline-system
         build-iso
+        build-offline-iso
         build-test-iso
+        build-test-offline-iso
         write-iso-to-device
         cymenixos-install
         cymenixos-install-offline
