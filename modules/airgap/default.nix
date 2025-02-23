@@ -16,6 +16,7 @@ in {
     modules = {
       airgap = {
         enable = lib.mkEnableOption "Enable airgap mode" // {default = false;};
+        offline = lib.mkEnableOption "Enable offline building" // {default = false;};
         cardano = {
           enable = lib.mkEnableOption "Enable cardano airgap tools" // {default = false;};
         };
@@ -23,6 +24,9 @@ in {
     };
   };
   config = lib.mkIf config.modules.airgap.enable {
+    system = {
+      includeBuildDependencies = cfg.airgap.offline;
+    };
     nix = {
       settings = {
         substituters = lib.mkForce [];

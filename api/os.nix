@@ -1,6 +1,13 @@
 {...}: {
   modules = {
     enable = true;
+    airgap = {
+      enable = false;
+      offline = false;
+      cardano = {
+        enable = false;
+      };
+    };
     disk = {
       enable = true;
       device = "/dev/sda";
