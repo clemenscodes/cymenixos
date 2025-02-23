@@ -29,7 +29,7 @@ in {
     };
     nix = {
       registry = lib.mapAttrs (_: value: {flake = value;}) inputs;
-      nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+      nixPath = lib.mkIf (!config.modules.airgap.enable) (lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry);
       channel = {
         enable = false;
       };
