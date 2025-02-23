@@ -7,6 +7,13 @@ final: prev: {
         nom build .#nixosConfigurations.nixos.config.system.build.toplevel --show-trace
       '';
     };
+    build-offline-system = prev.writeShellApplication {
+      name = "build-offline-system";
+      runtimeInputs = [prev.nix-output-monitor];
+      text = ''
+        nom build .#nixosConfigurations.offline.config.system.build.toplevel --show-trace
+      '';
+    };
     build-iso = prev.writeShellApplication {
       name = "build-iso";
       runtimeInputs = [prev.nix-output-monitor];
@@ -130,6 +137,13 @@ final: prev: {
           echo "Running sudo disko-install --mode format -f $CONFIG --disk main $DEVICE"
           sudo disko-install --mode format -f "$CONFIG" --disk main "$DEVICE"
         fi
+      '';
+    };
+    cymenixos-install-offline = prev.writeShellApplication {
+      name = "cymenixos-install-offline";
+      runtimeInputs = [cymenixos-install];
+      text = ''
+        cymenixos-install "$FLAKE#offline"
       '';
     };
     qemu-run-iso = prev.writeShellApplication {
@@ -299,19 +313,19 @@ final: prev: {
       '';
     };
   in
-    prev.stdenv.mkDerivation {
+    prev.symlinkJoin {
       name = "cymenixos-scripts";
-      phases = "installPhase";
-      installPhase = ''
-        mkdir -p $out/bin
-        ln -s ${build-system}/bin/build-system $out/bin
-        ln -s ${build-iso}/bin/build-iso $out/bin
-        ln -s ${build-test-iso}/bin/build-test-iso $out/bin
-        ln -s ${write-iso-to-device}/bin/write-iso-to-device $out/bin
-        ln -s ${cymenixos-install}/bin/cymenixos-install $out/bin
-        ln -s ${qemu-run-iso}/bin/qemu-run-iso $out/bin
-        ln -s ${copyro}/bin/copyro $out/bin
-        ln -s ${btrfs-swap-resume-offset}/bin/btrfs-swap-resume-offset $out/bin
-      '';
+      paths = [
+        build-system
+        build-offline-system
+        build-iso
+        build-test-iso
+        write-iso-to-device
+        cymenixos-install
+        cymenixos-install-offline
+        qemu-run-iso
+        copyro
+        btrfs-swap-resume-offset
+      ];
     };
 }

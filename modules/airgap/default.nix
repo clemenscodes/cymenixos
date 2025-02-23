@@ -27,6 +27,20 @@ in {
       settings = {
         substituters = lib.mkForce [];
         trusted-users = [cfg.users.user];
+        hashed-mirrors = null;
+        connect-timeout = 3;
+        flake-registry = lib.mkForce pkgs.writeText "flake-registry" ''{"flakes":[],"version":2}'';
+      };
+      registry = {
+        nixpkgs = {
+          to = {};
+        };
+      };
+    };
+    nixpkgs = {
+      flake = {
+        setFlakeRegistry = false;
+        setNixPath = false;
       };
     };
     hardware = {
@@ -87,23 +101,23 @@ in {
     };
     environment = {
       systemPackages =
-        (with pkgs; [
-          cfssl
-          cryptsetup
-          pgpdump
-          paperkey
-          rng-tools
-          ent
-          gnupg
-          pcsctools
-          jq
-          lvm2
-          openssl
-          pwgen
-          usbutils
-          util-linux
-          disko
-        ])
+        [
+          pkgs.cfssl
+          pkgs.cryptsetup
+          pkgs.pgpdump
+          pkgs.paperkey
+          pkgs.rng-tools
+          pkgs.ent
+          pkgs.gnupg
+          pkgs.pcsctools
+          pkgs.jq
+          pkgs.lvm2
+          pkgs.openssl
+          pkgs.pwgen
+          pkgs.usbutils
+          pkgs.util-linux
+          pkgs.disko
+        ]
         ++ (
           if config.modules.airgap.cardano.enable
           then [

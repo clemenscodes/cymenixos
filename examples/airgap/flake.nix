@@ -29,6 +29,38 @@
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [./configuration.nix];
       };
+      offline = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit self inputs nixpkgs system;};
+        modules = [
+          ./configuration.nix
+          ({...}: let
+            dependencies =
+              [
+                self.nixosConfigurations.offline.config.system.build.toplevel
+                self.nixosConfigurations.offline.config.system.build.diskoScript
+                self.nixosConfigurations.offline.config.system.build.diskoScript.drvPath
+                self.nixosConfigurations.offline.pkgs.stdenv.drvPath
+                self.nixosConfigurations.offline.pkgs.perlPackages.ConfigIniFiles
+                self.nixosConfigurations.offline.pkgs.perlPackages.FileSlurp
+                (self.nixosConfigurations.offline.pkgs.closureInfo {rootPaths = [];}).drvPath
+              ]
+              ++ builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
+
+            closureInfo = pkgs.closureInfo {rootPaths = dependencies;};
+          in {
+            environment = {
+              etc = {
+                install-closure = {
+                  source = "${closureInfo}/store-paths";
+                };
+              };
+            };
+            system = {
+              # includeBuildDependencies = true;
+            };
+          })
+        ];
+      };
       iso = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
