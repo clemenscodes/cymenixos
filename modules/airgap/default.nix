@@ -29,7 +29,7 @@ in {
         trusted-users = [cfg.users.user];
         hashed-mirrors = null;
         connect-timeout = 3;
-        flake-registry = lib.mkForce pkgs.writeText "flake-registry" ''{"flakes":[],"version":2}'';
+        flake-registry = lib.mkForce (pkgs.writeText "flake-registry" ''{"flakes":[],"version":2}'');
       };
       registry = {
         nixpkgs = {
