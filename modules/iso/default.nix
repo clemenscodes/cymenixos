@@ -26,9 +26,6 @@ in {
       };
     };
     modules = {
-      airgap = {
-        enable = lib.mkForce false;
-      };
       disk = {
         enable = lib.mkForce false;
       };
