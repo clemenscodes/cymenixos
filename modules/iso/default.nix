@@ -26,9 +26,6 @@ in {
       };
     };
     modules = {
-      disk = {
-        enable = lib.mkForce false;
-      };
       users = {
         isIso = true;
       };

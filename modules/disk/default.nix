@@ -100,7 +100,7 @@ in {
             content = {
               type = "gpt";
               efiGptPartitionFirst = false;
-              partitions = {
+              partitions = lib.mkIf (!cfg.iso.enable) {
                 bios = lib.mkIf (cfg.boot.biosSupport && !cfg.boot.libreboot) {
                   priority = 1;
                   type = "EF02";
