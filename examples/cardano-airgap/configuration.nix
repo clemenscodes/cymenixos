@@ -63,18 +63,6 @@
         enable = true;
       };
     };
-    gpu = {
-      enable = true;
-      amd = {
-        enable = true;
-      };
-    };
-    crypto = {
-      enable = true;
-      ledger-live = {
-        enable = true;
-      };
-    };
     display = {
       enable = true;
       gui = "wayland"; # or "headless"
@@ -106,9 +94,6 @@
     io = {
       enable = true;
       sound = {
-        enable = true;
-      };
-      udisks = {
         enable = true;
       };
       xremap = {
@@ -266,13 +251,6 @@
               enable = true;
             };
           };
-          editor = {
-            enable = true;
-            defaultEditor = "nvim";
-            nvim = {
-              enable = true;
-            };
-          };
           explorer = {
             enable = true;
             defaultExplorer = "yazi";
@@ -343,19 +321,10 @@
             fzf = {
               enable = true;
             };
-            gparted = {
-              enable = true;
-            };
             ripgrep = {
               enable = true;
             };
-            unzip = {
-              enable = true;
-            };
             lsusb = {
-              enable = true;
-            };
-            zip = {
               enable = true;
             };
           };

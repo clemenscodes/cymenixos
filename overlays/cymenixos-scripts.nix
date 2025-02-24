@@ -174,6 +174,7 @@ final: prev: {
         DISK="vm.qcow2"
         CPU=8
         MEMORY=16G
+        DISK_SIZE=64G  # Added DISK_SIZE variable with default
         USB_ARGS=""
         HOSTBUS=""
         HOSTADDR=""
@@ -184,12 +185,13 @@ final: prev: {
           echo "Options:"
           echo "  --cpu <num>       Set the number of CPU cores (default: 8)"
           echo "  --memory <size>   Set the memory allocated to VM (default: 16G)"
+          echo "  --disk-size <size> Set the disk size when creating a new VM (default: 64G)"  # Added help entry
           echo "  --hostbus <num>   USB passthrough: specify the USB bus number"
           echo "  --hostaddr <num>  USB passthrough: specify the USB device address"
           echo "  --help            Show this help message and exit"
           echo ""
           echo "Example:"
-          echo "  $0 --cpu 4 --memory 8G --hostbus 1 --hostaddr 2"
+          echo "  $0 --cpu 4 --memory 8G --disk-size 100G --hostbus 1 --hostaddr 2"  # Updated example
           echo ""
           echo "To find HOSTBUS and HOSTADDR, run 'lsusb'"
           exit 0
@@ -203,6 +205,10 @@ final: prev: {
               ;;
             --memory)
               MEMORY="$2"
+              shift 2
+              ;;
+            --disk-size)  # Added case for --disk-size
+              DISK_SIZE="$2"
               shift 2
               ;;
             --hostbus)
@@ -235,8 +241,8 @@ final: prev: {
         fi
 
         if [ ! -f "$DISK" ]; then
-          echo "Disk not found. Creating a new disk and booting from ISO for installation..."
-          qemu-img create -f qcow2 "$DISK" 64G
+          echo "Disk not found. Creating a new disk ($DISK_SIZE) and booting from ISO for installation..."
+          qemu-img create -f qcow2 "$DISK" "$DISK_SIZE"
         fi
 
         if [[ -n "$HOSTBUS" && -n "$HOSTADDR" ]]; then
