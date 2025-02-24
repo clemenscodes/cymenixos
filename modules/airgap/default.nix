@@ -51,7 +51,10 @@ in {
   config = lib.mkIf config.modules.airgap.enable {
     system = {
       includeBuildDependencies = cfg.airgap.offline;
-      extraDependencies = [(flakeClosureRef self)];
+      extraDependencies = [
+        (flakeClosureRef self)
+        (flakeClosureRef cymenixos)
+      ];
     };
     nix = {
       settings = {
