@@ -306,7 +306,7 @@ in {
       };
     };
     boot = lib.mkIf cfg.security.yubikey.enable {
-      initrd = {
+      initrd = lib.mkIf (!cfg.iso.enable) {
         kernelModules = ["vfat" "nls_cp437" "nls_iso8859-1" "usbhid"];
         luks = {
           yubikeySupport = cfg.security.yubikey.enable;
