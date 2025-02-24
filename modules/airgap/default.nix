@@ -11,6 +11,17 @@
   cfg = config.modules;
   cardanix = inputs.cardanix.packages.${system};
   inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
+  dependencies = [
+    config.system.build.toplevel
+    config.system.build.diskoScript
+    config.system.build.diskoScript.drvPath
+    pkgs.stdenv.drvPath
+    pkgs.perlPackages.ConfigIniFiles
+    pkgs.perlPackages.FileSlurp
+    (pkgs.closureInfo {rootPaths = [];}).drvPath
+  ];
+  inputDependencies = builtins.map (i: i.outPath) (builtins.attrValues inputs);
+  closureInfo = pkgs.closureInfo {rootPaths = dependencies ++ inputDependencies;};
 in {
   options = {
     modules = {
@@ -24,9 +35,6 @@ in {
     };
   };
   config = lib.mkIf config.modules.airgap.enable {
-    # system = {
-    #   includeBuildDependencies = cfg.airgap.offline;
-    # };
     nix = {
       settings = {
         substituters = lib.mkForce [];
@@ -104,6 +112,11 @@ in {
       };
     };
     environment = {
+      etc = lib.mkIf cfg.airgap.offline {
+        install-closure = {
+          source = "${closureInfo}/store-paths";
+        };
+      };
       systemPackages =
         [
           pkgs.cfssl
