@@ -4,7 +4,6 @@
   lib,
   ...
 }: {
-  self,
   config,
   system,
   ...
@@ -49,7 +48,7 @@ in {
   };
   config = lib.mkIf config.modules.airgap.enable {
     system = {
-      extraDependencies = let in [(flakeClosureRef self)];
+      extraDependencies = let in [(flakeClosureRef inputs.self)];
     };
     nix = {
       settings = {

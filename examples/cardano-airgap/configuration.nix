@@ -33,7 +33,7 @@
       name = "desktop";
     };
     config = {
-      enable = false;
+      enable = true;
       nix = {
         enable = true;
       };
