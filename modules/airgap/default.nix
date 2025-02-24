@@ -62,7 +62,7 @@ in {
       settings = {
         substituters = lib.mkForce [];
         trusted-users = lib.mkForce [cfg.users.user];
-        flake-registry = lib.mkForce (pkgs.writeText "flake-registry" ''{"flakes":[],"version":2}'');
+        flake-registry = lib.mkForce (pkgs.writeText "registry.json" ''{"flakes":[],"version":2}'');
       };
     };
     hardware = {
