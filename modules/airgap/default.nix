@@ -2,10 +2,10 @@
   inputs,
   pkgs,
   lib,
-  # cymenixos,
+  cymenixos,
   ...
 }: {
-  # self,
+  self,
   config,
   system,
   ...
@@ -13,31 +13,17 @@
   cfg = config.modules;
   cardanix = inputs.cardanix.packages.${system};
   inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
-  # inherit (builtins) concatMap attrValues concatStringsSep;
-  # inherit (lib) unique;
-  # flakeClosureRef = flake: let
-  #   flakesClosure = flakes:
-  #     if flakes == []
-  #     then []
-  #     else
-  #       unique (flakes
-  #         ++ flakesClosure (concatMap (flake:
-  #           if flake ? inputs
-  #           then attrValues flake.inputs
-  #           else [])
-  #         flakes));
-  # in
-  #   pkgs.writeText "flake-closure" (concatStringsSep "\n" (flakesClosure [flake]) + "\n");
-  # dependencies = [
-  #   config.system.build.diskoScript
-  #   config.system.build.diskoScript.drvPath
-  #   pkgs.stdenv.drvPath
-  #   pkgs.perlPackages.ConfigIniFiles
-  #   pkgs.perlPackages.FileSlurp
-  #   (pkgs.closureInfo {rootPaths = [];}).drvPath
-  # ];
-  # inputDependencies = builtins.map (i: i.outPath) (builtins.attrValues inputs);
-  # closureInfo = pkgs.closureInfo {rootPaths = dependencies ++ inputDependencies;};
+  dependencies = [
+    self.nixosConfigurations.nixos.config.system.build.diskoScript
+    self.nixosConfigurations.nixos.config.system.build.diskoScript.drvPath
+    self.nixosConfigurations.nixos.pkgs.stdenv.drvPath
+    self.nixosConfigurations.nixos.pkgs.perlPackages.ConfigIniFiles
+    self.nixosConfigurations.nixos.pkgs.perlPackages.FileSlurp
+    (self.nixosConfigurations.nixos.pkgs.closureInfo {rootPaths = [];}).drvPath
+  ];
+  cymenixosInputs = builtins.map (i: i.outPath) (builtins.attrValues cymenixos.inputs);
+  selfInputs = builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
+  closureInfo = pkgs.closureInfo {rootPaths = dependencies ++ cymenixosInputs ++ selfInputs;};
 in {
   options = {
     modules = {
@@ -51,13 +37,6 @@ in {
     };
   };
   config = lib.mkIf config.modules.airgap.enable {
-    system = {
-      extraDependencies = let
-      in [
-        # (flakeClosureRef cymenixos)
-        # (flakeClosureRef self)
-      ];
-    };
     nix = {
       settings = {
         substituters = lib.mkForce [];
@@ -122,11 +101,11 @@ in {
       };
     };
     environment = {
-      # etc = lib.mkIf cfg.airgap.offline {
-      #   install-closure = {
-      #     source = "${closureInfo}/store-paths";
-      #   };
-      # };
+      etc = lib.mkIf cfg.airgap.offline {
+        install-closure = {
+          source = "${closureInfo}/store-paths";
+        };
+      };
       systemPackages =
         [
           pkgs.cfssl
