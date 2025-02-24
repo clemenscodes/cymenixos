@@ -12,7 +12,6 @@
   cardanix = inputs.cardanix.packages.${system};
   inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
   dependencies = [
-    config.system.build.toplevel
     config.system.build.diskoScript
     config.system.build.diskoScript.drvPath
     pkgs.stdenv.drvPath
@@ -35,6 +34,9 @@ in {
     };
   };
   config = lib.mkIf config.modules.airgap.enable {
+    # system = {
+    #   includeBuildDependencies = cfg.airgap.offline;
+    # };
     nix = {
       settings = {
         substituters = lib.mkForce [];
