@@ -24,9 +24,9 @@ in {
     };
   };
   config = lib.mkIf config.modules.airgap.enable {
-    system = {
-      includeBuildDependencies = cfg.airgap.offline;
-    };
+    # system = {
+    #   includeBuildDependencies = cfg.airgap.offline;
+    # };
     nix = {
       settings = {
         substituters = lib.mkForce [];

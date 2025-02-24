@@ -29,9 +29,18 @@
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [./configuration.nix];
       };
-      nixos-offline = nixpkgs.lib.nixosSystem {
+      offline = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};
-        modules = [./configuration.nix];
+        modules = [
+          ./configuration.nix
+          ({...}: {
+            modules = {
+              airgap = {
+                offline = true;
+              };
+            };
+          })
+        ];
       };
       iso = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};
@@ -47,6 +56,23 @@
           })
         ];
       };
+      offline-iso = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit self inputs nixpkgs system;};
+        modules = [
+          ./configuration.nix
+          (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
+          ({...}: {
+            modules = {
+              airgap = {
+                offline = true;
+              };
+              iso = {
+                enable = true;
+              };
+            };
+          })
+        ];
+      };
       test = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
@@ -54,6 +80,24 @@
           (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
           ({...}: {
             modules = {
+              iso = {
+                enable = true;
+                fast = true;
+              };
+            };
+          })
+        ];
+      };
+      offline-test = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit self inputs nixpkgs system;};
+        modules = [
+          ./configuration.nix
+          (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
+          ({...}: {
+            modules = {
+              airgap = {
+                offline = true;
+              };
               iso = {
                 enable = true;
                 fast = true;

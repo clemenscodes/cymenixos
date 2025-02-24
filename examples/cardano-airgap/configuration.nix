@@ -10,7 +10,7 @@
     airgap = {
       enable = true;
       cardano = {
-        enable = true;
+        enable = false;
       };
     };
     disk = {
@@ -331,9 +331,6 @@
           terminal = {
             enable = true;
             defaultTerminal = "kitty";
-            ghostty = {
-              enable = true;
-            };
             kitty = {
               enable = true;
             };
