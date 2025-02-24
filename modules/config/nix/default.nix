@@ -28,23 +28,24 @@ in {
       hostPlatform = system;
     };
     nix = {
-      registry = lib.mapAttrs (_: value: {flake = value;}) inputs;
+      registry = lib.mkIf (!config.modules.airgap.enable) (lib.mapAttrs (_: value: {flake = value;}) inputs);
       nixPath = lib.mkIf (!config.modules.airgap.enable) (lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry);
       channel = {
         enable = false;
       };
-      settings = {
+      settings = lib.mkIf (!config.modules.airgap.enable) {
         flake-registry = "/etc/nix/registry.json";
         auto-optimise-store = true;
         builders-use-substitutes = true;
         keep-going = true;
+        keep-outputs = true;
         allowed-users = ["@wheel"];
         trusted-users = ["@wheel"];
         substituters = ["https://nix-community.cachix.org"];
         trusted-public-keys = ["nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="];
         experimental-features = ["nix-command" "flakes" "fetch-closure"];
       };
-      gc = {
+      gc = lib.mkIf (!config.modules.airgap.enable) {
         automatic = lib.mkDefault false;
         dates = "weekly";
         options = "--delete-older-than 7d";

@@ -4,6 +4,7 @@
   lib,
   ...
 }: {
+  self,
   config,
   system,
   ...
@@ -11,6 +12,19 @@
   cfg = config.modules;
   cardanix = inputs.cardanix.packages.${system};
   inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
+  inherit (builtins) concatMap attrValues concatStringsSep;
+  inherit (lib) unique;
+  flakesClosure = flakes:
+    if flakes == []
+    then []
+    else
+      unique (flakes
+        ++ flakesClosure (concatMap (flake:
+          if flake ? inputs
+          then attrValues flake.inputs
+          else [])
+        flakes));
+  flakeClosureRef = flake: pkgs.writeText "flake-closure" (concatStringsSep "\n" (flakesClosure [flake]) + "\n");
   dependencies = [
     config.system.build.diskoScript
     config.system.build.diskoScript.drvPath
@@ -34,9 +48,9 @@ in {
     };
   };
   config = lib.mkIf config.modules.airgap.enable {
-    # system = {
-    #   includeBuildDependencies = cfg.airgap.offline;
-    # };
+    system = {
+      extraDependencies = let in [(flakeClosureRef self)];
+    };
     nix = {
       settings = {
         substituters = lib.mkForce [];
