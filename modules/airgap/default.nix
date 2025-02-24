@@ -14,6 +14,7 @@
   cardanix = inputs.cardanix.packages.${system};
   inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
   dependencies = [
+    self.nixosConfigurations.nixos.config.system.build.toplevel
     self.nixosConfigurations.nixos.config.system.build.diskoScript
     self.nixosConfigurations.nixos.config.system.build.diskoScript.drvPath
     self.nixosConfigurations.nixos.pkgs.stdenv.drvPath
