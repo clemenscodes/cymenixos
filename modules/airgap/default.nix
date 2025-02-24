@@ -2,10 +2,10 @@
   inputs,
   pkgs,
   lib,
-  cymenixos,
+  # cymenixos,
   ...
 }: {
-  self,
+  # self,
   config,
   system,
   ...
@@ -13,21 +13,21 @@
   cfg = config.modules;
   cardanix = inputs.cardanix.packages.${system};
   inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
-  inherit (builtins) concatMap attrValues concatStringsSep;
-  inherit (lib) unique;
-  flakeClosureRef = flake: let
-    flakesClosure = flakes:
-      if flakes == []
-      then []
-      else
-        unique (flakes
-          ++ flakesClosure (concatMap (flake:
-            if flake ? inputs
-            then attrValues flake.inputs
-            else [])
-          flakes));
-  in
-    pkgs.writeText "flake-closure" (concatStringsSep "\n" (flakesClosure [flake]) + "\n");
+  # inherit (builtins) concatMap attrValues concatStringsSep;
+  # inherit (lib) unique;
+  # flakeClosureRef = flake: let
+  #   flakesClosure = flakes:
+  #     if flakes == []
+  #     then []
+  #     else
+  #       unique (flakes
+  #         ++ flakesClosure (concatMap (flake:
+  #           if flake ? inputs
+  #           then attrValues flake.inputs
+  #           else [])
+  #         flakes));
+  # in
+  #   pkgs.writeText "flake-closure" (concatStringsSep "\n" (flakesClosure [flake]) + "\n");
   # dependencies = [
   #   config.system.build.diskoScript
   #   config.system.build.diskoScript.drvPath
@@ -54,8 +54,8 @@ in {
     system = {
       extraDependencies = let
       in [
-        (flakeClosureRef cymenixos)
-        (flakeClosureRef self)
+        # (flakeClosureRef cymenixos)
+        # (flakeClosureRef self)
       ];
     };
     nix = {

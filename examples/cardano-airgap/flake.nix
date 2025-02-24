@@ -61,7 +61,25 @@
         modules = [
           ./configuration.nix
           (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
-          ({...}: {
+          ({...}: let
+            dependencies = [
+              self.nixosConfigurations.nixos.config.system.build.diskoScript
+              self.nixosConfigurations.nixos.config.system.build.diskoScript.drvPath
+              self.nixosConfigurations.nixos.pkgs.stdenv.drvPath
+              self.nixosConfigurations.nixos.pkgs.perlPackages.ConfigIniFiles
+              self.nixosConfigurations.nixos.pkgs.perlPackages.FileSlurp
+              (self.nixosConfigurations.nixos.pkgs.closureInfo {rootPaths = [];}).drvPath
+            ];
+            inputDependencies = builtins.map (i: i.outPath) (builtins.attrValues inputs);
+            closureInfo = pkgs.closureInfo {rootPaths = dependencies ++ inputDependencies;};
+          in {
+            environment = {
+              etc = {
+                install-closure = {
+                  source = "${closureInfo}/store-paths";
+                };
+              };
+            };
             modules = {
               airgap = {
                 offline = true;
