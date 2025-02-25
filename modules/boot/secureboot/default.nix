@@ -6,7 +6,7 @@
 }: {config, ...}: let
   cfg = config.modules.boot;
 in {
-  imports = [inputs.lanzaboote.nixosModules.lanzaboote];
+  # imports = [inputs.lanzaboote.nixosModules.lanzaboote];
   options = {
     modules = {
       boot = {
