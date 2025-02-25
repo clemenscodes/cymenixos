@@ -9,7 +9,7 @@
 }: let
   cfg = config.modules.crypto;
 in {
-  imports = [inputs.cardanix.nixosModules.${system}];
+  # imports = [inputs.cardanix.nixosModules.${system}];
   options = {
     modules = {
       crypto = {
@@ -20,32 +20,32 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.cardanix.enable) {
-    cardano = {
-      inherit (cfg.cardanix) enable;
-      bech32 = {
-        inherit (cfg.cardanix) enable;
-      };
-      address = {
-        inherit (cfg.cardanix) enable;
-      };
-      cli = {
-        inherit (cfg.cardanix) enable;
-      };
-      node = {
-        inherit (cfg.cardanix) enable;
-        submit-api = {
-          inherit (cfg.cardanix) enable;
-        };
-      };
-      wallet = {
-        inherit (cfg.cardanix) enable;
-      };
-      db-sync = {
-        inherit (cfg.cardanix) enable;
-      };
-      daedalus = {
-        enable = false;
-      };
-    };
+    # cardano = {
+    #   inherit (cfg.cardanix) enable;
+    #   bech32 = {
+    #     inherit (cfg.cardanix) enable;
+    #   };
+    #   address = {
+    #     inherit (cfg.cardanix) enable;
+    #   };
+    #   cli = {
+    #     inherit (cfg.cardanix) enable;
+    #   };
+    #   node = {
+    #     inherit (cfg.cardanix) enable;
+    #     submit-api = {
+    #       inherit (cfg.cardanix) enable;
+    #     };
+    #   };
+    #   wallet = {
+    #     inherit (cfg.cardanix) enable;
+    #   };
+    #   db-sync = {
+    #     inherit (cfg.cardanix) enable;
+    #   };
+    #   daedalus = {
+    #     enable = false;
+    #   };
+    # };
   };
 }

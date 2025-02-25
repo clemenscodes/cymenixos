@@ -15,7 +15,7 @@
     config = {
       allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["untrap-for-youtube"];
     };
-    overlays = [inputs.nur.overlays.default];
+    # overlays = [inputs.nur.overlays.default];
   };
 in {
   options = {
@@ -203,18 +203,18 @@ in {
           ${user} = {
             id = 0;
             name = user;
-            extensions = with pkgs.nur.repos.rycee.firefox-addons; [
-              decentraleyes
-              ublock-origin
-              bitwarden
-              istilldontcareaboutcookies
-              firefox-color
-              sponsorblock
-              df-youtube
-              untrap-for-youtube
-              zotero-connector
-              vimium
-            ];
+            # extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+            #   decentraleyes
+            #   ublock-origin
+            #   bitwarden
+            #   istilldontcareaboutcookies
+            #   firefox-color
+            #   sponsorblock
+            #   df-youtube
+            #   untrap-for-youtube
+            #   zotero-connector
+            #   vimium
+            # ];
             search = {
               force = true;
               default = "DuckDuckGo";

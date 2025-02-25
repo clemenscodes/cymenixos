@@ -14,14 +14,14 @@
         };
       };
     };
-    nur = {
-      url = "github:nix-community/NUR";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
-        };
-      };
-    };
+    # nur = {
+    #   url = "github:nix-community/NUR";
+    #   inputs = {
+    #     nixpkgs = {
+    #       follows = "nixpkgs";
+    #     };
+    #   };
+    # };
     catppuccin = {
       url = "github:catppuccin/nix";
       inputs = {
@@ -92,9 +92,9 @@
     lpi = {
       url = "github:cymenix/lpi";
     };
-    cardanix = {
-      url = "github:clemenscodes/cardanix";
-    };
+    # cardanix = {
+    #   url = "github:clemenscodes/cardanix";
+    # };
     templates = {
       url = "github:NixOS/templates";
     };

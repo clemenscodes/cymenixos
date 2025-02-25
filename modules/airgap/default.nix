@@ -11,8 +11,8 @@
   ...
 }: let
   cfg = config.modules;
-  cardanix = inputs.cardanix.packages.${system};
-  inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
+  # cardanix = inputs.cardanix.packages.${system};
+  # inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
   flakesClosure = flakes:
     if flakes == []
     then []
@@ -159,11 +159,11 @@ in {
         ++ (
           if config.modules.airgap.cardano.enable
           then [
-            bech32
-            cardano-address
-            cardano-cli
-            orchestrator-cli
-            cc-sign
+            # bech32
+            # cardano-address
+            # cardano-cli
+            # orchestrator-cli
+            # cc-sign
           ]
           else []
         );
