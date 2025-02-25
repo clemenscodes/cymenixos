@@ -92,9 +92,9 @@
     lpi = {
       url = "github:cymenix/lpi";
     };
-    # cardanix = {
-    #   url = "github:clemenscodes/cardanix";
-    # };
+    cardanix = {
+      url = "github:clemenscodes/cardanix/develop";
+    };
     templates = {
       url = "github:NixOS/templates";
     };
