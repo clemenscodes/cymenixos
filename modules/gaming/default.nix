@@ -23,8 +23,8 @@
   wine = pkgs.wineWowPackages.unstableFull;
 in {
   imports = [
-    # inputs.nix-gaming.nixosModules.pipewireLowLatency
-    # inputs.nix-gaming.nixosModules.platformOptimizations
+    inputs.nix-gaming.nixosModules.pipewireLowLatency
+    inputs.nix-gaming.nixosModules.platformOptimizations
     (import ./emulation {inherit inputs pkgs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
@@ -54,15 +54,15 @@ in {
         })
       ];
     };
-    # services = {
-    #   pipewire = {
-    #     lowLatency = {
-    #       inherit (cfg) enable;
-    #       quantum = 64;
-    #       rate = 48000;
-    #     };
-    #   };
-    # };
+    services = {
+      pipewire = {
+        lowLatency = {
+          inherit (cfg) enable;
+          quantum = 64;
+          rate = 48000;
+        };
+      };
+    };
     nix = {
       settings = {
         substituters = ["https://nix-gaming.cachix.org"];

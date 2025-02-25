@@ -73,14 +73,14 @@
         };
       };
     };
-    # nix-gaming = {
-    #   url = "github:fufexan/nix-gaming";
-    #   inputs = {
-    #     nixpkgs = {
-    #       follows = "nixpkgs";
-    #     };
-    #   };
-    # };
+    nix-gaming = {
+      url = "github:fufexan/nix-gaming";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
       inputs = {
