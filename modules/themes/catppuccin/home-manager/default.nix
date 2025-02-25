@@ -17,7 +17,13 @@ in {
             cava = {
               enable = lib.mkForce false;
             };
+            fzf = {
+              enable = lib.mkForce false;
+            };
             gh-dash = {
+              enable = lib.mkForce false;
+            };
+            mako = {
               enable = lib.mkForce false;
             };
             imv = {
@@ -27,9 +33,6 @@ in {
               enable = lib.mkForce false;
             };
             swaylock = {
-              enable = lib.mkForce false;
-            };
-            mako = {
               enable = lib.mkForce false;
             };
           };
