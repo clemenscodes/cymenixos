@@ -118,11 +118,11 @@
         "yubikey-guide": "yubikey-guide"
       },
       "locked": {
-        "lastModified": 1740497481,
-        "narHash": "sha256-NovDzsnCQE79OBVOM7IAn9DG66Npd6AHKjCSEJCXKCY=",
+        "lastModified": 1740504034,
+        "narHash": "sha256-rOMdidlU/QiO4aubb9DOC/NtNiRzqSG9Jy8nNxG135E=",
         "owner": "clemenscodes",
         "repo": "cymenixos",
-        "rev": "be7c830403376a3b536de3f67096e9e68ce82f47",
+        "rev": "f1d62dbe28b280f47053a3cf8f390063a35503fa",
         "type": "github"
       },
       "original": {
@@ -139,15 +139,16 @@
         "nixvim": "nixvim"
       },
       "locked": {
-        "lastModified": 1738240060,
-        "narHash": "sha256-4y7wxIQ/66tjQcsRvaLJHJ+/XHDl0kZpl8ohU7s+45w=",
+        "lastModified": 1740503985,
+        "narHash": "sha256-5u6AqzuA6EVSEQrO89a+i+o0y9B6addLpRiXGmJLVzY=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "ec56c4958f09b94de6b4b888b6a638f3bf1c4a13",
+        "rev": "32619e8cdb6536e37af38958c04dca0b53ecdeb9",
         "type": "github"
       },
       "original": {
         "owner": "clemenscodes",
+        "ref": "develop",
         "repo": "cymenixvim",
         "type": "github"
       }
