@@ -91,9 +91,6 @@
       firewall = {
         enable = true;
       };
-      wireless = {
-        enable = true;
-      };
     };
     security = {
       enable = true;
@@ -110,9 +107,6 @@
         enable = true;
       };
       rtkit = {
-        enable = true;
-      };
-      ssh = {
         enable = true;
       };
       sudo = {
@@ -245,9 +239,6 @@
               enable = true;
             };
             gpg = {
-              enable = true;
-            };
-            ssh = {
               enable = true;
             };
           };
