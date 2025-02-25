@@ -41,27 +41,6 @@
         "type": "github"
       }
     },
-    "catppuccin": {
-      "inputs": {
-        "nixpkgs": [
-          "cymenixos",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1739934729,
-        "narHash": "sha256-PcrLk10meIJICzUJqtCMOJxoITzbH52fZg2XAB7SSsM=",
-        "owner": "catppuccin",
-        "repo": "nix",
-        "rev": "b1ff2a638afa827f1473498190a2c1cae1cf41cf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "catppuccin",
-        "repo": "nix",
-        "type": "github"
-      }
-    },
     "crane": {
       "locked": {
         "lastModified": 1737689766,
@@ -79,7 +58,6 @@
     },
     "cymenixos": {
       "inputs": {
-        "catppuccin": "catppuccin",
         "disko": "disko",
         "gpu-usage-waybar": "gpu-usage-waybar",
         "home-manager": "home-manager",
@@ -96,11 +74,11 @@
         "yubikey-guide": "yubikey-guide"
       },
       "locked": {
-        "lastModified": 1740465383,
-        "narHash": "sha256-gbyn70BWZP62wXKoksDdACYfDYHuyIk5qLWXtlc4/NI=",
+        "lastModified": 1740472963,
+        "narHash": "sha256-ZCSqAZVIA4+wptcBJ4KsJMFrhwSCIfhHcfOZfxMBQ7k=",
         "owner": "clemenscodes",
         "repo": "cymenixos",
-        "rev": "d5264e9b065aa87dd21aa2255c2770e7e6ee002f",
+        "rev": "eae16d3d84ba90c1c8eb681370d4757dff13edec",
         "type": "github"
       },
       "original": {

@@ -24,15 +24,18 @@
           else [])
         flakes));
   flakeClosureRef = flake: pkgs.writeText "flake-closure" (builtins.concatStringsSep "\n" (flakesClosure [flake]) + "\n");
-  dependencies = [
-    self.nixosConfigurations.nixos.config.system.build.toplevel
-    self.nixosConfigurations.nixos.config.system.build.diskoScript
-    self.nixosConfigurations.nixos.config.system.build.diskoScript.drvPath
-    self.nixosConfigurations.nixos.pkgs.stdenv.drvPath
-    self.nixosConfigurations.nixos.pkgs.perlPackages.ConfigIniFiles
-    self.nixosConfigurations.nixos.pkgs.perlPackages.FileSlurp
-    (self.nixosConfigurations.nixos.pkgs.closureInfo {rootPaths = [];}).drvPath
-  ];
+  dependencies =
+    if cfg.users.isIso
+    then [
+      self.nixosConfigurations.nixos.config.system.build.toplevel
+      self.nixosConfigurations.nixos.config.system.build.diskoScript
+      self.nixosConfigurations.nixos.config.system.build.diskoScript.drvPath
+      self.nixosConfigurations.nixos.pkgs.stdenv.drvPath
+      self.nixosConfigurations.nixos.pkgs.perlPackages.ConfigIniFiles
+      self.nixosConfigurations.nixos.pkgs.perlPackages.FileSlurp
+      (self.nixosConfigurations.nixos.pkgs.closureInfo {rootPaths = [];}).drvPath
+    ]
+    else [];
   cymenixosInputs = builtins.map (i: i.outPath) (builtins.attrValues cymenixos.inputs);
   selfInputs = builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
   closureInfo = pkgs.closureInfo {rootPaths = dependencies ++ cymenixosInputs ++ selfInputs;};
