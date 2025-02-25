@@ -4,7 +4,7 @@
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
     cymenixos = {
-      url = "github:clemenscodes/cymenixos/develop";
+      url = "github:clemenscodes/cymenixos/feature/airgap-offline-flake";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
