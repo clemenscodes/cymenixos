@@ -6,7 +6,7 @@
   cfg = config.modules.themes;
 in {
   imports = [
-    # inputs.catppuccin.nixosModules.catppuccin
+    inputs.catppuccin.nixosModules.catppuccin
     (import ./home-manager {inherit inputs lib;})
   ];
   options = {
@@ -47,8 +47,8 @@ in {
     };
   };
   config = {
-    # catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable) {
-    #   inherit (cfg.catppuccin) enable flavor accent;
-    # };
+    catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable) {
+      inherit (cfg.catppuccin) enable flavor accent;
+    };
   };
 }

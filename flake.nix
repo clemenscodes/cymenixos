@@ -22,14 +22,14 @@
         };
       };
     };
-    # catppuccin = {
-    #   url = "github:catppuccin/nix";
-    #   inputs = {
-    #     nixpkgs = {
-    #       follows = "nixpkgs";
-    #     };
-    #   };
-    # };
+    catppuccin = {
+      url = "github:catppuccin/nix";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     wsl = {
       url = "github:nix-community/NixOS-WSL";
       inputs = {
