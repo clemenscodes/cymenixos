@@ -29,6 +29,20 @@
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [./configuration.nix];
       };
+      offline = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit self inputs nixpkgs system;};
+        modules = [
+          ./configuration.nix
+          ({...}: {
+            modules = {
+              airgap = {
+                enable = true;
+                offline = true;
+              };
+            };
+          })
+        ];
+      };
       iso = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
