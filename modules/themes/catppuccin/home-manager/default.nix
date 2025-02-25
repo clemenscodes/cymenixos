@@ -23,6 +23,9 @@ in {
             imv = {
               enable = lib.mkForce false;
             };
+            starship = {
+              enable = lib.mkForce false;
+            };
             swaylock = {
               enable = lib.mkForce false;
             };
