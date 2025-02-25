@@ -47,7 +47,7 @@
       };
     };
     cymenixvim = {
-      url = "github:clemenscodes/cymenixvim";
+      url = "github:clemenscodes/cymenixvim/develop";
     };
     xremap-flake = {
       url = "github:xremap/nix-flake";
