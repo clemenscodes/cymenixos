@@ -10,9 +10,26 @@ in {
       users = {
         ${config.modules.users.user} = {
           imports = [inputs.catppuccin.homeManagerModules.catppuccin];
-          # catppuccin = {
-          #   inherit (cfg.catppuccin) enable flavor accent;
-          # };
+          catppuccin = {
+            inherit (cfg.catppuccin) enable flavor accent;
+
+            # Disable IFD
+            cava = {
+              enable = lib.mkForce false;
+            };
+            gh-dash = {
+              enable = lib.mkForce false;
+            };
+            imv = {
+              enable = lib.mkForce false;
+            };
+            swaylock = {
+              enable = lib.mkForce false;
+            };
+            mako = {
+              enable = lib.mkForce false;
+            };
+          };
         };
       };
     };
