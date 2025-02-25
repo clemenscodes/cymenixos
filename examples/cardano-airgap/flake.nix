@@ -4,7 +4,7 @@
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
     cymenixos = {
-      url = "github:clemenscodes/cymenixos";
+      url = "github:clemenscodes/cymenixos/develop";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";

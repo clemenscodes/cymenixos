@@ -135,21 +135,25 @@
     "aquamarine": {
       "inputs": {
         "hyprutils": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprutils"
         ],
         "hyprwayland-scanner": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprwayland-scanner"
         ],
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -573,11 +577,13 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "haskellNix": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "haskellNix"
         ],
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "nixpkgs"
@@ -602,12 +608,14 @@
       "inputs": {
         "flake-utils": "flake-utils_5",
         "haskellNix": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
           "haskellNix"
         ],
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -637,6 +645,7 @@
         "haskellNix": "haskellNix",
         "iohkNix": "iohkNix",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-db-sync",
           "haskellNix",
@@ -709,12 +718,14 @@
         "hackageNix": "hackageNix_2",
         "haskellNix": "haskellNix_2",
         "hostNixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "nixpkgs"
         ],
         "iohkNix": "iohkNix_2",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "haskellNix",
@@ -768,6 +779,7 @@
         "hackageNix": "hackageNix_3",
         "haskellNix": "haskellNix_3",
         "hostNixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -775,6 +787,7 @@
         ],
         "iohkNix": "iohkNix_3",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -908,12 +921,14 @@
         "hackage": "hackage",
         "haskellNix": "haskellNix_4",
         "hostNixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "nixpkgs"
         ],
         "iohkNix": "iohkNix_4",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "haskellNix",
@@ -956,6 +971,7 @@
     "catppuccin": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ]
       },
@@ -974,6 +990,24 @@
       }
     },
     "crane": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_19"
+      },
+      "locked": {
+        "lastModified": 1707363508,
+        "narHash": "sha256-Cu5Mwktod5hcxxSpHl0FCeZ9la7v4KO5Tfrrs59AAJg=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "f2926e34a1599837f3256c701739529d772e36e7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
+    "crane_2": {
       "locked": {
         "lastModified": 1737689766,
         "narHash": "sha256-ivVXYaYlShxYoKfSo5+y5930qMKKJ8CLcAoIBPQfJ6s=",
@@ -1033,6 +1067,43 @@
         "type": "github"
       }
     },
+    "cymenixos": {
+      "inputs": {
+        "cardanix": "cardanix",
+        "catppuccin": "catppuccin",
+        "cymenixvim": "cymenixvim",
+        "disko": "disko",
+        "gpu-usage-waybar": "gpu-usage-waybar",
+        "home-manager": "home-manager_2",
+        "impermanence": "impermanence",
+        "lanzaboote": "lanzaboote",
+        "lpi": "lpi",
+        "nix-gaming": "nix-gaming",
+        "nix-vscode-extensions": "nix-vscode-extensions",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nur": "nur",
+        "sops-nix": "sops-nix",
+        "templates": "templates",
+        "wsl": "wsl",
+        "xremap-flake": "xremap-flake",
+        "yubikey-guide": "yubikey-guide"
+      },
+      "locked": {
+        "lastModified": 1740223148,
+        "narHash": "sha256-upIJT/KlIvS2e2GavXVj2GoJ+s1NO00RYhbKoiCuLyc=",
+        "owner": "clemenscodes",
+        "repo": "cymenixos",
+        "rev": "23762e8fb74d19943f6455a011a4a2aa4611e2e6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "clemenscodes",
+        "repo": "cymenixos",
+        "type": "github"
+      }
+    },
     "cymenixvim": {
       "inputs": {
         "neovim-nightly-overlay": "neovim-nightly-overlay",
@@ -1082,6 +1153,7 @@
     "devshell": {
       "inputs": {
         "flake-utils": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -1090,6 +1162,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -1115,6 +1188,7 @@
     "devshell_2": {
       "inputs": {
         "flake-utils": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -1124,6 +1198,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -1150,6 +1225,7 @@
     "devshell_3": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nixpkgs"
@@ -1190,6 +1266,7 @@
     "disko": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ]
       },
@@ -1210,6 +1287,7 @@
     "dmerge": {
       "inputs": {
         "nixlib": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -1218,6 +1296,7 @@
           "nixpkgs"
         ],
         "yants": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -1243,18 +1322,21 @@
     "dmerge_2": {
       "inputs": {
         "haumea": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
           "haumea"
         ],
         "nixlib": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
           "lib"
         ],
         "yants": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -1279,6 +1361,7 @@
     "dmerge_3": {
       "inputs": {
         "nixlib": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -1288,6 +1371,7 @@
           "nixpkgs"
         ],
         "yants": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -1314,6 +1398,7 @@
     "dmerge_4": {
       "inputs": {
         "haumea": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -1321,6 +1406,7 @@
           "haumea"
         ],
         "nixlib": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -1328,6 +1414,7 @@
           "lib"
         ],
         "yants": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -1527,6 +1614,22 @@
     "flake-compat_15": {
       "flake": false,
       "locked": {
+        "lastModified": 1733328505,
+        "narHash": "sha256-NeCCThCEP3eCl2l/+27kNNK7QrwZB1IJCrXfrbv5oqU=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "ff81ac966bb2cae68946d5ed5fc4994f96d0ffec",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_16": {
+      "flake": false,
+      "locked": {
         "lastModified": 1696426674,
         "narHash": "sha256-kvjfFW7WAETZlt09AgDn1MrtKzP7t90Vf7vypd3OL1U=",
         "owner": "edolstra",
@@ -1540,7 +1643,7 @@
         "type": "github"
       }
     },
-    "flake-compat_16": {
+    "flake-compat_17": {
       "flake": false,
       "locked": {
         "lastModified": 1733328505,
@@ -1556,7 +1659,7 @@
         "type": "github"
       }
     },
-    "flake-compat_17": {
+    "flake-compat_18": {
       "flake": false,
       "locked": {
         "lastModified": 1696426674,
@@ -1708,6 +1811,7 @@
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
+          "cymenixos",
           "cymenixvim",
           "neovim-nightly-overlay",
           "nixpkgs"
@@ -1730,6 +1834,7 @@
     "flake-parts_2": {
       "inputs": {
         "nixpkgs-lib": [
+          "cymenixos",
           "cymenixvim",
           "neovim-nightly-overlay",
           "hercules-ci-effects",
@@ -1752,6 +1857,7 @@
     "flake-parts_3": {
       "inputs": {
         "nixpkgs-lib": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nixpkgs"
@@ -1773,6 +1879,28 @@
     },
     "flake-parts_4": {
       "inputs": {
+        "nixpkgs-lib": [
+          "cymenixos",
+          "lanzaboote",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1733312601,
+        "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_5": {
+      "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
       },
       "locked": {
@@ -1789,9 +1917,10 @@
         "type": "github"
       }
     },
-    "flake-parts_5": {
+    "flake-parts_6": {
       "inputs": {
         "nixpkgs-lib": [
+          "cymenixos",
           "nur",
           "nixpkgs"
         ]
@@ -1810,7 +1939,7 @@
         "type": "github"
       }
     },
-    "flake-parts_6": {
+    "flake-parts_7": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib_2"
       },
@@ -2185,6 +2314,7 @@
         "flake-compat": "flake-compat_13",
         "gitignore": "gitignore",
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "neovim-nightly-overlay",
           "nixpkgs"
@@ -2207,12 +2337,14 @@
     "git-hooks_2": {
       "inputs": {
         "flake-compat": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "flake-compat"
         ],
         "gitignore": "gitignore_2",
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nixpkgs"
@@ -2235,6 +2367,7 @@
     "gitignore": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "neovim-nightly-overlay",
           "git-hooks",
@@ -2258,6 +2391,7 @@
     "gitignore_2": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "git-hooks",
@@ -2281,6 +2415,30 @@
     "gitignore_3": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
+          "lanzaboote",
+          "pre-commit-hooks-nix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1709087332,
+        "narHash": "sha256-HG2cCnktfHsKV0s4XW83gU3F57gaTljL9KNSuG6bnQs=",
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "rev": "637db329424fd7e46cf4185293b9cc8c88c95394",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "type": "github"
+      }
+    },
+    "gitignore_4": {
+      "inputs": {
+        "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "pre-commit-hooks",
@@ -2433,6 +2591,7 @@
         "flake-compat": "flake-compat_2",
         "ghc-8.6.5-iohk": "ghc-8.6.5-iohk",
         "hackage": [
+          "cymenixos",
           "cardanix",
           "cardano-db-sync",
           "hackageNix"
@@ -2451,6 +2610,7 @@
         "hydra": "hydra",
         "iserv-proxy": "iserv-proxy",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-db-sync",
           "haskellNix",
@@ -2494,6 +2654,7 @@
         "ghc910X": "ghc910X",
         "ghc911": "ghc911",
         "hackage": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "hackageNix"
@@ -2511,6 +2672,7 @@
         "hydra": "hydra_2",
         "iserv-proxy": "iserv-proxy_2",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "nixpkgs"
@@ -2553,6 +2715,7 @@
         "ghc910X": "ghc910X_2",
         "ghc911": "ghc911_2",
         "hackage": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -2571,6 +2734,7 @@
         "hydra": "hydra_3",
         "iserv-proxy": "iserv-proxy_3",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -2612,6 +2776,7 @@
         "flake-compat": "flake-compat_10",
         "ghc-8.6.5-iohk": "ghc-8.6.5-iohk_4",
         "hackage": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "hackage"
@@ -2630,6 +2795,7 @@
         "hydra": "hydra_4",
         "iserv-proxy": "iserv-proxy_4",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "nixpkgs"
@@ -2663,6 +2829,7 @@
     "haumea": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -2687,6 +2854,7 @@
     "haumea_2": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -2713,6 +2881,7 @@
       "inputs": {
         "flake-parts": "flake-parts_2",
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "neovim-nightly-overlay",
           "nixpkgs"
@@ -3381,6 +3550,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nixpkgs"
@@ -3403,6 +3573,7 @@
     "home-manager_2": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ]
       },
@@ -3506,6 +3677,7 @@
       "inputs": {
         "nix": "nix",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-db-sync",
           "haskellNix",
@@ -3531,6 +3703,7 @@
       "inputs": {
         "nix": "nix_2",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "haskellNix",
@@ -3556,6 +3729,7 @@
       "inputs": {
         "nix": "nix_3",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -3582,6 +3756,7 @@
       "inputs": {
         "nix": "nix_4",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "haskellNix",
@@ -3606,16 +3781,19 @@
     "hyprcursor": {
       "inputs": {
         "hyprlang": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprlang"
         ],
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -3638,16 +3816,19 @@
     "hyprgraphics": {
       "inputs": {
         "hyprutils": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprutils"
         ],
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -3699,11 +3880,13 @@
     "hyprland-protocols": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -3726,18 +3909,21 @@
     "hyprland-qt-support": {
       "inputs": {
         "hyprlang": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprland-qtutils",
           "hyprlang"
         ],
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprland-qtutils",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprland-qtutils",
@@ -3762,11 +3948,13 @@
       "inputs": {
         "hyprland-qt-support": "hyprland-qt-support",
         "hyprlang": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprlang"
         ],
         "hyprutils": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprland-qtutils",
@@ -3774,11 +3962,13 @@
           "hyprutils"
         ],
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -3801,16 +3991,19 @@
     "hyprlang": {
       "inputs": {
         "hyprutils": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprutils"
         ],
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -3833,11 +4026,13 @@
     "hyprutils": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -3860,11 +4055,13 @@
     "hyprwayland-scanner": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -3902,6 +4099,7 @@
     "incl": {
       "inputs": {
         "nixlib": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -3925,6 +4123,7 @@
     "incl_2": {
       "inputs": {
         "nixlib": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -3950,6 +4149,7 @@
       "inputs": {
         "blst": "blst",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-db-sync",
           "nixpkgs"
@@ -3975,6 +4175,7 @@
       "inputs": {
         "blst": "blst_2",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "nixpkgs"
@@ -4000,6 +4201,7 @@
       "inputs": {
         "blst": "blst_3",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -4026,6 +4228,7 @@
       "inputs": {
         "blst": "blst_4",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "nixpkgs"
@@ -4118,12 +4321,14 @@
     "ixx": {
       "inputs": {
         "flake-utils": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nuschtosSearch",
           "flake-utils"
         ],
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nuschtosSearch",
@@ -4142,6 +4347,32 @@
         "owner": "NuschtOS",
         "ref": "v0.0.6",
         "repo": "ixx",
+        "type": "github"
+      }
+    },
+    "lanzaboote": {
+      "inputs": {
+        "crane": "crane",
+        "flake-compat": "flake-compat_15",
+        "flake-parts": "flake-parts_4",
+        "nixpkgs": [
+          "cymenixos",
+          "nixpkgs"
+        ],
+        "pre-commit-hooks-nix": "pre-commit-hooks-nix",
+        "rust-overlay": "rust-overlay_2"
+      },
+      "locked": {
+        "lastModified": 1734263194,
+        "narHash": "sha256-KLamIbzzFUdyZ2htZ8lwTRPaLPreSxj1NfClNzGNzBI=",
+        "owner": "clemenscodes",
+        "repo": "lanzaboote",
+        "rev": "71834db45724b0b5f42289be347d2ac3748bc6aa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "clemenscodes",
+        "repo": "lanzaboote",
         "type": "github"
       }
     },
@@ -4242,8 +4473,8 @@
     "lpi": {
       "inputs": {
         "flake-utils": "flake-utils_12",
-        "nixpkgs": "nixpkgs_19",
-        "rust-overlay": "rust-overlay_2"
+        "nixpkgs": "nixpkgs_20",
+        "rust-overlay": "rust-overlay_3"
       },
       "locked": {
         "lastModified": 1728993312,
@@ -4295,6 +4526,7 @@
       "inputs": {
         "flake-utils": "flake-utils_4",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -4321,6 +4553,7 @@
       "inputs": {
         "flake-utils": "flake-utils_8",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -4352,6 +4585,7 @@
         "hercules-ci-effects": "hercules-ci-effects",
         "neovim-src": "neovim-src",
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixpkgs"
         ],
@@ -4427,6 +4661,7 @@
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nixpkgs"
@@ -4448,8 +4683,9 @@
     },
     "nix-gaming": {
       "inputs": {
-        "flake-parts": "flake-parts_4",
+        "flake-parts": "flake-parts_5",
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ]
       },
@@ -4471,6 +4707,7 @@
       "inputs": {
         "flake-compat": "flake-compat_3",
         "flake-utils": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -4480,6 +4717,7 @@
         ],
         "gomod2nix": "gomod2nix",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -4487,6 +4725,7 @@
           "nixpkgs"
         ],
         "nixpkgs-lib": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -4512,6 +4751,7 @@
       "inputs": {
         "flake-compat": "flake-compat_6",
         "flake-utils": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -4522,6 +4762,7 @@
         ],
         "gomod2nix": "gomod2nix_2",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -4530,6 +4771,7 @@
           "nixpkgs"
         ],
         "nixpkgs-lib": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -4554,9 +4796,10 @@
     },
     "nix-vscode-extensions": {
       "inputs": {
-        "flake-compat": "flake-compat_15",
+        "flake-compat": "flake-compat_16",
         "flake-utils": "flake-utils_13",
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ]
       },
@@ -4678,6 +4921,7 @@
     "nixago": {
       "inputs": {
         "flake-utils": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -4686,6 +4930,7 @@
           "flake-utils"
         ],
         "nixago-exts": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -4694,6 +4939,7 @@
           "blank"
         ],
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -4719,6 +4965,7 @@
     "nixago_2": {
       "inputs": {
         "flake-utils": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -4728,6 +4975,7 @@
           "flake-utils"
         ],
         "nixago-exts": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -4737,6 +4985,7 @@
           "blank"
         ],
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -5344,6 +5593,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-stable": {
+      "locked": {
+        "lastModified": 1730741070,
+        "narHash": "sha256-edm8WG19kWozJ/GqyYx2VjW99EdhjKwbY3ZwdlPAAlo=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d063c1dd113c91ab27959ba540c0d9753409edf3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-24.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-unstable": {
       "locked": {
         "lastModified": 1726583932,
@@ -5567,16 +5832,16 @@
     },
     "nixpkgs_19": {
       "locked": {
-        "lastModified": 1728492678,
-        "narHash": "sha256-9UTxR8eukdg+XZeHgxW5hQA9fIKHsKCdOIUycTryeVw=",
+        "lastModified": 1706925685,
+        "narHash": "sha256-hVInjWMmgH4yZgA4ZtbgJM1qEAel72SYhP5nOWX4UIM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5633bcff0c6162b9e4b5f1264264611e950c8ec7",
+        "rev": "79a13f1437e149dc7be2d1290c74d378dad60814",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-unstable",
+        "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -5599,11 +5864,11 @@
     },
     "nixpkgs_20": {
       "locked": {
-        "lastModified": 1739866667,
-        "narHash": "sha256-EO1ygNKZlsAC9avfcwHkKGMsmipUk1Uc0TbrEZpkn64=",
+        "lastModified": 1728492678,
+        "narHash": "sha256-9UTxR8eukdg+XZeHgxW5hQA9fIKHsKCdOIUycTryeVw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "73cf49b8ad837ade2de76f87eb53fc85ed5d4680",
+        "rev": "5633bcff0c6162b9e4b5f1264264611e950c8ec7",
         "type": "github"
       },
       "original": {
@@ -5689,6 +5954,22 @@
       "original": {
         "owner": "NixOS",
         "ref": "nixos-24.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_26": {
+      "locked": {
+        "lastModified": 1739866667,
+        "narHash": "sha256-EO1ygNKZlsAC9avfcwHkKGMsmipUk1Uc0TbrEZpkn64=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "73cf49b8ad837ade2de76f87eb53fc85ed5d4680",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -5810,6 +6091,7 @@
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixpkgs"
         ],
@@ -5862,8 +6144,9 @@
     },
     "nur": {
       "inputs": {
-        "flake-parts": "flake-parts_5",
+        "flake-parts": "flake-parts_6",
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ],
         "treefmt-nix": "treefmt-nix_3"
@@ -5887,6 +6170,7 @@
         "flake-utils": "flake-utils_10",
         "ixx": "ixx",
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nixpkgs"
@@ -6010,6 +6294,7 @@
       "inputs": {
         "call-flake": "call-flake",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -6017,6 +6302,7 @@
         ],
         "nosys": "nosys",
         "yants": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -6076,6 +6362,7 @@
       "inputs": {
         "call-flake": "call-flake_2",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6084,6 +6371,7 @@
         ],
         "nosys": "nosys_2",
         "yants": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6108,9 +6396,10 @@
     },
     "pre-commit-hooks": {
       "inputs": {
-        "flake-compat": "flake-compat_17",
-        "gitignore": "gitignore_3",
+        "flake-compat": "flake-compat_18",
+        "gitignore": "gitignore_4",
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
@@ -6130,34 +6419,50 @@
         "type": "github"
       }
     },
+    "pre-commit-hooks-nix": {
+      "inputs": {
+        "flake-compat": [
+          "cymenixos",
+          "lanzaboote",
+          "flake-compat"
+        ],
+        "gitignore": "gitignore_3",
+        "nixpkgs": [
+          "cymenixos",
+          "lanzaboote",
+          "nixpkgs"
+        ],
+        "nixpkgs-stable": "nixpkgs-stable"
+      },
+      "locked": {
+        "lastModified": 1734261738,
+        "narHash": "sha256-3Lzk+7QyX8v60+km26D3dln7NMSA13vW+KYTkMkds6Q=",
+        "owner": "cachix",
+        "repo": "pre-commit-hooks.nix",
+        "rev": "4c8e75efbbdcc6f9203f64b1f21f8a55d2285264",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "pre-commit-hooks.nix",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "cardanix": "cardanix",
-        "catppuccin": "catppuccin",
-        "cymenixvim": "cymenixvim",
-        "disko": "disko",
-        "gpu-usage-waybar": "gpu-usage-waybar",
-        "home-manager": "home-manager_2",
-        "impermanence": "impermanence",
-        "lpi": "lpi",
-        "nix-gaming": "nix-gaming",
-        "nix-vscode-extensions": "nix-vscode-extensions",
-        "nixpkgs": "nixpkgs_20",
-        "nur": "nur",
-        "sops-nix": "sops-nix",
-        "templates": "templates",
-        "wsl": "wsl",
-        "xremap-flake": "xremap-flake",
-        "yubikey-guide": "yubikey-guide"
+        "cymenixos": "cymenixos",
+        "nixpkgs": "nixpkgs_26"
       }
     },
     "rust-overlay": {
       "inputs": {
         "flake-utils": [
+          "cymenixos",
           "gpu-usage-waybar",
           "flake-utils"
         ],
         "nixpkgs": [
+          "cymenixos",
           "gpu-usage-waybar",
           "nixpkgs"
         ]
@@ -6179,6 +6484,29 @@
     "rust-overlay_2": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
+          "lanzaboote",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1734230139,
+        "narHash": "sha256-zsp0Mz8VgyIAnU8UhP/YT1g+zlsl+NIJTBMAbY+RifQ=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "150fbc8aa2bc501041810bbc1dbfe73694a861be",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": [
+          "cymenixos",
           "lpi",
           "nixpkgs"
         ]
@@ -6336,6 +6664,7 @@
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ]
       },
@@ -6424,6 +6753,7 @@
         "dmerge": "dmerge",
         "flake-utils": "flake-utils_3",
         "makes": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -6433,6 +6763,7 @@
         ],
         "mdbook-kroki-preprocessor": "mdbook-kroki-preprocessor",
         "microvm": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -6462,6 +6793,7 @@
     "std_2": {
       "inputs": {
         "arion": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -6469,6 +6801,7 @@
         ],
         "blank": "blank_2",
         "devshell": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -6479,24 +6812,28 @@
         "incl": "incl",
         "lib": "lib",
         "makes": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
           "blank"
         ],
         "microvm": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
           "blank"
         ],
         "n2c": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
           "blank"
         ],
         "nixago": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -6506,6 +6843,7 @@
         "paisano": "paisano",
         "paisano-tui": "paisano-tui",
         "terranix": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -6534,6 +6872,7 @@
         "dmerge": "dmerge_3",
         "flake-utils": "flake-utils_7",
         "makes": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6544,6 +6883,7 @@
         ],
         "mdbook-kroki-preprocessor": "mdbook-kroki-preprocessor_2",
         "microvm": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6574,6 +6914,7 @@
     "std_4": {
       "inputs": {
         "arion": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6582,6 +6923,7 @@
         ],
         "blank": "blank_4",
         "devshell": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6593,6 +6935,7 @@
         "incl": "incl_2",
         "lib": "lib_2",
         "makes": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6600,6 +6943,7 @@
           "blank"
         ],
         "microvm": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6607,6 +6951,7 @@
           "blank"
         ],
         "n2c": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6614,6 +6959,7 @@
           "blank"
         ],
         "nixago": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6624,6 +6970,7 @@
         "paisano": "paisano_2",
         "paisano-tui": "paisano-tui_2",
         "terranix": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -6799,6 +7146,7 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "neovim-nightly-overlay",
           "nixpkgs"
@@ -6821,6 +7169,7 @@
     "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cymenixvim",
           "nixvim",
           "nixpkgs"
@@ -6843,6 +7192,7 @@
     "treefmt-nix_3": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "nur",
           "nixpkgs"
         ]
@@ -6884,6 +7234,7 @@
         "nix-nomad": "nix-nomad",
         "nix2container": "nix2container",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -6910,6 +7261,7 @@
         "nix-nomad": "nix-nomad_2",
         "nix2container": "nix2container_2",
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -7034,8 +7386,9 @@
     },
     "wsl": {
       "inputs": {
-        "flake-compat": "flake-compat_16",
+        "flake-compat": "flake-compat_17",
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ]
       },
@@ -7056,31 +7409,37 @@
     "xdph": {
       "inputs": {
         "hyprland-protocols": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprland-protocols"
         ],
         "hyprlang": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprlang"
         ],
         "hyprutils": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprutils"
         ],
         "hyprwayland-scanner": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "hyprwayland-scanner"
         ],
         "nixpkgs": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "nixpkgs"
         ],
         "systems": [
+          "cymenixos",
           "xremap-flake",
           "hyprland",
           "systems"
@@ -7119,12 +7478,13 @@
     },
     "xremap-flake": {
       "inputs": {
-        "crane": "crane",
+        "crane": "crane_2",
         "devshell": "devshell_4",
-        "flake-parts": "flake-parts_6",
+        "flake-parts": "flake-parts_7",
         "home-manager": "home-manager_3",
         "hyprland": "hyprland",
         "nixpkgs": [
+          "cymenixos",
           "nixpkgs"
         ],
         "treefmt-nix": "treefmt-nix_4",
@@ -7147,6 +7507,7 @@
     "yants": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "cardano-automation",
@@ -7172,6 +7533,7 @@
     "yants_2": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-node",
           "std",
@@ -7195,6 +7557,7 @@
     "yants_3": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
@@ -7221,6 +7584,7 @@
     "yants_4": {
       "inputs": {
         "nixpkgs": [
+          "cymenixos",
           "cardanix",
           "cardano-wallet",
           "cardano-node-runtime",
