@@ -7,6 +7,10 @@
   imports = [inputs.cymenixos.nixosModules.${system}.default];
   modules = {
     enable = true;
+    airgap = {
+      enable = true;
+      offline = true;
+    };
     disk = {
       enable = true;
       device = "/dev/sda";

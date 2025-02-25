@@ -65,14 +65,14 @@
         };
       };
     };
-    # lanzaboote = {
-    #   url = "github:clemenscodes/lanzaboote";
-    #   inputs = {
-    #     nixpkgs = {
-    #       follows = "nixpkgs";
-    #     };
-    #   };
-    # };
+    lanzaboote = {
+      url = "github:clemenscodes/lanzaboote";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     # nix-gaming = {
     #   url = "github:fufexan/nix-gaming";
     #   inputs = {
