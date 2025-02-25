@@ -14,14 +14,14 @@
         };
       };
     };
-    # nur = {
-    #   url = "github:nix-community/NUR";
-    #   inputs = {
-    #     nixpkgs = {
-    #       follows = "nixpkgs";
-    #     };
-    #   };
-    # };
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     # catppuccin = {
     #   url = "github:catppuccin/nix";
     #   inputs = {
