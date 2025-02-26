@@ -78,6 +78,9 @@
       sound = {
         enable = true;
       };
+      udisks = {
+        enable = true;
+      };
       xremap = {
         enable = true;
       };
@@ -238,9 +241,6 @@
           };
           security = {
             enable = true;
-            bitwarden = {
-              enable = true;
-            };
             gpg = {
               enable = true;
             };
@@ -276,6 +276,18 @@
               enable = true;
             };
             fzf = {
+              enable = true;
+            };
+            gparted = {
+              enable = true;
+            };
+            lsusb = {
+              enable = true;
+            };
+            unzip = {
+              enable = true;
+            };
+            zip = {
               enable = true;
             };
             ripgrep = {
