@@ -62,7 +62,7 @@ in
         # Generate the squashfs image.
         mksquashfs nix-path-registration $out/closure $imgPath ${pseudoFilesArgs} \
           -no-hardlinks ${lib.optionalString noStrip "-no-strip"} -keep-as-directory -all-root -b 1048576 ${compFlag} \
-          -processors $NIX_BUILD_CORES -root-mode 0755 -info -progress -no-exports -mem 8GB
+          -processors $NIX_BUILD_CORES -root-mode 0755 -info -progress
       ''
       + lib.optionalString hydraBuildProduct ''
 
