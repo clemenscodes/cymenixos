@@ -61,10 +61,10 @@ in
 
         split -l 1000 "$closureInfo/store-paths" "$chunks-"
 
-        for chunk in $tempFile-*; do
+        for chunk in $chunks-*; do
           mksquashfs $(cat "$chunk") "$imgPath" -no-hardlinks \
             ${lib.optionalString noStrip "-no-strip"} -keep-as-directory -all-root \
-            -b 1048576 ${compFlag} -processors $NIX_BUILD_CORES -root-mode 0755 -no-recovery
+            -processors $NIX_BUILD_CORES -root-mode 0755 -no-recovery
         done
       ''
       + lib.optionalString hydraBuildProduct ''
