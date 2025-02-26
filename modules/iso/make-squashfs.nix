@@ -62,7 +62,7 @@ in
 
           mksquashfs "$path" "$imgPath" -no-hardlinks \
             ${lib.optionalString noStrip "-no-strip"} -keep-as-directory -all-root \
-            -b 1048576 ${compFlag} -processors $NIX_BUILD_CORES -root-mode 0755
+            -b 1048576 ${compFlag} -processors $NIX_BUILD_CORES -root-mode 0755 -no-recovery
         done < "$closureInfo/store-paths"
       ''
       + lib.optionalString hydraBuildProduct ''
