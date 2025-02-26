@@ -57,13 +57,15 @@ in
           -no-hardlinks ${lib.optionalString noStrip "-no-strip"} -keep-as-directory -all-root -b 1048576 ${compFlag} \
           -processors $NIX_BUILD_CORES -root-mode 0755 -info -progress
 
-        while read -r path; do
-          echo "Adding $path to squashfs image"
+        chunks=$(mktemp)
 
-          mksquashfs "$path" "$imgPath" -no-hardlinks \
+        split -l 1000 "$closureInfo/store-paths" "$chunks-"
+
+        for chunk in $tempFile-*; do
+          mksquashfs $(cat "$chunk") "$imgPath" -no-hardlinks \
             ${lib.optionalString noStrip "-no-strip"} -keep-as-directory -all-root \
             -b 1048576 ${compFlag} -processors $NIX_BUILD_CORES -root-mode 0755 -no-recovery
-        done < "$closureInfo/store-paths"
+        done
       ''
       + lib.optionalString hydraBuildProduct ''
 
