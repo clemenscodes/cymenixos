@@ -53,14 +53,12 @@ in
         fi
       ''
       + ''
-        mkdir -p $out/closure
-
         while read -r path; do
-          ln -s "$path" $out/closure/
+          ln -s "$path" nix-path-registration
         done < $closureInfo/store-paths
 
         # Generate the squashfs image.
-        mksquashfs nix-path-registration $out/closure $imgPath ${pseudoFilesArgs} \
+        mksquashfs nix-path-registration $imgPath ${pseudoFilesArgs} \
           -no-hardlinks ${lib.optionalString noStrip "-no-strip"} -keep-as-directory -all-root -b 1048576 ${compFlag} \
           -processors $NIX_BUILD_CORES -root-mode 0755 -info -progress
       ''
