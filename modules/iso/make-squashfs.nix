@@ -54,7 +54,7 @@ in
       ''
       + ''
         while read -r path; do
-          ln -s "$path" nix-path-registration/
+          ln -s "$path" "nix-path-registration/$(basename "$path")"
         done < $closureInfo/store-paths
 
         # Generate the squashfs image.
