@@ -53,14 +53,24 @@ in
         fi
       ''
       + ''
+        echo "Creating $out/closure"
         mkdir -p $out/closure
 
         while read -r path; do
+          echo "Linking $path"
           ln -s "$path" $out/closure/
         done < $closureInfo/store-paths
 
+        echo "Copying nix-path-registration"
+
+        cp nix-path-registration $out/closure
+
+        cat $out/closure/nix-path-registration
+
+        echo "Generating the squashfs image"
+
         # Generate the squashfs image.
-        mksquashfs  $out/closure nix-path-registration $imgPath ${pseudoFilesArgs} \
+        mksquashfs $out/closure $imgPath ${pseudoFilesArgs} \
           -no-hardlinks ${lib.optionalString noStrip "-no-strip"} -keep-as-directory -all-root -b 1048576 ${compFlag} \
           -processors $NIX_BUILD_CORES -root-mode 0755 -info -progress
       ''
