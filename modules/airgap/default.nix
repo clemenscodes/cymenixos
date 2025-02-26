@@ -52,7 +52,7 @@ in {
     };
   };
   config = lib.mkIf config.modules.airgap.enable {
-    system = {
+    system = lib.mkIf cfg.airgap.offline {
       includeBuildDependencies = cfg.airgap.offline;
       extraDependencies = [
         (flakeClosureRef self)
