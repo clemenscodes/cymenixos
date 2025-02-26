@@ -18,7 +18,6 @@ in {
   config = lib.mkIf cfg.iso.enable {
     isoImage = lib.mkIf cfg.iso.fast {
       squashfsCompression = "gzip -Xcompression-level 1";
-      includeSystemBuildDependencies = cfg.airgap.offline;
     };
     system = {
       build = {
