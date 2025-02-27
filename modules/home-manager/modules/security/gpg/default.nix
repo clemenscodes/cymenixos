@@ -10,6 +10,7 @@ in {
       security = {
         gpg = {
           enable = lib.mkEnableOption "Enable GPG support" // {default = false;};
+          importDebianKeyring = lib.mkEnableOption "Import debian keyring" // {default = false;};
         };
       };
     };
@@ -82,7 +83,8 @@ in {
             source = "${debianKeyring}/share/keyrings/debian-keyring.gpg";
             trust = "ultimate";
           };
-        in [debianDevelopers];
+        in
+          lib.mkIf cfg.gpg.importDebianKeyring [debianDevelopers];
       };
     };
   };
