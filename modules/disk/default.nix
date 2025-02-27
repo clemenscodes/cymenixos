@@ -232,7 +232,7 @@ in {
                   };
                 };
                 ${luksDisk} = {
-                  size = "80%";
+                  size = "100%";
                   label = luksDisk;
                   content = {
                     name = luksDisk;
