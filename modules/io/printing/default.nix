@@ -31,7 +31,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.printing.enable) {
     environment = {
       persistence = {
-        ${config.modules.boot.persistPath} = {
+        ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.name} = {
               directories = [
