@@ -195,7 +195,7 @@ in {
                 };
                 public = lib.mkIf (cfg.airgap.enable) {
                   priority = 4;
-                  size = "10%";
+                  size = "256M";
                   label = "public";
                   content = {
                     type = "filesystem";
@@ -206,7 +206,7 @@ in {
                 };
                 private = lib.mkIf (cfg.airgap.enable) {
                   priority = 5;
-                  size = "10%";
+                  size = "256M";
                   label = "private";
                   content = {
                     name = "private";
