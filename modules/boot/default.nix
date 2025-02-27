@@ -91,10 +91,6 @@ in {
         };
       };
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
-      tmp = {
-        useTmpfs = lib.mkDefault true;
-        cleanOnBoot = lib.mkDefault (!config.boot.tmp.useTmpfs);
-      };
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         efi = {
           efiSysMountPoint =
