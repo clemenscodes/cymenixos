@@ -27,7 +27,6 @@
   dependencies =
     if cfg.users.isIso
     then [
-      self.nixosConfigurations.nixos.config.system.build.toplevel
       self.nixosConfigurations.nixos.config.system.build.diskoScript
       self.nixosConfigurations.nixos.config.system.build.diskoScript.drvPath
       self.nixosConfigurations.nixos.pkgs.stdenv.drvPath
@@ -36,9 +35,7 @@
       (self.nixosConfigurations.nixos.pkgs.closureInfo {rootPaths = [];}).drvPath
     ]
     else [];
-  cymenixosInputs = builtins.map (i: i.outPath) (builtins.attrValues cymenixos.inputs);
-  selfInputs = builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
-  closureInfo = pkgs.closureInfo {rootPaths = dependencies ++ cymenixosInputs ++ selfInputs;};
+  closureInfo = pkgs.closureInfo {rootPaths = dependencies;};
 in {
   options = {
     modules = {
