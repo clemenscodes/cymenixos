@@ -10,7 +10,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.firewall.enable) {
+  config = lib.mkIf (cfg.firewall.enable) {
     networking = {
       nftables = {
         inherit (cfg.firewall) enable;

@@ -27,15 +27,18 @@
   dependencies =
     if cfg.users.isIso
     then [
-      config.system.build.diskoScript
-      config.system.build.diskoScript.drvPath
-      pkgs.stdenv.drvPath
-      pkgs.perlPackages.ConfigIniFiles
-      pkgs.perlPackages.FileSlurp
-      (pkgs.closureInfo {rootPaths = [];}).drvPath
+      self.nixosConfigurations.nixos.config.system.build.toplevel
+      self.nixosConfigurations.nixos.config.system.build.diskoScript
+      self.nixosConfigurations.nixos.config.system.build.diskoScript.drvPath
+      self.nixosConfigurations.nixos.pkgs.stdenv.drvPath
+      self.nixosConfigurations.nixos.pkgs.perlPackages.ConfigIniFiles
+      self.nixosConfigurations.nixos.pkgs.perlPackages.FileSlurp
+      (self.nixosConfigurations.nixos.pkgs.closureInfo {rootPaths = [];}).drvPath
     ]
     else [];
-  closureInfo = pkgs.closureInfo {rootPaths = dependencies;};
+  cymenixosInputs = builtins.map (i: i.outPath) (builtins.attrValues cymenixos.inputs);
+  selfInputs = builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
+  closureInfo = pkgs.closureInfo {rootPaths = dependencies ++ cymenixosInputs ++ selfInputs;};
 in {
   options = {
     modules = {

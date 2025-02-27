@@ -14,7 +14,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.dbus.enable) {
+  config = lib.mkIf (cfg.dbus.enable) {
     services = {
       dbus = {
         enable = cfg.dbus.enable;

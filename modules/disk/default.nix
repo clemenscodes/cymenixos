@@ -195,7 +195,7 @@ in {
                 };
                 public = lib.mkIf (cfg.airgap.enable) {
                   priority = 4;
-                  size = "256M";
+                  size = "10%";
                   label = "public";
                   content = {
                     type = "filesystem";
@@ -206,21 +206,21 @@ in {
                 };
                 private = lib.mkIf (cfg.airgap.enable) {
                   priority = 5;
-                  size = "256M";
+                  size = "10%";
                   label = "private";
                   content = {
                     name = "private";
                     type = "luks";
-                    askPassword = !cfg.security.yubikey.enable;
+                    askPassword = !(cfg.disk.luks.yubikey && cfg.security.yubikey.enable);
                     settings = {
                       keyFile =
-                        if cfg.security.yubikey.enable
+                        if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                         then keyFile
                         else null;
                       allowDiscards = true;
                     };
                     extraFormatArgs =
-                      if cfg.security.yubikey.enable
+                      if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                       then defaultLuksFormatArgs
                       else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
@@ -232,21 +232,21 @@ in {
                   };
                 };
                 ${luksDisk} = {
-                  size = "100%";
+                  size = "80%";
                   label = luksDisk;
                   content = {
                     name = luksDisk;
                     type = "luks";
-                    askPassword = !cfg.security.yubikey.enable;
+                    askPassword = !(cfg.disk.luks.yubikey && cfg.security.yubikey.enable);
                     settings = {
                       keyFile =
-                        if cfg.security.yubikey.enable
+                        if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                         then keyFile
                         else null;
                       allowDiscards = true;
                     };
                     extraFormatArgs =
-                      if cfg.security.yubikey.enable
+                      if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                       then defaultLuksFormatArgs
                       else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
