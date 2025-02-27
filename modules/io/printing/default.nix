@@ -29,6 +29,20 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.printing.enable) {
+    environment = {
+      persistence = lib.mkIf (cfg.enable && cfg.sops.enable) {
+        ${config.modules.boot.persistPath} = {
+          users = {
+            ${config.modules.users.name} = {
+              directories = [
+                ".sane"
+                ".hplip"
+              ];
+            };
+          };
+        };
+      };
+    };
     users = {
       users = {
         ${config.modules.users.name} = {
