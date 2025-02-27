@@ -55,32 +55,6 @@ in {
       users = {
         isIso = true;
       };
-      networking = {
-        enable = !cfg.airgap.enable;
-        dbus = {
-          enable = true;
-        };
-        firewall = {
-          enable = true;
-        };
-        wireless = {
-          enable = !cfg.airgap.enable;
-        };
-      };
-    };
-    home-manager = lib.mkIf (!cfg.airgap.offline) {
-      users = {
-        ${config.modules.users.user} = {
-          modules = {
-            networking = {
-              enable = true;
-              nm = {
-                enable = true;
-              };
-            };
-          };
-        };
-      };
     };
   };
 }
