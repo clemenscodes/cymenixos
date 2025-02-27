@@ -51,6 +51,7 @@ in {
           example = 64;
         };
         luks = {
+          yubikey = lib.mkEnableOption "Enable yubikey luks 2FA PBA" // {default = false;};
           slot = lib.mkOption {
             type = lib.types.int;
             default = 2;
@@ -128,7 +129,7 @@ in {
                     mountOptions = ["umask=0077"];
                   };
                 };
-                ${cryptStorage} = lib.mkIf cfg.security.yubikey.enable {
+                ${cryptStorage} = lib.mkIf (cfg.disk.luks.yubikey && cfg.security.yubikey.enable) {
                   priority = 3;
                   label = "${cryptStorage}";
                   size = "1M";
@@ -309,7 +310,7 @@ in {
       initrd = lib.mkIf (!cfg.users.isIso) {
         kernelModules = ["vfat" "nls_cp437" "nls_iso8859-1" "usbhid"];
         luks = {
-          yubikeySupport = cfg.security.yubikey.enable;
+          yubikeySupport = cfg.disk.luks.yubikey && cfg.security.yubikey.enable;
           devices = let
             inherit (cfg.disk) luksDisk cryptStorage;
             mkYubikey = partition: {
