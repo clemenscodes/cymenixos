@@ -19,7 +19,7 @@
             repo = "mullvadvpn-app";
             rev = version;
             fetchSubmodules = true;
-            hash = "sha256-IpGTqi0gSE2yXXou5fp+CryHfIKx0n3y/V4K2+ZO3k8=";
+            hash = pkgs.lib.fakeSha256;
           };
           cargoHash = "sha256-EJ8yk11H1QB+7CGjJYY5BjBAFTDK4d02/DJOQTVGFho=";
         });
