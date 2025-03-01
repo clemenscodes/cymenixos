@@ -13,13 +13,13 @@
     overlays = [
       (final: prev: {
         mullvad = prev.mullvad.overrideAttrs (oldAttrs: rec {
-          version = "2025.4";
+          version = "ca045c68af8ed3655d2d3ade69672e963dca90f0";
           src = prev.fetchFromGitHub {
             owner = "mullvad";
             repo = "mullvadvpn-app";
             rev = version;
+            hash = "sha256-44YBAmN5RyCRjpiLCRotdU6PqyVUf8uyejNBnYzs26o=";
             fetchSubmodules = true;
-            hash = "sha256-IpGTqi0gSE2yXXou5fp+CryHfIKx0n3y/V4K2+ZO3k7=";
           };
           cargoHash = "sha256-EJ8yk11H1QB+7CGjJYY5BjBAFTDK4d02/DJOQTVGFho=";
         });
