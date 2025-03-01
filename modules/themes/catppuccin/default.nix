@@ -47,8 +47,8 @@ in {
     };
   };
   config = {
-    # catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable) {
-    #   inherit (cfg.catppuccin) enable flavor accent;
-    # };
+    catppuccin = lib.mkIf (cfg.enable && cfg.catppuccin.enable && !config.modules.airgap.offline) {
+      inherit (cfg.catppuccin) enable flavor accent;
+    };
   };
 }

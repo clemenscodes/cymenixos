@@ -125,7 +125,10 @@ in {
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint = "/boot";
+                    mountpoint =
+                      if (!cfg.disk.luks.yubikey)
+                      then "/boot/efi"
+                      else "/boot";
                     mountOptions = ["umask=0077"];
                   };
                 };
@@ -269,28 +272,32 @@ in {
                 content = {
                   type = "btrfs";
                   extraArgs = ["-L" "nixos" "-f"];
-                  subvolumes = {
-                    "/root" = {
+                  subvolumes = let
+                    rootSubvol = {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
-                    "/var/log" = {
+                    bootSubvol = {
+                      mountpoint = "/boot";
+                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
+                    };
+                    logSubvol = {
                       mountpoint = "/var/log";
                       mountOptions = ["subvol=logs" "compress=zstd" "noatime"];
                     };
-                    "/snapshots" = {
+                    snapshotSubvol = {
                       mountpoint = "/snapshots";
                       mountOptions = ["subvol=snapshots" "compress=zstd" "noatime"];
                     };
-                    "/nix" = {
+                    nixSubvol = {
                       mountpoint = "/nix";
                       mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
                     };
-                    "${persistPath}" = {
+                    persistSubvol = {
                       mountpoint = "${persistPath}";
                       mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
                     };
-                    "/swap" = lib.mkIf (!config.modules.airgap.enable) {
+                    swapSubvol = {
                       mountpoint = "/swap";
                       swap = {
                         swapfile = {
@@ -298,7 +305,25 @@ in {
                         };
                       };
                     };
-                  };
+                  in
+                    if (!cfg.disk.luks.yubikey)
+                    then {
+                      "/root" = rootSubvol;
+                      "/var/log" = logSubvol;
+                      "/snapshots" = snapshotSubvol;
+                      "/nix" = nixSubvol;
+                      "${persistPath}" = persistSubvol;
+                      "/swap" = lib.mkIf (!config.modules.airgap.enable) swapSubvol;
+                    }
+                    else {
+                      "/root" = rootSubvol;
+                      "/boot" = bootSubvol;
+                      "/var/log" = logSubvol;
+                      "/snapshots" = snapshotSubvol;
+                      "/nix" = nixSubvol;
+                      "${persistPath}" = persistSubvol;
+                      "/swap" = lib.mkIf (!config.modules.airgap.enable) swapSubvol;
+                    };
                 };
               };
             };
