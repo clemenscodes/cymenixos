@@ -77,7 +77,10 @@ in {
       };
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         efi = {
-          efiSysMountPoint = "/boot";
+          efiSysMountPoint =
+            if (efiSupport && !cfg.disk.luks.yubikey)
+            then "/boot/efi"
+            else "/boot";
           canTouchEfiVariables = lib.mkForce false;
         };
         grub = {
@@ -95,11 +98,17 @@ in {
             "grub/${pkgs.grub2_efi.grubTarget}/argon2.mod" = lib.mkIf efiSupport "${pkgs.grub2_efi}/lib/grub/${pkgs.grub2_efi.grubTarget}/argon2.mod";
             "grub/${pkgs.grub2_efi.grubTarget}/argon2.module" = lib.mkIf efiSupport "${pkgs.grub2_efi}/lib/grub/${pkgs.grub2_efi.grubTarget}/argon2.module";
           };
+          mirroredBoots = lib.mkIf (!cfg.disk.luks.yubikey) (lib.mkForce [
+            {
+              path = "/boot";
+              devices = [
+                (lib.mkIf (biosSupport || libreboot) device)
+                (lib.mkIf efiSupport "nodev")
+              ];
+              inherit (config.boot.loader.efi) efiSysMountPoint;
+            }
+          ]);
         };
-      };
-      tmp = {
-        useTmpfs = lib.mkDefault true;
-        cleanOnBoot = lib.mkDefault (!config.boot.tmp.useTmpfs);
       };
     };
   };

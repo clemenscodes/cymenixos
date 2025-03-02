@@ -47,7 +47,7 @@
       };
     };
     cymenixvim = {
-      url = "github:clemenscodes/cymenixvim";
+      url = "github:clemenscodes/cymenixvim/develop";
     };
     xremap-flake = {
       url = "github:xremap/nix-flake";
@@ -93,7 +93,7 @@
       url = "github:cymenix/lpi";
     };
     cardanix = {
-      url = "github:clemenscodes/cardanix";
+      url = "github:clemenscodes/cardanix/develop";
     };
     templates = {
       url = "github:NixOS/templates";

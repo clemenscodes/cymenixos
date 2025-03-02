@@ -5,7 +5,7 @@
 }: {config, ...}: let
   cfg = config.modules.themes;
 in {
-  config = lib.mkIf (cfg.enable && cfg.catppuccin.enable && config.modules.home-manager.enable) {
+  config = lib.mkIf (cfg.enable && cfg.catppuccin.enable && config.modules.home-manager.enable && !config.modules.airgap.offline) {
     home-manager = {
       users = {
         ${config.modules.users.user} = {

@@ -51,6 +51,7 @@ in {
           example = 64;
         };
         luks = {
+          yubikey = lib.mkEnableOption "Enable yubikey luks 2FA PBA" // {default = false;};
           slot = lib.mkOption {
             type = lib.types.int;
             default = 2;
@@ -124,11 +125,14 @@ in {
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint = "/boot";
+                    mountpoint =
+                      if (!cfg.disk.luks.yubikey)
+                      then "/boot/efi"
+                      else "/boot";
                     mountOptions = ["umask=0077"];
                   };
                 };
-                ${cryptStorage} = lib.mkIf cfg.security.yubikey.enable {
+                ${cryptStorage} = lib.mkIf (cfg.disk.luks.yubikey && cfg.security.yubikey.enable) {
                   priority = 3;
                   label = "${cryptStorage}";
                   size = "1M";
@@ -210,16 +214,16 @@ in {
                   content = {
                     name = "private";
                     type = "luks";
-                    askPassword = !cfg.security.yubikey.enable;
+                    askPassword = !(cfg.disk.luks.yubikey && cfg.security.yubikey.enable);
                     settings = {
                       keyFile =
-                        if cfg.security.yubikey.enable
+                        if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                         then keyFile
                         else null;
                       allowDiscards = true;
                     };
                     extraFormatArgs =
-                      if cfg.security.yubikey.enable
+                      if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                       then defaultLuksFormatArgs
                       else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
@@ -236,16 +240,16 @@ in {
                   content = {
                     name = luksDisk;
                     type = "luks";
-                    askPassword = !cfg.security.yubikey.enable;
+                    askPassword = !(cfg.disk.luks.yubikey && cfg.security.yubikey.enable);
                     settings = {
                       keyFile =
-                        if cfg.security.yubikey.enable
+                        if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                         then keyFile
                         else null;
                       allowDiscards = true;
                     };
                     extraFormatArgs =
-                      if cfg.security.yubikey.enable
+                      if (cfg.disk.luks.yubikey && cfg.security.yubikey.enable)
                       then defaultLuksFormatArgs
                       else defaultLuksFormatArgs ++ ["--pbkdf argon2id"];
                     extraOpenArgs = ["--timeout 60"];
@@ -268,28 +272,32 @@ in {
                 content = {
                   type = "btrfs";
                   extraArgs = ["-L" "nixos" "-f"];
-                  subvolumes = {
-                    "/root" = {
+                  subvolumes = let
+                    rootSubvol = {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
-                    "/var/log" = {
+                    bootSubvol = {
+                      mountpoint = "/boot";
+                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
+                    };
+                    logSubvol = {
                       mountpoint = "/var/log";
                       mountOptions = ["subvol=logs" "compress=zstd" "noatime"];
                     };
-                    "/snapshots" = {
+                    snapshotSubvol = {
                       mountpoint = "/snapshots";
                       mountOptions = ["subvol=snapshots" "compress=zstd" "noatime"];
                     };
-                    "/nix" = {
+                    nixSubvol = {
                       mountpoint = "/nix";
                       mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
                     };
-                    "${persistPath}" = {
+                    persistSubvol = {
                       mountpoint = "${persistPath}";
                       mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
                     };
-                    "/swap" = lib.mkIf (!config.modules.airgap.enable) {
+                    swapSubvol = {
                       mountpoint = "/swap";
                       swap = {
                         swapfile = {
@@ -297,7 +305,25 @@ in {
                         };
                       };
                     };
-                  };
+                  in
+                    if (!cfg.disk.luks.yubikey)
+                    then {
+                      "/root" = rootSubvol;
+                      "/var/log" = logSubvol;
+                      "/snapshots" = snapshotSubvol;
+                      "/nix" = nixSubvol;
+                      "${persistPath}" = persistSubvol;
+                      "/swap" = lib.mkIf (!config.modules.airgap.enable) swapSubvol;
+                    }
+                    else {
+                      "/root" = rootSubvol;
+                      "/boot" = bootSubvol;
+                      "/var/log" = logSubvol;
+                      "/snapshots" = snapshotSubvol;
+                      "/nix" = nixSubvol;
+                      "${persistPath}" = persistSubvol;
+                      "/swap" = lib.mkIf (!config.modules.airgap.enable) swapSubvol;
+                    };
                 };
               };
             };
@@ -309,7 +335,7 @@ in {
       initrd = lib.mkIf (!cfg.users.isIso) {
         kernelModules = ["vfat" "nls_cp437" "nls_iso8859-1" "usbhid"];
         luks = {
-          yubikeySupport = cfg.security.yubikey.enable;
+          yubikeySupport = cfg.disk.luks.yubikey && cfg.security.yubikey.enable;
           devices = let
             inherit (cfg.disk) luksDisk cryptStorage;
             mkYubikey = partition: {

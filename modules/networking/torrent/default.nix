@@ -1,9 +1,31 @@
 {
-  pkgs,
+  inputs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.networking;
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    overlays = [
+      (final: prev: {
+        mullvad = prev.mullvad.overrideAttrs (oldAttrs: rec {
+          version = "ca045c68af8ed3655d2d3ade69672e963dca90f0";
+          src = prev.fetchFromGitHub {
+            owner = "mullvad";
+            repo = "mullvadvpn-app";
+            rev = version;
+            hash = "sha256-44YBAmN5RyCRjpiLCRotdU6PqyVUf8uyejNBnYzs26o=";
+            fetchSubmodules = true;
+          };
+          cargoHash = "sha256-EJ8yk11H1QB+7CGjJYY5BjBAFTDK4d02/DJOQTVGFho=";
+        });
+      })
+    ];
+  };
   nameservers = [
     "194.242.2.2"
     "194.242.2.3"
