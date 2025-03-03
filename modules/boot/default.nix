@@ -100,7 +100,10 @@ in {
           };
           mirroredBoots = lib.mkIf (!cfg.disk.luks.yubikey) (lib.mkForce [
             {
-              path = "/boot";
+              path =
+                if !cfg.disk.luks.yubikey
+                then "/boot/efi"
+                else "/boot";
               devices = [
                 (lib.mkIf (biosSupport || libreboot) device)
                 (lib.mkIf efiSupport "nodev")

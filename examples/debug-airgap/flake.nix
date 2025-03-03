@@ -24,6 +24,11 @@
     };
     inherit (pkgs) lib;
   in {
+    packages = {
+      ${system} = {
+        default = self.nixosConfigurations.nixos.config.system.build.toplevel;
+      };
+    };
     nixosConfigurations = {
       nixos = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit self inputs nixpkgs system;};

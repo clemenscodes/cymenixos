@@ -42,6 +42,32 @@ final: prev: {
         nom build .#nixosConfigurations.offline-test.config.system.build.isoImage --show-trace
       '';
     };
+    export-update = prev.writeShellApplication {
+      name = "export-update";
+      runtimeInputs = [prev.nix-output-monitor];
+      text = ''
+        UPDATE="$(pwd)/update"
+        UPDATE_STORE="$UPDATE/nix/store"
+        UPDATE_CACHE="$UPDATE/cache"
+        UPDATE_PATHS="$UPDATE/store-paths"
+
+        echo "Creating update at $UPDATE"
+        [ -d "$UPDATE" ] && rm -rf "$UPDATE"
+        mkdir -p "$UPDATE_STORE" "$UPDATE_CACHE"
+
+        echo "Saving flake evaluation cache at $UPDATE_CACHE"
+        cp -r ~/.cache/nix/eval* "$UPDATE_CACHE/"
+
+        echo "Building toplevel system derivation"
+        nom build .#nixosConfigurations.nixos.config.system.build.toplevel --show-trace
+
+        echo "Calculating store paths to copy to $UPDATE_PATHS"
+        STORE_PATHS="$(nix-store -qR --include-outputs "$(nix-store -q --deriver ./result)")"
+
+        echo "Copying store paths to $UPDATE_STORE"
+        nix copy --to file://"$UPDATE_STORE" "$STORE_PATHS"
+      '';
+    };
     write-iso-to-device = prev.writeShellApplication rec {
       name = "write-iso-to-device";
       runtimeInputs = [prev.nix-output-monitor];
@@ -342,6 +368,7 @@ final: prev: {
         build-offline-iso
         build-test-iso
         build-test-offline-iso
+        export-update
         write-iso-to-device
         cymenixos-install
         cymenixos-install-offline
