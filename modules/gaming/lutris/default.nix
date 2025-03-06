@@ -21,7 +21,7 @@ in {
       systemPackages = [
         (pkgs.lutris.override {
           extraPkgs = pkgs: [
-            wine
+            pkgs.wineWowPackages.unstableFull
             pkgs.winetricks
           ];
         })
