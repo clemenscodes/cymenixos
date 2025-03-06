@@ -5,7 +5,7 @@
 }: {config, ...}: let
   cfg = config.modules.gaming;
   inherit (config.modules.boot.impermanence) persistPath;
-  inherit (config.modules.users) user;
+  inherit (config.modules.users) name;
 in {
   options = {
     modules = {
@@ -16,7 +16,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.steam.enable) {
+  config = lib.mkIf (cfg.enable && cfg.lutris.enable) {
     environment = {
       systemPackages = [
         (pkgs.lutris.override {
@@ -29,7 +29,7 @@ in {
       persistence = {
         ${persistPath} = {
           users = {
-            ${user} = {
+            ${name} = {
               directories = [".cache/lutris"];
             };
           };
