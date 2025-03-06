@@ -3,7 +3,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.gaming;
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) name;
