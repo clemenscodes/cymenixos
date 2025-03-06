@@ -372,7 +372,7 @@ in {
               ''
               else "";
           in ''
-            monitor = , preferred, auto, 1
+            monitor = , highrr, auto, 1
 
             env = XCURSOR_SIZE,24
             env = XDG_SESSION_TYPE,wayland
