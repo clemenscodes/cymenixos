@@ -30,7 +30,10 @@ in {
         ${persistPath} = {
           users = {
             ${name} = {
-              directories = [".cache/lutris"];
+              directories = [
+                ".cache/lutris"
+                ".local/share/lutris"
+              ];
             };
           };
         };
