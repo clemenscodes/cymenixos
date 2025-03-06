@@ -164,6 +164,9 @@
       gamescope = {
         enable = false;
       };
+      lutris = {
+        enable = false;
+      };
       steam = {
         enable = false;
       };

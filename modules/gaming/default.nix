@@ -28,6 +28,7 @@ in {
     (import ./emulation {inherit inputs pkgs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
+    (import ./lutris {inherit inputs pkgs lib;})
     (import ./steam {inherit inputs pkgs lib;})
   ];
   options = {
@@ -42,12 +43,6 @@ in {
       systemPackages = [
         wine
         pkgs.winetricks
-        (pkgs.lutris.override {
-          extraPkgs = pkgs: [
-            wine
-            pkgs.winetricks
-          ];
-        })
         (inputs.umu.packages.${system}.default.override {
           extraPkgs = pkgs: [];
           extraLibraries = pkgs: [];
