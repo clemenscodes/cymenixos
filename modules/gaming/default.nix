@@ -42,15 +42,18 @@ in {
       systemPackages = [
         wine
         pkgs.winetricks
-        pkgs.protontricks
-        pkgs.mangohud
         (pkgs.lutris.override {
           extraPkgs = pkgs: [
             wine
             pkgs.winetricks
-            pkgs.gamescope
-            pkgs.vulkan-tools
           ];
+        })
+        (inputs.umu.packages.${system}.default.override {
+          extraPkgs = pkgs: [];
+          extraLibraries = pkgs: [];
+          withMultiArch = true;
+          withTruststore = true;
+          withDeltaUpdates = true;
         })
       ];
     };

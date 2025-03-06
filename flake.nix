@@ -75,6 +75,9 @@
     };
     nix-gaming = {
       url = "github:fufexan/nix-gaming";
+    };
+    umu = {
+      url = "github:Open-Wine-Components/umu-launcher?dir=packaging/nix";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
