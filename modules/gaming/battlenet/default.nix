@@ -18,7 +18,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.battlenet.enable) {
     environment = {
-      systemPackages = [inputs.battlenet.packags.${system}.battlenet];
+      systemPackages = [inputs.battlenet.packages.${system}.battlenet];
       persistence = {
         ${persistPath} = {
           users = {
