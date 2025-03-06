@@ -31,6 +31,7 @@ in {
     (import ./gamescope {inherit inputs pkgs lib;})
     (import ./lutris {inherit inputs pkgs lib;})
     (import ./steam {inherit inputs pkgs lib;})
+    (import ./umu {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
@@ -44,13 +45,6 @@ in {
       systemPackages = [
         wine
         pkgs.winetricks
-        (inputs.umu.packages.${system}.default.override {
-          extraPkgs = pkgs: [];
-          extraLibraries = pkgs: [];
-          withMultiArch = true;
-          withTruststore = true;
-          withDeltaUpdates = true;
-        })
       ];
     };
     services = {
