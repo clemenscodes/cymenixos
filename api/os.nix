@@ -167,6 +167,9 @@
       lutris = {
         enable = false;
       };
+      battlenet = {
+        enable = false;
+      };
       steam = {
         enable = false;
       };

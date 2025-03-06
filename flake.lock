@@ -169,6 +169,27 @@
         "type": "github"
       }
     },
+    "battlenet": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "umu": "umu"
+      },
+      "locked": {
+        "lastModified": 1741280275,
+        "narHash": "sha256-SniTNx2XUXgittsJcyjUE3dJ9bfOtpipGxHmcdg6oc0=",
+        "owner": "clemenscodes",
+        "repo": "bnet",
+        "rev": "14982dfe0be986a4541467b477c4012d18a4bf38",
+        "type": "github"
+      },
+      "original": {
+        "owner": "clemenscodes",
+        "repo": "bnet",
+        "type": "github"
+      }
+    },
     "blank": {
       "locked": {
         "lastModified": 1625557891,
@@ -6002,11 +6023,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1741270744,
-        "narHash": "sha256-Uvr849iyRHbD/Rp5VFCd0gzel1T2f2uHE7EMbyjQdL0=",
+        "lastModified": 1741279538,
+        "narHash": "sha256-gi00JEQiQLP0pLQjH5vLAL051L4GvEiUHAgK3uUPijY=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "56e505e3832ef0eddb87fd22d344e514cb07f104",
+        "rev": "a68317d3c8aeb353260cfb745281adca0e24aee8",
         "type": "github"
       },
       "original": {
@@ -6292,6 +6313,7 @@
     },
     "root": {
       "inputs": {
+        "battlenet": "battlenet",
         "cardanix": "cardanix",
         "catppuccin": "catppuccin",
         "cymenixvim": "cymenixvim",
@@ -6307,7 +6329,7 @@
         "nur": "nur",
         "sops-nix": "sops-nix",
         "templates": "templates",
-        "umu": "umu",
+        "umu": "umu_2",
         "wsl": "wsl",
         "xremap-flake": "xremap-flake",
         "yubikey-guide": "yubikey-guide"
@@ -7132,6 +7154,29 @@
       }
     },
     "umu": {
+      "inputs": {
+        "nixpkgs": [
+          "battlenet",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "packaging/nix",
+        "lastModified": 1741149843,
+        "narHash": "sha256-yX0sf4PUvp61cbnfUDEul//o5Tc60B9Rw10ajEZ5J9U=",
+        "owner": "Open-Wine-Components",
+        "repo": "umu-launcher",
+        "rev": "c2316d1798c727798e7f06767f3f11e23c51e973",
+        "type": "github"
+      },
+      "original": {
+        "dir": "packaging/nix",
+        "owner": "Open-Wine-Components",
+        "repo": "umu-launcher",
+        "type": "github"
+      }
+    },
+    "umu_2": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"

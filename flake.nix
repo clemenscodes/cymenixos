@@ -84,6 +84,14 @@
         };
       };
     };
+    battlenet = {
+      url = "github:clemenscodes/bnet";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
       inputs = {
