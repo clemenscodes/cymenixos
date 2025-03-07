@@ -28,10 +28,28 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.firefox.enable) {
+    home = {
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+          directories = [
+            ".mozilla"
+          ];
+        };
+      };
+    };
     programs = {
       firefox = {
         inherit (cfg.firefox) enable;
+        package = pkgs.wrapFirefox (
+          pkgs.firefox-unwrapped.override {
+            pipewireSupport = true;
+          }
+        ) {};
         nativeMessagingHosts = [pkgs.gnome-browser-connector];
+        languagePacks = [
+          "en-US"
+          "de"
+        ];
         policies = {
           DisableAppUpdate = true;
           DisableFirefoxStudies = true;
@@ -82,121 +100,8 @@ in {
           DontCheckDefaultBrowser = true;
           DisplayMenuBar = "default-off";
           SearchBar = "unified";
-          NoDefaultBookmarks = false;
+          NoDefaultBookmarks = true;
           NetworkPrediction = false;
-          Preferences = {
-            "accessibility.force_disabled" = {
-              Value = 1;
-              Status = "locked";
-            };
-            "browser.aboutConfig.showWarning" = {
-              Value = false;
-              Status = "locked";
-            };
-            "browser.aboutHomeSnippets.updateUrl" = {
-              Value = "";
-              Status = "locked";
-            };
-            "browser.crashReports.unsubmittedCheck.autoSubmit2" = {
-              Value = false;
-              Status = "locked";
-            };
-            "browser.selfsupport.url" = {
-              Value = "";
-              Status = "locked";
-            };
-            "browser.startup.homepage_override.mstone" = {
-              Value = "ignore";
-              Status = "locked";
-            };
-            "browser.startup.homepage_override.buildID" = {
-              Value = "";
-              Status = "locked";
-            };
-            "browser.tabs.firefox-view" = {
-              Value = false;
-              Status = "locked";
-            };
-            "browser.tabs.firefox-view-next" = {
-              Value = false;
-              Status = "locked";
-            };
-            "browser.urlbar.suggest.history" = {
-              Value = true;
-              Status = "locked";
-            };
-            "browser.urlbar.suggest.topsites" = {
-              Value = true;
-              Status = "locked";
-            };
-            "browser.translations.automaticallyPopup" = {
-              Value = false;
-              Status = "locked";
-            };
-            "dom.security.https_only_mode" = {
-              Value = true;
-              Status = "locked";
-            };
-            "extensions.htmlaboutaddons.recommendations.enabled" = {
-              Value = false;
-              Status = "locked";
-            };
-            "extensions.recommendations.themeRecommendationUrl" = {
-              Value = "";
-              Status = "locked";
-            };
-            "gfx.canvas.accelerated.cache-items" = {
-              Value = 4096;
-              Status = "locked";
-            };
-            "gfx.canvas.accelerated.cache-size" = {
-              Value = 512;
-              Status = "locked";
-            };
-            "gfx.content.skia-font-cache-size" = {
-              Value = 20;
-              Status = "locked";
-            };
-            "network.dns.disablePrefetch" = {
-              Value = false;
-              Status = "locked";
-            };
-            "network.dns.disablePrefetchFromHTTPS" = {
-              Value = false;
-              Status = "locked";
-            };
-            "network.http.max-connections" = {
-              Value = 1800;
-              Status = "locked";
-            };
-            "network.http.max-persistent-connections-per-server" = {
-              Value = 10;
-              Status = "locked";
-            };
-            "network.http.max-urgent-start-excessive-connections-per-host" = {
-              Value = 5;
-              Status = "locked";
-            };
-            "network.http.pacing.requests.enabled" = {
-              Value = false;
-              Status = "locked";
-            };
-            "network.IDN_show_punycode" = {
-              Value = true;
-              Status = "locked";
-            };
-            "network.predictor.enabled" = {
-              Value = false;
-              Status = "locked";
-            };
-            "network.prefetch-next" = {
-              Value = false;
-              Status = "locked";
-            };
-            "signon.management.page.breach-alerts.enabled" = {
-              Value = false;
-              Status = "locked";
-            };
           };
         };
         profiles = {
@@ -271,77 +176,6 @@ in {
               };
             };
             bookmarks = import ./bookmarks;
-            settings = {
-              "general.smoothScroll" = true;
-              "app.update.channel" = "default";
-              "browser.download.useDownloadDir" = true;
-              "browser.urlbar.suggest.quickactions" = false;
-              "browser.urlbar.suggest.topsites" = false;
-              "browser.urlbar.shortcuts.bookmarks" = false;
-              "browser.urlbar.shortcuts.history" = false;
-              "browser.urlbar.shortcuts.tabs" = false;
-              "browser.urlbar.suggest.bookmark" = false;
-              "browser.urlbar.suggest.engines" = false;
-              "browser.urlbar.suggest.history" = false;
-              "browser.urlbar.suggest.openpage" = false;
-              "browser.tabs.tabmanager.enabled" = false;
-              "browser.tabs.loadBookmarksInTabs" = false;
-              "browser.bookmarks.showMobileBookmarks" = false;
-              "browser.bookmarks.addedImportButton" = false;
-              "browser.toolbars.bookmarks.visibility" = "always";
-              "browser.shell.checkDefaultBrowser" = false;
-              "browser.shell.defaultBrowserCheckCount" = 1;
-              "browser.places.importBookmarksHTML" = true;
-              "browser.helperApps.deleteTempFileOnExit" = true;
-              "browser.newtabpage.activity-stream.default.sites" = "";
-              "browser.newtabpage.activity-stream.feeds.topsites" = false;
-              "browser.newtabpage.activity-stream.showSponsored" = false;
-              "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
-              "browser.uidensity" = 1;
-              "datareporting.policy.dataSubmissionEnabled" = false;
-              "datareporting.healthreport.uploadEnabled" = false;
-              "toolkit.telemetry.unified" = false;
-              "toolkit.telemetry.enabled" = false;
-              "toolkit.telemetry.server" = "data:,";
-              "toolkit.telemetry.archive.enabled" = false;
-              "toolkit.telemetry.newProfilePing.enabled" = false;
-              "toolkit.telemetry.shutdownPingSender.enabled" = false;
-              "toolkit.telemetry.updatePing.enabled" = false;
-              "toolkit.telemetry.bhrPing.enabled" = false;
-              "toolkit.telemetry.firstShutdownPing.enabled" = false;
-              "toolkit.telemetry.coverage.opt-out" = true;
-              "toolkit.coverage.opt-out" = true;
-              "toolkit.coverage.endpoint.base" = "";
-              "browser.ping-centre.telemetry" = false;
-              "browser.newtabpage.activity-stream.feeds.telemetry" = false;
-              "browser.newtabpage.activity-stream.telemetry" = false;
-              "toolkit.telemetry.reportingpolicy.firstRun" = false;
-              "toolkit.telemetry.shutdownPingSender.enabledFirstsession" = false;
-              "browser.vpn_promo.enabled" = false;
-              "network.protocol-handler.expose.magnet" = false;
-              "network.dns.force_use_https_rr" = false;
-              "network.trr.mode" = 3;
-              "network.trr.uri" = "https://family.dns.mullvad.net/dns-query";
-              "network.trr.useGET" = true;
-              "network.connectivity-service.enabled" = false;
-              "network.security.esni.enabled" = true;
-              "widget.use-xdg-desktop-portal" = true;
-              "media.ffmpeg.vaapi.enabled" = true;
-              "media.autoplay.enabled" = false;
-              "layers.acceleration.force-enabled" = true;
-              "gfx.webrender.all" = true;
-              "gfx.webrender.compositor" = true;
-              "gfx.webrender.enabled" = true;
-              "ui.context_menus.after_mouseup" = true;
-              "extensions.autoDisableScopes" = 0;
-              "extensions.activeThemeID" = "firefox-alpenglow@mozilla.org";
-              "extensions.webcompat.enable_picture_in_picture_overrides" = true;
-              "extensions.webcompat.enable_shims" = true;
-              "extensions.webcompat.perform_injections" = true;
-              "extensions.webcompat.perform_ua_overrides" = true;
-              "extensions.getAddons.showPane" = false;
-              "extensions.htmlaboutaddons.recommendations.enabled" = false;
-            };
             userChrome = ''
               /* Sidebery settings:
               #root.root {--general-border-radius: 8px;}
