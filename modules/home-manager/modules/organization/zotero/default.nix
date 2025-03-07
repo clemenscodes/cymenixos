@@ -27,6 +27,7 @@ in {
           directories = [
             ".cache/zotero"
             ".zotero"
+            "Zotero"
           ];
         };
       };
