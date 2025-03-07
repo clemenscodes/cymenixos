@@ -306,7 +306,7 @@ in {
                       };
                     };
                   in
-                    if (!cfg.disk.luks.yubikey)
+                    if (!cfg.disk.luks.yubikey && !cfg.boot.libreboot)
                     then {
                       "/root" = rootSubvol;
                       "/var/log" = logSubvol;
