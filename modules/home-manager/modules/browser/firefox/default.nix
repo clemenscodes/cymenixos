@@ -50,9 +50,6 @@ in {
           "en-US"
           "de"
         ];
-        settings = {
-          "extensions.autoDisableScopes" = 0;
-        };
         policies = {
           DisableAppUpdate = true;
           DisableFirefoxStudies = true;
@@ -111,6 +108,9 @@ in {
         ${user} = {
           id = 0;
           name = user;
+          settings = {
+            "extensions.autoDisableScopes" = 0;
+          };
           extensions = with pkgs.nur.repos.rycee.firefox-addons; [
             decentraleyes
             ublock-origin
