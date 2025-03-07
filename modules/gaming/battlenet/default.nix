@@ -12,6 +12,9 @@
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) name;
 in {
+  imports = [
+    (import ./warcraft {inherit inputs pkgs lib;})
+  ];
   options = {
     modules = {
       gaming = {
