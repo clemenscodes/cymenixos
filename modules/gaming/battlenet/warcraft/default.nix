@@ -59,6 +59,13 @@ in {
                           *) exit 1 ;;  # Invalid spell number
                       esac
 
+                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/158
+                      MOUSE_X=$((MOUSE_X / 2))
+                      MOUSE_Y=$((MOUSE_Y / 2))
+                      X=$((X / 2))
+                      Y=$((Y / 2))
+
+                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/250
                       echo "Moving mouse to 0x0"
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       echo "Moving mouse to $X x $Y y"
