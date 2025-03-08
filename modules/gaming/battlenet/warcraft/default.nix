@@ -56,15 +56,6 @@ in {
                           10) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
                           11) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
                           12) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-
-                          # TODO: figure
-                          F1) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F2) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F3) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F4) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F5) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F6) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          *) exit 1 ;;  # Invalid spell number
                       esac
 
                       # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/158
