@@ -44,8 +44,19 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      ydotool key 28:1 28:0
+                      ydotool key 104:1 104:0
                       hyprctl dispatch submap CHAT
+                    '';
+                  };
+                  send-warcraft-chat = pkgs.writeShellApplication {
+                    name = "send-warcraft-chat";
+                    runtimeInputs = [
+                      pkgs.ydotool
+                      pkgs.hyprland
+                    ];
+                    text = ''
+                      ydotool key 104:1 104:0
+                      hyprctl dispatch submap WARCRAFT
                     '';
                   };
                   close-warcraft-chat = pkgs.writeShellApplication {
@@ -55,7 +66,7 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      ydotool key 28:1 28:0
+                      ydotool key 9:1 9:0
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
@@ -76,8 +87,8 @@ in {
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   submap = CHAT
-                  bind = , RETURN, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
-                  bind = , ESCAPE, submap, WARCRAFT
+                  bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
+                  bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
                   submap = WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = reset
