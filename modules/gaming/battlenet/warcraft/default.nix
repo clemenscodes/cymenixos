@@ -34,21 +34,13 @@ in {
                     name = "warcraft-hotkey";
                     runtimeInputs = [pkgs.ydotool];
                     text = ''
-                      # Default screen resolution
                       DEFAULT_SCREEN_WIDTH=1920
                       DEFAULT_SCREEN_HEIGHT=1080
-
-                      # Get screen resolution from arguments (or use default)
-                      SCREEN_WIDTH=''${1:-$DEFAULT_SCREEN_WIDTH}
-                      SCREEN_HEIGHT=''${2:-$DEFAULT_SCREEN_HEIGHT}
-
-                      # Get current mouse position
                       MOUSE_POS=$(hyprctl cursorpos)
                       MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
                       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
 
-                      # Calculate new cursor position for spells
-                      case "$3" in
+                      case "$1" in
                           1) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
                           2) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
                           3) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
@@ -64,13 +56,11 @@ in {
                           *) exit 1 ;;  # Invalid spell number
                       esac
 
-                      # Move mouse to spell position
+                      echo "Moving mouse to $X x $Y y"
                       ydotool mousemove --absolute --xpos "$X" --ypos "$Y"
-
-                      # Right-click to cast the spell
+                      echo "Clicking left and clicking right"
                       ydotool click 0x00 0x01
-
-                      # Restore original mouse position
+                      echo "Moving mouse back to $MOUSE_X x $MOUSE_Y y"
                       ydotool mousemove --absolute --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
