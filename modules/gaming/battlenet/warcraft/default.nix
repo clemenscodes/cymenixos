@@ -37,8 +37,8 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      DEFAULT_SCREEN_WIDTH=1920
-                      DEFAULT_SCREEN_HEIGHT=1080
+                      SCREEN_WIDTH=1920
+                      SCREEN_HEIGHT=1080
                       MOUSE_POS=$(hyprctl cursorpos)
                       MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
                       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
