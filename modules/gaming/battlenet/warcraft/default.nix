@@ -26,6 +26,42 @@ in {
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${name} = {
+          wayland = {
+            windowManager = {
+              hyprland = {
+                extraConfig = let
+                  warcraft-hotkey = pkgs.writeShellApplication {
+                    name = "warcraft-hotkey";
+                    runtimeInputs = [pkgs.ydotool];
+                    text = ''
+                      ydotool mousemove --absolute --xpos 0 --ypos 0
+                    '';
+                  };
+                in ''
+                  bind = $mod SHIFT, W, submap, warcraft
+                  submap = warcraft
+                  bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , RETURN, submap, chat
+                  submap = chat
+                  bind = , escape, submap, warcraft
+                  submap = warcraft
+                  bind = $mod SHIFT, Q, submap, reset
+                  submap = reset
+                '';
+              };
+            };
+          };
           home = {
             file = {
               ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings/CustomKeys.txt" = {
