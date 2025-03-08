@@ -41,7 +41,6 @@ in {
         (import ./waybar-swaync {inherit inputs pkgs lib;})
         (import ./waybar-toggle {inherit inputs pkgs lib;})
         (import ./waybar-watch {inherit inputs pkgs lib;})
-        (import ./waybar-yubikey {inherit inputs pkgs lib;})
       ];
     };
     programs = {
@@ -66,7 +65,6 @@ in {
               (lib.mkIf useMusic "mpd")
             ];
             modules-right = [
-              (lib.mkIf useYubi "custom/yubikey")
               (lib.mkIf useEmail "custom/mail")
               "disk"
               "memory"
@@ -186,6 +184,7 @@ in {
             ];
             modules-center = [];
             modules-right = [
+              "hyprland/submap"
               "privacy"
               (lib.mkIf useSwaync "custom/notification")
               "idle_inhibitor"
@@ -195,6 +194,12 @@ in {
               (lib.mkIf useMusic "pulseaudio#mic")
               "custom/clock"
             ];
+            "hyprland/submap" = {
+              format = "{}";
+              always-on = true;
+              tooltip = false;
+              default-submap = "NORMAL";
+            };
             "image#logo" = {
               path = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               size = height - 12;
@@ -455,6 +460,7 @@ in {
             margin: ${defaultMargin} 4px 0px 4px;
           }
 
+          #submap,
           #tray,
           #custom-idle,
           #privacy,
