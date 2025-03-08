@@ -44,8 +44,8 @@ in {
 
                       # Get current mouse position
                       MOUSE_POS=$(hyprctl cursorpos)
-                      MOUSE_X=$(echo $MOUSE_POS | cut -d' ' -f1 | cut -d',' -f1)
-                      MOUSE_Y=$(echo $MOUSE_POS | cut -d' ' -f2)
+                      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
+                      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
 
                       # Calculate new cursor position for spells
                       case "$3" in
