@@ -53,12 +53,12 @@ in {
                   bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , RETURN, submap, CHAT
-                  bind = , RETURN, pass, title:^(Warcraft III)$
+                  bind = , RETURN, exec, ${pkgs.ydotool}/bin/ydotool key 104:1 104:0
                   submap = CHAT
                   bind = , RETURN, submap, WARCRAFT
-                  bind = , RETURN, pass, title:^(Warcraft III)$
-                  bind = , escape, submap, WARCRAFT
-                  bind = , escape, pass, title:^(Warcraft III)$
+                  bind = , RETURN, exec, ${pkgs.ydotool}/bin/ydotool key 104:1 104:0
+                  bind = , ESCAPE, submap, WARCRAFT
+                  bind = , RETURN, exec, ${pkgs.ydotool}/bin/ydotool key 9:1 9:0
                   submap = WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = reset
