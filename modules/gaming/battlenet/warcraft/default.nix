@@ -53,12 +53,12 @@ in {
                   bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , RETURN, submap, CHAT
-                  bind = , RETURN, pass, class:^(Warcraft III)$
+                  bind = , RETURN, pass, title:^(Warcraft III)$
                   submap = CHAT
                   bind = , RETURN, submap, WARCRAFT
-                  bind = , RETURN, pass, class:^(Warcraft III)$
+                  bind = , RETURN, pass, title:^(Warcraft III)$
                   bind = , escape, submap, WARCRAFT
-                  bind = , escape, pass, class:^(Warcraft III)$
+                  bind = , escape, pass, title:^(Warcraft III)$
                   submap = WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = reset
