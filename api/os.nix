@@ -217,6 +217,9 @@
       xremap = {
         enable = false;
       };
+      ydotool = {
+        enable = false;
+      };
     };
     locale = {
       enable = false;
