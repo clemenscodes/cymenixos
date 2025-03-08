@@ -62,13 +62,13 @@ in {
                       echo "Moving mouse to 0x0"
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       echo "Moving mouse to $X x $Y y"
-                      ydotool mousemove --absolute --xpos "$X" --ypos "$Y"
+                      ydotool mousemove --xpos "$X" --ypos "$Y"
                       echo "Clicking left and clicking right"
                       ydotool click 0x00 0x01
                       echo "Moving mouse to 0x0"
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       echo "Moving mouse back to $MOUSE_X x $MOUSE_Y y"
-                      ydotool mousemove --absolute --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
+                      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
                   open-warcraft-chat = pkgs.writeShellApplication {
