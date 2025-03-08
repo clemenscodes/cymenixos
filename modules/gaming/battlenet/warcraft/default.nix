@@ -32,7 +32,10 @@ in {
                 extraConfig = let
                   warcraft-hotkey = pkgs.writeShellApplication {
                     name = "warcraft-hotkey";
-                    runtimeInputs = [pkgs.ydotool];
+                    runtimeInputs = [
+                      pkgs.ydotool
+                      pkgs.hyprland
+                    ];
                     text = ''
                       DEFAULT_SCREEN_WIDTH=1920
                       DEFAULT_SCREEN_HEIGHT=1080
