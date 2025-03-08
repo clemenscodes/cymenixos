@@ -44,7 +44,7 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      ydotool key 104:1 104:0
+                      ydotool key 96:1 96:0 # Press Numpad_Enter
                       hyprctl dispatch submap CHAT
                     '';
                   };
@@ -55,7 +55,7 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      ydotool key 104:1 104:0
+                      ydotool key 96:1 96:0 # Press Numpad_Enter
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
@@ -66,7 +66,7 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      ydotool key 9:1 9:0
+                      ydotool key 1:1 1:0 # Press escape
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
