@@ -56,6 +56,14 @@ in {
                           10) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
                           11) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
                           12) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+
+                          # TODO: figure
+                          F1) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F2) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F3) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F4) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F5) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F6) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
                           *) exit 1 ;;  # Invalid spell number
                       esac
 
@@ -69,6 +77,44 @@ in {
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       ydotool mousemove --xpos "$X" --ypos "$Y"
                       ydotool click 0x00 0x01
+                      ydotool mousemove --absolute --xpos 0 --ypos 0
+                      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
+                    '';
+                  };
+                  warcraft-hotkey-inventory = pkgs.writeShellApplication {
+                    name = "warcraft-hotkey-inventory";
+                    runtimeInputs = [
+                      pkgs.ydotool
+                      pkgs.hyprland
+                    ];
+                    text = ''
+                      SCREEN_WIDTH=1920
+                      SCREEN_HEIGHT=1080
+                      MOUSE_POS=$(hyprctl cursorpos)
+                      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
+                      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
+
+                      # TODO: figure out correct places
+                      case "$1" in
+                          F1) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F2) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F3) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F4) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F5) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          F6) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          *) exit 1 ;;  # Invalid inventory number
+                      esac
+
+                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/158
+                      MOUSE_X=$((MOUSE_X / 2))
+                      MOUSE_Y=$((MOUSE_Y / 2))
+                      X=$((X / 2))
+                      Y=$((Y / 2))
+
+                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/250
+                      ydotool mousemove --absolute --xpos 0 --ypos 0
+                      ydotool mousemove --xpos "$X" --ypos "$Y"
+                      ydotool click 0x00 0x00
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
@@ -111,18 +157,12 @@ in {
                   bind = $mod SHIFT, W, submap, WARCRAFT
                   submap = WARCRAFT
                   bind = Alt_L, Q, exec, true
-                  bind = , F1, exec, ${pkgs.ydotool}/bin/ydotool key 71:1 71:0
-                  bind = SHIFT, F1, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 71:1 71:0 42:0
-                  bind = , F2, exec, ${pkgs.ydotool}/bin/ydotool key 72:1 72:0
-                  bind = SHIFT, F2, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 72:1 72:0 42:0
-                  bind = , F3, exec, ${pkgs.ydotool}/bin/ydotool key 75:1 75:0
-                  bind = SHIFT, F3, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 75:1 75:0 42:0
-                  bind = , F4, exec, ${pkgs.ydotool}/bin/ydotool key 76:1 76:0
-                  bind = SHIFT, F4, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 76:1 76:0 42:0
-                  bind = , F5, exec, ${pkgs.ydotool}/bin/ydotool key 79:1 79:0
-                  bind = SHIFT, F5, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 79:1 79:0 42:0
-                  bind = , F6, exec, ${pkgs.ydotool}/bin/ydotool key 80:1 80:0
-                  bind = SHIFT, F6, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 80:1 80:0 42:0
+                  bind = , F1, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F1
+                  bind = , F2, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F2
+                  bind = , F3, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F3
+                  bind = , F4, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F4
+                  bind = , F5, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F5
+                  bind = , F6, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F6
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
                   bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
                   bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
