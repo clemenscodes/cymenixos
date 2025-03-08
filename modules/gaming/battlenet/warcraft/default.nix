@@ -112,19 +112,22 @@ in {
                     '';
                   };
                 in ''
+                  # device:ydotoold-virtual-device {
+                  #   accel_profile = flat
+                  # }
                   bind = $mod SHIFT, W, submap, WARCRAFT
                   submap = WARCRAFT
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
-                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 2
-                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 3
-                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
-                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 5
-                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 6
-                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
-                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 8
-                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 9
-                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 10
-                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 11
+                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
+                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
+                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 10
+                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 2
+                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 5
+                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 8
+                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 11
+                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 3
+                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 6
+                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 9
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 12
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   submap = CHAT
