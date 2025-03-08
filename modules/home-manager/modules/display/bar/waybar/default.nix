@@ -432,6 +432,7 @@ in {
           #pulseaudio.mic,
           #idle_inhibitor,
           #tray,
+          #submap,
           #privacy,
           #custom-clock,
           #custom-notification,
