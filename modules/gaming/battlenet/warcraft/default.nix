@@ -34,7 +34,44 @@ in {
                     name = "warcraft-hotkey";
                     runtimeInputs = [pkgs.ydotool];
                     text = ''
-                      ydotool mousemove --absolute --xpos 0 --ypos 0
+                      # Default screen resolution
+                      DEFAULT_SCREEN_WIDTH=1920
+                      DEFAULT_SCREEN_HEIGHT=1080
+
+                      # Get screen resolution from arguments (or use default)
+                      SCREEN_WIDTH=''${1:-$DEFAULT_SCREEN_WIDTH}
+                      SCREEN_HEIGHT=''${2:-$DEFAULT_SCREEN_HEIGHT}
+
+                      # Get current mouse position
+                      MOUSE_POS=$(hyprctl cursorpos)
+                      MOUSE_X=$(echo $MOUSE_POS | cut -d' ' -f1)
+                      MOUSE_Y=$(echo $MOUSE_POS | cut -d' ' -f2)
+
+                      # Calculate new cursor position for spells
+                      case "$3" in
+                          1) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
+                          2) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
+                          3) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          4) X=$((SCREEN_WIDTH * 17 / 20)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
+                          5) X=$((SCREEN_WIDTH * 17 / 20)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
+                          6) X=$((SCREEN_WIDTH * 17 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          7) X=$((SCREEN_WIDTH * 9 / 10)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
+                          8) X=$((SCREEN_WIDTH * 9 / 10)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
+                          9) X=$((SCREEN_WIDTH * 9 / 10)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          10) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
+                          11) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
+                          12) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                          *) exit 1 ;;  # Invalid spell number
+                      esac
+
+                      # Move mouse to spell position
+                      ydotool mousemove --absolute --xpos $X --ypos $Y
+
+                      # Right-click to cast the spell
+                      ydotool click 0x00 0x01
+
+                      # Restore original mouse position
+                      ydotool mousemove --absolute --xpos $MOUSE_X --ypos $MOUSE_Y
                     '';
                   };
                   open-warcraft-chat = pkgs.writeShellApplication {
@@ -73,18 +110,18 @@ in {
                 in ''
                   bind = $mod SHIFT, W, submap, WARCRAFT
                   submap = WARCRAFT
-                  bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
+                  bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
+                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 2
+                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 3
+                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
+                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 5
+                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 6
+                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
+                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 8
+                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 9
+                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 10
+                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 11
+                  bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 12
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   submap = CHAT
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
