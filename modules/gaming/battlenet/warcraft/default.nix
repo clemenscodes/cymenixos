@@ -66,15 +66,10 @@ in {
                       Y=$((Y / 2))
 
                       # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/250
-                      echo "Moving mouse to 0x0"
                       ydotool mousemove --absolute --xpos 0 --ypos 0
-                      echo "Moving mouse to $X x $Y y"
                       ydotool mousemove --xpos "$X" --ypos "$Y"
-                      echo "Clicking left and clicking right"
                       ydotool click 0x00 0x01
-                      echo "Moving mouse to 0x0"
                       ydotool mousemove --absolute --xpos 0 --ypos 0
-                      echo "Moving mouse back to $MOUSE_X x $MOUSE_Y y"
                       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
@@ -107,16 +102,29 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      ydotool key 1:1 1:0 # Press escape
+                      ydotool key 58:1 58:0 # Press caps lock which is actually escape
+                      ydotool key 1:1 1:0 # Press escape again to be sure
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
                 in ''
-                  # device:ydotoold-virtual-device {
-                  #   accel_profile = flat
-                  # }
                   bind = $mod SHIFT, W, submap, WARCRAFT
                   submap = WARCRAFT
+                  bind = Alt_L, Q, exec, true
+                  bind = , Control_L, exec, ${pkgs.ydotool}/bin/ydotool key 57:1 57:0
+                  bind = , SPACE, exec, ${pkgs.ydotool}/bin/ydotool key 29:1 29:0
+                  bind = , F1, exec, ${pkgs.ydotool}/bin/ydotool key 71:1 71:0
+                  bind = SHIFT, F1, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 71:1 71:0 42:0
+                  bind = , F2, exec, ${pkgs.ydotool}/bin/ydotool key 72:1 72:0
+                  bind = SHIFT, F2, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 72:1 72:0 42:0
+                  bind = , F3, exec, ${pkgs.ydotool}/bin/ydotool key 75:1 75:0
+                  bind = SHIFT, F3, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 75:1 75:0 42:0
+                  bind = , F4, exec, ${pkgs.ydotool}/bin/ydotool key 76:1 76:0
+                  bind = SHIFT, F4, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 76:1 76:0 42:0
+                  bind = , F5, exec, ${pkgs.ydotool}/bin/ydotool key 79:1 79:0
+                  bind = SHIFT, F5, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 79:1 79:0 42:0
+                  bind = , F6, exec, ${pkgs.ydotool}/bin/ydotool key 80:1 80:0
+                  bind = SHIFT, F6, exec, ${pkgs.ydotool}/bin/ydotool key 42:1 80:1 80:0 42:0
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
                   bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
                   bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
