@@ -37,6 +37,28 @@ in {
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                     '';
                   };
+                  open-warcraft-chat = pkgs.writeShellApplication {
+                    name = "open-warcraft-chat";
+                    runtimeInputs = [
+                      pkgs.ydotool
+                      pkgs.hyprland
+                    ];
+                    text = ''
+                      ydotool key 28:1 28:0
+                      hyprctl dispatch submap CHAT
+                    '';
+                  };
+                  close-warcraft-chat = pkgs.writeShellApplication {
+                    name = "close-warcraft-chat";
+                    runtimeInputs = [
+                      pkgs.ydotool
+                      pkgs.hyprland
+                    ];
+                    text = ''
+                      ydotool key 28:1 28:0
+                      hyprctl dispatch submap WARCRAFT
+                    '';
+                  };
                 in ''
                   bind = $mod SHIFT, W, submap, WARCRAFT
                   submap = WARCRAFT
@@ -52,13 +74,10 @@ in {
                   bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , RETURN, submap, CHAT
-                  bind = , RETURN, exec, ${pkgs.ydotool}/bin/ydotool key 104:1 104:0
+                  bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   submap = CHAT
-                  bind = , RETURN, submap, WARCRAFT
-                  bind = , RETURN, exec, ${pkgs.ydotool}/bin/ydotool key 104:1 104:0
+                  bind = , RETURN, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
                   bind = , ESCAPE, submap, WARCRAFT
-                  bind = , RETURN, exec, ${pkgs.ydotool}/bin/ydotool key 9:1 9:0
                   submap = WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = reset
