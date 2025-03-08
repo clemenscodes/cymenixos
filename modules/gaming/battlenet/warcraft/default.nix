@@ -44,7 +44,7 @@ in {
 
                       # Get current mouse position
                       MOUSE_POS=$(hyprctl cursorpos)
-                      MOUSE_X=$(echo $MOUSE_POS | cut -d' ' -f1)
+                      MOUSE_X=$(echo $MOUSE_POS | cut -d' ' -f1 | cut -d',' -f1)
                       MOUSE_Y=$(echo $MOUSE_POS | cut -d' ' -f2)
 
                       # Calculate new cursor position for spells
@@ -65,13 +65,13 @@ in {
                       esac
 
                       # Move mouse to spell position
-                      ydotool mousemove --absolute --xpos $X --ypos $Y
+                      ydotool mousemove --absolute --xpos "$X" --ypos "$Y"
 
                       # Right-click to cast the spell
                       ydotool click 0x00 0x01
 
                       # Restore original mouse position
-                      ydotool mousemove --absolute --xpos $MOUSE_X --ypos $MOUSE_Y
+                      ydotool mousemove --absolute --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
                   open-warcraft-chat = pkgs.writeShellApplication {
