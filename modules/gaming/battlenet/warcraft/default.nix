@@ -38,8 +38,8 @@ in {
                     '';
                   };
                 in ''
-                  bind = $mod SHIFT, W, submap, warcraft
-                  submap = warcraft
+                  bind = $mod SHIFT, W, submap, WARCRAFT
+                  submap = WARCRAFT
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
@@ -52,10 +52,14 @@ in {
                   bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey
-                  bind = , RETURN, submap, chat
-                  submap = chat
-                  bind = , escape, submap, warcraft
-                  submap = warcraft
+                  bind = , RETURN, submap, CHAT
+                  bind = , RETURN, pass, class:^(Warcraft III)$
+                  submap = CHAT
+                  bind = , RETURN, submap, WARCRAFT
+                  bind = , RETURN, pass, class:^(Warcraft III)$
+                  bind = , escape, submap, WARCRAFT
+                  bind = , escape, pass, class:^(Warcraft III)$
+                  submap = WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = reset
                 '';
