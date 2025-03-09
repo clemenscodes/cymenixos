@@ -20,6 +20,13 @@ in {
     };
   };
   config = {
+    users = {
+      users = {
+        "${config.modules.users.name}" = {
+          extraGroups = ["uinput" "input"];
+        };
+      };
+    };
     environment = {
       systemPackages = [inputs.xremap-flake.packages.${system}.xremap-hypr];
     };
@@ -28,6 +35,7 @@ in {
         enable = cfg.enable && cfg.xremap.enable && config.modules.display.gui != "headless";
         withHypr = config.modules.display.hyprland.enable;
         userName = config.modules.users.name;
+        serviceMode = "user";
         watch = true;
         yamlConfig = ''
           modmap:
@@ -37,6 +45,11 @@ in {
                   held: SUPER_L
                   alone: ESC
                   alone_timeout_millis: 500
+        '';
+      };
+      udev = {
+        extraRules = ''
+          KERNEL=="uinput", GROUP=="input", TAG+="uaccess"
         '';
       };
     };
