@@ -157,7 +157,7 @@ in {
                     '';
                   };
                 in ''
-                  binds = Control_L&SHIFT, W, exec, ${start-warcraft-xremap}/bin/start-warcraft-xremap
+                  bind = Alt_L, W, exec, ${start-warcraft-xremap}/bin/start-warcraft-xremap
                   submap = WARCRAFT
                   bind = Alt_L, Q, exec, true
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
@@ -177,7 +177,7 @@ in {
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
                   bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
                   submap = WARCRAFT
-                  binds = Control_L&SHIFT, Q, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
+                  bind = Alt_L, Q, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
                   submap = reset
                 '';
               };
