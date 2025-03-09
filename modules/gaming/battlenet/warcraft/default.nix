@@ -161,8 +161,8 @@ in {
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey Q
                   bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey W
-                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey W
-                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey E
+                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey E
+                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey R
                   bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey A
                   bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey S
                   bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey D
