@@ -72,6 +72,55 @@ in {
                       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
+                  warcraft-xremap = pkgs.writeText "warcraft-xremap" ''
+                    modmap:
+                      - name: Inventory Keys
+                        remap:
+                          F1: KP7
+                          F2: KP8
+                          F3: KP4
+                          F4: KP5
+                          F5: KP1
+                          F6: KP6
+
+                      - name: User Specified Hotkeys
+                        remap:
+                          BTN_SIDE: KP7
+
+                      - name: "Better CapsLock"
+                        remap:
+                          CapsLock:
+                            held: SUPER_L
+                            alone: ESC
+                            alone_timeout_millis: 500
+                  '';
+                  start-warcraft-xremap = pkgs.writeShellApplication {
+                    name = "start-warcraft-xremap";
+                    runtimeInputs = [
+                      inputs.xremap-flake.packages.${system}.xremap-hypr
+                      pkgs.systemd
+                      pkgs.hyprland
+                      pkgs.killall
+                    ];
+                    text = ''
+                      systemctl --user stop xremap.service
+                      killall xremap
+                      xremap --watch ${warcraft-xremap} &
+                      hyprctl dispatch submap WARCRAFT
+                    '';
+                  };
+                  stop-warcraft-xremap = pkgs.writeShellApplication {
+                    name = "stop-warcraft-xremap";
+                    runtimeInputs = [
+                      pkgs.systemd
+                      pkgs.killall
+                    ];
+                    text = ''
+                      killall xremap
+                      systemctl --user start xremap.service
+                      hyprctl dispatch submap reset
+                    '';
+                  };
                   open-warcraft-chat = pkgs.writeShellApplication {
                     name = "open-warcraft-chat";
                     runtimeInputs = [
@@ -81,7 +130,6 @@ in {
                     ];
                     text = ''
                       ydotool key 96:1 96:0 # Press Numpad_Enter
-                      ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
                       hyprctl dispatch submap CHAT
                     '';
                   };
@@ -105,59 +153,11 @@ in {
                     text = ''
                       ydotool key 58:1 58:0 # Press caps lock which is actually escape
                       ydotool key 1:1 1:0 # Press escape again to be sure
-                      ${start-warcraft-xremap}/bin/start-warcraft-xremap
-                    '';
-                  };
-                  warcraft-xremap = pkgs.writeText "warcraft-xremap" ''
-                    modmap:
-                      - name: Inventory Keys
-                        remap:
-                          F1: KP7
-                          F2: KP8
-                          F3: KP4
-                          F4: KP5
-                          F5: KP1
-                          F6: KP6
-
-                      - name: User Specified Hotkeys
-                        remap:
-                          LeftCtrl: Space
-                          Space: LeftCtrl
-                          BTN_SIDE: KP7
-
-                      - name: "Better CapsLock"
-                        remap:
-                          CapsLock:
-                            held: SUPER_L
-                            alone: ESC
-                            alone_timeout_millis: 500
-                  '';
-                  start-warcraft-xremap = pkgs.writeShellApplication {
-                    name = "start-warcraft-xremap";
-                    runtimeInputs = [
-                      inputs.xremap-flake.packages.${system}.xremap-hypr
-                      pkgs.systemd
-                      pkgs.hyprland
-                    ];
-                    text = ''
-                      systemctl --user stop xremap.service
-                      xremap --watch ${warcraft-xremap} &
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
-                  stop-warcraft-xremap = pkgs.writeShellApplication {
-                    name = "stop-warcraft-xremap";
-                    runtimeInputs = [
-                      pkgs.systemd
-                    ];
-                    text = ''
-                      pkill xremap
-                      systemctl --user start xremap.service
-                      hyprctl dispatch submap reset
-                    '';
-                  };
                 in ''
-                  bind = $mod SHIFT, W, exec, ${start-warcraft-xremap}/bin/start-warcraft-xremap
+                  binds = Control_L&SHIFT, W, exec, ${start-warcraft-xremap}/bin/start-warcraft-xremap
                   submap = WARCRAFT
                   bind = Alt_L, Q, exec, true
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
@@ -177,7 +177,7 @@ in {
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
                   bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
                   submap = WARCRAFT
-                  bind = $mod SHIFT, Q, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
+                  binds = Control_L&SHIFT, Q, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
                   submap = reset
                 '';
               };
