@@ -30,8 +30,8 @@ in {
             windowManager = {
               hyprland = {
                 extraConfig = let
-                  warcraft-hotkey = pkgs.writeShellApplication {
-                    name = "warcraft-hotkey";
+                  warcraft-autocast-hotkey = pkgs.writeShellApplication {
+                    name = "warcraft-autocast-hotkey";
                     runtimeInputs = [
                       pkgs.ydotool
                       pkgs.hyprland
@@ -69,54 +69,49 @@ in {
                       ydotool mousemove --xpos "$X" --ypos "$Y"
 
                       # See here https://github.com/ReimuNotMoe/ydotool/issues/219
-                      ydotool click 0xC0 0xC1
+                      ydotool click 0xC1
 
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
-                  warcraft-xremap = pkgs.writeText "warcraft-xremap" ''
-                    modmap:
-                      - name: Inventory Keys
-                        remap:
-                          F1: KP7
-                          F2: KP8
-                          F3: KP4
-                          F4: KP5
-                          F5: KP1
-                          F6: KP6
-
-                      - name: User Specified Hotkeys
-                        remap:
-                          BTN_SIDE: KP7
-
-                      - name: "Better CapsLock"
-                        remap:
-                          CapsLock:
-                            held: SUPER_L
-                            alone: ESC
-                            alone_timeout_millis: 500
-                  '';
-                  start-warcraft-xremap = pkgs.writeShellApplication {
-                    name = "start-warcraft-xremap";
+                  warcraft-inventory-hotkey = pkgs.writeShellApplication {
+                    name = "warcraft-inventory-hotkey";
                     runtimeInputs = [
-                      inputs.xremap-flake.packages.${system}.xremap-hypr
-                      pkgs.systemd
+                      pkgs.ydotool
                       pkgs.hyprland
                     ];
                     text = ''
-                      systemctl --user stop xremap.service && xremap --watch ${warcraft-xremap} &
-                      hyprctl dispatch submap WARCRAFT
-                    '';
-                  };
-                  stop-warcraft-xremap = pkgs.writeShellApplication {
-                    name = "stop-warcraft-xremap";
-                    runtimeInputs = [
-                      pkgs.systemd
-                    ];
-                    text = ''
-                      pkill xremap
-                      systemctl --user start xremap.service && hyprctl dispatch submap reset
+                      SCREEN_WIDTH=1920
+                      SCREEN_HEIGHT=1080
+                      MOUSE_POS=$(hyprctl cursorpos)
+                      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
+                      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
+
+                      case "$1" in
+                        F1) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 89 / 108)) ;;
+                        F2  X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 89 / 108)) ;;
+                        F3) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 4 / 45)) ;;
+                        F4) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 4 / 45)) ;;
+                        F5) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 205 / 216)) ;;
+                        F6) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)) ;;
+                      esac
+
+                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/158
+                      MOUSE_X=$((MOUSE_X / 2))
+                      MOUSE_Y=$((MOUSE_Y / 2))
+                      X=$((X / 2))
+                      Y=$((Y / 2))
+
+                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/250
+                      ydotool mousemove --absolute --xpos 0 --ypos 0
+                      ydotool mousemove --xpos "$X" --ypos "$Y"
+
+                      # See here https://github.com/ReimuNotMoe/ydotool/issues/219
+                      ydotool click 0xC0
+
+                      ydotool mousemove --absolute --xpos 0 --ypos 0
+                      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
                   open-warcraft-chat = pkgs.writeShellApplication {
@@ -155,22 +150,28 @@ in {
                     '';
                   };
                 in ''
-                  bind = Alt_L SHIFT, W, exec, ${start-warcraft-xremap}/bin/start-warcraft-xremap
+                  bind = Alt_L SHIFT, W, submap, WARCRAFT
                   submap = WARCRAFT
-                  bind = Alt_L SHIFT, W, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
+                  bind = Alt_L SHIFT, W, submap, reset
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
-                  bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey Q
-                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey W
-                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey E
-                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey R
-                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey A
-                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey S
-                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey D
-                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey F
-                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey Y
-                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey X
-                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey C
-                  bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey V
+                  bind = SHIFT, Q, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey Q
+                  bind = SHIFT, W, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey W
+                  bind = SHIFT, E, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey E
+                  bind = SHIFT, R, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey R
+                  bind = SHIFT, A, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey A
+                  bind = SHIFT, S, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey S
+                  bind = SHIFT, D, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey D
+                  bind = SHIFT, F, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey F
+                  bind = SHIFT, Y, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey Y
+                  bind = SHIFT, X, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey X
+                  bind = SHIFT, C, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey C
+                  bind = SHIFT, V, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey V
+                  bind = , F1, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey F1
+                  bind = , F2, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey F2
+                  bind = , F3, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey F3
+                  bind = , F4, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey F4
+                  bind = , F5, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey F5
+                  bind = , F6, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey F6
                   bind = Alt_L, Q, exec, true
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CHAT
