@@ -67,7 +67,8 @@ in {
                       # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/250
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       ydotool mousemove --xpos "$X" --ypos "$Y"
-                      ydotool click 0x00 0x01
+                      # See here https://github.com/ReimuNotMoe/ydotool/issues/219
+                      ydotool click 0xC0 0xC1 
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
