@@ -135,10 +135,12 @@ in {
                     runtimeInputs = [
                       inputs.xremap-flake.packages.${system}.xremap-hypr
                       pkgs.systemd
+                      pkgs.hyprland
                     ];
                     text = ''
                       systemctl --user stop xremap.service
                       xremap --watch ${warcraft-xremap}
+                      hyprctl dispatch submap WARCRAFT
                     '';
                   };
                   stop-warcraft-xremap = pkgs.writeShellApplication {
@@ -149,11 +151,11 @@ in {
                     text = ''
                       pkill xremap
                       systemctl --user start xremap.service
+                      hyprctl dispatch submap reset
                     '';
                   };
                 in ''
-                  bind = $mod SHIFT, W, submap, WARCRAFT
-                  bind = $mod SHIFT, W, exec,
+                  bind = $mod SHIFT, W, exec, ${start-warcraft-xremap}/bin/start-warcraft-xremap
                   submap = WARCRAFT
                   bind = Alt_L, Q, exec, true
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
@@ -173,7 +175,7 @@ in {
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
                   bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
                   submap = WARCRAFT
-                  bind = $mod SHIFT, Q, submap, reset
+                  bind = $mod SHIFT, Q, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
                   submap = reset
                 '';
               };
