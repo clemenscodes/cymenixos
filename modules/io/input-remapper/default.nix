@@ -15,7 +15,7 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.input-remapper.enable) {
-    programs = {
+    services = {
       input-remapper = {
         inherit (cfg.input-remapper) enable;
       };
