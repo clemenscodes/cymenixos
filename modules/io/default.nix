@@ -6,6 +6,7 @@
 }: {...}: {
   imports = [
     (import ./android {inherit inputs pkgs lib;})
+    (import ./input-remapper {inherit inputs pkgs lib;})
     (import ./printing {inherit inputs pkgs lib;})
     (import ./sound {inherit inputs pkgs lib;})
     (import ./udisks {inherit inputs pkgs lib;})

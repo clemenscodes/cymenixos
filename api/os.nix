@@ -205,6 +205,9 @@
       android = {
         enable = false;
       };
+      input-remapper = {
+        enable = false;
+      };
       printing = {
         enable = false;
       };
