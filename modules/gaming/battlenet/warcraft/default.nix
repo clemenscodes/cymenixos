@@ -77,9 +77,11 @@ in {
                     runtimeInputs = [
                       pkgs.ydotool
                       pkgs.hyprland
+                      pkgs.systemd
                     ];
                     text = ''
                       ydotool key 96:1 96:0 # Press Numpad_Enter
+                      ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
                       hyprctl dispatch submap CHAT
                     '';
                   };
@@ -103,7 +105,7 @@ in {
                     text = ''
                       ydotool key 58:1 58:0 # Press caps lock which is actually escape
                       ydotool key 1:1 1:0 # Press escape again to be sure
-                      hyprctl dispatch submap WARCRAFT
+                      ${start-warcraft-xremap}/bin/start-warcraft-xremap
                     '';
                   };
                   warcraft-xremap = pkgs.writeText "warcraft-xremap" ''
