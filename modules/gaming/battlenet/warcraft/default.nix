@@ -102,7 +102,9 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      systemctl --user stop xremap.service && xremap --watch ${warcraft-xremap} &
+                      systemctl --user stop xremap.service
+                      sleep 0.1
+                      xremap --watch ${warcraft-xremap} &
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
@@ -110,9 +112,13 @@ in {
                     name = "stop-warcraft-xremap";
                     runtimeInputs = [
                       pkgs.systemd
+                      pkgs.killall
                     ];
                     text = ''
-                      systemctl --user start xremap.service && hyprctl dispatch submap reset
+                      killall xremap
+                      sleep 0.1
+                      systemctl --user start xremap.service 
+                      hyprctl dispatch submap reset
                     '';
                   };
                   open-warcraft-chat = pkgs.writeShellApplication {
