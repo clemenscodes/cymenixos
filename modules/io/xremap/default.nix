@@ -2,7 +2,11 @@
   inputs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.io;
 in {
   imports = [inputs.xremap-flake.nixosModules.default];
@@ -16,11 +20,14 @@ in {
     };
   };
   config = {
+    environment = {
+      systemPackages = [inputs.xremap-flake.packages.${system}.xremap-hypr];
+    };
     services = {
       xremap = {
         enable = cfg.enable && cfg.xremap.enable && config.modules.display.gui != "headless";
-        withWlroots = config.modules.display.gui == "wayland";
-        userName = config.modules.users.user;
+        withHypr = config.modules.display.hyprland.enable;
+        userName = config.modules.users.name;
         watch = true;
         yamlConfig = ''
           modmap:
