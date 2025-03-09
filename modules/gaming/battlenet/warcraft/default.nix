@@ -72,44 +72,6 @@ in {
                       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
                   };
-                  warcraft-hotkey-inventory = pkgs.writeShellApplication {
-                    name = "warcraft-hotkey-inventory";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                      pkgs.hyprland
-                    ];
-                    text = ''
-                      SCREEN_WIDTH=1920
-                      SCREEN_HEIGHT=1080
-                      MOUSE_POS=$(hyprctl cursorpos)
-                      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
-                      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
-
-                      # TODO: figure out correct places
-                      case "$1" in
-                          F1) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F2) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F3) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F4) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F5) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          F6) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          *) exit 1 ;;  # Invalid inventory number
-                      esac
-
-                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/158
-                      MOUSE_X=$((MOUSE_X / 2))
-                      MOUSE_Y=$((MOUSE_Y / 2))
-                      X=$((X / 2))
-                      Y=$((Y / 2))
-
-                      # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/250
-                      ydotool mousemove --absolute --xpos 0 --ypos 0
-                      ydotool mousemove --xpos "$X" --ypos "$Y"
-                      ydotool click 0x00 0x00
-                      ydotool mousemove --absolute --xpos 0 --ypos 0
-                      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
-                    '';
-                  };
                   open-warcraft-chat = pkgs.writeShellApplication {
                     name = "open-warcraft-chat";
                     runtimeInputs = [
@@ -144,16 +106,56 @@ in {
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
+                  warcraft-xremap = pkgs.writeText "warcraft-xremap" ''
+                    modmap:
+                      - name: Inventory Keys
+                        remap:
+                          F1: KP7
+                          F2: KP8
+                          F3: KP4
+                          F4: KP5
+                          F5: KP1
+                          F6: KP6
+
+                      - name: User Specified Hotkeys
+                        remap:
+                          LeftCtrl: Space
+                          Space: LeftCtrl
+                          BTN_SIDE: KP7
+
+                      - name: "Better CapsLock"
+                        remap:
+                          CapsLock:
+                            held: SUPER_L
+                            alone: ESC
+                            alone_timeout_millis: 500
+                  '';
+                  start-warcraft-xremap = pkgs.writeShellApplication {
+                    name = "start-warcraft-xremap";
+                    runtimeInputs = [
+                      inputs.xremap-flake.packages.${system}.xremap-hypr
+                      pkgs.systemd
+                    ];
+                    text = ''
+                      systemctl --user stop xremap.service
+                      xremap --watch ${warcraft-xremap}
+                    '';
+                  };
+                  stop-warcraft-xremap = pkgs.writeShellApplication {
+                    name = "stop-warcraft-xremap";
+                    runtimeInputs = [
+                      pkgs.systemd
+                    ];
+                    text = ''
+                      pkill xremap
+                      systemctl --user start xremap.service
+                    '';
+                  };
                 in ''
                   bind = $mod SHIFT, W, submap, WARCRAFT
+                  bind = $mod SHIFT, W, exec,
                   submap = WARCRAFT
                   bind = Alt_L, Q, exec, true
-                  bind = , F1, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F1
-                  bind = , F2, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F2
-                  bind = , F3, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F3
-                  bind = , F4, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F4
-                  bind = , F5, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F5
-                  bind = , F6, exec, ${warcraft-hotkey-inventory}/bin/warcraft-hotkey-inventory F6
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
                   bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
                   bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
