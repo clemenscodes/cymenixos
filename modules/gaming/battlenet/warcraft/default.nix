@@ -169,7 +169,7 @@ in {
                   bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 9
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 12
                   bind = Alt_L, Q, exec, true
-                  bind = , ESCAPE, exec, true
+                  bindr = CAPS, Caps_Lock, exec, true
                   submap = CHAT
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
                   bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
