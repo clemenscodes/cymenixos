@@ -44,18 +44,18 @@ in {
                       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
 
                       case "$1" in
-                          1) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
-                          2) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
-                          3) X=$((SCREEN_WIDTH * 4 / 5)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          4) X=$((SCREEN_WIDTH * 17 / 20)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
-                          5) X=$((SCREEN_WIDTH * 17 / 20)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
-                          6) X=$((SCREEN_WIDTH * 17 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          7) X=$((SCREEN_WIDTH * 9 / 10)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
-                          8) X=$((SCREEN_WIDTH * 9 / 10)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
-                          9) X=$((SCREEN_WIDTH * 9 / 10)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
-                          10) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 4 / 5)) ;;
-                          11) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 22 / 25)) ;;
-                          12) X=$((SCREEN_WIDTH * 19 / 20)); Y=$((SCREEN_HEIGHT * 19 / 20)) ;;
+                        Q) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
+                        W) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
+                        E) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
+                        R) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
+                        A) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
+                        S) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
+                        D) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
+                        F) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
+                        Y) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
+                        X) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
+                        C) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
+                        V) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
                       esac
 
                       # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/158
@@ -67,8 +67,10 @@ in {
                       # Workaround for https://github.com/ReimuNotMoe/ydotool/issues/250
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       ydotool mousemove --xpos "$X" --ypos "$Y"
+
                       # See here https://github.com/ReimuNotMoe/ydotool/issues/219
-                      ydotool click 0xC0 0xC1 
+                      ydotool click 0xC0 0xC1
+
                       ydotool mousemove --absolute --xpos 0 --ypos 0
                       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
                     '';
@@ -157,18 +159,18 @@ in {
                   submap = WARCRAFT
                   bind = Alt_L SHIFT, W, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
-                  bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
-                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
-                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
-                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 10
-                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 2
-                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 5
-                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 8
-                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 11
-                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 3
-                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 6
-                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 9
-                  bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 12
+                  bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey Q
+                  bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey W
+                  bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey W
+                  bind = , R, exec, ${warcraft-hotkey}/bin/warcraft-hotkey E
+                  bind = , A, exec, ${warcraft-hotkey}/bin/warcraft-hotkey A
+                  bind = , S, exec, ${warcraft-hotkey}/bin/warcraft-hotkey S
+                  bind = , D, exec, ${warcraft-hotkey}/bin/warcraft-hotkey D
+                  bind = , F, exec, ${warcraft-hotkey}/bin/warcraft-hotkey F
+                  bind = , Y, exec, ${warcraft-hotkey}/bin/warcraft-hotkey Y
+                  bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey X
+                  bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey C
+                  bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey V
                   bind = Alt_L, Q, exec, true
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CHAT
