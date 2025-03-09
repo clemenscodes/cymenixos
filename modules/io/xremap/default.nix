@@ -30,6 +30,15 @@ in {
     environment = {
       systemPackages = [inputs.xremap-flake.packages.${system}.xremap-hypr];
     };
+    systemd = {
+      user = {
+        services = {
+          xremap = {
+            wantedBy = ["default.target"];
+          };
+        };
+      };
+    };
     services = {
       xremap = {
         enable = cfg.enable && cfg.xremap.enable && config.modules.display.gui != "headless";
