@@ -102,9 +102,7 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
-                      systemctl --user stop xremap.service
-                      sleep 0.1
-                      xremap --watch ${warcraft-xremap} &
+                      systemctl --user stop xremap.service && xremap --watch ${warcraft-xremap} &
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
@@ -112,13 +110,10 @@ in {
                     name = "stop-warcraft-xremap";
                     runtimeInputs = [
                       pkgs.systemd
-                      pkgs.killall
                     ];
                     text = ''
-                      killall xremap
-                      sleep 0.1
-                      systemctl --user start xremap.service 
-                      hyprctl dispatch submap reset
+                      pkill xremap
+                      systemctl --user start xremap.service && hyprctl dispatch submap reset
                     '';
                   };
                   open-warcraft-chat = pkgs.writeShellApplication {
@@ -159,7 +154,8 @@ in {
                 in ''
                   bind = Alt_L SHIFT, W, exec, ${start-warcraft-xremap}/bin/start-warcraft-xremap
                   submap = WARCRAFT
-                  bind = Alt_L, Q, exec, true
+                  bind = Alt_L SHIFT, W, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
+                  bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   bind = , Q, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 1
                   bind = , W, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 4
                   bind = , E, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 7
@@ -172,12 +168,11 @@ in {
                   bind = , X, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 6
                   bind = , C, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 9
                   bind = , V, exec, ${warcraft-hotkey}/bin/warcraft-hotkey 12
-                  bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
+                  bind = Alt_L, Q, exec, true
+                  bind = , ESCAPE, Q, exec, true
                   submap = CHAT
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
                   bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
-                  submap = WARCRAFT
-                  bind = Alt_L SHIFT, W, exec, ${stop-warcraft-xremap}/bin/stop-warcraft-xremap
                   submap = reset
                 '';
               };
