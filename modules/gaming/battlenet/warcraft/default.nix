@@ -139,7 +139,7 @@ in {
                     ];
                     text = ''
                       systemctl --user stop xremap.service
-                      xremap --watch ${warcraft-xremap}
+                      xremap --watch ${warcraft-xremap} &
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
