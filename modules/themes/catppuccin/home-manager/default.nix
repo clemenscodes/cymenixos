@@ -12,9 +12,6 @@ in {
           imports = [inputs.catppuccin.homeManagerModules.catppuccin];
           catppuccin = {
             inherit (cfg.catppuccin) enable flavor accent;
-            gitea = {
-              enable = lib.mkForce false;
-            };
           };
         };
       };
