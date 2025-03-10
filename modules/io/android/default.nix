@@ -15,7 +15,7 @@ in {
       };
     };
   };
-  config = {
+  config = lib.mkIf (cfg.enable && cfg.android.enable) {
     programs = {
       adb = {
         inherit (cfg.android) enable;

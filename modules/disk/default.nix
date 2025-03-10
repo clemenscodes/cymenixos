@@ -397,13 +397,6 @@ in {
           };
         };
       };
-      btrfs = {
-        autoScrub = {
-          enable = true;
-          interval = "weekly";
-          fileSystems = ["/"];
-        };
-      };
     };
     fileSystems = {
       "/var/log" = {

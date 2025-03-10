@@ -20,12 +20,6 @@ in {
     environment = {
       persistence = {
         "${config.modules.boot.impermanence.persistPath}" = {
-          directories = [
-            {
-              directory = "/root/.gnupg";
-              mode = "0700";
-            }
-          ];
           users = {
             ${config.modules.users.user} = {
               directories = [

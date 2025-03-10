@@ -58,7 +58,7 @@ in {
       };
       udev = {
         extraRules = ''
-          KERNEL=="uinput", GROUP=="input", TAG+="uaccess"
+          KERNEL=="uinput", GROUP="input", TAG+="uaccess"
         '';
       };
     };

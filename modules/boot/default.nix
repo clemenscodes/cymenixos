@@ -47,7 +47,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
-      kernelModules = ["tcp_bpr" "v4l2loopback"];
+      kernelModules = ["v4l2loopback"];
       kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
       kernelParams = lib.mkIf hibernation ["resume_offset=${builtins.toString swapResumeOffset}"];
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
