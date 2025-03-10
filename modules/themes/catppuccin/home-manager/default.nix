@@ -15,9 +15,6 @@ in {
             gitea = {
               enable = lib.mkForce false;
             };
-            forgejo = {
-              enable = lib.mkForce false;
-            };
           };
         };
       };
