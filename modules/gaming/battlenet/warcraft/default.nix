@@ -49,7 +49,7 @@ in {
                 RestrictAddressFamilies = "AF_UNIX";
                 ExecStart = let
                   mkExecStart = configFile: let
-                    cfg = config.modules.xremap;
+                    cfg = config.services.xremap;
                     mkDeviceString = x: "--device '${x}'";
                   in
                     builtins.concatStringsSep " " (
