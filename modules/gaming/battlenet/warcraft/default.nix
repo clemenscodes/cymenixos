@@ -143,6 +143,7 @@ in {
                 genericName = "Warcraft III";
                 icon = ./assets/warcraft-iii-reforged.svg;
                 exec = "${warcraft}/bin/warcraft";
+                terminal = false;
               };
             };
           };
