@@ -220,11 +220,14 @@
 
       hyprctl dispatch submap CONTROLGROUP
 
-      sleep 0.1
+      sleep 0.01
+
 
       SELECTED_CONTROL_GROUP="$1"
       CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
       CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+
+      echo "Creating control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
 
@@ -267,8 +270,9 @@
 
       hyprctl dispatch submap CONTROLGROUP
 
-      sleep 0.1
+      sleep 0.01
 
+      echo "Selecting control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
 
       echo "Typing $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
@@ -290,7 +294,9 @@
 
       hyprctl dispatch submap CONTROLGROUP
 
-      sleep 0.1
+      sleep 0.01
+
+      echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
 
       echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:1
