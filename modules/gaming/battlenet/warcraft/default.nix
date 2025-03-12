@@ -240,8 +240,8 @@
       get_control_group_keycode
       echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers" >> "$YDOTOOL_LOG_FILE"
-      ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
       sleep 0.1
+      ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
       hyprctl dispatch submap WARCRAFT
     '';
   };
@@ -260,8 +260,8 @@
       echo "Selecting control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
       echo "Typing $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
-      ydotool type "$SELECTED_CONTROL_GROUP"
       sleep 0.1
+      ydotool type "$SELECTED_CONTROL_GROUP"
       hyprctl dispatch submap WARCRAFT
     '';
   };
@@ -285,8 +285,8 @@
       echo "Releasing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:0
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
-      ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
       sleep 0.1
+      ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
       hyprctl dispatch submap WARCRAFT
     '';
   };
