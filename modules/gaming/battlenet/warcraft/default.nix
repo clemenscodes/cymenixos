@@ -220,8 +220,7 @@
 
       hyprctl dispatch submap CONTROLGROUP
 
-      sleep 0.01
-
+      sleep 0.06
 
       SELECTED_CONTROL_GROUP="$1"
       CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
@@ -270,7 +269,7 @@
 
       hyprctl dispatch submap CONTROLGROUP
 
-      sleep 0.01
+      sleep 0.06
 
       echo "Selecting control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
@@ -294,7 +293,7 @@
 
       hyprctl dispatch submap CONTROLGROUP
 
-      sleep 0.01
+      sleep 0.06
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
 
