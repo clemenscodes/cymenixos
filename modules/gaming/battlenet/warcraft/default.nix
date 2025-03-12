@@ -182,20 +182,24 @@ in {
                       MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
                       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
 
-                      case "$HOTKEY" in
-                        Q) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
-                        W) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
-                        E) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
-                        R) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)) ;;
-                        A) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
-                        S) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
-                        D) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
-                        F) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)) ;;
-                        Y) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
-                        X) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
-                        C) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
-                        V) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)) ;;
-                      esac
+                      calculate_coordinates() {
+                        case "$HOTKEY" in
+                          Q) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+                          W) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+                          E) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+                          R) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+                          A) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+                          S) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+                          D) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+                          F) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+                          Y) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+                          X) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+                          C) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+                          V) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+                        esac
+                      }
+
+                      calculate_coordinates
 
                       MOUSE_X=$((MOUSE_X / 2))
                       MOUSE_Y=$((MOUSE_Y / 2))
@@ -240,14 +244,18 @@ in {
                       MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
                       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
 
-                      case "$HOTKEY" in
-                        1) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 89 / 108)) ;;
-                        2) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 89 / 108)) ;;
-                        3) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 8 / 9)) ;;
-                        4) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 8 / 9)) ;;
-                        5) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 205 / 216)) ;;
-                        6) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)) ;;
-                      esac
+                      calculate_coordinates() {
+                        case "$HOTKEY" in
+                          1) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
+                          2) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
+                          3) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
+                          4) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
+                          5) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+                          6) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+                        esac
+                      }
+
+                      calculate_coordinates
 
                       MOUSE_X=$((MOUSE_X / 2))
                       MOUSE_Y=$((MOUSE_Y / 2))
@@ -302,6 +310,90 @@ in {
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
+                  warcraft-select-control-group = pkgs.writeShellApplication {
+                    name = "warcraft-select-control-group";
+                    runtimeInputs = [
+                      pkgs.ydotool
+                    ];
+                    text = ''
+                      SELECTED_CONTROL_GROUP="$1"
+                      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+                      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+
+                      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+
+                      get_control_group_keycode() {
+                        case "$SELECTED_CONTROL_GROUP" in
+                          1) CONTROL_GROUP_KEYCODE=2; return ;;
+                          2) CONTROL_GROUP_KEYCODE=3; return ;;
+                          3) CONTROL_GROUP_KEYCODE=4; return ;;
+                          4) CONTROL_GROUP_KEYCODE=5; return ;;
+                          5) CONTROL_GROUP_KEYCODE=6; return ;;
+                          6) CONTROL_GROUP_KEYCODE=7; return ;;
+                          7) CONTROL_GROUP_KEYCODE=8; return ;;
+                          8) CONTROL_GROUP_KEYCODE=9; return ;;
+                          9) CONTROL_GROUP_KEYCODE=10; return ;;
+                          0) CONTROL_GROUP_KEYCODE=11; return ;;
+                        esac
+                      }
+
+                      get_control_group_keycode
+
+                      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
+
+                      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
+                    '';
+                  };
+                  warcraft-create-control-group = pkgs.writeShellApplication {
+                    name = "warcraft-create-control-group";
+                    runtimeInputs = [
+                      pkgs.ydotool
+                    ];
+                    text = ''
+                      SELECTED_CONTROL_GROUP="$1"
+                      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+                      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+
+                      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+
+                      get_control_group_keycode() {
+                        case "$SELECTED_CONTROL_GROUP" in
+                          1) CONTROL_GROUP_KEYCODE=2; return ;;
+                          2) CONTROL_GROUP_KEYCODE=3; return;;
+                          3) CONTROL_GROUP_KEYCODE=4; return;;
+                          4) CONTROL_GROUP_KEYCODE=5; return;;
+                          5) CONTROL_GROUP_KEYCODE=6; return;;
+                          6) CONTROL_GROUP_KEYCODE=7; return;;
+                          7) CONTROL_GROUP_KEYCODE=8; return;;
+                          8) CONTROL_GROUP_KEYCODE=9; return;;
+                          9) CONTROL_GROUP_KEYCODE=10; return;;
+                          0) CONTROL_GROUP_KEYCODE=11; return;;
+                        esac
+                      }
+
+                      get_control_group_keycode
+
+                      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
+
+                      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
+                    '';
+                  };
+                  warcraft-remove-unit-control-group = pkgs.writeShellApplication {
+                    name = "warcraft-remove-unit-control-group";
+                    runtimeInputs = [
+                      pkgs.ydotool
+                    ];
+                    text = ''
+                      ydotool key 42:1
+                      ydotool click 0xC0
+                      ydotool key 42:0
+
+                      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+                      CONTROL_GROUP_KEYCODE="$(cat $CONTROL_GROUP_KEYCODE_FILE)"
+
+                      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":1 29:0
+                    '';
+                  };
                 in ''
                   bind = CTRL, W, submap, WARCRAFT
                   submap = WARCRAFT
@@ -325,6 +417,27 @@ in {
                   bind = CTRL, S, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 4
                   bind = CTRL, Y, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 5
                   bind = CTRL, X, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 6
+                  bind = , 1, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 1
+                  bind = , 2, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 2
+                  bind = , 3, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 3
+                  bind = , 4, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 4
+                  bind = , 5, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 5
+                  bind = , 6, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 6
+                  bind = , 7, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 7
+                  bind = , 8, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 8
+                  bind = , 9, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 9
+                  bind = , 0, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 0
+                  bind = CTRL, 1, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 1
+                  bind = CTRL, 2, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 2
+                  bind = CTRL, 3, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 3
+                  bind = CTRL, 4, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 4
+                  bind = CTRL, 5, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 5
+                  bind = CTRL, 6, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 6
+                  bind = CTRL, 7, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 7
+                  bind = CTRL, 8, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 8
+                  bind = CTRL, 9, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 9
+                  bind = CTRL, 0, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 0
+                  bind = SHIFT, mouse:272, exec, ${warcraft-remove-unit-control-group}/bin/warcraft-remove-unit-control-group
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CHAT
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
