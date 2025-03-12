@@ -216,7 +216,8 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      hyprctl dispatch submap CONTROLGROUP &
+      hyprctl dispatch submap CONTROLGROUP
+      sleep 0.1
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
       SELECTED_CONTROL_GROUP="$1"
       CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
@@ -240,7 +241,6 @@
       get_control_group_keycode
       echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers" >> "$YDOTOOL_LOG_FILE"
-      sleep 0.1
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
       hyprctl dispatch submap WARCRAFT
     '';
@@ -253,14 +253,14 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      hyprctl dispatch submap CONTROLGROUP &
+      hyprctl dispatch submap CONTROLGROUP
+      sleep 0.1
       SELECTED_CONTROL_GROUP="$1"
       CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
       echo "Selecting control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
       echo "Typing $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
-      sleep 0.1
       ydotool type "$SELECTED_CONTROL_GROUP"
       hyprctl dispatch submap WARCRAFT
     '';
@@ -273,7 +273,8 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      hyprctl dispatch submap CONTROLGROUP &
+      hyprctl dispatch submap CONTROLGROUP
+      sleep 0.1
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
       CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
       CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
@@ -285,7 +286,6 @@
       echo "Releasing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:0
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
-      sleep 0.1
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
       hyprctl dispatch submap WARCRAFT
     '';
