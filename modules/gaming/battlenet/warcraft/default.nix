@@ -281,7 +281,7 @@
 
       echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
 
-      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
+      ydotool key -d 30 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
 
       hyprctl dispatch submap WARCRAFT
     '';
@@ -302,7 +302,9 @@
       CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
       CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
 
-      ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":1 57:0
+      ydotool key -d 30 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
+
+      ydotool key 96:1 96:0 # test
 
       hyprctl dispatch submap WARCRAFT
     '';
