@@ -484,7 +484,8 @@ in {
                   bind = SHIFT, mouse:272, exec, ${warcraft-remove-unit-control-group}/bin/warcraft-remove-unit-control-group
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CONTROLGROUP
-                  bind = $mod, Q, submap, reset
+                  bind = $mod, Q, submap, WARCRAFT
+                  bind = $mod SHIFT, Q, submap, reset
                   submap = CHAT
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
                   bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
