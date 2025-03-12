@@ -32,10 +32,10 @@
       pkgs.hyprland
     ];
     text = ''
-      pkill battlenet
-      pkill srt-bwrap
-      pkill wine
-      pkill wineserver
+      pkill battlenet || true
+      pkill srt-bwrap || true
+      pkill wine || true
+      pkill wineserver || true
       systemctl --user stop xremap.service
       systemctl --user start xremap-warcraft.service
       hyprctl dispatch submap WARCRAFT
@@ -51,10 +51,10 @@
       systemctl --user stop xremap-warcraft.service
       systemctl --user start xremap.service
       hyprctl dispatch submap reset
-      pkill battlenet
-      pkill srt-bwrap
-      pkill wine
-      pkill wineserver
+      pkill battlenet || true
+      pkill srt-bwrap || true
+      pkill wine || true
+      pkill wineserver || true
     '';
   };
   warcraft-autocast-hotkey = pkgs.writeShellApplication {
