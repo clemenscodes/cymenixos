@@ -248,6 +248,9 @@
       echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
 
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers" >> "$YDOTOOL_LOG_FILE"
+
+      sleep 0.09
+
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
       hyprctl dispatch submap WARCRAFT
@@ -271,6 +274,8 @@
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
 
       echo "Typing $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
+
+      sleep 0.09
 
       ydotool type "$SELECTED_CONTROL_GROUP"
 
@@ -302,6 +307,9 @@
       CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
 
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
+
+      sleep 0.09
+
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
       hyprctl dispatch submap WARCRAFT
