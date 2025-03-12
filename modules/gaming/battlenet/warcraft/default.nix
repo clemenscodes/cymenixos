@@ -218,7 +218,7 @@
     text = ''
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
 
-      # hyprctl dispatch submap CONTROLGROUP &
+      hyprctl dispatch submap CONTROLGROUP &
 
       SELECTED_CONTROL_GROUP="$1"
       CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
@@ -250,7 +250,7 @@
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers" >> "$YDOTOOL_LOG_FILE"
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
-      # hyprctl dispatch submap WARCRAFT
+      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-select-control-group = pkgs.writeShellApplication {
@@ -265,7 +265,7 @@
       CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
 
-      # hyprctl dispatch submap CONTROLGROUP &
+      hyprctl dispatch submap CONTROLGROUP &
 
       echo "Selecting control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
@@ -274,7 +274,7 @@
 
       ydotool type "$SELECTED_CONTROL_GROUP"
 
-      # hyprctl dispatch submap WARCRAFT
+      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-remove-unit-control-group = pkgs.writeShellApplication {
@@ -287,7 +287,7 @@
     text = ''
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
 
-      # hyprctl dispatch submap CONTROLGROUP
+      hyprctl dispatch submap CONTROLGROUP &
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
 
@@ -304,7 +304,7 @@
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
-      # hyprctl dispatch submap WARCRAFT
+      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-scripts = pkgs.symlinkJoin {
