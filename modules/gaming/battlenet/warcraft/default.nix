@@ -214,45 +214,7 @@
       pkgs.ydotool
       pkgs.hyprland
     ];
-    text = ''
-      hyprctl dispatch submap CONTROLGROUP
-
-      SELECTED_CONTROL_GROUP="$1"
-      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
-
-      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
-
-      get_control_group_keycode() {
-        case "$SELECTED_CONTROL_GROUP" in
-          1) CONTROL_GROUP_KEYCODE=2; return ;;
-          2) CONTROL_GROUP_KEYCODE=3; return;;
-          3) CONTROL_GROUP_KEYCODE=4; return;;
-          4) CONTROL_GROUP_KEYCODE=5; return;;
-          5) CONTROL_GROUP_KEYCODE=6; return;;
-          6) CONTROL_GROUP_KEYCODE=7; return;;
-          7) CONTROL_GROUP_KEYCODE=8; return;;
-          8) CONTROL_GROUP_KEYCODE=9; return;;
-          9) CONTROL_GROUP_KEYCODE=10; return;;
-          0) CONTROL_GROUP_KEYCODE=11; return;;
-        esac
-      }
-
-      get_control_group_keycode
-
-      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
-
-      ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
-
-      hyprctl dispatch submap WARCRAFT
-    '';
-  };
-  warcraft-select-control-group = pkgs.writeShellApplication {
-    name = "warcraft-select-control-group";
-    runtimeInputs = [
-      pkgs.ydotool
-      pkgs.hyprland
-    ];
+    excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
       hyprctl dispatch submap CONTROLGROUP
 
@@ -281,7 +243,48 @@
 
       echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
 
-      ydotool key -d 30 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
+      ydotool key $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0
+      # ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
+
+      hyprctl dispatch submap WARCRAFT
+    '';
+  };
+  warcraft-select-control-group = pkgs.writeShellApplication {
+    name = "warcraft-select-control-group";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    excludeShellChecks = ["SC2046" "SC2086"];
+    text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
+      SELECTED_CONTROL_GROUP="$1"
+      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+
+      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+
+      get_control_group_keycode() {
+        case "$SELECTED_CONTROL_GROUP" in
+          1) CONTROL_GROUP_KEYCODE=2; return ;;
+          2) CONTROL_GROUP_KEYCODE=3; return ;;
+          3) CONTROL_GROUP_KEYCODE=4; return ;;
+          4) CONTROL_GROUP_KEYCODE=5; return ;;
+          5) CONTROL_GROUP_KEYCODE=6; return ;;
+          6) CONTROL_GROUP_KEYCODE=7; return ;;
+          7) CONTROL_GROUP_KEYCODE=8; return ;;
+          8) CONTROL_GROUP_KEYCODE=9; return ;;
+          9) CONTROL_GROUP_KEYCODE=10; return ;;
+          0) CONTROL_GROUP_KEYCODE=11; return ;;
+        esac
+      }
+
+      get_control_group_keycode
+
+      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
+
+      ydotool key $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0
 
       hyprctl dispatch submap WARCRAFT
     '';
@@ -292,10 +295,9 @@
       pkgs.ydotool
       pkgs.hyprland
     ];
+    excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
       hyprctl dispatch submap CONTROLGROUP
-
-      sleep 0.1
 
       ydotool key 42:1
       ydotool click 0xC0
@@ -304,7 +306,7 @@
       CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
       CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
 
-      ydotool key -d 30 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
+      ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
       hyprctl dispatch submap WARCRAFT
     '';
@@ -471,16 +473,6 @@ in {
                   bind = CTRL, S, exec, ${lib.getExe warcraft-inventory-hotkey} 4
                   bind = CTRL, Y, exec, ${lib.getExe warcraft-inventory-hotkey} 5
                   bind = CTRL, X, exec, ${lib.getExe warcraft-inventory-hotkey} 6
-                  bind = , 1, exec, ${lib.getExe warcraft-select-control-group} 1
-                  bind = , 2, exec, ${lib.getExe warcraft-select-control-group} 2
-                  bind = , 3, exec, ${lib.getExe warcraft-select-control-group} 3
-                  bind = , 4, exec, ${lib.getExe warcraft-select-control-group} 4
-                  bind = , 5, exec, ${lib.getExe warcraft-select-control-group} 5
-                  bind = , 6, exec, ${lib.getExe warcraft-select-control-group} 6
-                  bind = , 7, exec, ${lib.getExe warcraft-select-control-group} 7
-                  bind = , 8, exec, ${lib.getExe warcraft-select-control-group} 8
-                  bind = , 9, exec, ${lib.getExe warcraft-select-control-group} 9
-                  bind = , 0, exec, ${lib.getExe warcraft-select-control-group} 0
                   bind = CTRL, 1, exec, ${lib.getExe warcraft-create-control-group} 1
                   bind = CTRL, 2, exec, ${lib.getExe warcraft-create-control-group} 2
                   bind = CTRL, 3, exec, ${lib.getExe warcraft-create-control-group} 3
@@ -491,6 +483,16 @@ in {
                   bind = CTRL, 8, exec, ${lib.getExe warcraft-create-control-group} 8
                   bind = CTRL, 9, exec, ${lib.getExe warcraft-create-control-group} 9
                   bind = CTRL, 0, exec, ${lib.getExe warcraft-create-control-group} 0
+                  bind = , 1, exec, ${lib.getExe warcraft-select-control-group} 1
+                  bind = , 2, exec, ${lib.getExe warcraft-select-control-group} 2
+                  bind = , 3, exec, ${lib.getExe warcraft-select-control-group} 3
+                  bind = , 4, exec, ${lib.getExe warcraft-select-control-group} 4
+                  bind = , 5, exec, ${lib.getExe warcraft-select-control-group} 5
+                  bind = , 6, exec, ${lib.getExe warcraft-select-control-group} 6
+                  bind = , 7, exec, ${lib.getExe warcraft-select-control-group} 7
+                  bind = , 8, exec, ${lib.getExe warcraft-select-control-group} 8
+                  bind = , 9, exec, ${lib.getExe warcraft-select-control-group} 9
+                  bind = , 0, exec, ${lib.getExe warcraft-select-control-group} 0
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-remove-unit-control-group}
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CONTROLGROUP
