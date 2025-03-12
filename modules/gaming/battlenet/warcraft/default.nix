@@ -67,10 +67,10 @@ in {
                           */
                           if cfg.deviceName != ""
                           then
-                            pipe cfg.deviceName [
+                            lib.pipe cfg.deviceName [
                               mkDeviceString
-                              singleton
-                              (showWarnings [
+                              lib.singleton
+                              (lib.showWarnings [
                                 "'deviceName' option is deprecated in favor of 'deviceNames'. Current value will continue working but please replace it with 'deviceNames'."
                               ])
                             ]
