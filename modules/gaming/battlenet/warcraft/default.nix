@@ -249,7 +249,7 @@
 
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.07
+      sleep 0.08
 
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
@@ -275,7 +275,7 @@
 
       echo "Typing $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.07
+      sleep 0.08
 
       ydotool type "$SELECTED_CONTROL_GROUP"
 
@@ -308,7 +308,7 @@
 
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.07
+      sleep 0.08
 
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
