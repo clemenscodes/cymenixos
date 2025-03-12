@@ -259,13 +259,11 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
+      SELECTED_CONTROL_GROUP="$1"
+      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
 
       hyprctl dispatch submap CONTROLGROUP
-
-      SELECTED_CONTROL_GROUP="$1"
-      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
 
       echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
 
