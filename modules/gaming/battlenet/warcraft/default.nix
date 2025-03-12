@@ -295,6 +295,8 @@
     text = ''
       hyprctl dispatch submap CONTROLGROUP
 
+      sleep 0.1
+
       ydotool key 42:1
       ydotool click 0xC0
       ydotool key 42:0
@@ -303,8 +305,6 @@
       CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
 
       ydotool key -d 30 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
-
-      ydotool key 96:1 96:0 # test
 
       hyprctl dispatch submap WARCRAFT
     '';
