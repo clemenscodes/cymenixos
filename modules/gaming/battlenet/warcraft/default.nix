@@ -23,6 +23,93 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
+    systemd = {
+      user = {
+        services = {
+          xremap-warcraft = {
+            description = "xremap-warcraft user service";
+            path = [config.services.xremap.package];
+            serviceConfig = lib.mkMerge [
+              {
+                KeyringMode = "private";
+                SystemCallArchitectures = ["native"];
+                RestrictRealtime = true;
+                ProtectSystem = true;
+                SystemCallFilter = map (x: "~@${x}") [
+                  "clock"
+                  "debug"
+                  "module"
+                  "reboot"
+                  "swap"
+                  "cpu-emulation"
+                  "obsolete"
+                ];
+                LockPersonality = true;
+                UMask = "077";
+                RestrictAddressFamilies = "AF_UNIX";
+                ExecStart = let
+                  mkExecStart = configFile: let
+                    cfg = config.modules.xremap;
+                  in
+                    builtins.concatStringsSep " " (
+                      lib.flatten (
+                        lib.lists.singleton "${lib.getExe cfg.package}"
+                        ++ (
+                          /*
+                          Logic to handle --device parameter.
+
+                          Originally only "deviceName" (singular) was an option. Upstream implemented multiple devices, e.g.:
+                          https://github.com/xremap/xremap/issues/44
+
+                          Option "deviceNames" (plural) is implemented to allow passing a list of devices to remap.
+
+                          Legacy parameter wins by default to prevent surprises, but emits a warning.
+                          */
+                          if cfg.deviceName != ""
+                          then
+                            pipe cfg.deviceName [
+                              mkDeviceString
+                              singleton
+                              (showWarnings [
+                                "'deviceName' option is deprecated in favor of 'deviceNames'. Current value will continue working but please replace it with 'deviceNames'."
+                              ])
+                            ]
+                          else if cfg.deviceNames != null
+                          then map mkDeviceString cfg.deviceNames
+                          else []
+                        )
+                        ++ lib.optional cfg.watch "--watch"
+                        ++ lib.optional cfg.mouse "--mouse"
+                        ++ cfg.extraArgs
+                        ++ lib.lists.singleton configFile
+                      )
+                    );
+                  configFile = pkgs.writeTextFile {
+                    name = "xremap-warcraft-config.yml";
+                    text = ''
+                      modmap:
+                        - name: Swap Space & Ctrl
+                          remap:
+                            LeftCtrl: Space
+                            Space: LeftCtrl
+
+                        - name: "Better CapsLock"
+                          remap:
+                            CapsLock:
+                              held: SUPER_L
+                              alone: ESC
+                              alone_timeout_millis: 500
+                    '';
+                  };
+                in
+                  mkExecStart configFile;
+              }
+              (lib.optionalAttrs config.services.xremap.debug {Environment = ["RUST_LOG=debug"];})
+            ];
+          };
+        };
+      };
+    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${name} = {
