@@ -140,7 +140,7 @@ in {
                 name = "Warcraft III";
                 type = "Application";
                 categories = ["Game"];
-                genericName = "Warcraft III";
+                genericName = "Real-time strategy game by Blizzard Entertainment";
                 icon = ./assets/warcraft-iii-reforged.svg;
                 exec = "${warcraft}/bin/warcraft";
                 terminal = false;
