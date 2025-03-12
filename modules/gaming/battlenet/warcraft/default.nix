@@ -16,17 +16,17 @@
       inputs.battlenet.packages.${system}.battlenet
       pkgs.systemd
       pkgs.hyprland
-      start-warcraft-mode
-      stop-warcraft-mode
+      warcraft-mode-start
+      warcraft-mode-stop
     ];
     text = ''
-      start-warcraft-mode
+      warcraft-mode-start
       battlenet
-      stop-warcraft-mode
+      warcraft-mode-stop
     '';
   };
-  start-warcraft-mode = pkgs.writeShellApplication {
-    name = "start-warcraft-mode";
+  warcraft-mode-start = pkgs.writeShellApplication {
+    name = "warcraft-mode-start";
     runtimeInputs = [
       pkgs.ydotool
       pkgs.hyprland
@@ -37,8 +37,8 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
-  stop-warcraft-mode = pkgs.writeShellApplication {
-    name = "stop-warcraft-mode";
+  warcraft-mode-stop = pkgs.writeShellApplication {
+    name = "warcraft-mode-stop";
     runtimeInputs = [
       pkgs.ydotool
       pkgs.hyprland
@@ -167,8 +167,8 @@
       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
     '';
   };
-  open-warcraft-chat = pkgs.writeShellApplication {
-    name = "open-warcraft-chat";
+  warcraft-chat-open = pkgs.writeShellApplication {
+    name = "warcraft-chat-open";
     runtimeInputs = [
       pkgs.ydotool
       pkgs.hyprland
@@ -181,8 +181,8 @@
       hyprctl dispatch submap CHAT
     '';
   };
-  send-warcraft-chat = pkgs.writeShellApplication {
-    name = "send-warcraft-chat";
+  warcraft-chat-send = pkgs.writeShellApplication {
+    name = "warcraft-chat-send";
     runtimeInputs = [
       pkgs.ydotool
       pkgs.hyprland
@@ -194,8 +194,8 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
-  close-warcraft-chat = pkgs.writeShellApplication {
-    name = "close-warcraft-chat";
+  warcraft-chat-close = pkgs.writeShellApplication {
+    name = "warcraft-chat-close";
     runtimeInputs = [
       pkgs.ydotool
       pkgs.hyprland
@@ -205,45 +205,6 @@
       systemctl --user start xremap-warcraft.service
       ydotool key 58:1 58:0 # Press caps lock which is actually escape
       ydotool key 1:1 1:0 # Press escape again to be sure
-      hyprctl dispatch submap WARCRAFT
-    '';
-  };
-  warcraft-select-control-group = pkgs.writeShellApplication {
-    name = "warcraft-select-control-group";
-    runtimeInputs = [
-      pkgs.ydotool
-      pkgs.hyprland
-    ];
-    text = ''
-      hyprctl dispatch submap CONTROLGROUP
-
-      SELECTED_CONTROL_GROUP="$1"
-      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
-
-      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
-
-      get_control_group_keycode() {
-        case "$SELECTED_CONTROL_GROUP" in
-          1) CONTROL_GROUP_KEYCODE=2; return ;;
-          2) CONTROL_GROUP_KEYCODE=3; return ;;
-          3) CONTROL_GROUP_KEYCODE=4; return ;;
-          4) CONTROL_GROUP_KEYCODE=5; return ;;
-          5) CONTROL_GROUP_KEYCODE=6; return ;;
-          6) CONTROL_GROUP_KEYCODE=7; return ;;
-          7) CONTROL_GROUP_KEYCODE=8; return ;;
-          8) CONTROL_GROUP_KEYCODE=9; return ;;
-          9) CONTROL_GROUP_KEYCODE=10; return ;;
-          0) CONTROL_GROUP_KEYCODE=11; return ;;
-        esac
-      }
-
-      get_control_group_keycode
-
-      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
-
-      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
-
       hyprctl dispatch submap WARCRAFT
     '';
   };
@@ -286,6 +247,45 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
+  warcraft-select-control-group = pkgs.writeShellApplication {
+    name = "warcraft-select-control-group";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
+      SELECTED_CONTROL_GROUP="$1"
+      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+
+      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+
+      get_control_group_keycode() {
+        case "$SELECTED_CONTROL_GROUP" in
+          1) CONTROL_GROUP_KEYCODE=2; return ;;
+          2) CONTROL_GROUP_KEYCODE=3; return ;;
+          3) CONTROL_GROUP_KEYCODE=4; return ;;
+          4) CONTROL_GROUP_KEYCODE=5; return ;;
+          5) CONTROL_GROUP_KEYCODE=6; return ;;
+          6) CONTROL_GROUP_KEYCODE=7; return ;;
+          7) CONTROL_GROUP_KEYCODE=8; return ;;
+          8) CONTROL_GROUP_KEYCODE=9; return ;;
+          9) CONTROL_GROUP_KEYCODE=10; return ;;
+          0) CONTROL_GROUP_KEYCODE=11; return ;;
+        esac
+      }
+
+      get_control_group_keycode
+
+      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
+
+      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
+
+      hyprctl dispatch submap WARCRAFT
+    '';
+  };
   warcraft-remove-unit-control-group = pkgs.writeShellApplication {
     name = "warcraft-remove-unit-control-group";
     runtimeInputs = [
@@ -307,6 +307,22 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
+  warcraft-scripts = pkgs.symlinkJoin {
+    name = "warcraft-scripts";
+    paths = [
+      warcraft
+      warcraft-mode-start
+      warcraft-mode-stop
+      warcraft-autocast-hotkey
+      warcraft-inventory-hotkey
+      warcraft-chat-open
+      warcraft-chat-send
+      warcraft-chat-close
+      warcraft-create-control-group
+      warcraft-select-control-group
+      warcraft-remove-unit-control-group
+    ];
+  };
 in {
   options = {
     modules = {
@@ -321,7 +337,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
     environment = {
-      systemPackages = [warcraft];
+      systemPackages = [warcraft-scripts];
     };
     systemd = {
       user = {
@@ -422,7 +438,7 @@ in {
                 categories = ["Game"];
                 genericName = "RTS by Blizzard";
                 icon = ./assets/warcraft-iii-reforged.svg;
-                exec = "${warcraft}/bin/warcraft";
+                exec = "${lib.getBin warcraft}";
                 terminal = false;
               };
             };
@@ -431,56 +447,56 @@ in {
             windowManager = {
               hyprland = {
                 extraConfig = ''
-                  bind = CTRL, W, exec, ${start-warcraft-mode}/bin/start-warcraft-mode
+                  bind = CTRL, W, exec, ${lib.getBin warcraft-mode-start}
                   submap = WARCRAFT
-                  bind = Alt_L, W, exec, ${stop-warcraft-mode}/bin/stop-warcraft-mode
-                  bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
-                  bind = SHIFT, Q, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey Q
-                  bind = SHIFT, W, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey W
-                  bind = SHIFT, E, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey E
-                  bind = SHIFT, R, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey R
-                  bind = SHIFT, A, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey A
-                  bind = SHIFT, S, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey S
-                  bind = SHIFT, D, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey D
-                  bind = SHIFT, F, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey F
-                  bind = SHIFT, Y, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey Y
-                  bind = SHIFT, X, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey X
-                  bind = SHIFT, C, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey C
-                  bind = SHIFT, V, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey V
-                  bind = CTRL, Q, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 1
-                  bind = CTRL, W, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 2
-                  bind = CTRL, A, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 3
-                  bind = CTRL, S, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 4
-                  bind = CTRL, Y, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 5
-                  bind = CTRL, X, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 6
-                  bind = , 1, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 1
-                  bind = , 2, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 2
-                  bind = , 3, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 3
-                  bind = , 4, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 4
-                  bind = , 5, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 5
-                  bind = , 6, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 6
-                  bind = , 7, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 7
-                  bind = , 8, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 8
-                  bind = , 9, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 9
-                  bind = , 0, exec, ${warcraft-select-control-group}/bin/warcraft-select-control-group 0
-                  bind = CTRL, 1, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 1
-                  bind = CTRL, 2, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 2
-                  bind = CTRL, 3, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 3
-                  bind = CTRL, 4, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 4
-                  bind = CTRL, 5, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 5
-                  bind = CTRL, 6, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 6
-                  bind = CTRL, 7, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 7
-                  bind = CTRL, 8, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 8
-                  bind = CTRL, 9, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 9
-                  bind = CTRL, 0, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 0
-                  bind = SHIFT, mouse:272, exec, ${warcraft-remove-unit-control-group}/bin/warcraft-remove-unit-control-group
+                  bind = Alt_L, W, exec, ${lib.getBin warcraft-mode-stop}
+                  bind = , RETURN, exec, ${lib.getBin warcraft-chat-open}
+                  bind = SHIFT, Q, exec, ${lib.getBin warcraft-autocast-hotkey} Q
+                  bind = SHIFT, W, exec, ${lib.getBin warcraft-autocast-hotkey} W
+                  bind = SHIFT, E, exec, ${lib.getBin warcraft-autocast-hotkey} E
+                  bind = SHIFT, R, exec, ${lib.getBin warcraft-autocast-hotkey} R
+                  bind = SHIFT, A, exec, ${lib.getBin warcraft-autocast-hotkey} A
+                  bind = SHIFT, S, exec, ${lib.getBin warcraft-autocast-hotkey} S
+                  bind = SHIFT, D, exec, ${lib.getBin warcraft-autocast-hotkey} D
+                  bind = SHIFT, F, exec, ${lib.getBin warcraft-autocast-hotkey} F
+                  bind = SHIFT, Y, exec, ${lib.getBin warcraft-autocast-hotkey} Y
+                  bind = SHIFT, X, exec, ${lib.getBin warcraft-autocast-hotkey} X
+                  bind = SHIFT, C, exec, ${lib.getBin warcraft-autocast-hotkey} C
+                  bind = SHIFT, V, exec, ${lib.getBin warcraft-autocast-hotkey} V
+                  bind = CTRL, Q, exec, ${lib.getBin warcraft-inventory-hotkey} 1
+                  bind = CTRL, W, exec, ${lib.getBin warcraft-inventory-hotkey} 2
+                  bind = CTRL, A, exec, ${lib.getBin warcraft-inventory-hotkey} 3
+                  bind = CTRL, S, exec, ${lib.getBin warcraft-inventory-hotkey} 4
+                  bind = CTRL, Y, exec, ${lib.getBin warcraft-inventory-hotkey} 5
+                  bind = CTRL, X, exec, ${lib.getBin warcraft-inventory-hotkey} 6
+                  bind = , 1, exec, ${lib.getBin warcraft-select-control-group} 1
+                  bind = , 2, exec, ${lib.getBin warcraft-select-control-group} 2
+                  bind = , 3, exec, ${lib.getBin warcraft-select-control-group} 3
+                  bind = , 4, exec, ${lib.getBin warcraft-select-control-group} 4
+                  bind = , 5, exec, ${lib.getBin warcraft-select-control-group} 5
+                  bind = , 6, exec, ${lib.getBin warcraft-select-control-group} 6
+                  bind = , 7, exec, ${lib.getBin warcraft-select-control-group} 7
+                  bind = , 8, exec, ${lib.getBin warcraft-select-control-group} 8
+                  bind = , 9, exec, ${lib.getBin warcraft-select-control-group} 9
+                  bind = , 0, exec, ${lib.getBin warcraft-select-control-group} 0
+                  bind = CTRL, 1, exec, ${lib.getBin warcraft-create-control-group} 1
+                  bind = CTRL, 2, exec, ${lib.getBin warcraft-create-control-group} 2
+                  bind = CTRL, 3, exec, ${lib.getBin warcraft-create-control-group} 3
+                  bind = CTRL, 4, exec, ${lib.getBin warcraft-create-control-group} 4
+                  bind = CTRL, 5, exec, ${lib.getBin warcraft-create-control-group} 5
+                  bind = CTRL, 6, exec, ${lib.getBin warcraft-create-control-group} 6
+                  bind = CTRL, 7, exec, ${lib.getBin warcraft-create-control-group} 7
+                  bind = CTRL, 8, exec, ${lib.getBin warcraft-create-control-group} 8
+                  bind = CTRL, 9, exec, ${lib.getBin warcraft-create-control-group} 9
+                  bind = CTRL, 0, exec, ${lib.getBin warcraft-create-control-group} 0
+                  bind = SHIFT, mouse:272, exec, ${lib.getBin warcraft-remove-unit-control-group}
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CONTROLGROUP
                   bind = $mod, Q, submap, WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = CHAT
-                  bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
-                  bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
+                  bind = , RETURN, exec, ${lib.getBin warcraft-chat-send}
+                  bind = , ESCAPE, exec, ${lib.getBin warcraft-chat-close}
                   submap = reset
                 '';
               };
