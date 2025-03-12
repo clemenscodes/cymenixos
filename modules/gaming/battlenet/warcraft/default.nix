@@ -245,7 +245,7 @@
 
       echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
 
-      echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers"
+      echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers" >> "$YDOTOOL_LOG_FILE"
       ydotool key 57:0 57:1 57:0 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
 
       hyprctl dispatch submap WARCRAFT
