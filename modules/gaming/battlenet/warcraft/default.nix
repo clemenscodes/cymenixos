@@ -16,15 +16,303 @@
       inputs.battlenet.packages.${system}.battlenet
       pkgs.systemd
       pkgs.hyprland
+      start-warcraft-mode
+      stop-warcraft-mode
+    ];
+    text = ''
+      start-warcraft-mode
+      battlenet
+      stop-warcraft-mode
+    '';
+  };
+  start-warcraft-mode = pkgs.writeShellApplication {
+    name = "start-warcraft-mode";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      pkill battlenet
+      pkill srt-bwrap
+      pkill wine
+      pkill wineserver
+      systemctl --user stop xremap.service
+      systemctl --user start xremap-warcraft.service
+      hyprctl dispatch submap WARCRAFT
+    '';
+  };
+  stop-warcraft-mode = pkgs.writeShellApplication {
+    name = "stop-warcraft-mode";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      systemctl --user stop xremap-warcraft.service
+      systemctl --user start xremap.service
+      hyprctl dispatch submap reset
+      pkill battlenet
+      pkill srt-bwrap
+      pkill wine
+      pkill wineserver
+    '';
+  };
+  warcraft-autocast-hotkey = pkgs.writeShellApplication {
+    name = "warcraft-autocast-hotkey";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      SCREEN_WIDTH=1920
+      SCREEN_HEIGHT=1080
+
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --width)
+            SCREEN_WIDTH="$2"
+            shift 2
+            ;;
+          --height)
+            SCREEN_HEIGHT="$2"
+            shift 2
+            ;;
+          *)
+            HOTKEY="$1"
+            shift
+            ;;
+        esac
+      done
+
+      MOUSE_POS=$(hyprctl cursorpos)
+      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
+      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
+
+      calculate_coordinates() {
+        case "$HOTKEY" in
+          Q) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+          W) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+          E) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+          R) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
+          A) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+          S) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+          D) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+          F) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
+          Y) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+          X) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+          C) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+          V) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+        esac
+      }
+
+      calculate_coordinates
+
+      MOUSE_X=$((MOUSE_X / 2))
+      MOUSE_Y=$((MOUSE_Y / 2))
+      X=$((X / 2))
+      Y=$((Y / 2))
+
+      ydotool mousemove --absolute --xpos 0 --ypos 0
+      ydotool mousemove --xpos "$X" --ypos "$Y"
+      ydotool click 0xC1
+      ydotool mousemove --absolute --xpos 0 --ypos 0
+      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
+    '';
+  };
+  warcraft-inventory-hotkey = pkgs.writeShellApplication {
+    name = "warcraft-inventory-hotkey";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      SCREEN_WIDTH=1920
+      SCREEN_HEIGHT=1080
+
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --width)
+            SCREEN_WIDTH="$2"
+            shift 2
+            ;;
+          --height)
+            SCREEN_HEIGHT="$2"
+            shift 2
+            ;;
+          *)
+            HOTKEY="$1"
+            shift
+            ;;
+        esac
+      done
+
+      MOUSE_POS=$(hyprctl cursorpos)
+      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
+      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
+
+      calculate_coordinates() {
+        case "$HOTKEY" in
+          1) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
+          2) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
+          3) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
+          4) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
+          5) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          6) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+        esac
+      }
+
+      calculate_coordinates
+
+      MOUSE_X=$((MOUSE_X / 2))
+      MOUSE_Y=$((MOUSE_Y / 2))
+      X=$((X / 2))
+      Y=$((Y / 2))
+
+      ydotool mousemove --absolute --xpos 0 --ypos 0
+      ydotool mousemove --xpos "$X" --ypos "$Y"
+      ydotool click 0xC0
+      ydotool mousemove --absolute --xpos 0 --ypos 0
+      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
+    '';
+  };
+  open-warcraft-chat = pkgs.writeShellApplication {
+    name = "open-warcraft-chat";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+      pkgs.systemd
+    ];
+    text = ''
+      systemctl --user stop xremap-warcraft.service
+      systemctl --user start xremap.service
+      ydotool key 96:1 96:0 # Press Numpad_Enter
+      hyprctl dispatch submap CHAT
+    '';
+  };
+  send-warcraft-chat = pkgs.writeShellApplication {
+    name = "send-warcraft-chat";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
     ];
     text = ''
       systemctl --user stop xremap.service
       systemctl --user start xremap-warcraft.service
+      ydotool key 96:1 96:0 # Press Numpad_Enter
       hyprctl dispatch submap WARCRAFT
-      battlenet
-      hyprctl dispatch submap reset
-      systemctl --user stop xremap-warcraft.service
-      systemctl --user start xremap.service
+    '';
+  };
+  close-warcraft-chat = pkgs.writeShellApplication {
+    name = "close-warcraft-chat";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      systemctl --user stop xremap.service
+      systemctl --user start xremap-warcraft.service
+      ydotool key 58:1 58:0 # Press caps lock which is actually escape
+      ydotool key 1:1 1:0 # Press escape again to be sure
+      hyprctl dispatch submap WARCRAFT
+    '';
+  };
+  warcraft-select-control-group = pkgs.writeShellApplication {
+    name = "warcraft-select-control-group";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
+      SELECTED_CONTROL_GROUP="$1"
+      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+
+      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+
+      get_control_group_keycode() {
+        case "$SELECTED_CONTROL_GROUP" in
+          1) CONTROL_GROUP_KEYCODE=2; return ;;
+          2) CONTROL_GROUP_KEYCODE=3; return ;;
+          3) CONTROL_GROUP_KEYCODE=4; return ;;
+          4) CONTROL_GROUP_KEYCODE=5; return ;;
+          5) CONTROL_GROUP_KEYCODE=6; return ;;
+          6) CONTROL_GROUP_KEYCODE=7; return ;;
+          7) CONTROL_GROUP_KEYCODE=8; return ;;
+          8) CONTROL_GROUP_KEYCODE=9; return ;;
+          9) CONTROL_GROUP_KEYCODE=10; return ;;
+          0) CONTROL_GROUP_KEYCODE=11; return ;;
+        esac
+      }
+
+      get_control_group_keycode
+
+      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
+
+      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
+
+      hyprctl dispatch submap WARCRAFT
+    '';
+  };
+  warcraft-create-control-group = pkgs.writeShellApplication {
+    name = "warcraft-create-control-group";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
+      SELECTED_CONTROL_GROUP="$1"
+      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+
+      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+
+      get_control_group_keycode() {
+        case "$SELECTED_CONTROL_GROUP" in
+          1) CONTROL_GROUP_KEYCODE=2; return ;;
+          2) CONTROL_GROUP_KEYCODE=3; return;;
+          3) CONTROL_GROUP_KEYCODE=4; return;;
+          4) CONTROL_GROUP_KEYCODE=5; return;;
+          5) CONTROL_GROUP_KEYCODE=6; return;;
+          6) CONTROL_GROUP_KEYCODE=7; return;;
+          7) CONTROL_GROUP_KEYCODE=8; return;;
+          8) CONTROL_GROUP_KEYCODE=9; return;;
+          9) CONTROL_GROUP_KEYCODE=10; return;;
+          0) CONTROL_GROUP_KEYCODE=11; return;;
+        esac
+      }
+
+      get_control_group_keycode
+
+      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
+
+      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
+
+      hyprctl dispatch submap WARCRAFT
+    '';
+  };
+  warcraft-remove-unit-control-group = pkgs.writeShellApplication {
+    name = "warcraft-remove-unit-control-group";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
+      ydotool key 42:1
+      ydotool click 0xC0
+      ydotool key 42:0
+
+      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
+      CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
+
+      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":1 29:0
+
+      hyprctl dispatch submap WARCRAFT
     '';
   };
 in {
@@ -140,7 +428,7 @@ in {
                 name = "Warcraft III";
                 type = "Application";
                 categories = ["Game"];
-                genericName = "Real-time strategy game by Blizzard Entertainment";
+                genericName = "RTS by Blizzard";
                 icon = ./assets/warcraft-iii-reforged.svg;
                 exec = "${warcraft}/bin/warcraft";
                 terminal = false;
@@ -150,254 +438,10 @@ in {
           wayland = {
             windowManager = {
               hyprland = {
-                extraConfig = let
-                  warcraft-autocast-hotkey = pkgs.writeShellApplication {
-                    name = "warcraft-autocast-hotkey";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                      pkgs.hyprland
-                    ];
-                    text = ''
-                      SCREEN_WIDTH=1920
-                      SCREEN_HEIGHT=1080
-
-                      while [[ $# -gt 0 ]]; do
-                        case "$1" in
-                          --width)
-                            SCREEN_WIDTH="$2"
-                            shift 2
-                            ;;
-                          --height)
-                            SCREEN_HEIGHT="$2"
-                            shift 2
-                            ;;
-                          *)
-                            HOTKEY="$1"
-                            shift
-                            ;;
-                        esac
-                      done
-
-                      MOUSE_POS=$(hyprctl cursorpos)
-                      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
-                      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
-
-                      calculate_coordinates() {
-                        case "$HOTKEY" in
-                          Q) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-                          W) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-                          E) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-                          R) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-                          A) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-                          S) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-                          D) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-                          F) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-                          Y) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
-                          X) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
-                          C) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
-                          V) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
-                        esac
-                      }
-
-                      calculate_coordinates
-
-                      MOUSE_X=$((MOUSE_X / 2))
-                      MOUSE_Y=$((MOUSE_Y / 2))
-                      X=$((X / 2))
-                      Y=$((Y / 2))
-
-                      ydotool mousemove --absolute --xpos 0 --ypos 0
-                      ydotool mousemove --xpos "$X" --ypos "$Y"
-                      ydotool click 0xC1
-                      ydotool mousemove --absolute --xpos 0 --ypos 0
-                      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
-                    '';
-                  };
-                  warcraft-inventory-hotkey = pkgs.writeShellApplication {
-                    name = "warcraft-inventory-hotkey";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                      pkgs.hyprland
-                    ];
-                    text = ''
-                      SCREEN_WIDTH=1920
-                      SCREEN_HEIGHT=1080
-
-                      while [[ $# -gt 0 ]]; do
-                        case "$1" in
-                          --width)
-                            SCREEN_WIDTH="$2"
-                            shift 2
-                            ;;
-                          --height)
-                            SCREEN_HEIGHT="$2"
-                            shift 2
-                            ;;
-                          *)
-                            HOTKEY="$1"
-                            shift
-                            ;;
-                        esac
-                      done
-
-                      MOUSE_POS=$(hyprctl cursorpos)
-                      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
-                      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
-
-                      calculate_coordinates() {
-                        case "$HOTKEY" in
-                          1) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
-                          2) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
-                          3) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
-                          4) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
-                          5) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-                          6) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-                        esac
-                      }
-
-                      calculate_coordinates
-
-                      MOUSE_X=$((MOUSE_X / 2))
-                      MOUSE_Y=$((MOUSE_Y / 2))
-                      X=$((X / 2))
-                      Y=$((Y / 2))
-
-                      ydotool mousemove --absolute --xpos 0 --ypos 0
-                      ydotool mousemove --xpos "$X" --ypos "$Y"
-                      ydotool click 0xC0
-                      ydotool mousemove --absolute --xpos 0 --ypos 0
-                      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
-                    '';
-                  };
-                  open-warcraft-chat = pkgs.writeShellApplication {
-                    name = "open-warcraft-chat";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                      pkgs.hyprland
-                      pkgs.systemd
-                    ];
-                    text = ''
-                      systemctl --user stop xremap-warcraft.service
-                      systemctl --user start xremap.service
-                      ydotool key 96:1 96:0 # Press Numpad_Enter
-                      hyprctl dispatch submap CHAT
-                    '';
-                  };
-                  send-warcraft-chat = pkgs.writeShellApplication {
-                    name = "send-warcraft-chat";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                      pkgs.hyprland
-                    ];
-                    text = ''
-                      systemctl --user stop xremap.service
-                      systemctl --user start xremap-warcraft.service
-                      ydotool key 96:1 96:0 # Press Numpad_Enter
-                      hyprctl dispatch submap WARCRAFT
-                    '';
-                  };
-                  close-warcraft-chat = pkgs.writeShellApplication {
-                    name = "close-warcraft-chat";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                      pkgs.hyprland
-                    ];
-                    text = ''
-                      systemctl --user stop xremap.service
-                      systemctl --user start xremap-warcraft.service
-                      ydotool key 58:1 58:0 # Press caps lock which is actually escape
-                      ydotool key 1:1 1:0 # Press escape again to be sure
-                      hyprctl dispatch submap WARCRAFT
-                    '';
-                  };
-                  warcraft-select-control-group = pkgs.writeShellApplication {
-                    name = "warcraft-select-control-group";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                    ];
-                    text = ''
-                      SELECTED_CONTROL_GROUP="$1"
-                      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-                      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
-
-                      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
-
-                      get_control_group_keycode() {
-                        case "$SELECTED_CONTROL_GROUP" in
-                          1) CONTROL_GROUP_KEYCODE=2; return ;;
-                          2) CONTROL_GROUP_KEYCODE=3; return ;;
-                          3) CONTROL_GROUP_KEYCODE=4; return ;;
-                          4) CONTROL_GROUP_KEYCODE=5; return ;;
-                          5) CONTROL_GROUP_KEYCODE=6; return ;;
-                          6) CONTROL_GROUP_KEYCODE=7; return ;;
-                          7) CONTROL_GROUP_KEYCODE=8; return ;;
-                          8) CONTROL_GROUP_KEYCODE=9; return ;;
-                          9) CONTROL_GROUP_KEYCODE=10; return ;;
-                          0) CONTROL_GROUP_KEYCODE=11; return ;;
-                        esac
-                      }
-
-                      get_control_group_keycode
-
-                      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
-
-                      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
-                    '';
-                  };
-                  warcraft-create-control-group = pkgs.writeShellApplication {
-                    name = "warcraft-create-control-group";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                    ];
-                    text = ''
-                      SELECTED_CONTROL_GROUP="$1"
-                      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-                      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
-
-                      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
-
-                      get_control_group_keycode() {
-                        case "$SELECTED_CONTROL_GROUP" in
-                          1) CONTROL_GROUP_KEYCODE=2; return ;;
-                          2) CONTROL_GROUP_KEYCODE=3; return;;
-                          3) CONTROL_GROUP_KEYCODE=4; return;;
-                          4) CONTROL_GROUP_KEYCODE=5; return;;
-                          5) CONTROL_GROUP_KEYCODE=6; return;;
-                          6) CONTROL_GROUP_KEYCODE=7; return;;
-                          7) CONTROL_GROUP_KEYCODE=8; return;;
-                          8) CONTROL_GROUP_KEYCODE=9; return;;
-                          9) CONTROL_GROUP_KEYCODE=10; return;;
-                          0) CONTROL_GROUP_KEYCODE=11; return;;
-                        esac
-                      }
-
-                      get_control_group_keycode
-
-                      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
-
-                      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
-                    '';
-                  };
-                  warcraft-remove-unit-control-group = pkgs.writeShellApplication {
-                    name = "warcraft-remove-unit-control-group";
-                    runtimeInputs = [
-                      pkgs.ydotool
-                    ];
-                    text = ''
-                      ydotool key 42:1
-                      ydotool click 0xC0
-                      ydotool key 42:0
-
-                      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
-                      CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
-
-                      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":1 29:0
-                    '';
-                  };
-                in ''
-                  bind = CTRL, W, submap, WARCRAFT
+                extraConfig = ''
+                  bind = CTRL, W, exec, ${start-warcraft-mode}/bin/start-warcraft-mode
                   submap = WARCRAFT
-                  bind = CTRL SHIFT, W, submap, reset
+                  bind = Alt_L, W, exec, ${stop-warcraft-mode}/bin/stop-warcraft-mode
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   bind = SHIFT, Q, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey Q
                   bind = SHIFT, W, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey W
@@ -439,6 +483,7 @@ in {
                   bind = CTRL, 0, exec, ${warcraft-create-control-group}/bin/warcraft-create-control-group 0
                   bind = SHIFT, mouse:272, exec, ${warcraft-remove-unit-control-group}/bin/warcraft-remove-unit-control-group
                   bindr = CAPS, Caps_Lock, exec, true
+                  submap = CONTROLGROUP
                   submap = CHAT
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
                   bind = , ESCAPE, exec, ${close-warcraft-chat}/bin/close-warcraft-chat
