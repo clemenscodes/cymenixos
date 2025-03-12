@@ -10,6 +10,23 @@
 }: let
   cfg = config.modules.gaming.battlenet;
   inherit (config.modules.users) name;
+  warcraft = pkgs.writeShellApplication {
+    name = "warcraft";
+    runtimeInputs = [
+      inputs.battlenet.packages.${system}.battlenet
+      pkgs.systemd
+      pkgs.hyprland
+    ];
+    text = ''
+      systemctl --user stop xremap.service
+      systemctl --user start xremap-warcraft.service
+      hyprctl dispatch submap WARCRAFT
+      battlenet
+      hyprctl dispatch submap reset
+      systemctl --user stop xremap-warcraft.service
+      systemctl --user start xremap.service
+    '';
+  };
 in {
   options = {
     modules = {
@@ -23,6 +40,9 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
+    environment = {
+      systemPackages = [warcraft];
+    };
     systemd = {
       user = {
         services = {
@@ -114,6 +134,19 @@ in {
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${name} = {
+          xdg = {
+            desktopEntries = {
+              warcraft = {
+                name = "Warcraft III";
+                type = "Application";
+                categories = ["Game"];
+                genericName = "Warcraft III";
+                icon = ./assets/warcraft-iii-reforged.svg;
+                exec = "${warcraft}/bin/warcraft";
+                terminal = false;
+              };
+            };
+          };
           wayland = {
             windowManager = {
               hyprland = {
@@ -236,6 +269,8 @@ in {
                       pkgs.systemd
                     ];
                     text = ''
+                      systemctl --user stop xremap-warcraft.service
+                      systemctl --user start xremap.service
                       ydotool key 96:1 96:0 # Press Numpad_Enter
                       hyprctl dispatch submap CHAT
                     '';
@@ -247,6 +282,8 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
+                      systemctl --user stop xremap.service
+                      systemctl --user start xremap-warcraft.service
                       ydotool key 96:1 96:0 # Press Numpad_Enter
                       hyprctl dispatch submap WARCRAFT
                     '';
@@ -258,15 +295,17 @@ in {
                       pkgs.hyprland
                     ];
                     text = ''
+                      systemctl --user stop xremap.service
+                      systemctl --user start xremap-warcraft.service
                       ydotool key 58:1 58:0 # Press caps lock which is actually escape
                       ydotool key 1:1 1:0 # Press escape again to be sure
                       hyprctl dispatch submap WARCRAFT
                     '';
                   };
                 in ''
-                  bind = Alt_L SHIFT, W, submap, WARCRAFT
+                  bind = CTRL, W, submap, WARCRAFT
                   submap = WARCRAFT
-                  bind = Alt_L SHIFT, W, submap, reset
+                  bind = CTRL SHIFT, W, submap, reset
                   bind = , RETURN, exec, ${open-warcraft-chat}/bin/open-warcraft-chat
                   bind = SHIFT, Q, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey Q
                   bind = SHIFT, W, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey W
@@ -280,12 +319,12 @@ in {
                   bind = SHIFT, X, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey X
                   bind = SHIFT, C, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey C
                   bind = SHIFT, V, exec, ${warcraft-autocast-hotkey}/bin/warcraft-autocast-hotkey V
-                  bind = Alt_L, Q, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 1
-                  bind = Alt_L, W, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 2
-                  bind = Alt_L, A, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 3
-                  bind = Alt_L, S, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 4
-                  bind = Alt_L, Y, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 5
-                  bind = Alt_L, X, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 6
+                  bind = CTRL, Q, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 1
+                  bind = CTRL, W, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 2
+                  bind = CTRL, A, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 3
+                  bind = CTRL, S, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 4
+                  bind = CTRL, Y, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 5
+                  bind = CTRL, X, exec, ${warcraft-inventory-hotkey}/bin/warcraft-inventory-hotkey 6
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CHAT
                   bind = , RETURN, exec, ${send-warcraft-chat}/bin/send-warcraft-chat
