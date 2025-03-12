@@ -50,6 +50,7 @@ in {
                 ExecStart = let
                   mkExecStart = configFile: let
                     cfg = config.modules.xremap;
+                    mkDeviceString = x: "--device '${x}'";
                   in
                     builtins.concatStringsSep " " (
                       lib.flatten (
