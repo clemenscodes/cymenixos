@@ -482,25 +482,43 @@ in {
                           remap:
                             G: F8
 
+                        - name: Control Groups
+                          remap:
+                            KEY_1:
+                              alone_timeout_millis: 300
+                              alone: KEY_1
+                              held: KEY_6
+                            KEY_2:
+                              alone_timeout_millis: 300
+                              alone: KEY_2
+                              held: KEY_7
+                            KEY_3:
+                              alone_timeout_millis: 300
+                              alone: KEY_3
+                              held: KEY_8
+                            KEY_4:
+                              alone_timeout_millis: 300
+                              alone: KEY_4
+                              held: KEY_9
+                            KEY_5:
+                              alone_timeout_millis: 300
+                              alone: KEY_5
+                              held: KEY_0
+
                       keymap:
                         - name: Better Control Groups
                           remap:
-                            BTN_SIDE: ALT_R-LeftCtrl
-                            ALT_R-KEY_1: KEY_6
-                            ALT_R-KEY_2: KEY_7
-                            ALT_R-KEY_3: KEY_8
-                            ALT_R-KEY_4: KEY_9
-                            ALT_R-KEY_5: KEY_0
                             ALT_L-KEY_1: LeftCtrl-KEY_1
                             ALT_L-KEY_2: LeftCtrl-KEY_2
                             ALT_L-KEY_3: LeftCtrl-KEY_3
                             ALT_L-KEY_4: LeftCtrl-KEY_4
                             ALT_L-KEY_5: LeftCtrl-KEY_5
-                            ALT_R-LeftCtrl-KEY_1: LeftCtrl-KEY_6
-                            ALT_R-LeftCtrl-KEY_2: LeftCtrl-KEY_7
-                            ALT_R-LeftCtrl-KEY_3: LeftCtrl-KEY_8
-                            ALT_R-LeftCtrl-KEY_4: LeftCtrl-KEY_9
-                            ALT_R-LeftCtrl-KEY_5: LeftCtrl-KEY_0
+                            ALT_L-KEY_6: LeftCtrl-KEY_6
+                            ALT_L-KEY_7: LeftCtrl-KEY_7
+                            ALT_L-KEY_8: LeftCtrl-KEY_8
+                            ALT_L-KEY_9: LeftCtrl-KEY_9
+                            ALT_L-KEY_0: LeftCtrl-KEY_0
+                            BTN_SIDE: ALT_L-SHIFT_L
                     '';
                   };
                 in
@@ -559,21 +577,21 @@ in {
                   bind = CTRL, 3, exec, ${lib.getExe warcraft-create-control-group} 3
                   bind = CTRL, 4, exec, ${lib.getExe warcraft-create-control-group} 4
                   bind = CTRL, 5, exec, ${lib.getExe warcraft-create-control-group} 5
-                  bind = $mod CTRL, 1, exec, ${lib.getExe warcraft-create-control-group} 6
-                  bind = $mod CTRL, 2, exec, ${lib.getExe warcraft-create-control-group} 7
-                  bind = $mod CTRL, 3, exec, ${lib.getExe warcraft-create-control-group} 8
-                  bind = $mod CTRL, 4, exec, ${lib.getExe warcraft-create-control-group} 9
-                  bind = $mod CTRL, 5, exec, ${lib.getExe warcraft-create-control-group} 0
+                  bind = CTRL, 6, exec, ${lib.getExe warcraft-create-control-group} 6
+                  bind = CTRL, 7, exec, ${lib.getExe warcraft-create-control-group} 7
+                  bind = CTRL, 8, exec, ${lib.getExe warcraft-create-control-group} 8
+                  bind = CTRL, 9, exec, ${lib.getExe warcraft-create-control-group} 9
+                  bind = CTRL, 0, exec, ${lib.getExe warcraft-create-control-group} 0
                   bind = , 1, exec, ${lib.getExe warcraft-select-control-group} 1
                   bind = , 2, exec, ${lib.getExe warcraft-select-control-group} 2
                   bind = , 3, exec, ${lib.getExe warcraft-select-control-group} 3
                   bind = , 4, exec, ${lib.getExe warcraft-select-control-group} 4
                   bind = , 5, exec, ${lib.getExe warcraft-select-control-group} 5
-                  bind = $mod, 1, exec, ${lib.getExe warcraft-select-control-group} 6
-                  bind = $mod, 2, exec, ${lib.getExe warcraft-select-control-group} 7
-                  bind = $mod, 3, exec, ${lib.getExe warcraft-select-control-group} 8
-                  bind = $mod, 4, exec, ${lib.getExe warcraft-select-control-group} 9
-                  bind = $mod, 5, exec, ${lib.getExe warcraft-select-control-group} 0
+                  bind = , 6, exec, ${lib.getExe warcraft-select-control-group} 6
+                  bind = , 7, exec, ${lib.getExe warcraft-select-control-group} 7
+                  bind = , 8, exec, ${lib.getExe warcraft-select-control-group} 8
+                  bind = , 9, exec, ${lib.getExe warcraft-select-control-group} 9
+                  bind = , 0, exec, ${lib.getExe warcraft-select-control-group} 0
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = ALT, A, exec, ${lib.getExe warcraft-select-unit} 1
                   bind = ALT, S, exec, ${lib.getExe warcraft-select-unit} 2
