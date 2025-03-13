@@ -104,6 +104,8 @@
       X=$((X / 2))
       Y=$((Y / 2))
 
+      echo "Moving mouse to coordinate $X x $Y and clicking right mouse button" >> "$YDOTOOL_LOG_FILE"
+
       ydotool mousemove --absolute --xpos 0 --ypos 0
       ydotool mousemove --xpos "$X" --ypos "$Y"
       ydotool click 0xC1
@@ -159,6 +161,8 @@
       MOUSE_Y=$((MOUSE_Y / 2))
       X=$((X / 2))
       Y=$((Y / 2))
+
+      echo "Moving mouse to coordinate $X x $Y and clicking left mouse button" >> "$YDOTOOL_LOG_FILE"
 
       ydotool mousemove --absolute --xpos 0 --ypos 0
       ydotool mousemove --xpos "$X" --ypos "$Y"
@@ -290,6 +294,75 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
+  warcraft-select-unit = pkgs.writeShellApplication {
+    name = "warcraft-select-unit";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    excludeShellChecks = ["SC2046" "SC2086"];
+    text = ''
+      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      SCREEN_WIDTH=1920
+      SCREEN_HEIGHT=1080
+
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --width)
+            SCREEN_WIDTH="$2"
+            shift 2
+            ;;
+          --height)
+            SCREEN_HEIGHT="$2"
+            shift 2
+            ;;
+          *)
+            SELECTED_UNIT="$1"
+            shift
+            ;;
+        esac
+      done
+
+      echo "Selecting unit $SELECTED_UNIT from control group" >> "$YDOTOOL_LOG_FILE"
+
+      MOUSE_POS=$(hyprctl cursorpos)
+      MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
+      MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
+
+      calculate_coordinates() {
+        case "$SELECTED_UNIT" in
+          1) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
+          2) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
+          3) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
+          4) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
+          5) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          6) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          7) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          8) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          9) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          10) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          11) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          12) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+        esac
+      }
+
+      calculate_coordinates
+
+
+      MOUSE_X=$((MOUSE_X / 2))
+      MOUSE_Y=$((MOUSE_Y / 2))
+      X=$((X / 2))
+      Y=$((Y / 2))
+
+      echo "Moving mouse to coordinate $X x $Y and clicking left mouse button" >> "$YDOTOOL_LOG_FILE"
+
+      ydotool mousemove --absolute --xpos 0 --ypos 0
+      ydotool mousemove --xpos "$X" --ypos "$Y"
+      ydotool click 0xC0
+      ydotool mousemove --absolute --xpos 0 --ypos 0
+      ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
+    '';
+  };
   warcraft-scripts = pkgs.symlinkJoin {
     name = "warcraft-scripts";
     paths = [
@@ -304,6 +377,7 @@
       warcraft-create-control-group
       warcraft-select-control-group
       warcraft-edit-unit-control-group
+      warcraft-select-unit
     ];
   };
 in {
@@ -387,10 +461,17 @@ in {
                   configFile = pkgs.writeTextFile {
                     name = "xremap-warcraft-config.yml";
                     text = ''
-                      virtual_modifiers:
-                        - BTN_EXTRA
-
                       modmap:
+                        - name: Better Modifiers
+                          remap:
+                            BTN_EXTRA: ALT_L
+                            BTN_SIDE:
+                              held:
+                                - ALT_L
+                                - SHIFT_L
+                              alone_timeout_millis: 100
+                              alone: BTN_SIDE
+
                         - name: Better Caps
                           remap:
                             CapsLock:
@@ -448,11 +529,11 @@ in {
                             SUPER-KEY_3: KEY_8
                             SUPER-KEY_4: KEY_9
                             SUPER-KEY_5: KEY_0
-                            BTN_EXTRA-KEY_1: LeftCtrl-KEY_6
-                            BTN_EXTRA-KEY_2: LeftCtrl-KEY_7
-                            BTN_EXTRA-KEY_3: LeftCtrl-KEY_8
-                            BTN_EXTRA-KEY_4: LeftCtrl-KEY_9
-                            BTN_EXTRA-KEY_5: LeftCtrl-KEY_0
+                            ALT_L-KEY_1: LeftCtrl-KEY_6
+                            ALT_L-KEY_2: LeftCtrl-KEY_7
+                            ALT_L-KEY_3: LeftCtrl-KEY_8
+                            ALT_L-KEY_4: LeftCtrl-KEY_9
+                            ALT_L-KEY_5: LeftCtrl-KEY_0
                     '';
                   };
                 in
@@ -527,6 +608,18 @@ in {
                   bind = $mod, 4, exec, ${lib.getExe warcraft-select-control-group} 9
                   bind = $mod, 5, exec, ${lib.getExe warcraft-select-control-group} 0
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
+                  bind = ALT, A, exec, ${lib.getExe warcraft-select-unit} 1
+                  bind = ALT, S, exec, ${lib.getExe warcraft-select-unit} 2
+                  bind = ALT, D, exec, ${lib.getExe warcraft-select-unit} 3
+                  bind = ALT, F, exec, ${lib.getExe warcraft-select-unit} 4
+                  bind = ALT, E, exec, ${lib.getExe warcraft-select-unit} 5
+                  bind = ALT, R, exec, ${lib.getExe warcraft-select-unit} 6
+                  bind = ALT SHIFT, A, exec, ${lib.getExe warcraft-select-unit} 7
+                  bind = ALT SHIFT, S, exec, ${lib.getExe warcraft-select-unit} 8
+                  bind = ALT SHIFT, D, exec, ${lib.getExe warcraft-select-unit} 9
+                  bind = ALT SHIFT, F, exec, ${lib.getExe warcraft-select-unit} 10
+                  bind = ALT SHIFT, E, exec, ${lib.getExe warcraft-select-unit} 11
+                  bind = ALT SHIFT, R, exec, ${lib.getExe warcraft-select-unit} 12
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CONTROLGROUP
                   bind = $mod, Q, submap, WARCRAFT
