@@ -459,18 +459,12 @@ in {
                       )
                     );
                   configFile = pkgs.writeTextFile {
-                    name = "xremap-warcraft-config.yml";
+                    name = "xremap-warcraft.yml";
                     text = ''
                       modmap:
                         - name: Better Modifiers
                           remap:
                             BTN_EXTRA: ALT_L
-                            BTN_SIDE:
-                              held:
-                                - ALT_L
-                                - SHIFT_L
-                              alone_timeout_millis: 100
-                              alone: BTN_SIDE
 
                         - name: Better Caps
                           remap:
@@ -479,56 +473,34 @@ in {
                               alone: ESC
                               alone_timeout_millis: 500
 
+                        - name: Swap Space & Ctrl
+                          remap:
+                            LeftCtrl: Space
+                            Space: LeftCtrl
+
                         - name: Idle workers
                           remap:
                             G: F8
 
+                      keymap:
                         - name: Better Control Groups
                           remap:
-                            KEY_1:
-                              alone_timeout_millis: 500
-                              alone: KEY_1
-                              held:
-                                - LeftCtrl
-                                - KEY_1
-                            KEY_2:
-                              alone_timeout_millis: 500
-                              alone: KEY_2
-                              held:
-                                - LeftCtrl
-                                - KEY_2
-                            KEY_3:
-                              alone_timeout_millis: 500
-                              alone: KEY_3
-                              held:
-                                - LeftCtrl
-                                - KEY_3
-                            KEY_4:
-                              alone_timeout_millis: 500
-                              alone: KEY_4
-                              held:
-                                - LeftCtrl
-                                - KEY_4
-                            KEY_5:
-                              alone_timeout_millis: 500
-                              alone: KEY_5
-                              held:
-                                - LeftCtrl
-                                - KEY_5
-
-                      keymap:
-                        - name: Better Control Groups keymaps
-                          remap:
-                            SUPER-KEY_1: KEY_6
-                            SUPER-KEY_2: KEY_7
-                            SUPER-KEY_3: KEY_8
-                            SUPER-KEY_4: KEY_9
-                            SUPER-KEY_5: KEY_0
-                            ALT_L-KEY_1: LeftCtrl-KEY_6
-                            ALT_L-KEY_2: LeftCtrl-KEY_7
-                            ALT_L-KEY_3: LeftCtrl-KEY_8
-                            ALT_L-KEY_4: LeftCtrl-KEY_9
-                            ALT_L-KEY_5: LeftCtrl-KEY_0
+                            BTN_SIDE: ALT_R-LeftCtrl
+                            ALT_R-KEY_1: KEY_6
+                            ALT_R-KEY_2: KEY_7
+                            ALT_R-KEY_3: KEY_8
+                            ALT_R-KEY_4: KEY_9
+                            ALT_R-KEY_5: KEY_0
+                            ALT_L-KEY_1: LeftCtrl-KEY_1
+                            ALT_L-KEY_2: LeftCtrl-KEY_2
+                            ALT_L-KEY_3: LeftCtrl-KEY_3
+                            ALT_L-KEY_4: LeftCtrl-KEY_4
+                            ALT_L-KEY_5: LeftCtrl-KEY_5
+                            ALT_R-LeftCtrl-KEY_1: LeftCtrl-KEY_6
+                            ALT_R-LeftCtrl-KEY_2: LeftCtrl-KEY_7
+                            ALT_R-LeftCtrl-KEY_3: LeftCtrl-KEY_8
+                            ALT_R-LeftCtrl-KEY_4: LeftCtrl-KEY_9
+                            ALT_R-LeftCtrl-KEY_5: LeftCtrl-KEY_0
                     '';
                   };
                 in
