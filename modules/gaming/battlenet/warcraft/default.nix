@@ -479,11 +479,6 @@ in {
                               alone: ESC
                               alone_timeout_millis: 500
 
-                        - name: Swap Space & Ctrl
-                          remap:
-                            LeftCtrl: Space
-                            Space: LeftCtrl
-
                         - name: Idle workers
                           remap:
                             G: F8
@@ -491,31 +486,31 @@ in {
                         - name: Better Control Groups
                           remap:
                             KEY_1:
-                              alone_timeout_millis: 100
+                              alone_timeout_millis: 500
                               alone: KEY_1
                               held:
                                 - LeftCtrl
                                 - KEY_1
                             KEY_2:
-                              alone_timeout_millis: 100
+                              alone_timeout_millis: 500
                               alone: KEY_2
                               held:
                                 - LeftCtrl
                                 - KEY_2
                             KEY_3:
-                              alone_timeout_millis: 100
+                              alone_timeout_millis: 500
                               alone: KEY_3
                               held:
                                 - LeftCtrl
                                 - KEY_3
                             KEY_4:
-                              alone_timeout_millis: 100
+                              alone_timeout_millis: 500
                               alone: KEY_4
                               held:
                                 - LeftCtrl
                                 - KEY_4
                             KEY_5:
-                              alone_timeout_millis: 100
+                              alone_timeout_millis: 500
                               alone: KEY_5
                               held:
                                 - LeftCtrl
