@@ -414,10 +414,10 @@ in {
                             LeftCtrl: Space
                             Space: LeftCtrl
 
-                        - name: Better Modifiers
+                        - name: Better Mouse
                           remap:
-                            BTN_EXTRA: SUPER
-                            BTN_SIDE: CAPSLOCK
+                            BTN_EXTRA: ALT_L
+                            BTN_SIDE: ALT_R
 
                         - name: Idle workers
                           remap:
@@ -484,20 +484,25 @@ in {
                   bind = CTRL, S, exec, ${lib.getExe warcraft-inventory-hotkey} 4
                   bind = CTRL, Y, exec, ${lib.getExe warcraft-inventory-hotkey} 5
                   bind = CTRL, X, exec, ${lib.getExe warcraft-inventory-hotkey} 6
-                  bind = $mod, A, exec, ${lib.getExe warcraft-select-unit} 1
-                  bind = $mod, S, exec, ${lib.getExe warcraft-select-unit} 2
-                  bind = $mod, D, exec, ${lib.getExe warcraft-select-unit} 3
-                  bind = $mod, F, exec, ${lib.getExe warcraft-select-unit} 4
-                  bind = $mod, E, exec, ${lib.getExe warcraft-select-unit} 5
-                  bind = $mod, R, exec, ${lib.getExe warcraft-select-unit} 6
-                  bind = CAPS, A, exec, ${lib.getExe warcraft-select-unit} 7
-                  bind = CAPS, S, exec, ${lib.getExe warcraft-select-unit} 8
-                  bind = CAPS, D, exec, ${lib.getExe warcraft-select-unit} 9
-                  bind = CAPS, F, exec, ${lib.getExe warcraft-select-unit} 10
-                  bind = CAPS, E, exec, ${lib.getExe warcraft-select-unit} 11
-                  bind = CAPS, R, exec, ${lib.getExe warcraft-select-unit} 12
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
-                  bindr = CAPS, Caps_Lock, exec, true
+                  bind = , mouse:276, submap, BTN_EXTRA
+                  bind = , mouse:275, submap, BTN_SIDE
+                  submap = BTN_EXTRA
+                  bind = , A, exec, ${lib.getExe warcraft-select-unit} 1
+                  bind = , S, exec, ${lib.getExe warcraft-select-unit} 2
+                  bind = , D, exec, ${lib.getExe warcraft-select-unit} 3
+                  bind = , F, exec, ${lib.getExe warcraft-select-unit} 4
+                  bind = , E, exec, ${lib.getExe warcraft-select-unit} 5
+                  bind = , R, exec, ${lib.getExe warcraft-select-unit} 6
+                  bind = , catchall, submap, WARCRAFT
+                  submap = BTN_SIDE
+                  bind = , A, exec, ${lib.getExe warcraft-select-unit} 7
+                  bind = , S, exec, ${lib.getExe warcraft-select-unit} 8
+                  bind = , D, exec, ${lib.getExe warcraft-select-unit} 9
+                  bind = , F, exec, ${lib.getExe warcraft-select-unit} 10
+                  bind = , E, exec, ${lib.getExe warcraft-select-unit} 11
+                  bind = , R, exec, ${lib.getExe warcraft-select-unit} 12
+                  bind = , catchall, submap, WARCRAFT
                   submap = CONTROLGROUP
                   bind = $mod, Q, submap, WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
