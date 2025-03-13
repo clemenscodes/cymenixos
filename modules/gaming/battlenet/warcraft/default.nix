@@ -296,11 +296,11 @@
       X=$((X / 2))
       Y=$((Y / 2))
 
-      echo "Moving mouse to coordinate $X x $Y and clicking left mouse button" >> "$YDOTOOL_LOG_FILE"
+      echo "Moving mouse to coordinate $X x $Y and double clicking left mouse button" >> "$YDOTOOL_LOG_FILE"
 
       ydotool mousemove --absolute --xpos 0 --ypos 0
       ydotool mousemove --xpos "$X" --ypos "$Y"
-      ydotool click 0xC0
+      ydotool click 0xC0 0xC0
       ydotool mousemove --absolute --xpos 0 --ypos 0
       ydotool mousemove --xpos "$MOUSE_X" --ypos "$MOUSE_Y"
     '';
@@ -416,7 +416,8 @@ in {
 
                         - name: Better Modifiers
                           remap:
-                            BTN_EXTRA: ALT_L
+                            BTN_EXTRA: SUPER
+                            BTN_SIDE: CAPSLOCK
 
                         - name: Idle workers
                           remap:
@@ -430,7 +431,6 @@ in {
                             SUPER-KEY_3: KEY_8
                             SUPER-KEY_4: KEY_9
                             SUPER-KEY_5: KEY_0
-                            BTN_SIDE: ALT_L-SHIFT_L
                     '';
                   };
                 in
@@ -484,18 +484,18 @@ in {
                   bind = CTRL, S, exec, ${lib.getExe warcraft-inventory-hotkey} 4
                   bind = CTRL, Y, exec, ${lib.getExe warcraft-inventory-hotkey} 5
                   bind = CTRL, X, exec, ${lib.getExe warcraft-inventory-hotkey} 6
-                  bind = ALT, A, exec, ${lib.getExe warcraft-select-unit} 1
-                  bind = ALT, S, exec, ${lib.getExe warcraft-select-unit} 2
-                  bind = ALT, D, exec, ${lib.getExe warcraft-select-unit} 3
-                  bind = ALT, F, exec, ${lib.getExe warcraft-select-unit} 4
-                  bind = ALT, E, exec, ${lib.getExe warcraft-select-unit} 5
-                  bind = ALT, R, exec, ${lib.getExe warcraft-select-unit} 6
-                  bind = ALT SHIFT, A, exec, ${lib.getExe warcraft-select-unit} 7
-                  bind = ALT SHIFT, S, exec, ${lib.getExe warcraft-select-unit} 8
-                  bind = ALT SHIFT, D, exec, ${lib.getExe warcraft-select-unit} 9
-                  bind = ALT SHIFT, F, exec, ${lib.getExe warcraft-select-unit} 10
-                  bind = ALT SHIFT, E, exec, ${lib.getExe warcraft-select-unit} 11
-                  bind = ALT SHIFT, R, exec, ${lib.getExe warcraft-select-unit} 12
+                  bind = $mod, A, exec, ${lib.getExe warcraft-select-unit} 1
+                  bind = $mod, S, exec, ${lib.getExe warcraft-select-unit} 2
+                  bind = $mod, D, exec, ${lib.getExe warcraft-select-unit} 3
+                  bind = $mod, F, exec, ${lib.getExe warcraft-select-unit} 4
+                  bind = $mod, E, exec, ${lib.getExe warcraft-select-unit} 5
+                  bind = $mod, R, exec, ${lib.getExe warcraft-select-unit} 6
+                  bind = CAPS, A, exec, ${lib.getExe warcraft-select-unit} 7
+                  bind = CAPS, S, exec, ${lib.getExe warcraft-select-unit} 8
+                  bind = CAPS, D, exec, ${lib.getExe warcraft-select-unit} 9
+                  bind = CAPS, F, exec, ${lib.getExe warcraft-select-unit} 10
+                  bind = CAPS, E, exec, ${lib.getExe warcraft-select-unit} 11
+                  bind = CAPS, R, exec, ${lib.getExe warcraft-select-unit} 12
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CONTROLGROUP
