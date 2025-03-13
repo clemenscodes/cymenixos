@@ -265,8 +265,8 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
-  warcraft-remove-unit-control-group = pkgs.writeShellApplication {
-    name = "warcraft-remove-unit-control-group";
+  warcraft-edit-unit-control-group = pkgs.writeShellApplication {
+    name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
       pkgs.ydotool
       pkgs.hyprland
@@ -303,7 +303,7 @@
       warcraft-chat-close
       warcraft-create-control-group
       warcraft-select-control-group
-      warcraft-remove-unit-control-group
+      warcraft-edit-unit-control-group
     ];
   };
 in {
@@ -387,18 +387,72 @@ in {
                   configFile = pkgs.writeTextFile {
                     name = "xremap-warcraft-config.yml";
                     text = ''
-                      modmap:
-                        - name: Swap Space & Ctrl
-                          remap:
-                            LeftCtrl: Space
-                            Space: LeftCtrl
+                      virtual_modifiers:
+                        - BTN_EXTRA
 
-                        - name: "Better CapsLock"
+                      modmap:
+                        - name: Better Caps
                           remap:
                             CapsLock:
                               held: SUPER_L
                               alone: ESC
                               alone_timeout_millis: 500
+
+                        - name: Swap Space & Ctrl
+                          remap:
+                            LeftCtrl: Space
+                            Space: LeftCtrl
+
+                        - name: Idle workers
+                          remap:
+                            G: F8
+
+                        - name: Better Control Groups
+                          remap:
+                            KEY_1:
+                              alone_timeout_millis: 100
+                              alone: KEY_1
+                              held:
+                                - LeftCtrl
+                                - KEY_1
+                            KEY_2:
+                              alone_timeout_millis: 100
+                              alone: KEY_2
+                              held:
+                                - LeftCtrl
+                                - KEY_2
+                            KEY_3:
+                              alone_timeout_millis: 100
+                              alone: KEY_3
+                              held:
+                                - LeftCtrl
+                                - KEY_3
+                            KEY_4:
+                              alone_timeout_millis: 100
+                              alone: KEY_4
+                              held:
+                                - LeftCtrl
+                                - KEY_4
+                            KEY_5:
+                              alone_timeout_millis: 100
+                              alone: KEY_5
+                              held:
+                                - LeftCtrl
+                                - KEY_5
+
+                      keymap:
+                        - name: Better Control Groups keymaps
+                          remap:
+                            SUPER-KEY_1: KEY_6
+                            SUPER-KEY_2: KEY_7
+                            SUPER-KEY_3: KEY_8
+                            SUPER-KEY_4: KEY_9
+                            SUPER-KEY_5: KEY_0
+                            BTN_EXTRA-KEY_1: LeftCtrl-KEY_6
+                            BTN_EXTRA-KEY_2: LeftCtrl-KEY_7
+                            BTN_EXTRA-KEY_3: LeftCtrl-KEY_8
+                            BTN_EXTRA-KEY_4: LeftCtrl-KEY_9
+                            BTN_EXTRA-KEY_5: LeftCtrl-KEY_0
                     '';
                   };
                 in
@@ -472,7 +526,7 @@ in {
                   bind = $mod, 3, exec, ${lib.getExe warcraft-select-control-group} 8
                   bind = $mod, 4, exec, ${lib.getExe warcraft-select-control-group} 9
                   bind = $mod, 5, exec, ${lib.getExe warcraft-select-control-group} 0
-                  bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-remove-unit-control-group}
+                  bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CONTROLGROUP
                   bind = $mod, Q, submap, WARCRAFT
