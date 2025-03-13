@@ -212,63 +212,6 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
-  warcraft-create-control-group = pkgs.writeShellApplication {
-    name = "warcraft-create-control-group";
-    runtimeInputs = [
-      pkgs.ydotool
-      pkgs.hyprland
-    ];
-    excludeShellChecks = ["SC2046" "SC2086"];
-    text = ''
-      hyprctl dispatch submap CONTROLGROUP &
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
-      SELECTED_CONTROL_GROUP="$1"
-      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
-      echo "Creating control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
-      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
-      get_control_group_keycode() {
-        case "$SELECTED_CONTROL_GROUP" in
-          1) CONTROL_GROUP_KEYCODE=2; return ;;
-          2) CONTROL_GROUP_KEYCODE=3; return ;;
-          3) CONTROL_GROUP_KEYCODE=4; return ;;
-          4) CONTROL_GROUP_KEYCODE=5; return ;;
-          5) CONTROL_GROUP_KEYCODE=6; return ;;
-          6) CONTROL_GROUP_KEYCODE=7; return ;;
-          7) CONTROL_GROUP_KEYCODE=8; return ;;
-          8) CONTROL_GROUP_KEYCODE=9; return ;;
-          9) CONTROL_GROUP_KEYCODE=10; return ;;
-          0) CONTROL_GROUP_KEYCODE=11; return ;;
-        esac
-      }
-      get_control_group_keycode
-      echo "$CONTROL_GROUP_KEYCODE" > "$CONTROL_GROUP_KEYCODE_FILE"
-      echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifiers" >> "$YDOTOOL_LOG_FILE"
-      sleep 0.084
-      ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
-      hyprctl dispatch submap WARCRAFT
-    '';
-  };
-  warcraft-select-control-group = pkgs.writeShellApplication {
-    name = "warcraft-select-control-group";
-    runtimeInputs = [
-      pkgs.ydotool
-      pkgs.hyprland
-    ];
-    excludeShellChecks = ["SC2046" "SC2086"];
-    text = ''
-      hyprctl dispatch submap CONTROLGROUP &
-      SELECTED_CONTROL_GROUP="$1"
-      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
-      echo "Selecting control group $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
-      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
-      echo "Typing $SELECTED_CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
-      sleep 0.084
-      ydotool type "$SELECTED_CONTROL_GROUP"
-      hyprctl dispatch submap WARCRAFT
-    '';
-  };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
     name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
@@ -283,7 +226,7 @@
       CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
       echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
-      sleep 0.084
+      sleep 0.13
       ydotool key 42:1
       echo "Clicking left mouse button" >> "$YDOTOOL_LOG_FILE"
       ydotool click 0xC0
@@ -331,23 +274,22 @@
 
       calculate_coordinates() {
         case "$SELECTED_UNIT" in
-          1) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
-          2) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 89 / 108)); return ;;
-          3) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
-          4) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 8 / 9)); return ;;
-          5) X=$((SCREEN_WIDTH * 79 / 128)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-          6) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-          7) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-          8) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-          9) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-          10) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-          11) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
-          12) X=$((SCREEN_WIDTH * 21 / 32)); Y=$((SCREEN_HEIGHT * 205 / 216)); return ;;
+          1) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
+          2) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
+          3) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
+          4) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
+          5) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
+          6) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
+          7) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
+          8) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
+          9) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
+          10) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
+          11) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
+          12) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
         esac
       }
 
       calculate_coordinates
-
 
       MOUSE_X=$((MOUSE_X / 2))
       MOUSE_Y=$((MOUSE_Y / 2))
@@ -374,8 +316,6 @@
       warcraft-chat-open
       warcraft-chat-send
       warcraft-chat-close
-      warcraft-create-control-group
-      warcraft-select-control-group
       warcraft-edit-unit-control-group
       warcraft-select-unit
     ];
@@ -462,10 +402,6 @@ in {
                     name = "xremap-warcraft.yml";
                     text = ''
                       modmap:
-                        - name: Better Modifiers
-                          remap:
-                            BTN_EXTRA: ALT_L
-
                         - name: Better Caps
                           remap:
                             CapsLock:
@@ -478,46 +414,22 @@ in {
                             LeftCtrl: Space
                             Space: LeftCtrl
 
+                        - name: Better Modifiers
+                          remap:
+                            BTN_EXTRA: ALT_L
+
                         - name: Idle workers
                           remap:
                             G: F8
 
-                        - name: Control Groups
-                          remap:
-                            KEY_1:
-                              alone_timeout_millis: 300
-                              alone: KEY_1
-                              held: KEY_6
-                            KEY_2:
-                              alone_timeout_millis: 300
-                              alone: KEY_2
-                              held: KEY_7
-                            KEY_3:
-                              alone_timeout_millis: 300
-                              alone: KEY_3
-                              held: KEY_8
-                            KEY_4:
-                              alone_timeout_millis: 300
-                              alone: KEY_4
-                              held: KEY_9
-                            KEY_5:
-                              alone_timeout_millis: 300
-                              alone: KEY_5
-                              held: KEY_0
-
                       keymap:
                         - name: Better Control Groups
                           remap:
-                            ALT_L-KEY_1: LeftCtrl-KEY_1
-                            ALT_L-KEY_2: LeftCtrl-KEY_2
-                            ALT_L-KEY_3: LeftCtrl-KEY_3
-                            ALT_L-KEY_4: LeftCtrl-KEY_4
-                            ALT_L-KEY_5: LeftCtrl-KEY_5
-                            ALT_L-KEY_6: LeftCtrl-KEY_6
-                            ALT_L-KEY_7: LeftCtrl-KEY_7
-                            ALT_L-KEY_8: LeftCtrl-KEY_8
-                            ALT_L-KEY_9: LeftCtrl-KEY_9
-                            ALT_L-KEY_0: LeftCtrl-KEY_0
+                            SUPER-KEY_1: KEY_6
+                            SUPER-KEY_2: KEY_7
+                            SUPER-KEY_3: KEY_8
+                            SUPER-KEY_4: KEY_9
+                            SUPER-KEY_5: KEY_0
                             BTN_SIDE: ALT_L-SHIFT_L
                     '';
                   };
@@ -572,27 +484,6 @@ in {
                   bind = CTRL, S, exec, ${lib.getExe warcraft-inventory-hotkey} 4
                   bind = CTRL, Y, exec, ${lib.getExe warcraft-inventory-hotkey} 5
                   bind = CTRL, X, exec, ${lib.getExe warcraft-inventory-hotkey} 6
-                  bind = CTRL, 1, exec, ${lib.getExe warcraft-create-control-group} 1
-                  bind = CTRL, 2, exec, ${lib.getExe warcraft-create-control-group} 2
-                  bind = CTRL, 3, exec, ${lib.getExe warcraft-create-control-group} 3
-                  bind = CTRL, 4, exec, ${lib.getExe warcraft-create-control-group} 4
-                  bind = CTRL, 5, exec, ${lib.getExe warcraft-create-control-group} 5
-                  bind = CTRL, 6, exec, ${lib.getExe warcraft-create-control-group} 6
-                  bind = CTRL, 7, exec, ${lib.getExe warcraft-create-control-group} 7
-                  bind = CTRL, 8, exec, ${lib.getExe warcraft-create-control-group} 8
-                  bind = CTRL, 9, exec, ${lib.getExe warcraft-create-control-group} 9
-                  bind = CTRL, 0, exec, ${lib.getExe warcraft-create-control-group} 0
-                  bind = , 1, exec, ${lib.getExe warcraft-select-control-group} 1
-                  bind = , 2, exec, ${lib.getExe warcraft-select-control-group} 2
-                  bind = , 3, exec, ${lib.getExe warcraft-select-control-group} 3
-                  bind = , 4, exec, ${lib.getExe warcraft-select-control-group} 4
-                  bind = , 5, exec, ${lib.getExe warcraft-select-control-group} 5
-                  bind = , 6, exec, ${lib.getExe warcraft-select-control-group} 6
-                  bind = , 7, exec, ${lib.getExe warcraft-select-control-group} 7
-                  bind = , 8, exec, ${lib.getExe warcraft-select-control-group} 8
-                  bind = , 9, exec, ${lib.getExe warcraft-select-control-group} 9
-                  bind = , 0, exec, ${lib.getExe warcraft-select-control-group} 0
-                  bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = ALT, A, exec, ${lib.getExe warcraft-select-unit} 1
                   bind = ALT, S, exec, ${lib.getExe warcraft-select-unit} 2
                   bind = ALT, D, exec, ${lib.getExe warcraft-select-unit} 3
@@ -605,6 +496,7 @@ in {
                   bind = ALT SHIFT, F, exec, ${lib.getExe warcraft-select-unit} 10
                   bind = ALT SHIFT, E, exec, ${lib.getExe warcraft-select-unit} 11
                   bind = ALT SHIFT, R, exec, ${lib.getExe warcraft-select-unit} 12
+                  bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = CONTROLGROUP
                   bind = $mod, Q, submap, WARCRAFT
