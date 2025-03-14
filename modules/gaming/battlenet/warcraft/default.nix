@@ -444,7 +444,7 @@ in {
               hyprland = {
                 extraConfig = ''
                   bind = CTRL, W, exec, ${lib.getExe warcraft-mode-start}
-                  bind = , Caps_Lock, exec, true
+                  bind = , Caps_Lock, exec, ${lib.getExe pkgs.ydotool} key 58:1 58:0
                   submap = WARCRAFT
                   bind = ALT, W, exec, ${lib.getExe warcraft-mode-stop}
                   bind = , Caps_Lock, exec, true
