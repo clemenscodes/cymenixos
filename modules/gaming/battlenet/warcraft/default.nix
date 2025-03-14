@@ -245,8 +245,6 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      hyprctl dispatch submap CONTROLGROUP
-
       YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       CONTROL_GROUP_FILE="$WARCRAFT_HOME/control_group"
       CONTROL_GROUP="$(cat "$CONTROL_GROUP_FILE")"
@@ -266,8 +264,6 @@
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.3
-
       echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:1
 
@@ -280,7 +276,7 @@
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
       ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
 
-      hyprctrl dispatch submap WARCRAFT
+      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-select-unit = pkgs.writeShellApplication {
@@ -417,7 +413,12 @@ in {
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = WARCRAFT
                   bindr = CAPS, Caps_Lock, exec, true
-                  bind = ALT, W, exec, ${lib.getExe warcraft-mode-stop}
+                  bindr = ALT, Alt_L, submap, ALT
+                  submap = ALT
+                  bindr = CAPS, Caps_Lock, exec, true
+                  bind = , W, exec, ${lib.getExe warcraft-mode-stop}
+                  bind = , mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
+                  submap = WARCRAFT
                   bind = SHIFT, Q, exec, ${lib.getExe warcraft-autocast-hotkey} Q
                   bind = SHIFT, W, exec, ${lib.getExe warcraft-autocast-hotkey} W
                   bind = SHIFT, E, exec, ${lib.getExe warcraft-autocast-hotkey} E
@@ -446,7 +447,6 @@ in {
                   bind = , L, exec, ${lib.getExe warcraft-write-control-group} 8
                   bind = , N, exec, ${lib.getExe warcraft-write-control-group} 9
                   bind = , M, exec, ${lib.getExe warcraft-write-control-group} 0
-                  bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bind = , mouse:276, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
