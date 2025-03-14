@@ -286,7 +286,7 @@ in {
               };
               format-muted = "🔇";
               on-click = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-              on-click-right = "${pkgs.pwvucontrol}/bin/pwvucontrol";
+              on-click-right = "${pkgs.pavucontrol}/bin/pavucontrol";
             };
             "pulseaudio#mic" = lib.mkIf useMusic {
               inherit max-volume;
@@ -297,7 +297,7 @@ in {
               on-click = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
               on-scroll-down = "${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%-";
               on-scroll-up = "${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 1%+";
-              on-click-right = "${pkgs.pwvucontrol}/bin/pwvucontrol";
+              on-click-right = "${pkgs.pavucontrol}/bin/pavucontrol";
             };
             "custom/clock" = {
               format = "{}";

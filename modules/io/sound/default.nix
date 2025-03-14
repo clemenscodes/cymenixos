@@ -103,14 +103,5 @@ in {
         };
       };
     };
-    home-manager = lib.mkIf (config.modules.home-manager.enable) {
-      users = {
-        ${user} = {
-          home = {
-            packages = [pkgs.pwvucontrol];
-          };
-        };
-      };
-    };
   };
 }
