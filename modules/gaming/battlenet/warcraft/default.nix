@@ -245,6 +245,8 @@
       pkgs.hyprland
     ];
     text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
       YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       CONTROL_GROUP_FILE="$WARCRAFT_HOME/control_group"
       CONTROL_GROUP="$1"
@@ -444,6 +446,7 @@ in {
                   bind = CTRL, W, exec, ${lib.getExe warcraft-mode-start}
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = WARCRAFT
+                  bind = ALT, W, exec, ${lib.getExe warcraft-mode-stop}
                   bindr = CAPS, Caps_Lock, exec, true
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = SHIFT, Q, exec, ${lib.getExe warcraft-autocast-hotkey} Q
@@ -477,16 +480,16 @@ in {
                   bind = , SPACE, submap, SPACE
                   submap = SPACE
                   bindr = CAPS, Caps_Lock, exec, true
-                  bind = , U, exec, ${lib.getExe warcraft-create-control-group} 1
-                  bind = , I, exec, ${lib.getExe warcraft-create-control-group} 2
-                  bind = , O, exec, ${lib.getExe warcraft-create-control-group} 3
-                  bind = , P, exec, ${lib.getExe warcraft-create-control-group} 4
-                  bind = , H, exec, ${lib.getExe warcraft-create-control-group} 5
-                  bind = , J, exec, ${lib.getExe warcraft-create-control-group} 6
-                  bind = , K, exec, ${lib.getExe warcraft-create-control-group} 7
-                  bind = , L, exec, ${lib.getExe warcraft-create-control-group} 8
-                  bind = , N, exec, ${lib.getExe warcraft-create-control-group} 9
-                  bind = , M, exec, ${lib.getExe warcraft-create-control-group} 0
+                  bind = , 1, exec, ${lib.getExe warcraft-create-control-group} 1
+                  bind = , 2, exec, ${lib.getExe warcraft-create-control-group} 2
+                  bind = , 3, exec, ${lib.getExe warcraft-create-control-group} 3
+                  bind = , 4, exec, ${lib.getExe warcraft-create-control-group} 4
+                  bind = , 5, exec, ${lib.getExe warcraft-create-control-group} 5
+                  bind = , 6, exec, ${lib.getExe warcraft-create-control-group} 6
+                  bind = , 7, exec, ${lib.getExe warcraft-create-control-group} 7
+                  bind = , 8, exec, ${lib.getExe warcraft-create-control-group} 8
+                  bind = , 9, exec, ${lib.getExe warcraft-create-control-group} 9
+                  bind = , 0, exec, ${lib.getExe warcraft-create-control-group} 0
                   submap = WARCRAFT
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bind = , mouse:276, submap, BTN_EXTRA
