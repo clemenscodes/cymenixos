@@ -50,7 +50,7 @@ in {
           modmap:
             - name: "Better CapsLock"
               remap:
-                CapsLock:
+                ESC:
                   held: SUPER_L
                   alone: ESC
                   alone_timeout_millis: 500
