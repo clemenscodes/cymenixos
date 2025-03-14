@@ -397,7 +397,7 @@ in {
         ${name} = {
           home = {
             sessionVariables = {
-              WARCRAFT_HOME = "$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III"
+              WARCRAFT_HOME = "$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III";
             };
           };
           xdg = {
