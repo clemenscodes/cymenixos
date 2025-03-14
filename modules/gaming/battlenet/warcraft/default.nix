@@ -224,6 +224,8 @@
 
       echo "$1" > "$WARCRAFT_HOME/control_group"
 
+      sleep 0.1
+
       ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 
 
       hyprctl dispatch submap WARCRAFT
