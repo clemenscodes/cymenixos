@@ -477,9 +477,10 @@ in {
                   bind = , L, exec, ${lib.getExe warcraft-write-control-group} 8
                   bind = , N, exec, ${lib.getExe warcraft-write-control-group} 9
                   bind = , M, exec, ${lib.getExe warcraft-write-control-group} 0
-                  bind = , SPACE, submap, SPACE
-                  submap = SPACE
+                  bind = CTRL, Control_L, submap, CTRL
+                  submap = CTRL
                   bindr = CAPS, Caps_Lock, exec, true
+                  bind = , catchall, submap, WARCRAFT
                   bind = , 1, exec, ${lib.getExe warcraft-create-control-group} 1
                   bind = , 2, exec, ${lib.getExe warcraft-create-control-group} 2
                   bind = , 3, exec, ${lib.getExe warcraft-create-control-group} 3
@@ -498,6 +499,7 @@ in {
                   binde = , XF86AudioLowerVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
                   submap = BTN_EXTRA
                   bindr = CAPS, Caps_Lock, exec, true
+                  bind = , catchall, submap, WARCRAFT
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 1
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 2
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 3
@@ -512,6 +514,7 @@ in {
                   bind = , G, submap, WARCRAFT
                   submap = BTN_SIDE
                   bindr = CAPS, Caps_Lock, exec, true
+                  bind = , catchall, submap, WARCRAFT
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 7
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 8
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 9
@@ -525,6 +528,7 @@ in {
                   bind = , F, submap, WARCRAFT
                   bind = , G, submap, WARCRAFT
                   submap = CONTROLGROUP
+                  bind = , catchall, submap, WARCRAFT
                   bindr = CAPS, Caps_Lock, exec, true
                   bind = $mod, Q, submap, WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
