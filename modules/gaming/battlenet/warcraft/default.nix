@@ -534,17 +534,6 @@ in {
                                 - KEY_M
                               alone_timeout_millis: 300
 
-                        - name: Better Modifiers
-                          remap:
-                            BTN_EXTRA:
-                              held: BTN_EXTRA
-                              alone: KEY_Z
-                              alone_timeout_millis: 300
-                            BTN_SIDE:
-                              held: BTN_SIDE
-                              alone: KEY_B
-                              alone_timeout_millis: 300
-
                       keymap:
                         - name: Better Control Groups
                           remap:
@@ -617,27 +606,29 @@ in {
                   bind = , M, exec, ${lib.getExe warcraft-write-control-group} 0
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
-                  bind = , Z, exec, ${lib.getExe warcraft-select-unit} 1
-                  bind = , B, exec, ${lib.getExe warcraft-select-unit} 7
                   bind = , mouse:276, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
                   submap = BTN_EXTRA
+                  bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 1
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 2
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 3
                   bind = , D, exec, ${lib.getExe warcraft-select-unit} 4
                   bind = , F, exec, ${lib.getExe warcraft-select-unit} 5
                   bind = , G, exec, ${lib.getExe warcraft-select-unit} 6
+                  bind = , ESCAPE, submap, WARCRAFT
                   bind = , A, submap, WARCRAFT
                   bind = , S, submap, WARCRAFT
                   bind = , D, submap, WARCRAFT
                   bind = , F, submap, WARCRAFT
                   bind = , G, submap, WARCRAFT
                   submap = BTN_SIDE
+                  bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 7
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 8
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 9
                   bind = , D, exec, ${lib.getExe warcraft-select-unit} 10
                   bind = , F, exec, ${lib.getExe warcraft-select-unit} 11
                   bind = , G, exec, ${lib.getExe warcraft-select-unit} 12
+                  bind = , ESCAPE, submap, WARCRAFT
                   bind = , A, submap, WARCRAFT
                   bind = , S, submap, WARCRAFT
                   bind = , D, submap, WARCRAFT
