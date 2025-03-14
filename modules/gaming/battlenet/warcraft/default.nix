@@ -54,6 +54,7 @@
       pkgs.hyprland
     ];
     text = ''
+      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
       SCREEN_WIDTH=1920
       SCREEN_HEIGHT=1080
 
@@ -118,6 +119,7 @@
       pkgs.hyprland
     ];
     text = ''
+      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
       SCREEN_WIDTH=1920
       SCREEN_HEIGHT=1080
 
@@ -249,7 +251,9 @@
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.13
+      hyprctl dispatch submap CONTROLGROUP
+
+      sleep 0.1
 
       echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:1
@@ -262,6 +266,8 @@
 
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
+
+      hyprctrl dispatch submap WARCRAFT
     '';
   };
   warcraft-select-unit = pkgs.writeShellApplication {
@@ -301,12 +307,12 @@
 
       calculate_coordinates() {
         case "$SELECTED_UNIT" in
-          1) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
-          2) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
-          3) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
-          4) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
-          5) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
-          6) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 906 / SCREEN_HEIGHT)); return ;;
+          1) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
+          2) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
+          3) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
+          4) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
+          5) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
+          6) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
           7) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
           8) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
           9) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
