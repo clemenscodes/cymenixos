@@ -51,9 +51,9 @@ in {
             - name: "Better CapsLock"
               remap:
                 ESC: SUPER_L
-                LeftCtrl: 
+                CapsLock: 
                   held: SUPER_L
-                  alone: ESC
+                  alone: LeftCtrl
                   alone_timeout_millis: 500
         '';
       };
