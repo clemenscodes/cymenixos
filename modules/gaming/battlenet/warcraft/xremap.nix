@@ -15,7 +15,10 @@
       modmap:
         - name: Better Caps
           remap:
-            ESC: SUPER_L
+            CapsLock: 
+              held: SUPER_L
+              alone: ESC
+              alone_timeout_millis: 500
 
         - name: Swap Space & Ctrl
           remap:

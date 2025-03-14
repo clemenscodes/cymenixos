@@ -50,7 +50,6 @@ in {
           modmap:
             - name: "Better CapsLock"
               remap:
-                ESC: SUPER_L
                 CapsLock: 
                   held: SUPER_L
                   alone: ESC
