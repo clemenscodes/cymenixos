@@ -417,7 +417,6 @@ in {
                         - name: Better Mouse
                           remap:
                             BTN_EXTRA: ALT_L
-                            BTN_SIDE: ALT_R
 
                         - name: Idle workers
                           remap:
@@ -464,7 +463,6 @@ in {
                 extraConfig = ''
                   bind = CTRL, W, exec, ${lib.getExe warcraft-mode-start}
                   submap = WARCRAFT
-                  bind = Alt_L, W, exec, ${lib.getExe warcraft-mode-stop}
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bind = SHIFT, Q, exec, ${lib.getExe warcraft-autocast-hotkey} Q
                   bind = SHIFT, W, exec, ${lib.getExe warcraft-autocast-hotkey} W
@@ -485,7 +483,7 @@ in {
                   bind = CTRL, Y, exec, ${lib.getExe warcraft-inventory-hotkey} 5
                   bind = CTRL, X, exec, ${lib.getExe warcraft-inventory-hotkey} 6
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
-                  bind = , mouse:276, submap, BTN_EXTRA
+                  bindr = ALT, Alt_L, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
                   submap = BTN_EXTRA
                   bindr = $mod, SUPER, exec, ${lib.getExe warcraft-select-unit} 1
@@ -500,6 +498,7 @@ in {
                   bind = , D, submap, WARCRAFT
                   bind = , F, submap, WARCRAFT
                   bind = , G, submap, WARCRAFT
+                  bind = , W, exec, ${lib.getExe warcraft-mode-stop}
                   submap = BTN_SIDE
                   bindr = $mod, SUPER, exec, ${lib.getExe warcraft-select-unit} 7
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 8
