@@ -51,7 +51,10 @@ in {
             - name: "Better CapsLock"
               remap:
                 ESC: SUPER_L
-                LeftCtrl: ESC
+                LeftCtrl: 
+                  held: SUPER_L
+                  alone: ESC
+                  alone_timeout_millis: 500
         '';
       };
       udev = {
