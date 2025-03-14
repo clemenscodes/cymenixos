@@ -444,10 +444,10 @@ in {
               hyprland = {
                 extraConfig = ''
                   bind = CTRL, W, exec, ${lib.getExe warcraft-mode-start}
-                  bind = , Caps_Lock, exec, ${lib.getExe pkgs.ydotool} key 58:1 58:0
                   submap = WARCRAFT
                   bind = ALT, W, exec, ${lib.getExe warcraft-mode-stop}
                   bind = , Caps_Lock, exec, true
+                  bind = CAPS, Caps_Lock, exec, true
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = SHIFT, Q, exec, ${lib.getExe warcraft-autocast-hotkey} Q
                   bind = SHIFT, W, exec, ${lib.getExe warcraft-autocast-hotkey} W
