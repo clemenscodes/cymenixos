@@ -51,35 +51,29 @@
     name = "warcraft-chat-open";
     runtimeInputs = [
       pkgs.hyprland
-      pkgs.systemd
     ];
     text = ''
       hyprctl dispatch submap CHAT
-      systemctl --user stop xremap-warcraft.service
-      systemctl --user start xremap.service
+      cat /tmp/xremap/warcraft-chat.yaml > /tmp/xremap/warcraft.yaml
     '';
   };
   warcraft-chat-send = pkgs.writeShellApplication {
     name = "warcraft-chat-send";
     runtimeInputs = [
-      pkgs.systemd
       pkgs.hyprland
     ];
     text = ''
-      systemctl --user stop xremap.service
-      systemctl --user start xremap-warcraft.service
+      cat /tmp/xremap/warcraft-config.yaml > /tmp/xremap/warcraft.yaml
       hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-chat-close = pkgs.writeShellApplication {
     name = "warcraft-chat-close";
     runtimeInputs = [
-      pkgs.systemd
       pkgs.hyprland
     ];
     text = ''
-      systemctl --user stop xremap.service
-      systemctl --user start xremap-warcraft.service
+      cat /tmp/xremap/warcraft-config.yaml > /tmp/xremap/warcraft.yaml
       hyprctl dispatch submap WARCRAFT
     '';
   };

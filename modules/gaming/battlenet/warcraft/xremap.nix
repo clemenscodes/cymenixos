@@ -15,7 +15,7 @@
       modmap:
         - name: Better Caps
           remap:
-            CapsLock: 
+            CapsLock:
               held: SUPER_L
               alone: ESC
               alone_timeout_millis: 500
@@ -128,6 +128,18 @@
             SHIFT-KEY_6: KEY_F6
     '';
   };
+  chatConfigFile = pkgs.writeTextFile {
+    name = "xremap-warcraft-chat.yml";
+    text = ''
+      modmap:
+        - name: Better Caps
+          remap:
+            CapsLock:
+              held: SUPER_L
+              alone: ESC
+              alone_timeout_millis: 500
+    '';
+  };
 in {
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
     systemd = {
@@ -157,31 +169,14 @@ in {
                 ExecStart = let
                   mkExecStart = configFile: let
                     cfg = config.services.xremap;
-                    mkDeviceString = x: "--device '${x}'";
-                  in
-                    builtins.concatStringsSep " " (
-                      lib.flatten (
-                        lib.lists.singleton "${lib.getExe cfg.package}"
-                        ++ (
-                          if cfg.deviceName != ""
-                          then
-                            lib.pipe cfg.deviceName [
-                              mkDeviceString
-                              lib.singleton
-                              (lib.showWarnings [
-                                "'deviceName' option is deprecated in favor of 'deviceNames'. Current value will continue working but please replace it with 'deviceNames'."
-                              ])
-                            ]
-                          else if cfg.deviceNames != null
-                          then map mkDeviceString cfg.deviceNames
-                          else []
-                        )
-                        ++ lib.optional cfg.watch "--watch"
-                        ++ lib.optional cfg.mouse "--mouse"
-                        ++ cfg.extraArgs
-                        ++ lib.lists.singleton configFile
-                      )
-                    );
+                  in ''
+                    XREMAP=/tmp/xremap
+                    mkdir -p "$XREMAP"
+                    cat ${chatConfigFile} > "$XREMAP/warcraft-chat.yaml"
+                    cat ${configFile} > "$XREMAP/warcraft-config.yaml"
+                    cat ${configFile} > "$XREMAP/warcraft.yaml"
+                    ${lib.getExe cfg.package} --watch=config "$XREMAP/warcraft.yaml"
+                  '';
                 in
                   mkExecStart configFile;
               }
