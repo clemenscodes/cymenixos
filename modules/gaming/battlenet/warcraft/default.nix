@@ -47,6 +47,7 @@
       pkgs.hyprland
     ];
     text = ''
+      ydotool key 96:1 96:0
       hyprctl dispatch submap CHAT
     '';
   };
@@ -56,6 +57,7 @@
       pkgs.hyprland
     ];
     text = ''
+      ydotool key 96:1 96:0
       hyprctl dispatch submap WARCRAFT
     '';
   };
@@ -63,8 +65,10 @@
     name = "warcraft-chat-close";
     runtimeInputs = [
       pkgs.hyprland
+      pkgs.ydotool
     ];
     text = ''
+      ydotool key 1:1 1:0
       hyprctl dispatch submap WARCRAFT
     '';
   };
@@ -261,7 +265,7 @@
 
       echo "Creating control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.3
+      sleep 0.1
 
       ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
 
@@ -453,7 +457,7 @@ in {
                   bind = SHIFT, X, exec, ${lib.getExe warcraft-autocast-hotkey} X
                   bind = SHIFT, C, exec, ${lib.getExe warcraft-autocast-hotkey} C
                   bind = SHIFT, V, exec, ${lib.getExe warcraft-autocast-hotkey} V
-                  bindn = , RETURN, exec, ${lib.getExe warcraft-chat-open}
+                  bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = , 1, exec, ${lib.getExe warcraft-write-control-group} 1
                   bind = , 2, exec, ${lib.getExe warcraft-write-control-group} 2
@@ -514,8 +518,8 @@ in {
                   bind = , G, submap, WARCRAFT
                   bind = , catchall, submap, WARCRAFT
                   submap = CHAT
-                  bindn = , RETURN, exec, ${lib.getExe warcraft-chat-send}
-                  bindn = , ESCAPE, exec, ${lib.getExe warcraft-chat-close}
+                  bind = , RETURN, exec, ${lib.getExe warcraft-chat-send}
+                  bind = , ESCAPE, exec, ${lib.getExe warcraft-chat-close}
                   submap = CONTROLGROUP
                   bind = $mod, Q, submap, WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
