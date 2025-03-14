@@ -88,7 +88,7 @@ in {
           settings = {
             input = {
               kb_layout = osConfig.modules.locale.defaultLocale;
-              kb_options = "caps:swapescape";
+              kb_options = "ctrl:nocaps";
               follow_mouse = 0;
               repeat_rate = 50;
               repeat_delay = 300;
@@ -136,7 +136,7 @@ in {
               allow_workspace_cycles = true;
             };
 
-            "$mod" = "ESCAPE";
+            "$mod" = "CTRL";
 
             bind = [
               "$mod, F, fullscreen"
@@ -377,11 +377,6 @@ in {
             env = XDG_SESSION_DESKTOP,Hyprland
             env = XDG_CURRENT_DESKTOP,Hyprland
             env = MOZ_ENABLE_WAYLAND,1
-
-            bind = CTRL ALT_L, V, submap,passthrough
-            submap = passthrough
-            bind = CTRL ALT_L, V, submap,reset
-            submap = reset
 
             exec-once = ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
             exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME
