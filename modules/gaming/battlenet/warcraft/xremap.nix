@@ -140,6 +140,17 @@
               alone_timeout_millis: 500
     '';
   };
+  start-xremap-warcraft = pkgs.writeShellApplication {
+    name = "start-xremap-warcraft";
+    text = ''
+      XREMAP=/tmp/xremap
+      mkdir -p "$XREMAP"
+      cat ${chatConfigFile} > "$XREMAP/warcraft-chat.yaml"
+      cat ${configFile} > "$XREMAP/warcraft-config.yaml"
+      cat ${configFile} > "$XREMAP/warcraft.yaml"
+      ${lib.getExe cfg.package} --watch=config "$XREMAP/warcraft.yaml"
+    '';
+  };
 in {
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
     systemd = {
@@ -166,19 +177,7 @@ in {
                 LockPersonality = true;
                 UMask = "077";
                 RestrictAddressFamilies = "AF_UNIX";
-                ExecStart = let
-                  mkExecStart = configFile: let
-                    cfg = config.services.xremap;
-                  in ''
-                    XREMAP=/tmp/xremap
-                    mkdir -p "$XREMAP"
-                    cat ${chatConfigFile} > "$XREMAP/warcraft-chat.yaml"
-                    cat ${configFile} > "$XREMAP/warcraft-config.yaml"
-                    cat ${configFile} > "$XREMAP/warcraft.yaml"
-                    ${lib.getExe cfg.package} --watch=config "$XREMAP/warcraft.yaml"
-                  '';
-                in
-                  mkExecStart configFile;
+                ExecStart = "${lib.getExe start-xremap-warcraft}";
               }
               (lib.optionalAttrs config.services.xremap.debug {Environment = ["RUST_LOG=debug"];})
             ];
