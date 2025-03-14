@@ -212,6 +212,22 @@
       hyprctl dispatch submap WARCRAFT
     '';
   };
+  warcraft-write-control-group = pkgs.writeShellApplication {
+    name = "warcraft-write-control-group";
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    excludeShellChecks = ["SC2046" "SC2086"];
+    text = ''
+      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+
+      SELECTED_CONTROL_GROUP="$1"
+
+      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+    '';
+  };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
     name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
@@ -220,21 +236,42 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      hyprctl dispatch submap CONTROLGROUP &
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
-      CONTROL_GROUP_KEYCODE_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group_keycode"
-      CONTROL_GROUP_KEYCODE="$(cat "$CONTROL_GROUP_KEYCODE_FILE")"
+      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+      CONTROL_GROUP="$(cat "$CONTROL_GROUP_FILE")"
+
+      get_control_group_keycode() {
+        case "$CONTROL_GROUP" in
+          1) CONTROL_GROUP_KEYCODE=2; return ;;
+          2) CONTROL_GROUP_KEYCODE=3; return ;;
+          3) CONTROL_GROUP_KEYCODE=4; return ;;
+          4) CONTROL_GROUP_KEYCODE=5; return ;;
+          5) CONTROL_GROUP_KEYCODE=6; return ;;
+          6) CONTROL_GROUP_KEYCODE=7; return ;;
+          7) CONTROL_GROUP_KEYCODE=8; return ;;
+          8) CONTROL_GROUP_KEYCODE=9; return ;;
+          9) CONTROL_GROUP_KEYCODE=10; return ;;
+          0) CONTROL_GROUP_KEYCODE=11; return ;;
+        esac
+      }
+
+      get_control_group_keycode
+
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
-      echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
+
       sleep 0.13
+
+      echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:1
+
       echo "Clicking left mouse button" >> "$YDOTOOL_LOG_FILE"
       ydotool click 0xC0
+
       echo "Releasing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:0
+
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
       ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
-      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-select-unit = pkgs.writeShellApplication {
@@ -316,6 +353,7 @@
       warcraft-chat-open
       warcraft-chat-send
       warcraft-chat-close
+      warcraft-write-control-group
       warcraft-edit-unit-control-group
       warcraft-select-unit
     ];
@@ -416,17 +454,100 @@ in {
 
                         - name: Idle workers
                           remap:
-                            G: F8
+                            T: F8
+
+                        - name: Better Control Groups
+                          remap:
+                            KEY_1:
+                              held:
+                                - LeftCtrl
+                                - KEY_1
+                              alone:
+                                - KEY_1
+                                - KEY_U
+                              alone_timeout_millis: 300
+                            KEY_2:
+                              held:
+                                - LeftCtrl
+                                - KEY_2
+                              alone:
+                                - KEY_2
+                                - KEY_I
+                              alone_timeout_millis: 300
+                            KEY_3:
+                              held:
+                                - LeftCtrl
+                                - KEY_3
+                              alone:
+                                - KEY_3
+                                - KEY_O
+                              alone_timeout_millis: 300
+                            KEY_4:
+                              held:
+                                - LeftCtrl
+                                - KEY_4
+                              alone:
+                                - KEY_4
+                                - KEY_P
+                              alone_timeout_millis: 300
+                            KEY_5:
+                              held:
+                                - LeftCtrl
+                                - KEY_5
+                              alone:
+                                - KEY_5
+                                - KEY_H
+                              alone_timeout_millis: 300
+                            KEY_6:
+                              held:
+                                - LeftCtrl
+                                - KEY_6
+                              alone:
+                                - KEY_6
+                                - KEY_J
+                              alone_timeout_millis: 300
+                            KEY_7:
+                              held:
+                                - LeftCtrl
+                                - KEY_7
+                              alone:
+                                - KEY_7
+                                - KEY_K
+                              alone_timeout_millis: 300
+                            KEY_8:
+                              held:
+                                - LeftCtrl
+                                - KEY_8
+                              alone:
+                                - KEY_8
+                                - KEY_L
+                              alone_timeout_millis: 300
+                            KEY_9:
+                              held:
+                                - LeftCtrl
+                                - KEY_9
+                              alone:
+                                - KEY_9
+                                - KEY_N
+                              alone_timeout_millis: 300
+                            KEY_0:
+                              held:
+                                - LeftCtrl
+                                - KEY_0
+                              alone:
+                                - KEY_0
+                                - KEY_M
+                              alone_timeout_millis: 300
 
                         - name: Better Modifiers
                           remap:
-                            BTN_EXTRA: 
+                            BTN_EXTRA:
                               held: BTN_EXTRA
-                              alone: KEY_H
+                              alone: KEY_Z
                               alone_timeout_millis: 300
-                            BTN_SIDE: 
+                            BTN_SIDE:
                               held: BTN_SIDE
-                              alone: KEY_N
+                              alone: KEY_B
                               alone_timeout_millis: 300
 
                       keymap:
@@ -489,10 +610,20 @@ in {
                   bind = CTRL, S, exec, ${lib.getExe warcraft-inventory-hotkey} 4
                   bind = CTRL, Y, exec, ${lib.getExe warcraft-inventory-hotkey} 5
                   bind = CTRL, X, exec, ${lib.getExe warcraft-inventory-hotkey} 6
+                  bind = , U, exec, ${lib.getExe warcraft-write-control-group} 1
+                  bind = , I, exec, ${lib.getExe warcraft-write-control-group} 2
+                  bind = , O, exec, ${lib.getExe warcraft-write-control-group} 3
+                  bind = , P, exec, ${lib.getExe warcraft-write-control-group} 4
+                  bind = , H, exec, ${lib.getExe warcraft-write-control-group} 5
+                  bind = , J, exec, ${lib.getExe warcraft-write-control-group} 6
+                  bind = , K, exec, ${lib.getExe warcraft-write-control-group} 7
+                  bind = , L, exec, ${lib.getExe warcraft-write-control-group} 8
+                  bind = , N, exec, ${lib.getExe warcraft-write-control-group} 9
+                  bind = , M, exec, ${lib.getExe warcraft-write-control-group} 0
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
-                  bind = , H, exec, ${lib.getExe warcraft-select-unit} 1
-                  bind = , N, exec, ${lib.getExe warcraft-select-unit} 7
+                  bind = , Z, exec, ${lib.getExe warcraft-select-unit} 1
+                  bind = , B, exec, ${lib.getExe warcraft-select-unit} 7
                   bind = , mouse:276, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
                   submap = BTN_EXTRA
