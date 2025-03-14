@@ -51,6 +51,7 @@ in {
             - name: "Better CapsLock"
               remap:
                 ESC: SUPER_L
+                LeftCtrl: ESC
         '';
       };
       udev = {
