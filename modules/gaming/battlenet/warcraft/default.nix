@@ -251,22 +251,18 @@
       CONTROL_GROUP_FILE="$WARCRAFT_HOME/control_group"
       CONTROL_GROUP="$(cat "$CONTROL_GROUP_FILE")"
 
-      get_control_group_keycode() {
-        case "$CONTROL_GROUP" in
-          1) CONTROL_GROUP_KEYCODE=2; return ;;
-          2) CONTROL_GROUP_KEYCODE=3; return ;;
-          3) CONTROL_GROUP_KEYCODE=4; return ;;
-          4) CONTROL_GROUP_KEYCODE=5; return ;;
-          5) CONTROL_GROUP_KEYCODE=6; return ;;
-          6) CONTROL_GROUP_KEYCODE=7; return ;;
-          7) CONTROL_GROUP_KEYCODE=8; return ;;
-          8) CONTROL_GROUP_KEYCODE=9; return ;;
-          9) CONTROL_GROUP_KEYCODE=10; return ;;
-          0) CONTROL_GROUP_KEYCODE=11; return ;;
-        esac
-      }
-
-      get_control_group_keycode
+      case "$CONTROL_GROUP" in
+        1) CONTROL_GROUP_KEYCODE=2 ;;
+        2) CONTROL_GROUP_KEYCODE=3 ;;
+        3) CONTROL_GROUP_KEYCODE=4 ;;
+        4) CONTROL_GROUP_KEYCODE=5 ;;
+        5) CONTROL_GROUP_KEYCODE=6 ;;
+        6) CONTROL_GROUP_KEYCODE=7 ;;
+        7) CONTROL_GROUP_KEYCODE=8 ;;
+        8) CONTROL_GROUP_KEYCODE=9 ;;
+        9) CONTROL_GROUP_KEYCODE=10 ;;
+        0) CONTROL_GROUP_KEYCODE=11 ;;
+      esac
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
 
@@ -282,7 +278,7 @@
       ydotool key 42:0
 
       echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
-      ydotool key 57:1 $CONTROL_GROUP_KEYCODE:1 $CONTROL_GROUP_KEYCODE:0 57:0
+      ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
 
       hyprctrl dispatch submap WARCRAFT
     '';
@@ -418,7 +414,9 @@ in {
               hyprland = {
                 extraConfig = ''
                   bind = CTRL, W, exec, ${lib.getExe warcraft-mode-start}
+                  bindr = CAPS, Caps_Lock, exec, true
                   submap = WARCRAFT
+                  bindr = CAPS, Caps_Lock, exec, true
                   bind = ALT, W, exec, ${lib.getExe warcraft-mode-stop}
                   bind = SHIFT, Q, exec, ${lib.getExe warcraft-autocast-hotkey} Q
                   bind = SHIFT, W, exec, ${lib.getExe warcraft-autocast-hotkey} W
@@ -465,6 +463,7 @@ in {
                   binde = , XF86AudioRaiseVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
                   binde = , XF86AudioLowerVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
                   submap = BTN_EXTRA
+                  bindr = CAPS, Caps_Lock, exec, true
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 1
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 2
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 3
@@ -478,6 +477,7 @@ in {
                   bind = , F, submap, WARCRAFT
                   bind = , G, submap, WARCRAFT
                   submap = BTN_SIDE
+                  bindr = CAPS, Caps_Lock, exec, true
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 7
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 8
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 9
@@ -491,9 +491,11 @@ in {
                   bind = , F, submap, WARCRAFT
                   bind = , G, submap, WARCRAFT
                   submap = CONTROLGROUP
+                  bindr = CAPS, Caps_Lock, exec, true
                   bind = $mod, Q, submap, WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = CHAT
+                  bindr = CAPS, Caps_Lock, exec, true
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-send}
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-chat-close}
                   submap = reset
