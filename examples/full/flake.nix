@@ -30,7 +30,7 @@
         modules = [
           ./configuration.nix
           # uncomment after installing initial config
-          # ./hardware-configuration.nix 
+          # ./hardware-configuration.nix
           # ./secrets.nix
         ];
       };

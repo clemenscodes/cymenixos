@@ -29,7 +29,7 @@ pkgs.writeShellApplication {
     echo "Setting public key URL on YubiKey to $PUBLIC_KEY_URL..."
     gpg --command-fd=0 --pinentry-mode=loopback --edit-card <<EOF
     admin
-    url 
+    url
     $PUBLIC_KEY_URL
     quit
     EOF
