@@ -245,6 +245,8 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
       YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       CONTROL_GROUP_FILE="$WARCRAFT_HOME/control_group"
       CONTROL_GROUP="$(cat "$CONTROL_GROUP_FILE")"
@@ -263,6 +265,8 @@
       esac
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
+
+      sleep 0.1
 
       echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:1
@@ -413,12 +417,7 @@ in {
                   bindr = CAPS, Caps_Lock, exec, true
                   submap = WARCRAFT
                   bindr = CAPS, Caps_Lock, exec, true
-                  bindr = ALT, Alt_L, submap, ALT
-                  submap = ALT
-                  bindr = CAPS, Caps_Lock, exec, true
-                  bind = , W, exec, ${lib.getExe warcraft-mode-stop}
-                  bind = , mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
-                  submap = WARCRAFT
+                  bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = SHIFT, Q, exec, ${lib.getExe warcraft-autocast-hotkey} Q
                   bind = SHIFT, W, exec, ${lib.getExe warcraft-autocast-hotkey} W
                   bind = SHIFT, E, exec, ${lib.getExe warcraft-autocast-hotkey} E
@@ -450,16 +449,6 @@ in {
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bind = , mouse:276, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
-                  bind = $mod, 1, workspace, 1
-                  bind = $mod, 2, workspace, 2
-                  bind = $mod, 3, workspace, 3
-                  bind = $mod, 4, workspace, 4
-                  bind = $mod, 5, workspace, 5
-                  bind = $mod, 6, workspace, 6
-                  bind = $mod, 7, workspace, 7
-                  bind = $mod, 8, workspace, 8
-                  bind = $mod, 9, workspace, 9
-                  bind = $mod, 0, workspace, 10
                   binde = , XF86AudioRaiseVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
                   binde = , XF86AudioLowerVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
                   submap = BTN_EXTRA
