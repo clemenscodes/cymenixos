@@ -231,7 +231,7 @@
 
       echo "Creating control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
-      ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
+      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
     '';
   };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
@@ -260,7 +260,7 @@
 
       echo "Removing unit from control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
-      ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
+      ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
     '';
   };
   warcraft-select-unit = pkgs.writeShellApplication {
