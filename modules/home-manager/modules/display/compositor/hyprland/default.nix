@@ -88,7 +88,6 @@ in {
           settings = {
             input = {
               kb_layout = osConfig.modules.locale.defaultLocale;
-              kb_options = "caps:swapescape";
               follow_mouse = 0;
               repeat_rate = 50;
               repeat_delay = 300;
