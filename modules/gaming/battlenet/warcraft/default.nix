@@ -237,6 +237,40 @@
       echo "$1" > "$WARCRAFT_HOME/control_group"
     '';
   };
+  warcraft-create-control-group = pkgs.writeShellApplication {
+    name = "warcraft-create-control-group";
+    excludeShellChecks = ["SC2046" "SC2086"];
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
+    text = ''
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
+      CONTROL_GROUP_FILE="$WARCRAFT_HOME/control_group"
+      CONTROL_GROUP="$1"
+
+      echo "$CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+
+      echo "Creating control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
+
+      case "$CONTROL_GROUP" in
+        1) CONTROL_GROUP_KEYCODE=2 ;;
+        2) CONTROL_GROUP_KEYCODE=3 ;;
+        3) CONTROL_GROUP_KEYCODE=4 ;;
+        4) CONTROL_GROUP_KEYCODE=5 ;;
+        5) CONTROL_GROUP_KEYCODE=6 ;;
+        6) CONTROL_GROUP_KEYCODE=7 ;;
+        7) CONTROL_GROUP_KEYCODE=8 ;;
+        8) CONTROL_GROUP_KEYCODE=9 ;;
+        9) CONTROL_GROUP_KEYCODE=10 ;;
+        0) CONTROL_GROUP_KEYCODE=11 ;;
+      esac
+
+      ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
+
+      hyprctl dispatch submap WARCRAFT
+    '';
+  };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
     name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
@@ -264,20 +298,13 @@
         0) CONTROL_GROUP_KEYCODE=11 ;;
       esac
 
-      echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
+      echo "Removing unit from control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
       sleep 0.1
 
-      echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:1
-
-      echo "Clicking left mouse button" >> "$YDOTOOL_LOG_FILE"
       ydotool click 0xC0
-
-      echo "Releasing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:0
-
-      echo "Pressing $CONTROL_GROUP_KEYCODE keycode with space modifier" >> "$YDOTOOL_LOG_FILE"
       ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
 
       hyprctl dispatch submap WARCRAFT
@@ -312,7 +339,7 @@
         esac
       done
 
-      echo "Selecting unit $SELECTED_UNIT from control group" >> "$YDOTOOL_LOG_FILE"
+      echo "Selecting unit $SELECTED_UNIT from current control group" >> "$YDOTOOL_LOG_FILE"
 
       MOUSE_POS=$(hyprctl cursorpos)
       MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
@@ -363,6 +390,7 @@
       warcraft-chat-send
       warcraft-chat-close
       warcraft-write-control-group
+      warcraft-create-control-group
       warcraft-edit-unit-control-group
       warcraft-select-unit
     ];
@@ -446,6 +474,20 @@ in {
                   bind = , L, exec, ${lib.getExe warcraft-write-control-group} 8
                   bind = , N, exec, ${lib.getExe warcraft-write-control-group} 9
                   bind = , M, exec, ${lib.getExe warcraft-write-control-group} 0
+                  bind = , SPACE, submap, SPACE
+                  submap = SPACE
+                  bindr = CAPS, Caps_Lock, exec, true
+                  bind = , U, exec, ${lib.getExe warcraft-create-control-group} 1
+                  bind = , I, exec, ${lib.getExe warcraft-create-control-group} 2
+                  bind = , O, exec, ${lib.getExe warcraft-create-control-group} 3
+                  bind = , P, exec, ${lib.getExe warcraft-create-control-group} 4
+                  bind = , H, exec, ${lib.getExe warcraft-create-control-group} 5
+                  bind = , J, exec, ${lib.getExe warcraft-create-control-group} 6
+                  bind = , K, exec, ${lib.getExe warcraft-create-control-group} 7
+                  bind = , L, exec, ${lib.getExe warcraft-create-control-group} 8
+                  bind = , N, exec, ${lib.getExe warcraft-create-control-group} 9
+                  bind = , M, exec, ${lib.getExe warcraft-create-control-group} 0
+                  submap = WARCRAFT
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bind = , mouse:276, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
