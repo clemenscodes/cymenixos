@@ -38,7 +38,7 @@
               alone:
                 - KEY_1
                 - KEY_U
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_2:
               held:
                 - LeftCtrl
@@ -46,7 +46,7 @@
               alone:
                 - KEY_2
                 - KEY_I
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_3:
               held:
                 - LeftCtrl
@@ -54,7 +54,7 @@
               alone:
                 - KEY_3
                 - KEY_O
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_4:
               held:
                 - LeftCtrl
@@ -62,7 +62,7 @@
               alone:
                 - KEY_4
                 - KEY_P
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_5:
               held:
                 - LeftCtrl
@@ -70,7 +70,7 @@
               alone:
                 - KEY_5
                 - KEY_H
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_6:
               held:
                 - LeftCtrl
@@ -78,7 +78,7 @@
               alone:
                 - KEY_6
                 - KEY_J
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_7:
               held:
                 - LeftCtrl
@@ -86,7 +86,7 @@
               alone:
                 - KEY_7
                 - KEY_K
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_8:
               held:
                 - LeftCtrl
@@ -94,7 +94,7 @@
               alone:
                 - KEY_8
                 - KEY_L
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_9:
               held:
                 - LeftCtrl
@@ -102,7 +102,7 @@
               alone:
                 - KEY_9
                 - KEY_N
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
             KEY_0:
               held:
                 - LeftCtrl
@@ -110,7 +110,7 @@
               alone:
                 - KEY_0
                 - KEY_M
-              alone_timeout_millis: 200
+              alone_timeout_millis: 500
 
       keymap:
         - name: Better Control Groups
@@ -123,6 +123,9 @@
             SHIFT-KEY_1: KEY_F1
             SHIFT-KEY_2: KEY_F2
             SHIFT-KEY_3: KEY_F3
+            SHIFT-KEY_4: KEY_F4
+            SHIFT-KEY_5: KEY_F5
+            SHIFT-KEY_6: KEY_F6
     '';
   };
 in {

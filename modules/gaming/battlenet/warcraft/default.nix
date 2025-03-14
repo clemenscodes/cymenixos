@@ -54,7 +54,7 @@
       pkgs.hyprland
     ];
     text = ''
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       SCREEN_WIDTH=1920
       SCREEN_HEIGHT=1080
 
@@ -121,7 +121,7 @@
       pkgs.hyprland
     ];
     text = ''
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       SCREEN_WIDTH=1920
       SCREEN_HEIGHT=1080
 
@@ -183,7 +183,7 @@
       pkgs.systemd
     ];
     text = ''
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
 
       echo "Opening warcraft chat" >> "$YDOTOOL_LOG_FILE"
 
@@ -201,7 +201,7 @@
       pkgs.hyprland
     ];
     text = ''
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
 
       echo "Sending warcraft chat" >> "$YDOTOOL_LOG_FILE"
 
@@ -219,7 +219,7 @@
       pkgs.hyprland
     ];
     text = ''
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
 
       echo "Closing warcraft chat" >> "$YDOTOOL_LOG_FILE"
 
@@ -234,7 +234,7 @@
     name = "warcraft-write-control-group";
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      echo "$1" > "$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+      echo "$1" > "$WARCRAFT_HOME/control_group"
     '';
   };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
@@ -247,8 +247,8 @@
     text = ''
       hyprctl dispatch submap CONTROLGROUP
 
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
-      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
+      CONTROL_GROUP_FILE="$WARCRAFT_HOME/control_group"
       CONTROL_GROUP="$(cat "$CONTROL_GROUP_FILE")"
 
       get_control_group_keycode() {
@@ -270,7 +270,7 @@
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.1
+      sleep 0.3
 
       echo "Pressing left shift" >> "$YDOTOOL_LOG_FILE"
       ydotool key 42:1
@@ -295,7 +295,7 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       SCREEN_WIDTH=1920
       SCREEN_HEIGHT=1080
 
@@ -395,6 +395,11 @@ in {
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${name} = {
+          home = {
+            sessionVariables = {
+              WARCRAFT_HOME = "$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III"
+            };
+          };
           xdg = {
             desktopEntries = {
               warcraft = {
