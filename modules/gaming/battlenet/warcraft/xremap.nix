@@ -148,7 +148,7 @@
       cat ${chatConfigFile} > "$XREMAP/warcraft-chat.yaml"
       cat ${configFile} > "$XREMAP/warcraft-config.yaml"
       cat ${configFile} > "$XREMAP/warcraft.yaml"
-      ${lib.getExe cfg.package} --watch=config "$XREMAP/warcraft.yaml"
+      ${lib.getExe config.services.xremap.package} --watch=config "$XREMAP/warcraft.yaml"
     '';
   };
 in {
