@@ -136,7 +136,7 @@ in {
               allow_workspace_cycles = true;
             };
 
-            "$mod" = "SUPER";
+            "$mod" = "ESCAPE";
 
             bind = [
               "$mod, F, fullscreen"

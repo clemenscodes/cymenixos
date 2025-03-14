@@ -444,12 +444,8 @@ in {
               hyprland = {
                 extraConfig = ''
                   bind = CTRL, W, exec, ${lib.getExe warcraft-mode-start}
-                  bind = , Caps_Lock, exec, true
-                  bind = CAPS, Caps_Lock, exec, true
                   submap = WARCRAFT
                   bind = ALT, W, exec, ${lib.getExe warcraft-mode-stop}
-                  bind = , Caps_Lock, exec, true
-                  bind = CAPS, Caps_Lock, exec, true
                   bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = SHIFT, Q, exec, ${lib.getExe warcraft-autocast-hotkey} Q
                   bind = SHIFT, W, exec, ${lib.getExe warcraft-autocast-hotkey} W
@@ -481,7 +477,6 @@ in {
                   bind = , M, exec, ${lib.getExe warcraft-write-control-group} 0
                   bind = CTRL, Control_L, submap, CTRL
                   submap = CTRL
-                  bind = , Caps_Lock, exec, true
                   bind = , 1, exec, ${lib.getExe warcraft-create-control-group} 1
                   bind = , 2, exec, ${lib.getExe warcraft-create-control-group} 2
                   bind = , 3, exec, ${lib.getExe warcraft-create-control-group} 3
@@ -500,7 +495,6 @@ in {
                   binde = , XF86AudioRaiseVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
                   binde = , XF86AudioLowerVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
                   submap = BTN_EXTRA
-                  bind = , Caps_Lock, exec, true
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 1
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 2
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 3
@@ -515,7 +509,6 @@ in {
                   bind = , G, submap, WARCRAFT
                   bind = , catchall, submap, WARCRAFT
                   submap = BTN_SIDE
-                  bind = , Caps_Lock, exec, true
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 7
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 8
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 9
@@ -531,11 +524,9 @@ in {
                   bind = , catchall, submap, WARCRAFT
                   submap = CONTROLGROUP
                   bind = , catchall, submap, WARCRAFT
-                  bind = , Caps_Lock, exec, true
                   bind = $mod, Q, submap, WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = CHAT
-                  bind = , Caps_Lock, exec, true
                   bind = , RETURN, exec, ${lib.getExe warcraft-chat-send}
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-chat-close}
                   submap = reset
