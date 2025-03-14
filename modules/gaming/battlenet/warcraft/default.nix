@@ -261,7 +261,7 @@
 
       echo "Creating control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
-      sleep 0.1
+      sleep 0.3
 
       ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
 
@@ -454,7 +454,7 @@ in {
                   bind = SHIFT, C, exec, ${lib.getExe warcraft-autocast-hotkey} C
                   bind = SHIFT, V, exec, ${lib.getExe warcraft-autocast-hotkey} V
                   bindn = , RETURN, exec, ${lib.getExe warcraft-chat-open}
-                  bindn = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
+                  bind = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bind = , 1, exec, ${lib.getExe warcraft-write-control-group} 1
                   bind = , 2, exec, ${lib.getExe warcraft-write-control-group} 2
                   bind = , 3, exec, ${lib.getExe warcraft-write-control-group} 3
