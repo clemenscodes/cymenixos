@@ -217,8 +217,6 @@ in {
               (lib.mkIf useObs "SHIFT, F9, pass, ^(com\.obsproject\.Studio)$")
               (lib.mkIf useObs "SHIFT, F10, pass, ^(com\.obsproject\.Studio)$")
               (lib.mkIf useObs "SHIFT, F11, pass, ^(com\.obsproject\.Studio)$")
-
-              # Move/resize windows with mod + LMB/RMB and dragging
               (lib.mkIf useMusic ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
               (lib.mkIf useMusic ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle")
               (lib.mkIf useMusic ", XF86AudioAudioPrev, exec, mpc prev")
@@ -233,7 +231,6 @@ in {
               (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessDown, exec, brightnessctl set 5%-")
               (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessUp, exec, brightnessctl set 5%+")
               (lib.mkIf (useMusic && useKitty) ", XF86AudioAudioMedia, exec, kitty ncmpcpp")
-
               "$mod, P, togglespecialworkspace, magic"
               "$mod, P, movetoworkspace, +0"
               "$mod, P, togglespecialworkspace, magic"
@@ -268,8 +265,8 @@ in {
             ];
 
             bindm = [
-              "$mod ALT, mouse:272, movewindow"
-              "$mod ALT, mouse:273, resizewindow"
+              "ALT, mouse:272, movewindow"
+              "ALT, mouse:273, resizewindow"
             ];
           };
           extraConfig = let
