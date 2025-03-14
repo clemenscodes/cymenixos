@@ -199,8 +199,34 @@
   warcraft-write-control-group = pkgs.writeShellApplication {
     name = "warcraft-write-control-group";
     excludeShellChecks = ["SC2046" "SC2086"];
+    runtimeInputs = [
+      pkgs.ydotool
+      pkgs.hyprland
+    ];
     text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
+      CONTROL_GROUP="$1"
+      echo "$CONTROL_GROUP" > "$WARCRAFT_HOME/control_group"
+      
+      case "$CONTROL_GROUP" in
+        1) CONTROL_GROUP_KEYCODE=2 ;;
+        2) CONTROL_GROUP_KEYCODE=3 ;;
+        3) CONTROL_GROUP_KEYCODE=4 ;;
+        4) CONTROL_GROUP_KEYCODE=5 ;;
+        5) CONTROL_GROUP_KEYCODE=6 ;;
+        6) CONTROL_GROUP_KEYCODE=7 ;;
+        7) CONTROL_GROUP_KEYCODE=8 ;;
+        8) CONTROL_GROUP_KEYCODE=9 ;;
+        9) CONTROL_GROUP_KEYCODE=10 ;;
+        0) CONTROL_GROUP_KEYCODE=11 ;;
+      esac
+
       echo "$1" > "$WARCRAFT_HOME/control_group"
+
+      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 
+
+      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-create-control-group = pkgs.writeShellApplication {
@@ -208,10 +234,12 @@
     excludeShellChecks = ["SC2046" "SC2086"];
     runtimeInputs = [
       pkgs.ydotool
+      pkgs.hyprland
     ];
     text = ''
-      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
+      hyprctl dispatch submap CONTROLGROUP
 
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       CONTROL_GROUP="$1"
 
       echo "$CONTROL_GROUP" > "$WARCRAFT_HOME/control_group"
@@ -231,13 +259,18 @@
 
       echo "Creating control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
+      sleep 0.1
+
       ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
+
+      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
     name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
       pkgs.ydotool
+      pkgs.hyprland
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
@@ -260,7 +293,16 @@
 
       echo "Removing unit from control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
+      hyprctl dispatch submap CONTROLGROUP
+
+      sleep 0.1
+
+      ydotool key 42:1
+      ydotool click 0xC0
+      ydotool click 42:0
       ydotool key 29:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 29:0
+
+      hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-select-unit = pkgs.writeShellApplication {
@@ -411,31 +453,31 @@ in {
                   bind = SHIFT, V, exec, ${lib.getExe warcraft-autocast-hotkey} V
                   bindn = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bindn = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
-                  bindn = , 1, exec, ${lib.getExe warcraft-write-control-group} 1
-                  bindn = , 2, exec, ${lib.getExe warcraft-write-control-group} 2
-                  bindn = , 3, exec, ${lib.getExe warcraft-write-control-group} 3
-                  bindn = , 4, exec, ${lib.getExe warcraft-write-control-group} 4
-                  bindn = , 5, exec, ${lib.getExe warcraft-write-control-group} 5
-                  bindn = , 6, exec, ${lib.getExe warcraft-write-control-group} 6
-                  bindn = , 7, exec, ${lib.getExe warcraft-write-control-group} 7
-                  bindn = , 8, exec, ${lib.getExe warcraft-write-control-group} 8
-                  bindn = , 9, exec, ${lib.getExe warcraft-write-control-group} 9
-                  bindn = , 0, exec, ${lib.getExe warcraft-write-control-group} 0
+                  bind = , 1, exec, ${lib.getExe warcraft-write-control-group} 1
+                  bind = , 2, exec, ${lib.getExe warcraft-write-control-group} 2
+                  bind = , 3, exec, ${lib.getExe warcraft-write-control-group} 3
+                  bind = , 4, exec, ${lib.getExe warcraft-write-control-group} 4
+                  bind = , 5, exec, ${lib.getExe warcraft-write-control-group} 5
+                  bind = , 6, exec, ${lib.getExe warcraft-write-control-group} 6
+                  bind = , 7, exec, ${lib.getExe warcraft-write-control-group} 7
+                  bind = , 8, exec, ${lib.getExe warcraft-write-control-group} 8
+                  bind = , 9, exec, ${lib.getExe warcraft-write-control-group} 9
+                  bind = , 0, exec, ${lib.getExe warcraft-write-control-group} 0
                   bind = , mouse:276, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
                   binde = , XF86AudioRaiseVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
                   binde = , XF86AudioLowerVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
                   submap = BTN_EXTRA
-                  bindn = , 1, exec, ${lib.getExe warcraft-create-control-group} 1
-                  bindn = , 2, exec, ${lib.getExe warcraft-create-control-group} 2
-                  bindn = , 3, exec, ${lib.getExe warcraft-create-control-group} 3
-                  bindn = , 4, exec, ${lib.getExe warcraft-create-control-group} 4
-                  bindn = , 5, exec, ${lib.getExe warcraft-create-control-group} 5
-                  bindn = , 6, exec, ${lib.getExe warcraft-create-control-group} 6
-                  bindn = , 7, exec, ${lib.getExe warcraft-create-control-group} 7
-                  bindn = , 8, exec, ${lib.getExe warcraft-create-control-group} 8
-                  bindn = , 9, exec, ${lib.getExe warcraft-create-control-group} 9
-                  bindn = , 0, exec, ${lib.getExe warcraft-create-control-group} 0
+                  bind = , 1, exec, ${lib.getExe warcraft-create-control-group} 1
+                  bind = , 2, exec, ${lib.getExe warcraft-create-control-group} 2
+                  bind = , 3, exec, ${lib.getExe warcraft-create-control-group} 3
+                  bind = , 4, exec, ${lib.getExe warcraft-create-control-group} 4
+                  bind = , 5, exec, ${lib.getExe warcraft-create-control-group} 5
+                  bind = , 6, exec, ${lib.getExe warcraft-create-control-group} 6
+                  bind = , 7, exec, ${lib.getExe warcraft-create-control-group} 7
+                  bind = , 8, exec, ${lib.getExe warcraft-create-control-group} 8
+                  bind = , 9, exec, ${lib.getExe warcraft-create-control-group} 9
+                  bind = , 0, exec, ${lib.getExe warcraft-create-control-group} 0
                   bind = , Tab, exec, ${lib.getExe warcraft-inventory-hotkey} 1
                   bind = , Q, exec, ${lib.getExe warcraft-inventory-hotkey} 2
                   bind = , W, exec, ${lib.getExe warcraft-inventory-hotkey} 3
@@ -472,6 +514,9 @@ in {
                   submap = CHAT
                   bindn = , RETURN, exec, ${lib.getExe warcraft-chat-send}
                   bindn = , ESCAPE, exec, ${lib.getExe warcraft-chat-close}
+                  submap = CONTROLGROUP
+                  bind = $mod, Q, submap, WARCRAFT
+                  bind = $mod SHIFT, Q, submap, reset
                   submap = reset
                 '';
               };
