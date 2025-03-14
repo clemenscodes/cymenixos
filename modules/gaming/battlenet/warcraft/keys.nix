@@ -9,6 +9,7 @@
   ...
 }: let
   cfg = config.modules.gaming.battlenet;
+  inherit (config.modules.users) name;
 in {
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
