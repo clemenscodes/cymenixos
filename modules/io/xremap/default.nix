@@ -53,7 +53,7 @@ in {
                 ESC: SUPER_L
                 CapsLock: 
                   held: SUPER_L
-                  alone: LeftCtrl
+                  alone: ESC
                   alone_timeout_millis: 500
         '';
       };
