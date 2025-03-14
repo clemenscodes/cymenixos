@@ -75,6 +75,8 @@
         esac
       done
 
+      echo "Activating autocast hotkey $HOTKEY" >> "$YDOTOOL_LOG_FILE"
+
       MOUSE_POS=$(hyprctl cursorpos)
       MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
@@ -140,6 +142,8 @@
         esac
       done
 
+      echo "Activating inventory hotkey $HOTKEY" >> "$YDOTOOL_LOG_FILE"
+
       MOUSE_POS=$(hyprctl cursorpos)
       MOUSE_X=$(echo "$MOUSE_POS" | cut -d' ' -f1 | cut -d',' -f1)
       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
@@ -179,6 +183,10 @@
       pkgs.systemd
     ];
     text = ''
+      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+
+      echo "Opening warcraft chat" >> "$YDOTOOL_LOG_FILE"
+
       systemctl --user stop xremap-warcraft.service
       systemctl --user start xremap.service
       ydotool key 96:1 96:0 # Press Numpad_Enter
@@ -193,6 +201,10 @@
       pkgs.hyprland
     ];
     text = ''
+      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+
+      echo "Sending warcraft chat" >> "$YDOTOOL_LOG_FILE"
+
       systemctl --user stop xremap.service
       systemctl --user start xremap-warcraft.service
       ydotool key 96:1 96:0 # Press Numpad_Enter
@@ -207,6 +219,10 @@
       pkgs.hyprland
     ];
     text = ''
+      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
+
+      echo "Closing warcraft chat" >> "$YDOTOOL_LOG_FILE"
+
       systemctl --user stop xremap.service
       systemctl --user start xremap-warcraft.service
       ydotool key 58:1 58:0 # Press caps lock which is actually escape
@@ -225,9 +241,12 @@
     name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
       pkgs.ydotool
+      pkgs.hyprland
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
+      hyprctl dispatch submap CONTROLGROUP
+
       YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
       CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
       CONTROL_GROUP="$(cat "$CONTROL_GROUP_FILE")"
@@ -250,8 +269,6 @@
       get_control_group_keycode
 
       echo "Removing unit from control group" >> "$YDOTOOL_LOG_FILE"
-
-      hyprctl dispatch submap CONTROLGROUP
 
       sleep 0.1
 
