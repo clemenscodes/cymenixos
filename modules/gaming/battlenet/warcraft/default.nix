@@ -26,24 +26,18 @@
   warcraft-mode-start = pkgs.writeShellApplication {
     name = "warcraft-mode-start";
     runtimeInputs = [
-      pkgs.systemd
       pkgs.hyprland
     ];
     text = ''
-      systemctl --user stop xremap.service
-      systemctl --user start xremap-warcraft.service
       hyprctl dispatch submap WARCRAFT
     '';
   };
   warcraft-mode-stop = pkgs.writeShellApplication {
     name = "warcraft-mode-stop";
     runtimeInputs = [
-      pkgs.systemd
       pkgs.hyprland
     ];
     text = ''
-      systemctl --user stop xremap-warcraft.service
-      systemctl --user start xremap.service
       hyprctl dispatch submap reset
     '';
   };
@@ -54,7 +48,6 @@
     ];
     text = ''
       hyprctl dispatch submap CHAT
-      cat /tmp/xremap/warcraft-chat.yaml > /tmp/xremap/warcraft.yaml
     '';
   };
   warcraft-chat-send = pkgs.writeShellApplication {
@@ -63,7 +56,6 @@
       pkgs.hyprland
     ];
     text = ''
-      cat /tmp/xremap/warcraft-config.yaml > /tmp/xremap/warcraft.yaml
       hyprctl dispatch submap WARCRAFT
     '';
   };
@@ -73,7 +65,6 @@
       pkgs.hyprland
     ];
     text = ''
-      cat /tmp/xremap/warcraft-config.yaml > /tmp/xremap/warcraft.yaml
       hyprctl dispatch submap WARCRAFT
     '';
   };
@@ -212,11 +203,41 @@
       echo "$1" > "$WARCRAFT_HOME/control_group"
     '';
   };
+  warcraft-create-control-group = pkgs.writeShellApplication {
+    name = "warcraft-create-control-group";
+    excludeShellChecks = ["SC2046" "SC2086"];
+    runtimeInputs = [
+      pkgs.ydotool
+    ];
+    text = ''
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
+
+      CONTROL_GROUP="$1"
+
+      echo "$CONTROL_GROUP" > "$WARCRAFT_HOME/control_group"
+
+      case "$CONTROL_GROUP" in
+        1) CONTROL_GROUP_KEYCODE=2 ;;
+        2) CONTROL_GROUP_KEYCODE=3 ;;
+        3) CONTROL_GROUP_KEYCODE=4 ;;
+        4) CONTROL_GROUP_KEYCODE=5 ;;
+        5) CONTROL_GROUP_KEYCODE=6 ;;
+        6) CONTROL_GROUP_KEYCODE=7 ;;
+        7) CONTROL_GROUP_KEYCODE=8 ;;
+        8) CONTROL_GROUP_KEYCODE=9 ;;
+        9) CONTROL_GROUP_KEYCODE=10 ;;
+        0) CONTROL_GROUP_KEYCODE=11 ;;
+      esac
+
+      echo "Creating control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
+
+      ydotool key 57:1 "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 57:0
+    '';
+  };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
     name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
       pkgs.ydotool
-      pkgs.hyprland
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
@@ -322,6 +343,7 @@
       warcraft-autocast-hotkey
       warcraft-inventory-hotkey
       warcraft-write-control-group
+      warcraft-create-control-group
       warcraft-edit-unit-control-group
       warcraft-select-unit
     ];
@@ -387,12 +409,6 @@ in {
                   bind = SHIFT, X, exec, ${lib.getExe warcraft-autocast-hotkey} X
                   bind = SHIFT, C, exec, ${lib.getExe warcraft-autocast-hotkey} C
                   bind = SHIFT, V, exec, ${lib.getExe warcraft-autocast-hotkey} V
-                  bind = CTRL, Q, exec, ${lib.getExe warcraft-inventory-hotkey} 1
-                  bind = CTRL, W, exec, ${lib.getExe warcraft-inventory-hotkey} 2
-                  bind = CTRL, A, exec, ${lib.getExe warcraft-inventory-hotkey} 3
-                  bind = CTRL, S, exec, ${lib.getExe warcraft-inventory-hotkey} 4
-                  bind = CTRL, Y, exec, ${lib.getExe warcraft-inventory-hotkey} 5
-                  bind = CTRL, X, exec, ${lib.getExe warcraft-inventory-hotkey} 6
                   bindn = , RETURN, exec, ${lib.getExe warcraft-chat-open}
                   bindn = SHIFT, mouse:272, exec, ${lib.getExe warcraft-edit-unit-control-group}
                   bindn = , 1, exec, ${lib.getExe warcraft-write-control-group} 1
@@ -410,6 +426,22 @@ in {
                   binde = , XF86AudioRaiseVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
                   binde = , XF86AudioLowerVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
                   submap = BTN_EXTRA
+                  bindn = , 1, exec, ${lib.getExe warcraft-create-control-group} 1
+                  bindn = , 2, exec, ${lib.getExe warcraft-create-control-group} 2
+                  bindn = , 3, exec, ${lib.getExe warcraft-create-control-group} 3
+                  bindn = , 4, exec, ${lib.getExe warcraft-create-control-group} 4
+                  bindn = , 5, exec, ${lib.getExe warcraft-create-control-group} 5
+                  bindn = , 6, exec, ${lib.getExe warcraft-create-control-group} 6
+                  bindn = , 7, exec, ${lib.getExe warcraft-create-control-group} 7
+                  bindn = , 8, exec, ${lib.getExe warcraft-create-control-group} 8
+                  bindn = , 9, exec, ${lib.getExe warcraft-create-control-group} 9
+                  bindn = , 0, exec, ${lib.getExe warcraft-create-control-group} 0
+                  bind = , Tab, exec, ${lib.getExe warcraft-inventory-hotkey} 1
+                  bind = , Q, exec, ${lib.getExe warcraft-inventory-hotkey} 2
+                  bind = , W, exec, ${lib.getExe warcraft-inventory-hotkey} 3
+                  bind = , E, exec, ${lib.getExe warcraft-inventory-hotkey} 4
+                  bind = , R, exec, ${lib.getExe warcraft-inventory-hotkey} 5
+                  bind = , T, exec, ${lib.getExe warcraft-inventory-hotkey} 6
                   bind = , ESCAPE, exec, ${lib.getExe warcraft-select-unit} 1
                   bind = , A, exec, ${lib.getExe warcraft-select-unit} 2
                   bind = , S, exec, ${lib.getExe warcraft-select-unit} 3
