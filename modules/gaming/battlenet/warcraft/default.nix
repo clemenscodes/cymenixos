@@ -220,12 +220,7 @@
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
-      YDOTOOL_LOG_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/ydotool_log"
-      CONTROL_GROUP_FILE="$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
-
-      SELECTED_CONTROL_GROUP="$1"
-
-      echo "$SELECTED_CONTROL_GROUP" > "$CONTROL_GROUP_FILE"
+      echo "$1" > "$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
     '';
   };
   warcraft-edit-unit-control-group = pkgs.writeShellApplication {
