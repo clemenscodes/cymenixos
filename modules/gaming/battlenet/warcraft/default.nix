@@ -14,8 +14,6 @@
     name = "warcraft";
     runtimeInputs = [
       inputs.battlenet.packages.${system}.battlenet
-      pkgs.systemd
-      pkgs.hyprland
       warcraft-mode-start
       warcraft-mode-stop
     ];
@@ -28,7 +26,7 @@
   warcraft-mode-start = pkgs.writeShellApplication {
     name = "warcraft-mode-start";
     runtimeInputs = [
-      pkgs.ydotool
+      pkgs.systemd
       pkgs.hyprland
     ];
     text = ''
@@ -40,7 +38,7 @@
   warcraft-mode-stop = pkgs.writeShellApplication {
     name = "warcraft-mode-stop";
     runtimeInputs = [
-      pkgs.ydotool
+      pkgs.systemd
       pkgs.hyprland
     ];
     text = ''
@@ -188,6 +186,7 @@
   warcraft-chat-send = pkgs.writeShellApplication {
     name = "warcraft-chat-send";
     runtimeInputs = [
+      pkgs.systemd
       pkgs.ydotool
       pkgs.hyprland
     ];
@@ -201,6 +200,7 @@
   warcraft-chat-close = pkgs.writeShellApplication {
     name = "warcraft-chat-close";
     runtimeInputs = [
+      pkgs.systemd
       pkgs.ydotool
       pkgs.hyprland
     ];
@@ -214,10 +214,6 @@
   };
   warcraft-write-control-group = pkgs.writeShellApplication {
     name = "warcraft-write-control-group";
-    runtimeInputs = [
-      pkgs.ydotool
-      pkgs.hyprland
-    ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''
       echo "$1" > "$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/control_group"
@@ -227,7 +223,6 @@
     name = "warcraft-edit-unit-control-group";
     runtimeInputs = [
       pkgs.ydotool
-      pkgs.hyprland
     ];
     excludeShellChecks = ["SC2046" "SC2086"];
     text = ''

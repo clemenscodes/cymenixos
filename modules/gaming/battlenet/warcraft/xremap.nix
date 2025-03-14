@@ -184,9 +184,9 @@ in {
                             SUPER-KEY_3: KEY_8
                             SUPER-KEY_4: KEY_9
                             SUPER-KEY_5: KEY_0
-                            SHIFT_KEY_1: KEY_F1
-                            SHIFT_KEY_2: KEY_F2
-                            SHIFT_KEY_3: KEY_F3
+                            SHIFT-KEY_1: KEY_F1
+                            SHIFT-KEY_2: KEY_F2
+                            SHIFT-KEY_3: KEY_F3
                     '';
                   };
                 in
