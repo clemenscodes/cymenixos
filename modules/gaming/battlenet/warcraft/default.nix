@@ -406,7 +406,8 @@ in {
         ${name} = {
           home = {
             sessionVariables = {
-              WARCRAFT_HOME = "$HOME/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III";
+              WARCRAFT_WINEPREFIX = "$HOME/.local/share/wineprefixes/bnet";
+              WARCRAFT_HOME = "$WARCRAFT_WINEPREFIX/drive_c/users/${name}/Documents/Warcraft III";
             };
           };
           xdg = {

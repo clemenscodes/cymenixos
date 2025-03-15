@@ -20,7 +20,6 @@
         ];
     };
   };
-  wine = pkgs.wineWowPackages.unstableFull;
 in {
   imports = [
     inputs.nix-gaming.nixosModules.pipewireLowLatency
@@ -41,12 +40,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable) {
-    environment = {
-      systemPackages = [
-        wine
-        pkgs.winetricks
-      ];
-    };
     services = {
       pipewire = {
         lowLatency = {
