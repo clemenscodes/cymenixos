@@ -11,17 +11,42 @@
   cfg = config.modules.gaming.battlenet;
   inherit (config.modules.users) name;
   inherit (inputs.battlenet.packages.${system}) battlenet bonjour w3champions;
+  restart-bonjour = pkgs.writeShellApplication {
+    name = "restart-bonjour";
+    runtimeInputs = [
+      bonjour
+      pkgs.libnotify
+    ];
+    text = ''
+      notify-send --expire-time 3000 --icon ${./assets/bonjour-128x128.png} "Restarting Bonjour Service"
+      bonjour
+      notify-send --expire-time 3000 --icon ${./assets/bonjour-128x128.png} "Restarted Bonjour Service"
+    '';
+  };
+  start-w3champions = pkgs.writeShellApplication {
+    name = "start-w3champions";
+    runtimeInputs = [
+      w3champions
+    ];
+    text = ''
+      pkill wine
+      w3champions
+      pkill wine
+    '';
+  };
   warcraft = pkgs.writeShellApplication {
     name = "warcraft";
     runtimeInputs = [
-      w3champions
+      battlenet
       warcraft-mode-start
       warcraft-mode-stop
+      restart-bonjour
     ];
     text = ''
       warcraft-mode-start
-      w3champions
-      warcraft-mode-stop
+      restart-bonjour
+      battlenet
+      warcraft-mode-start
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
@@ -364,6 +389,8 @@
   warcraft-scripts = pkgs.symlinkJoin {
     name = "warcraft-scripts";
     paths = [
+      restart-bonjour
+      start-w3champions
       warcraft
       warcraft-mode-start
       warcraft-mode-stop
@@ -385,7 +412,6 @@ in {
   imports = [
     (import ./keys.nix {inherit inputs pkgs lib;})
     (import ./preferences.nix {inherit inputs pkgs lib;})
-    (import ./xremap.nix {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
@@ -417,7 +443,7 @@ in {
                 name = "Bonjour";
                 type = "Application";
                 categories = ["Game"];
-                genericName = "Restarts Bonjour";
+                genericName = "Restarts Bonjour for Warcraft III";
                 icon = ./assets/bonjour-128x128.png;
                 exec = "${lib.getExe bonjour}";
                 terminal = false;
@@ -426,7 +452,7 @@ in {
                 name = "Battle.net";
                 type = "Application";
                 categories = ["Game"];
-                genericName = "RTS by Blizzard";
+                genericName = "Launcher for Warcraft III";
                 icon = ./assets/battle-net.svg;
                 exec = "${lib.getExe battlenet}";
                 terminal = false;
@@ -438,6 +464,15 @@ in {
                 genericName = "RTS by Blizzard";
                 icon = ./assets/warcraft-iii-reforged.svg;
                 exec = "${lib.getExe warcraft}";
+                terminal = false;
+              };
+              w3champions = {
+                name = "W3Champions";
+                type = "Application";
+                categories = ["Game"];
+                genericName = "Alternative Warcraft III Ladder";
+                icon = ./assets/w3champions.png;
+                exec = "${lib.getExe start-w3champions}";
                 terminal = false;
               };
             };
