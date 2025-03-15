@@ -433,7 +433,7 @@ in {
                 categories = ["Game"];
                 genericName = "Restarts Bonjour for Warcraft III";
                 icon = ./assets/bonjour-128x128.png;
-                exec = "${lib.getExe bonjour}";
+                exec = "${lib.getExe restart-bonjour}";
                 terminal = false;
               };
               battlenet = {
