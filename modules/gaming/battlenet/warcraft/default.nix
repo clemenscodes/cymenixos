@@ -10,16 +10,17 @@
 }: let
   cfg = config.modules.gaming.battlenet;
   inherit (config.modules.users) name;
+  inherit (inputs.battlenet.packages.${system}) battlenet bonjour w3champions;
   warcraft = pkgs.writeShellApplication {
     name = "warcraft";
     runtimeInputs = [
-      inputs.battlenet.packages.${system}.battlenet
+      w3champions
       warcraft-mode-start
       warcraft-mode-stop
     ];
     text = ''
       warcraft-mode-start
-      battlenet
+      w3champions
       warcraft-mode-stop
     '';
   };
@@ -375,9 +376,9 @@
       warcraft-create-control-group
       warcraft-edit-unit-control-group
       warcraft-select-unit
-      inputs.battlenet.packages.${system}.battlenet
-      inputs.battlenet.packages.${system}.bonjour
-      inputs.battlenet.packages.${system}.w3champions
+      battlenet
+      bonjour
+      w3champions
     ];
   };
 in {
@@ -412,6 +413,24 @@ in {
           };
           xdg = {
             desktopEntries = {
+              bonjour = {
+                name = "Bonjour";
+                type = "Application";
+                categories = ["Game"];
+                genericName = "Restarts Bonjour";
+                icon = ./assets/bonjour-128x128.png;
+                exec = "${lib.getExe bonjour}";
+                terminal = false;
+              };
+              battlenet = {
+                name = "Battle.net";
+                type = "Application";
+                categories = ["Game"];
+                genericName = "RTS by Blizzard";
+                icon = ./assets/battle-net.svg;
+                exec = "${lib.getExe battlenet}";
+                terminal = false;
+              };
               warcraft = {
                 name = "Warcraft III";
                 type = "Application";
