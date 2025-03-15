@@ -53,9 +53,6 @@ in {
               ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/tft_undead.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/mainmenu.webm" = {
-                text = "";
-              };
               ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/War3Preferences.txt" = {
                 text = ''
                   [Commandbar Hotkeys 00]
