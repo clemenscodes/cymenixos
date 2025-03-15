@@ -212,7 +212,7 @@
 
       CONTROL_GROUP="$1"
       echo "$CONTROL_GROUP" > "$WARCRAFT_HOME/control_group"
-      
+
       case "$CONTROL_GROUP" in
         1) CONTROL_GROUP_KEYCODE=2 ;;
         2) CONTROL_GROUP_KEYCODE=3 ;;
@@ -230,7 +230,7 @@
 
       sleep 0.1
 
-      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0 
+      ydotool key "$CONTROL_GROUP_KEYCODE":1 "$CONTROL_GROUP_KEYCODE":0
 
       hyprctl dispatch submap WARCRAFT
     '';
@@ -464,11 +464,11 @@ in {
                   bind = , 3, exec, ${lib.getExe warcraft-write-control-group} 3
                   bind = , 4, exec, ${lib.getExe warcraft-write-control-group} 4
                   bind = , 5, exec, ${lib.getExe warcraft-write-control-group} 5
-                  bind = , 6, exec, ${lib.getExe warcraft-write-control-group} 6
-                  bind = , 7, exec, ${lib.getExe warcraft-write-control-group} 7
-                  bind = , 8, exec, ${lib.getExe warcraft-write-control-group} 8
-                  bind = , 9, exec, ${lib.getExe warcraft-write-control-group} 9
-                  bind = , 0, exec, ${lib.getExe warcraft-write-control-group} 0
+                  bind = $mod, 1, exec, ${lib.getExe warcraft-write-control-group} 6
+                  bind = $mod, 2, exec, ${lib.getExe warcraft-write-control-group} 7
+                  bind = $mod, 3, exec, ${lib.getExe warcraft-write-control-group} 8
+                  bind = $mod, 4, exec, ${lib.getExe warcraft-write-control-group} 9
+                  bind = $mod, 5, exec, ${lib.getExe warcraft-write-control-group} 0
                   bind = , mouse:276, submap, BTN_EXTRA
                   bind = , mouse:275, submap, BTN_SIDE
                   binde = , XF86AudioRaiseVolume, exec, ${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
@@ -479,11 +479,11 @@ in {
                   bind = , 3, exec, ${lib.getExe warcraft-create-control-group} 3
                   bind = , 4, exec, ${lib.getExe warcraft-create-control-group} 4
                   bind = , 5, exec, ${lib.getExe warcraft-create-control-group} 5
-                  bind = , 6, exec, ${lib.getExe warcraft-create-control-group} 6
-                  bind = , 7, exec, ${lib.getExe warcraft-create-control-group} 7
-                  bind = , 8, exec, ${lib.getExe warcraft-create-control-group} 8
-                  bind = , 9, exec, ${lib.getExe warcraft-create-control-group} 9
-                  bind = , 0, exec, ${lib.getExe warcraft-create-control-group} 0
+                  bind = $mod, 1, exec, ${lib.getExe warcraft-create-control-group} 6
+                  bind = $mod, 2, exec, ${lib.getExe warcraft-create-control-group} 7
+                  bind = $mod, 3, exec, ${lib.getExe warcraft-create-control-group} 8
+                  bind = $mod, 4, exec, ${lib.getExe warcraft-create-control-group} 9
+                  bind = $mod, 5, exec, ${lib.getExe warcraft-create-control-group} 0
                   bind = , Tab, exec, ${lib.getExe warcraft-inventory-hotkey} 1
                   bind = , Q, exec, ${lib.getExe warcraft-inventory-hotkey} 2
                   bind = , W, exec, ${lib.getExe warcraft-inventory-hotkey} 3
