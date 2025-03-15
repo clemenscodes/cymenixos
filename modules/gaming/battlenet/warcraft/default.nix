@@ -375,6 +375,9 @@
       warcraft-create-control-group
       warcraft-edit-unit-control-group
       warcraft-select-unit
+      inputs.battlenet.packages.${system}.battlenet
+      inputs.battlenet.packages.${system}.bonjour
+      inputs.battlenet.packages.${system}.w3champions
     ];
   };
 in {

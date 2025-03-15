@@ -177,11 +177,11 @@
         "umu": "umu"
       },
       "locked": {
-        "lastModified": 1741281313,
-        "narHash": "sha256-crCswuP2Dz6Haur8fr1hJFRNk80Gpr/85kqI6g/B+E8=",
+        "lastModified": 1742036169,
+        "narHash": "sha256-c32wcKJ5gc/niDKHfnExmpiFfMpW/V2K/Pa+lo0aVY8=",
         "owner": "clemenscodes",
         "repo": "bnet",
-        "rev": "e66aa9d9accef989f42873b2bacb634e1a4c86ed",
+        "rev": "9c5094eaa141de0e45225c86d9597e682f1dedf6",
         "type": "github"
       },
       "original": {
