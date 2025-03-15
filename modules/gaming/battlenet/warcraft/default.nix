@@ -23,17 +23,6 @@
       notify-send --expire-time 3000 --icon ${./assets/bonjour-128x128.png} "Restarted Bonjour Service"
     '';
   };
-  start-w3champions = pkgs.writeShellApplication {
-    name = "start-w3champions";
-    runtimeInputs = [
-      w3champions
-    ];
-    text = ''
-      pkill wine
-      w3champions
-      pkill wine
-    '';
-  };
   warcraft = pkgs.writeShellApplication {
     name = "warcraft";
     runtimeInputs = [
@@ -43,10 +32,10 @@
       restart-bonjour
     ];
     text = ''
-      warcraft-mode-start
       restart-bonjour
-      battlenet
       warcraft-mode-start
+      battlenet
+      warcraft-mode-stop
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
@@ -390,7 +379,6 @@
     name = "warcraft-scripts";
     paths = [
       restart-bonjour
-      start-w3champions
       warcraft
       warcraft-mode-start
       warcraft-mode-stop
@@ -472,7 +460,7 @@ in {
                 categories = ["Game"];
                 genericName = "Alternative Warcraft III Ladder";
                 icon = ./assets/w3champions.png;
-                exec = "${lib.getExe start-w3champions}";
+                exec = "${lib.getExe w3champions}";
                 terminal = false;
               };
             };
