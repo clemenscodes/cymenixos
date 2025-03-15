@@ -17,40 +17,40 @@ in {
         ${name} = {
           home = {
             file = {
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/mainmenu.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/mainmenu.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/corner-machinery-animated.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/corner-machinery-animated.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/random-bg.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/random-bg.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/roc_prologue.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/roc_prologue.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/roc_human.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/roc_human.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/roc_orc.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/roc_orc.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/roc_nightelf.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/roc_nightelf.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/roc_undead.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/roc_undead.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/tft_human.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/tft_human.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/tft_orc.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/tft_orc.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/tft_nightelf.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/tft_nightelf.webm" = {
                 text = "";
               };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/_retail_/webui/webms/tft_undead.webm" = {
+              ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/tft_undead.webm" = {
                 text = "";
               };
               ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/War3Preferences.txt" = {

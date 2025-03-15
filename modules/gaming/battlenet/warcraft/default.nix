@@ -210,7 +210,9 @@
     text = ''
       hyprctl dispatch submap CONTROLGROUP
 
+      YDOTOOL_LOG_FILE="$WARCRAFT_HOME/ydotool_log"
       CONTROL_GROUP="$1"
+
       echo "$CONTROL_GROUP" > "$WARCRAFT_HOME/control_group"
 
       case "$CONTROL_GROUP" in
@@ -227,6 +229,8 @@
       esac
 
       echo "$1" > "$WARCRAFT_HOME/control_group"
+
+      echo "Selecting control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
       sleep 0.1
 
@@ -297,7 +301,7 @@
         0) CONTROL_GROUP_KEYCODE=11 ;;
       esac
 
-      echo "Removing unit from control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
+      echo "Editing unit from control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
 
       hyprctl dispatch submap CONTROLGROUP
 
