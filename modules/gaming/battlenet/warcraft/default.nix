@@ -10,7 +10,7 @@
 }: let
   cfg = config.modules.gaming.battlenet;
   inherit (config.modules.users) name;
-  inherit (inputs.battlenet.packages.${system}) battlenet bonjour w3champions;
+  inherit (inputs.battlenet.packages.${system}) battlenet bonjour w3champions webview2-w3champions;
   restart-bonjour = pkgs.writeShellApplication {
     name = "restart-bonjour";
     runtimeInputs = [
@@ -422,7 +422,9 @@ in {
           home = {
             sessionVariables = {
               WARCRAFT_WINEPREFIX = "$HOME/.local/share/wineprefixes/bnet";
-              WARCRAFT_HOME = "$WARCRAFT_WINEPREFIX/drive_c/users/${name}/Documents/Warcraft III";
+              WARCRAFT_HOME = let
+                prefix = config.home-manager.users.${name}.home.sessionVariables.WARCRAFT_WINEPREFIX;
+              in "${prefix}/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III";
             };
           };
           xdg = {
@@ -461,6 +463,15 @@ in {
                 genericName = "Alternative Warcraft III Ladder";
                 icon = ./assets/w3champions.png;
                 exec = "${lib.getExe w3champions}";
+                terminal = false;
+              };
+              webview2w3champions = {
+                name = "WebView2 W3Champions";
+                type = "Application";
+                categories = ["Game"];
+                genericName = "Alternative Warcraft III Ladder";
+                icon = ./assets/w3champions.png;
+                exec = "${lib.getExe webview2-w3champions}";
                 terminal = false;
               };
             };

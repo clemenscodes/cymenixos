@@ -85,7 +85,7 @@
       };
     };
     battlenet = {
-      url = "github:clemenscodes/bnet";
+      url = "github:clemenscodes/bnet/feature/webview2";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
