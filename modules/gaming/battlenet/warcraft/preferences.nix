@@ -13,7 +13,6 @@
 in {
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
     environment = {
-      systemPackages = [inputs.battlenet.packages.${system}.battlenet];
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
           users = {
