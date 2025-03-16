@@ -18,7 +18,7 @@ in {
           users = {
             ${config.modules.users.name} = {
               directories = [
-                ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings"
+                # ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings"
               ];
             };
           };
