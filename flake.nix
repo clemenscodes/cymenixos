@@ -85,7 +85,7 @@
       };
     };
     battlenet = {
-      url = "github:clemenscodes/bnet/feature/webview2";
+      url = "github:clemenscodes/bnet/feature/fix-bnet-install-stuck";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";

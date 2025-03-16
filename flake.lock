@@ -177,16 +177,16 @@
         "umu": "umu"
       },
       "locked": {
-        "lastModified": 1742154056,
-        "narHash": "sha256-pGpfQ1UNa/0vtjfbZsHEqtj3DL4HNPton26F965bIZM=",
+        "lastModified": 1742154367,
+        "narHash": "sha256-OHY/CVoCrlvc2zmiy8oetcXx4aaqfLvEVDoTUS6pxE4=",
         "owner": "clemenscodes",
         "repo": "bnet",
-        "rev": "0c4ef06e84440eda14b6df1740b6da5346e548f3",
+        "rev": "55861b20d9fc34c8ccdd0eaf869b28b83c71111e",
         "type": "github"
       },
       "original": {
         "owner": "clemenscodes",
-        "ref": "feature/webview2",
+        "ref": "feature/fix-bnet-install-stuck",
         "repo": "bnet",
         "type": "github"
       }
