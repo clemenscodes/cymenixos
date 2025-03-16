@@ -12,6 +12,17 @@
   inherit (config.modules.users) name;
 in {
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
+    persistence = {
+      ${config.modules.boot.impermanence.persistPath} = {
+        users = {
+          ${config.modules.users.name} = {
+            directories = [
+              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings"
+            ];
+          };
+        };
+      };
+    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${name} = {

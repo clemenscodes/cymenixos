@@ -9,8 +9,6 @@
   ...
 }: let
   cfg = config.modules.gaming;
-  inherit (config.modules.boot.impermanence) persistPath;
-  inherit (config.modules.users) name;
 in {
   imports = [
     (import ./warcraft {inherit inputs pkgs lib;})
@@ -28,9 +26,9 @@ in {
     environment = {
       systemPackages = [inputs.battlenet.packages.${system}.battlenet];
       persistence = {
-        ${persistPath} = {
+        ${config.modules.boot.impermanence.persistPath} = {
           users = {
-            ${name} = {
+            ${config.modules.users.name} = {
               directories = [
                 ".local/share/wineprefixes/bnet"
               ];

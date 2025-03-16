@@ -12,6 +12,21 @@
   inherit (config.modules.users) name;
 in {
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
+    environment = {
+      systemPackages = [inputs.battlenet.packages.${system}.battlenet];
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          users = {
+            ${config.modules.users.name} = {
+              directories = [
+                ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/"
+                ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms"
+              ];
+            };
+          };
+        };
+      };
+    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${name} = {
