@@ -177,11 +177,11 @@
         "umu": "umu"
       },
       "locked": {
-        "lastModified": 1742137510,
-        "narHash": "sha256-dWCIzoceqSsA8rbXJjuTTV8nUATQaPTGYtM443DYPyM=",
+        "lastModified": 1742154056,
+        "narHash": "sha256-pGpfQ1UNa/0vtjfbZsHEqtj3DL4HNPton26F965bIZM=",
         "owner": "clemenscodes",
         "repo": "bnet",
-        "rev": "d1cb1b9e0461cb1640f8c5d3af198fd3490ec03e",
+        "rev": "0c4ef06e84440eda14b6df1740b6da5346e548f3",
         "type": "github"
       },
       "original": {
@@ -6027,11 +6027,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1742132695,
-        "narHash": "sha256-c4WnLfYqLHqyhovAn0bUtHyKqDZOq+mFs4iIs4pUn6I=",
+        "lastModified": 1742153106,
+        "narHash": "sha256-GzAHDqHZerM5gY2Fxb044XO4h+qzXNFch2RJYapnDWI=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "9667dea224705b76854e42961c6f4a10798adecd",
+        "rev": "c79a6acb80f17853e54b7b5fb8f6c7d86b9c2ca2",
         "type": "github"
       },
       "original": {
