@@ -413,6 +413,14 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
+    systemd = {
+      tmpfiles = {
+        rules = [
+          "d '/home/${name}/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III' 0755 ${name} ${name}"
+          "d '/home/${name}/.local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/' 0755 ${name} ${name}"
+        ];
+      };
+    };
     environment = {
       systemPackages = [warcraft-scripts];
     };
