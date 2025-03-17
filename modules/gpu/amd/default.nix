@@ -92,6 +92,7 @@ in {
         extraPackages = [
           pkgs.amdvlk
           pkgs.mesa
+          pkgs.mesa.drivers
           pkgs.rocmPackages.clr
           pkgs.rocmPackages.clr.icd
           pkgs.rocmPackages.rocm-runtime
