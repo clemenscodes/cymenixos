@@ -145,6 +145,7 @@ in {
               "$mod, W, exec, ${config.modules.browser.defaultBrowser}"
               "$mod SHIFT, C, exit"
               "$mod SHIFT, F, togglefloating,"
+              "$mod SHIFT, K, exec, hyprctl kill"
               "$mod, SPACE, layoutmsg, swapwithmaster"
 
               "$mod, 1, workspace, 1"
