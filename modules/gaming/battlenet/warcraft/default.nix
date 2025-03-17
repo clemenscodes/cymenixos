@@ -394,6 +394,7 @@
       battlenet
       bonjour
       w3champions
+      webview2-w3champions
     ];
   };
 in {
