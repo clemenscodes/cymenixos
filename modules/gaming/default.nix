@@ -40,6 +40,12 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable) {
+    environment = {
+      systemPackages = [
+        pkgs.wineWowPackages.unstableFull
+        pkgs.winetricks
+      ];
+    };
     services = {
       pipewire = {
         lowLatency = {
