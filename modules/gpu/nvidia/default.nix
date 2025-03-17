@@ -37,7 +37,6 @@ in {
         pkgs.cudaPackages.cudatoolkit
         pkgs.cudaPackages.cudnn
         pkgs.nvtop-amd
-        pkgs.mesa
         pkgs.vulkan-tools
         pkgs.vulkan-loader
         pkgs.vulkan-validation-layers

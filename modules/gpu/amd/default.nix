@@ -35,8 +35,17 @@ in {
         pkgs.clinfo
         pkgs.glxinfo
         pkgs.glmark2
+        pkgs.libva
         pkgs.libva-utils
+        pkgs.vulkan-loader
+        pkgs.vulkan-validation-layers
+        pkgs.vulkan-extension-layer
         pkgs.vulkan-tools
+        pkgs.amdvlk
+        pkgs.mesa
+        pkgs.rocmPackages.clr
+        pkgs.rocmPackages.clr.icd
+        pkgs.rocmPackages.rocm-runtime
         inputs.gpu-usage-waybar.packages.${system}.gpu-usage-waybar
       ];
       variables = {
@@ -92,7 +101,6 @@ in {
         extraPackages = [
           pkgs.amdvlk
           pkgs.mesa
-          pkgs.mesa.drivers
           pkgs.rocmPackages.clr
           pkgs.rocmPackages.clr.icd
           pkgs.rocmPackages.rocm-runtime
