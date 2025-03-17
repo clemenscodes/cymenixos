@@ -10,7 +10,7 @@
 }: let
   cfg = config.modules.gaming.battlenet;
   inherit (config.modules.users) name;
-  inherit (inputs.battlenet.packages.${system}) battlenet bonjour w3champions webview2-w3champions;
+  inherit (inputs.battlenet.packages.${system}) battlenet bonjour w3champions-legacy w3champions webview2;
   restart-bonjour = pkgs.writeShellApplication {
     name = "restart-bonjour";
     runtimeInputs = [
@@ -393,8 +393,9 @@
       warcraft-select-unit
       battlenet
       bonjour
+      w3champions-legacy
       w3champions
-      webview2-w3champions
+      webview2
     ];
   };
 in {
@@ -457,22 +458,22 @@ in {
                 exec = "${lib.getExe warcraft}";
                 terminal = false;
               };
-              w3champions = {
-                name = "W3Champions";
+              w3champions-legacy = {
+                name = "W3Champions Legacy";
                 type = "Application";
                 categories = ["Game"];
                 genericName = "Alternative Warcraft III Ladder";
                 icon = ./assets/w3champions.png;
-                exec = "${lib.getExe w3champions}";
+                exec = "${lib.getExe w3champions-legacy}";
                 terminal = false;
               };
-              webview2w3champions = {
+              w3champions = {
                 name = "WebView2 W3Champions";
                 type = "Application";
                 categories = ["Game"];
                 genericName = "Alternative Warcraft III Ladder";
                 icon = ./assets/w3champions.png;
-                exec = "${lib.getExe webview2-w3champions}";
+                exec = "${lib.getExe w3champions}";
                 terminal = false;
               };
             };
