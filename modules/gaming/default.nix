@@ -42,7 +42,7 @@ in {
   config = lib.mkIf (cfg.enable) {
     environment = {
       systemPackages = [
-        pkgs.wineWowPackages.unstableFull
+        inputs.nix-gaming.packages.${system}.wine-ge
         pkgs.winetricks
       ];
     };
