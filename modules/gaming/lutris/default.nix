@@ -28,9 +28,9 @@ in {
           extraPkgs = pkgs: [
             pkgs.winetricks
             pkgs."wine64-bleeding-9.22"
-            pkgs."wine64-winetricks-9.22"
+            pkgs."wine64-bleeding-winetricks-9.22"
             pkgs."wine64-bleeding-10.3"
-            pkgs."wine64-winetricks-10.3"
+            pkgs."wine64-bleeding-winetricks-10.3"
           ];
         })
       ];

@@ -125,7 +125,7 @@ in {
       systemPackages = [
         pkgs.winetricks
         pkgs."wine64-bleeding-9.22"
-        pkgs."wine64-winetricks-9.22"
+        pkgs."wine64-bleeding-winetricks-9.22"
       ];
     };
     services = {
