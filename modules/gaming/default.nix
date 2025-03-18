@@ -23,6 +23,7 @@
       (final: prev: {
         wine-bleeding = prev.winePackages.unstableFull.overrideAttrs (oldAttrs: rec {
           version = "10.3";
+          name = "wine-bleeding";
           src = prev.fetchurl rec {
             inherit version;
             url = "https://dl.winehq.org/wine/source/10.x/wine-${version}.tar.xz";
@@ -31,6 +32,7 @@
         });
         wine64-bleeding = prev.wine64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
           version = "10.3";
+          name = "wine64-bleeding";
           src = prev.fetchurl rec {
             inherit version;
             url = "https://dl.winehq.org/wine/source/10.x/wine-${version}.tar.xz";
@@ -39,14 +41,16 @@
         });
         wine-wow-bleeding = prev.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: rec {
           version = "10.3";
+          name = "wine-wow-bleeding";
           src = prev.fetchurl rec {
             inherit version;
             url = "https://dl.winehq.org/wine/source/10.x/wine-${version}.tar.xz";
             hash = "sha256-3j2I/wBWuC/9/KhC8RGVkuSRT0jE6gI3aOBBnDZGfD4=";
           };
         });
-        wine-wow64-bleeding = prev.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: rec {
+        wine-wow64-bleeding = prev.wineWow64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
           version = "10.3";
+          name = "wine-wow64-bleeding";
           src = prev.fetchurl rec {
             inherit version;
             url = "https://dl.winehq.org/wine/source/10.x/wine-${version}.tar.xz";
