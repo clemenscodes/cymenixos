@@ -30,30 +30,54 @@
           };
         in rec
         {
-          wine64-winetricks = prev.stdenv.mkDerivation {
-            name = "wine64-winetricks";
+          wine-bleeding = prev.winePackages.unstableFull.overrideAttrs (oldAttrs: {
+            inherit version src;
+            name = "wine-bleeding";
+          });
+          wine-bleeding-winetricks = prev.stdenv.mkDerivation {
+            name = "wine-bleeding-winetricks";
+            phases = "installPhase";
+            installPhase = ''
+              mkdir -p $out/bin
+              ln -s ${final.wine-bleeding}/bin/wine $out/bin/wine64
+            '';
+          };
+          wine64-bleeding = prev.wine64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
+            inherit version src;
+            name = "wine64-bleeding";
+          });
+          wine64-bleeding-winetricks = prev.stdenv.mkDerivation {
+            name = "wine64-bleeding-winetricks";
             phases = "installPhase";
             installPhase = ''
               mkdir -p $out/bin
               ln -s ${final.wine64-bleeding}/bin/wine $out/bin/wine64
             '';
           };
-          wine-bleeding = prev.winePackages.unstableFull.overrideAttrs (oldAttrs: {
-            inherit version src;
-            name = "wine-bleeding";
-          });
-          wine64-bleeding = prev.wine64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
-            inherit version src;
-            name = "wine64-bleeding";
-          });
           wine-wow-bleeding = prev.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: rec {
             inherit version src;
             name = "wine-wow-bleeding";
           });
+          wine-wow-bleeding-winetricks = prev.stdenv.mkDerivation {
+            name = "wine-wow-bleeding-winetricks";
+            phases = "installPhase";
+            installPhase = ''
+              mkdir -p $out/bin
+              ln -s ${final.wine-wow-bleeding}/bin/wine $out/bin/wine64
+            '';
+          };
           wine-wow64-bleeding = prev.wineWow64Packages.unstableFull.overrideAttrs (oldAttrs: {
             inherit version src;
             name = "wine-wow64-bleeding";
           });
+          wine-wow64-bleeding-winetricks = prev.stdenv.mkDerivation {
+            name = "wine-wow64-bleeding-winetricks";
+            phases = "installPhase";
+            installPhase = ''
+              mkdir -p $out/bin
+              ln -s ${final.wine-wow64-bleeding}/bin/wine $out/bin/wine64
+            '';
+          };
         }
       )
     ];
