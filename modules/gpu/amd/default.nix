@@ -41,9 +41,6 @@ in {
         pkgs.vulkan-validation-layers
         pkgs.vulkan-extension-layer
         pkgs.vulkan-tools
-        pkgs.vkd3d
-        pkgs.vkd3d-proton
-        pkgs.dxvk_2
         pkgs.amdvlk
         pkgs.mesa
         pkgs.rocmPackages.clr
@@ -53,7 +50,6 @@ in {
       ];
       variables = {
         OCL_ICD_VENDORS = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors/";
-        VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/amd_icd64.json";
       };
     };
     boot = {
