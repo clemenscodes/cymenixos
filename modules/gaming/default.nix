@@ -124,8 +124,7 @@ in {
     environment = {
       systemPackages = [
         pkgs.winetricks
-        pkgs."wine-wow64-bleeding-9.22"
-        pkgs."wine-wow64-bleeding-winetricks-9.22"
+        inputs.nix-gaming.packages.${system}.wine-ge
       ];
     };
     services = {
