@@ -28,6 +28,7 @@ in {
           extraPkgs = pkgs: [
             inputs.nix-gaming.packages.${system}.wine-ge
             pkgs.wineWowPackages.unstableFull
+            pkgs.wine-bleeding
             pkgs.winetricks
           ];
         })

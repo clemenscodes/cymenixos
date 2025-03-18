@@ -44,7 +44,8 @@ in {
       systemPackages = [
         pkgs.winetricks
         pkgs.winePackages.fonts
-        pkgs.winePackages.unstableFull
+        pkgs.wineWowPackages.unstableFull
+        pkgs.wine-bleeding
       ];
     };
     services = {

@@ -136,7 +136,6 @@
     packages = {
       ${system} = {
         inherit (pkgs) grub2;
-        winePackages.unstableFull = pkgs.winePackages.unstableFull;
       };
     };
 

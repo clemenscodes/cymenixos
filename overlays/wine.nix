@@ -1,5 +1,5 @@
 (final: prev: {
-  winePackages.unstableFull = prev.winePackages.unstableFull.overrideAttrs (oldAttrs: rec {
+  wine-bleeding = prev.winePackages.unstableFull.overrideAttrs (oldAttrs: rec {
     version = "10.3";
     src = prev.fetchurl rec {
       inherit version;
