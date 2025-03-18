@@ -56,7 +56,6 @@ in {
       systemPackages = [
         pkgs.winetricks
         pkgs.winePackages.fonts
-        pkgs.wineWowPackages.unstableFull
         pkgs.wine-bleeding
       ];
     };
