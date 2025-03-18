@@ -124,7 +124,7 @@ in {
     environment = {
       systemPackages = [
         pkgs.winetricks
-        inputs.nix-gaming.packages.${system}.wine-ge
+        pkgs.wineWowPackages.unstableFull
       ];
     };
     services = {
