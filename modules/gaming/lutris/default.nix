@@ -26,8 +26,9 @@ in {
       systemPackages = [
         (pkgs.lutris.override {
           extraPkgs = pkgs: [
-            pkgs.wine-bleeding
             pkgs.winetricks
+            pkgs.wine64-winetricks
+            pkgs.wine-bleeding
           ];
         })
       ];

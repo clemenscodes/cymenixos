@@ -30,6 +30,14 @@
           };
         in rec
         {
+          wine64-winetricks = prev.stdenv.mkDerivation {
+            name = "wine64-winetricks";
+            phases = "installPhase";
+            installPhase = ''
+              mkdir -p $out/bin
+              ln -s ${final.wine64-bleeding}/bin/wine $out/bin/wine64
+            '';
+          };
           wine-bleeding = prev.winePackages.unstableFull.overrideAttrs (oldAttrs: {
             inherit version src;
             name = "wine-bleeding";
@@ -75,6 +83,7 @@ in {
         pkgs.winetricks
         pkgs.winePackages.fonts
         pkgs.wine64-bleeding
+        pkgs.wine64-winetricks
       ];
     };
     services = {
