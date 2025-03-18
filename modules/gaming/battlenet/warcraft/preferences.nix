@@ -229,12 +229,12 @@ in {
                   creepFilter=1
                   customfilter=0
                   custommask=0
-                  defaultZoom=3000
+                  defaultZoom=2300
                   denyIcon=1
                   displayapm=1
                   displayfps=1
                   displayping=1
-                  enabledAdvancedObserverUi=false
+                  enabledAdvancedObserverUi=true
                   enabledEnhancedZoom=1
                   enabledGameInfoMessages=1
                   enabledGlobalChat=1
@@ -255,7 +255,7 @@ in {
                   multiboardon=1
                   netgameport=6112
                   numericCooldown=1
-                  occlusion=0
+                  occlusion=1
                   peonDoubleTapFocus=1
                   profanity=0
                   schedrace=32
