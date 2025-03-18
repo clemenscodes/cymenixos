@@ -42,8 +42,9 @@ in {
   config = lib.mkIf (cfg.enable) {
     environment = {
       systemPackages = [
-        inputs.nix-gaming.packages.${system}.wine-ge
         pkgs.winetricks
+        pkgs.winePackages.fonts
+        pkgs.winePackages.unstableFull
       ];
     };
     services = {
