@@ -36,7 +36,7 @@
           phases = "installPhase";
           installPhase = ''
             mkdir -p $out/bin
-            ln -s ${final.wine-bleeding}/bin/wine $out/bin/wine64
+            ln -s ${"final.wine-bleeding-${version}"}/bin/wine $out/bin/wine64
           '';
         };
         "wine64-bleeding-${version}" = prev.wine64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
@@ -48,7 +48,7 @@
           phases = "installPhase";
           installPhase = ''
             mkdir -p $out/bin
-            ln -s ${final.wine64-bleeding}/bin/wine $out/bin/wine64
+            ln -s ${"final.wine64-bleeding-${version}"}/bin/wine $out/bin/wine64
           '';
         };
         "wine-wow-bleeding-${version}" = prev.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: rec {
@@ -60,7 +60,7 @@
           phases = "installPhase";
           installPhase = ''
             mkdir -p $out/bin
-            ln -s ${final.wine-wow-bleeding}/bin/wine $out/bin/wine64
+            ln -s ${"final.wine-wow-bleeding-${version}"}/bin/wine $out/bin/wine64
           '';
         };
         "wine-wow64-bleeding-${version}" = prev.wineWow64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
@@ -72,7 +72,7 @@
           phases = "installPhase";
           installPhase = ''
             mkdir -p $out/bin
-            ln -s ${final.wine-wow64-bleeding}/bin/wine $out/bin/wine64
+            ln -s ${"final.wine-wow64-bleeding-${version}"}/bin/wine $out/bin/wine64
           '';
         };
       };
