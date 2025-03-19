@@ -170,7 +170,7 @@ in {
       };
     };
     virtualisation = {
-      libvirt = {
+      libvirtd = {
         onBoot = "ignore";
         onShutdown = "shutdown";
         allowedBridges = ["virbr0"];
