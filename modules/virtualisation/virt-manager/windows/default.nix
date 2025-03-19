@@ -189,6 +189,8 @@ in {
             vnc = "${lib.getExe qemu-vnc-hook}";
           };
         };
+      };
+      libvirt = {
         inherit (config.modules.virtualisation) enable;
         swtpm = {
           inherit (config.modules.virtualisation) enable;
