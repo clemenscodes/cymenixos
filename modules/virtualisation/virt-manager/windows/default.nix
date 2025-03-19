@@ -146,7 +146,7 @@ in {
     };
     users = {
       users = {
-        ${user} = {
+        ${config.modules.users.name} = {
           extraGroups = ["libvirtd" "kvm" "input"];
         };
       };
