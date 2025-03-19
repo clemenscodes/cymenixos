@@ -88,6 +88,24 @@
       fi
     '';
   };
+  qemu-mkdisk = pkgs.writeShellApplication {
+    name = "qemu-mkdisk";
+    runtimeInputs = [
+      pkgs.qemu
+    ];
+    text = ''
+      DISK_PATH="/var/lib/libvirt/images/win11.qcow2"
+
+      mkdir -p /var/lib/libvirt/images
+
+      if [ -f "$DISK_PATH" ]; then
+        exit 0
+      else
+        qemu-img create -f qcow2 "$DISK_PATH" 64G
+        qemu-img info "$DISK_PATH"
+      fi
+    '';
+  };
 in {
   imports = [inputs.nixvirt.nixosModules.default];
   options = {
@@ -131,8 +149,7 @@ in {
       services = {
         libvirtd = {
           preStart = ''
-            mkdir -p /var/lib/libvirt/vgabios
-            ln -sf ${qemu}/bin/qemu /var/lib/libvirt/hooks/qemu
+            ${lib.getExe qemu-mkdisk}
           '';
         };
       };
