@@ -12,7 +12,7 @@
     text = ''
       shopt -s nullglob
       for d in /sys/kernel/iommu_groups/*/devices/*; do
-        n=''${d#*/iommu_groups/*}; n=''${n%%/*}
+        n="''${d#*/iommu_groups/*}"; n="''${n%%/*}"
         printf 'IOMMU Group %s ' "$n"
         lspci -nns "''${d##*/}"
       done;
@@ -79,12 +79,12 @@
         notify-send "Running Windows 11 VNC hook"
         iptables -A FORWARD -s 192.168.178.30/24 -d 192.168.122.0/24 -o virbr0 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
         if [ "$2" = "stopped" ] || [ "$2" = "reconnect" ]; then
-         iptables -D FORWARD -o virbr0 -p tcp -d $GUEST_IP --dport $GUEST_PORT -j ACCEPT
-         iptables -t nat -D PREROUTING -p tcp --dport $HOST_PORT -j DNAT --to $GUEST_IP:$GUEST_PORT
+         iptables -D FORWARD -o virbr0 -p tcp -d "$GUEST_IP" --dport "$GUEST_PORT" -j ACCEPT
+         iptables -t nat -D PREROUTING -p tcp --dport "$HOST_PORT" -j DNAT --to "$GUEST_IP:$GUEST_PORT"
         fi
         if [ "$2" = "start" ] || [ "$2" = "reconnect" ]; then
-         iptables -I FORWARD -o virbr0 -p tcp -d $GUEST_IP --dport $GUEST_PORT -j ACCEPT
-         iptables -t nat -I PREROUTING -p tcp --dport $HOST_PORT -j DNAT --to $GUEST_IP:$GUEST_PORT
+         iptables -I FORWARD -o virbr0 -p tcp -d "$GUEST_IP" --dport "$GUEST_PORT" -j ACCEPT
+         iptables -t nat -I PREROUTING -p tcp --dport "$HOST_PORT" -j DNAT --to "$GUEST_IP:$GUEST_PORT"
         fi
       fi
     '';
