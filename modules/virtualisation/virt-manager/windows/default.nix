@@ -34,7 +34,7 @@
       MISC="''${@:4}"
       BASEDIR="$(dirname $0)"
       HOOKPATH="$BASEDIR/qemu.d/$GUEST_NAME/$HOOK_NAME/$STATE_NAME"
-      if [ -f "$HOOKPATH" ] && [ -s "$HOOKPATH"] && [ -x "$HOOKPATH" ]; then
+      if [ -f "$HOOKPATH" ] && [ -s "$HOOKPATH" ] && [ -x "$HOOKPATH" ]; then
         eval \"$HOOKPATH\" "$@"
       elif [ -d "$HOOKPATH" ]; then
         while read file; do
