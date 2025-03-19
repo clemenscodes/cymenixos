@@ -14,6 +14,14 @@
         };
       };
     };
+    nixvirt = {
+      url = "github:clemenscodes/NixVirt";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     nur = {
       url = "github:nix-community/NUR";
       inputs = {

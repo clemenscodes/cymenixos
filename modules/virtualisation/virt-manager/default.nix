@@ -1,6 +1,12 @@
-{lib, ...}: {config, ...}: let
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules.virtualisation;
 in {
+  imports = [(import ./windows {inherit inputs pkgs lib;})];
   options = {
     modules = {
       virtualisation = {

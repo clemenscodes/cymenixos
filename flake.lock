@@ -5446,6 +5446,22 @@
         "url": "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz"
       }
     },
+    "nixpkgs-ovmf": {
+      "locked": {
+        "lastModified": 1708984720,
+        "narHash": "sha256-gJctErLbXx4QZBBbGp78PxtOOzsDaQ+yw1ylNQBuSUY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "13aff9b34cc32e59d35c62ac9356e4a41198a538",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -6044,6 +6060,27 @@
         "type": "github"
       }
     },
+    "nixvirt": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-ovmf": "nixpkgs-ovmf"
+      },
+      "locked": {
+        "lastModified": 1722805248,
+        "narHash": "sha256-wJTEER2Wdsfv+2SqX1gFcprkIL2QQiSxXg2+ROt2MB4=",
+        "owner": "clemenscodes",
+        "repo": "NixVirt",
+        "rev": "97b71096d8cb1f290edb2cb0fa01cedb4a580b55",
+        "type": "github"
+      },
+      "original": {
+        "owner": "clemenscodes",
+        "repo": "NixVirt",
+        "type": "github"
+      }
+    },
     "nosys": {
       "locked": {
         "lastModified": 1668010795,
@@ -6386,6 +6423,7 @@
         "nix-gaming": "nix-gaming_2",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixpkgs": "nixpkgs_22",
+        "nixvirt": "nixvirt",
         "nur": "nur",
         "sops-nix": "sops-nix",
         "templates": "templates",
