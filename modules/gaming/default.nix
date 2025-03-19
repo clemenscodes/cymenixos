@@ -124,9 +124,9 @@ in {
     environment = {
       systemPackages = [
         pkgs.winetricks
-        # pkgs.wineWowPackages.unstableFull
-        pkgs."wine-wow64-bleeding-10.3"
-        pkgs."wine-wow64-bleeding-winetricks-10.3"
+        pkgs.wineWowPackages.unstableFull
+        # pkgs."wine-wow64-bleeding-10.3"
+        # pkgs."wine-wow64-bleeding-winetricks-10.3"
       ];
     };
     services = {

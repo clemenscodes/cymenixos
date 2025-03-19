@@ -27,8 +27,9 @@ in {
         (pkgs.lutris.override {
           extraPkgs = pkgs: [
             pkgs.winetricks
-            pkgs."wine-wow64-bleeding-10.3"
-            pkgs."wine-wow64-bleeding-winetricks-10.3"
+            pkgs.wineWowPackages.unstableFull;
+            # pkgs."wine-wow64-bleeding-10.3"
+            # pkgs."wine-wow64-bleeding-winetricks-10.3"
           ];
           extraLibraries = pkgs: [];
         })
