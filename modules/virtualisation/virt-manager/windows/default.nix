@@ -811,10 +811,10 @@ in {
                           type = "virtiofs";
                         };
                         source = {
-                          dir = "/home/${user}/.local/share/games/battlenet/drive_c/users/steamuser/${user}/AppData/Local/com.w3champions.client";
+                          dir = "/home/${user}/Public";
                         };
                         target = {
-                          dir = "com.w3champions.client";
+                          dir = "Public";
                         };
                       }
                     ];
