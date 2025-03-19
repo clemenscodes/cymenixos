@@ -46,36 +46,30 @@
   };
   qemu-start-hook = pkgs.writeShellApplication {
     name = "qemu-start-hook";
-    runtimeInputs = [pkgs.libnotify];
+    runtimeInputs = [pkgs.mullvad];
     text = ''
       if [ "$1" = "win11" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        notify-send "Starting Windows 11 VM"
-        ${pkgs.mullvad}/bin/mullvad disconnect
+        mullvad disconnect
       fi
     '';
   };
   qemu-stop-hook = pkgs.writeShellApplication {
     name = "qemu-stop-hook";
-    runtimeInputs = [pkgs.libnotify];
+    runtimeInputs = [pkgs.mullvad];
     text = ''
       if [ "$1" = "win11" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        notify-send "Stopping Windows 11 VM"
-        ${pkgs.mullvad}/bin/mullvad connect
+        mullvad connect
       fi
     '';
   };
   qemu-vnc-hook = pkgs.writeShellApplication {
     name = "qemu-vnc-hook";
-    runtimeInputs = [
-      pkgs.libnotify
-      pkgs.iptables
-    ];
+    runtimeInputs = [pkgs.iptables];
     text = ''
       GUEST_IP="192.168.122.1"
       GUEST_PORT="5900"
       HOST_PORT="5900"
       if [ "$1" = "win11" ]; then
-        notify-send "Running Windows 11 VNC hook"
         iptables -A FORWARD -s 192.168.178.30/24 -d 192.168.122.0/24 -o virbr0 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
         if [ "$2" = "stopped" ] || [ "$2" = "reconnect" ]; then
          iptables -D FORWARD -o virbr0 -p tcp -d "$GUEST_IP" --dport "$GUEST_PORT" -j ACCEPT
@@ -90,9 +84,7 @@
   };
   qemu-mkdisk = pkgs.writeShellApplication {
     name = "qemu-mkdisk";
-    runtimeInputs = [
-      pkgs.qemu
-    ];
+    runtimeInputs = [pkgs.qemu];
     text = ''
       DISK_PATH="/var/lib/libvirt/images/win11.qcow2"
 
