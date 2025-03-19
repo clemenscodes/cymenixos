@@ -90,6 +90,7 @@
     '';
   };
 in {
+  imports = [inputs.nixvirt.nixosModules.default];
   options = {
     modules = {
       virtualisation = {
