@@ -155,7 +155,7 @@ in {
     };
     networking = {
       firewall = {
-        allowedTCPPorts = ["5900"];
+        allowedTCPPorts = [5900];
       };
       nat = {
         inherit (config.modules.virtualisation.virt-manager) enable;
