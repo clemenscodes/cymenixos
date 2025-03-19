@@ -41,9 +41,6 @@ in {
       spiceUSBRedirection = {
         inherit (cfg.virtualisation) enable;
       };
-      hypervGuest = {
-        inherit (cfg.virtualisation) enable;
-      };
     };
     services = {
       spice-vdagentd = {
