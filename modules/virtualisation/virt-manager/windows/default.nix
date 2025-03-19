@@ -5,6 +5,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.virtualisation.virt-manager;
+  inherit (config.modules.users) user;
   iommu-check = pkgs.writeShellApplication {
     name = "iommu-check";
     runtimeInputs = [pkgs.pciutils];
@@ -146,7 +147,7 @@ in {
     };
     users = {
       users = {
-        ${config.modules.users.name} = {
+        ${user} = {
           extraGroups = ["libvirtd" "kvm" "input"];
         };
       };
