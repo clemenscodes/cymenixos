@@ -98,6 +98,7 @@
       fi
     '';
   };
+  virtio-iso = pkgs.runCommand "virtio-win.iso" { } "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
 in {
   imports = [inputs.nixvirt.nixosModules.default];
   options = {
@@ -132,7 +133,7 @@ in {
         pkgs.spice-gtk
         pkgs.spice-protocol
         pkgs.libguestfs
-        pkgs.win-virtio
+        pkgs.virtio-win
         pkgs.win-spice
         iommu-check
       ];
@@ -609,7 +610,7 @@ in {
                           type = "raw";
                         };
                         source = {
-                          file = "${inputs.nixvirt.lib.guest-install.virtio-win.iso}";
+                          file = "${virtio-iso}"
                         };
                         target = {
                           bus = "sata";
