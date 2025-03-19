@@ -44,9 +44,6 @@ in {
       hypervGuest = {
         inherit (cfg.virtualisation) enable;
       };
-      tpm = {
-        inherit (cfg.virtualisation) enable;
-      };
     };
     services = {
       spice-vdagentd = {
