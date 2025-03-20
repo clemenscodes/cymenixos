@@ -32,7 +32,11 @@ in {
             # pkgs."wine-wow64-bleeding-10.3"
             # pkgs."wine-wow64-bleeding-winetricks-10.3"
           ];
-          extraLibraries = pkgs: [];
+          extraLibraries = pkgs: [
+            # Battle.net
+            pkgs.jansson
+            pkgs.samba
+          ];
         })
       ];
       persistence = {
