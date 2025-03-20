@@ -99,6 +99,18 @@
         in
           mkWinePkgs {inherit final prev version src;}
       )
+      (
+        final: prev: {
+          winetricks-fix = prev.stdenv.mkDerivation {
+            name = "winetricks-fix";
+            phases = "installPhase";
+            installPhase = ''
+              mkdir -p $out/bin
+              ln -s ${final.wineWowPackages.unstableFull}/bin/wine $out/bin/wine64
+            '';
+          };
+        }
+      )
     ];
   };
 in {
@@ -124,6 +136,7 @@ in {
     environment = {
       systemPackages = [
         pkgs.winetricks
+        pkgs.winetricks-fix
         pkgs.wineWowPackages.unstableFull
         # pkgs."wine-wow64-bleeding-10.3"
         # pkgs."wine-wow64-bleeding-winetricks-10.3"
