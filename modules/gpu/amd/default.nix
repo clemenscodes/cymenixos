@@ -68,8 +68,10 @@ in {
         extraPackages = [
           pkgs.rocmPackages.clr
           pkgs.mesa
+          pkgs.amdvlk
         ];
         extraPackages32 = [
+          pkgs.driversi686Linux.mesa
           pkgs.driversi686Linux.amdvlk
         ];
       };
