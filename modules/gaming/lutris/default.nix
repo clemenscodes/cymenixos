@@ -27,15 +27,39 @@ in {
         (pkgs.lutris.override {
           extraPkgs = pkgs: [
             pkgs.winetricks
-            pkgs.winetricks-fix
-            pkgs.wineWowPackages.unstableFull
-            # pkgs."wine-wow64-bleeding-10.3"
-            # pkgs."wine-wow64-bleeding-winetricks-10.3"
+            pkgs."wine-wow64-bleeding-10.3"
+            pkgs."wine-wow64-bleeding-winetricks-10.3"
+            pkgs.curl
+            pkgs.samba
+            pkgs.jansson
+            pkgs.gnutls
+            pkgs.protobuf
+            pkgs.python313Packages.protobuf
+            pkgs.vulkan-tools
+            pkgs.vulkan-loader
+            pkgs.vulkan-validation-layers
+            pkgs.vulkan-extension-layer
+            pkgs.libdrm
+            pkgs.mesa
+            pkgs.driversi686Linux.mesa
           ];
           extraLibraries = pkgs: [
-            # Battle.net
-            pkgs.jansson
+            pkgs.winetricks
+            pkgs."wine-wow64-bleeding-10.3"
+            pkgs."wine-wow64-bleeding-winetricks-10.3"
+            pkgs.curl
             pkgs.samba
+            pkgs.jansson
+            pkgs.gnutls
+            pkgs.protobuf
+            pkgs.python313Packages.protobuf
+            pkgs.vulkan-tools
+            pkgs.vulkan-loader
+            pkgs.vulkan-validation-layers
+            pkgs.vulkan-extension-layer
+            pkgs.libdrm
+            pkgs.mesa
+            pkgs.driversi686Linux.mesa
           ];
         })
       ];
