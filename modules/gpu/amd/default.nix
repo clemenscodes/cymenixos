@@ -33,19 +33,9 @@ in {
     environment = {
       systemPackages = [
         pkgs.clinfo
-        pkgs.glxinfo
-        pkgs.glmark2
-        pkgs.libva
-        pkgs.libva-utils
+        pkgs.vulkan-tools
         pkgs.vulkan-loader
         pkgs.vulkan-validation-layers
-        pkgs.vulkan-extension-layer
-        pkgs.vulkan-tools
-        pkgs.amdvlk
-        pkgs.mesa
-        pkgs.rocmPackages.clr
-        pkgs.rocmPackages.clr.icd
-        pkgs.rocmPackages.rocm-runtime
         inputs.gpu-usage-waybar.packages.${system}.gpu-usage-waybar
       ];
       variables = {
@@ -73,42 +63,14 @@ in {
       };
     };
     hardware = {
-      amdgpu = {
-        amdvlk = {
-          enable = true;
-          support32Bit = {
-            enable = true;
-          };
-          supportExperimental = {
-            enable = true;
-          };
-          settings = {
-            AllowVkPipelineCachingToDisk = 1;
-            EnableVmAlwaysValid = 1;
-            IFH = 0;
-            IdleAfterSubmitGpuMask = 1;
-            ShaderCacheMode = 1;
-          };
-        };
-        initrd = {
-          enable = true;
-        };
-        opencl = {
-          enable = true;
-        };
-      };
       graphics = {
         enable = true;
         extraPackages = [
-          pkgs.amdvlk
-          pkgs.mesa
           pkgs.rocmPackages.clr
-          pkgs.rocmPackages.clr.icd
-          pkgs.rocmPackages.rocm-runtime
+          pkgs.mesa
         ];
         extraPackages32 = [
           pkgs.driversi686Linux.amdvlk
-          pkgs.driversi686Linux.mesa
         ];
       };
     };
