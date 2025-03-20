@@ -36,11 +36,12 @@ in {
         pkgs.vulkan-tools
         pkgs.vulkan-loader
         pkgs.vulkan-validation-layers
+        pkgs.rocmPackages.clr
+        pkgs.rocmPackages.clr.icd
         inputs.gpu-usage-waybar.packages.${system}.gpu-usage-waybar
       ];
       variables = {
         OCL_ICD_VENDORS = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors/";
-        VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
       };
     };
     boot = {
@@ -67,6 +68,7 @@ in {
         enable = true;
         extraPackages = [
           pkgs.rocmPackages.clr
+          pkgs.rocmPackages.clr.icd
           pkgs.mesa
           pkgs.amdvlk
         ];
