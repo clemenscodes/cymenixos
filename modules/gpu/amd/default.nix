@@ -50,6 +50,7 @@ in {
       ];
       variables = {
         OCL_ICD_VENDORS = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors/";
+        VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
       };
     };
     boot = {
