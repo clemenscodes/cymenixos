@@ -133,12 +133,12 @@
     nixpkgs,
     ...
   } @ inputs: let
-    system = "x86_64-linux";
-    pkgs = import nixpkgs {
-      inherit system;
-      overlays = [inputs.chaotic.overlays.default] ++ (import ./overlays);
-    };
     inherit (pkgs) lib;
+    system = "x86_64-linux";
+    overlays = import ./overlays {inherit inputs pkgs lib;};
+    pkgs = import nixpkgs {
+      inherit system overlays;
+    };
   in {
     formatter = {
       ${system} = pkgs.alejandra;
@@ -152,7 +152,7 @@
 
     overlays = {
       ${system} = {
-        default = import ./overlays;
+        default = overlays;
       };
     };
 
