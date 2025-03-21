@@ -31,7 +31,7 @@ in {
       };
     };
     hardware = {
-      graphics = lib.mkIf (!cfg.nyx.enable) {
+      graphics = lib.mkIf {
         package = pkgs.amdvlk;
         package32 = pkgs.driversi686Linux.amdvlk;
       };
