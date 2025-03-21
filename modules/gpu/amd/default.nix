@@ -35,7 +35,6 @@ in {
         package = pkgs.amdvlk;
         package32 = pkgs.driversi686Linux.amdvlk;
         extraPackages = [
-          pkgs.rocmPackages.clr.icd
           pkgs.mesa
           pkgs.libdrm
           pkgs.libva
@@ -43,6 +42,8 @@ in {
           pkgs.libvdpau-va-gl
           pkgs.intel-vaapi-driver
           pkgs.intel-media-driver
+          pkgs.rocmPackages.clr
+          pkgs.rocmPackages.clr.icd
         ];
         extraPackages32 = [
           pkgs.driversi686Linux.mesa
