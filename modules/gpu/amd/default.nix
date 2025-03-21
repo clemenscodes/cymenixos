@@ -36,11 +36,11 @@ in {
         package32 = pkgs.driversi686Linux.amdvlk;
         extraPackages = [
           pkgs.rocmPackages.clr.icd
-          #   pkgs.mesa
+            pkgs.mesa
         ];
-        # extraPackages32 = [
-        #   pkgs.driversi686Linux.mesa
-        # ];
+        extraPackages32 = [
+          pkgs.driversi686Linux.mesa
+        ];
       };
     };
     environment = {
