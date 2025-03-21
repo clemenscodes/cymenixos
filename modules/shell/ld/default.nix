@@ -32,32 +32,28 @@ in {
           pkgs.pkg-config
 
           # common requirement for several games
-          stdenv.cc.cc.lib
-
-          # from https://github.com/NixOS/nixpkgs/blob/nixos-23.05/pkgs/games/steam/fhsenv.nix#L72-L79
-          xorg.libXcomposite
-          xorg.libXtst
-          xorg.libXrandr
-          xorg.libXext
-          xorg.libX11
-          xorg.libXfixes
-          libGL
-          libva
-
-          # from https://github.com/NixOS/nixpkgs/blob/nixos-23.05/pkgs/games/steam/fhsenv.nix#L124-L136
-          fontconfig
-          freetype
-          xorg.libXt
-          xorg.libXmu
-          libogg
-          libvorbis
-          SDL
-          SDL2_image
-          glew110
-          libdrm
-          libidn
-          tbb
-          zlib
+          pkgs.stdenv.cc.cc.lib
+          pkgs.xorg.libXcomposite
+          pkgs.xorg.libXtst
+          pkgs.xorg.libXrandr
+          pkgs.xorg.libXext
+          pkgs.xorg.libX11
+          pkgs.xorg.libXfixes
+          pkgs.libGL
+          pkgs.libva
+          pkgs.fontconfig
+          pkgs.freetype
+          pkgs.xorg.libXt
+          pkgs.xorg.libXmu
+          pkgs.libogg
+          pkgs.libvorbis
+          pkgs.SDL
+          pkgs.SDL2_image
+          pkgs.glew110
+          pkgs.libdrm
+          pkgs.libidn
+          pkgs.tbb
+          pkgs.zlib
         ];
       };
     };
