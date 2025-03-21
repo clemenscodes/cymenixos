@@ -18,7 +18,7 @@ in {
     programs = {
       gamescope = {
         inherit (cfg.gamescope) enable;
-        package = pkgs.gamescope;
+        package = pkgs.gamescope-wsi_git;
       };
     };
   };

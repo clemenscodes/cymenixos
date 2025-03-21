@@ -122,6 +122,7 @@ in {
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
     (import ./lutris {inherit inputs pkgs lib;})
+    (import ./mangohud {inherit inputs pkgs lib;})
     (import ./steam {inherit inputs pkgs lib;})
     (import ./umu {inherit inputs pkgs lib;})
   ];
@@ -133,11 +134,33 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable) {
+    chaotic = {
+      hdr = {
+        inherit (cfg.gaming) enable;
+        wsiPackage = pkgs.gamescope-wsi_git;
+      };
+    };
+
     environment = {
       systemPackages = [
         pkgs.winetricks
-        pkgs.winetricks-fix
-        pkgs.wineWowPackages.unstableFull
+        pkgs.proton-ge-custom
+        pkgs.vulkanPackages_latest.gfxreconstruct
+        pkgs.vulkanPackages_latest.glslang
+        pkgs.vulkanPackages_latest.spirv-cross
+        pkgs.vulkanPackages_latest.spirv-headers
+        pkgs.vulkanPackages_latest.spirv-tools
+        pkgs.vulkanPackages_latest.vulkan-extension-layer
+        pkgs.vulkanPackages_latest.vulkan-headers
+        pkgs.vulkanPackages_latest.vulkan-loader
+        pkgs.vulkanPackages_latest.vulkan-tools
+        pkgs.vulkanPackages_latest.vulkan-tools-lunarg
+        pkgs.vulkanPackages_latest.vulkan-utiliity-libraries
+        pkgs.vulkanPackages_latest.vulkan-validation-layers
+        pkgs.vulkanPackages_latest.vulkan-volk
+        pkgs.latencyflex-vulkan
+        # pkgs.winetricks-fix
+        # pkgs.wineWowPackages.unstableFull
         # pkgs."wine-wow64-bleeding-10.3"
         # pkgs."wine-wow64-bleeding-winetricks-10.3"
       ];

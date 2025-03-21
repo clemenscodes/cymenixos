@@ -24,6 +24,7 @@
     (import ./locale {inherit inputs pkgs lib;})
     (import ./machine {inherit inputs pkgs lib;})
     (import ./networking {inherit inputs pkgs lib;})
+    (import ./nyx {inherit inputs pkgs lib;})
     (import ./performance {inherit inputs pkgs lib;})
     (import ./security {inherit inputs pkgs lib;})
     (import ./shell {inherit inputs pkgs lib cymenixos;})
@@ -33,7 +34,6 @@
     (import ./virtualisation {inherit inputs pkgs lib;})
     (import ./wsl {inherit inputs pkgs lib;})
     (import ./xdg {inherit inputs pkgs lib;})
-    (inputs.chaotic.nixosModules.default)
   ];
   options = {
     cymenixos = {

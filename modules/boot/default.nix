@@ -45,10 +45,17 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
+    services = {
+      scx = {
+        inherit (cfg.nyx) enable;
+        scheduler = "scx_rusty";
+        package = pkgs.scx_git.full;
+      };
+    };
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];
-      kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
+      kernelPackages = lib.mkForce pkgs.linuxPackages_cachyos;
       kernelParams = lib.mkIf hibernation ["resume_offset=${builtins.toString swapResumeOffset}"];
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       consoleLogLevel = lib.mkDefault 0;

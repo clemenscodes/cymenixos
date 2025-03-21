@@ -388,5 +388,8 @@
     xdg = {
       enable = false;
     };
+    nyx = {
+      enable = false;
+    };
   };
 }
