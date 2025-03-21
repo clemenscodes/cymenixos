@@ -31,7 +31,7 @@ in {
       };
     };
     hardware = {
-      graphics = lib.mkIf {
+      graphics = {
         package = pkgs.amdvlk;
         package32 = pkgs.driversi686Linux.amdvlk;
       };
