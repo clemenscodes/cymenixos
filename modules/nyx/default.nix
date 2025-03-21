@@ -14,7 +14,4 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.nyx.enable) {
-    
-  };
 }
