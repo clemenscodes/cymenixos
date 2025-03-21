@@ -237,8 +237,8 @@ in {
             };
             search = {
               force = true;
-              default = "DuckDuckGo";
-              privateDefault = "DuckDuckGo";
+              default = "ddg";
+              privateDefault = "ddg";
               engines = {
                 "Nix Packages" = {
                   urls = [
@@ -282,7 +282,7 @@ in {
                   updateInterval = 24 * 60 * 60 * 1000;
                   definedAliases = ["nw"];
                 };
-                "Google" = {
+                "google" = {
                   metadata = {
                     hidden = true;
                     alias = "@g";

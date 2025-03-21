@@ -111,6 +111,7 @@
           };
         }
       )
+      (inputs.chaotic.overlays.default)
     ];
   };
 in {

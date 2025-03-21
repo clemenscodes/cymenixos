@@ -146,7 +146,7 @@
 
     packages = {
       ${system} = {
-        inherit (pkgs) grub2;
+        inherit pkgs;
       };
     };
 
