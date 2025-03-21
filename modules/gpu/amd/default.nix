@@ -30,6 +30,12 @@ in {
         vendor = "amd";
       };
     };
+    hardware = {
+      graphics = lib.mkIf (!cfg.nyx.enable) {
+        package = pkgs.amdvlk;
+        package32 = pkgs.driversi686Linux.amdvlk;
+      };
+    };
     environment = {
       systemPackages = [
         pkgs.clinfo
