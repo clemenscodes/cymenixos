@@ -21,9 +21,9 @@ in {
       };
     };
   };
-  config = lib.
+  config = {
     hardware = {
-      graphics = lib.mkIf (!cfg.nyx.enable) {
+      graphics = {
         inherit (cfg.gpu) enable;
         enable32Bit = true;
       };
