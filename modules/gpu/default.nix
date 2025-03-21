@@ -35,7 +35,7 @@ in {
         pkgs.vulkanPackages_latest.vulkan-headers
         pkgs.vulkanPackages_latest.vulkan-loader
         pkgs.vulkanPackages_latest.vulkan-tools
-        pkgs.vulkanPackages_latest.vulkan-tools-lunarg
+        # pkgs.vulkanPackages_latest.vulkan-tools-lunarg BROKEN when I compiled this on 21.03.2025
         pkgs.vulkanPackages_latest.vulkan-utility-libraries
         pkgs.vulkanPackages_latest.vulkan-validation-layers
         pkgs.vulkanPackages_latest.vulkan-volk
