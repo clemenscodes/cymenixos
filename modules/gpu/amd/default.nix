@@ -36,10 +36,20 @@ in {
         package32 = pkgs.driversi686Linux.amdvlk;
         extraPackages = [
           pkgs.rocmPackages.clr.icd
-            pkgs.mesa
+          pkgs.mesa
+          pkgs.libdrm
+          pkgs.libva
+          pkgs.libva-vdpau-driver
+          pkgs.libvavdpau-va-gl
+          pkgs.intel-vaapi-driver
+          pkgs.intel-media-driver
         ];
         extraPackages32 = [
           pkgs.driversi686Linux.mesa
+          pkgs.driversi686Linux.libva-vdpau-driver
+          pkgs.driversi686Linux.libvavdpau-va-gl
+          pkgs.driversi686Linux.intel-vaapi-driver
+          pkgs.driversi686Linux.intel-media-driver
         ];
       };
     };
@@ -50,10 +60,14 @@ in {
         pkgs.glmark2
         pkgs.libva
         pkgs.libva-utils
+        pkgs.vdpauinfo
+        pkgs.vulkan-tools
         inputs.gpu-usage-waybar.packages.${system}.gpu-usage-waybar
       ];
       variables = {
         OCL_ICD_VENDORS = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors/";
+        VDPAU_DRIVER = "radeonsi";
+        LIBVA_DRIVER_NAME = "iHD";
       };
     };
     boot = {
