@@ -35,13 +35,8 @@ in {
         pkgs.clinfo
         pkgs.glxinfo
         pkgs.glmark2
-        pkgs.libdrm
         pkgs.libva
         pkgs.libva-utils
-        pkgs.vulkan-tools
-        pkgs.vulkan-loader
-        pkgs.vulkan-validation-layers
-        pkgs.vulkan-extension-layer
         inputs.gpu-usage-waybar.packages.${system}.gpu-usage-waybar
       ];
       variables = {
@@ -64,45 +59,6 @@ in {
       tmpfiles = {
         rules = [
           "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
-        ];
-      };
-    };
-    hardware = {
-      # amdgpu = {
-      #   amdvlk = {
-      #     enable = true;
-      #     support32Bit = {
-      #       enable = true;
-      #     };
-      #     supportExperimental = {
-      #       enable = true;
-      #     };
-      #     settings = {
-      #       AllowVkPipelineCachingToDisk = 1;
-      #       EnableVmAlwaysValid = 1;
-      #       IFH = 0;
-      #       IdleAfterSubmitGpuMask = 1;
-      #       ShaderCacheMode = 1;
-      #     };
-      #   };
-      #   initrd = {
-      #     enable = true;
-      #   };
-      #   opencl = {
-      #     enable = true;
-      #   };
-      # };
-      graphics = {
-        enable = true;
-        extraPackages = [
-          pkgs.mesa
-          pkgs.mesa.drivers
-          pkgs.rocmPackages.clr
-          pkgs.rocmPackages.clr.icd
-          pkgs.rocmPackages.rocm-runtime
-        ];
-        extraPackages32 = [
-          pkgs.driversi686Linux.mesa
         ];
       };
     };

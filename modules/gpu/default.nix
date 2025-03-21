@@ -26,6 +26,20 @@ in {
       systemPackages = [
         pkgs.libdrm_git
         pkgs.libdrm32_git
+        pkgs.vulkanPackages_latest.gfxreconstruct
+        pkgs.vulkanPackages_latest.glslang
+        pkgs.vulkanPackages_latest.spirv-cross
+        pkgs.vulkanPackages_latest.spirv-headers
+        pkgs.vulkanPackages_latest.spirv-tools
+        pkgs.vulkanPackages_latest.vulkan-extension-layer
+        pkgs.vulkanPackages_latest.vulkan-headers
+        pkgs.vulkanPackages_latest.vulkan-loader
+        pkgs.vulkanPackages_latest.vulkan-tools
+        pkgs.vulkanPackages_latest.vulkan-tools-lunarg
+        pkgs.vulkanPackages_latest.vulkan-utility-libraries
+        pkgs.vulkanPackages_latest.vulkan-validation-layers
+        pkgs.vulkanPackages_latest.vulkan-volk
+        pkgs.latencyflex-vulkan
       ];
     };
     hardware = {
@@ -40,6 +54,9 @@ in {
           pkgs.mesa_git.opencl
           pkgs.intel-media-driver
           pkgs.vaapiIntel
+          pkgs.rocmPackages.clr
+          pkgs.rocmPackages.clr.icd
+          pkgs.rocmPackages.rocm-runtime
         ];
         extraPackages32 = [
           pkgs.pkgsi686Linux.mesa_git.opencl

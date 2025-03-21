@@ -145,20 +145,6 @@ in {
       systemPackages = [
         pkgs.winetricks
         pkgs.proton-ge-custom
-        pkgs.vulkanPackages_latest.gfxreconstruct
-        pkgs.vulkanPackages_latest.glslang
-        pkgs.vulkanPackages_latest.spirv-cross
-        pkgs.vulkanPackages_latest.spirv-headers
-        pkgs.vulkanPackages_latest.spirv-tools
-        pkgs.vulkanPackages_latest.vulkan-extension-layer
-        pkgs.vulkanPackages_latest.vulkan-headers
-        pkgs.vulkanPackages_latest.vulkan-loader
-        pkgs.vulkanPackages_latest.vulkan-tools
-        pkgs.vulkanPackages_latest.vulkan-tools-lunarg
-        pkgs.vulkanPackages_latest.vulkan-utility-libraries
-        pkgs.vulkanPackages_latest.vulkan-validation-layers
-        pkgs.vulkanPackages_latest.vulkan-volk
-        pkgs.latencyflex-vulkan
         # pkgs.winetricks-fix
         # pkgs.wineWowPackages.unstableFull
         # pkgs."wine-wow64-bleeding-10.3"
