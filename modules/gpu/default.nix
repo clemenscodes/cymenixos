@@ -21,28 +21,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.gpu.enable) {
-    environment = {
-      systemPackages = [
-        # pkgs.libdrm_git
-        # pkgs.libdrm32_git
-        # pkgs.vulkanPackages_latest.gfxreconstruct
-        # pkgs.vulkanPackages_latest.glslang
-        # pkgs.vulkanPackages_latest.spirv-cross
-        # pkgs.vulkanPackages_latest.spirv-headers
-        # pkgs.vulkanPackages_latest.spirv-tools
-        # pkgs.vulkanPackages_latest.vulkan-extension-layer
-        # pkgs.vulkanPackages_latest.vulkan-headers
-        # pkgs.vulkanPackages_latest.vulkan-loader
-        # pkgs.vulkanPackages_latest.vulkan-tools
-        # # pkgs.vulkanPackages_latest.vulkan-tools-lunarg BROKEN when I compiled this on 21.03.2025
-        # pkgs.vulkanPackages_latest.vulkan-utility-libraries
-        # pkgs.vulkanPackages_latest.vulkan-validation-layers
-        # pkgs.vulkanPackages_latest.vulkan-volk
-        # pkgs.latencyflex-vulkan
-        # pkgs.libcef
-      ];
-    };
+  config = lib.
     hardware = {
       graphics = lib.mkIf (!cfg.nyx.enable) {
         inherit (cfg.gpu) enable;

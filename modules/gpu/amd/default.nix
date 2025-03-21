@@ -34,6 +34,13 @@ in {
       graphics = {
         package = pkgs.amdvlk;
         package32 = pkgs.driversi686Linux.amdvlk;
+        extraPackages = [
+          pkgs.rocmPackages.clr.icd
+          pkgs.mesa
+        ];
+        extraPackages32 = [
+          pkgs.driversi686Linux.mesa
+        ];
       };
     };
     environment = {
@@ -63,8 +70,17 @@ in {
     };
     systemd = {
       tmpfiles = {
-        rules = [
-          "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+        rules = let
+          rocmEnv = pkgs.symlinkJoin {
+            name = "rocm-combined";
+            paths = with pkgs.rocmPackages; [
+              rocblas
+              hipblas
+              clr
+            ];
+          };
+        in [
+          "L+    /opt/rocm   -    -    -     -    ${rocmEnv}"
         ];
       };
     };
