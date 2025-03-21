@@ -40,14 +40,14 @@ in {
           pkgs.libdrm
           pkgs.libva
           pkgs.libva-vdpau-driver
-          pkgs.libvavdpau-va-gl
+          pkgs.libvdpau-va-gl
           pkgs.intel-vaapi-driver
           pkgs.intel-media-driver
         ];
         extraPackages32 = [
           pkgs.driversi686Linux.mesa
           pkgs.driversi686Linux.libva-vdpau-driver
-          pkgs.driversi686Linux.libvavdpau-va-gl
+          pkgs.driversi686Linux.libvdpau-va-gl
           pkgs.driversi686Linux.intel-vaapi-driver
           pkgs.driversi686Linux.intel-media-driver
         ];
