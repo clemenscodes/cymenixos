@@ -35,8 +35,13 @@ in {
         pkgs.clinfo
         pkgs.glxinfo
         pkgs.glmark2
+        pkgs.libdrm
+        pkgs.libva
         pkgs.libva-utils
         pkgs.vulkan-tools
+        pkgs.vulkan-loader
+        pkgs.vulkan-validation-layers
+        pkgs.vulkan-extension-layer
         inputs.gpu-usage-waybar.packages.${system}.gpu-usage-waybar
       ];
       variables = {

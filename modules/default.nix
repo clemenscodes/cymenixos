@@ -33,6 +33,7 @@
     (import ./virtualisation {inherit inputs pkgs lib;})
     (import ./wsl {inherit inputs pkgs lib;})
     (import ./xdg {inherit inputs pkgs lib;})
+    (inputs.chaotic.nixosModules.default)
   ];
   options = {
     cymenixos = {

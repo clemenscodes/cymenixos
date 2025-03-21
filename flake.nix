@@ -123,6 +123,9 @@
     gpu-usage-waybar = {
       url = "github:cymenix/gpu-usage-waybar";
     };
+    chaotic = {
+      url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+    };
   };
 
   outputs = {

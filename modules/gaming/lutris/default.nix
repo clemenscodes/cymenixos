@@ -40,8 +40,6 @@ in {
             pkgs.vulkan-validation-layers
             pkgs.vulkan-extension-layer
             pkgs.libdrm
-            pkgs.mesa
-            pkgs.driversi686Linux.mesa
           ];
           extraLibraries = pkgs: [
             pkgs.samba
