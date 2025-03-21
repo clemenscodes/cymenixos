@@ -136,11 +136,10 @@ in {
   config = lib.mkIf (cfg.enable) {
     chaotic = {
       hdr = {
-        inherit (cfg.gaming) enable;
+        inherit (cfg) enable;
         wsiPackage = pkgs.gamescope-wsi_git;
       };
     };
-
     environment = {
       systemPackages = [
         pkgs.winetricks
