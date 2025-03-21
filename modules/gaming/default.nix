@@ -155,7 +155,7 @@ in {
         pkgs.vulkanPackages_latest.vulkan-loader
         pkgs.vulkanPackages_latest.vulkan-tools
         pkgs.vulkanPackages_latest.vulkan-tools-lunarg
-        pkgs.vulkanPackages_latest.vulkan-utiliity-libraries
+        pkgs.vulkanPackages_latest.vulkan-utility-libraries
         pkgs.vulkanPackages_latest.vulkan-validation-layers
         pkgs.vulkanPackages_latest.vulkan-volk
         pkgs.latencyflex-vulkan
