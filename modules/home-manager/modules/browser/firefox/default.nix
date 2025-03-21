@@ -290,7 +290,7 @@ in {
                 };
               };
             };
-            bookmarks = import ./bookmarks;
+            # bookmarks = import ./bookmarks;
             settings = {
               "extensions.autoDisableScopes" = 0;
             };

@@ -136,7 +136,7 @@
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
-      overlays = [] ++ (import ./overlays);
+      overlays = [inputs.chaotic.overlays.default] ++ (import ./overlays);
     };
     inherit (pkgs) lib;
   in {
