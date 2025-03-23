@@ -45,16 +45,9 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable) {
-    chaotic = {
-      hdr = {
-        inherit (cfg) enable;
-        wsiPackage = pkgs.gamescope-wsi_git;
-      };
-    };
     environment = {
       systemPackages = [
         pkgs.winetricks
-        pkgs.proton-ge-custom
       ];
     };
     services = {
