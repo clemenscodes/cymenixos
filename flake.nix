@@ -100,6 +100,9 @@
         };
       };
     };
+    lutris-overlay = {
+      url = "github:clemenscodes/lutris-overlay";
+    };
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
       inputs = {
@@ -127,7 +130,6 @@
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     };
   };
-
   outputs = {
     self,
     nixpkgs,

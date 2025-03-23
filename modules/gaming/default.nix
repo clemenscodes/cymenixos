@@ -19,99 +19,9 @@
           "steam-unwrapped"
         ];
     };
-    overlays = let
-      mkWinePkgs = {
-        final,
-        prev,
-        version,
-        src,
-        ...
-      }: {
-        "wine-bleeding-${version}" = prev.winePackages.unstableFull.overrideAttrs (oldAttrs: rec {
-          inherit version src;
-          name = "wine-bleeding-${version}";
-        });
-        "wine-bleeding-winetricks-${version}" = prev.stdenv.mkDerivation {
-          name = "wine-bleeding-winetricks-${version}";
-          phases = "installPhase";
-          installPhase = ''
-            mkdir -p $out/bin
-            ln -s ${final."wine-bleeding-${version}"}/bin/wine $out/bin/wine64
-          '';
-        };
-        "wine64-bleeding-${version}" = prev.wine64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
-          inherit version src;
-          name = "wine64-bleeding-${version}";
-        });
-        "wine64-bleeding-winetricks-${version}" = prev.stdenv.mkDerivation {
-          name = "wine64-bleeding-winetricks-${version}";
-          phases = "installPhase";
-          installPhase = ''
-            mkdir -p $out/bin
-            ln -s ${final."wine64-bleeding-${version}"}/bin/wine $out/bin/wine64
-          '';
-        };
-        "wine-wow-bleeding-${version}" = prev.wineWowPackages.unstableFull.overrideAttrs (oldAttrs: rec {
-          inherit version src;
-          name = "wine-wow-bleeding-${version}";
-        });
-        "wine-wow-bleeding-winetricks-${version}" = prev.stdenv.mkDerivation {
-          name = "wine-wow-bleeding-winetricks-${version}";
-          phases = "installPhase";
-          installPhase = ''
-            mkdir -p $out/bin
-            ln -s ${final."wine-wow-bleeding-${version}"}/bin/wine $out/bin/wine64
-          '';
-        };
-        "wine-wow64-bleeding-${version}" = prev.wineWow64Packages.unstableFull.overrideAttrs (oldAttrs: rec {
-          inherit version src;
-          name = "wine-wow64-bleeding-${version}";
-        });
-        "wine-wow64-bleeding-winetricks-${version}" = prev.stdenv.mkDerivation {
-          name = "wine-wow64-bleeding-winetricks-${version}";
-          phases = "installPhase";
-          installPhase = ''
-            mkdir -p $out/bin
-            ln -s ${final."wine-wow64-bleeding-${version}"}/bin/wine $out/bin/wine64
-          '';
-        };
-      };
-    in [
-      (
-        final: prev: let
-          version = "9.22";
-          src = prev.fetchurl rec {
-            inherit version;
-            url = "https://dl.winehq.org/wine/source/9.x/wine-${version}.tar.xz";
-            hash = "sha256-4VDSl0KqVPdo7z6XbthhqqT59IVC5Am+qQLQ9Js1loM=";
-          };
-        in
-          mkWinePkgs {inherit final prev version src;}
-      )
-      (
-        final: prev: let
-          version = "10.3";
-          src = prev.fetchurl rec {
-            inherit version;
-            url = "https://dl.winehq.org/wine/source/10.x/wine-${version}.tar.xz";
-            hash = "sha256-3j2I/wBWuC/9/KhC8RGVkuSRT0jE6gI3aOBBnDZGfD4=";
-          };
-        in
-          mkWinePkgs {inherit final prev version src;}
-      )
-      (
-        final: prev: {
-          winetricks-fix = prev.stdenv.mkDerivation {
-            name = "winetricks-fix";
-            phases = "installPhase";
-            installPhase = ''
-              mkdir -p $out/bin
-              ln -s ${final.wineWowPackages.unstableFull}/bin/wine $out/bin/wine64
-            '';
-          };
-        }
-      )
+    overlays = [
       (inputs.chaotic.overlays.default)
+      (inputs.lutris-overlay.overlays.lutris)
     ];
   };
 in {
@@ -145,10 +55,6 @@ in {
       systemPackages = [
         pkgs.winetricks
         pkgs.proton-ge-custom
-        # pkgs.winetricks-fix
-        # pkgs.wineWowPackages.unstableFull
-        # pkgs."wine-wow64-bleeding-10.3"
-        # pkgs."wine-wow64-bleeding-winetricks-10.3"
       ];
     };
     services = {
