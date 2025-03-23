@@ -4497,11 +4497,11 @@
         "wine-overlays": "wine-overlays"
       },
       "locked": {
-        "lastModified": 1742717625,
-        "narHash": "sha256-q8HLdJd1mW1v27VTCjngaK4Kdq2qwwQI/1E8g3G0Pdc=",
+        "lastModified": 1742718220,
+        "narHash": "sha256-BU/mq5ePyZuVjQePAN98dtkZdOQs1BXYLy23JC71oHs=",
         "owner": "clemenscodes",
         "repo": "lutris-overlay",
-        "rev": "e73c8b5eeeb2f8951c55ec5efa804df7442c2c05",
+        "rev": "c3a595a115a78c9b0103fb67aefd83741b364b85",
         "type": "github"
       },
       "original": {
