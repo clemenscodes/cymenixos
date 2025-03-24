@@ -30,30 +30,30 @@ in {
         vendor = "amd";
       };
     };
-    hardware = {
-      graphics = {
-        package = pkgs.amdvlk;
-        package32 = pkgs.driversi686Linux.amdvlk;
-        extraPackages = [
-          pkgs.mesa
-          pkgs.libdrm
-          pkgs.libva
-          pkgs.libva-vdpau-driver
-          pkgs.libvdpau-va-gl
-          pkgs.intel-vaapi-driver
-          pkgs.intel-media-driver
-          pkgs.rocmPackages.clr
-          pkgs.rocmPackages.clr.icd
-        ];
-        extraPackages32 = [
-          pkgs.driversi686Linux.mesa
-          pkgs.driversi686Linux.libva-vdpau-driver
-          pkgs.driversi686Linux.libvdpau-va-gl
-          pkgs.driversi686Linux.intel-vaapi-driver
-          pkgs.driversi686Linux.intel-media-driver
-        ];
-      };
-    };
+    # hardware = {
+    #   graphics = {
+    #     extraPackages = [
+    #       pkgs.mesa
+    #       pkgs.libdrm
+    #       pkgs.libva
+    #       pkgs.libva-vdpau-driver
+    #       pkgs.libvdpau-va-gl
+    #       pkgs.intel-vaapi-driver
+    #       pkgs.intel-media-driver
+    #       pkgs.rocmPackages.clr
+    #       pkgs.rocmPackages.clr.icd
+    #       pkgs.vkd3d
+    #       pkgs.vkd3d-proton
+    #     ];
+    #     extraPackages32 = [
+    #       pkgs.driversi686Linux.mesa
+    #       pkgs.driversi686Linux.libva-vdpau-driver
+    #       pkgs.driversi686Linux.libvdpau-va-gl
+    #       pkgs.driversi686Linux.intel-vaapi-driver
+    #       pkgs.driversi686Linux.intel-media-driver
+    #     ];
+    #   };
+    # };
     environment = {
       systemPackages = [
         pkgs.clinfo

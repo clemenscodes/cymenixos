@@ -29,22 +29,28 @@ in {
       };
     };
     chaotic = {
-      # mesa-git = {
-      #   inherit (cfg.nyx) enable;
-      #   extraPackages = [
-      #     pkgs.mesa_git.opencl
-      #     pkgs.intel-media-driver
-      #     pkgs.vaapiIntel
-      #     pkgs.rocmPackages.clr
-      #     pkgs.rocmPackages.clr.icd
-      #     pkgs.rocmPackages.rocm-runtime
-      #   ];
-      #   extraPackages32 = [
-      #     pkgs.pkgsi686Linux.mesa_git.opencl
-      #     pkgs.pkgsi686Linux.intel-media-driver
-      #     pkgs.pkgsi686Linux.vaapiIntel
-      #   ];
-      # };
+      mesa-git = {
+        inherit (cfg.nyx) enable;
+        extraPackages = [
+          pkgs.mesa_git.opencl
+          pkgs.intel-media-driver
+          pkgs.rocmPackages.clr
+          pkgs.rocmPackages.clr.icd
+          pkgs.rocmPackages.rocm-runtime
+          pkgs.libdrm
+          pkgs.libva
+          pkgs.libva-vdpau-driver
+          pkgs.libvdpau-va-gl
+          pkgs.intel-vaapi-driver
+          pkgs.vkd3d
+          pkgs.vkd3d-proton
+        ];
+        extraPackages32 = [
+          pkgs.pkgsi686Linux.mesa32_git.opencl
+          pkgs.pkgsi686Linux.intel-media-driver
+          pkgs.pkgsi686Linux.intel-vaapi-driver
+        ];
+      };
     };
   };
 }
