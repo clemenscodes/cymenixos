@@ -37,21 +37,11 @@ in {
         pkgs.cudaPackages.cudatoolkit
         pkgs.cudaPackages.cudnn
         pkgs.nvtop-amd
-        pkgs.vulkan-tools
-        pkgs.vulkan-loader
-        pkgs.vulkan-validation-layers
-        pkgs.vulkan-extension-layer
-        pkgs.libva
-        pkgs.libva-utils
       ];
     };
     boot = {
-      kernelModules = [
-        "nvidia_uvm"
-      ];
-      kernelParams = [
-        "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
-      ];
+      kernelModules = ["nvidia_uvm"];
+      kernelParams = ["nvidia.NVreg_PreserveVideoMemoryAllocations=1"];
       blacklistedKernelModules = ["nouveau"];
     };
     services = {
