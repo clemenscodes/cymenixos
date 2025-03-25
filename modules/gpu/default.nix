@@ -3,7 +3,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules;
 in {
   imports = [
