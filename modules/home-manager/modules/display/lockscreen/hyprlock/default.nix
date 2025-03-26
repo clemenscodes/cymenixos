@@ -83,29 +83,6 @@ in {
               valign = "top";
             }
           ];
-          input-field = {
-            monitor = "";
-            inherit font_family;
-            size = "250, 60";
-            outline_thickness = "2";
-            dots_size = "0.2";
-            dots_spacing = "0.35";
-            dots_center = true;
-            outer_color = "$accent";
-            inner_color = "$surface0";
-            font_color = "$text";
-            fade_on_empty = false;
-            check_color = "$accent";
-            rounding = "-1";
-            placeholder_text = ''<span foreground="##$textAlpha"><i>󰌾 Logged in as </i><span foreground="##$accentAlpha">$USER</span></span>'';
-            hide_input = false;
-            fail_color = "$red";
-            fail_text = ''<i>$FAIL <b>($ATTEMPTS)</b></i>'';
-            capslock_color = "$yellow";
-            position = "0, -200";
-            halign = "center";
-            valign = "center";
-          };
         };
       };
     };
