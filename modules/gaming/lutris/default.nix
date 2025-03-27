@@ -37,5 +37,18 @@ in {
         };
       };
     };
+    home-manager = lib.mkIf (config.modules.home-manager.enable) {
+      users = {
+        ${name} = {
+          xdg = {
+            dataFile = {
+              "lutris/runners/proton/proton-ge" = {
+                source = pkgs.proton-ge-bin.steamcompattool;
+              };
+            };
+          };
+        };
+      };
+    };
   };
 }
