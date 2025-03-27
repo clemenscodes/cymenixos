@@ -30,7 +30,7 @@ in {
         ${name} = {
           home = {
             file = {
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings/CustomKeys.txt" = {
+              "Games/battlenet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings/CustomKeys.txt" = {
                 text = ''
                   /////////////////////////////////////////////////////
                   // Customized for Lefthanded Keyboard Alignment (QWEASY)

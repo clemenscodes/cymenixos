@@ -30,7 +30,7 @@ in {
           users = {
             ${config.modules.users.name} = {
               directories = [
-                ".local/share/wineprefixes/bnet"
+                "Games/battlenet"
               ];
             };
           };

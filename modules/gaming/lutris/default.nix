@@ -29,6 +29,7 @@ in {
           users = {
             ${name} = {
               directories = [
+                "Games"
                 ".cache/lutris"
                 ".local/share/lutris"
               ];

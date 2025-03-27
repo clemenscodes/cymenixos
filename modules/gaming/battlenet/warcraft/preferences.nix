@@ -67,7 +67,7 @@ in {
               # ".local/share/wineprefixes/bnet/drive_c/Program Files (x86)/Warcraft III/_retail_/webui/webms/tft_undead.webm" = {
               #   text = "";
               # };
-              ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/War3Preferences.txt" = {
+              "Games/battlenet/drive_c/users/${name}/Documents/Warcraft III/War3Preferences.txt" = {
                 text = ''
                   [Commandbar Hotkeys 00]
                   HeroOnly=0

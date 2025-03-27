@@ -423,10 +423,10 @@ in {
         ${name} = {
           home = {
             sessionVariables = {
-              WARCRAFT_WINEPREFIX = "$HOME/.local/share/wineprefixes/bnet";
+              WARCRAFT_WINEPREFIX = "$HOME/Games/battlenet";
               WARCRAFT_HOME = let
                 prefix = config.home-manager.users.${name}.home.sessionVariables.WARCRAFT_WINEPREFIX;
-              in "${prefix}/.local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III";
+              in "${prefix}/drive_c/users/${name}/Documents/Warcraft III";
             };
           };
           xdg = {
