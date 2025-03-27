@@ -167,14 +167,17 @@
       lutris = {
         enable = false;
       };
-      battlenet = {
-        enable = false;
-      };
       steam = {
         enable = false;
       };
       umu = {
         enable = false;
+      };
+      w3champions = {
+        enable = false;
+        warcraft = {
+          enable = false;
+        };
       };
     };
     gpu = {

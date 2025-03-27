@@ -8,29 +8,17 @@
   system,
   ...
 }: let
-  cfg = config.modules.gaming.battlenet;
+  cfg = config.modules.gaming.w3champions;
   inherit (config.modules.users) name;
+  inherit (config.modules.gaming.w3champions) prefix;
 in {
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
-    environment = {
-      persistence = {
-        ${config.modules.boot.impermanence.persistPath} = {
-          users = {
-            ${config.modules.users.name} = {
-              directories = [
-                # ".local/share/wineprefixes/bnet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings"
-              ];
-            };
-          };
-        };
-      };
-    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${name} = {
           home = {
             file = {
-              "Games/battlenet/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings/CustomKeys.txt" = {
+              "${prefix}/drive_c/users/${name}/Documents/Warcraft III/CustomKeyBindings/CustomKeys.txt" = {
                 text = ''
                   /////////////////////////////////////////////////////
                   // Customized for Lefthanded Keyboard Alignment (QWEASY)

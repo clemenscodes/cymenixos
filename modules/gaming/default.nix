@@ -28,7 +28,6 @@ in {
   imports = [
     inputs.nix-gaming.nixosModules.pipewireLowLatency
     inputs.nix-gaming.nixosModules.platformOptimizations
-    (import ./battlenet {inherit inputs pkgs lib;})
     (import ./emulation {inherit inputs pkgs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
@@ -36,6 +35,7 @@ in {
     (import ./mangohud {inherit inputs pkgs lib;})
     (import ./steam {inherit inputs pkgs lib;})
     (import ./umu {inherit inputs pkgs lib;})
+    (import ./w3champions {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {

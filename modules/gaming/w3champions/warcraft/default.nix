@@ -8,34 +8,20 @@
   system,
   ...
 }: let
-  cfg = config.modules.gaming.battlenet;
+  cfg = config.modules.gaming.w3champions;
   inherit (config.modules.users) name;
-  inherit (inputs.battlenet.packages.${system}) battlenet bonjour w3champions-legacy w3champions webview2;
-  restart-bonjour = pkgs.writeShellApplication {
-    name = "restart-bonjour";
-    runtimeInputs = [
-      bonjour
-      pkgs.libnotify
-    ];
+  battlenet = pkgs.writeShellApplication {
+    name = "battlenet";
+    runtimeInputs = [pkgs.lutris];
     text = ''
-      notify-send --expire-time 3000 --icon ${./assets/bonjour-128x128.png} "Restarting Bonjour Service"
-      bonjour
-      notify-send --expire-time 3000 --icon ${./assets/bonjour-128x128.png} "Restarted Bonjour Service"
+      echo "Noop for now"
     '';
   };
-  warcraft = pkgs.writeShellApplication {
-    name = "warcraft";
-    runtimeInputs = [
-      battlenet
-      warcraft-mode-start
-      warcraft-mode-stop
-      restart-bonjour
-    ];
+  w3champions = pkgs.writeShellApplication {
+    name = "w3champions";
+    runtimeInputs = [pkgs.lutris];
     text = ''
-      restart-bonjour
-      warcraft-mode-start
-      battlenet
-      warcraft-mode-stop
+      echo "Noop for now"
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
@@ -378,8 +364,6 @@
   warcraft-scripts = pkgs.symlinkJoin {
     name = "warcraft-scripts";
     paths = [
-      restart-bonjour
-      warcraft
       warcraft-mode-start
       warcraft-mode-stop
       warcraft-chat-open
@@ -391,11 +375,6 @@
       warcraft-create-control-group
       warcraft-edit-unit-control-group
       warcraft-select-unit
-      battlenet
-      bonjour
-      w3champions-legacy
-      w3champions
-      webview2
     ];
   };
 in {
@@ -406,7 +385,7 @@ in {
   options = {
     modules = {
       gaming = {
-        battlenet = {
+        w3champions = {
           warcraft = {
             enable = lib.mkEnableOption "Enable Warcraft III hotkeys" // {default = false;};
           };
@@ -423,7 +402,7 @@ in {
         ${name} = {
           home = {
             sessionVariables = {
-              WARCRAFT_WINEPREFIX = "$HOME/Games/battlenet";
+              WARCRAFT_WINEPREFIX = "$HOME/${cfg.prefix}";
               WARCRAFT_HOME = let
                 prefix = config.home-manager.users.${name}.home.sessionVariables.WARCRAFT_WINEPREFIX;
               in "${prefix}/drive_c/users/${name}/Documents/Warcraft III";
@@ -431,44 +410,17 @@ in {
           };
           xdg = {
             desktopEntries = {
-              bonjour = {
-                name = "Bonjour";
-                type = "Application";
-                categories = ["Game"];
-                genericName = "Restarts Bonjour for Warcraft III";
-                icon = ./assets/bonjour-128x128.png;
-                exec = "${lib.getExe restart-bonjour}";
-                terminal = false;
-              };
               battlenet = {
                 name = "Battle.net";
                 type = "Application";
                 categories = ["Game"];
-                genericName = "Launcher for Warcraft III";
+                genericName = "Blizzard Game Launcher";
                 icon = ./assets/battle-net.svg;
                 exec = "${lib.getExe battlenet}";
                 terminal = false;
               };
-              warcraft = {
-                name = "Warcraft III";
-                type = "Application";
-                categories = ["Game"];
-                genericName = "RTS by Blizzard";
-                icon = ./assets/warcraft-iii-reforged.svg;
-                exec = "${lib.getExe warcraft}";
-                terminal = false;
-              };
-              w3champions-legacy = {
-                name = "W3Champions Legacy";
-                type = "Application";
-                categories = ["Game"];
-                genericName = "Alternative Warcraft III Ladder";
-                icon = ./assets/w3champions.png;
-                exec = "${lib.getExe w3champions-legacy}";
-                terminal = false;
-              };
               w3champions = {
-                name = "WebView2 W3Champions";
+                name = "W3Champions";
                 type = "Application";
                 categories = ["Game"];
                 genericName = "Alternative Warcraft III Ladder";
