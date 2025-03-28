@@ -40,5 +40,18 @@ in {
         };
       };
     };
+    networking = {
+      firewall = {
+        enable = lib.mkForce false;
+        allowedTCPPorts = [
+          1337
+          3552
+        ];
+        allowedUDPPorts = [
+          1337
+          3552
+        ];
+      };
+    };
   };
 }

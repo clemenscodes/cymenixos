@@ -33,6 +33,11 @@ in {
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = ["/etc/NetworkManager/system-connections"];
+          files = [
+            "/var/lib/NetworkManager/secret_key"
+            "/var/lib/NetworkManager/seen-bssids"
+            "/var/lib/NetworkManager/timestamps"
+          ];
         };
       };
     };
@@ -53,15 +58,6 @@ in {
         ${user} = {
           extraGroups = ["networkmanager"];
         };
-      };
-    };
-    systemd = {
-      tmpfiles = {
-        rules = [
-          "L /var/lib/NetworkManager/secret_key - - - - /persist/var/lib/NetworkManager/secret_key"
-          "L /var/lib/NetworkManager/seen-bssids - - - - /persist/var/lib/NetworkManager/seen-bssids"
-          "L /var/lib/NetworkManager/timestamps - - - - /persist/var/lib/NetworkManager/timestamps"
-        ];
       };
     };
   };
