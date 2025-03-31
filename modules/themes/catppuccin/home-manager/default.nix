@@ -9,7 +9,7 @@ in {
     home-manager = {
       users = {
         ${config.modules.users.user} = {
-          imports = [inputs.catppuccin.homeManagerModules.catppuccin];
+          imports = [inputs.catppuccin.homeModules.catppuccin];
           catppuccin = {
             inherit (cfg.catppuccin) enable flavor accent;
           };
