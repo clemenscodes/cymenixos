@@ -348,10 +348,11 @@ in {
                 windowrule = tile,class:w3champions.exe
                 windowrule = float,class:explorer.exe
                 windowrule = pin,class:explorer.exe
-                windowrule = move 50% 90%,class:explorer.exe
+                windowrule = move 45% 95%,class:explorer.exe
                 windowrule = noinitialfocus,class:explorer.exe
                 windowrule = workspace 2,class:battle.net.exe
                 windowrule = workspace 3,class:w3champions.exe
+                windowrule = content game,class:battle.net.exe
                 windowrule = content game,class:w3champions.exe
               ''
               else "";
