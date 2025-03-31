@@ -344,17 +344,18 @@ in {
             warcraft =
               if useWarcraft
               then ''
+                windowrule = content game,class:battle.net.exe
+                windowrule = content game,class:w3champions.exe
+                windowrule = workspace 2,class:battle.net.exe
+                windowrule = workspace 3,class:w3champions.exe
                 windowrule = tile,class:battle.net.exe
-                windowrule = tile,class:w3champions.exe
+                windowrule = float,class:w3champions.exe
+                windowrule = size 80% 80%,class:w3champions.exe
+                windowrule = center,class:w3champions.exe
                 windowrule = float,class:explorer.exe
                 windowrule = noinitialfocus,class:explorer.exe
                 windowrule = pin,class:explorer.exe
                 windowrule = move 47% 96%,class:explorer.exe
-                windowrule = workspace 2,class:battle.net.exe
-                windowrule = workspace 3,class:w3champions.exe
-                windowrule = fullscreen,class:w3champions.exe
-                windowrule = content game,class:battle.net.exe
-                windowrule = content game,class:w3champions.exe
               ''
               else "";
             swayidle =
