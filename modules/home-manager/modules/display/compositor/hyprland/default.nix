@@ -346,11 +346,14 @@ in {
               then ''
                 windowrule = content game,class:battle.net.exe
                 windowrule = content game,class:w3champions.exe
+                windowrule = content game,class:(warcraft iii.exe)
                 windowrule = workspace 2,class:battle.net.exe
                 windowrule = workspace 3,class:w3champions.exe
+                windowrule = workspace 4,class:(warcraft iii.exe)
                 windowrule = tile,class:battle.net.exe
-                windowrule = tile,class:w3champions.exe
-                windowrule = maxsize 90% 90%,class:w3champions.exe
+                windowrule = float,class:w3champions.exe
+                windowrule = center,class:w3champions.exe
+                windowrule = fullscreen,class:(warcraft iii).exe
                 windowrule = float,class:explorer.exe
                 windowrule = noinitialfocus,class:explorer.exe
                 windowrule = pin,class:explorer.exe
