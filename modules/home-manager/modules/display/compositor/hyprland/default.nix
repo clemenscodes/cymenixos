@@ -345,19 +345,18 @@ in {
               if useWarcraft
               then ''
                 windowrule = content game,class:battle.net.exe
-                windowrule = content game,class:w3champions.exe
-                windowrule = content game,class:(warcraft iii.exe)
+                windowrule = content game,title:(W3Champions)
+                windowrule = content game,title:(Warcraft III)
                 windowrule = workspace 1,class:explorer.exe
                 windowrule = workspace 2,class:battle.net.exe
-                windowrule = workspace 3,class:w3champions.exe
-                windowrule = workspace 4,class:(warcraft iii.exe)
+                windowrule = workspace 3,title:(W3Champions)
+                windowrule = workspace 4,title:(Warcraft III)
                 windowrule = tile,class:battle.net.exe
                 windowrule = float,class:w3champions.exe
                 windowrule = float,class:explorer.exe
-                windowrule = size 100% 100%,class:w3champions.exe
-                windowrule = size 100% 100%,class:(warcraft iii).exe
+                windowrule = size 100% 100%,title:(W3Champions)
+                windowrule = size 100% 100%,title:(Warcraft III)
                 windowrule = noinitialfocus,class:explorer.exe
-                windowrule = noinitialfocus,class:battle.net.exe
                 windowrule = noinitialfocus,class:(warcraft iii).exe
                 windowrule = move 47% 96%,class:explorer.exe
               ''
