@@ -415,6 +415,7 @@ in {
             ${hypridle}
             ${hyprsunset}
             ${yubikey}
+            ${warcraft}
           '';
         };
       };
