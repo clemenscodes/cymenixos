@@ -349,10 +349,9 @@ in {
                 windowrule = float,class:explorer.exe
                 windowrule = noinitialfocus,class:explorer.exe
                 windowrule = pin,class:explorer.exe
-                windowrule = move 47% 97%,class:explorer.exe
+                windowrule = move 47% 96%,class:explorer.exe
                 windowrule = workspace 2,class:battle.net.exe
                 windowrule = workspace 3,class:w3champions.exe
-                windowrule = maximize,class:w3champions.exe
                 windowrule = fullscreen,class:w3champions.exe
                 windowrule = content game,class:battle.net.exe
                 windowrule = content game,class:w3champions.exe
