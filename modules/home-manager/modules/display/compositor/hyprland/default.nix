@@ -40,6 +40,7 @@
   useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   useNewsboat = config.modules.media.rss.newsboat.enable;
+  useWarcraft = config.modules.gaming.w3champions.enable;
   isLaptop = machine == "laptop";
   close-window = pkgs.writeShellScriptBin "close-window" ''
     if [ "$(${pkgs.hyprland}/bin/hyprctl activewindow -j | ${lib.getExe pkgs.jq} -r ".class")" = "Steam" ]; then
@@ -338,6 +339,15 @@ in {
               if useRofi
               then ''
                 windowrule = float,class:Rofi
+              ''
+              else "";
+            warcraft =
+              if useWarcraft
+              then ''
+                windowrule = tile,class:battle.net.exe
+                windowrule = tile,class:w3champions.exe
+                windowrule = workspace 2,class:battle.net.exe
+                windowrule = workspace 3,class:w3champions.exe
               ''
               else "";
             swayidle =
