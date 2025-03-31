@@ -40,7 +40,7 @@
   useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   useNewsboat = config.modules.media.rss.newsboat.enable;
-  useWarcraft = config.modules.gaming.w3champions.enable;
+  useWarcraft = osConfig.modules.gaming.w3champions.enable;
   isLaptop = machine == "laptop";
   close-window = pkgs.writeShellScriptBin "close-window" ''
     if [ "$(${pkgs.hyprland}/bin/hyprctl activewindow -j | ${lib.getExe pkgs.jq} -r ".class")" = "Steam" ]; then
