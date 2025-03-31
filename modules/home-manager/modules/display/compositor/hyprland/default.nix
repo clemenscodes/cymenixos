@@ -354,9 +354,11 @@ in {
                 windowrule = tile,class:battle.net.exe
                 windowrule = float,class:w3champions.exe
                 windowrule = float,class:explorer.exe
-                windowrule = fullscreen,class:w3champions.exe
-                windowrule = fullscreen,class:(warcraft iii).exe
+                windowrule = size 100% 100%,class:w3champions.exe
+                windowrule = size 100% 100%,class:(warcraft iii).exe
                 windowrule = noinitialfocus,class:explorer.exe
+                windowrule = noinitialfocus,class:battle.net.exe
+                windowrule = noinitialfocus,class:(warcraft iii).exe
                 windowrule = move 47% 96%,class:explorer.exe
               ''
               else "";
