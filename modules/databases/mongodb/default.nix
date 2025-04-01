@@ -1,5 +1,19 @@
-{lib, ...}: {config, ...}: let
+{
+  inputs,
+  lib,
+  ...
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.databases;
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    config = {
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["mongodb"];
+    };
+  };
 in {
   options = {
     modules = {
@@ -14,6 +28,7 @@ in {
     services = {
       mongodb = {
         enable = true;
+        package = pkgs.mongodb;
       };
     };
   };
