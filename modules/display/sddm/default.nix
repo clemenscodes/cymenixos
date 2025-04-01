@@ -25,7 +25,6 @@ in {
     };
     services = {
       displayManager = {
-        defaultSession = "hyprland";
         autoLogin = {
           inherit (config.modules.users) user;
         };
