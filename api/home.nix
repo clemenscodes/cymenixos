@@ -45,6 +45,9 @@
             postman = {
               enable = false;
             };
+            tongo = {
+              enable = false;
+            };
             reversing = {
               enable = false;
               ghidra = {

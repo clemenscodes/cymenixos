@@ -149,6 +149,7 @@
     packages = {
       ${system} = {
         inherit pkgs;
+        inherit (pkgs) tongo;
       };
     };
 
