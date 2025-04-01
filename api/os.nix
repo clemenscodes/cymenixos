@@ -119,6 +119,9 @@
     };
     databases = {
       enable = false;
+      mongodb = {
+        enable = false;
+      };
       postgres = {
         enable = false;
       };

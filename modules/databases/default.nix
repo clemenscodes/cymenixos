@@ -5,6 +5,7 @@
   ...
 }: {...}: {
   imports = [
+    (import ./mongodb {inherit inputs pkgs lib;})
     (import ./postgres {inherit inputs pkgs lib;})
   ];
   options = {
