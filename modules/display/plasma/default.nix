@@ -15,6 +15,15 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.plasma.enable) {
+    environment = {
+      plasma6 = {
+        excludePackages = with pkgs.kdePackages; [
+          plasma-browser-integration
+          konsole
+          oxygen
+        ];
+      };
+    };
     services = {
       xserver = {
         enable = true;
@@ -30,15 +39,6 @@ in {
           enable = true;
         };
       };
-    };
-  };
-  environment = {
-    plasma6 = {
-      excludePackages = with pkgs.kdePackages; [
-        plasma-browser-integration
-        konsole
-        oxygen
-      ];
     };
   };
 }
