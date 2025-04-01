@@ -40,31 +40,5 @@ in {
         };
       };
     };
-    networking = {
-      firewall = {
-        # allowedTCPPorts = [
-        #   1337
-        #   3552
-        #   5353
-        # ];
-        # allowedUDPPorts = [
-        #   1337
-        #   3552
-        #   5353
-        # ];
-        allowedTCPPortRanges = [
-          {
-            from = 1;
-            to = 64000;
-          }
-        ];
-        allowedUDPPortRanges = [
-          {
-            from = 1;
-            to = 64000;
-          }
-        ];
-      };
-    };
   };
 }

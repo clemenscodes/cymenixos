@@ -135,6 +135,9 @@
       hyprland = {
         enable = false;
       };
+      plasma = {
+        enable = false;
+      };
       qt = {
         enable = false;
       };

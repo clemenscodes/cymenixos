@@ -9,6 +9,7 @@ in {
   imports = [
     (import ./gtk {inherit inputs pkgs lib;})
     (import ./hyprland {inherit inputs pkgs lib;})
+    (import ./plasma {inherit inputs pkgs lib;})
     (import ./qt {inherit inputs pkgs lib;})
     (import ./sddm {inherit inputs pkgs lib;})
   ];
