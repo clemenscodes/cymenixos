@@ -42,13 +42,27 @@ in {
     };
     networking = {
       firewall = {
-        allowedTCPPorts = [
-          1337
-          3552
+        # allowedTCPPorts = [
+        #   1337
+        #   3552
+        #   5353
+        # ];
+        # allowedUDPPorts = [
+        #   1337
+        #   3552
+        #   5353
+        # ];
+        allowedTCPPortRanges = [
+          {
+            from = 1;
+            to = 64000;
+          }
         ];
-        allowedUDPPorts = [
-          1337
-          3552
+        allowedUDPPortRanges = [
+          {
+            from = 1;
+            to = 64000;
+          }
         ];
       };
     };
