@@ -12,7 +12,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.mongodb.enable) {
     services = {
-      mongodbql = {
+      mongodb = {
         enable = true;
       };
     };
