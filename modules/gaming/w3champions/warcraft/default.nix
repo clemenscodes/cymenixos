@@ -27,7 +27,7 @@
     name = "battlenet";
     runtimeInputs = [
       pkgs.lutris
-      pkgs.libnotfiy
+      pkgs.libnotify
     ];
     text = ''
       notify-send "Starting Battle.net"
