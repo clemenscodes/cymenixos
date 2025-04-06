@@ -78,7 +78,7 @@
       fi
 
       if [ -d "$TARGET_DIR" ]; then
-        rm -rf "''${TARGET_DIR:?}/"*
+        rm -rf "''${TARGET_DIR:?}/"* >/dev/null
       else
         mkdir -p "$TARGET_DIR"
       fi
