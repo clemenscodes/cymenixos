@@ -28,17 +28,4 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.w3champions.enable) {
-    environment = {
-      persistence = {
-        ${config.modules.boot.impermanence.persistPath} = {
-          users = {
-            ${config.modules.users.name} = {
-              directories = ["Games"];
-            };
-          };
-        };
-      };
-    };
-  };
 }
