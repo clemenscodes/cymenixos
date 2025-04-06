@@ -477,7 +477,7 @@ in {
           };
           xdg = {
             desktopEntries = {
-              battlenet = {
+              kill-games = {
                 name = "Kill Games";
                 type = "Application";
                 categories = ["Game"];
