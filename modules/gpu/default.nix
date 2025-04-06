@@ -53,7 +53,7 @@ in {
         inherit (cfg.gpu) enable;
         enable32Bit = true;
         extraPackages = [
-          pkgs.mesa_git.opencl
+          pkgs.mesa.opencl
           pkgs.intel-media-driver
           pkgs.rocmPackages.clr
           pkgs.rocmPackages.clr.icd
@@ -67,7 +67,7 @@ in {
           pkgs.vkd3d-proton
         ];
         extraPackages32 = [
-          pkgs.pkgsi686Linux.mesa32_git.opencl
+          pkgs.pkgsi686Linux.mesa.opencl
           pkgs.pkgsi686Linux.intel-media-driver
           pkgs.pkgsi686Linux.intel-vaapi-driver
         ];
