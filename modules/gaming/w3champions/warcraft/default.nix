@@ -462,6 +462,14 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.warcraft.enable) {
+    networking = {
+      firewall = {
+        # TODO: figure out which firewall config permits LAN games in WC3
+        # Default firewall configuration blocks the traffic for hosting LAN games
+        # and thus prevents W3C from working whatsoever
+        enable = lib.mkForce false;
+      };
+    };
     environment = {
       systemPackages = [warcraft-scripts];
     };
