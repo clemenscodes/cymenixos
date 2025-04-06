@@ -57,7 +57,6 @@ in {
         MBSYNCRC = "${config.xdg.configHome}/mbsync/config";
         M2_HOME = "${config.xdg.dataHome}/m2";
         CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
-        WINEPREFIX = "${config.xdg.dataHome}/wine";
         LD_LIBRARY_PATH =
           if osConfig.modules.gpu.amd.enable
           then "/run/opengl-driver/lib:$LD_LIBRARY_PATH"

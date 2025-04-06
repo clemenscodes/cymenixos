@@ -13,14 +13,9 @@
   kill-games = pkgs.writeShellApplication {
     name = "kill-games";
     text = ''
-      pkill lutris || true
-      pkill main || true
-      pkill srt-bwrap || true
-      pkill wine || true
-      pkill exe || true
-      pkill Cr || true
-      pkill Microsoft || true
-      pkill Warcraft || true
+      for proc in main Warcraft wine Microsoft srt-bwrap exe Cr mDNS; do
+        pkill "$proc" || true
+      done
     '';
   };
   battlenet = pkgs.writeShellApplication {
@@ -28,29 +23,12 @@
     runtimeInputs = [
       pkgs.lutris
       pkgs.libnotify
+      kill-games
     ];
     text = ''
       notify-send "Starting Battle.net"
 
-      pkill main || true
-      pkill Warcraft || true
-      pkill wine || true
-      pkill Microsoft || true
-      pkill srt-bwrap || true
-      pkill exe || true
-      pkill Cr || true
-      pkill mDNS || true
-
-      sleep 2
-
-      pkill main || true
-      pkill Warcraft || true
-      pkill wine || true
-      pkill Microsoft || true
-      pkill srt-bwrap || true
-      pkill exe || true
-      pkill Cr || true
-      pkill mDNS || true
+      kill-games
 
       sleep 2
 
@@ -63,14 +41,13 @@
       pkgs.lutris
       pkgs.libnotify
       pkgs.rsync
+      kill-games
     ];
     text = ''
       BACKUP_DIR="$HOME/Games/Warcraft"
       TARGET_DIR="$HOME/Games/W3Champions"
 
-      for proc in main Warcraft wine Microsoft srt-bwrap exe Cr mDNS; do
-        pkill "$proc" || true
-      done
+      kill-games
 
       if [ ! -d "$BACKUP_DIR" ]; then
         echo "Failed to find a backup directory"
@@ -78,14 +55,12 @@
       fi
 
       if [ -d "$TARGET_DIR" ]; then
-        rm -rf "''${TARGET_DIR:?}/"* >/dev/null
+        rm -rf "$TARGET_DIR}"
       else
         mkdir -p "$TARGET_DIR"
       fi
 
-      notify-send "Installing W3Champions"
-
-      rsync -av --progress "''${BACKUP_DIR:?}/" "$TARGET_DIR/"
+      cp -r "$BACKUP_DIR" "$TARGET_DIR"
 
       notify-send "Starting W3Champions"
 

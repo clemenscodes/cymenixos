@@ -34,7 +34,7 @@ in {
         ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.name} = {
-              directories = [cfg.w3champions.prefix];
+              directories = ["Games"];
             };
           };
         };
