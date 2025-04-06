@@ -40,7 +40,6 @@
     runtimeInputs = [
       pkgs.lutris
       pkgs.libnotify
-      pkgs.rsync
       kill-games
     ];
     text = ''
@@ -55,7 +54,7 @@
       fi
 
       if [ -d "$TARGET_DIR" ]; then
-        rm -rf "$TARGET_DIR}"
+        rm -rf "$TARGET_DIR"
       else
         mkdir -p "$TARGET_DIR"
       fi
