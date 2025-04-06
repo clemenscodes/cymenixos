@@ -486,7 +486,7 @@ in {
                 name = "W3Champions";
                 type = "Application";
                 categories = ["Game"];
-                genericName = "Alternative Warcraft III Ladder";
+                genericName = "The Warcraft III Ladder";
                 icon = ./assets/w3champions.png;
                 exec = "${lib.getExe w3champions}";
                 terminal = false;
