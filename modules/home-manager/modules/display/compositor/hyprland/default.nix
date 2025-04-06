@@ -40,7 +40,6 @@
   useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   useNewsboat = config.modules.media.rss.newsboat.enable;
-  useWarcraft = osConfig.modules.gaming.w3champions.enable;
   isLaptop = machine == "laptop";
   close-window = pkgs.writeShellScriptBin "close-window" ''
     if [ "$(${pkgs.hyprland}/bin/hyprctl activewindow -j | ${lib.getExe pkgs.jq} -r ".class")" = "Steam" ]; then
@@ -341,30 +340,6 @@ in {
                 windowrule = float,class:Rofi
               ''
               else "";
-            warcraft =
-              if useWarcraft
-              then ''
-                windowrule = content game,class:battle.net.exe
-                windowrule = content game,title:(W3Champions)
-                windowrule = content game,title:(w3champions),class:(w3champions.exe)
-                windowrule = content game,title:(Warcraft III)
-                windowrule = workspace 1,class:explorer.exe
-                windowrule = workspace 2,class:battle.net.exe
-                windowrule = workspace 3,title:(W3Champions)
-                windowrule = workspace 3,title:(w3champions),class:(w3champions.exe)
-                windowrule = workspace 4,title:(Warcraft III)
-                windowrule = tile,class:battle.net.exe
-                windowrule = float,class:w3champions.exe
-                windowrule = float,title:(w3champions),class:(w3champions.exe)
-                windowrule = float,class:explorer.exe
-                windowrule = size 100% 100%,title:(w3champions),class:(w3champions.exe)
-                windowrule = size 100% 100%,title:(W3Champions)
-                windowrule = size 100% 100%,title:(Warcraft III)
-                windowrule = noinitialfocus,class:explorer.exe
-                windowrule = noinitialfocus,class:(warcraft iii).exe
-                windowrule = move 47% 96%,class:explorer.exe
-              ''
-              else "";
             swayidle =
               if useSwayidle
               then ''
@@ -430,7 +405,6 @@ in {
             ${hypridle}
             ${hyprsunset}
             ${yubikey}
-            ${warcraft}
           '';
         };
       };

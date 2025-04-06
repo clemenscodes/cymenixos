@@ -17,11 +17,11 @@ in {
     modules = {
       gaming = {
         w3champions = {
-          enable = lib.mkEnableOption "Enable w3champions" // {default = false;};
+          enable = lib.mkEnableOption "Enable W3Champions" // {default = false;};
           prefix = lib.mkOption {
             type = lib.types.str;
-            default = "Games/w3champions";
-            example = ".local/share/games/w3champions";
+            default = "Games/W3Champions";
+            example = ".local/share/games/W3Champions";
             description = "Where the wineprefix will be for W3Champions, relative to $HOME";
           };
         };

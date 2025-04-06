@@ -46,9 +46,7 @@ in {
   };
   config = lib.mkIf (cfg.enable) {
     environment = {
-      systemPackages = [
-        pkgs.winetricks
-      ];
+      systemPackages = [pkgs.winetricks];
     };
     services = {
       pipewire = {

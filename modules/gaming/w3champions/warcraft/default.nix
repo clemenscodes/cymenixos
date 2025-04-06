@@ -10,18 +10,85 @@
 }: let
   cfg = config.modules.gaming.w3champions;
   inherit (config.modules.users) name;
+  kill-games = pkgs.writeShellApplication {
+    name = "kill-games";
+    text = ''
+      pkill lutris || true
+      pkill main || true
+      pkill srt-bwrap || true
+      pkill wine || true
+      pkill exe || true
+      pkill Cr || true
+      pkill Microsoft || true
+      pkill Warcraft || true
+    '';
+  };
   battlenet = pkgs.writeShellApplication {
     name = "battlenet";
-    runtimeInputs = [pkgs.lutris];
+    runtimeInputs = [
+      pkgs.lutris
+      pkgs.libnotfiy
+    ];
     text = ''
-      echo "Noop for now"
+      notify-send "Starting Battle.net"
+
+      pkill main || true
+      pkill Warcraft || true
+      pkill wine || true
+      pkill Microsoft || true
+      pkill srt-bwrap || true
+      pkill exe || true
+      pkill Cr || true
+      pkill mDNS || true
+
+      sleep 2
+
+      pkill main || true
+      pkill Warcraft || true
+      pkill wine || true
+      pkill Microsoft || true
+      pkill srt-bwrap || true
+      pkill exe || true
+      pkill Cr || true
+      pkill mDNS || true
+
+      sleep 2
+
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungameid/1
     '';
   };
   w3champions = pkgs.writeShellApplication {
     name = "w3champions";
-    runtimeInputs = [pkgs.lutris];
+    runtimeInputs = [
+      pkgs.lutris
+      pkgs.libnotify
+    ];
     text = ''
-      echo "Noop for now"
+      notify-send "Starting W3Champions"
+
+      pkill main || true
+      pkill Warcraft || true
+      pkill wine || true
+      pkill Microsoft || true
+      pkill srt-bwrap || true
+      pkill exe || true
+      pkill Cr || true
+      pkill mDNS || true
+
+      sleep 2
+
+      pkill main || true
+      pkill Warcraft || true
+      pkill wine || true
+      pkill Microsoft || true
+      pkill srt-bwrap || true
+      pkill exe || true
+      pkill Cr || true
+      pkill mDNS || true
+
+      sleep 2
+
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungameid/1
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
@@ -108,18 +175,18 @@
       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
 
       case "$HOTKEY" in
-        Q) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-        W) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-        E) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-        R) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); return ;;
-        A) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-        S) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-        D) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-        F) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); return ;;
-        Y) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
-        X) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
-        C) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
-        V) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); return ;;
+        Q) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); ;;
+        W) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); ;;
+        E) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); ;;
+        R) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 80 / 100)); ;;
+        A) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); ;;
+        S) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); ;;
+        D) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); ;;
+        F) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 87 / 100)); ;;
+        Y) X=$((SCREEN_WIDTH * 72 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); ;;
+        X) X=$((SCREEN_WIDTH * 76 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); ;;
+        C) X=$((SCREEN_WIDTH * 80 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); ;;
+        V) X=$((SCREEN_WIDTH * 84 / 100)); Y=$((SCREEN_HEIGHT * 94 / 100)); ;;
       esac
 
       MOUSE_X=$((MOUSE_X / 2))
@@ -261,7 +328,7 @@
       esac
 
       echo "Creating control group $CONTROL_GROUP" >> "$YDOTOOL_LOG_FILE"
-      echo "Writing control group keycode" >> "YDOTOOL_LOG_FILE"
+      echo "Writing control group keycode" >> "$YDOTOOL_LOG_FILE"
       echo "$CONTROL_GROUP_KEYCODE" > "$WARCRAFT_HOME/control_group_keycode"
 
       sleep 0.1
@@ -333,18 +400,18 @@
       MOUSE_Y=$(echo "$MOUSE_POS" | cut -d' ' -f2)
 
       case "$SELECTED_UNIT" in
-        1) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
-        2) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
-        3) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
-        4) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
-        5) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
-        6) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); return ;;
-        7) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
-        8) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
-        9) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
-        10) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
-        11) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
-        12) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); return ;;
+        1) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); ;;
+        2) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); ;;
+        3) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); ;;
+        4) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); ;;
+        5) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); ;;
+        6) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 915 / SCREEN_HEIGHT)); ;;
+        7) X=$((SCREEN_WIDTH * 811 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); ;;
+        8) X=$((SCREEN_WIDTH * 870 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); ;;
+        9) X=$((SCREEN_WIDTH * 923 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); ;;
+        10) X=$((SCREEN_WIDTH * 979 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); ;;
+        11) X=$((SCREEN_WIDTH * 1032 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); ;;
+        12) X=$((SCREEN_WIDTH * 1089 / SCREEN_WIDTH)); Y=$((SCREEN_HEIGHT * 1000 / SCREEN_HEIGHT)); ;;
       esac
 
       MOUSE_X=$((MOUSE_X / 2))
@@ -410,6 +477,15 @@ in {
           };
           xdg = {
             desktopEntries = {
+              battlenet = {
+                name = "Kill Games";
+                type = "Application";
+                categories = ["Game"];
+                genericName = "Kills all running games";
+                icon = "lutris";
+                exec = "${lib.getExe kill-games}";
+                terminal = false;
+              };
               battlenet = {
                 name = "Battle.net";
                 type = "Application";
@@ -516,6 +592,37 @@ in {
                   bind = $mod, Q, submap, WARCRAFT
                   bind = $mod SHIFT, Q, submap, reset
                   submap = reset
+
+                  windowrule = content game,class:(steam_app_default),title:()
+                  windowrule = content game,class:(steam_app_default),title:(Battle.net)
+                  windowrule = content game,class:(steam_app_default),title:(W3Champions)
+                  windowrule = content game,class:(steam_app_default),title:(Warcraft III)
+                  windowrule = content game,class:(explorer.exe),title:()
+                  windowrule = content game,class:(battle.net.exe),title:(Battle.net)
+                  windowrule = content game,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = content game,class:(warcraft iii.exe),title:(Warcraft III)
+                  windowrule = workspace 2,class:(steam_app_default),title:(Battle.net)
+                  windowrule = workspace 3,class:(steam_app_default),title:()
+                  windowrule = workspace 3,class:(steam_app_default),title:(W3Champions)
+                  windowrule = workspace 4,class:(steam_app_default),title:(Warcraft III)
+                  windowrule = workspace 2,class:(battle.net.exe),title:(Battle.net)
+                  windowrule = workspace 3,class:(explorer.exe),title:()
+                  windowrule = workspace 3,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = workspace 4,class:(warcraft iii.exe),title:(Warcraft III)
+                  windowrule = tile,class:(steam_app_default),title:(Battle.net)
+                  windowrule = tile,class:(steam_app_default),title:(W3Champions)
+                  windowrule = tile,class:(steam_app_default),title:(Warcraft III)
+                  windowrule = tile,class:(battle.net.exe),title:(Battle.net)
+                  windowrule = tile,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
+                  windowrule = noinitialfocus,class:(steam_app_default),title:()
+                  windowrule = noinitialfocus,class:(steam_app_default),title:(Warcraft III)
+                  windowrule = noinitialfocus,class:(explorer.exe),title:()
+                  windowrule = noinitialfocus,class:(warcraft iii.exe),title:(Warcraft III)
+                  windowrule = move 47% 96%,class:(steam_app_default),title:()
+                  windowrule = move 47% 96%,class:(explorer.exe),title:()
+                  windowrule = opacity 0%,class:(steam_app_default),title:()
+                  windowrule = opacity 0%,class:(explorer.exe),title:()
                 '';
               };
             };
