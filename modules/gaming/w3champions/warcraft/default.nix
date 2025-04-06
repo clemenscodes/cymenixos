@@ -54,7 +54,7 @@
 
       sleep 2
 
-      LUTRIS_SKIP_INIT=1 lutris lutris:rungameid/1
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/battlenet
     '';
   };
   w3champions = pkgs.writeShellApplication {
@@ -64,31 +64,32 @@
       pkgs.libnotify
     ];
     text = ''
+      BACKUP_DIR="$HOME/Games/Warcraft"
+      TARGET_DIR="$HOME/Games/W3Champions"
+
+      if [ -d "$BACKUP_DIR" ]; then
+        chattr -R +i "$BACKUP_DIR"
+        chmod -R a-w "$BACKUP_DIR"
+        chmod -R u+rx "$BACKUP_DIR"
+      fi
+
+      if [ -d "$TARGET_DIR" ]; then
+        rm -rf "$TARGET_DIR"/*
+      else
+        mkdir -p "$TARGET_DIR"
+      fi
+
+      cp -r "$BACKUP_DIR/"* "$TARGET_DIR/"
+
       notify-send "Starting W3Champions"
 
-      pkill main || true
-      pkill Warcraft || true
-      pkill wine || true
-      pkill Microsoft || true
-      pkill srt-bwrap || true
-      pkill exe || true
-      pkill Cr || true
-      pkill mDNS || true
+      for proc in main Warcraft wine Microsoft srt-bwrap exe Cr mDNS; do
+        pkill "$proc" || true
+      done
 
       sleep 2
 
-      pkill main || true
-      pkill Warcraft || true
-      pkill wine || true
-      pkill Microsoft || true
-      pkill srt-bwrap || true
-      pkill exe || true
-      pkill Cr || true
-      pkill mDNS || true
-
-      sleep 2
-
-      LUTRIS_SKIP_INIT=1 lutris lutris:rungameid/1
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
