@@ -62,15 +62,19 @@
     runtimeInputs = [
       pkgs.lutris
       pkgs.libnotify
+      pkgs.rsync
     ];
     text = ''
       BACKUP_DIR="$HOME/Games/Warcraft"
       TARGET_DIR="$HOME/Games/W3Champions"
 
-      if [ -d "$BACKUP_DIR" ]; then
-        chattr -R +i "$BACKUP_DIR"
-        chmod -R a-w "$BACKUP_DIR"
-        chmod -R u+rx "$BACKUP_DIR"
+      for proc in main Warcraft wine Microsoft srt-bwrap exe Cr mDNS; do
+        pkill "$proc" || true
+      done
+
+      if [ ! -d "$BACKUP_DIR" ]; then
+        echo "Failed to find a backup directory"
+        exit 1
       fi
 
       if [ -d "$TARGET_DIR" ]; then
@@ -79,15 +83,11 @@
         mkdir -p "$TARGET_DIR"
       fi
 
-      cp -r "''${BACKUP_DIR:?}/"* "$TARGET_DIR/"
+      notify-send "Installing W3Champions"
+
+      rsync -av --progress "''${BACKUP_DIR:?}/" "$TARGET_DIR/"
 
       notify-send "Starting W3Champions"
-
-      for proc in main Warcraft wine Microsoft srt-bwrap exe Cr mDNS; do
-        pkill "$proc" || true
-      done
-
-      sleep 2
 
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions
     '';
@@ -432,6 +432,9 @@
   warcraft-scripts = pkgs.symlinkJoin {
     name = "warcraft-scripts";
     paths = [
+      kill-games
+      battlenet
+      w3champions
       warcraft-mode-start
       warcraft-mode-stop
       warcraft-chat-open
