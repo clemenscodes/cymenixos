@@ -74,12 +74,12 @@
       fi
 
       if [ -d "$TARGET_DIR" ]; then
-        rm -rf "$TARGET_DIR"/*
+        rm -rf "''${TARGET_DIR:?}/"*
       else
         mkdir -p "$TARGET_DIR"
       fi
 
-      cp -r "$BACKUP_DIR/"* "$TARGET_DIR/"
+      cp -r "''${BACKUP_DIR:?}/"* "$TARGET_DIR/"
 
       notify-send "Starting W3Champions"
 
