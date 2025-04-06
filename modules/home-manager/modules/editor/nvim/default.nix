@@ -8,7 +8,7 @@
   ...
 }: let
   cfg = config.modules.editor;
-  nvim = inputs.cymenixvim.packages.${system}.default;
+  nvim = inputs.cymenixvim.packages.${system}.development;
 in {
   options = {
     modules = {
