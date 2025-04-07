@@ -206,7 +206,7 @@ in {
               on-click = "sleep 0.3; ${pkgs.rofi-wayland}/bin/rofi -show drun";
             };
             "wlr/taskbar" = {
-              format = "{icon}";
+              format = "{icon} - {title} - {app_id}";
               on-click = "activate";
               on-click-middle = "fullscreen";
               on-click-right = "close";
