@@ -79,6 +79,7 @@
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
+      obs-studio &
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions &
       GAME_PID="$!"
 
@@ -630,13 +631,13 @@ in {
                   windowrule = content game,class:(w3champions.exe),title:(W3Champions)
                   windowrule = content game,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = workspace 2,class:(steam_app_default),title:(Battle.net)
-                  windowrule = workspace 3,class:(steam_app_default),title:(W3Champions)
-                  windowrule = workspace 3,class:(steam_app_default),title:()
-                  windowrule = workspace 3,class:(explorer.exe),title:()
-                  windowrule = workspace 4,class:(steam_app_default),title:(Warcraft III)
+                  windowrule = workspace 2,class:(steam_app_default),title:(W3Champions)
+                  windowrule = workspace 2,class:(steam_app_default),title:()
+                  windowrule = workspace 2,class:(explorer.exe),title:()
+                  windowrule = workspace 3,class:(steam_app_default),title:(Warcraft III)
                   windowrule = workspace 2,class:(battle.net.exe),title:(Battle.net)
-                  windowrule = workspace 3,class:(w3champions.exe),title:(W3Champions)
-                  windowrule = workspace 4,class:(warcraft iii.exe),title:(Warcraft III)
+                  windowrule = workspace 2,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = workspace 3,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = tile,class:(steam_app_default),title:(Battle.net)
                   windowrule = tile,class:(steam_app_default),title:(Warcraft III)
                   windowrule = tile,class:(battle.net.exe),title:(Battle.net)
@@ -653,6 +654,8 @@ in {
                   windowrule = opacity 0,class:(explorer.exe),title:()
                   windowrule = move 50%% 50%,class:(steam_app_default),title:()
                   windowrule = move 50% 50%,class:(explorer.exe),title:()
+                  windowrule = workspace 1,class:^(com\.obsproject\.Studio)$
+                  windowrule = noinitialfocus,class:^(com\.obsproject\.Studio)$
                 '';
               };
             };
