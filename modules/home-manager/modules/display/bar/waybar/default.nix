@@ -6,6 +6,7 @@
 }: {
   config,
   osConfig,
+  system,
   ...
 }: let
   cfg = config.modules.display.bar;
@@ -46,6 +47,7 @@ in {
     programs = {
       waybar = {
         inherit (cfg.waybar) enable;
+        package = inputs.waybar.packages.${system}.waybar;
         systemd = {
           enable = false;
         };

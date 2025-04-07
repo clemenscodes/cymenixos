@@ -123,6 +123,9 @@
     yubikey-guide = {
       url = "github:drduh/YubiKey-Guide";
     };
+    waybar = {
+      url = "github:clemenscodes/Waybar/wlr-taskbar-icon-title-fallback";
+    };
     gpu-usage-waybar = {
       url = "github:cymenix/gpu-usage-waybar";
     };

@@ -87,3 +87,4 @@ Options are defined according to the directory structure.
 To tweak options, take a look at the [modules](./modules/)
 
 Feel free to reach out if you have any questions.
+

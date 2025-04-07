@@ -471,22 +471,31 @@ in {
                 exec = "${lib.getExe kill-games}";
                 terminal = false;
               };
-              battlenet = {
+              "Battle.net" = {
                 name = "Battle.net";
                 type = "Application";
                 categories = ["Game"];
                 genericName = "Blizzard Game Launcher";
-                icon = ./assets/battle-net.svg;
+                icon = ./assets/Battle.net.png;
                 exec = "${lib.getExe battlenet}";
                 terminal = false;
               };
-              w3champions = {
+              "W3Champions" = {
                 name = "W3Champions";
                 type = "Application";
                 categories = ["Game"];
                 genericName = "The Warcraft III Ladder";
-                icon = ./assets/w3champions.png;
+                icon = ./assets/w3c.png;
                 exec = "${lib.getExe w3champions}";
+                terminal = false;
+              };
+              "Warcraft III" = {
+                name = "Warcraft III";
+                type = "Application";
+                categories = ["Game"];
+                genericName = "The Warcraft III Ladder";
+                icon = ./assets/Warcraft.png;
+                exec = "${lib.getExe battlenet}";
                 terminal = false;
               };
             };
@@ -578,35 +587,32 @@ in {
                   bind = $mod SHIFT, Q, submap, reset
                   submap = reset
 
-                  windowrule = content game,class:(steam_app_default),title:()
                   windowrule = content game,class:(steam_app_default),title:(Battle.net)
                   windowrule = content game,class:(steam_app_default),title:(W3Champions)
                   windowrule = content game,class:(steam_app_default),title:(Warcraft III)
-                  windowrule = content game,class:(explorer.exe),title:()
                   windowrule = content game,class:(battle.net.exe),title:(Battle.net)
                   windowrule = content game,class:(w3champions.exe),title:(W3Champions)
                   windowrule = content game,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = workspace 2,class:(steam_app_default),title:(Battle.net)
-                  windowrule = workspace 3,class:(steam_app_default),title:()
                   windowrule = workspace 3,class:(steam_app_default),title:(W3Champions)
+                  windowrule = workspace 3,class:(steam_app_default),title:()
+                  windowrule = workspace 3,class:(explorer.exe),title:()
                   windowrule = workspace 4,class:(steam_app_default),title:(Warcraft III)
                   windowrule = workspace 2,class:(battle.net.exe),title:(Battle.net)
-                  windowrule = workspace 3,class:(explorer.exe),title:()
                   windowrule = workspace 3,class:(w3champions.exe),title:(W3Champions)
                   windowrule = workspace 4,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = tile,class:(steam_app_default),title:(Battle.net)
                   windowrule = tile,class:(steam_app_default),title:(Warcraft III)
                   windowrule = tile,class:(battle.net.exe),title:(Battle.net)
+                  windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = tile,class:(steam_app_default),title:(W3Champions)
                   windowrule = tile,class:(w3champions.exe),title:(W3Champions)
                   windowrule = size 1600 900,class:(steam_app_default),title:(W3Champions)
                   windowrule = size 1600 900,class:(w3champions.exe),title:(W3Champions)
-                  windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(steam_app_default),title:(Warcraft III)
-                  windowrule = noinitialfocus,class:(explorer.exe),title:()
                   windowrule = noinitialfocus,class:(warcraft iii.exe),title:(Warcraft III)
-                  windowrule = move 47% 96%,class:(steam_app_default),title:()
-                  windowrule = move 47% 96%,class:(explorer.exe),title:()
+                  windowrule = noinitialfocus,class:(steam_app_default),title:()
+                  windowrule = noinitialfocus,class:(explorer.exe),title:()
                 '';
               };
             };
