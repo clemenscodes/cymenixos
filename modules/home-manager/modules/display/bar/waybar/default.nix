@@ -54,7 +54,7 @@ in {
     programs = {
       waybar = {
         inherit (cfg.waybar) enable;
-        packages = pkgs.waybar;
+        package = pkgs.waybar;
         systemd = {
           enable = false;
         };
