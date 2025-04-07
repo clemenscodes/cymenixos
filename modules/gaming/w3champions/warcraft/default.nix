@@ -86,15 +86,15 @@
         W3C_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "W3Champions") | .pid' | head -n 1)
         if [ -n "$W3C_PID" ]; then
           hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
-          while true; do
-            EXPLORER_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
-            if [ -n "$EXPLORER_PID" ]; then
-              sleep 0.3
-              kill "$EXPLORER_PID"
-              break
-            fi
-            sleep 0.1
-          done
+          # while true; do
+          #   EXPLORER_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
+          #   if [ -n "$EXPLORER_PID" ]; then
+          #     sleep 0.3
+          #     kill "$EXPLORER_PID"
+          #     break
+          #   fi
+          #   sleep 0.1
+          # done
         fi
         sleep 0.1
       done
