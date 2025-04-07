@@ -30,7 +30,7 @@
 
       kill-games
 
-      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/battlenet  &
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/battlenet &
       GAME_PID="$!"
 
       (
@@ -89,15 +89,11 @@
           while true; do
             WARCRAFT_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "Warcraft III") | .pid' | head -n 1)
             if [ -n "$WARCRAFT_PID" ]; then
-              while true; do
-                W3C_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "W3Champions") | .pid' | head -n 1)
-                if [ -n "$W3C_PID" ]; then
-                  hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
-                fi
-                break
-              done
+              hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
+              break
             fi
           done
+          break
         fi
       done
 
