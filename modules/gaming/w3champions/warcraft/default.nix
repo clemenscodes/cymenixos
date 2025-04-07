@@ -13,7 +13,7 @@
   kill-games = pkgs.writeShellApplication {
     name = "kill-games";
     text = ''
-      for proc in main Warcraft wine Microsoft srt-bwrap exe Cr mDNS; do
+      for proc in main Warcraft wine Microsoft edge srt-bwrap exe Cr mDNS; do
         pkill "$proc" || true
       done
     '';
