@@ -79,8 +79,6 @@
       WATCHDOG_PID=$!
 
       wait "$GAME_PID"
-      INSTALL_EXIT_CODE="$?"
-
       wait "$WATCHDOG_PID"
     '';
   };
