@@ -206,12 +206,11 @@ in {
               on-click = "sleep 0.3; ${pkgs.rofi-wayland}/bin/rofi -show drun";
             };
             "wlr/taskbar" = {
-              format = "{icon}";
+              format = "{icon} - {app_id}";
               on-click = "activate";
               on-click-middle = "fullscreen";
               on-click-right = "close";
               icon-theme = "Papirus-Dark";
-              tooltip-format = "{title} - {app_id}";
               icon-size = 22;
               markup = true;
               tooltip = false;
