@@ -1,6 +1,5 @@
 {
   inputs,
-  pkgs,
   lib,
   ...
 }: {
@@ -18,6 +17,14 @@
   useMusic = config.modules.media.music.enable;
   useHyprland = config.modules.display.compositor.hyprland.enable;
   useSwaync = config.modules.display.notifications.swaync.enable;
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    overlays = [
+      (final: prev: {
+        inherit (inputs.waybar.packages.${system}) waybar;
+      })
+    ];
+  };
 in {
   options = {
     modules = {
@@ -47,7 +54,7 @@ in {
     programs = {
       waybar = {
         inherit (cfg.waybar) enable;
-        package = inputs.waybar.packages.${system}.waybar;
+        packages = pkgs.waybar;
         systemd = {
           enable = false;
         };
