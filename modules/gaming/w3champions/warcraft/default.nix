@@ -61,7 +61,27 @@
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
-      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions &
+      GAME_PID="$!"
+
+      (
+        set +e
+        while true; do
+          explorer_process_count=$(pgrep explorer | wc -l)
+          if [ "$explorer_process_count" -gt 0 ]; then
+            pkill explorer
+            break
+          fi
+          sleep 1
+        done
+      ) &
+
+      WATCHDOG_PID=$!
+
+      wait "$GAME_PID"
+      INSTALL_EXIT_CODE="$?"
+
+      wait "$WATCHDOG_PID"
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
@@ -605,12 +625,12 @@ in {
                   windowrule = tile,class:(steam_app_default),title:(Warcraft III)
                   windowrule = tile,class:(battle.net.exe),title:(Battle.net)
                   windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
-                  windowrule = center 1,class:(steam_app_default),title:(W3Champions)
-                  windowrule = center 1,class:(w3champions.exe),title:(W3Champions)
                   windowrule = float,class:(steam_app_default),title:(W3Champions)
                   windowrule = float,class:(w3champions.exe),title:(W3Champions)
                   windowrule = size 1600 900,class:(steam_app_default),title:(W3Champions)
                   windowrule = size 1600 900,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = center 1,class:(steam_app_default),title:(W3Champions)
+                  windowrule = center 1,class:(w3champions.exe),title:(W3Champions)
                   windowrule = tile,class:(steam_app_default),title:(W3Champions)
                   windowrule = tile,class:(w3champions.exe),title:(W3Champions)
                   windowrule = noinitialfocus,class:(steam_app_default),title:(Warcraft III)
