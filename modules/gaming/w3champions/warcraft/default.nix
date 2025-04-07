@@ -38,6 +38,7 @@
         while true; do
           PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
           if [ -n "$PID" ]; then
+            sleep 0.1
             kill "$PID"
             break
           fi
@@ -639,10 +640,12 @@ in {
                   windowrule = tile,class:(steam_app_default),title:(Warcraft III)
                   windowrule = tile,class:(battle.net.exe),title:(Battle.net)
                   windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
-                  windowrule = tile,class:(steam_app_default),title:(W3Champions)
-                  windowrule = tile,class:(w3champions.exe),title:(W3Champions)
-                  windowrule = size 1600 900,class:(steam_app_default),title:(W3Champions)
-                  windowrule = size 1600 900,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = float,class:(steam_app_default),title:(W3Champions)
+                  windowrule = float,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = center,class:(steam_app_default),title:(W3Champions)
+                  windowrule = center,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = size 1600,class:(steam_app_default),title:(W3Champions)
+                  windowrule = size 1600,class:(w3champions.exe),title:(W3Champions)
                   windowrule = noinitialfocus,class:(steam_app_default),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(steam_app_default),title:()
