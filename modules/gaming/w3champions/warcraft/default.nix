@@ -81,21 +81,24 @@
 
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions &
       GAME_PID="$!"
-
-      (
-        set +e
-        while true; do
-          PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
-          if [ -n "$PID" ]; then
-            kill "$PID"
-            break
-          fi
-        done
-      ) &
-
-      WATCHDOG_PID=$!
-
-      wait "$WATCHDOG_PID"
+      
+      while true; do
+        W3C_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "W3Champions") | .pid' | head -n 1)
+        if [ -n "$W3C_PID" ]; then
+          hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
+          while true; do
+            EXPLORER_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
+            if [ -n "$EXPLORER_PID" ]; then
+              sleep 0.3
+              kill "$EXPLORER_PID"
+              break
+            fi
+            sleep 0.1
+          done
+        fi
+        sleep 0.1
+      done
+      
       wait "$GAME_PID"
     '';
   };
@@ -640,12 +643,10 @@ in {
                   windowrule = tile,class:(steam_app_default),title:(Warcraft III)
                   windowrule = tile,class:(battle.net.exe),title:(Battle.net)
                   windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
-                  windowrule = float,class:(steam_app_default),title:(W3Champions)
-                  windowrule = float,class:(w3champions.exe),title:(W3Champions)
-                  windowrule = center,class:(steam_app_default),title:(W3Champions)
-                  windowrule = center,class:(w3champions.exe),title:(W3Champions)
                   windowrule = size 1600,class:(steam_app_default),title:(W3Champions)
                   windowrule = size 1600,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = center 1,class:(steam_app_default),title:(W3Champions)
+                  windowrule = center 1,class:(w3champions.exe),title:(W3Champions)
                   windowrule = noinitialfocus,class:(steam_app_default),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(steam_app_default),title:()
