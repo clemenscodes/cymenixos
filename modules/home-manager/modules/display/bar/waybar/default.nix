@@ -208,7 +208,7 @@ in {
               on-click = "sleep 0.3; ${pkgs.rofi-wayland}/bin/rofi -show drun";
             };
             "wlr/taskbar" = {
-              format = "{icon} - {title} - {app_id}";
+              format = "{icon}";
               on-click = "activate";
               on-click-middle = "fullscreen";
               on-click-right = "close";
@@ -217,10 +217,6 @@ in {
               markup = true;
               tooltip = false;
               spacing = 0;
-              ignore-list = [
-                # "steam_app_default"
-                # "steam_app_0"
-              ];
             };
             "custom/notification" = lib.mkIf useSwaync {
               format = "{icon}";
