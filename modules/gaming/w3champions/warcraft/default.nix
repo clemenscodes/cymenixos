@@ -86,15 +86,20 @@
         W3C_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "W3Champions") | .pid' | head -n 1)
         if [ -n "$W3C_PID" ]; then
           hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
-          # while true; do
-          #   EXPLORER_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
-          #   if [ -n "$EXPLORER_PID" ]; then
-          #     sleep 0.3
-          #     kill "$EXPLORER_PID"
-          #     break
-          #   fi
-          #   sleep 0.1
-          # done
+          while true; do
+            WARCRAFT_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "Warcraft III") | .pid' | head -n 1)
+            if [ -n "$WARCRAFT_PID" ]; then
+              while true; do
+                EXPLORER_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
+                if [ -n "$EXPLORER_PID" ]; then
+                  kill "$EXPLORER_PID"
+                  break
+                fi
+                sleep 0.1
+              done
+            fi
+            sleep 0.1
+          done
         fi
         sleep 0.1
       done
@@ -651,6 +656,10 @@ in {
                   windowrule = noinitialfocus,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(steam_app_default),title:()
                   windowrule = noinitialfocus,class:(explorer.exe),title:()
+                  windowrule = opacity 0,class:(steam_app_default),title:()
+                  windowrule = opacity 0,class:(explorer.exe),title:()
+                  windowrule = move 50%% 50%,class:(steam_app_default),title:()
+                  windowrule = move 50% 50%,class:(explorer.exe),title:()
                 '';
               };
             };

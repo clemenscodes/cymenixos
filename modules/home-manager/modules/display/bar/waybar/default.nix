@@ -224,6 +224,9 @@ in {
               markup = true;
               tooltip = false;
               spacing = 0;
+              ignore-list = [
+                ""
+              ];
             };
             "custom/notification" = lib.mkIf useSwaync {
               format = "{icon}";
