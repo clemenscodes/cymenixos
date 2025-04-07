@@ -216,8 +216,8 @@ in {
               tooltip = false;
               spacing = 0;
               ignore-list = [
-                "steam_app_default"
-                "steam_app_0"
+                # "steam_app_default"
+                # "steam_app_0"
               ];
             };
             "custom/notification" = lib.mkIf useSwaync {
