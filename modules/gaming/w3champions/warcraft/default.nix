@@ -26,7 +26,7 @@
       kill-games
     ];
     text = ''
-      notify-send "Starting Battle.net"
+      notify-send "Starting Battle.net" --icon "${./assets/battle-net.svg}"
 
       kill-games
 
@@ -61,7 +61,7 @@
 
       cp -r "$BACKUP_DIR" "$TARGET_DIR"
 
-      notify-send "Starting W3Champions"
+      notify-send "Starting W3Champions" --icon "${./assets/w3champions.png}"
 
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions
     '';
