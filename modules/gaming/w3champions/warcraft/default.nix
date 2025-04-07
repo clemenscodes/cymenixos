@@ -30,7 +30,7 @@
 
       kill-games
 
-      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/battlenet --icon "${./assets/battle-net.svg}"
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/battlenet --icon "${./assets/Battle.net.png}"
     '';
   };
   w3champions = pkgs.writeShellApplication {
@@ -59,7 +59,7 @@
 
       cp -r "$BACKUP_DIR" "$TARGET_DIR"
 
-      notify-send "Starting W3Champions" --icon "${./assets/w3champions.png}"
+      notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions
     '';
@@ -485,7 +485,7 @@ in {
                 type = "Application";
                 categories = ["Game"];
                 genericName = "The Warcraft III Ladder";
-                icon = ./assets/w3c.png;
+                icon = ./assets/W3Champions.png;
                 exec = "${lib.getExe w3champions}";
                 terminal = false;
               };
@@ -605,10 +605,14 @@ in {
                   windowrule = tile,class:(steam_app_default),title:(Warcraft III)
                   windowrule = tile,class:(battle.net.exe),title:(Battle.net)
                   windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
-                  windowrule = tile,class:(steam_app_default),title:(W3Champions)
-                  windowrule = tile,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = center 1,class:(steam_app_default),title:(W3Champions)
+                  windowrule = center 1,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = float,class:(steam_app_default),title:(W3Champions)
+                  windowrule = float,class:(w3champions.exe),title:(W3Champions)
                   windowrule = size 1600 900,class:(steam_app_default),title:(W3Champions)
                   windowrule = size 1600 900,class:(w3champions.exe),title:(W3Champions)
+                  windowrule = tile,class:(steam_app_default),title:(W3Champions)
+                  windowrule = tile,class:(w3champions.exe),title:(W3Champions)
                   windowrule = noinitialfocus,class:(steam_app_default),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(steam_app_default),title:()

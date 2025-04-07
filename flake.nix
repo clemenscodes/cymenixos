@@ -92,14 +92,6 @@
         };
       };
     };
-    battlenet = {
-      url = "github:clemenscodes/bnet/feature/fix-bnet-install-stuck";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
-        };
-      };
-    };
     lutris-overlay = {
       url = "github:clemenscodes/lutris-overlay";
     };
