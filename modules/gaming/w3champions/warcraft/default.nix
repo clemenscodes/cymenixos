@@ -81,7 +81,7 @@
 
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions &
       GAME_PID="$!"
-      
+
       while true; do
         W3C_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "W3Champions") | .pid' | head -n 1)
         if [ -n "$W3C_PID" ]; then
@@ -90,10 +90,9 @@
             WARCRAFT_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "Warcraft III") | .pid' | head -n 1)
             if [ -n "$WARCRAFT_PID" ]; then
               while true; do
-                EXPLORER_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
-                if [ -n "$EXPLORER_PID" ]; then
-                  kill "$EXPLORER_PID"
-                  break
+                W3C_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "W3Champions") | .pid' | head -n 1)
+                if [ -n "$W3C_PID" ]; then
+                  hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
                 fi
                 sleep 0.1
               done
@@ -103,7 +102,7 @@
         fi
         sleep 0.1
       done
-      
+
       wait "$GAME_PID"
     '';
   };
