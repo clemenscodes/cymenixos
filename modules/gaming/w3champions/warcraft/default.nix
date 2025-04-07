@@ -94,13 +94,11 @@
                 if [ -n "$W3C_PID" ]; then
                   hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
                 fi
-                sleep 0.1
+                break
               done
             fi
-            sleep 0.1
           done
         fi
-        sleep 0.1
       done
 
       wait "$GAME_PID"
