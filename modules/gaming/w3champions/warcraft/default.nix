@@ -26,11 +26,28 @@
       kill-games
     ];
     text = ''
-      notify-send "Starting Battle.net"
+      notify-send "Starting Battle.net" --icon "${./assets/Battle.net.png}"
 
       kill-games
 
-      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/battlenet --icon "${./assets/Battle.net.png}"
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/battlenet  &
+      GAME_PID="$!"
+
+      (
+        set +e
+        while true; do
+          PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
+          if [ -n "$PID" ]; then
+            kill "$PID"
+            break
+          fi
+        done
+      ) &
+
+      WATCHDOG_PID=$!
+
+      wait "$WATCHDOG_PID"
+      wait "$GAME_PID"
     '';
   };
   w3champions = pkgs.writeShellApplication {
@@ -67,19 +84,18 @@
       (
         set +e
         while true; do
-          explorer_process_count=$(pgrep explorer | wc -l)
-          if [ "$explorer_process_count" -gt 0 ]; then
-            pkill explorer
+          PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "") | .pid' | head -n 1)
+          if [ -n "$PID" ]; then
+            kill "$PID"
             break
           fi
-          sleep 1
         done
       ) &
 
       WATCHDOG_PID=$!
 
-      wait "$GAME_PID"
       wait "$WATCHDOG_PID"
+      wait "$GAME_PID"
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
@@ -629,8 +645,6 @@ in {
                   windowrule = size 1600 900,class:(w3champions.exe),title:(W3Champions)
                   windowrule = center 1,class:(steam_app_default),title:(W3Champions)
                   windowrule = center 1,class:(w3champions.exe),title:(W3Champions)
-                  windowrule = tile,class:(steam_app_default),title:(W3Champions)
-                  windowrule = tile,class:(w3champions.exe),title:(W3Champions)
                   windowrule = noinitialfocus,class:(steam_app_default),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = noinitialfocus,class:(steam_app_default),title:()
