@@ -79,7 +79,7 @@
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
-      obs-studio &
+      obs &
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions &
       GAME_PID="$!"
 
