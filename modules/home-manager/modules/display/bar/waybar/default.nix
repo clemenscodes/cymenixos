@@ -211,6 +211,7 @@ in {
               on-click-middle = "fullscreen";
               on-click-right = "close";
               icon-theme = "Papirus-Dark";
+              tooltip-format = "{title} - {app_id}";
               icon-size = 22;
               markup = true;
               tooltip = false;
