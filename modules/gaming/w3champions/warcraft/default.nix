@@ -600,6 +600,8 @@ in {
                   windowrule = tile,class:(steam_app_.*),title:(Warcraft III)
                   windowrule = tile,class:(battle.net.exe),title:(Battle.net)
                   windowrule = tile,class:(warcraft iii.exe),title:(Warcraft III)
+                  windowrule = float,class:(steam_app_.*),title:(W3Champions)
+                  windowrule = float,class:(w3champions.exe),title:(W3Champions)
                   windowrule = size 1600 900,class:(steam_app_.*),title:(W3Champions)
                   windowrule = size 1600 900,class:(w3champions.exe),title:(W3Champions)
                   windowrule = noinitialfocus,class:(steam_app_.*),title:()
