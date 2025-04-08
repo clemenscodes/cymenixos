@@ -56,14 +56,14 @@
     runtimeInputs = [
       pkgs.lutris
       pkgs.libnotify
+      pkgs.rsync
       kill-games
     ];
     text = ''
-      BNET_ID="''${BNET_ID:-464861888}"
       BACKUP_DIR="$HOME/Games/Warcraft"
       TARGET_DIR="$HOME/Games/W3Champions"
-      WARCRAFT_REPLAYS="$TARGET_DIR/drive_c/users/steamuser/Documents/Warcraft III/BattleNet/$BNET_ID/Replays"
-      REPLAY_BACKUP="$HOME/Documents/Warcraft III/BattleNet/$BNET_ID/Replays"
+      WARCRAFT_CONFIG_HOME="$TARGET_DIR/drive_c/users/steamuser/Documents/Warcraft III"
+      WARCRAFT_CONFIG_BACKUP="$HOME/Documents/Warcraft III"
 
       kill-games
 
@@ -72,17 +72,12 @@
         exit 1
       fi
 
-      if [ -d "$WARCRAFT_REPLAYS" ]; then
-        echo "Backing up replays"
-        replay_count="$(find "$WARCRAFT_REPLAYS"/* | wc -l)"
-        if [ "$replay_count" -gt 1 ]; then
-          if [ ! -d "$REPLAY_BACKUP" ]; then
-            mkdir -p "$REPLAY_BACKUP"
-          fi
-          cp "$WARCRAFT_REPLAYS"/* "$REPLAY_BACKUP"
-        else
-          echo "No replays found to backup"
+      if [ -d "$WARCRAFT_CONFIG_HOME" ]; then
+        echo "Backing up Warcraft configuration"
+        if [ ! -d "$WARCRAFT_CONFIG_BACKUP" ]; then
+          mkdir -p "$WARCRAFT_CONFIG_BACKUP"
         fi
+        rsync "$WARCRAFT_REPLAYS/" "$WARCRAFT_CONFIG_BACKUP/"
       fi
 
       if [ -d "$TARGET_DIR" ]; then
@@ -93,6 +88,8 @@
 
       echo "Restoring prefix state"
       cp -r "$BACKUP_DIR" "$TARGET_DIR"
+      rm -rf "$WARCRAFT_CONFIG_HOME"
+      cp -r "$WARCRAFT_CONFIG_BACKUP" "$WARCRAFT_CONFIG_HOME"
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
