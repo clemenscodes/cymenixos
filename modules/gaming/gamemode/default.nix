@@ -26,7 +26,7 @@ in {
           gpu = {
             gpu_device = 1;
             apply_gpu_optimisations = "accept-responsibility";
-            amd_performance_level = "high";
+            amd_performance_level = "auto";
           };
           custom = {
             start = "${pkgs.libnotify}/bin/notify-send 'Gamemode started'";
