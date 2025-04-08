@@ -79,7 +79,7 @@
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
-      obs --disable-shutdown-check --minimize-to-tray --multi --startreplaybuffer &
+      obs --disable-shutdown-check --multi --startreplaybuffer &
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions &
       GAME_PID="$!"
 
