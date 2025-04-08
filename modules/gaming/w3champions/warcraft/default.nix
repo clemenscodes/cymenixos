@@ -89,6 +89,8 @@
       echo "Restoring prefix state"
       cp -r "$BACKUP_DIR" "$TARGET_DIR"
       rm -rf "$WARCRAFT_CONFIG_HOME"
+      mkdir -p "$WARCRAFT_CONFIG_HOME"
+      rm -rf "$WARCRAFT_CONFIG_HOME"
       cp -r "$WARCRAFT_CONFIG_BACKUP" "$WARCRAFT_CONFIG_HOME"
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
