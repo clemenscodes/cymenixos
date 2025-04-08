@@ -59,8 +59,11 @@
       kill-games
     ];
     text = ''
+      BNET_ID="''${BNET_ID:-464861888}"
       BACKUP_DIR="$HOME/Games/Warcraft"
       TARGET_DIR="$HOME/Games/W3Champions"
+      WARCRAFT_REPLAYS="$TARGET_DIR/drive_c/users/steamuser/Documents/Warcraft III/BattleNet/$BNET_ID/Replays"
+      REPLAY_BACKUP="$HOME/Documents/Warcraft III/BattleNet/$BNET_ID/Replays"
 
       kill-games
 
@@ -69,12 +72,26 @@
         exit 1
       fi
 
+      if [ -d "$WARCRAFT_REPLAYS" ]; then
+        echo "Backing up replays"
+        replay_count="$(ls "$WARCRAFT_REPLAYS" | wc -l)"
+        if [ "$replay_count" -gt 1 ]; then
+          if [ ! -d "$REPLAY_BACKUP" ]; then
+            mkdir -p "$REPLAY_BACKUP"
+          fi
+          cp "$WARCRAFT_REPLAYS"/* "$REPLAY_BACKUP"
+        else
+          echo "No replays found to backup"
+        fi
+      fi
+
       if [ -d "$TARGET_DIR" ]; then
         rm -rf "$TARGET_DIR"
       else
         mkdir -p "$TARGET_DIR"
       fi
 
+      echo "Restoring prefix state"
       cp -r "$BACKUP_DIR" "$TARGET_DIR"
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
