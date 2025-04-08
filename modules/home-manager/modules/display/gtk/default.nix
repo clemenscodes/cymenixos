@@ -35,6 +35,7 @@ in {
       packages = [
         pkgs.libsForQt5.breeze-icons
         pkgs.hicolor-icon-theme
+        pkgs.zenity
       ];
       file = {
         ".icons/Papirus-Dark" = {
@@ -42,6 +43,18 @@ in {
         };
         ".local/share/.icons/Papirus-Dark" = {
           source = "${iconTheme}/share/icons/Papirus-Dark";
+        };
+      };
+    };
+    xdg = {
+      desktopEntries = {
+        zenity = {
+          name = "Zenity";
+          type = "Application";
+          genericName = "Dialog window";
+          icon = "zenity";
+          exec = "${lib.getExe pkgs.zenity}";
+          terminal = false;
         };
       };
     };
