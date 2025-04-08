@@ -22,6 +22,15 @@ in {
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
     environment = {
       defaultPackages = lib.mkForce [];
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          users = {
+            ${config.modules.users.name} = {
+              directories = [".cache/nix"];
+            };
+          };
+        };
+      };
     };
     nixpkgs = {
       inherit pkgs;
