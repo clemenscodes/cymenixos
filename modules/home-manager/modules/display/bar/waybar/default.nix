@@ -465,7 +465,7 @@ in {
           #pulseaudio.mic,
           #idle_inhibitor,
           #tray,
-          #systemd-failed-units
+          #systemd-failed-units,
           #submap,
           #privacy,
           #gamemode,
@@ -496,7 +496,7 @@ in {
             margin: ${defaultMargin} 4px 0px 4px;
           }
 
-          #systemd-failed-units
+          #systemd-failed-units,
           #submap,
           #tray,
           #custom-idle,
