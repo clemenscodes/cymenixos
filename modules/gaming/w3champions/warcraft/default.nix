@@ -77,7 +77,7 @@
         if [ ! -d "$WARCRAFT_CONFIG_BACKUP" ]; then
           mkdir -p "$WARCRAFT_CONFIG_BACKUP"
         fi
-        rsync "$WARCRAFT_CONFIG_HOME/" "$WARCRAFT_CONFIG_BACKUP/"
+        rsync -av --ignore-existing "$WARCRAFT_CONFIG_HOME/" "$WARCRAFT_CONFIG_BACKUP/"
       fi
 
       if [ -d "$TARGET_DIR" ]; then
