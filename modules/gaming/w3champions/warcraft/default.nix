@@ -56,42 +56,10 @@
     runtimeInputs = [
       pkgs.lutris
       pkgs.libnotify
-      pkgs.rsync
       kill-games
     ];
     text = ''
-      BACKUP_DIR="$HOME/Games/Warcraft"
-      TARGET_DIR="$HOME/Games/W3Champions"
-      WARCRAFT_CONFIG_HOME="$TARGET_DIR/drive_c/users/steamuser/Documents/Warcraft III"
-      WARCRAFT_CONFIG_BACKUP="$HOME/Documents/Warcraft III"
-
       kill-games
-
-      if [ ! -d "$BACKUP_DIR" ]; then
-        echo "Failed to find a backup directory"
-        exit 1
-      fi
-
-      if [ -d "$WARCRAFT_CONFIG_HOME" ]; then
-        echo "Backing up Warcraft configuration"
-        if [ ! -d "$WARCRAFT_CONFIG_BACKUP" ]; then
-          mkdir -p "$WARCRAFT_CONFIG_BACKUP"
-        fi
-        rsync -av --ignore-existing "$WARCRAFT_CONFIG_HOME/" "$WARCRAFT_CONFIG_BACKUP/"
-      fi
-
-      if [ -d "$TARGET_DIR" ]; then
-        rm -rf "$TARGET_DIR"
-      else
-        mkdir -p "$TARGET_DIR"
-      fi
-
-      echo "Restoring prefix state"
-      cp -r "$BACKUP_DIR" "$TARGET_DIR"
-      rm -rf "$WARCRAFT_CONFIG_HOME"
-      mkdir -p "$WARCRAFT_CONFIG_HOME"
-      rm -rf "$WARCRAFT_CONFIG_HOME"
-      cp -r "$WARCRAFT_CONFIG_BACKUP" "$WARCRAFT_CONFIG_HOME"
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
