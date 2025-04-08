@@ -475,11 +475,6 @@
     ];
   };
 in {
-  imports = [
-    (import ./keys.nix {inherit inputs pkgs lib;})
-    (import ./preferences.nix {inherit inputs pkgs lib;})
-    (import ./start.nix {inherit inputs pkgs lib;})
-  ];
   options = {
     modules = {
       gaming = {
