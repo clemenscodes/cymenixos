@@ -79,8 +79,7 @@
 
       notify-send "Starting W3Champions" --icon "${./assets/W3Champions.png}"
 
-      OBS_PIDS="$(pgrep obs | wc -l)"
-      if [ "$OBS_PIDS" -eq 0 ]; then
+      if ! pgrep obs > /dev/null 2>&1; then
         obs --disable-shutdown-check --multi --startreplaybuffer &
       fi
 
