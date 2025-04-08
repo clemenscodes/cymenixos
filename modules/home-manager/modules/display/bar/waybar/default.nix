@@ -193,7 +193,9 @@ in {
             ];
             modules-center = [];
             modules-right = [
+              "systemd-failed-units"
               "hyprland/submap"
+              "gamemode"
               "privacy"
               (lib.mkIf useSwaync "custom/notification")
               "idle_inhibitor"
@@ -203,6 +205,13 @@ in {
               (lib.mkIf useMusic "pulseaudio#mic")
               "custom/clock"
             ];
+            systemd-failed-units = {
+              hide-on-ok = false;
+              format = "{nr_failed}";
+              format-ok = "✓";
+              system = true;
+              user = true;
+            };
             "hyprland/submap" = {
               format = "{}";
               always-on = true;
@@ -246,6 +255,18 @@ in {
               exec = "${pkgs.swaynotificationcenter}/bin/swaync-client -swb";
               on-click = "waybar-swaync";
               escape = true;
+            };
+            gamemode = {
+              format = "{glyph}";
+              format-alt = "{glyph} {count}";
+              glyph = "";
+              hide-not-running = true;
+              use-icon = true;
+              icon-name = "input-gaming-symbolic";
+              icon-spacing = 4;
+              icon-size = 20;
+              tooltip = true;
+              tooltip-format = "Games running: {count}";
             };
             privacy = {
               icon-spacing = 8;
@@ -444,8 +465,10 @@ in {
           #pulseaudio.mic,
           #idle_inhibitor,
           #tray,
+          #systemd-failed-units
           #submap,
           #privacy,
+          #gamemode,
           #custom-clock,
           #custom-notification,
           #custom-powermenu,
@@ -473,10 +496,12 @@ in {
             margin: ${defaultMargin} 4px 0px 4px;
           }
 
+          #systemd-failed-units
           #submap,
           #tray,
           #custom-idle,
           #privacy,
+          #gamemode,
           #custom-notification,
           #idle_inhibitor,
           #backlight,

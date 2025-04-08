@@ -21,6 +21,7 @@ in {
         settings = {
           general = {
             renice = 10;
+            inhibit_screensaver = 0;
           };
           gpu = {
             apply_gpu_optimisations = "accept-responsibility";
@@ -28,9 +29,16 @@ in {
             amd_performance_level = "high";
           };
           custom = {
-            start = "${pkgs.libnotify}/bin/notify-send 'GameMode started'";
-            end = "${pkgs.libnotify}/bin/notify-send 'GameMode ended'";
+            start = "${pkgs.libnotify}/bin/notify-send 'Gamemode started'";
+            end = "${pkgs.libnotify}/bin/notify-send 'Gamemode ended'";
           };
+        };
+      };
+    };
+    users = {
+      users = {
+        ${config.modules.users.name} = {
+          extraGroups = ["gamemode"];
         };
       };
     };
