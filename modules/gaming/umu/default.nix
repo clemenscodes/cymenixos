@@ -37,7 +37,6 @@ in {
           users = {
             ${name} = {
               directories = [
-                ".cache/umu"
                 ".local/share/umu"
               ];
             };
