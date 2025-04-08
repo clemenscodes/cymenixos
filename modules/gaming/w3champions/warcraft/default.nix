@@ -74,7 +74,7 @@
 
       if [ -d "$WARCRAFT_REPLAYS" ]; then
         echo "Backing up replays"
-        replay_count="$(ls "$WARCRAFT_REPLAYS" | wc -l)"
+        replay_count="$(find "$WARCRAFT_REPLAYS"/* | wc -l)"
         if [ "$replay_count" -gt 1 ]; then
           if [ ! -d "$REPLAY_BACKUP" ]; then
             mkdir -p "$REPLAY_BACKUP"
