@@ -193,7 +193,6 @@ in {
             ];
             modules-center = [];
             modules-right = [
-              "systemd-failed-units"
               "hyprland/submap"
               "gamemode"
               "privacy"
