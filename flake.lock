@@ -7449,11 +7449,11 @@
         "umu": "umu_2"
       },
       "locked": {
-        "lastModified": 1744237537,
-        "narHash": "sha256-OoMrdQZUwyvsoK3fC0i+EVLA2UtrEEVb2StJrFhWPx8=",
+        "lastModified": 1744238679,
+        "narHash": "sha256-xqwh0t+wklqe2A9aH/67aWjwZRLREIbgp9hPkNY0MY0=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "ef17490b23e5c2370f25ba4f9b9b7601197d8add",
+        "rev": "dd3d9fb2d55fa1f925953b4f75bd9151c4a95967",
         "type": "github"
       },
       "original": {

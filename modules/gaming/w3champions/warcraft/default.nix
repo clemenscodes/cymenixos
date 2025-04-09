@@ -56,7 +56,6 @@
     runtimeInputs = [
       pkgs.lutris
       pkgs.libnotify
-      kill-games
       inputs.w3c.packages.${system}.warcraft-install-scripts
     ];
     text = ''
