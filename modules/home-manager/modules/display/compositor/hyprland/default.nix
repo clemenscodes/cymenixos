@@ -96,6 +96,8 @@ in {
                 natural_scroll = "no";
               };
               sensitivity = 0;
+              focus_on_activate = true;
+              accel_profile = "flat";
             };
 
             general = {
