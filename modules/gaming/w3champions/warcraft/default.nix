@@ -77,7 +77,7 @@
           while true; do
             WARCRAFT_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "Warcraft III") | .pid' | head -n 1)
             if [ -n "$WARCRAFT_PID" ]; then
-              hyprctl --batch "dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow"
+              hyprctl --batch "dispatch focuswindow pid:$WARCRAFT_PID; dispatch fullscreen 0 ; dispatch focuswindow pid:$W3C_PID; dispatch resizeactive exact 1600 900 ; dispatch centerwindow ; "
               break
             fi
           done
@@ -652,6 +652,12 @@ in {
                   windowrule = noinitialfocus,class:(steam_app_default),title:()
                   windowrule = noinitialfocus,class:(steam_app_0),title:()
                   windowrule = noinitialfocus,class:(explorer.exe),title:()
+                  windowrule = suppressevent fullscreen,class:(steam_app_default),title:(Warcraft III)
+                  windowrule = suppressevent fullscreen,class:(steam_app_0),title:(Warcraft III)
+                  windowrule = suppressevent fullscreen,class:(warcraft iii.exe),title:(Warcraft III)
+                  windowrule = stayfocused,class:(steam_app_default),title:(Warcraft III)
+                  windowrule = stayfocused,class:(steam_app_0),title:(Warcraft III)
+                  windowrule = stayfocused,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = opacity 0,class:(steam_app_default),title:()
                   windowrule = opacity 0,class:(steam_app_0),title:()
                   windowrule = opacity 0,class:(explorer.exe),title:()
