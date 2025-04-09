@@ -67,7 +67,7 @@
         obs --disable-shutdown-check --multi --startreplaybuffer &
       fi
 
-      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/w3champions &
+      LUTRIS_SKIP_INIT=1 lutris lutris:rungame/W3Champions &
       GAME_PID="$!"
 
       while true; do
