@@ -520,7 +520,7 @@ in {
                 name = "Warcraft III";
                 type = "Application";
                 categories = ["Game"];
-                genericName = "The Warcraft III Ladder";
+                genericName = "The godfather of RTS";
                 icon = ./assets/Warcraft.png;
                 exec = "${lib.getExe battlenet}";
                 terminal = false;
