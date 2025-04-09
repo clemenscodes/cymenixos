@@ -124,6 +124,9 @@
     chaotic = {
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     };
+    w3c = {
+      url = "github:clemenscodes/W3ChampionsOnLinux";
+    };
   };
   outputs = {
     self,

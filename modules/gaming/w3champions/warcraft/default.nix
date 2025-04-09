@@ -466,7 +466,10 @@ in {
       };
     };
     environment = {
-      systemPackages = [warcraft-scripts];
+      systemPackages = [
+        warcraft-scripts
+        inputs.w3c.packages.${system}.warcraft-install-scripts
+      ];
     };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
