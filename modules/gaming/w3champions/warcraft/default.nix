@@ -57,6 +57,7 @@
       pkgs.lutris
       pkgs.libnotify
       kill-games
+      inputs.w3c.packages.${system}.warcraft-install-scripts
     ];
     text = ''
       kill-games
@@ -85,7 +86,11 @@
         fi
       done
 
+      focus-warcraft-game &
+      GAME_WATCHDOG_PID="$!"
+
       wait "$GAME_PID"
+      kill "$GAME_WATCHDOG_PID"
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {

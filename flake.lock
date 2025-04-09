@@ -3475,11 +3475,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1744207189,
-        "narHash": "sha256-dTxaVEDb4qmYqfwRrqWbth5Blif+JO7R6nhkQElL7Ck=",
+        "lastModified": 1744223888,
+        "narHash": "sha256-reYpe0J1J+wH34JFs7KKp0G5nP7+XSQ5z0ZLFJcfJr8=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "a1036d4d3e939d740149508aa68b2545c4964d37",
+        "rev": "79461936709b12e17adb9c91dd02d1c66d577f09",
         "type": "github"
       },
       "original": {
@@ -6185,11 +6185,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1744206097,
-        "narHash": "sha256-kMpapRUkQeLgNRoRD+EuCHhVzXlChSuEI5YwERMtjcQ=",
+        "lastModified": 1744230705,
+        "narHash": "sha256-Xmi3X/Gm2Ni5uaBikZ2L+TZETRGd9C64F4DAt7AmVj0=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "c5a7315171c1b922e0b30c898d54ef32c42a820c",
+        "rev": "46dfd9bb4df40ac481fe58164897811f96adbb37",
         "type": "github"
       },
       "original": {
@@ -7449,11 +7449,11 @@
         "umu": "umu_2"
       },
       "locked": {
-        "lastModified": 1744207790,
-        "narHash": "sha256-LiIYzwd78uWedJE0mBu9iPz+7mTpIU2IsNLTbv4FAxg=",
+        "lastModified": 1744230846,
+        "narHash": "sha256-ylsS3TKvHyDpJvX1XitNyOAWcmbetut7HG0uy3/BSA8=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "391915ac1d471e0bbdc4ba4efc0876777c7479df",
+        "rev": "62d83f24b9be8b9771c2607e58818f8ab9d38001",
         "type": "github"
       },
       "original": {
