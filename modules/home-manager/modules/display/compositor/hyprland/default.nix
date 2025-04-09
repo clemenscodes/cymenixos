@@ -96,7 +96,6 @@ in {
                 natural_scroll = "no";
               };
               sensitivity = 0;
-              focus_on_activate = true;
               accel_profile = "flat";
             };
 
@@ -131,6 +130,7 @@ in {
               enable_swallow = true;
               disable_hyprland_logo = true;
               disable_splash_rendering = true;
+              focus_on_activate = true;
               vrr = 1;
             };
 
