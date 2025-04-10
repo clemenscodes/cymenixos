@@ -170,6 +170,9 @@
       gamescope = {
         enable = false;
       };
+      heroic = {
+        enable = false;
+      };
       lutris = {
         enable = false;
       };
