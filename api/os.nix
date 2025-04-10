@@ -173,6 +173,12 @@
       lutris = {
         enable = false;
       };
+      mangohud = {
+        enable = false;
+      };
+      nexusmods = {
+        enable = false;
+      };
       steam = {
         enable = false;
       };
