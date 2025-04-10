@@ -194,7 +194,6 @@ in {
             modules-center = [];
             modules-right = [
               "hyprland/submap"
-              "gamemode"
               "privacy"
               (lib.mkIf useSwaync "custom/notification")
               "idle_inhibitor"
