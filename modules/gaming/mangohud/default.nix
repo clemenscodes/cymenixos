@@ -19,6 +19,7 @@ in {
       systemPackages = [
         pkgs.mangohud_git
         pkgs.mangohud32_git
+        pkgs.goverlay
       ];
     };
   };

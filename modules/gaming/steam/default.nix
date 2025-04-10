@@ -83,6 +83,10 @@ in {
           pkgs.stdenv.cc.cc.lib
           pkgs.libkrb5
           pkgs.keyutils
+          pkgs.mangohud_git
+        ];
+        extraPackages32 = [
+          pkgs.mangohud32_git
         ];
         extraCompatPackages = [pkgs.proton-ge-bin];
       };
