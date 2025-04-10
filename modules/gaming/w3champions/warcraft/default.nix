@@ -70,6 +70,9 @@
       LUTRIS_SKIP_INIT=1 lutris lutris:rungame/W3Champions &
       GAME_PID="$!"
 
+      focus-warcraft-game &
+      WATCHDOG_PID="$!"
+
       while true; do
         W3C_PID=$(hyprctl clients -j | jq -r '.[] | select(.class == "steam_app_default" and .title == "W3Champions") | .pid' | head -n 1)
         if [ -n "$W3C_PID" ]; then
@@ -85,11 +88,8 @@
         fi
       done
 
-      focus-warcraft-game &
-      GAME_WATCHDOG_PID="$!"
-
       wait "$GAME_PID"
-      kill "$GAME_WATCHDOG_PID"
+      kill "$WATCHDOG_PID"
     '';
   };
   warcraft-mode-start = pkgs.writeShellApplication {
@@ -652,12 +652,6 @@ in {
                   windowrule = noinitialfocus,class:(steam_app_default),title:()
                   windowrule = noinitialfocus,class:(steam_app_0),title:()
                   windowrule = noinitialfocus,class:(explorer.exe),title:()
-                  windowrule = suppressevent fullscreen,class:(steam_app_default),title:(Warcraft III)
-                  windowrule = suppressevent fullscreen,class:(steam_app_0),title:(Warcraft III)
-                  windowrule = suppressevent fullscreen,class:(warcraft iii.exe),title:(Warcraft III)
-                  windowrule = stayfocused,class:(steam_app_default),title:(Warcraft III)
-                  windowrule = stayfocused,class:(steam_app_0),title:(Warcraft III)
-                  windowrule = stayfocused,class:(warcraft iii.exe),title:(Warcraft III)
                   windowrule = opacity 0,class:(steam_app_default),title:()
                   windowrule = opacity 0,class:(steam_app_0),title:()
                   windowrule = opacity 0,class:(explorer.exe),title:()
