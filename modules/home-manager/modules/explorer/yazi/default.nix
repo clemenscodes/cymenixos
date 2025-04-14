@@ -37,7 +37,7 @@ in {
       ];
     };
     xdg = {
-      configHome = {
+      configFile = {
         "xdg-desktop-portal-termfilechooser/config" = {
           text = ''
             [filechooser]
