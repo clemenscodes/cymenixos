@@ -23,9 +23,6 @@ in {
     w3champions = {
       inherit (cfg.w3champions) enable;
       inherit (config.modules.users) name;
-      warcraft = {
-        inherit (cfg.w3champions) enable;
-      };
     };
   };
 }
