@@ -33,7 +33,7 @@ in {
         pkgs.glow
         pkgs.hexyl
         pkgs.eza
-        xdg-desktop-portal-termfilechooser
+        pkgs.xdg-desktop-portal-termfilechooser
       ];
     };
     programs = {
