@@ -9,7 +9,7 @@
 }: let
   cfg = config.modules.media.video;
   isDesktop = osConfig.modules.display.gui != "headless";
-  obs-cmd = pkgs.writeShellScriptBin {
+  obs-cmd = pkgs.writeShellApplication {
     name = "obs-cmd";
     runtimeInputs = [
       pkgs.jq
