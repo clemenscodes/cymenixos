@@ -7720,14 +7720,16 @@
         "nixpkgs": "nixpkgs_31"
       },
       "locked": {
-        "lastModified": 1744159980,
-        "narHash": "sha256-7Qebnj8TcrRgnG1zdb3ARVY3A+QjukXEtnYa72SXtHw=",
+        "dir": "nix",
+        "lastModified": 1744585214,
+        "narHash": "sha256-cSzfPLn98KGB1BSrgxv2QnpU/w00Iam/UHMwvc2o+4g=",
         "owner": "drduh",
         "repo": "YubiKey-Guide",
-        "rev": "c341c08c95cd005b86ea1255d1bb85e1cfa3494e",
+        "rev": "5bce454a4c980e026bccf9b097d0d054f1e7df85",
         "type": "github"
       },
       "original": {
+        "dir": "nix",
         "owner": "drduh",
         "repo": "YubiKey-Guide",
         "type": "github"

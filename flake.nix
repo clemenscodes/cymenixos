@@ -113,7 +113,7 @@
       url = "github:NixOS/templates";
     };
     yubikey-guide = {
-      url = "github:drduh/YubiKey-Guide";
+      url = "github:drduh/YubiKey-Guide?dir=nix";
     };
     waybar = {
       url = "github:clemenscodes/Waybar/wlr-taskbar-icon-title-fallback";
