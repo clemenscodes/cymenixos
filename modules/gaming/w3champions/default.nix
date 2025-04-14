@@ -23,6 +23,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.w3champions.enable) {
     w3champions = {
       inherit (cfg.w3champions) enable;
+      inherit (config.modules.users) name;
       warcraft = {
         inherit (cfg.w3champions) enable;
       };
