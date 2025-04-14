@@ -7390,11 +7390,11 @@
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744644739,
-        "narHash": "sha256-0Pf9FM7TH1X1SS6PSHSdZliWVE7Vak1afPX+Q1crtSA=",
+        "lastModified": 1744645152,
+        "narHash": "sha256-rjginloAooP7XH7npYIpQ6wFXlzdTlutknXgzEptLTg=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "3e79a69ab22980e8d139e1060abd09c9a31e8404",
+        "rev": "127d653fea6f9028754043bec7404c1c6cf95f5b",
         "type": "github"
       },
       "original": {
