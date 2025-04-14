@@ -36,6 +36,25 @@ in {
         pkgs.xdg-desktop-portal-termfilechooser
       ];
     };
+    xdg = {
+      configHome = {
+        "xdg-desktop-portal-termfilechooser/config" = {
+          text = ''
+            [filechooser]
+            cmd=${pkgs.xdg-desktop-portal-termfilechooser}/share/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh
+            default_dir=$HOME
+          '';
+        };
+      };
+      portal = {
+        extraPortals = [pkgs.xdg-desktop-portal-termfilechooser];
+        config = {
+          common = {
+            "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+          };
+        };
+      };
+    };
     programs = {
       yazi = {
         inherit (cfg.yazi) enable;

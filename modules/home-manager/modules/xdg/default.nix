@@ -129,7 +129,6 @@ in {
           common = {
             default = "hyprland;gtk";
             "org.freedesktop.portal.OpenURI" = "gtk";
-            "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
           };
         };
       };
