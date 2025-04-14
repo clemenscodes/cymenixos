@@ -190,9 +190,6 @@
       };
       w3champions = {
         enable = false;
-        warcraft = {
-          enable = false;
-        };
       };
     };
     gpu = {
