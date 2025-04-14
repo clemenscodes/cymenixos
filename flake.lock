@@ -3472,27 +3472,6 @@
     },
     "home-manager_3": {
       "inputs": {
-        "nixpkgs": [
-          "w3c",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1744618730,
-        "narHash": "sha256-n3gN7aHwVRnnBZI64EDoKyJnWidNYJ0xezhqQtdjH2Q=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "85dd758c703ffbf9d97f34adcef3a898b54b4014",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "home-manager_4": {
-      "inputs": {
         "nixpkgs": "nixpkgs_28"
       },
       "locked": {
@@ -7407,16 +7386,15 @@
     },
     "w3c": {
       "inputs": {
-        "home-manager": "home-manager_3",
         "lutris-overlay": "lutris-overlay_2",
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744641757,
-        "narHash": "sha256-EelodN6THYu2y2j0pdbh+PhCAfg08U2u/ZOdU9t4Nlo=",
+        "lastModified": 1744642226,
+        "narHash": "sha256-IVtH6VaUsTAhGITvhIM+5xa6XyasKJW9gEdmKEL4zFE=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "d3171669b44d9ecd36a984da292779dacdaee7ca",
+        "rev": "624e7d028979cf337896ac6dc2765eadab67b11b",
         "type": "github"
       },
       "original": {
@@ -7535,7 +7513,7 @@
         "crane": "crane_2",
         "devshell": "devshell_3",
         "flake-parts": "flake-parts_7",
-        "home-manager": "home-manager_4",
+        "home-manager": "home-manager_3",
         "hyprland": "hyprland",
         "nixpkgs": [
           "nixpkgs"
