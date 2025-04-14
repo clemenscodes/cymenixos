@@ -4,6 +4,48 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.explorer;
+  yazi-termfilechooser-wrapper = pkgs.writeShellApplication {
+    name = "yazi-termfilechooser-wrapper";
+    runtimeInputs = [
+      pkgs.yazi
+      pkgs.gnused
+      pkgs.kitty
+    ];
+    text = ''
+      multiple="$1"
+      directory="$2"
+      save="$3"
+      path="$4"
+      out="$5"
+
+      cmd="yazi"
+      termcmd="''${TERMCMD:-kitty --title 'termfilechooser'}"
+
+      if [ "$save" = "1" ]; then
+          # save a file
+          set -- --chooser-file="$out" "$path"
+      elif [ "$directory" = "1" ]; then
+          # upload files from a directory
+          set -- --chooser-file="$out" --cwd-file="$out" "$path"
+      elif [ "$multiple" = "1" ]; then
+          # upload multiple files
+          set -- --chooser-file="$out" "$path"
+      else
+          # upload only 1 file
+          set -- --chooser-file="$out" "$path"
+      fi
+
+      command="$termcmd $cmd"
+      for arg in "$@"; do
+          # escape double quotes
+          escaped="$(printf "%s" "$arg" | sed 's/"/\\"/g')"
+          # escape spaces
+          command="$command \"$escaped\""
+      done
+
+      sh -c "$command"
+    '';
+  };
 in {
   options = {
     modules = {
@@ -41,7 +83,7 @@ in {
         "xdg-desktop-portal-termfilechooser/config" = {
           text = ''
             [filechooser]
-            cmd=${pkgs.xdg-desktop-portal-termfilechooser}/share/xdg-desktop-portal-termfilechooser/yazi-wrapper.sh
+            cmd=${lib.getExe yazi-termfilechooser-wrapper}
             default_dir=$HOME
           '';
         };
