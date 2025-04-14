@@ -4382,11 +4382,11 @@
         "nixpkgs": "nixpkgs_22"
       },
       "locked": {
-        "lastModified": 1744618716,
-        "narHash": "sha256-cfCzyv8B+KQ16HXsJcO1yk2gPyLVCTTGnv4hWFkfM5w=",
+        "lastModified": 1744622884,
+        "narHash": "sha256-qWGviIwRfambknEhmpCOopHEzXZBLub2hTESKoPN8tc=",
         "owner": "clemenscodes",
         "repo": "lutris-overlay",
-        "rev": "3f0074e61208238437a8af0bf922975d0d4bbf12",
+        "rev": "9ed55402278e495b617482074c47801af9207d85",
         "type": "github"
       },
       "original": {
@@ -4403,11 +4403,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1744618716,
-        "narHash": "sha256-cfCzyv8B+KQ16HXsJcO1yk2gPyLVCTTGnv4hWFkfM5w=",
+        "lastModified": 1744622884,
+        "narHash": "sha256-qWGviIwRfambknEhmpCOopHEzXZBLub2hTESKoPN8tc=",
         "owner": "clemenscodes",
         "repo": "lutris-overlay",
-        "rev": "3f0074e61208238437a8af0bf922975d0d4bbf12",
+        "rev": "9ed55402278e495b617482074c47801af9207d85",
         "type": "github"
       },
       "original": {
@@ -7412,11 +7412,11 @@
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744621208,
-        "narHash": "sha256-PJViIn0sQ4KA+lXTvXc9fEp8jou0q6+myFO1BxUw7eM=",
+        "lastModified": 1744622921,
+        "narHash": "sha256-rnzvL/0unhkK4q2puZFOEQW60wDc50BggaelNRLntqQ=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "7d874010447e6155f59b944f774d58f11f54a93c",
+        "rev": "beb7b6c89dad96d89bb0aa32fd8f642172c0c580",
         "type": "github"
       },
       "original": {
