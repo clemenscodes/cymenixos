@@ -10,6 +10,7 @@
 }: let
   cfg = config.modules.gaming;
 in {
+  imports = [inputs.w3c.nixosModules.${system}.default];
   options = {
     modules = {
       gaming = {
