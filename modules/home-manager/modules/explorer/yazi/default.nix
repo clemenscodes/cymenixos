@@ -39,6 +39,9 @@ in {
       yazi = {
         inherit (cfg.yazi) enable;
         enableZshIntegration = config.modules.shell.zsh.enable;
+        plugins = {
+          inherit (pkgs.yaziPlugins) smart-enter;
+        };
         settings = {
           manager = {
             show_hidden = true;
