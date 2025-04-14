@@ -9,6 +9,34 @@
 }: let
   cfg = config.modules.media.video;
   isDesktop = osConfig.modules.display.gui != "headless";
+  obs-cmd = pkgs.writeShellScriptBin {
+    name = "obs-cmd";
+    runtimeInputs = [
+      pkgs.jq
+      pkgs.obs-cmd
+    ];
+    text = ''
+      CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
+
+      if [[ ! -f "$CONFIG_PATH" ]]; then
+        echo "Error: OBS websocket config not found at $CONFIG_PATH" >&2
+        exit 1
+      fi
+
+      OBS_WEBSOCKET_PORT="$(jq -r '.server_port // empty' "$CONFIG_PATH")"
+      OBS_WEBSOCKET_PASSWORD="$(jq -r '.server_password // empty' "$CONFIG_PATH")"
+
+      if [[ -z "$OBS_WEBSOCKET_PORT" || -z "$OBS_WEBSOCKET_PASSWORD" ]]; then
+        echo "Error: Failed to extract port or password from OBS websocket config" >&2
+        exit 1
+      fi
+
+      OBS_WEBSOCKET_URL="obsws://localhost:$OBS_WEBSOCKET_PORT/$OBS_WEBSOCKET_PASSWORD"
+      export OBS_WEBSOCKET_URL
+
+      exec obs-cmd "$@"
+    '';
+  };
 in {
   options = {
     modules = {
@@ -28,14 +56,15 @@ in {
           directories = [".config/obs-studio"];
         };
       };
-      packages = with pkgs; [
-        gst_all_1.gstreamer
-        gst_all_1.gst-plugins-base
-        gst_all_1.gst-plugins-good
-        gst_all_1.gst-plugins-bad
-        gst_all_1.gst-plugins-ugly
-        gst_all_1.gst-libav
-        gst_all_1.gst-vaapi
+      packages = [
+        pkgs.gst_all_1.gstreamer
+        pkgs.gst_all_1.gst-plugins-base
+        pkgs.gst_all_1.gst-plugins-good
+        pkgs.gst_all_1.gst-plugins-bad
+        pkgs.gst_all_1.gst-plugins-ugly
+        pkgs.gst_all_1.gst-libav
+        pkgs.gst_all_1.gst-vaapi
+        obs-cmd
       ];
     };
     programs = {
