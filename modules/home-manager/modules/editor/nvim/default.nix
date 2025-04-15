@@ -21,7 +21,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.nvim.enable) {
     home = {
-      packages = [inputs.cymenixvim.packages.${system}.default];
+      packages = [inputs.cymenixvim.packages.${system}.development];
     };
     programs = {
       zsh = {
