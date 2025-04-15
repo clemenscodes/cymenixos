@@ -35,6 +35,16 @@ in {
     };
   };
   config = mkIf (cfg.enable && cfg.users.enable) {
+    systemd = {
+      services = {
+        "user@1000" = {
+          serviceConfig = {
+            LimitNOFILE = "32768";
+          };
+        };
+      };
+    };
+    
     users = {
       defaultUserShell = mkIf cfg.shell.enable cfg.shell.defaultShell;
       allowNoPasswordLogin = true;
