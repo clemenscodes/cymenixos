@@ -21,7 +21,14 @@
     inherit system;
     overlays = [
       (final: prev: {
-        inherit (inputs.waybar.packages.${system}) waybar;
+        waybar = prev.waybar.overrideAttrs (oldAttrs: {
+          src = prev.fetchFromGitHub {
+            owner = "Alexays";
+            repo = "Waybar";
+            rev = "67272cc47f430dcb82f533e29ae26495f7876154";
+            hash = "sha256-Q+ZrEkJr1sEu48VfOtkFrfT3B1yo4fJHB2qE9ZTpmuw=";
+          };
+        });
       })
     ];
   };
@@ -79,7 +86,6 @@ in {
               "memory"
               "temperature"
               "cpu"
-              (lib.mkIf isAmd "custom/amdgpuinfo")
               (lib.mkIf isNvidia "custom/nvidiagpuinfo")
               (lib.mkIf isLaptop "battery")
               "custom/powermenu"
@@ -148,12 +154,6 @@ in {
               format-critical = "{temperatureC}°C 🔥";
               on-click = "${pkgs.kitty}/bin/kitty ${pkgs.btop}/bin/btop";
               format-icons = ["🌡️"];
-            };
-            "custom/amdgpuinfo" = lib.mkIf isAmd {
-              format = "{} {icon}";
-              exec = "gpu-usage-waybar";
-              return-type = "json";
-              format-icons = "🌡️";
             };
             "custom/nvidiagpuinfo" = lib.mkIf isNvidia {
               format = "{} 🌡️";
@@ -473,7 +473,6 @@ in {
           #custom-mail,
           #custom-idle,
           #custom-nvidiagpuinfo,
-          #custom-amdgpuinfo,
           #mpd {
             ${padding}
             ${defaultColor}
@@ -488,7 +487,6 @@ in {
           #cpu,
           #temperature,
           #custom-nvidiagpuinfo,
-          #custom-amdgpuinfo,
           #battery,
           #custom-powermenu {
             margin: ${defaultMargin} 4px 0px 4px;

@@ -38,7 +38,6 @@ in {
         pkgs.vulkan-loader
         pkgs.vulkan-validation-layers
         pkgs.vulkan-extension-layer
-        inputs.gpu-usage-waybar.packages.${system}.gpu-usage-waybar
       ];
       variables = {
         OCL_ICD_VENDORS = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors/";

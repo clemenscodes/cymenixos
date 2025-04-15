@@ -115,12 +115,6 @@
     yubikey-guide = {
       url = "github:drduh/YubiKey-Guide?dir=nix";
     };
-    waybar = {
-      url = "github:clemenscodes/Waybar/wlr-taskbar-icon-title-fallback";
-    };
-    gpu-usage-waybar = {
-      url = "github:cymenix/gpu-usage-waybar";
-    };
     chaotic = {
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     };
