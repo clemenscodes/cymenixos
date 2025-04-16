@@ -7429,11 +7429,11 @@
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744840999,
-        "narHash": "sha256-0uU83SPIW8VKFlyJEhTTDy+4V02G78sMI6goBRSttC8=",
+        "lastModified": 1744841548,
+        "narHash": "sha256-ZQ4hZyZ65Uq9N0/PPZUL213PJaAYUOq3NH5pFhBm3BM=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "110f34c96fb27efe5b29e9f437138d412be3eb54",
+        "rev": "89a018cec3187340cdcddf46471b4c62503aa89a",
         "type": "github"
       },
       "original": {
