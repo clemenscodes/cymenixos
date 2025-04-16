@@ -2150,11 +2150,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1744800918,
-        "narHash": "sha256-z65FTDUzQaqtztIVpIUduW5gR9fncu9arzN5XGJEhac=",
+        "lastModified": 1744839886,
+        "narHash": "sha256-luS/8fdv8qt6qX1lAhKgnY3l51zl+7e0z4q+NdcyCug=",
         "ref": "refs/heads/develop",
-        "rev": "62254a8686af67adb218ad2b8076f733030dc23e",
-        "revCount": 691,
+        "rev": "86e2d1f40ee38226fc37b088b6eec2f77184ecd0",
+        "revCount": 692,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/clemenscodes/flo"
@@ -3484,11 +3484,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1744812667,
-        "narHash": "sha256-2AJZwXMO82YGw6B/RRCPz8Wz2zSRCZIdjhdFuiw7Ymg=",
+        "lastModified": 1744833442,
+        "narHash": "sha256-BBMWW2m64Grcc5FlXz74+vdkUyCJOfUGnl+VcS/4x44=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "5d48f3ded3b55ef32d5853c9022fb4df29b3fc45",
+        "rev": "c6b75d69b6994ba68ec281bd36faebcc56097800",
         "type": "github"
       },
       "original": {
@@ -6190,11 +6190,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1744818557,
-        "narHash": "sha256-lrJB+r6bLmIA2w+3TyzYk19vqDsfZKCtKxjw9lDS5qg=",
+        "lastModified": 1744838537,
+        "narHash": "sha256-u/t5S8PeLTUTfX5IkzMNtkLoM6dJBT5j34YdXUbdRL8=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "8662e035a20d6e03adb48a56de7c8343b5623897",
+        "rev": "a9bac75c59fbe2825f7a21d061ba5c23344daebf",
         "type": "github"
       },
       "original": {
@@ -7429,11 +7429,11 @@
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744819677,
-        "narHash": "sha256-5w6qCNIxm1Rw2h+pyAw5/LuguUOMToPmuP0I6J3jQOU=",
+        "lastModified": 1744840999,
+        "narHash": "sha256-0uU83SPIW8VKFlyJEhTTDy+4V02G78sMI6goBRSttC8=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "9523c1e549430d5f3cac63e95be8f32a61b05492",
+        "rev": "110f34c96fb27efe5b29e9f437138d412be3eb54",
         "type": "github"
       },
       "original": {
