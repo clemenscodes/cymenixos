@@ -4,6 +4,7 @@
   lib,
 }: {...}: {
   imports = [
+    (import ./cargo {inherit inputs pkgs lib;})
     (import ./direnv {inherit inputs pkgs lib;})
     (import ./gh {inherit inputs pkgs lib;})
     (import ./git {inherit inputs pkgs lib;})

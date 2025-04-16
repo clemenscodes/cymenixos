@@ -19,6 +19,9 @@
           };
           development = {
             enable = false;
+            cargo = {
+              enable = false;
+            };
             direnv = {
               enable = false;
             };
