@@ -2150,11 +2150,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1744914889,
-        "narHash": "sha256-5RKZU31ScLJ0pM994EwOuWDj0JqEFMBwXhJvPK6YPFU=",
+        "lastModified": 1744915825,
+        "narHash": "sha256-EI/b6egswYN9bYaO9JpuYi/+BtKvz8vhdbtMP7ZMucg=",
         "ref": "refs/heads/develop",
-        "rev": "3ef938d6021178e49db40a175a8587849e61d2a7",
-        "revCount": 725,
+        "rev": "ae81f437323e8703624a4c44077c9bd01e17e628",
+        "revCount": 726,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/clemenscodes/flo"
@@ -7429,11 +7429,11 @@
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744914913,
-        "narHash": "sha256-gXaK/m8W19cN0IuDPmN2ZSXGWlxgL1VCgmgkt7sW3SQ=",
+        "lastModified": 1744915942,
+        "narHash": "sha256-HFZiSN8fuY92nC4FpDoHjflAHjCjolpM47o3QzAdxvA=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "98831e99c5055a1462fbbb9effaf14338e8b9227",
+        "rev": "e05bb151518eb363c3f382afa39183d868fd5fb8",
         "type": "github"
       },
       "original": {
