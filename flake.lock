@@ -2150,11 +2150,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1744904925,
-        "narHash": "sha256-jYudhp5sJCs3wenMCkNPyMPYtCjx3iACFkoD9pTVCNw=",
+        "lastModified": 1744905816,
+        "narHash": "sha256-D4BvK5YZKp0UXi2sY5rLqT5oRm1fMdUjvCFdNEXUWDw=",
         "ref": "refs/heads/develop",
-        "rev": "8cc976448c8394b6c9e49c386e45df6fc080a2ce",
-        "revCount": 718,
+        "rev": "6bfe73b359c0964318c1d1acde8005dba8c36674",
+        "revCount": 719,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/clemenscodes/flo"
@@ -6190,11 +6190,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1744894722,
-        "narHash": "sha256-JH8WAicd7yDlxsczYoLPbNo2m3XdxOztGz2FxgIXTI0=",
+        "lastModified": 1744904898,
+        "narHash": "sha256-wLepe0sdFFgXUOLY2t+GrfjBquiGFgNydQkQYGh6UwQ=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "690c7fc4ba963d4fd0961c82341e832d8b386988",
+        "rev": "9ea0c40c52673079dfe50e82ddbb78679723be05",
         "type": "github"
       },
       "original": {
@@ -7429,11 +7429,11 @@
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744904949,
-        "narHash": "sha256-hE5ykZTF/7j+QjgJaXvycGtd5XWuK3gTa/ONJUT1cRk=",
+        "lastModified": 1744905898,
+        "narHash": "sha256-j0A+s2GBaX1UrCLK/esuNmhOvS/AVJJopHBHDEbG++0=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "bb1008bb29b0c282b398c657677f8cfb772be047",
+        "rev": "6b830aff6ec1dc53e61ead5e723290b87a2e4785",
         "type": "github"
       },
       "original": {
