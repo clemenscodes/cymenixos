@@ -27,7 +27,7 @@ in {
       inherit (cfg.w3champions) enable;
       inherit (config.modules.users) name;
       flo = {
-        inherit (cfg.flo) enable;
+        inherit (cfg.w3champions.flo) enable;
       };
     };
   };
