@@ -323,16 +323,16 @@ final: prev: {
             src="$1"
             dest="$2"
 
-            # Attempt to create the directory and handle permission error
             if ! mkdir -p "$dest"; then
               echo "Permission denied while creating $dest. Exiting successfully."
               exit 0
             fi
 
-            for item in "$src"/*; do
-              [ -e "$item" ] || continue
-              local dest_item
-              dest_item="$dest/$(basename "$item")"
+            find "$src" -mindepth 1 -maxdepth 1 | while IFS= read -r item; do
+              local base
+              base=$(basename "$item")
+              local dest_item="$dest/$base"
+
               if [ -d "$item" ]; then
                 copy_directory "$item" "$dest_item"
               elif [ -f "$item" ]; then
