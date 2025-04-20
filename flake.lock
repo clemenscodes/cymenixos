@@ -4388,11 +4388,11 @@
         "nixpkgs": "nixpkgs_21"
       },
       "locked": {
-        "lastModified": 1744622884,
-        "narHash": "sha256-qWGviIwRfambknEhmpCOopHEzXZBLub2hTESKoPN8tc=",
+        "lastModified": 1745154629,
+        "narHash": "sha256-8W1rQYPvJMLGRMQy0wxY5QG8/eFl84nLnrMm22uUkVc=",
         "owner": "clemenscodes",
         "repo": "lutris-overlay",
-        "rev": "9ed55402278e495b617482074c47801af9207d85",
+        "rev": "ef8d056a4e730086c7005367057558b26860324d",
         "type": "github"
       },
       "original": {
@@ -4409,11 +4409,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1744622884,
-        "narHash": "sha256-qWGviIwRfambknEhmpCOopHEzXZBLub2hTESKoPN8tc=",
+        "lastModified": 1745154629,
+        "narHash": "sha256-8W1rQYPvJMLGRMQy0wxY5QG8/eFl84nLnrMm22uUkVc=",
         "owner": "clemenscodes",
         "repo": "lutris-overlay",
-        "rev": "9ed55402278e495b617482074c47801af9207d85",
+        "rev": "ef8d056a4e730086c7005367057558b26860324d",
         "type": "github"
       },
       "original": {
@@ -5841,11 +5841,11 @@
     },
     "nixpkgs_21": {
       "locked": {
-        "lastModified": 1744463964,
-        "narHash": "sha256-LWqduOgLHCFxiTNYi3Uj5Lgz0SR+Xhw3kr/3Xd0GPTM=",
+        "lastModified": 1744932701,
+        "narHash": "sha256-fusHbZCyv126cyArUwwKrLdCkgVAIaa/fQJYFlCEqiU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2631b0b7abcea6e640ce31cd78ea58910d31e650",
+        "rev": "b024ced1aac25639f8ca8fdfc2f8c4fbd66c48ef",
         "type": "github"
       },
       "original": {
@@ -6190,11 +6190,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1745144792,
-        "narHash": "sha256-Sv6jiRzcp52aS1r4iarUkKFJrdXgEvB8QbNTw9/pFC0=",
+        "lastModified": 1745153764,
+        "narHash": "sha256-4bpB+mxtHYDVhWz3dU9s8iKnKX5IQjjwuZjBcNw7QZQ=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "1b903470d8855603f676ccbc0ce44bdc4ee15cfd",
+        "rev": "a1238353b95544ed7ad9745641d1075c2a6dcdc1",
         "type": "github"
       },
       "original": {
@@ -7429,11 +7429,11 @@
         "nixpkgs": "nixpkgs_25"
       },
       "locked": {
-        "lastModified": 1744998738,
-        "narHash": "sha256-0d6CkhJ45gEEZTQlDXDAa2Rq8G2x0M4iTaNTXHwVoXs=",
+        "lastModified": 1745154664,
+        "narHash": "sha256-gXke0zrvZP1s383d0LglHii4elygr9Sih93jV5q4E/I=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "d6ee9c765edca47fab869bc2bf2c3e4176f529e9",
+        "rev": "e8753c139d54e15b31985b61dc244c01352e42e1",
         "type": "github"
       },
       "original": {
