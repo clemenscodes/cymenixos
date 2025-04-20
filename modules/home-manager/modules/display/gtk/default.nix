@@ -35,7 +35,6 @@ in {
       packages = [
         pkgs.libsForQt5.breeze-icons
         pkgs.hicolor-icon-theme
-        pkgs.zenity
       ];
       file = {
         ".icons/Papirus-Dark" = {
