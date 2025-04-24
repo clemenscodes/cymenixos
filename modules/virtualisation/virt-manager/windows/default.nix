@@ -98,7 +98,7 @@
       fi
     '';
   };
-  virtio-iso = pkgs.runCommand "virtio-win.iso" { } "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
+  virtio-iso = pkgs.runCommand "virtio-win.iso" {} "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
 in {
   imports = [inputs.nixvirt.nixosModules.default];
   options = {
@@ -193,9 +193,9 @@ in {
         };
         hooks = {
           qemu = {
-            start = "${lib.getExe qemu-start-hook}";
-            stop = "${lib.getExe qemu-stop-hook}";
-            vnc = "${lib.getExe qemu-vnc-hook}";
+            start = lib.getExe qemu-start-hook;
+            stop = lib.getExe qemu-stop-hook;
+            vnc = lib.getExe qemu-vnc-hook;
           };
         };
       };
@@ -478,6 +478,9 @@ in {
                       };
                       stimer = {
                         state = true;
+                        direct = {
+                          state = true;
+                        };
                       };
                       reset = {
                         state = true;
@@ -487,6 +490,18 @@ in {
                         value = "GenuineIntel";
                       };
                       frequencies = {
+                        state = true;
+                      };
+                      reenlightenment = {
+                        state = true;
+                      };
+                      tlbflush = {
+                        state = true;
+                      };
+                      ipi = {
+                        state = true;
+                      };
+                      evmcs = {
                         state = true;
                       };
                     };
@@ -829,10 +844,6 @@ in {
                       };
                     };
                     input = [
-                      {
-                        type = "tablet";
-                        bus = "usb";
-                      }
                       {
                         type = "mouse";
                         bus = "ps2";
