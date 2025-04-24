@@ -625,7 +625,7 @@ in {
                           type = "raw";
                         };
                         source = {
-                          file = virtio-iso;
+                          file = "${virtio-iso}";
                         };
                         target = {
                           bus = "sata";
