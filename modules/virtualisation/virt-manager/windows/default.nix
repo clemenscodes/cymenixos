@@ -487,7 +487,7 @@ in {
                       };
                       vendor_id = {
                         state = true;
-                        value = "GenuineIntel";
+                        value = "KVM Hv";
                       };
                       frequencies = {
                         state = true;
@@ -625,7 +625,7 @@ in {
                           type = "raw";
                         };
                         source = {
-                          file = "${virtio-iso}";
+                          file = virtio-iso;
                         };
                         target = {
                           bus = "sata";
@@ -843,6 +843,25 @@ in {
                         bridge = "virbr0";
                       };
                     };
+                    channel = [
+                      {
+                        type = "spicevmc";
+                        target = {
+                          type = "virtio";
+                          name = "com.redhat.spice.0";
+                        };
+                      }
+                      {
+                        type = "spiceport";
+                        source = {
+                          channel = "org.spice-space.webdav.0";
+                        };
+                        target = {
+                          type = "virtio";
+                          name = "org.spice-space.webdav.0";
+                        };
+                      }
+                    ];
                     input = [
                       {
                         type = "mouse";
@@ -854,22 +873,32 @@ in {
                       }
                     ];
                     tpm = {
-                      model = "tpm-tis";
+                      model = "tpm-crb";
                       backend = {
                         type = "emulator";
                         version = "2.0";
                       };
                     };
                     graphics = {
-                      type = "vnc";
-                      port = -1;
+                      type = "spice";
                       autoport = true;
-                      hack = "0.0.0.0";
                       listen = {
-                        type = "address";
-                        address = "0.0.0.0";
+                        type = "none";
+                      };
+                      gl = {
+                        enable = true;
                       };
                     };
+                    # graphics = {
+                    #   type = "vnc";
+                    #   port = -1;
+                    #   autoport = true;
+                    #   hack = "0.0.0.0";
+                    #   listen = {
+                    #     type = "address";
+                    #     address = "0.0.0.0";
+                    #   };
+                    # };
                     sound = {
                       model = "ich9";
                     };
@@ -879,12 +908,40 @@ in {
                     };
                     video = {
                       model = {
-                        type = "cirrus";
-                        vram = 65536;
+                        type = "virtio";
                         heads = 1;
                         primary = true;
+                        acceleration = {
+                          accel3d = true;
+                        };
                       };
                     };
+                    # video = {
+                    #   model = {
+                    #     type = "cirrus";
+                    #     vram = 65536;
+                    #     heads = 1;
+                    #     primary = true;
+                    #   };
+                    # };
+                    redirdev = [
+                      {
+                        bus = "usb";
+                        type = "spicevmc";
+                      }
+                      {
+                        bus = "usb";
+                        type = "spicevmc";
+                      }
+                      {
+                        bus = "usb";
+                        type = "spicevmc";
+                      }
+                      {
+                        bus = "usb";
+                        type = "spicevmc";
+                      }
+                    ];
                     watchdog = {
                       model = "itco";
                       action = "reset";
