@@ -885,10 +885,20 @@ in {
                       listen = {
                         type = "none";
                       };
-                      gl = {
-                        enable = true;
-                      };
+                      # gl = {
+                      #   enable = true;
+                      # };
                     };
+                    # graphics = {
+                    #   type = "vnc";
+                    #   port = -1;
+                    #   autoport = true;
+                    #   hack = "0.0.0.0";
+                    #   listen = {
+                    #     type = "address";
+                    #     address = "0.0.0.0";
+                    #   };
+                    # };
                     sound = {
                       model = "ich9";
                     };
@@ -896,14 +906,22 @@ in {
                       id = 1;
                       type = "spice";
                     };
+                    # video = {
+                    #   model = {
+                    #     type = "virtio";
+                    #     heads = 1;
+                    #     primary = true;
+                    #     acceleration = {
+                    #       accel3d = true;
+                    #     };
+                    #   };
+                    # };
                     video = {
                       model = {
-                        type = "virtio";
+                        type = "cirrus";
+                        vram = 65536;
                         heads = 1;
                         primary = true;
-                        acceleration = {
-                          accel3d = true;
-                        };
                       };
                     };
                     redirdev = [
@@ -924,6 +942,13 @@ in {
                         type = "spicevmc";
                       }
                     ];
+                    watchdog = {
+                      model = "itco";
+                      action = "reset";
+                    };
+                    memballoon = {
+                      model = "none";
+                    };
                   };
                 };
               }
