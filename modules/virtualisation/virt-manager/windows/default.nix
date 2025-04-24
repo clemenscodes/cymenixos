@@ -889,22 +889,12 @@ in {
                         enable = true;
                       };
                     };
-                    # graphics = {
-                    #   type = "vnc";
-                    #   port = -1;
-                    #   autoport = true;
-                    #   hack = "0.0.0.0";
-                    #   listen = {
-                    #     type = "address";
-                    #     address = "0.0.0.0";
-                    #   };
-                    # };
                     sound = {
                       model = "ich9";
                     };
                     audio = {
                       id = 1;
-                      type = "none";
+                      type = "spice";
                     };
                     video = {
                       model = {
@@ -916,14 +906,6 @@ in {
                         };
                       };
                     };
-                    # video = {
-                    #   model = {
-                    #     type = "cirrus";
-                    #     vram = 65536;
-                    #     heads = 1;
-                    #     primary = true;
-                    #   };
-                    # };
                     redirdev = [
                       {
                         bus = "usb";
@@ -942,13 +924,6 @@ in {
                         type = "spicevmc";
                       }
                     ];
-                    watchdog = {
-                      model = "itco";
-                      action = "reset";
-                    };
-                    memballoon = {
-                      model = "none";
-                    };
                   };
                 };
               }
