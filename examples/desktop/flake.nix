@@ -36,7 +36,7 @@
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
           ./configuration.nix
-          (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
+          (import "${inputs.cymenixos}/modules/iso" {inherit pkgs inputs lib;})
           ({...}: {
             modules = {
               iso = {
@@ -50,7 +50,7 @@
         specialArgs = {inherit self inputs nixpkgs system;};
         modules = [
           ./configuration.nix
-          (import "${inputs.cymenixos}/modules/iso" {inherit inputs lib;})
+          (import "${inputs.cymenixos}/modules/iso" {inherit pkgs inputs lib;})
           ({...}: {
             modules = {
               iso = {
