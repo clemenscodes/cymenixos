@@ -59,7 +59,10 @@ in {
       kernelParams = lib.mkIf hibernation ["resume_offset=${builtins.toString swapResumeOffset}"];
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       consoleLogLevel = lib.mkDefault 0;
-      extraModulePackages = [config.boot.kernelPackages.v4l2loopback.out];
+      extraModulePackages = with config.boot.kernelPackages; [
+        v4l2loopback.out
+        rtw88
+      ];
       extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
       '';
