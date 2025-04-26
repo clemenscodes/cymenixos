@@ -55,13 +55,20 @@ in {
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];
-      kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
+      kernelPackages = lib.mkForce pkgs.linuxKernel.packages.linux._xanmod_latest;
       kernelParams = lib.mkIf hibernation ["resume_offset=${builtins.toString swapResumeOffset}"];
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       consoleLogLevel = lib.mkDefault 0;
       extraModulePackages = with config.boot.kernelPackages; [
         v4l2loopback.out
-        rtw88
+        (rtw88.overrideAttrs (oldAttrs: {
+          src = pkgs.fetchFromGitHub {
+            owner = "lwfinger";
+            repo = "rtw88";
+            rev = "9c44629201f629de772b98449249b0d92912022d";
+            hash = "sha256-9hWJza3SOljlZytJZIdIgVoDFQfm3b70t97mRwNpoKE=";
+          };
+        }))
       ];
       extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
