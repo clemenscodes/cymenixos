@@ -19,6 +19,11 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.wireless.enable) {
+    environment = {
+      systemPackages = [
+        pkgs.wirelesstools
+      ];
+    };
     networking = {
       wireless = lib.mkIf config.modules.security.sops.enable {
         inherit (cfg.wireless) enable;
