@@ -17,7 +17,7 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.ssh.enable) {
-    systemd = {
+    systemd = lib.mkIf config.modules.boot.enable {
       user = {
         tmpfiles = {
           rules = ["d %h/.config/ssh 700 - - - -"];

@@ -30,7 +30,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.networking.enable) {
     environment = {
-      persistence = {
+      persistence = lib.mkIf config.modules.boot.enable {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = [
             "/etc/NetworkManager/system-connections"
