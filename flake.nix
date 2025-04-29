@@ -119,7 +119,7 @@
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     };
     w3c = {
-      url = "github:clemenscodes/W3ChampionsOnLinux";
+      url = "github:clemenscodes/W3ChampionsOnLinux/develop";
     };
   };
   outputs = {

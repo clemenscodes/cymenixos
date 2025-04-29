@@ -15,9 +15,6 @@ in {
       gaming = {
         w3champions = {
           enable = lib.mkEnableOption "Enable W3Champions" // {default = false;};
-          flo = {
-            enable = lib.mkEnableOption "Enable W3Champions FLO" // {default = false;};
-          };
         };
       };
     };
@@ -26,9 +23,6 @@ in {
     w3champions = {
       inherit (cfg.w3champions) enable;
       inherit (config.modules.users) name;
-      flo = {
-        inherit (cfg.w3champions.flo) enable;
-      };
     };
   };
 }

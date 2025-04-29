@@ -190,9 +190,6 @@
       };
       w3champions = {
         enable = false;
-        flo = {
-          enable = false;
-        };
       };
     };
     gpu = {
