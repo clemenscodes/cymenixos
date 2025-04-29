@@ -48,7 +48,6 @@ in {
       ];
       # NOTE: If systemd user units do not work,
       # follow the instructions here https://github.com/nix-community/NixOS-WSL/issues/527#issuecomment-2271417039
-      nativeSystemd = true;
       startMenuLaunchers = true;
       usbip = {
         enable = true;
