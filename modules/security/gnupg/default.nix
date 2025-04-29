@@ -18,7 +18,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.gnupg.enable) {
     environment = {
-      persistence = {
+      persistence = lib.mkIf config.modules.boot.enable {
         "${config.modules.boot.impermanence.persistPath}" = {
           users = {
             ${config.modules.users.user} = {
