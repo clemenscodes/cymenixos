@@ -22,7 +22,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.nix.enable) {
     environment = {
       defaultPackages = lib.mkForce [];
-      persistence = {
+      persistence = lib.mkIf config.modules.boot.enable {
         ${config.modules.boot.impermanence.persistPath} = {
           users = {
             ${config.modules.users.name} = {
