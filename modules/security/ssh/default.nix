@@ -24,7 +24,7 @@ in {
         };
       };
     };
-    fileSystems = {
+    fileSystems = lib.mkIf config.modules.boot.enable {
       "/etc/ssh" = {
         depends = [persistPath];
         neededForBoot = true;
