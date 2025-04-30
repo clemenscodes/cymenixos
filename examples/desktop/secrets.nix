@@ -164,7 +164,7 @@ in {
         };
         programs = {
           zsh = {
-            initExtra = let
+            initContent = let
               gh_token =
                 if cfg.security.sops.enable
                 then ''

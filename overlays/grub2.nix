@@ -32,7 +32,7 @@ final: pkgs: {
       (pkgs.fetchpatch {
         name = "argon_3.patch";
         url = "https://aur.archlinux.org/cgit/aur.git/plain/argon_3.patch?h=grub-improved-luks2-git";
-        sha256 = "sha256-rxtvrBG4HhGYIvpIGZ7luNH5GPbl7TlqbNHcnR7IZc8=";
+        sha256 = "sha256-nWtJSi7zJjD/gvM3OVbsH3vktbDnSHlIb+Fixd9DFDk=";
       })
       (pkgs.fetchpatch {
         name = "argon_4.patch";

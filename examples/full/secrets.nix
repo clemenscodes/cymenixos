@@ -173,7 +173,7 @@ in {
         };
         programs = {
           zsh = {
-            initExtra = let
+            initContent = let
               gh_token =
                 if cfg.security.sops.enable
                 then ''
@@ -199,6 +199,7 @@ in {
                 ''
                 else "";
             in
+              lib.mkOrder 550
               /*
               bash
               */

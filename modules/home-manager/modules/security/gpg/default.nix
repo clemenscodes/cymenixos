@@ -21,7 +21,9 @@ in {
         inherit (cfg.gpg) enable;
         enableSshSupport = cfg.ssh.enable;
         enableZshIntegration = config.modules.shell.zsh.enable;
-        pinentryPackage = pkgs.pinentry-gnome3;
+        pinentry = {
+          package = pkgs.pinentry-gnome3;
+        };
         maxCacheTtl = 120;
         defaultCacheTtl = 60;
         extraConfig = ''
