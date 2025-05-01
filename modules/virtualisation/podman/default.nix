@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules.virtualisation;
   inherit (config.modules.users) user;
 in {
