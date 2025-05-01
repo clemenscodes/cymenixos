@@ -75,28 +75,28 @@ in {
         pkgs.glow
         pkgs.hexyl
         pkgs.eza
-        pkgs.xdg-desktop-portal-termfilechooser
+        # pkgs.xdg-desktop-portal-termfilechooser
       ];
     };
-    xdg = {
-      configFile = {
-        "xdg-desktop-portal-termfilechooser/config" = {
-          text = ''
-            [filechooser]
-            cmd=${lib.getExe yazi-termfilechooser-wrapper}
-            default_dir=$HOME
-          '';
-        };
-      };
-      portal = {
-        extraPortals = [pkgs.xdg-desktop-portal-termfilechooser];
-        config = {
-          common = {
-            "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
-          };
-        };
-      };
-    };
+    # xdg = {
+    #   configFile = {
+    #     "xdg-desktop-portal-termfilechooser/config" = {
+    #       text = ''
+    #         [filechooser]
+    #         cmd=${lib.getExe yazi-termfilechooser-wrapper}
+    #         default_dir=$HOME
+    #       '';
+    #     };
+    #   };
+    #   portal = {
+    #     extraPortals = [pkgs.xdg-desktop-portal-termfilechooser];
+    #     config = {
+    #       common = {
+    #         "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+    #       };
+    #     };
+    #   };
+    # };
     programs = {
       yazi = {
         inherit (cfg.yazi) enable;
