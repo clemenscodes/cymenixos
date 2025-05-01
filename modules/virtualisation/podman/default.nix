@@ -14,9 +14,9 @@ in {
   config = lib.mkIf (cfg.enable && cfg.podman.enable) {
     environment = {
       systemPackages = [
-        dive
-        podman-tui
-        docker-compose
+        pkgs.dive
+        pkgs.podman-tui
+        pkgs.docker-compose
       ];
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
