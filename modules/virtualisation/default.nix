@@ -10,6 +10,7 @@
 in {
   imports = [
     (import ./docker {inherit inputs pkgs lib;})
+    (import ./podman {inherit inputs pkgs lib;})
     (import ./virt-manager {inherit inputs pkgs lib;})
   ];
   options = {

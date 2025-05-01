@@ -393,6 +393,9 @@
       docker = {
         enable = false;
       };
+      podman = {
+        enable = false;
+      };
       virt-manager = {
         enable = false;
       };
