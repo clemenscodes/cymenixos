@@ -12,6 +12,9 @@ in {
           imports = [inputs.catppuccin.homeModules.catppuccin];
           catppuccin = {
             inherit (cfg.catppuccin) enable flavor accent;
+            mako = {
+              enable = false;
+            };
           };
         };
       };
