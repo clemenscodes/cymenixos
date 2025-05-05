@@ -3,7 +3,7 @@
   pkgs,
   lib,
   ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.editor;
 in {
   config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
