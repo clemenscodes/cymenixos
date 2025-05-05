@@ -113,7 +113,8 @@
       url = "github:NixOS/templates";
     };
     yubikey-guide = {
-      url = "github:drduh/YubiKey-Guide?dir=nix";
+      url = "github:drduh/YubiKey-Guide";
+      flake = false;
     };
     chaotic = {
       url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
