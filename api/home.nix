@@ -38,6 +38,16 @@
               enable = false;
               userName = null; # Must be set when git is enabled
               userEmail = null; # Must be set when git is enabled
+              signing = {
+                enable = false;
+                gpgFingerprint = null;
+              };
+              gitui = {
+                enable = false;
+              };
+              lazygit = {
+                enable = false;
+              };
             };
             pentesting = {
               enable = false;
