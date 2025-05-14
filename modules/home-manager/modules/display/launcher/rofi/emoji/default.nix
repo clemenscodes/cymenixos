@@ -16,7 +16,7 @@ in {
       hyprland = {
         settings = {
           bind = [
-            "$mod SHIFT, D, ${emoji}/bin/emoji"
+            "$mod SHIFT, D, exec, ${emoji}/bin/emoji"
           ];
         };
       };
