@@ -334,7 +334,7 @@ in {
             kitty =
               if useKitty
               then ''
-                windowrule = opacity 0.95,class:kitty
+                windowrule = opacity 0.90,class:kitty
               ''
               else "";
             rofi =
