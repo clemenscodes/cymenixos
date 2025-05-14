@@ -5,7 +5,7 @@
   ...
 }: {...}: let
   emoji = pkgs.writeShellScriptBin "emoji" ''
-    ${pkgs.rofi}/bin/rofi -modi emoji -show emoji -emoji-format '{emoji}'
+    ${pkgs.rofi}/bin/rofi -modi emoji -show emoji
   '';
 in {
   home = {
@@ -16,7 +16,7 @@ in {
       hyprland = {
         settings = {
           bind = [
-            "$mod SHIFT, D, ${emoji}"
+            "$mod SHIFT, D, ${emoji}/bin/emoji"
           ];
         };
       };
