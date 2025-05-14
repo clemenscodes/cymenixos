@@ -112,10 +112,12 @@ in {
               rounding = 4;
               blur = {
                 enabled = true;
-                size = 1;
-                noise = 0.01;
-                brightness = 1.423;
-                contrast = 1.309;
+                size = 4;
+                noise = 0.02;
+                brightness = 0.9;
+                contrast = 0.9;
+                vibrancy = 0.2;
+                vibrancy_darkness = 0.1;
                 passes = 2;
                 special = false;
               };
@@ -332,7 +334,7 @@ in {
             kitty =
               if useKitty
               then ''
-                windowrule = opacity 0.92,class:kitty
+                windowrule = opacity 0.97,class:kitty
               ''
               else "";
             rofi =
