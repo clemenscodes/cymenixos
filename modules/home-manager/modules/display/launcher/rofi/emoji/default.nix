@@ -5,7 +5,7 @@
   ...
 }: {...}: let
   emoji = pkgs.writeShellScriptBin "emoji" ''
-    ${pkgs.rofi}/bin/rofi -modi emoji -show emoji
+    rofi -modi emoji -show emoji
   '';
 in {
   home = {
