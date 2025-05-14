@@ -46,6 +46,14 @@
       sh -c "$command"
     '';
   };
+  yazi-cwd = pkgs.writeShellScriptBin "y" ''
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    	builtin cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+  '';
 in {
   options = {
     modules = {
@@ -75,6 +83,7 @@ in {
         pkgs.glow
         pkgs.hexyl
         pkgs.eza
+        yazi-cwd
         # pkgs.xdg-desktop-portal-termfilechooser
       ];
     };
