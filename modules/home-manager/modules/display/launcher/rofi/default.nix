@@ -26,7 +26,6 @@ in {
       packages = [
         (import ./emoji {inherit inputs pkgs lib;})
         (import ./logoutlaunch {inherit pkgs;})
-        (import ./signout {inherit pkgs osConfig;})
       ];
     };
     programs = {
