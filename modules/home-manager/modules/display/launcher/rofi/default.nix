@@ -23,6 +23,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.rofi.enable) {
     home = {
       packages = [
+        (import ./emoji {inherit inputs pkgs lib;})
         (import ./logoutlaunch {inherit pkgs;})
         (import ./signout {inherit pkgs osConfig;})
       ];
@@ -31,6 +32,7 @@ in {
       rofi = {
         enable = cfg.rofi.enable;
         package = pkgs.rofi-wayland;
+        plugins = [pkgs.rofi-emoji];
         terminal = "${config.modules.terminal.defaultTerminal}";
         font = "${osConfig.modules.fonts.defaultFont} ${builtins.toString osConfig.modules.fonts.size}";
       };
