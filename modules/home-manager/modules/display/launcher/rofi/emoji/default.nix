@@ -11,9 +11,11 @@ in {
   wayland = {
     windowManager = {
       hyprland = {
-        bind = [
-          "$mod SHIFT, D, ${emoji}/bin/emoji"
-        ];
+        settings = {
+          bind = [
+            "$mod SHIFT, D, ${emoji}/bin/emoji"
+          ];
+        };
       };
     };
   };
