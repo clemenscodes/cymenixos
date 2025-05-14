@@ -92,7 +92,7 @@ in {
         settings = {
           general = {
             lock_cmd = "pidof ${hyprlockExe} || ${hyprlockExe}";
-            before_sleep_cmd = "${pkgs.systemd}bin/loginctl lock-session";
+            before_sleep_cmd = "${pkgs.systemd}/bin/loginctl lock-session";
             ignore_dbus_inhibit = false;
             ignore_systemd_inhibit = false;
           };
