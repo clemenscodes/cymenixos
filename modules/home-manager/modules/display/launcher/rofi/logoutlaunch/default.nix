@@ -60,7 +60,7 @@ pkgs.writeShellScriptBin "logoutlaunch" ''
       sleep 1
       ${pkgs.systemd}/bin/systemctl suspend
     elif [[ $1 == '--logout' ]]; then
-      signout
+      ${pkgs.systemd}/bin/loginctl kill-user $USER
     fi
   }
 

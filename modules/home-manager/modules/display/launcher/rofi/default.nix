@@ -10,6 +10,7 @@
 }: let
   cfg = config.modules.display.launcher;
 in {
+  imports = [(import ./emoji {inherit inputs pkgs lib;})];
   options = {
     modules = {
       display = {
@@ -24,7 +25,6 @@ in {
   config = lib.mkIf (cfg.enable && cfg.rofi.enable) {
     home = {
       packages = [
-        (import ./emoji {inherit inputs pkgs lib;})
         (import ./logoutlaunch {inherit pkgs;})
       ];
     };
