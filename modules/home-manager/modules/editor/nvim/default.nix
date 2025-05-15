@@ -22,6 +22,11 @@ in {
   config = lib.mkIf (cfg.enable && cfg.nvim.enable) {
     home = {
       packages = [inputs.cymenixvim.packages.${system}.development];
+      persistence = lib.mkIf osConfig.modules.boot.enable {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+          directories = [".local/state/nvim"];
+        };
+      };
     };
     programs = {
       zsh = {
