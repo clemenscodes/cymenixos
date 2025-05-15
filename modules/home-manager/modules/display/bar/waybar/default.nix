@@ -113,20 +113,20 @@ in {
               format = "{}";
               interval = 5;
               exec = "waybar-mail";
-              on-click = "${pkgs.kitty}/bin/kitty ${pkgs.neomutt}/bin/neomutt";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.neomutt}/bin/neomutt";
             };
             disk = {
               interval = 30;
               format = "{percentage_used}% 💾";
               tooltip-format = "{used}/{total} 💾";
-              on-click = "${pkgs.kitty}/bin/kitty ${pkgs.ncdu}/bin/ncdu";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.ncdu}/bin/ncdu";
               path = "/";
             };
             memory = {
               format = "{percentage}% 🧠";
               format-alt = "󰾅  {used}GB";
               tooltip-format = "{used:0.1f}G/{total:0.1f}GB  ";
-              on-click = "${pkgs.kitty}/bin/kitty ${pkgs.btop}/bin/btop";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.btop}/bin/btop";
               interval = 30;
               tooltip = true;
             };
@@ -143,7 +143,7 @@ in {
                 "<span color='#ff9977'>▇</span>" # orange
                 "<span color='#dd532e'>█</span>" # red
               ];
-              on-click = "${pkgs.kitty}/bin/kitty ${pkgs.btop}/bin/btop";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.btop}/bin/btop";
             };
             temperature = {
               critical-threshold = 80;
@@ -152,7 +152,7 @@ in {
               interval = 0.1;
               format = "{temperatureC}°C {icon}";
               format-critical = "{temperatureC}°C 🔥";
-              on-click = "${pkgs.kitty}/bin/kitty ${pkgs.btop}/bin/btop";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.btop}/bin/btop";
               format-icons = ["🌡️"];
             };
             "custom/nvidiagpuinfo" = lib.mkIf isNvidia {
@@ -334,7 +334,7 @@ in {
               format = "{}";
               interval = 1;
               exec = "waybar-clock";
-              on-click = "${pkgs.kitty}/bin/kitty ${pkgs.calcurse}/bin/calcurse";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.calcurse}/bin/calcurse";
             };
           }
         ];

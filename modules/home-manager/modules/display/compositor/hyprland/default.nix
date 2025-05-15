@@ -194,16 +194,16 @@ in {
               "$mod, mouse_up, workspace, e-1"
 
               (lib.mkIf useHyprpicker "$mod, U, exec, hyprpicker")
-              (lib.mkIf useKitty "$mod, RETURN, exec, kitty -1")
-              (lib.mkIf (useKitty && useNvim) "$mod, V, exec, kitty -1 nvim")
-              (lib.mkIf (useKitty && useLf) "$mod, R, exec, kitty -1 lf")
-              (lib.mkIf (useKitty && useYazi) "$mod, R, exec, kitty -1 yazi")
-              (lib.mkIf (useKitty && useEmail) "$mod, E, exec, kitty -1 neomutt")
+              (lib.mkIf useKitty "$mod, RETURN, exec, kitty -1 --title=kitty ")
+              (lib.mkIf (useKitty && useNvim) "$mod, V, exec, kitty -1 --title=kitty nvim")
+              (lib.mkIf (useKitty && useLf) "$mod, R, exec, kitty -1 --title=kitty lf")
+              (lib.mkIf (useKitty && useYazi) "$mod, R, exec, kitty -1 --title=kitty yazi")
+              (lib.mkIf (useKitty && useEmail) "$mod, E, exec, kitty -1 --title=kitty neomutt")
               (lib.mkIf (useKitty && useEmail && useThunderbird) "$mod SHIFT, E, exec, ${pkgs.thunderbird}/bin/thunderbird")
-              (lib.mkIf (useKitty && useBtop) "$mod SHIFT, R, exec, kitty -1 btop")
-              (lib.mkIf (useKitty && useNcmpcpp) "$mod, M, exec, kitty -1 ncmpcpp")
-              (lib.mkIf (useKitty && useCalcurse) "$mod SHIFT, K, exec, kitty -1 calcurse")
-              (lib.mkIf useNewsboat "$mod SHIFT, N, exec, kitty -1 newsboat")
+              (lib.mkIf (useKitty && useBtop) "$mod SHIFT, R, exec, kitty -1 --title=kitty btop")
+              (lib.mkIf (useKitty && useNcmpcpp) "$mod, M, exec, kitty -1 --title=kitty ncmpcpp")
+              (lib.mkIf (useKitty && useCalcurse) "$mod SHIFT, K, exec, kitty -1 --title=kitty calcurse")
+              (lib.mkIf useNewsboat "$mod SHIFT, N, exec, kitty -1 --title=kitty newsboat")
               (lib.mkIf useWaybar "$mod, B, exec, waybar-toggle")
               (lib.mkIf useWaybar "$mod SHIFT, B, exec, waybar-reload")
               (lib.mkIf useSwaync "$mod, N, exec, swaync-client -t -sw")
@@ -235,7 +235,7 @@ in {
               (lib.mkIf isLaptop ", XF86MonBrightnessUp, exec, brightnessctl set 1%+")
               (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessDown, exec, brightnessctl set 5%-")
               (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessUp, exec, brightnessctl set 5%+")
-              (lib.mkIf (useMusic && useKitty) ", XF86AudioAudioMedia, exec, kitty -1 ncmpcpp")
+              (lib.mkIf (useMusic && useKitty) ", XF86AudioAudioMedia, exec, kitty -1 --title=kitty ncmpcpp")
               "$mod, P, togglespecialworkspace, magic"
               "$mod, P, movetoworkspace, +0"
               "$mod, P, togglespecialworkspace, magic"
