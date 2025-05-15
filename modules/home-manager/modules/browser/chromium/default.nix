@@ -43,6 +43,9 @@ in {
         ];
         extensions = [
           {
+            id = "nglaklhklhcoonedhgnpgddginnjdadi"; # ActivityWatch
+          }
+          {
             id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; # ublock origin
           }
           {
