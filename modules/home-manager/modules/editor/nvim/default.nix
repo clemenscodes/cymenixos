@@ -3,6 +3,7 @@
   lib,
   ...
 }: {
+  osConfig,
   config,
   system,
   ...
