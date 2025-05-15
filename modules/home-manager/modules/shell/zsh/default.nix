@@ -95,6 +95,7 @@ in {
           ne = "${explorer} $FLAKE";
           nix-repl-flake = ''nix repl --expr "builtins.getFlake \"$PWD\""'';
           notes = "${explorer} $XDG_NOTE_DIR";
+          v = "nvim .";
           V = "${explorer} $XDG_VIDEOS_DIR";
           D = "${explorer} $XDG_DOWNLOAD_DIR";
           M = "${explorer} $XDG_MUSIC_DIR";
@@ -145,6 +146,7 @@ in {
             bindkey -M vicmd '^[[P' vi-delete-char
             bindkey -M vicmd '^e' edit-command-line
             bindkey -M visual '^[[P' vi-delete
+            bindkey -s '^b' 'v\n'
             export ZSH_CACHE_DIR
             ${
               if config.modules.explorer.enable
