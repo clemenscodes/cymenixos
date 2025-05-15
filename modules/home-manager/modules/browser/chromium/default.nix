@@ -43,9 +43,6 @@ in {
         ];
         extensions = [
           {
-            id = "nglaklhklhcoonedhgnpgddginnjdadi"; # ActivityWatch
-          }
-          {
             id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; # ublock origin
           }
           {
@@ -71,9 +68,6 @@ in {
           }
           {
             id = "gebbhagfogifgggkldgodflihgfeippi"; # YouTube Dislikes
-          }
-          {
-            id = "ekhagklcjbdpajgpjgmbionohlpdbjgc"; # Zotero Connector
           }
         ];
       };
