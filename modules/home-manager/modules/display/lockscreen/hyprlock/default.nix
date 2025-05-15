@@ -14,6 +14,9 @@
   suspendScript = pkgs.writeShellScript "suspend-script" ''
     ${lib.getExe pkgs.playerctl} -a status | ${lib.getExe pkgs.ripgrep} Playing -q
     if [ $? == 1 ]; then
+      for dev in $(grep enabled /proc/acpi/wakeup|cut -f 1); do
+        echo $dev | sudo tee /proc/acpi/wakeup
+      done
       ${pkgs.systemd}/bin/systemctl suspend
     fi
   '';

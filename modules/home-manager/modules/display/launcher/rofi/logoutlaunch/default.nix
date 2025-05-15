@@ -56,6 +56,9 @@ pkgs.writeShellScriptBin "logoutlaunch" ''
       ${pkgs.systemd}/bin/systemctl hibernate
     elif [[ $1 == '--suspend' ]]; then
       ${pkgs.mpc-cli}/bin/mpc -q pause
+      for dev in $(grep enabled /proc/acpi/wakeup|cut -f 1); do
+        echo $dev | sudo tee /proc/acpi/wakeup
+      done
       ${pkgs.systemd}/bin/loginctl lock-session
       sleep 1
       ${pkgs.systemd}/bin/systemctl suspend
