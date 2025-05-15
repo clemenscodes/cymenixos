@@ -25,19 +25,18 @@ in {
             confirmOnQuit: false
             disableStartupPopups: true
             git:
-              allBranchesLogCmd: git log --graph --all --color=always --abbrev-commit --decorate --date=relative  --pretty=medium
               autoFetch: true
               autoRefresh: true
               autoStageResolvedConflicts: true
               branchLogCmd: git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --
-              branchPrefix: ''''
+              branchPrefix: '''
               commit:
                 autoWrapCommitMessage: true
                 autoWrapWidth: 72
                 signOff: false
               commitPrefix:
-                - pattern: ''''
-                  replace: ''''
+                - pattern: '''
+                  replace: '''
               disableForcePushing: false
               fetchAll: true
               log:
@@ -48,14 +47,14 @@ in {
                 - master
                 - main
               merging:
-                args: ''''
+                args: '''
                 manualCommit: false
                 squashMergeMessage: Squash merge {{selectedRef}} into {{currentBranch}}
               overrideGpg: false
               paging:
                 colorArg: always
                 externalDiffCommand: ${pkgs.difftastic}/bin/difft --color=always
-                pager: ''''
+                pager: '''
                 useConfig: false
               parseEmoji: false
               skipHookPrefix: WIP
@@ -78,7 +77,7 @@ in {
               language: auto
               mainPanelSplitMode: flexible
               mouseEvents: true
-              nerdFontsVersion: ''''
+              nerdFontsVersion: '''
               portraitMode: auto
               screenMode: normal
               scrollHeight: 2
@@ -228,7 +227,6 @@ in {
                 decreaseContextInDiffView: '{'
                 decreaseRenameSimilarityThreshold: (
                 diffingMenu: W
-                diffingMenuAlt: <c-e>
                 edit: e
                 executeShellCommand: ':'
                 extrasMenu: '@'
@@ -245,11 +243,7 @@ in {
                   - '4'
                   - '5'
                 new: n
-                nextBlock: <right>
-                nextBlockAlt: l
-                nextBlockAlt2: <tab>
                 nextItem: <down>
-                nextItemAlt: j
                 nextMatch: n
                 nextPage: .
                 nextScreenMode: +
@@ -258,12 +252,8 @@ in {
                 openFile: o
                 openRecentRepos: <c-r>
                 optionMenu: <disabled>
-                optionMenuAlt1: '?'
                 prevBlock: <left>
-                prevBlockAlt: h
-                prevBlockAlt2: <backtab>
                 prevItem: <up>
-                prevItemAlt: k
                 prevMatch: N
                 prevPage: ','
                 prevScreenMode: _
@@ -271,7 +261,6 @@ in {
                 pullFiles: p
                 pushFiles: P
                 quit: q
-                quitAlt1: <c-c>
                 quitWithoutChangingDirectory: Q
                 rangeSelectDown: <s-down>
                 rangeSelectUp: <s-up>
@@ -280,13 +269,9 @@ in {
                 remove: d
                 return: <esc>
                 scrollDownMain: <pgdown>
-                scrollDownMainAlt1: J
-                scrollDownMainAlt2: <c-d>
                 scrollLeft: H
                 scrollRight: L
                 scrollUpMain: <pgup>
-                scrollUpMainAlt1: K
-                scrollUpMainAlt2: <c-u>
                 select: <space>
                 startSearch: /
                 submitEditorText: <enter>
@@ -297,20 +282,6 @@ in {
               worktrees:
                 viewWorktreeOptions: w
             notARepository: prompt
-            os:
-              copyToClipboardCmd: ''''
-              edit: ''''
-              editAtLine: ''''
-              editAtLineAndWait: ''''
-              editCommand: ''''
-              editCommandTemplate: ''''
-              editPreset: ''''
-              open: ''''
-              openCommand: ''''
-              openDirInEditor: ''''
-              openLink: ''''
-              openLinkCommand: ''''
-              readFromClipboardCmd: ''''
             promptToReturnFromSubprocess: true
             quitOnTopLevelReturn: false
             refresher:
