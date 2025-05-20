@@ -90,7 +90,7 @@ in {
           sudo = "sudo ";
           ssh = "kitten ssh";
           v = "nvim .";
-          g = "lazygit .";
+          g = "lazygit";
           vsc = "codium .";
           ls = "${pkgs.eza}/bin/eza";
           ne = "${explorer} $FLAKE";
