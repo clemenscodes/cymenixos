@@ -25,7 +25,10 @@ in {
       packages = [inputs.cymenixvim.packages.${system}.development];
       persistence = lib.mkIf osConfig.modules.boot.enable {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
-          directories = [".local/state/nvim"];
+          directories = [
+            ".local/state/nvim"
+            ".local/share/nvim"
+          ];
         };
       };
     };
