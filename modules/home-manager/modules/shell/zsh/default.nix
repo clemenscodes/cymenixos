@@ -90,6 +90,7 @@ in {
           sudo = "sudo ";
           ssh = "kitten ssh";
           v = "nvim .";
+          g = "lazygit .";
           vsc = "codium .";
           ls = "${pkgs.eza}/bin/eza";
           ne = "${explorer} $FLAKE";
@@ -145,6 +146,7 @@ in {
             bindkey -M vicmd '^e' edit-command-line
             bindkey -M visual '^[[P' vi-delete
             bindkey -s '^n' 'v\n'
+            bindkey -s '^g' 'g\n'
             export ZSH_CACHE_DIR
             ${
               if config.modules.explorer.enable
