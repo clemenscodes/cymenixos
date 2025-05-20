@@ -19,7 +19,7 @@
     then pkgs.vscode
     else pkgs.vscodium;
   codevim = pkgs.writeShellScriptBin "codevim" ''
-    nix run github:clemenscodes/codevim -- "$@"
+    ${inputs.codevim.packages.${system}.default}/bin/nvim -- "$@"
   '';
 in {
   imports = [

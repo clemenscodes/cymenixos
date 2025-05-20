@@ -57,6 +57,9 @@
     cymenixvim = {
       url = "github:clemenscodes/cymenixvim";
     };
+    codevim = {
+      url = "github:clemenscodes/codevim";
+    };
     xremap-flake = {
       url = "github:xremap/nix-flake";
       inputs = {
