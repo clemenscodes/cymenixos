@@ -89,7 +89,6 @@ in {
         shellAliases = {
           sudo = "sudo ";
           ssh = "kitten ssh";
-          v = "nvim .";
           g = "lazygit";
           vsc = "codium .";
           ls = "${pkgs.eza}/bin/eza";
@@ -145,7 +144,7 @@ in {
             bindkey -M vicmd '^[[P' vi-delete-char
             bindkey -M vicmd '^e' edit-command-line
             bindkey -M visual '^[[P' vi-delete
-            bindkey -s '^n' 'v\n'
+            bindkey -s '^n' 'nvim .\n'
             bindkey -s '^g' 'g\n'
             export ZSH_CACHE_DIR
             ${
