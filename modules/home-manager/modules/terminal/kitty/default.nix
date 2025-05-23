@@ -32,6 +32,8 @@ in {
           shell = config.modules.shell.defaultShell;
           confirm_os_window_close = 0;
           open_url_with = "default";
+          allow_remote_control = "socket-only";
+          listen_on = "unix:/tmp/kitty";
         };
       };
     };
