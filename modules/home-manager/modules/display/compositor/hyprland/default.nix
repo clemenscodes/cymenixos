@@ -48,6 +48,7 @@
         ${pkgs.hyprland}/bin/hyprctl dispatch killactive ""
     fi
   '';
+  random-wallpaper = import ./wallpaper {inherit inputs pkgs lib;};
 in {
   imports = [
     (import ./hyprshade {inherit inputs pkgs lib;})
@@ -74,8 +75,7 @@ in {
         pkgs.wl-clipboard
         pkgs.cliphist
         (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
-        (import ./random-wallpaper {inherit inputs pkgs lib;})
-        (import ./wallpaper {inherit inputs pkgs lib;})
+        random-wallpaper
       ];
     };
     wayland = {
@@ -149,6 +149,7 @@ in {
               "$mod SHIFT, C, exit"
               "$mod SHIFT, F, togglefloating,"
               "$mod SHIFT, K, exec, hyprctl kill"
+              "$mod SHIFT, W, exec, ${lib.getExe random-wallpaper}"
               "$mod, SPACE, layoutmsg, swapwithmaster"
 
               "$mod, 1, workspace, 1"
