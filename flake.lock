@@ -1102,11 +1102,11 @@
         "nixvim": "nixvim_2"
       },
       "locked": {
-        "lastModified": 1748175386,
-        "narHash": "sha256-0VtRYw4RwnPZ9Da+oyBb08sJL+9frrLs8VuiPNE71k8=",
+        "lastModified": 1748175963,
+        "narHash": "sha256-uCocs9BDMUDT1ZYH9FT8T9MaLo2SryoirRmctk5ps/Y=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "ded57dafb37558db15e5720e3fc773b850a2cdd6",
+        "rev": "222fd5210ed4e8e52ceffd45c58912c52eac76c7",
         "type": "github"
       },
       "original": {
