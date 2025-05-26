@@ -1103,11 +1103,11 @@
         "telescope-manix": "telescope-manix"
       },
       "locked": {
-        "lastModified": 1748245822,
-        "narHash": "sha256-hMqGi41osNPStfBQVgbeR/XELUzbMJLnUE46tuJyans=",
+        "lastModified": 1748248637,
+        "narHash": "sha256-YQjpA0LE3aU7GbRhsrlliXAeChE8btYC/41Zy+uYLt0=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "d389257003ef42d42a15970b01864e8652ce4cff",
+        "rev": "660f0f2b16d095251c1246d38ed26ca9c0574659",
         "type": "github"
       },
       "original": {
@@ -5006,11 +5006,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1748176456,
-        "narHash": "sha256-9KctKybf6ypTTeqepgWPwCLU2V2tVrLXL8OtHzfKEhY=",
+        "lastModified": 1748246210,
+        "narHash": "sha256-fj0PRX6H5auoXPnVBA2H0TWiQp8gi/WbYUpHkTXd7qY=",
         "owner": "nix-community",
         "repo": "neovim-nightly-overlay",
-        "rev": "f788fa289c6e2769339eb519ce7e3732f24a8096",
+        "rev": "b27cb5caa9d5d73beb01ccb440f8daf2e20b5b47",
         "type": "github"
       },
       "original": {
@@ -5022,11 +5022,11 @@
     "neovim-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1748117132,
-        "narHash": "sha256-RscRZfMlnsCYzLbgskVPc0AOqtcdyg77htxaVT0xFpc=",
+        "lastModified": 1748213475,
+        "narHash": "sha256-VuZ3EHzfI/CDWaf6tKJ83uEg9CFZ9dwPGy4mOK7ayK4=",
         "owner": "neovim",
         "repo": "neovim",
-        "rev": "06043af27d9c9258eeebf16e4691dcb92f9b857d",
+        "rev": "bd01bd6564790d977095447ae70082c97fbbd480",
         "type": "github"
       },
       "original": {
@@ -6824,11 +6824,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1748244228,
-        "narHash": "sha256-wlw5tNjrJcyDRfQlBfmX/QCgXaJ7iGj9Pi2o5WNXm/0=",
+        "lastModified": 1748245705,
+        "narHash": "sha256-mLCnotOMzzVgQnPEIqKT90wd6aLbxW+X0ypJmOGW1Lg=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "9da5254d2d7c0b2c3c7a0b64ffed5ae1b7a17a19",
+        "rev": "abb4d9820a084cf4c95400993ac6041a2e7af2fb",
         "type": "github"
       },
       "original": {
