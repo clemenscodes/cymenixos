@@ -9,8 +9,6 @@
 }: let
   hyprlockExe = lib.getExe hyprlock;
   cfg = config.modules.display.lockscreen;
-  font_family = "${osConfig.modules.fonts.defaultFont}";
-  font_size = "25";
   suspendScript = pkgs.writeShellScript "suspend-script" ''
     ${lib.getExe pkgs.playerctl} -a status | ${lib.getExe pkgs.ripgrep} Playing -q
     if [ $? == 1 ]; then
@@ -59,33 +57,7 @@ in {
               color = "$base";
             }
           ];
-          label = [
-            {
-              inherit font_family font_size;
-              text = "Layout: $LAYOUT";
-              color = "$text";
-              position = "30, -30";
-              halign = "left";
-              valign = "top";
-            }
-            {
-              inherit font_family;
-              text = "$TIME";
-              font_size = "90";
-              color = "$text";
-              position = "-30, 0";
-              halign = "right";
-              valign = "top";
-            }
-            {
-              inherit font_family font_size;
-              text = ''cmd[update:43200000] date +"%A, %d %B %Y"'';
-              color = "$text";
-              position = "-30, -150";
-              halign = "right";
-              valign = "top";
-            }
-          ];
+          label = [];
         };
       };
     };
