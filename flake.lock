@@ -1105,11 +1105,11 @@
         "telescope-manix": "telescope-manix"
       },
       "locked": {
-        "lastModified": 1748431192,
-        "narHash": "sha256-f7Ju9pGM3ij77V6Nmg9O4fwIQ39qvovUqGEDab0rRrk=",
+        "lastModified": 1748431639,
+        "narHash": "sha256-21lmKwyf4y7T9UPOOxTKGY0C91dgAT0S6vir4kdRZxc=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "a24005538118a9105d23bf2913da04a9432bdd68",
+        "rev": "179c49d52743c2c0b0683c1b10fce0c3f90c7ca1",
         "type": "github"
       },
       "original": {
