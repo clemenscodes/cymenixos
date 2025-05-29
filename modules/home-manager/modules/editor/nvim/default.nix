@@ -22,7 +22,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.nvim.enable) {
     home = {
-      packages = [inputs.cymenixvim.packages.${system}.development];
+      packages = [inputs.cymenixvim.packages.${system}.minimal];
       persistence = lib.mkIf osConfig.modules.boot.enable {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
