@@ -9,7 +9,7 @@
   ...
 }: let
   cfg = config.modules.editor;
-  nvim = inputs.cymenixvim.packages.${system}.development;
+  nvim = inputs.cymenixvim.packages.${system}.minimal;
 in {
   options = {
     modules = {
@@ -22,7 +22,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.nvim.enable) {
     home = {
-      packages = [inputs.cymenixvim.packages.${system}.minimal];
+      packages = [nvim];
       persistence = lib.mkIf osConfig.modules.boot.enable {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
