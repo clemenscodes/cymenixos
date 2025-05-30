@@ -997,6 +997,23 @@
         "type": "github"
       }
     },
+    "cinnamon-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721889689,
+        "narHash": "sha256-+nDYk3zkLlj9YkzfK8mbD22iLWaHpzHImxPt3EVfyV0=",
+        "owner": "declancm",
+        "repo": "cinnamon.nvim",
+        "rev": "ecd211e46a1d4fb0efffbdb2c2bbd59785605870",
+        "type": "github"
+      },
+      "original": {
+        "owner": "declancm",
+        "ref": "v1.2.5",
+        "repo": "cinnamon.nvim",
+        "type": "github"
+      }
+    },
     "codevim": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1097,6 +1114,7 @@
     },
     "cymenixvim": {
       "inputs": {
+        "cinnamon-nvim": "cinnamon-nvim",
         "modes-nvim": "modes-nvim",
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixpkgs": "nixpkgs_20",
@@ -1105,11 +1123,11 @@
         "telescope-manix": "telescope-manix"
       },
       "locked": {
-        "lastModified": 1748586752,
-        "narHash": "sha256-4p9wlz0Vxnz9co/eJg5Cva4hBwiJ5x1LYyE5SdjB7Og=",
+        "lastModified": 1748594845,
+        "narHash": "sha256-VQmPzWMPwMG2jISREIhr1iEK1dQNQqo16vpEiPlNKZU=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "335ecf68f6f1876d7be3f5bcf2da19abe3e708b1",
+        "rev": "790ca072c0a0cf84a482d662b834084dda81ca48",
         "type": "github"
       },
       "original": {
@@ -7432,11 +7450,11 @@
         "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
-        "lastModified": 1748578784,
-        "narHash": "sha256-88ubtcmdMt1AGCVprlZ1taIixUjWDsuM6Mvkhd++0h0=",
+        "lastModified": 1748594621,
+        "narHash": "sha256-oOEHX9yRflyBju6/zS/TZkwgFludfqHLdfS04qL4S44=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "4cce78af34a5c8742df1064a9c7be7d27c66d736",
+        "rev": "133e72e392d124db6b91d4eb3a27c7642d86e25a",
         "type": "github"
       },
       "original": {
