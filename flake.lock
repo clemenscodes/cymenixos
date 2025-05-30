@@ -1123,11 +1123,11 @@
         "telescope-manix": "telescope-manix"
       },
       "locked": {
-        "lastModified": 1748601583,
-        "narHash": "sha256-50ecRn9AT87jNNMqbE/jVWO8rJc09sP0DzVqOd34g+Q=",
+        "lastModified": 1748607691,
+        "narHash": "sha256-RElAQ0eqXhczFNBHVrV12xMVAvXi2J05K4TYApQ2Dxg=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "d138fa75f4009e17a90ae300ab372d0ed8fca9f5",
+        "rev": "79e3fad7e7d3d879b37da47cafae75492d25b1c8",
         "type": "github"
       },
       "original": {
@@ -7450,11 +7450,11 @@
         "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
-        "lastModified": 1748598337,
-        "narHash": "sha256-3wv/gKzDYOlCs+zzxw+2TP2ufJSr1Nz6F9J8YTYPBI8=",
+        "lastModified": 1748604420,
+        "narHash": "sha256-TpGjB8lehR8u00YtcWkwE3daevoGto6r5CZNn7wA1a8=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "afd797bcc3093a33a5b0c5fcc57c145a26a881d1",
+        "rev": "767dc9e05f7e94bc64e70adca701fd696673d251",
         "type": "github"
       },
       "original": {
