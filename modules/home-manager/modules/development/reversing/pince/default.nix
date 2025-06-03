@@ -3,6 +3,7 @@
   lib,
   ...
 }: {
+  osConfig,
   config,
   system,
   ...
@@ -29,6 +30,14 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.pince.enable) {
+    home = {
+      packages = [pkgs.pince];
+      persistence = {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+          directories = [".config/PINCE"];
+        };
+      };
+    };
     xdg = {
       desktopEntries = {
         pince = {
@@ -43,11 +52,6 @@ in {
           startupNotify = true;
         };
       };
-    };
-    home = {
-      packages = [
-        pkgs.pince
-      ];
     };
   };
 }
