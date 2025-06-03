@@ -15,6 +15,9 @@ in {
             mako = {
               enable = false;
             };
+            yazi = {
+              enable = false;
+            };
           };
         };
       };

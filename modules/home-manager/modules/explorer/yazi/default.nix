@@ -93,6 +93,12 @@ in {
             default_dir=$HOME
           '';
         };
+        "yazi/theme.toml" = {
+          source = ./theme.toml;
+        };
+        "yazi/Catppuccin-macchiato.tmTheme" = {
+          source = ./Catppuccin-macchiato.tmTheme;
+        };
       };
       portal = {
         extraPortals = [pkgs.xdg-desktop-portal-termfilechooser];
