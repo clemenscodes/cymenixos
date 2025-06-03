@@ -72,6 +72,9 @@
               imhex = {
                 enable = false;
               };
+              pince = {
+                enable = false;
+              };
             };
           };
           display = {

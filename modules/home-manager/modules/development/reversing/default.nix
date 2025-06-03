@@ -8,6 +8,7 @@
     (import ./ghidra {inherit inputs pkgs lib;})
     (import ./ida {inherit inputs pkgs lib;})
     (import ./imhex {inherit inputs pkgs lib;})
+    (import ./pince {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
