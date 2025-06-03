@@ -31,12 +31,12 @@ in {
   config = lib.mkIf (cfg.enable && cfg.pince.enable) {
     xdg = {
       desktopEntries = {
-        gparted = {
+        pince = {
           name = "PINCE";
           genericName = "PINCE is not Cheat Engine";
           comment = "Reverse engineering tool for linux games";
           type = "Application";
-          exec = "sudo -E ${pkgs.pince}/bin/pince %f";
+          exec = "sudo -E ${pkgs.pince}/bin/PINCE %f";
           terminal = false;
           icon = "${pkgs.pince}/share/pince/media/logo/ozgurozbek/pince_big_red.png";
           categories = ["GTK" "System"];
