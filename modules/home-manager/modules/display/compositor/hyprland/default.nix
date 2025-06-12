@@ -377,7 +377,7 @@ in {
           in ''
             monitor = , highrr, auto, 1
 
-            env = XCURSOR_SIZE,24
+            env = XCURSOR_SIZE,16
             env = XDG_SESSION_TYPE,wayland
             env = XDG_SESSION_DESKTOP,Hyprland
             env = XDG_CURRENT_DESKTOP,Hyprland
