@@ -278,7 +278,7 @@ in {
           extraConfig = let
             waybar =
               if useWaybar
-              then "exec-once = waybar-watch"
+              then "exec-once = waybar"
               else "";
             swaync =
               if useSwaync
