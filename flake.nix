@@ -84,6 +84,9 @@
         };
       };
     };
+    pwndbg = {
+      url = "github:pwndbg/pwndbg";
+    };
     nix-gaming = {
       url = "github:fufexan/nix-gaming";
     };
