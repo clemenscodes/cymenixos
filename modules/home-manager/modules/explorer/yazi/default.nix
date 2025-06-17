@@ -194,10 +194,6 @@ in {
             ];
             prepend_previewers = [
               {
-                name = "*";
-                run = ''piper -- echo "$1"'';
-              }
-              {
                 name = "*.tar*";
                 run = ''piper --format=url -- tar tf "$1"'';
               }
@@ -211,7 +207,7 @@ in {
               }
               {
                 name = "*/";
-                run = ''piper -- eza -TL=3 --color=always --icons=always --group-directories-first --no-quotes "$1"'';
+                run = ''piper -- eza --color=always --icons=always --group-directories-first --no-quotes "$1"'';
               }
               {
                 mime = "{audio,video,image}/*";
