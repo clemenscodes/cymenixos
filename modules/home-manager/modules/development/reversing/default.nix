@@ -10,6 +10,7 @@
     (import ./ida {inherit inputs pkgs lib;})
     (import ./imhex {inherit inputs pkgs lib;})
     (import ./pince {inherit inputs pkgs lib;})
+    (import ./pwndbg {inherit inputs pkgs lib;})
     (import ./radare2 {inherit inputs pkgs lib;})
     (import ./strace {inherit inputs pkgs lib;})
   ];

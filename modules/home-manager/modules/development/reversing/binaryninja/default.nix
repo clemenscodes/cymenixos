@@ -1,5 +1,5 @@
 {
-  pkgs,
+  inputs,
   lib,
   ...
 }: {
@@ -8,6 +8,12 @@
   ...
 }: let
   cfg = config.modules.development.reversing;
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    config = {
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["binaryninja-free"];
+    };
+  };
 in {
   options = {
     modules = {
