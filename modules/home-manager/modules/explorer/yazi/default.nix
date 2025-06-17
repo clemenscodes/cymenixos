@@ -206,10 +206,6 @@ in {
                 run = ''piper -- CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"'';
               }
               {
-                name = "*/";
-                run = ''piper -- eza --color=always --icons=always --group-directories-first --no-quotes "$1"'';
-              }
-              {
                 mime = "{audio,video,image}/*";
                 run = "mediainfo";
               }
