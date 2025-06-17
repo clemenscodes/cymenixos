@@ -53,7 +53,7 @@
     y "$@"
   '';
 
-  hexyl-yazi = pkgs.mkDerivation {
+  hexyl-yazi = pkgs.stdenv.mkDerivation {
     name = "hexyl.yazi";
     src = inputs.hexyl-yazi;
     installPhase = ''
