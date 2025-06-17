@@ -3596,23 +3596,6 @@
         "type": "github"
       }
     },
-    "hexyl-yazi": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1749038996,
-        "narHash": "sha256-n0shoqUZWUjWK+1PfPTjZxEg6g+kmWBRaFANg6sOUpI=",
-        "owner": "DivitMittal",
-        "repo": "hexyl.yazi",
-        "rev": "ec8e5ed25576dbb8c5b553f3917befab20539258",
-        "type": "github"
-      },
-      "original": {
-        "owner": "DivitMittal",
-        "ref": "update-deprecated-api-v25.5.31",
-        "repo": "hexyl.yazi",
-        "type": "github"
-      }
-    },
     "hls-1.10": {
       "flake": false,
       "locked": {
@@ -7483,11 +7466,11 @@
         "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
-        "lastModified": 1750134509,
-        "narHash": "sha256-wh7G45Q/qcBH1yNM157pXKo/NrlraAqKVDwQ69o8v8E=",
+        "lastModified": 1750146427,
+        "narHash": "sha256-7uCxz+XobHbuLz/eO7YuPbPxXEFI/dnOiNk2dCZdUjs=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "be8fafc7b7641c56beee2f6506003d00488ebcf5",
+        "rev": "ad98c506def8096a521e1c70badff8b358a34604",
         "type": "github"
       },
       "original": {
@@ -7919,7 +7902,6 @@
         "codevim": "codevim",
         "cymenixvim": "cymenixvim",
         "disko": "disko",
-        "hexyl-yazi": "hexyl-yazi",
         "home-manager": "home-manager_2",
         "impermanence": "impermanence",
         "lanzaboote": "lanzaboote",

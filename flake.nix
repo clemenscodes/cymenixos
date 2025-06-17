@@ -128,10 +128,6 @@
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux/develop";
     };
-    hexyl-yazi = {
-      url = "github:DivitMittal/hexyl.yazi/update-deprecated-api-v25.5.31";
-      flake = false;
-    };
   };
   outputs = {
     self,

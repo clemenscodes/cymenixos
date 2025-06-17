@@ -52,15 +52,6 @@
     }
     y "$@"
   '';
-
-  hexyl = pkgs.stdenv.mkDerivation {
-    name = "hexyl.yazi";
-    src = inputs.hexyl-yazi;
-    installPhase = ''
-      mkdir -p $out
-      cp $src/* $out
-    '';
-  };
 in {
   options = {
     modules = {
@@ -165,15 +156,13 @@ in {
             toggle-pane
             mediainfo
             rsync
-            miller
             piper
             ;
-          inherit hexyl;
         };
         settings = {
           mgr = {
             show_hidden = true;
-            show_symlink = true;
+            show_symlink = false;
           };
           preview = {
             max_width = 1000;
