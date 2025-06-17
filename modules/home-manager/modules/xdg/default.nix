@@ -115,6 +115,11 @@ in {
       };
       mimeApps = {
         inherit (cfg.xdg) enable;
+        defaultApplications = {
+          "application/x-pie-executable" = ["nvim.desktop"];
+          "application/octet-stream" = ["nvim.desktop"];
+          "application/x-object" = ["nvim.desktop"];
+        };
       };
       portal = {
         inherit (cfg.xdg) enable;

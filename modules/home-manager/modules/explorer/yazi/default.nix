@@ -166,6 +166,14 @@ in {
             max_height = 1000;
             image_delay = 0;
           };
+          open = {
+            append_rules = [
+              {
+                name = "*";
+                use = "edit";
+              }
+            ];
+          };
           plugin = {
             prepend_preloaders = [
               {
