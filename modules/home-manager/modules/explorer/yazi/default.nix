@@ -53,7 +53,7 @@
     y "$@"
   '';
 
-  hexyl-yazi = pkgs.stdenv.mkDerivation {
+  hexyl = pkgs.stdenv.mkDerivation {
     name = "hexyl.yazi";
     src = inputs.hexyl-yazi;
     installPhase = ''
@@ -122,6 +122,15 @@ in {
     programs = {
       yazi = {
         inherit (cfg.yazi) enable;
+        initLua =
+          # Lua
+          ''
+            require("git"):setup()
+            require("full-border"):setup {
+              -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
+              type = ui.Border.ROUNDED,
+            }
+          '';
         enableZshIntegration = config.modules.shell.zsh.enable;
         plugins = {
           inherit
@@ -129,8 +138,9 @@ in {
             smart-enter
             git
             lazygit
+            full-border
             ;
-          inherit hexyl-yazi;
+          inherit hexyl;
         };
         settings = {
           mgr = {
