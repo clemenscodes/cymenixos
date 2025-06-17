@@ -140,9 +140,6 @@ in {
                 " ",
               }
             end, 500, Status.RIGHT)
-            if os.getenv("NVIM") then
-              require("toggle-pane"):entry("min-preview")
-            end
           '';
         enableZshIntegration = config.modules.shell.zsh.enable;
         plugins = {
@@ -240,16 +237,12 @@ in {
                 desc = "Enter the child directory, or open the file";
               }
               {
-                on = ["<C-y>"];
-                run = "plugin wl-clipboard";
-              }
-              {
                 on = ["d"];
                 run = "shell --confirm 'rm -rf $@'";
                 desc = "Remove files instantly";
               }
               {
-                on = ["T"];
+                on = ["n"];
                 run = "plugin toggle-pane max-preview";
                 desc = "Maximize or restore the preview pane";
               }
