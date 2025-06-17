@@ -86,7 +86,6 @@ in {
         pkgs.wl-clipboard
         pkgs.exiftool
         pkgs.mediainfo
-        pkgs.miller
         pkgs.glow
         pkgs.hexyl
         pkgs.eza
@@ -166,6 +165,8 @@ in {
             toggle-pane
             mediainfo
             rsync
+            miller
+            piper
             ;
           inherit hexyl;
         };
@@ -204,6 +205,26 @@ in {
             ];
             prepend_previewers = [
               {
+                name = "*";
+                run = ''piper -- echo "$1"'';
+              }
+              {
+                name = "*.tar*";
+                run = ''piper --format=url -- tar tf "$1"'';
+              }
+              {
+                name = "*.csv";
+                run = ''piper -- bat -p --color=always "$1"'';
+              }
+              {
+                name = "*.md";
+                run = ''piper -- CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"'';
+              }
+              {
+                name = "*/";
+                run = ''piper -- eza -TL=3 --color=always --icons=always --group-directories-first --no-quotes "$1"'';
+              }
+              {
                 mime = "{audio,video,image}/*";
                 run = "mediainfo";
               }
@@ -215,7 +236,7 @@ in {
             append_previewers = [
               {
                 name = "*";
-                run = "hexyl";
+                run = ''piper -- hexyl --border=none --terminal-width=$w "$1"'';
               }
             ];
           };
