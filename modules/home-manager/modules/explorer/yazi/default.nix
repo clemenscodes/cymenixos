@@ -126,10 +126,8 @@ in {
           # Lua
           ''
             require("git"):setup()
-            require("full-border"):setup {
-              -- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
-              type = ui.Border.ROUNDED,
-            }
+            require("starship"):setup()
+            require("full-border"):setup({ type = ui.Border.ROUNDED })
           '';
         enableZshIntegration = config.modules.shell.zsh.enable;
         plugins = {
@@ -139,6 +137,7 @@ in {
             git
             lazygit
             full-border
+            starship
             ;
           inherit hexyl;
         };
