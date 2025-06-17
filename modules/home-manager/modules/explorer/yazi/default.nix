@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
@@ -51,6 +52,15 @@
     }
     y "$@"
   '';
+
+  hexyl-yazi = pkgs.mkDerivation {
+    name = "hexyl.yazi";
+    src = inputs.hexyl-yazi;
+    installPhase = ''
+      mkdir -p $out
+      cp $src/* $out
+    '';
+  };
 in {
   options = {
     modules = {
@@ -114,17 +124,48 @@ in {
         inherit (cfg.yazi) enable;
         enableZshIntegration = config.modules.shell.zsh.enable;
         plugins = {
-          inherit (pkgs.yaziPlugins) smart-enter;
+          inherit
+            (pkgs.yaziPlugins)
+            smart-enter
+            git
+            lazygit
+            ;
+          inherit hexyl-yazi;
         };
         settings = {
           mgr = {
             show_hidden = true;
             show_symlink = false;
           };
+          plugin = {
+            prepend_fetchers = [
+              {
+                id = "git";
+                name = "*";
+                run = "git";
+              }
+              {
+                id = "git";
+                name = "*/";
+                run = "git";
+              }
+            ];
+            append_previewers = [
+              {
+                name = "*";
+                run = "hexyl";
+              }
+            ];
+          };
         };
         keymap = {
           mgr = {
             prepend_keymap = [
+              {
+                on = ["g" "i"];
+                run = "plugin lazygit";
+                desc = "run lazygit";
+              }
               {
                 on = ["l"];
                 run = "plugin smart-enter";

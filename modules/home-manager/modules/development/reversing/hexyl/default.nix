@@ -13,18 +13,16 @@ in {
     modules = {
       development = {
         reversing = {
-          radare2 = {
-            enable = lib.mkEnableOption "Enable radare2" // {default = false;};
+          hexyl = {
+            enable = lib.mkEnableOption "Enable hexyl" // {default = false;};
           };
         };
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.radare2.enable) {
+  config = lib.mkIf (cfg.enable && cfg.hexyl.enable) {
     home = {
-      packages = [
-        pkgs.radare2
-      ];
+      packages = [pkgs.hexyl];
     };
   };
 }

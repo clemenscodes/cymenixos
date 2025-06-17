@@ -128,6 +128,10 @@
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux/develop";
     };
+    hexyl-yazi = {
+      url = "github:Reledia/hexyl.yazi";
+      flake = false;
+    };
   };
   outputs = {
     self,

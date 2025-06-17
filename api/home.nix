@@ -63,7 +63,13 @@
             };
             reversing = {
               enable = false;
+              binaryninja = {
+                enable = false;
+              };
               ghidra = {
+                enable = false;
+              };
+              hexyl = {
                 enable = false;
               };
               ida = {
@@ -73,6 +79,18 @@
                 enable = false;
               };
               pince = {
+                enable = false;
+              };
+              pwndbg = {
+                enable = false;
+              };
+              radare2 = {
+                enable = false;
+              };
+              strace = {
+                enable = false;
+              };
+              xxd = {
                 enable = false;
               };
             };
