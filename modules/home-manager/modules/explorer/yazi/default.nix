@@ -92,6 +92,7 @@ in {
         pkgs.eza
         yazi-cwd
         pkgs.xdg-desktop-portal-termfilechooser
+        pkgs.rsync
       ];
     };
     xdg = {
@@ -149,6 +150,9 @@ in {
                 " ",
               }
             end, 500, Status.RIGHT)
+            if os.getenv("NVIM") then
+              require("toggle-pane"):entry("min-preview")
+            end
           '';
         enableZshIntegration = config.modules.shell.zsh.enable;
         plugins = {
@@ -159,15 +163,33 @@ in {
             lazygit
             full-border
             starship
+            toggle-pane
+            mediainfo
+            rsync
             ;
           inherit hexyl;
         };
         settings = {
           mgr = {
             show_hidden = true;
-            show_symlink = false;
+            show_symlink = true;
+          };
+          preview = {
+            max_width = 1000;
+            max_height = 1000;
+            image_delay = 0;
           };
           plugin = {
+            prepend_preloaders = [
+              {
+                mime = "{audio,video,image}/*";
+                run = "mediainfo";
+              }
+              {
+                mime = "application/subrip";
+                run = "mediainfo";
+              }
+            ];
             prepend_fetchers = [
               {
                 id = "git";
@@ -178,6 +200,16 @@ in {
                 id = "git";
                 name = "*/";
                 run = "git";
+              }
+            ];
+            prepend_previewers = [
+              {
+                mime = "{audio,video,image}/*";
+                run = "mediainfo";
+              }
+              {
+                mime = "application/subrip";
+                run = "mediainfo";
               }
             ];
             append_previewers = [
@@ -213,6 +245,16 @@ in {
                 on = ["d"];
                 run = "shell --confirm 'rm -rf $@'";
                 desc = "Remove files instantly";
+              }
+              {
+                on = ["T"];
+                run = "plugin toggle-pane max-preview";
+                desc = "Maximize or restore the preview pane";
+              }
+              {
+                on = ["R"];
+                run = "plugin rsync";
+                desc = "Copy files using rsync";
               }
             ];
           };
