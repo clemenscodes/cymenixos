@@ -30,7 +30,6 @@ in {
         upnp = true;
         externalInterface = "wlp0s20f0u3u1u1";
         internalIPs = [
-          "192.168.1.1/24"
           "enp5s0"
           "wlp0s20f0u3u1u1"
           "wlp4s0"
