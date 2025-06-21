@@ -4,6 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.gaming.emulation;
+  ps3bios = import ./firmware {inherit pkgs;};
 in {
   options = {
     modules = {
@@ -17,8 +18,24 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
-    environment = {
-      systemPackages = [pkgs.rpcs3];
+    home-manager = lib.mkIf (config.modules.home-manager.enable) {
+      users = {
+        ${config.modules.users.user} = {
+          home = {
+            packages = [pkgs.rpcs3];
+            file = {
+              ".config/rpcs3/bios" = {
+                source = "${ps3bios}/bios";
+              };
+            };
+            persistence = lib.mkIf config.modules.boot.enable {
+              "${config.modules.boot.impermanence.persistPath}/home/${config.modules.users.user}" = {
+                directories = [".config/rpcs3"];
+              };
+            };
+          };
+        };
+      };
     };
   };
 }
