@@ -1,4 +1,10 @@
-{lib, ...}: {...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
+  cfg = config.modules.gaming.emulation;
+in {
   options = {
     modules = {
       gaming = {
@@ -8,6 +14,11 @@
           };
         };
       };
+    };
+  };
+  config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
+    environment = {
+      systemPackages = [pkgs.rpcs3];
     };
   };
 }
