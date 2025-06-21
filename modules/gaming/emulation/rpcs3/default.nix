@@ -28,12 +28,6 @@ in {
       miniupnpd = {
         enable = true;
         upnp = true;
-        externalInterface = "wlp0s20f0u3u1u1";
-        internalIPs = [
-          "enp5s0"
-          "wlp0s20f0u3u1u1"
-          "wlp4s0"
-        ];
       };
     };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
