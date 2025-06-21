@@ -20,8 +20,8 @@ in {
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
     networking = {
       firewall = {
-        allowedTCPPOrts = [5000];
-        allowedUDPPOrts = [1900 3658];
+        allowedTCPPorts = [5000];
+        allowedUDPPorts = [1900 3658];
       };
     };
     services = {
