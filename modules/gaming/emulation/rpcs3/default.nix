@@ -18,6 +18,25 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
+    networking = {
+      firewall = {
+        allowedTCPPOrts = [5000];
+        allowedUDPPOrts = [1900 3658];
+      };
+    };
+    services = {
+      miniupnpd = {
+        enable = true;
+        upnp = true;
+        externalInterface = "wlp0s20f0u3u1u1";
+        internalIPs = [
+          "192.168.1.1/24"
+          "enp5s0"
+          "wlp0s20f0u3u1u1"
+          "wlp4s0"
+        ];
+      };
+    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${config.modules.users.user} = {
