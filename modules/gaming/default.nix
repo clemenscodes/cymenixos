@@ -50,17 +50,7 @@ in {
     environment = {
       systemPackages = [pkgs.winetricks];
     };
-    powerManagement = {
-      enable = true;
-      cpuFreqGovernor = "performance";
-      powertop = {
-        enable = true;
-      };
-    };
     services = {
-      cpupower-gui = {
-        enable = true;
-      };
       pipewire = {
         lowLatency = {
           inherit (cfg) enable;
