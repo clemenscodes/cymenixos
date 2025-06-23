@@ -34,7 +34,10 @@ in {
       users = {
         ${config.modules.users.user} = {
           home = {
-            packages = [pkgs.rpcs3];
+            packages = [
+              pkgs.rpcs3
+              pkgs.rusty-psn-gui
+            ];
             file = {
               ".config/rpcs3/bios" = {
                 source = "${ps3bios}/bios";
