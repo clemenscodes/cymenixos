@@ -50,10 +50,6 @@ in {
     environment = {
       systemPackages = [pkgs.winetricks];
     };
-    powerManagement = {
-      enable = true;
-      cpuFreqGovernor = "performance";
-    };
     services = {
       cpupower-gui = {
         enable = true;
