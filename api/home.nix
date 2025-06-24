@@ -9,7 +9,7 @@
           };
           browser = {
             enable = false;
-            defaultBrowser = "brave";
+            defaultBrowser = "firefox";
             chromium = {
               enable = false;
             };

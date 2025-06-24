@@ -23,7 +23,7 @@ in {
           type = lib.types.str;
           default =
             if isDesktop
-            then "brave"
+            then "firefox"
             else "echo";
         };
       };

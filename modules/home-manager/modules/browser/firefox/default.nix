@@ -20,8 +20,7 @@
 in {
   options = {
     modules = {
-      browser = {
-        firefox = {
+      browser = { firefox = {
           enable = lib.mkEnableOption "Enable firefox" // {default = false;};
         };
       };
