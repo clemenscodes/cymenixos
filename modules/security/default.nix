@@ -31,19 +31,13 @@
         loginLimits = [
           {
             domain = "*";
-            type = "hard";
-            item = "memlock";
-            value = "unlimited";
-          }
-          {
-            domain = "*";
-            type = "soft";
-            item = "memlock";
-            value = "unlimited";
-          }
-          {
-            domain = "*";
             item = "nofile";
+            type = "-";
+            value = "524288";
+          }
+          {
+            domain = "*";
+            item = "memlock";
             type = "-";
             value = "524288";
           }
