@@ -10,6 +10,7 @@
     (import ./gparted {inherit inputs pkgs lib;})
     (import ./lpi {inherit inputs pkgs lib;})
     (import ./lsusb {inherit inputs pkgs lib;})
+    (import ./p7zip {inherit inputs pkgs lib;})
     (import ./nix-prefetch-github {inherit inputs pkgs lib;})
     (import ./nix-prefetch-git {inherit inputs pkgs lib;})
     (import ./ripgrep {inherit inputs pkgs lib;})
