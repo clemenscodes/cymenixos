@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   lib,
   ...
 }: {
@@ -11,27 +12,10 @@
   cfg = config.modules.display.bar;
   isLaptop = osConfig.modules.machine.kind == "laptop";
   isNvidia = osConfig.modules.gpu.nvidia.enable;
-  isAmd = osConfig.modules.gpu.amd.enable;
-  useYubi = osConfig.modules.security.yubikey.enable;
   useEmail = config.modules.organization.email.enable;
   useMusic = config.modules.media.music.enable;
   useHyprland = config.modules.display.compositor.hyprland.enable;
   useSwaync = config.modules.display.notifications.swaync.enable;
-  pkgs = import inputs.nixpkgs {
-    inherit system;
-    overlays = [
-      (final: prev: {
-        waybar = prev.waybar.overrideAttrs (oldAttrs: {
-          src = prev.fetchFromGitHub {
-            owner = "Alexays";
-            repo = "Waybar";
-            rev = "67272cc47f430dcb82f533e29ae26495f7876154";
-            hash = "sha256-Q+ZrEkJr1sEu48VfOtkFrfT3B1yo4fJHB2qE9ZTpmuw=";
-          };
-        });
-      })
-    ];
-  };
 in {
   options = {
     modules = {
