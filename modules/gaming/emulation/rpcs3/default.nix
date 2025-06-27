@@ -35,7 +35,17 @@ in {
         ${config.modules.users.user} = {
           home = {
             packages = [
-              pkgs.rpcs3
+              (pkgs.rpcs3.overrideAttrs (oldAttrs: {
+                version = "0.0.37";
+                src = pkgs.fetchFromGitHub {
+                  owner = "RPCS3";
+                  repo = "rpcs3";
+                  rev = "v0.0.37";
+                  hash = "sha256-/ve1qe76Rc+mXHemq8DI2U9IP6+tPV5m5SNh/wmppEw=";
+                  fetchSubmodules = true;
+                };
+                patches = [];
+              }))
               pkgs.rusty-psn-gui
             ];
             file = {
