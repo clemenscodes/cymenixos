@@ -5,6 +5,17 @@
 }: {config, ...}: let
   cfg = config.modules.gaming.emulation;
   ps3bios = import ./firmware {inherit pkgs;};
+  rpcs3 = pkgs.rpcs3.overrideAttrs (oldAttrs: {
+    version = "0.0.37";
+    src = pkgs.fetchFromGitHub {
+      owner = "RPCS3";
+      repo = "rpcs3";
+      rev = "v0.0.37";
+      hash = "sha256-/ve1qe76Rc+mXHemq8DI2U9IP6+tPV5m5SNh/wmppEw=";
+      fetchSubmodules = true;
+    };
+    patches = [];
+  });
 in {
   options = {
     modules = {
@@ -35,22 +46,70 @@ in {
         ${config.modules.users.user} = {
           home = {
             packages = [
-              (pkgs.rpcs3.overrideAttrs (oldAttrs: {
-                version = "0.0.37";
-                src = pkgs.fetchFromGitHub {
-                  owner = "RPCS3";
-                  repo = "rpcs3";
-                  rev = "v0.0.37";
-                  hash = "sha256-/ve1qe76Rc+mXHemq8DI2U9IP6+tPV5m5SNh/wmppEw=";
-                  fetchSubmodules = true;
-                };
-                patches = [];
-              }))
+              rpcs3
               pkgs.rusty-psn-gui
             ];
             file = {
               ".config/rpcs3/bios" = {
                 source = "${ps3bios}/bios";
+              };
+              ".config/rpcs3/Icons/ui" = {
+                source = "${rpcs3}/share/rpcs3/Icons/ui";
+                recursive = true;
+              };
+              ".config/rpcs3/GuiConfigs/check_mark_white.png" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/check_mark_white.png";
+              };
+              ".config/rpcs3/GuiConfigs/list_arrow_blue.png" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_blue.png";
+              };
+              ".config/rpcs3/GuiConfigs/list_arrow_down_blue.png" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_down_blue.png";
+              };
+              ".config/rpcs3/GuiConfigs/list_arrow_down_green.png" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_down_green.png";
+              };
+              ".config/rpcs3/GuiConfigs/list_arrow_down_white.png" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_down_white.png";
+              };
+              ".config/rpcs3/GuiConfigs/list_arrow_green.png" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_green.png";
+              };
+              ".config/rpcs3/GuiConfigs/list_arrow_white.png" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_white.png";
+              };
+              ".config/rpcs3/GuiConfigs/ModernBlue Theme by TheMitoSan.qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/ModernBlue Theme by TheMitoSan.qss";
+              };
+              ".config/rpcs3/GuiConfigs/Nekotekina by GooseWing.qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/Nekotekina by GooseWing.qss";
+              };
+              ".config/rpcs3/GuiConfigs/Skyline (Nightfall).qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/Skyline (Nightfall).qss";
+              };
+              ".config/rpcs3/GuiConfigs/Skyline.qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/Skyline.qss";
+              };
+              ".config/rpcs3/GuiConfigs/YoRHa by Ani.qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/YoRHa by Ani.qss";
+              };
+              ".config/rpcs3/GuiConfigs/YoRHa-background.jpq" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/YoRHa-background.jpq";
+              };
+              ".config/rpcs3/GuiConfigs/Classic (Bright).qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/Classic (Bright).qss";
+              };
+              ".config/rpcs3/GuiConfigs/Darker Style by TheMitoSan.qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/Darker Style by TheMitoSan.qss";
+              };
+              ".config/rpcs3/GuiConfigs/Envy.qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/Envy.qss";
+              };
+              ".config/rpcs3/GuiConfigs/Kuroi (Dark) by Ani.qss" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/Kuroi (Dark) by Ani.qss";
+              };
+              ".config/rpcs3/GuiConfigs/kot-bg.jpq" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/kot-bg.jpq";
               };
               ".config/rpcs3/input_configs/active_input_configurations.yml" = {
                 text = ''
