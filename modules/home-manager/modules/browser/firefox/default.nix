@@ -20,7 +20,8 @@
 in {
   options = {
     modules = {
-      browser = { firefox = {
+      browser = {
+        firefox = {
           enable = lib.mkEnableOption "Enable firefox" // {default = false;};
         };
       };
@@ -221,6 +222,7 @@ in {
             id = 0;
             name = user;
             extensions = {
+              force = true;
               packages = with pkgs.nur.repos.rycee.firefox-addons; [
                 decentraleyes
                 ublock-origin
