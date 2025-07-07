@@ -217,7 +217,7 @@ in {
           };
         };
         profiles = {
-          ${user} = {
+          default = {
             id = 0;
             name = user;
             extensions = {
