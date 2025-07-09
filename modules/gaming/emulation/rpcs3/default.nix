@@ -783,7 +783,7 @@ in {
                     Disable SPU GETLLAR Spin Optimization: false
                     SPU Debug: false
                     MFC Debug: false
-                    Preferred SPU Threads: 1
+                    Preferred SPU Threads: 0
                     SPU delay penalty: 3
                     SPU loop detection: false
                     Max SPURS Threads: 6
@@ -800,7 +800,7 @@ in {
                     MFC Commands Timeout: 0
                     MFC Commands Shuffling In Steps: false
                     Enable TSX: Disabled
-                    XFloat Accuracy: Relaxed
+                    XFloat Accuracy: Accurate
                     Accurate PPU 128-byte Reservation Op Max Length: 0
                     Stub PPU Traps: 0
                     Precise SPU Verification: false
@@ -825,7 +825,7 @@ in {
                     SPU Wake-Up Delay Thread Mask: 63
                     Max CPU Preempt Count: 0
                     Allow RSX CPU Preemptions: true
-                    Sleep Timers Accuracy: As Host
+                    Sleep Timers Accuracy: Usleep Only
                     Usleep Time Addend: 0
                     Performance Report Threshold: 500
                     Enable Performance Report: false
@@ -845,14 +845,14 @@ in {
                     Second Frame Limit: 0
                     MSAA: Disabled
                     Shader Mode: Async Shader Recompiler
-                    Shader Precision: Auto
+                    Shader Precision: Ultra
                     Write Color Buffers: true
                     Write Depth Buffer: true
                     Read Color Buffers: false
                     Read Depth Buffer: true
                     Handle RSX Memory Tiling: false
                     Log shader programs: false
-                    VSync: true
+                    VSync: false
                     Debug output: false
                     Debug overlay: false
                     Renderdoc Compatibility Mode: false
@@ -871,27 +871,27 @@ in {
                     Use full RGB output range: true
                     Strict Texture Flushing: false
                     Multithreaded RSX: true
-                    Relaxed ZCULL Sync: true
+                    Relaxed ZCULL Sync: false
                     Force Hardware MSAA Resolve: false
                     3D Display Mode: Disabled
                     Debug Program Analyser: false
-                    Accurate ZCULL stats: false
+                    Accurate ZCULL stats: true
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
                     Resolution Scale: 150
-                    Anisotropic Filter Override: 0
+                    Anisotropic Filter Override: 16
                     Texture LOD Bias Addend: 0
                     Minimum Scalable Dimension: 160
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
-                    Driver Wake-Up Delay: 40
+                    Driver Wake-Up Delay: 20
                     Vblank Rate: 60
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
                     Disable MSL Fast Math: false
                     Disable Asynchronous Memory Manager: false
-                    Output Scaling Mode: Bilinear
+                    Output Scaling Mode: FidelityFX Super Resolution
                     Vulkan:
                       Adapter: AMD Radeon RX 7900 XTX (RADV NAVI31)
                       Force FIFO present mode: false
