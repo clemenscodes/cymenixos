@@ -3,9 +3,7 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
-  cfg = config.modules;
-in {
+}: {config, ...}: {
   imports = [inputs.chaotic.nixosModules.default];
   options = {
     modules = {
