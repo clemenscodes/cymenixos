@@ -29,12 +29,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
-    networking = {
-      firewall = {
-        allowedTCPPorts = [5000];
-        allowedUDPPorts = [1900 3658];
-      };
-    };
     services = {
       miniupnpd = {
         enable = true;
@@ -52,6 +46,9 @@ in {
             file = {
               ".config/rpcs3/bios" = {
                 source = "${ps3bios}/bios";
+              };
+              ".config/rpcs3/patches/patch.yml" = {
+                source = ./patch.yml;
               };
               ".config/rpcs3/Icons/ui" = {
                 source = "${rpcs3}/share/rpcs3/Icons/ui";
@@ -93,8 +90,8 @@ in {
               ".config/rpcs3/GuiConfigs/YoRHa by Ani.qss" = {
                 source = "${rpcs3}/share/rpcs3/GuiConfigs/YoRHa by Ani.qss";
               };
-              ".config/rpcs3/GuiConfigs/YoRHa-background.jpq" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/YoRHa-background.jpq";
+              ".config/rpcs3/GuiConfigs/YoRHa-background.jpg" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/YoRHa-background.jpg";
               };
               ".config/rpcs3/GuiConfigs/Classic (Bright).qss" = {
                 source = "${rpcs3}/share/rpcs3/GuiConfigs/Classic (Bright).qss";
@@ -108,8 +105,8 @@ in {
               ".config/rpcs3/GuiConfigs/Kuroi (Dark) by Ani.qss" = {
                 source = "${rpcs3}/share/rpcs3/GuiConfigs/Kuroi (Dark) by Ani.qss";
               };
-              ".config/rpcs3/GuiConfigs/kot-bg.jpq" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/kot-bg.jpq";
+              ".config/rpcs3/GuiConfigs/kot-bg.jpg" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs/kot-bg.jpg";
               };
               ".config/rpcs3/input_configs/active_input_configurations.yml" = {
                 text = ''
@@ -120,8 +117,8 @@ in {
               ".config/rpcs3/input_configs/global/Default.yml" = {
                 text = ''
                   Player 1 Input:
-                    Handler: DualShock 4
-                    Device: "DS4 Pad #1"
+                    Handler: SDL
+                    Device: JoyMouse 1
                     Config:
                       Left Stick Left: LS X-
                       Left Stick Down: LS Y-
@@ -131,23 +128,23 @@ in {
                       Right Stick Down: RS Y-
                       Right Stick Right: RS X+
                       Right Stick Up: RS Y+
-                      Start: Options
-                      Select: Share
-                      PS Button: PS Button
-                      Square: Square
-                      Cross: Cross
-                      Circle: Circle
-                      Triangle: Triangle
+                      Start: Start
+                      Select: Back
+                      PS Button: Guide
+                      Square: West
+                      Cross: South
+                      Circle: East
+                      Triangle: North
                       Left: Left
                       Down: Down
                       Right: Right
                       Up: Up
-                      R1: R1
-                      R2: R2
-                      R3: R3
-                      L1: L1
-                      L2: L2
-                      L3: L3
+                      R1: RB
+                      R2: RT
+                      R3: RS
+                      L1: LB
+                      L2: LT
+                      L3: LS
                       IR Nose: ""
                       IR Tail: ""
                       IR Left: ""
@@ -180,10 +177,10 @@ in {
                       Analog Limiter Toggle Mode: false
                       Left Stick Multiplier: 100
                       Right Stick Multiplier: 100
-                      Left Stick Deadzone: 40
-                      Right Stick Deadzone: 40
-                      Left Stick Anti-Deadzone: 33
-                      Right Stick Anti-Deadzone: 33
+                      Left Stick Deadzone: 8000
+                      Right Stick Deadzone: 8000
+                      Left Stick Anti-Deadzone: 4259
+                      Right Stick Anti-Deadzone: 4259
                       Left Trigger Threshold: 0
                       Right Trigger Threshold: 0
                       Left Pad Squircling Factor: 8000
@@ -786,7 +783,7 @@ in {
                     Disable SPU GETLLAR Spin Optimization: false
                     SPU Debug: false
                     MFC Debug: false
-                    Preferred SPU Threads: 0
+                    Preferred SPU Threads: 1
                     SPU delay penalty: 3
                     SPU loop detection: false
                     Max SPURS Threads: 6
@@ -888,7 +885,7 @@ in {
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 1
-                    Vblank Rate: 240
+                    Vblank Rate: 60
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
