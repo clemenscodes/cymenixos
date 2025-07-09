@@ -841,11 +841,11 @@ in {
                     Renderer: Vulkan
                     Resolution: 1280x720
                     Aspect ratio: 16:9
-                    Frame limit: Display
+                    Frame limit: 60
                     Second Frame Limit: 0
                     MSAA: Disabled
                     Shader Mode: Async Shader Recompiler
-                    Shader Precision: Ultra
+                    Shader Precision: Auto
                     Write Color Buffers: true
                     Write Depth Buffer: true
                     Read Color Buffers: false
@@ -871,27 +871,27 @@ in {
                     Use full RGB output range: true
                     Strict Texture Flushing: false
                     Multithreaded RSX: true
-                    Relaxed ZCULL Sync: false
+                    Relaxed ZCULL Sync: true
                     Force Hardware MSAA Resolve: false
                     3D Display Mode: Disabled
                     Debug Program Analyser: false
-                    Accurate ZCULL stats: true
+                    Accurate ZCULL stats: false
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
-                    Resolution Scale: 300
+                    Resolution Scale: 150
                     Anisotropic Filter Override: 0
                     Texture LOD Bias Addend: 0
                     Minimum Scalable Dimension: 160
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
-                    Driver Wake-Up Delay: 1
+                    Driver Wake-Up Delay: 40
                     Vblank Rate: 60
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
                     Disable MSL Fast Math: false
                     Disable Asynchronous Memory Manager: false
-                    Output Scaling Mode: FidelityFX Super Resolution
+                    Output Scaling Mode: Bilinear
                     Vulkan:
                       Adapter: AMD Radeon RX 7900 XTX (RADV NAVI31)
                       Force FIFO present mode: false
