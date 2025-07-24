@@ -69,6 +69,9 @@ in {
           {
             id = "gebbhagfogifgggkldgodflihgfeippi"; # YouTube Dislikes
           }
+          {
+            id = "ienfalfjdbdpebioblfackkekamfmbnh"; # Angular DevTools
+          }
         ];
       };
     };
