@@ -841,18 +841,18 @@ in {
                     Renderer: Vulkan
                     Resolution: 1280x720
                     Aspect ratio: 16:9
-                    Frame limit: Infinite
+                    Frame limit: 60
                     Second Frame Limit: 0
                     MSAA: Disabled
                     Shader Mode: Async Shader Recompiler
-                    Shader Precision: High
+                    Shader Precision: Ultra
                     Write Color Buffers: true
                     Write Depth Buffer: true
                     Read Color Buffers: false
                     Read Depth Buffer: true
                     Handle RSX Memory Tiling: false
                     Log shader programs: false
-                    VSync: false
+                    VSync: true
                     Debug output: false
                     Debug overlay: false
                     Renderdoc Compatibility Mode: false
@@ -879,13 +879,13 @@ in {
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
                     Resolution Scale: 150
-                    Anisotropic Filter Override: 0
+                    Anisotropic Filter Override: 16
                     Texture LOD Bias Addend: 0
                     Minimum Scalable Dimension: 160
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 20
-                    Vblank Rate: 240
+                    Vblank Rate: 60
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
@@ -948,7 +948,7 @@ in {
                     Music Handler: Qt
                   Input/Output:
                     Keyboard: "Null"
-                    Mouse: Basic
+                    Mouse: "Null"
                     Camera: "Null"
                     Camera type: Unknown
                     Camera flip: None
@@ -1013,7 +1013,7 @@ in {
                     Show mouse and keyboard toggle hint: true
                     Use native user interface: true
                     GDB Server: 127.0.0.1:2345
-                    Silence All Logs: false
+                    Silence All Logs: true
                     Window Title Format: "FPS: %F | %R | %V | %T [%t]"
                     Pause Emulation During Home Menu: false
                   Log: {}
