@@ -43,6 +43,7 @@
           "libcurand"
           "libcusolver"
           "libnvjitlink"
+          "libcusparse"
         ];
     };
   };
