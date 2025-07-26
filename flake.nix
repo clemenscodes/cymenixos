@@ -92,6 +92,10 @@
     };
     lsfg-vk-flake.url = "github:pabloaul/lsfg-vk-flake/main";
     lsfg-vk-flake.inputs.nixpkgs.follows = "nixpkgs";
+    joymouse = {
+      url = "github:clemenscodes/joymouse-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     umu = {
       url = "github:Open-Wine-Components/umu-launcher?dir=packaging/nix";
       inputs = {

@@ -1,8 +1,13 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.gaming.emulation;
   ps3bios = import ./firmware {inherit pkgs;};
   rpcs3 = pkgs.rpcs3.overrideAttrs (oldAttrs: {
@@ -19,9 +24,16 @@
   user = config.modules.users.name;
   uncharted = pkgs.writeShellApplication {
     name = "uncharted";
-    runtimeInputs = [pkgs.gamemode];
+    runtimeInputs = [
+      pkgs.gamemode
+      pkgs.mullvad
+      inputs.joymouse.packages.${system}.joymouse-musl-static
+    ];
     text = ''
+      joymouse-musl-static &
+      mullvad disconnect
       MANGOHUD=1 ENABLE_LSFG=1 gamemoderun ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
+      mullvad connect
     '';
   };
 in {
