@@ -44,6 +44,7 @@
           "libcusolver"
           "libnvjitlink"
           "libcusparse"
+          "libnpp"
         ];
     };
   };
