@@ -69,7 +69,6 @@ in {
             hash = "sha256-9hWJza3SOljlZytJZIdIgVoDFQfm3b70t97mRwNpoKE=";
           };
         }))
-        rtw89
       ];
       extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
