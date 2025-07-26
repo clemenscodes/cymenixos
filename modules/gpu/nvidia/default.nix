@@ -37,6 +37,7 @@
           "cuda_nvrtc"
           "cuda_nvtx"
           "cuda_profiler_api"
+          "cuda_sanitizer_api"
         ];
     };
   };
