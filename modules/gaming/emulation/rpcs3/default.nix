@@ -16,6 +16,7 @@
     };
     patches = [];
   });
+  user = config.modules.users.name;
 in {
   options = {
     modules = {
@@ -37,7 +38,7 @@ in {
     };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
-        ${config.modules.users.user} = {
+        ${user} = {
           xdg = {
             desktopEntries = {
               "Uncharted 2： Among Thieves™" = {
@@ -45,8 +46,8 @@ in {
                 comment = "Uncharted 2: Among Thieves™";
                 type = "Application";
                 categories = ["Application" "Game"];
-                exec = ''sh -c "MANGOHUD=1 ENABLE_LSFG=1 ${rpcs3}/bin/.rpcs3-wrapped --no-gui $HOME/Games/U2/Game"'';
-                icon = "/home/${config.modules.users.user}/.config/rpcs3/Icons/game_icons/BCES00757/shortcut.png";
+                exec = ''sh -c "MANGOHUD=1 ENABLE_LSFG=1 ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game"'';
+                icon = "/home/${user}/.config/rpcs3/Icons/game_icons/BCES00757/shortcut.png";
                 noDisplay = false;
                 startupNotify = true;
                 terminal = false;
@@ -1036,7 +1037,7 @@ in {
               };
             };
             persistence = lib.mkIf config.modules.boot.enable {
-              "${config.modules.boot.impermanence.persistPath}/home/${config.modules.users.user}" = {
+              "${config.modules.boot.impermanence.persistPath}/home/${user}" = {
                 directories = [".config/rpcs3"];
               };
             };
