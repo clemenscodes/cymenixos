@@ -38,6 +38,21 @@ in {
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${config.modules.users.user} = {
+          xdg = {
+            desktopEntries = {
+              "Uncharted 2： Among Thieves™" = {
+                name = "Uncharted 2: Among Thieves™";
+                comment = "Uncharted 2: Among Thieves™";
+                type = "Application";
+                categories = ["Application" "Game"];
+                exec = ''sh -c "MANGOHUD=1 ENABLE_LSFG=1 ${rpcs3}/bin/.rpcs3-wrapped --no-gui $HOME/Games/U2/Game"'';
+                icon = "/home/${config.modules.users.user}/.config/rpcs3/Icons/game_icons/BCES00757/shortcut.png";
+                noDisplay = false;
+                startupNotify = true;
+                terminal = false;
+              };
+            };
+          };
           home = {
             packages = [
               rpcs3
@@ -841,7 +856,7 @@ in {
                     Renderer: Vulkan
                     Resolution: 1280x720
                     Aspect ratio: 16:9
-                    Frame limit: 120
+                    Frame limit: Infinite
                     Second Frame Limit: 0
                     MSAA: Auto
                     Shader Mode: Async Shader Recompiler
@@ -852,7 +867,7 @@ in {
                     Read Depth Buffer: true
                     Handle RSX Memory Tiling: false
                     Log shader programs: false
-                    VSync: true
+                    VSync: false
                     Debug output: false
                     Debug overlay: false
                     Renderdoc Compatibility Mode: false
@@ -870,7 +885,7 @@ in {
                     Disable Vulkan Memory Allocator: false
                     Use full RGB output range: true
                     Strict Texture Flushing: false
-                    Multithreaded RSX: true
+                    Multithreaded RSX: false
                     Relaxed ZCULL Sync: false
                     Force Hardware MSAA Resolve: false
                     3D Display Mode: Disabled
@@ -885,7 +900,7 @@ in {
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 20
-                    Vblank Rate: 120
+                    Vblank Rate: 240
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
