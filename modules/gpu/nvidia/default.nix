@@ -24,6 +24,7 @@
           "nvidia-settings"
           "nvidia-persistenced"
           "cuda-merged"
+          "cuda_cuobjdump"
         ];
     };
   };
