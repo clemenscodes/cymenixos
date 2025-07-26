@@ -14,13 +14,17 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.corectrl.enable) {
-    programs = {
-      corectrl = {
-        inherit (cfg.corectrl) enable;
-        gpuOverclock = {
+    hardware = {
+      amdgpu = {
+        overdrive = {
           enable = true;
           ppfeaturemask = "0xfff7ffff";
         };
+      };
+    };
+    programs = {
+      corectrl = {
+        inherit (cfg.corectrl) enable;
       };
     };
     security = {
