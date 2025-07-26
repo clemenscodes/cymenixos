@@ -33,6 +33,7 @@
           "cuda_cudart"
           "cuda_cupti"
           "cuda_cuxxfilt"
+          "cuda_nvml_dev"
         ];
     };
   };
