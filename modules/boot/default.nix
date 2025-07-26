@@ -1,11 +1,21 @@
 {
   inputs,
-  pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {config, system, ...}: let
   cfg = config.modules;
   inherit (cfg.boot) biosSupport efiSupport libreboot device hibernation swapResumeOffset;
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    config = {
+      allowUnfreePredicate = pkg:
+        builtins.elem (lib.getName pkg) [
+          "nvidia-x11"
+          "nvidia-settings"
+          "nvidia-persistenced"
+        ];
+    };
+  };
 in {
   imports = [
     (import ./impermanence {inherit inputs pkgs lib;})

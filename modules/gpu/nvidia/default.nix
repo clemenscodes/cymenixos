@@ -85,7 +85,7 @@ in {
         #   intelBusId = "PCI:0:2:0";
         # };
         open = true;
-        nvidiaSettings = false;
+        nvidiaSettings = true;
         nvidiaPersistenced = true;
         # CS2 doesnt boot up in stable or beta
         # @see https://forums.developer.nvidia.com/t/cs2-stuck-on-valve-logo-on-startup-545-beta-branch/269778
