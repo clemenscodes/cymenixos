@@ -101,7 +101,7 @@ in {
         };
         open = true;
         nvidiaSettings = true;
-        nvidiaPersistenced = false;
+        nvidiaPersistenced = true;
         package = config.boot.kernelPackages.nvidiaPackages.beta;
       };
       graphics = {
