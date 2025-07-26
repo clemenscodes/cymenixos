@@ -32,7 +32,7 @@
     text = ''
       joymouse &
       mullvad disconnect
-      MANGOHUD=1 ENABLE_LSFG=1 gamemoderun ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
+      gamemoderun ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
       mullvad connect
     '';
   };
@@ -876,7 +876,7 @@ in {
                     Renderer: Vulkan
                     Resolution: 1280x720
                     Aspect ratio: 16:9
-                    Frame limit: Infinite
+                    Frame limit: 60
                     Second Frame Limit: 0
                     MSAA: Auto
                     Shader Mode: Async Shader Recompiler
@@ -887,7 +887,7 @@ in {
                     Read Depth Buffer: true
                     Handle RSX Memory Tiling: false
                     Log shader programs: false
-                    VSync: false
+                    VSync: true
                     Debug output: false
                     Debug overlay: false
                     Renderdoc Compatibility Mode: false
@@ -905,7 +905,7 @@ in {
                     Disable Vulkan Memory Allocator: false
                     Use full RGB output range: true
                     Strict Texture Flushing: false
-                    Multithreaded RSX: false
+                    Multithreaded RSX: true
                     Relaxed ZCULL Sync: false
                     Force Hardware MSAA Resolve: false
                     3D Display Mode: Disabled
@@ -920,7 +920,7 @@ in {
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 20
-                    Vblank Rate: 240
+                    Vblank Rate: 60
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
