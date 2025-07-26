@@ -98,7 +98,7 @@ in {
           # as long as this issue is not fixed
           # @see https://github.com/NVIDIA/open-gpu-kernel-modules/issues/360
           enable = true;
-          finegrained = false;
+          finegrained = true;
         };
         open = true;
         nvidiaSettings = true;
