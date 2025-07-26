@@ -41,6 +41,7 @@
           "libcublas"
           "libcufft"
           "libcurand"
+          "libcusolver"
         ];
     };
   };
