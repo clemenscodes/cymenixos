@@ -42,6 +42,7 @@
           "libcufft"
           "libcurand"
           "libcusolver"
+          "libnvjitlink"
         ];
     };
   };
