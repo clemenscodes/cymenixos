@@ -800,7 +800,7 @@ in {
                     MFC Commands Timeout: 0
                     MFC Commands Shuffling In Steps: false
                     Enable TSX: Disabled
-                    XFloat Accuracy: Relaxed
+                    XFloat Accuracy: Approximate
                     Accurate PPU 128-byte Reservation Op Max Length: 0
                     Stub PPU Traps: 0
                     Precise SPU Verification: false
@@ -841,11 +841,11 @@ in {
                     Renderer: Vulkan
                     Resolution: 1280x720
                     Aspect ratio: 16:9
-                    Frame limit: 60
+                    Frame limit: 120
                     Second Frame Limit: 0
-                    MSAA: Disabled
+                    MSAA: Auto
                     Shader Mode: Async Shader Recompiler
-                    Shader Precision: Ultra
+                    Shader Precision: High
                     Write Color Buffers: true
                     Write Depth Buffer: true
                     Read Color Buffers: false
@@ -870,22 +870,22 @@ in {
                     Disable Vulkan Memory Allocator: false
                     Use full RGB output range: true
                     Strict Texture Flushing: false
-                    Multithreaded RSX: false
+                    Multithreaded RSX: true
                     Relaxed ZCULL Sync: false
                     Force Hardware MSAA Resolve: false
                     3D Display Mode: Disabled
                     Debug Program Analyser: false
-                    Accurate ZCULL stats: true
+                    Accurate ZCULL stats: false
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
                     Resolution Scale: 150
-                    Anisotropic Filter Override: 16
+                    Anisotropic Filter Override: 0
                     Texture LOD Bias Addend: 0
                     Minimum Scalable Dimension: 160
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 20
-                    Vblank Rate: 60
+                    Vblank Rate: 120
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
@@ -902,7 +902,7 @@ in {
                       Asynchronous Queue Scheduler: Safe
                       VRAM allocation limit (MB): 65536
                     Performance Overlay:
-                      Enabled: true
+                      Enabled: false
                       Enable Framerate Graph: true
                       Enable Frametime Graph: false
                       Framerate datapoints: 199
@@ -1001,12 +1001,12 @@ in {
                     Automatically start games after boot: true
                     Exit RPCS3 when process finishes: false
                     Pause emulation on RPCS3 focus loss: false
-                    Start games in fullscreen mode: false
+                    Start games in fullscreen mode: true
                     Prevent display sleep while running games: true
                     Show trophy popups: true
                     Show RPCN popups: true
-                    Show shader compilation hint: true
-                    Show PPU compilation hint: true
+                    Show shader compilation hint: false
+                    Show PPU compilation hint: false
                     Show autosave/autoload hint: false
                     Show pressure intensity toggle hint: true
                     Show analog limiter toggle hint: true
