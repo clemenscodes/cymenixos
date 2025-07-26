@@ -100,20 +100,10 @@ in {
           enable = true;
           finegrained = false;
         };
-        # prime = {
-        #   offload = {
-        #     enable = true;
-        #     enableOffloadCmd = true;
-        #   };
-        #   nvidiaBusId = "PCI:1:0:0";
-        #   intelBusId = "PCI:0:2:0";
-        # };
         open = true;
         nvidiaSettings = true;
         nvidiaPersistenced = true;
-        # CS2 doesnt boot up in stable or beta
-        # @see https://forums.developer.nvidia.com/t/cs2-stuck-on-valve-logo-on-startup-545-beta-branch/269778
-        package = config.boot.kernelPackages.nvidiaPackages.production;
+        package = config.boot.kernelPackages.nvidiaPackages.beta;
       };
       graphics = {
         extraPackages = [pkgs.nvidia-vaapi-driver];
