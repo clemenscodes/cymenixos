@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   lib,
   ...
 }: {
@@ -15,17 +16,6 @@
     export __VK_LAYER_NV_optimus=NVIDIA_only
     exec "$@"
   '';
-  pkgs = import inputs.nixpkgs {
-    inherit system;
-    config = {
-      allowUnfreePredicate = pkg:
-        builtins.elem (lib.getName pkg) [
-          "nvidia-x11"
-          "nvidia-settings"
-          "nvidia-persistenced"
-        ];
-    };
-  };
 in {
   imports = [
     (import ./scripts {inherit inputs pkgs lib;})
@@ -50,7 +40,7 @@ in {
         nvidia-offload
         pkgs.cudaPackages.cudatoolkit
         pkgs.cudaPackages.cudnn
-        pkgs.nvtop-amd
+        pkgs.nvtopPackages.full
       ];
     };
     boot = {
