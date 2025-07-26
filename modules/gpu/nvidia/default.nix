@@ -78,9 +78,8 @@ in {
       ];
     };
     boot = {
-      kernelModules = ["nvidia_uvm"];
+      kernelModules = ["nvidia_uvm" "nvidia"];
       kernelParams = ["nvidia.NVreg_PreserveVideoMemoryAllocations=1"];
-      blacklistedKernelModules = ["nouveau"];
     };
     services = {
       xserver = {
@@ -102,7 +101,7 @@ in {
         };
         open = true;
         nvidiaSettings = true;
-        nvidiaPersistenced = false;
+        nvidiaPersistenced = true;
         package = config.boot.kernelPackages.nvidiaPackages.beta;
       };
       graphics = {
