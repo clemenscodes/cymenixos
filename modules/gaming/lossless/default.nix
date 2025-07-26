@@ -24,7 +24,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.lossless.enable) {
     environment = {
       systemPackages = [
-        inputs.lsfg-vk-flake.packages.${system}.lsfg-vk
+        inputs.lsfg-vk-flake.packages.${system}.default
       ];
     };
     services = {
