@@ -30,6 +30,7 @@
           "cuda_nvdisasm"
           "cuda_nvprune"
           "cuda_cccl"
+          "cuda_cudart"
         ];
     };
   };
