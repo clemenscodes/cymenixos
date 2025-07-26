@@ -28,11 +28,11 @@ in {
   imports = [
     inputs.nix-gaming.nixosModules.pipewireLowLatency
     inputs.nix-gaming.nixosModules.platformOptimizations
-    inputs.lsfg-vk-flake.nixosModules.default
     (import ./emulation {inherit inputs pkgs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
     (import ./heroic {inherit inputs pkgs lib;})
+    (import ./lossless {inherit inputs pkgs lib;})
     (import ./lutris {inherit inputs pkgs lib;})
     (import ./mangohud {inherit inputs pkgs lib;})
     (import ./nexusmods {inherit inputs pkgs lib;})
@@ -52,7 +52,6 @@ in {
       systemPackages = [pkgs.winetricks];
     };
     services = {
-      lsfg-vk.enable = true;
       pipewire = {
         lowLatency = {
           inherit (cfg) enable;

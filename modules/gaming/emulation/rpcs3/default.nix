@@ -800,7 +800,7 @@ in {
                     MFC Commands Timeout: 0
                     MFC Commands Shuffling In Steps: false
                     Enable TSX: Disabled
-                    XFloat Accuracy: Accurate
+                    XFloat Accuracy: Relaxed
                     Accurate PPU 128-byte Reservation Op Max Length: 0
                     Stub PPU Traps: 0
                     Precise SPU Verification: false
@@ -841,11 +841,11 @@ in {
                     Renderer: Vulkan
                     Resolution: 1280x720
                     Aspect ratio: 16:9
-                    Frame limit: 60
+                    Frame limit: Infinite
                     Second Frame Limit: 0
                     MSAA: Disabled
                     Shader Mode: Async Shader Recompiler
-                    Shader Precision: Ultra
+                    Shader Precision: High
                     Write Color Buffers: true
                     Write Depth Buffer: true
                     Read Color Buffers: false
@@ -870,7 +870,7 @@ in {
                     Disable Vulkan Memory Allocator: false
                     Use full RGB output range: true
                     Strict Texture Flushing: false
-                    Multithreaded RSX: true
+                    Multithreaded RSX: false
                     Relaxed ZCULL Sync: false
                     Force Hardware MSAA Resolve: false
                     3D Display Mode: Disabled
@@ -879,13 +879,13 @@ in {
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
                     Resolution Scale: 150
-                    Anisotropic Filter Override: 16
+                    Anisotropic Filter Override: 0
                     Texture LOD Bias Addend: 0
                     Minimum Scalable Dimension: 160
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 20
-                    Vblank Rate: 60
+                    Vblank Rate: 240
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
@@ -898,7 +898,7 @@ in {
                       Force primitive restart flag: false
                       Exclusive Fullscreen Mode: Automatic
                       Asynchronous Texture Streaming 2: true
-                      FidelityFX CAS Sharpening Intensity: 100
+                      FidelityFX CAS Sharpening Intensity: 50
                       Asynchronous Queue Scheduler: Safe
                       VRAM allocation limit (MB): 65536
                     Performance Overlay:

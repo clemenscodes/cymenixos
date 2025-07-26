@@ -164,6 +164,9 @@
           enable = false;
         };
       };
+      lossless = {
+        enable = false;
+      };
       gamemode = {
         enable = false;
       };
