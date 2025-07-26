@@ -90,6 +90,8 @@
     nix-gaming = {
       url = "github:fufexan/nix-gaming";
     };
+    lsfg-vk-flake.url = "github:pabloaul/lsfg-vk-flake/main";
+    lsfg-vk-flake.inputs.nixpkgs.follows = "nixpkgs";
     umu = {
       url = "github:Open-Wine-Components/umu-launcher?dir=packaging/nix";
       inputs = {
