@@ -45,6 +45,7 @@
           "libnvjitlink"
           "libcusparse"
           "libnpp"
+          "cudnn"
         ];
     };
   };
