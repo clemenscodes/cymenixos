@@ -34,6 +34,7 @@
           "cuda_cupti"
           "cuda_cuxxfilt"
           "cuda_nvml_dev"
+          "cuda_nvrtc"
         ];
     };
   };
