@@ -93,7 +93,7 @@ in {
       };
       graphics = {
         extraPackages = [pkgs.nvidia-vaapi-driver];
-        extraPackages32 = [pkgs.pkgsi686Linuxnvidia-vaapi-driver];
+        extraPackages32 = [pkgs.pkgsi686Linux.nvidia-vaapi-driver];
       };
     };
   };

@@ -9,7 +9,6 @@
   ...
 }: let
   cfg = config.modules.gaming;
-  inherit (config.modules.users) name;
 in {
   imports = [inputs.lsfg-vk-flake.nixosModules.default];
   options = {
@@ -30,7 +29,6 @@ in {
     services = {
       lsfg-vk = {
         enable = true;
-        losslessDLLFile = "/home/${name}/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll";
       };
     };
   };
