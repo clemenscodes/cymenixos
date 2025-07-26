@@ -876,7 +876,7 @@ in {
                     Renderer: Vulkan
                     Resolution: 1280x720
                     Aspect ratio: 16:9
-                    Frame limit: 60
+                    Frame limit: Infinite
                     Second Frame Limit: 0
                     MSAA: Auto
                     Shader Mode: Async Shader Recompiler
@@ -887,7 +887,7 @@ in {
                     Read Depth Buffer: true
                     Handle RSX Memory Tiling: false
                     Log shader programs: false
-                    VSync: true
+                    VSync: false
                     Debug output: false
                     Debug overlay: false
                     Renderdoc Compatibility Mode: false
@@ -920,7 +920,7 @@ in {
                     Shader Compiler Threads: 0
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 20
-                    Vblank Rate: 60
+                    Vblank Rate: 240
                     Vblank NTSC Fixup: false
                     DECR memory layout: false
                     Allow Host GPU Labels: false
