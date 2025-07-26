@@ -38,7 +38,6 @@ in {
           wayland = {
             enable = cfg.gui == "wayland";
           };
-          theme = "catppuccin-macchiato";
           extraPackages = [
             pkgs.kdePackages.breeze-icons
             pkgs.kdePackages.kirigami
