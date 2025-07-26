@@ -60,11 +60,10 @@ in {
         ${user} = {
           xdg = {
             desktopEntries = {
-              "Uncharted 2： Among Thieves™" = {
+              "Uncharted 2： Among Thieves" = {
                 name = "Uncharted 2: Among Thieves™";
-                comment = "Uncharted 2: Among Thieves™";
                 type = "Application";
-                categories = ["Application" "Game"];
+                categories = ["Game"];
                 exec = "${uncharted}/bin/uncharted";
                 icon = "/home/${user}/.config/rpcs3/Icons/game_icons/BCES00757/shortcut.png";
                 noDisplay = false;
