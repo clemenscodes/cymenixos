@@ -32,6 +32,7 @@
           "cuda_cccl"
           "cuda_cudart"
           "cuda_cupti"
+          "cuda_cuxxfilt"
         ];
     };
   };
