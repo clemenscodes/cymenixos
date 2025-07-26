@@ -40,6 +40,7 @@
           "cuda_sanitizer_api"
           "libcublas"
           "libcufft"
+          "libcurand"
         ];
     };
   };
