@@ -28,6 +28,7 @@
           "cuda_gdb"
           "cuda_nvcc"
           "cuda_nvdisasm"
+          "cuda_nvprune"
         ];
     };
   };
