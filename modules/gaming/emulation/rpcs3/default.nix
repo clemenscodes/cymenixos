@@ -19,9 +19,9 @@
   user = config.modules.users.name;
   uncharted = pkgs.writeShellApplication {
     name = "uncharted";
-    runtimeInputs = [pkgs.gamescope_git];
+    runtimeInputs = [pkgs.gamemode];
     text = ''
-      MANGOHUD=1 ENABLE_LSFG=1 ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
+      MANGOHUD=1 ENABLE_LSFG=1 gamemoderun ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
     '';
   };
 in {
