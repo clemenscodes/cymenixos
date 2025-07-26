@@ -30,7 +30,7 @@
       inputs.joymouse.packages.${system}.joymouse-musl-static
     ];
     text = ''
-      joymouse-musl-static &
+      joymouse &
       mullvad disconnect
       MANGOHUD=1 ENABLE_LSFG=1 gamemoderun ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
       mullvad connect
