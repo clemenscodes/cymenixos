@@ -2,11 +2,16 @@
   inputs,
   lib,
   ...
-}: {config, system, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules;
   inherit (cfg.boot) biosSupport efiSupport libreboot device hibernation swapResumeOffset;
   pkgs = import inputs.nixpkgs {
     inherit system;
+    overlays = [inputs.chaotic.overlays.default];
     config = {
       allowUnfreePredicate = pkg:
         builtins.elem (lib.getName pkg) [
