@@ -36,6 +36,7 @@
           "cuda_nvml_dev"
           "cuda_nvrtc"
           "cuda_nvtx"
+          "cuda_profiler_api"
         ];
     };
   };
