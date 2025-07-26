@@ -17,6 +17,13 @@
     patches = [];
   });
   user = config.modules.users.name;
+  uncharted = pkgs.writeShellApplication {
+    name = "uncharted";
+    runtimeInputs = [pkgs.gamescope_git];
+    text = ''
+      MANGOHUD=1 ENABLE_LSFG=1 ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
+    '';
+  };
 in {
   options = {
     modules = {
@@ -46,7 +53,7 @@ in {
                 comment = "Uncharted 2: Among Thieves™";
                 type = "Application";
                 categories = ["Application" "Game"];
-                exec = ''sh -c "MANGOHUD=1 ENABLE_LSFG=1 ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game"'';
+                exec = "${uncharted}/bin/uncharted";
                 icon = "/home/${user}/.config/rpcs3/Icons/game_icons/BCES00757/shortcut.png";
                 noDisplay = false;
                 startupNotify = true;
@@ -56,8 +63,9 @@ in {
           };
           home = {
             packages = [
-              rpcs3
               pkgs.rusty-psn-gui
+              rpcs3
+              uncharted
             ];
             file = {
               ".config/rpcs3/bios" = {
