@@ -1,9 +1,12 @@
 {
   inputs,
-  pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.gpu;
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -12,6 +15,17 @@
     export __VK_LAYER_NV_optimus=NVIDIA_only
     exec "$@"
   '';
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    config = {
+      allowUnfreePredicate = pkg:
+        builtins.elem (lib.getName pkg) [
+          "nvidia-x11"
+          "nvidia-settings"
+          "nvidia-persistenced"
+        ];
+    };
+  };
 in {
   imports = [
     (import ./scripts {inherit inputs pkgs lib;})
@@ -62,14 +76,14 @@ in {
           enable = true;
           finegrained = true;
         };
-        prime = {
-          offload = {
-            enable = true;
-            enableOffloadCmd = true;
-          };
-          nvidiaBusId = "PCI:1:0:0";
-          intelBusId = "PCI:0:2:0";
-        };
+        # prime = {
+        #   offload = {
+        #     enable = true;
+        #     enableOffloadCmd = true;
+        #   };
+        #   nvidiaBusId = "PCI:1:0:0";
+        #   intelBusId = "PCI:0:2:0";
+        # };
         open = true;
         nvidiaSettings = false;
         nvidiaPersistenced = true;
@@ -80,21 +94,6 @@ in {
       graphics = {
         extraPackages = [pkgs.nvidia-vaapi-driver];
         extraPackages32 = [pkgs.pkgsi686Linuxnvidia-vaapi-driver];
-      };
-    };
-    programs = {
-      zsh = {
-        loginShellInit = ''
-          export GDK_BACKEND=wayland,x11
-          export XDG_SESSION_TYPE=wayland
-          export SDL_VIDEODRIVER=wayland
-          export CLUTTER_BACKEND=wayland
-          export GBM_BACKEND=nvidia-drm
-          export LIBVA_DRIVER_NAME=nvidia
-          export __GLX_VENDOR_LIBRARY_NAME=nvidia
-          export __GL_GSYNC_ALLOWED=1
-          export __GL_VRR_ALLOWED=1
-        '';
       };
     };
   };
