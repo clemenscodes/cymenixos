@@ -118,8 +118,8 @@ in {
       kernelParams = [
         "amd_iommu=on"
         "iommu=pt"
-        # "vfio-pci.ids=10de:2206,10de:1aef"
-        # "pcie_aspm=off"
+        "vfio-pci.ids=10de:2206,10de:1aef"
+        "pcie_aspm=off"
       ];
       kernelModules = ["kvm-amd" "vfio_virqfd" "vfio_pci" "vfio" "vfio_iommu_type1"];
       extraModprobeConfig = ''
@@ -129,16 +129,16 @@ in {
         options vfio_iommu_type1 allow_unsafe_interrupts=1
         options vfio_pci disable_vga=1
       '';
-      # initrd = {
-      #   availableKernelModules = ["amdgpu" "vfio-pci"];
-      #   preDeviceCommands = ''
-      #     DEVS="0000:05:00.0 0000:05:00.1"
-      #     for DEV in $DEVS; do
-      #       echo "vfio-pci" > /sys/bus/pci/devices/$DEV/driver_override
-      #     done
-      #     modprobe -i vfio-pci
-      #   '';
-      # };
+      initrd = {
+        availableKernelModules = ["amdgpu" "vfio-pci"];
+        preDeviceCommands = ''
+          DEVS="0000:05:00.0 0000:05:00.1"
+          for DEV in $DEVS; do
+            echo "vfio-pci" > /sys/bus/pci/devices/$DEV/driver_override
+          done
+          modprobe -i vfio-pci
+        '';
+      };
     };
     environment = {
       systemPackages = [
