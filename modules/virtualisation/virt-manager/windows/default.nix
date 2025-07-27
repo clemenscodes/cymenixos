@@ -556,7 +556,7 @@ in {
                             dev = "sdb";
                           };
                           boot = {
-                            order = 1;
+                            order = 2;
                           };
                           readonly = true;
                         }
@@ -653,7 +653,7 @@ in {
                       };
                       video = {
                         model = {
-                          type = "none";
+                          type = "vga";
                         };
                       };
                       hostdev = [
