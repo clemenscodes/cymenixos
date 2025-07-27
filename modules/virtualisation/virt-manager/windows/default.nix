@@ -695,6 +695,16 @@ in {
                           bridge = "virbr0";
                         };
                       };
+                      shmem = {
+                        name = "looking-glass";
+                        model = {
+                          type = "ivshmem-plain";
+                        };
+                        size = {
+                          unit = "M";
+                          count = 32;
+                        };
+                      };
                       channel = [
                         {
                           type = "spicevmc";
