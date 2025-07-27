@@ -154,6 +154,8 @@ in {
       services = {
         libvirtd = {
           preStart = ''
+            mkdir -p /var/lib/libvirt/vgabios
+            ln -sf ${qemu}/bin/qemu /var/lib/libvirt/hooks/qemu
             ${lib.getExe qemu-mkdisk}
           '';
         };
