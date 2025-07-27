@@ -450,9 +450,6 @@ in {
                       ipi = {
                         state = true;
                       };
-                      evmcs = {
-                        state = true;
-                      };
                     };
                     kvm = {
                       hidden = {
