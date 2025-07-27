@@ -77,6 +77,7 @@ in {
           pkgs.obs-studio-plugins.obs-vkcapture
           pkgs.obs-studio-plugins.obs-gstreamer
           pkgs.obs-studio-plugins.obs-vaapi
+          pkgs.obs-studio-plugins.looking-glass-obs
         ];
       };
     };
