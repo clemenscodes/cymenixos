@@ -523,18 +523,6 @@ in {
                         bridge = "virbr0";
                       };
                     };
-                    channel = [
-                      {
-                        type = "spiceport";
-                        source = {
-                          channel = "org.spice-space.webdav.0";
-                        };
-                        target = {
-                          type = "virtio";
-                          name = "org.spice-space.webdav.0";
-                        };
-                      }
-                    ];
                     input = [
                       {
                         type = "mouse";
