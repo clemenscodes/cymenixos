@@ -115,7 +115,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.windows.enable) {
     boot = {
-      kernelParams = ["amd_iommu=on" "" "iommu=pt" "vfio-pci.ids=10de:2206,10de:1aef" "pcie_aspm=off"];
+      kernelParams = ["amd_iommu=on" "iommu=pt" "vfio-pci.ids=10de:2206,10de:1aef" "pcie_aspm=off"];
       kernelModules = ["kvm-amd" "vfio_virqfd" "vfio_pci" "vfio" "vfio_iommu_type1"];
       extraModprobeConfig = ''
         options kvm_amd nested=1
