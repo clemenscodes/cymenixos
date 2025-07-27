@@ -18,6 +18,7 @@
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
+      cudaSupport = true;
       allowUnfreePredicate = pkg:
         builtins.elem (lib.getName pkg) [
           "nvidia-x11"
@@ -77,10 +78,6 @@ in {
         pkgs.nvtopPackages.nvidia
       ];
     };
-    boot = {
-      kernelModules = ["nvidia_uvm" "nvidia"];
-      kernelParams = ["nvidia.NVreg_PreserveVideoMemoryAllocations=1"];
-    };
     services = {
       xserver = {
         videoDrivers = ["nvidia"];
@@ -92,14 +89,10 @@ in {
           enable = true;
         };
         powerManagement = {
-          # On wayland, suspend does not turn the screen back on when using the open source driver
-          # Use proprietary driver if you want to use the suspend feature
-          # as long as this issue is not fixed
-          # @see https://github.com/NVIDIA/open-gpu-kernel-modules/issues/360
-          enable = true;
-          finegrained = true;
+          enable = false;
+          finegrained = false;
         };
-        open = true;
+        open = false;
         nvidiaSettings = true;
         nvidiaPersistenced = false;
         package = config.boot.kernelPackages.nvidiaPackages.beta;
