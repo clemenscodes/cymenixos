@@ -127,6 +127,16 @@ in {
         options vfio_iommu_type1 allow_unsafe_interrupts=1
         options vfio_pci disable_vga=1
       '';
+      initrd = {
+        availableKernelModules = ["amdgpu" "vfio-pci"];
+        preDeviceCommands = ''
+          DEVS="0000:05:00.0 0000:05:00.1"
+          for DEV in $DEVS; do
+            echo "vfio-pci" > /sys/bus/pci/devices/$DEV/driver_override
+          done
+          modprobe -i vfio-pci
+        '';
+      };
     };
     environment = {
       systemPackages = [
