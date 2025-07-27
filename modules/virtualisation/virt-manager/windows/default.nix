@@ -553,28 +553,6 @@ in {
                     sound = {
                       model = "ich9";
                     };
-                    audio = {
-                      id = 1;
-                      type = "spice";
-                    };
-                    redirdev = [
-                      {
-                        bus = "usb";
-                        type = "spicevmc";
-                      }
-                      {
-                        bus = "usb";
-                        type = "spicevmc";
-                      }
-                      {
-                        bus = "usb";
-                        type = "spicevmc";
-                      }
-                      {
-                        bus = "usb";
-                        type = "spicevmc";
-                      }
-                    ];
                     watchdog = {
                       model = "itco";
                       action = "reset";
