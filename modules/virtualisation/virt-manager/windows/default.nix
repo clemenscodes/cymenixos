@@ -537,7 +537,7 @@ in {
                             bus = "sata";
                           };
                           boot = {
-                            order = 1; 
+                            order = 1;
                           };
                         }
                         {
@@ -646,6 +646,9 @@ in {
                       };
                       sound = {
                         model = "ich9";
+                        audio = {
+                          id = 1;
+                        };
                       };
                       audio = {
                         id = 1;
@@ -684,12 +687,6 @@ in {
                           rom = {
                             bar = false;
                           };
-                        }
-                      ];
-                      redirdev = [
-                        {
-                          bus = "usb";
-                          type = "spicevmc";
                         }
                       ];
                       watchdog = {
