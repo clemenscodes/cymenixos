@@ -146,7 +146,7 @@ in {
         pkgs.virtio-win
         pkgs.win-spice
         pkgs.looking-glass-client
-        pkgs.scream-receivers
+        pkgs.scream
         iommu-check
       ];
     };
