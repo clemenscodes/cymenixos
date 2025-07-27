@@ -366,7 +366,6 @@ in {
                       access = {
                         mode = "shared";
                       };
-                      hugepages = {};
                     };
                     vcpu = {
                       placement = "static";
