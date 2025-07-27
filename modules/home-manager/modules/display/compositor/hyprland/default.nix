@@ -393,6 +393,11 @@ in {
 
             windowrule = float,class:^(org.kde.polkit-kde-authentication-agent-1)$
 
+            bind = $mod SHIFT, Q,submap,passthru
+            submap = passthru
+            bind = $mod SHIFT, Q,submap,reset
+            submap = reset
+
             ${kitty}
             ${rofi}
             ${waybar}
