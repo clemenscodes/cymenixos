@@ -92,10 +92,10 @@ in {
           enable = false;
           finegrained = false;
         };
-        open = false;
+        open = true;
         nvidiaSettings = true;
         nvidiaPersistenced = false;
-        package = config.boot.kernelPackages.nvidiaPackages.beta;
+        package = config.boot.kernelPackages.nvidiaPackages.production;
       };
       graphics = {
         extraPackages = [pkgs.nvidia-vaapi-driver];
