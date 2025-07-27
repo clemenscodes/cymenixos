@@ -71,7 +71,7 @@
       GUEST_PORT="5900"
       HOST_PORT="5900"
       if [ "$1" = "win11" ]; then
-        iptables -A FORWARD -s 192.168.178.135/24 -d 192.168.122.0/24 -o virbr0 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+        iptables -A FORWARD -s 192.168.178.140/24 -d 192.168.122.0/24 -o virbr0 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
         if [ "$2" = "stopped" ] || [ "$2" = "reconnect" ]; then
          iptables -D FORWARD -o virbr0 -p tcp -d "$GUEST_IP" --dport "$GUEST_PORT" -j ACCEPT
          iptables -t nat -D PREROUTING -p tcp --dport "$HOST_PORT" -j DNAT --to "$GUEST_IP:$GUEST_PORT"
@@ -645,39 +645,39 @@ in {
                 };
               }
             ];
-            # networks = [
-            #   {
-            #     definition = inputs.nixvirt.lib.network.writeXML {
-            #       name = "default";
-            #       uuid = "fd64df3b-30ed-495c-ba06-b2f292c10d92";
-            #       forward = {
-            #         mode = "nat";
-            #         nat = {
-            #           port = {
-            #             start = 1024;
-            #             end = 65535;
-            #           };
-            #         };
-            #       };
-            #       bridge = {
-            #         name = "virbr0";
-            #         stp = true;
-            #         delay = 0;
-            #       };
-            #       ip = {
-            #         address = "192.168.122.1";
-            #         netmask = "255.255.255.0";
-            #         dhcp = {
-            #           range = {
-            #             start = "192.168.122.2";
-            #             end = "192.168.122.254";
-            #           };
-            #         };
-            #       };
-            #     };
-            #     active = true;
-            #   }
-            # ];
+            networks = [
+              {
+                definition = inputs.nixvirt.lib.network.writeXML {
+                  name = "default";
+                  uuid = "fd64df3b-30ed-495c-ba06-b2f292c10d92";
+                  forward = {
+                    mode = "nat";
+                    nat = {
+                      port = {
+                        start = 1024;
+                        end = 65535;
+                      };
+                    };
+                  };
+                  bridge = {
+                    name = "virbr0";
+                    stp = true;
+                    delay = 0;
+                  };
+                  ip = {
+                    address = "192.168.122.1";
+                    netmask = "255.255.255.0";
+                    dhcp = {
+                      range = {
+                        start = "192.168.122.2";
+                        end = "192.168.122.254";
+                      };
+                    };
+                  };
+                };
+                active = true;
+              }
+            ];
             pools = [
               {
                 definition = inputs.nixvirt.lib.pool.writeXML {
