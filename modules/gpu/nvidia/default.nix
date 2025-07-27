@@ -64,6 +64,9 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.nvidia.enable) {
+    boot = {
+      blacklistedKernelModules = ["nouveau"];
+    };
     modules = {
       gpu = {
         vendor = "nvidia";
