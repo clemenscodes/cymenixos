@@ -525,13 +525,6 @@ in {
                     };
                     channel = [
                       {
-                        type = "spicevmc";
-                        target = {
-                          type = "virtio";
-                          name = "com.redhat.spice.0";
-                        };
-                      }
-                      {
                         type = "spiceport";
                         source = {
                           channel = "org.spice-space.webdav.0";
