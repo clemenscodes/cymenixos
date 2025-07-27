@@ -537,7 +537,7 @@ in {
                             bus = "sata";
                           };
                           boot = {
-                            order = 2;
+                            order = 1; 
                           };
                         }
                         {
