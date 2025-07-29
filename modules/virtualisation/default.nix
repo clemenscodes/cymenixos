@@ -61,6 +61,21 @@ in {
         };
       };
     };
+    security = {
+      polkit = {
+        extraConfig =
+          /*
+          javascript
+          */
+          ''
+            polkit.addRule(function(action, subject) {
+              if (action.id == "org.libvirt.unix.manage" && subject.isInGroup("wheel")) {
+                return polkit.Result.YES;
+              }
+            });
+          '';
+      };
+    };
     home-manager = lib.mkIf (cfg.home-manager.enable && isDesktop) {
       users = {
         ${user} = {

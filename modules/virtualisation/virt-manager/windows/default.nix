@@ -189,7 +189,7 @@ in {
     users = {
       users = {
         ${user} = {
-          extraGroups = ["libvirtd" "kvm" "input"];
+          extraGroups = ["libvirtd" "libvirt" "kvm" "input"];
         };
       };
     };
