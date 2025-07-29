@@ -542,6 +542,10 @@ in {
                           policy = "disable";
                           name = "mpx";
                         }
+                        {
+                          policy = "require";
+                          name = "topoext";
+                        }
                       ];
                     };
                     clock = {
