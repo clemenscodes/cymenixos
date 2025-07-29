@@ -99,6 +99,19 @@
       fi
     '';
   };
+  qemu-run-windows-looking-glass = pkgs.writeShellApplication {
+    name = "qemu-run-windows-looking-glass";
+    runtimeInputs = [
+      pkgs.mullvad
+      pkgs.libvirt
+      pkgs.looking-glass-client
+    ];
+    text = ''
+      mullvad disconnect
+      virsh --connect qemu:///system start win11
+      looking-glass-client
+    '';
+  };
   virtio-iso = pkgs.runCommand "virtio-win.iso" {} "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
 in {
   imports = [inputs.nixvirt.nixosModules.default];
@@ -151,7 +164,28 @@ in {
         pkgs.looking-glass-client
         pkgs.scream
         iommu-check
+        qemu-run-windows-looking-glass
       ];
+    };
+    home-manager = lib.mkIf (config.modules.home-manager.enable) {
+      users = {
+        ${user} = {
+          xdg = {
+            desktopEntries = {
+              "Windows 11" = {
+                name = "Windows 11™";
+                type = "Application";
+                categories = ["Virtualisation"];
+                exec = lib.getExe qemu-run-windows-looking-glass;
+                icon = ./win11.png;
+                noDisplay = false;
+                startupNotify = true;
+                terminal = false;
+              };
+            };
+          };
+        };
+      };
     };
     systemd = {
       services = {
@@ -673,7 +707,7 @@ in {
                       };
                       video = {
                         model = {
-                          type = "vga";
+                          type = "none";
                         };
                       };
                       hostdev = [
