@@ -51,9 +51,6 @@
     };
   };
 in {
-  imports = [
-    (import ./scripts {inherit inputs pkgs lib;})
-  ];
   options = {
     modules = {
       gpu = {

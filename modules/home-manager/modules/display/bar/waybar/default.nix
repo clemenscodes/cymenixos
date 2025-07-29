@@ -70,7 +70,6 @@ in {
               "memory"
               "temperature"
               "cpu"
-              (lib.mkIf isNvidia "custom/nvidiagpuinfo")
               (lib.mkIf isLaptop "battery")
               "custom/powermenu"
             ];
@@ -138,14 +137,6 @@ in {
               format-critical = "{temperatureC}°C 🔥";
               on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.btop}/bin/btop";
               format-icons = ["🌡️"];
-            };
-            "custom/nvidiagpuinfo" = lib.mkIf isNvidia {
-              format = "{} 🌡️";
-              exec = "nvidiagpuinfo";
-              return-type = "json";
-              on-click = "nvidia-settings";
-              interval = 5;
-              tooltip = true;
             };
             battery = lib.mkIf isLaptop {
               states = {
@@ -456,7 +447,6 @@ in {
           #custom-powermenu,
           #custom-mail,
           #custom-idle,
-          #custom-nvidiagpuinfo,
           #mpd {
             ${padding}
             ${defaultColor}
@@ -470,7 +460,6 @@ in {
           #memory,
           #cpu,
           #temperature,
-          #custom-nvidiagpuinfo,
           #battery,
           #custom-powermenu {
             margin: ${defaultMargin} 4px 0px 4px;
