@@ -667,7 +667,7 @@ in {
                         };
                         size = {
                           unit = "M";
-                          count = 128;
+                          count = 256;
                         };
                       };
                       channel = [
