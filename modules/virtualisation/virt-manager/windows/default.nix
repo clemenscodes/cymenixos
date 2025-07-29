@@ -107,8 +107,19 @@
       pkgs.looking-glass-client
     ];
     text = ''
-      mullvad disconnect
-      virsh --connect qemu:///system start win11
+      if mullvad status | grep -q "Disconnected"; then
+        echo "Mullvad already disconnected."
+      else
+        echo "Please disconnect Mullvad first."
+        exit 1
+      fi
+
+      if virsh --connect qemu:///system domstate win11 | grep -q "running"; then
+        echo "VM 'win11' is already running."
+      else
+        virsh --connect qemu:///system start win11
+      fi
+
       looking-glass-client
     '';
   };
