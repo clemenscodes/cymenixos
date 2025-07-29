@@ -183,7 +183,7 @@ in {
         ${user} = {
           xdg = {
             desktopEntries = {
-              "Windows 11" = {
+              looking-glass-client = {
                 name = "Windows 11™";
                 type = "Application";
                 exec = lib.getExe qemu-run-windows-looking-glass;
@@ -191,6 +191,16 @@ in {
                 noDisplay = false;
                 startupNotify = true;
                 terminal = false;
+              };
+            };
+          };
+          wayland = {
+            windowManager = {
+              hyprland = {
+                extraConfig = ''
+                  windowrule = content game,class:(looking-glass-client)
+                  windowrule = fullscreen,class:(looking-glass-client)
+                '';
               };
             };
           };
