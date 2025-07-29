@@ -175,7 +175,6 @@ in {
               "Windows 11" = {
                 name = "Windows 11™";
                 type = "Application";
-                categories = ["Virtualisation"];
                 exec = lib.getExe qemu-run-windows-looking-glass;
                 icon = ./win11.png;
                 noDisplay = false;
