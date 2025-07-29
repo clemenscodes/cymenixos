@@ -94,7 +94,7 @@
       if [ -f "$DISK_PATH" ]; then
         exit 0
       else
-        qemu-img create -f qcow2 "$DISK_PATH" 64G
+        qemu-img create -f qcow2 "$DISK_PATH" 1T
         qemu-img info "$DISK_PATH"
       fi
     '';
