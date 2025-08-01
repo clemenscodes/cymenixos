@@ -137,6 +137,9 @@ in {
       kernelParams = [
         "amd_iommu=on"
         "iommu=pt"
+        "isolcpus=0-7,16-23"
+        "nohz_full=0-7,16-23"
+        "rcu_nocbs=0-7,16-23"
       ];
       kernelModules = ["kvm-amd" "vfio_virqfd" "vfio_pci" "vfio" "vfio_iommu_type1"];
       extraModprobeConfig = ''
