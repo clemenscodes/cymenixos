@@ -134,14 +134,16 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.windows.enable) {
     specialisation = {
-      inheritParentConfig = true;
       vm = {
-        boot = {
-          kernelParams = [
-            "isolcpus=0-7,16-23"
-            "nohz_full=0-7,16-23"
-            "rcu_nocbs=0-7,16-23"
-          ];
+        inheritParentConfig = true;
+        configuration = {
+          boot = {
+            kernelParams = [
+              "isolcpus=0-7,16-23"
+              "nohz_full=0-7,16-23"
+              "rcu_nocbs=0-7,16-23"
+            ];
+          };
         };
       };
     };
