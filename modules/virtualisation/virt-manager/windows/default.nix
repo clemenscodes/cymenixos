@@ -429,6 +429,90 @@ in {
                       placement = "static";
                       count = 16;
                     };
+                    # cputune = {
+                    #   vcpupin = [
+                    #     {
+                    #       vcpu = 0;
+                    #       cpuset = "0";
+                    #     }
+                    #     {
+                    #       vcpu = 1;
+                    #       cpuset = "10";
+                    #     }
+                    #     {
+                    #       vcpu = 2;
+                    #       cpuset = "1";
+                    #     }
+                    #     {
+                    #       vcpu = 3;
+                    #       cpuset = "11";
+                    #     }
+                    #     {
+                    #       vcpu = 4;
+                    #       cpuset = "2";
+                    #     }
+                    #     {
+                    #       vcpu = 5;
+                    #       cpuset = "12";
+                    #     }
+                    #     {
+                    #       vcpu = 6;
+                    #       cpuset = "3";
+                    #     }
+                    #     {
+                    #       vcpu = 7;
+                    #       cpuset = "13";
+                    #     }
+                    #     {
+                    #       vcpu = 8;
+                    #       cpuset = "4";
+                    #     }
+                    #     {
+                    #       vcpu = 9;
+                    #       cpuset = "14";
+                    #     }
+                    #     {
+                    #       vcpu = 10;
+                    #       cpuset = "5";
+                    #     }
+                    #     {
+                    #       vcpu = 11;
+                    #       cpuset = "15";
+                    #     }
+                    #     {
+                    #       vcpu = 12;
+                    #       cpuset = "6";
+                    #     }
+                    #     {
+                    #       vcpu = 13;
+                    #       cpuset = "16";
+                    #     }
+                    #     {
+                    #       vcpu = 14;
+                    #       cpuset = "7";
+                    #     }
+                    #     {
+                    #       vcpu = 15;
+                    #       cpuset = "17";
+                    #     }
+                    #     {
+                    #       vcpu = 16;
+                    #       cpuset = "8";
+                    #     }
+                    #     {
+                    #       vcpu = 17;
+                    #       cpuset = "18";
+                    #     }
+                    #     {
+                    #       vcpu = 18;
+                    #       cpuset = "9";
+                    #     }
+                    #     {
+                    #       vcpu = 19;
+                    #       cpuset = "19";
+                    #     }
+                    #   ];
+                    # };
                     os = {
                       hack = "efi";
                       type = "hvm";
@@ -460,7 +544,7 @@ in {
                         enable = false;
                       };
                       smbios = {
-                        mode = "sysinfo";
+                        mode = "host";
                       };
                     };
                     features = {
@@ -531,12 +615,15 @@ in {
                     cpu = {
                       mode = "host-passthrough";
                       check = "none";
-                      migratable = true;
+                      migratable = false;
                       topology = {
                         sockets = 1;
                         dies = 1;
                         cores = 8;
                         threads = 2;
+                      };
+                      cache = {
+                        mode = "passthrough";
                       };
                       feature = [
                         {
@@ -555,6 +642,10 @@ in {
                           policy = "require";
                           name = "topoext";
                         }
+                        {
+                          policy = "require";
+                          name = "invtsc";
+                        }
                       ];
                     };
                     clock = {
@@ -570,6 +661,10 @@ in {
                         }
                         {
                           name = "hpet";
+                          present = false;
+                        }
+                        {
+                          name = "kvmclock";
                           present = false;
                         }
                         {
@@ -722,6 +817,16 @@ in {
                           };
                           gl = {
                             enable = false;
+                          };
+                        }
+                        {
+                          type = "vnc";
+                          port = -1;
+                          autoport = true;
+                          hack = "0.0.0.0";
+                          listen = {
+                            type = "address";
+                            address = "0.0.0.0";
                           };
                         }
                       ];
