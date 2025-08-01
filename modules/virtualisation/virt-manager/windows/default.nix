@@ -141,18 +141,27 @@ in {
       kernelModules = ["kvm-amd" "vfio_virqfd" "vfio_pci" "vfio" "vfio_iommu_type1"];
       extraModprobeConfig = ''
         options kvm_amd nested=1
-        options kvm ignore_msrs=1
-        options kvm report_ignored_msrs=0
         options vfio_iommu_type1 allow_unsafe_interrupts=1
         options vfio_pci disable_vga=1
       '';
       initrd = {
         availableKernelModules = ["amdgpu" "vfio-pci"];
         preDeviceCommands = ''
-          DEVS="0000:05:00.0 0000:05:00.1"
-          for DEV in $DEVS; do
-            echo "vfio-pci" > /sys/bus/pci/devices/$DEV/driver_override
+          for i in /sys/bus/pci/devices/*/boot_vga; do
+              if [ $(cat "$i") -eq 0 ]; then
+                  GPU=''${i%/boot_vga}
+                  AUDIO="$(echo "$GPU" | sed -e "s/0$/1/")"
+                  USB="$(echo "$GPU" | sed -e "s/0$/2/")"
+                  echo "vfio-pci" > "$GPU/driver_override"
+                  if [ -d "$AUDIO" ]; then
+                      echo "vfio-pci" > "$AUDIO/driver_override"
+                  fi
+                  if [ -d "$USB" ]; then
+                      echo "vfio-pci" > "$USB/driver_override"
+                  fi
+              fi
           done
+
           modprobe -i vfio-pci
         '';
       };
@@ -230,8 +239,8 @@ in {
           '';
         in [
           "L+ /var/lib/qemu/firmware - - - - ${firmware}"
-          "f /dev/shm/scream 0660 ${user} qemu-libvirtd -"
-          "f /dev/shm/looking-glass 0660 ${user} qemu-libvirtd -"
+          "f /dev/shm/scream 0660 ${user} kvm -"
+          "f /dev/shm/looking-glass 0660 ${user} kvm -"
         ];
       };
     };
@@ -700,20 +709,22 @@ in {
                           version = "2.0";
                         };
                       };
-                      graphics = {
-                        type = "spice";
-                        autoport = true;
-                        listen = {
-                          type = "address";
-                          address = "127.0.0.1";
-                        };
-                        image = {
-                          compression = false;
-                        };
-                        gl = {
-                          enable = false;
-                        };
-                      };
+                      graphics = [
+                        {
+                          type = "spice";
+                          autoport = true;
+                          listen = {
+                            type = "address";
+                            address = "127.0.0.1";
+                          };
+                          image = {
+                            compression = false;
+                          };
+                          gl = {
+                            enable = false;
+                          };
+                        }
+                      ];
                       sound = {
                         model = "ich9";
                         audio = {
