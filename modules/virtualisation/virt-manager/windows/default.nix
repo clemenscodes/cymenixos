@@ -429,90 +429,80 @@ in {
                       placement = "static";
                       count = 16;
                     };
-                    # cputune = {
-                    #   vcpupin = [
-                    #     {
-                    #       vcpu = 0;
-                    #       cpuset = "0";
-                    #     }
-                    #     {
-                    #       vcpu = 1;
-                    #       cpuset = "10";
-                    #     }
-                    #     {
-                    #       vcpu = 2;
-                    #       cpuset = "1";
-                    #     }
-                    #     {
-                    #       vcpu = 3;
-                    #       cpuset = "11";
-                    #     }
-                    #     {
-                    #       vcpu = 4;
-                    #       cpuset = "2";
-                    #     }
-                    #     {
-                    #       vcpu = 5;
-                    #       cpuset = "12";
-                    #     }
-                    #     {
-                    #       vcpu = 6;
-                    #       cpuset = "3";
-                    #     }
-                    #     {
-                    #       vcpu = 7;
-                    #       cpuset = "13";
-                    #     }
-                    #     {
-                    #       vcpu = 8;
-                    #       cpuset = "4";
-                    #     }
-                    #     {
-                    #       vcpu = 9;
-                    #       cpuset = "14";
-                    #     }
-                    #     {
-                    #       vcpu = 10;
-                    #       cpuset = "5";
-                    #     }
-                    #     {
-                    #       vcpu = 11;
-                    #       cpuset = "15";
-                    #     }
-                    #     {
-                    #       vcpu = 12;
-                    #       cpuset = "6";
-                    #     }
-                    #     {
-                    #       vcpu = 13;
-                    #       cpuset = "16";
-                    #     }
-                    #     {
-                    #       vcpu = 14;
-                    #       cpuset = "7";
-                    #     }
-                    #     {
-                    #       vcpu = 15;
-                    #       cpuset = "17";
-                    #     }
-                    #     {
-                    #       vcpu = 16;
-                    #       cpuset = "8";
-                    #     }
-                    #     {
-                    #       vcpu = 17;
-                    #       cpuset = "18";
-                    #     }
-                    #     {
-                    #       vcpu = 18;
-                    #       cpuset = "9";
-                    #     }
-                    #     {
-                    #       vcpu = 19;
-                    #       cpuset = "19";
-                    #     }
-                    #   ];
-                    # };
+                    numatune = {
+                      memory = {
+                        mode = "strict";
+                        nodeset = "0";
+                      };
+                    };
+                    cputune = {
+                      vcpupin = [
+                        {
+                          vcpu = 0;
+                          cpuset = "0";
+                        }
+                        {
+                          vcpu = 1;
+                          cpuset = "16";
+                        }
+                        {
+                          vcpu = 2;
+                          cpuset = "1";
+                        }
+                        {
+                          vcpu = 3;
+                          cpuset = "17";
+                        }
+                        {
+                          vcpu = 4;
+                          cpuset = "2";
+                        }
+                        {
+                          vcpu = 5;
+                          cpuset = "18";
+                        }
+                        {
+                          vcpu = 6;
+                          cpuset = "3";
+                        }
+                        {
+                          vcpu = 7;
+                          cpuset = "19";
+                        }
+                        {
+                          vcpu = 8;
+                          cpuset = "4";
+                        }
+                        {
+                          vcpu = 9;
+                          cpuset = "20";
+                        }
+                        {
+                          vcpu = 10;
+                          cpuset = "5";
+                        }
+                        {
+                          vcpu = 11;
+                          cpuset = "21";
+                        }
+                        {
+                          vcpu = 12;
+                          cpuset = "6";
+                        }
+                        {
+                          vcpu = 13;
+                          cpuset = "22";
+                        }
+                        {
+                          vcpu = 14;
+                          cpuset = "7";
+                        }
+                        {
+                          vcpu = 15;
+                          cpuset = "23";
+                        }
+                      ];
+                    };
                     os = {
                       hack = "efi";
                       type = "hvm";
