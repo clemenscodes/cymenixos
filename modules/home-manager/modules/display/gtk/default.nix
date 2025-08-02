@@ -64,10 +64,6 @@ in {
         package = pkgs.catppuccin-cursors.macchiatoBlue;
         name = "catppuccin-macchiato-blue-cursors";
       };
-      iconTheme = {
-        package = iconTheme;
-        name = "Papirus-Dark";
-      };
       font = {
         package = pkgs.nerd-fonts.iosevka;
         name = "${osConfig.modules.fonts.defaultFont}";
