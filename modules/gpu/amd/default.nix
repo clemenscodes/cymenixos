@@ -37,11 +37,6 @@ in {
         LIBVA_DRIVER_NAME = "radeonsi";
       };
     };
-    modules = {
-      gpu = {
-        vendor = "amd";
-      };
-    };
     boot = {
       initrd = {
         kernelModules = [driver];

@@ -70,11 +70,6 @@ in {
         "nvidia_drm"
       ];
     };
-    modules = {
-      gpu = {
-        vendor = "nvidia";
-      };
-    };
     environment = {
       systemPackages = [
         nvidia-offload
