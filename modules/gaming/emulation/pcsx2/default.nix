@@ -7,7 +7,7 @@
   ps2bios = pkgs.stdenv.mkDerivation {
     name = "ps2bios";
     src = pkgs.fetchzip {
-      url = "https://ps2bios.co/ps2bios.zip";
+      url = "https://files.ps2-bios.com/ps2-bios-europe.zip";
       sha256 = "sha256-Spv+qCg2SwQBRfKZoLVd3VeiM7muHfke+BDnVwcGm58=";
       stripRoot = false;
     };
