@@ -8,7 +8,7 @@
     name = "ps2bios";
     src = pkgs.fetchzip {
       url = "https://files.ps2-bios.com/ps2-bios-europe.zip";
-      sha256 = "sha256-Spv+qCg2SwQBRfKZoLVd3VeiM7muHfke+BDnVwcGm58=";
+      sha256 = "sha256-DVLN5O7X7PWJk8AA+2TlhqaiYIWhl9Agcrv7XkMrdk4=";
       stripRoot = false;
     };
     dontBuild = true;
