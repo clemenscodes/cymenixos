@@ -59,11 +59,11 @@ in {
       extraModulePackages = with config.boot.kernelPackages; [
         v4l2loopback.out
         (rtw88.overrideAttrs (oldAttrs: {
-          src = pkgs. fetchFromGitHub {
-            owner = "lwfinger";
+          src = pkgs.fetchFromGitHub {
+            owner = "clemenscodes";
             repo = "rtw88";
-            rev = "549f33c361a2569733ba73e47d7e3986ca7e55d6";
-            hash = "sha256-gtUo3xo6iwFX203HuUXFbjrprhxvmD9z04yfMKaKIhY=";
+            rev = "33c6239c5a2f8a0aa85cf698cf86fb7929e57a2b";
+            hash = "sha256-p9GXUfE/pp1kUXULYWEvN/L1ie4pebmd2keigBybHqg=";
           };
         }))
       ];
