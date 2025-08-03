@@ -61,7 +61,7 @@
       url = "github:clemenscodes/codevim";
     };
     xremap-flake = {
-      url = "github:xremap/nix-flake";
+      url = "github:xremap/nix-flake/8001f37b1ffe86e76b62f36afadee2f4acf90e70";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
