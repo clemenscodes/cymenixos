@@ -387,6 +387,35 @@ final: prev: {
         done
       '';
     };
+    dump-efi = prev.writeShellApplication {
+      name = "dump-efi";
+      runtimeInputs = with prev; [
+        coreutils
+        util-linux
+        jq
+      ];
+      text = ''
+        set -euo pipefail
+
+        DIR="$HOME/Public"
+
+        echo "🔐 Dumping EFI/BIOS boot partitions..."
+
+        for part in $(lsblk -J -o NAME,FSTYPE,TYPE | jq -r '
+          .blockdevices[]
+          | select(.type == "disk")
+          | .children[]
+          | select(.type == "part")
+          | select((.fstype == null) or (.fstype | test("(?i)^(vfat|fat16|fat32|msdos)$")))
+          | .name'); do
+
+          BINARY_FILE="$DIR/efi_hash_$part.bin"
+          PARTITION="/dev/$part"
+
+          sudo dd if="$PARTITION" bs=1M status=none > "$BINARY_FILE"
+        done
+      '';
+    };
     verify-efi = prev.writeShellApplication {
       name = "verify-efi";
       runtimeInputs = with prev; [
@@ -425,7 +454,7 @@ final: prev: {
             echo "✅ OK"
           else
             echo "❌ Hash mismatch for $part!"
-            notify-send "‼️ SYSTEM MAY BE COMPROMISED - ALTERED BOOT PARTITIONS ‼️"
+            notify-send "‼️ SYSTEM COMPROMISED - ALTERED BOOT ‼️"
           fi
         done
       '';
@@ -448,6 +477,7 @@ final: prev: {
         copyro
         btrfs-swap-resume-offset
         hash-efi
+        dump-efi
         verify-efi
       ];
     };
