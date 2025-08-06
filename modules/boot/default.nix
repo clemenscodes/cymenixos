@@ -63,7 +63,7 @@ in {
       before = ["graphical.target"];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.verify-efi}/bin/verify-efi";
+        ExecStart = "${pkgs.cymenixos-scripts}/bin/verify-efi";
         StandardOutput = "journal";
         StandardError = "journal";
       };
