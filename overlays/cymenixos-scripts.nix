@@ -431,7 +431,7 @@ final: prev: {
         LOG_FILE="$HASH_DIR/verify-efi.log"
         mkdir -p "$HASH_DIR"
 
-        echo "🔐 Verifying EFI/BIOS boot partition integrity..." > "$LOG_FILE"
+        echo "Verifying EFI/BIOS boot partition integrity..." > "$LOG_FILE"
 
         result='{}'
 
@@ -449,7 +449,7 @@ final: prev: {
           echo -n "🔍 Checking $part... " >> "$LOG_FILE"
 
           if [[ ! -f "$HASH_FILE" ]]; then
-            echo "⚠️ No hash file found for $part — generating..." >> "$LOG_FILE"
+            echo "No hash file found for $part — generating..." >> "$LOG_FILE"
             dd if="$PARTITION" bs=1M status=none | sha256sum | tee "$HASH_FILE" > /dev/null
             result=$(echo "$result" | jq --arg part "$part" --arg status "generated" '. + {($part): $status}')
             continue
@@ -459,10 +459,10 @@ final: prev: {
           EXPECTED_HASH=$(awk '{ print $1 }' "$HASH_FILE")
 
           if [[ "$CURRENT_HASH" == "$EXPECTED_HASH" ]]; then
-            echo "✅ OK" >> "$LOG_FILE"
+            echo "OK" >> "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "ok" '. + {($part): $status}')
           else
-            echo "❌ Hash mismatch for $part!" >> "$LOG_FILE"
+            echo "[$part] Hash mismatch!" >> "$LOG_FILE"
             echo "   Expected: $EXPECTED_HASH" >> "$LOG_FILE"
             echo "   Found:    $CURRENT_HASH" >> "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" \
