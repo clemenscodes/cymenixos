@@ -433,7 +433,6 @@ final: prev: {
         echo "🔐 Verifying EFI/BIOS boot partition integrity..."
 
         result='{}'
-        echo "$result" > "$RESULT_FILE"
 
         for part in $(lsblk -J -o NAME,FSTYPE,TYPE | jq -r '
           .blockdevices[]
@@ -458,14 +457,13 @@ final: prev: {
           if dd if="$PARTITION" bs=1M status=none | sha256sum | cmp -s "$HASH_FILE" -; then
             echo "✅ OK"
             result=$(echo "$result" | jq --arg part "$part" --arg status "ok" '. + {($part): $status}')
-            echo "$result" >> "$RESULT_FILE"
           else
             echo "❌ Hash mismatch for $part!"
             result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" '. + {($part): $status}')
-            echo "$result" >> "$RESULT_FILE"
           fi
         done
 
+        echo "$result" > "$RESULT_FILE"
         chmod 644 "$RESULT_FILE"
       '';
     };
