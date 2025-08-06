@@ -455,12 +455,20 @@ final: prev: {
             continue
           fi
 
-          if dd if="$PARTITION" bs=1M status=none | sha256sum | cmp -s "$HASH_FILE" -; then
+          CURRENT_HASH=$(dd if="$PARTITION" bs=1M status=none | sha256sum | awk '{ print $1 }')
+          EXPECTED_HASH=$(awk '{ print $1 }' "$HASH_FILE")
+
+          if [[ "$CURRENT_HASH" == "$EXPECTED_HASH" ]]; then
             echo "✅ OK" >> "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "ok" '. + {($part): $status}')
           else
-            echo "❌ Hash mismatch for > $part!" >> "$LOG_FILE"
-            result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" '. + {($part): $status}')
+            echo "❌ Hash mismatch for $part!" >> "$LOG_FILE"
+            echo "   Expected: $EXPECTED_HASH" >> "$LOG_FILE"
+            echo "   Found:    $CURRENT_HASH" >> "$LOG_FILE"
+            result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" \
+              --arg expected "$EXPECTED_HASH" \
+              --arg found "$CURRENT_HASH" \
+              '. + {($part): {status: $status, expected: $expected, found: $found}}')
           fi
         done
 
