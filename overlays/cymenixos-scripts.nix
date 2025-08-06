@@ -428,9 +428,10 @@ final: prev: {
 
         HASH_DIR="/var/lib/efi"
         RESULT_FILE="$HASH_DIR/verify-efi-result.json"
+        LOG_FILE="$HASH_DIR/verify-efi.log"
         mkdir -p "$HASH_DIR"
 
-        echo "🔐 Verifying EFI/BIOS boot partition integrity..."
+        echo "🔐 Verifying EFI/BIOS boot partition integrity..." > "$LOG_FILE"
 
         result='{}'
 
@@ -445,26 +446,26 @@ final: prev: {
           HASH_FILE="$HASH_DIR/efi_hash_$part.txt"
           PARTITION="/dev/$part"
 
-          echo -n "🔍 Checking $part... "
+          echo -n "🔍 Checking $part... " > "$LOG_FILE"
 
           if [[ ! -f "$HASH_FILE" ]]; then
-            echo "⚠️ No hash file found for $part — generating..."
+            echo "⚠️ No hash file found for $part — generating..." > "$LOG_FILE"
             dd if="$PARTITION" bs=1M status=none | sha256sum | tee "$HASH_FILE" > /dev/null
             result=$(echo "$result" | jq --arg part "$part" --arg status "generated" '. + {($part): $status}')
             continue
           fi
 
           if dd if="$PARTITION" bs=1M status=none | sha256sum | cmp -s "$HASH_FILE" -; then
-            echo "✅ OK"
+            echo "✅ OK" > "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "ok" '. + {($part): $status}')
           else
-            echo "❌ Hash mismatch for $part!"
+            echo "❌ Hash mismatch for > $part!" "$LOG_FILE" 
             result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" '. + {($part): $status}')
           fi
         done
 
         echo "$result" > "$RESULT_FILE"
-        chmod 644 "$RESULT_FILE"
+        chmod 644 "$RESULT_FILE" "$LOG_FILE"
       '';
     };
     check-efi = prev.writeShellApplication {
