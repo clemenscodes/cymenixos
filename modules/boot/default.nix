@@ -49,6 +49,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
+    environment = {
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = ["/var/lib/efi"];
+        };
+      };
+    };
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];

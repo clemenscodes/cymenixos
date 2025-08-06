@@ -368,7 +368,7 @@ final: prev: {
       text = ''
         set -euo pipefail
 
-        HASH_DIR="$HOME/Public"
+        HASH_DIR="/var/lib/efi"
 
         echo "🔐 Hashing EFI/BIOS boot partitions..."
 
@@ -383,7 +383,7 @@ final: prev: {
           HASH_FILE="$HASH_DIR/efi_hash_$part.txt"
           PARTITION="/dev/$part"
 
-          sudo dd if="$PARTITION" bs=1M status=none | sha256sum > "$HASH_FILE"
+          sudo dd if="$PARTITION" bs=1M status=none | sha256sum | sudo tee "$HASH_FILE"
         done
       '';
     };
@@ -397,7 +397,7 @@ final: prev: {
       text = ''
         set -euo pipefail
 
-        DIR="$HOME/Public"
+        DIR="/var/lib/efi"
 
         echo "🔐 Dumping EFI/BIOS boot partitions..."
 
@@ -412,7 +412,7 @@ final: prev: {
           BINARY_FILE="$DIR/efi_hash_$part.bin"
           PARTITION="/dev/$part"
 
-          sudo dd if="$PARTITION" bs=1M status=none > "$BINARY_FILE"
+          sudo dd if="$PARTITION" bs=1M status=none | sudo tee "$BINARY_FILE"
         done
       '';
     };
@@ -426,7 +426,7 @@ final: prev: {
       text = ''
         set -euo pipefail
 
-        HASH_DIR="$HOME/Public"
+        HASH_DIR="/var/lib/efi"
 
         echo "🔐 Verifying EFI/BIOS boot partition integrity..."
 
@@ -445,7 +445,7 @@ final: prev: {
 
           if [[ ! -f "$HASH_FILE" ]]; then
             echo "⚠️ No hash file found for $part — generating..."
-            sudo dd if="$PARTITION" bs=1M status=none | sha256sum > "$HASH_FILE"
+            sudo dd if="$PARTITION" bs=1M status=none | sha256sum | sudo tee "$HASH_FILE"
             echo "✅ Hash stored at $HASH_FILE"
             continue
           fi
