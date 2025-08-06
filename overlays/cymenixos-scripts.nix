@@ -412,7 +412,7 @@ final: prev: {
           BINARY_FILE="$DIR/efi_hash_$part.bin"
           PARTITION="/dev/$part"
 
-          sudo dd if="$PARTITION" bs=1M status=none | sudo tee "$BINARY_FILE"
+          sudo dd if="$PARTITION" of="$BINARY_FILE" bs=1M status=progress
         done
       '';
     };
