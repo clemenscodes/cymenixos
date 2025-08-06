@@ -446,20 +446,20 @@ final: prev: {
           HASH_FILE="$HASH_DIR/efi_hash_$part.txt"
           PARTITION="/dev/$part"
 
-          echo -n "🔍 Checking $part... " > "$LOG_FILE"
+          echo -n "🔍 Checking $part... " >> "$LOG_FILE"
 
           if [[ ! -f "$HASH_FILE" ]]; then
-            echo "⚠️ No hash file found for $part — generating..." > "$LOG_FILE"
+            echo "⚠️ No hash file found for $part — generating..." >> "$LOG_FILE"
             dd if="$PARTITION" bs=1M status=none | sha256sum | tee "$HASH_FILE" > /dev/null
             result=$(echo "$result" | jq --arg part "$part" --arg status "generated" '. + {($part): $status}')
             continue
           fi
 
           if dd if="$PARTITION" bs=1M status=none | sha256sum | cmp -s "$HASH_FILE" -; then
-            echo "✅ OK" > "$LOG_FILE"
+            echo "✅ OK" >> "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "ok" '. + {($part): $status}')
           else
-            echo "❌ Hash mismatch for > $part!" "$LOG_FILE" 
+            echo "❌ Hash mismatch for > $part!" >> "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" '. + {($part): $status}')
           fi
         done
