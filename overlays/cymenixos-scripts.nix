@@ -368,7 +368,7 @@ final: prev: {
       text = ''
         set -euo pipefail
 
-        HASH_DIR="~/Public"
+        HASH_DIR="$HOME/Public"
 
         echo "🔐 Hashing EFI/BIOS boot partitions..."
 
@@ -397,7 +397,7 @@ final: prev: {
       text = ''
         set -euo pipefail
 
-        HASH_DIR="~/Public"
+        HASH_DIR="$HOME/Public"
 
         echo "🔐 Verifying EFI/BIOS boot partition integrity..."
 
