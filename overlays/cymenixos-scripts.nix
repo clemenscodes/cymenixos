@@ -446,10 +446,15 @@ final: prev: {
           HASH_FILE="$HASH_DIR/efi_hash_$part.txt"
           PARTITION="/dev/$part"
 
-          echo -n "🔍 Checking $part... " >> "$LOG_FILE"
+          {
+            echo "Checking $part..."
+          } >> "$LOG_FILE"
 
           if [[ ! -f "$HASH_FILE" ]]; then
-            echo "No hash file found for $part — generating..." >> "$LOG_FILE"
+            {
+              echo "No hash file found for $part — generating..."
+            } >> "$LOG_FILE"
+
             dd if="$PARTITION" bs=1M status=none | sha256sum | tee "$HASH_FILE" > /dev/null
             result=$(echo "$result" | jq --arg part "$part" --arg status "generated" '. + {($part): $status}')
             continue
@@ -459,16 +464,20 @@ final: prev: {
           EXPECTED_HASH=$(awk '{ print $1 }' "$HASH_FILE")
 
           if [[ "$CURRENT_HASH" == "$EXPECTED_HASH" ]]; then
-            echo "OK" >> "$LOG_FILE"
+            {
+              echo "Hash OK"
+            } >> "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "ok" '. + {($part): $status}')
           else
-            echo "[$part] Hash mismatch!" >> "$LOG_FILE"
-            echo "   Expected: $EXPECTED_HASH" >> "$LOG_FILE"
-            echo "   Found:    $CURRENT_HASH" >> "$LOG_FILE"
+            {
+              echo "[$part] Hash mismatch!"
+              echo "Expected: $EXPECTED_HASH"
+              echo "Found:    $CURRENT_HASH"
+            } >> "$LOG_FILE"
             result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" \
-              --arg expected "$EXPECTED_HASH" \
-              --arg found "$CURRENT_HASH" \
-              '. + {($part): {status: $status, expected: $expected, found: $found}}')
+                                          --arg expected "$EXPECTED_HASH" \
+                                          --arg found "$CURRENT_HASH" \
+                                          '. + {($part): {status: $status, expected: $expected, found: $found}}')
           fi
         done
 
