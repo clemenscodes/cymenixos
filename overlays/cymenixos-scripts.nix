@@ -427,8 +427,13 @@ final: prev: {
         set -euo pipefail
 
         HASH_DIR="/var/lib/efi"
+        RESULT_FILE="$HASH_DIR/verify-efi-result.json"
+        mkdir -p "$HASH_DIR"
 
         echo "🔐 Verifying EFI/BIOS boot partition integrity..."
+
+        result='{}'
+        echo "$result" > "$RESULT_FILE"
 
         for part in $(lsblk -J -o NAME,FSTYPE,TYPE | jq -r '
           .blockdevices[]
@@ -445,18 +450,38 @@ final: prev: {
 
           if [[ ! -f "$HASH_FILE" ]]; then
             echo "⚠️ No hash file found for $part — generating..."
-            sudo dd if="$PARTITION" bs=1M status=none | sha256sum | sudo tee "$HASH_FILE"
-            echo "✅ Hash stored at $HASH_FILE"
+            dd if="$PARTITION" bs=1M status=none | sha256sum | tee "$HASH_FILE" > /dev/null
+            result=$(echo "$result" | jq --arg part "$part" --arg status "generated" '. + {($part): $status}')
             continue
           fi
 
-          if sudo dd if="$PARTITION" bs=1M status=none | sha256sum | cmp -s "$HASH_FILE" -; then
+          if dd if="$PARTITION" bs=1M status=none | sha256sum | cmp -s "$HASH_FILE" -; then
             echo "✅ OK"
+            result=$(echo "$result" | jq --arg part "$part" --arg status "ok" '. + {($part): $status}')
+            echo "$result" >> "$RESULT_FILE"
           else
             echo "❌ Hash mismatch for $part!"
-            notify-send "‼️ SYSTEM COMPROMISED - ALTERED BOOT ‼️"
+            result=$(echo "$result" | jq --arg part "$part" --arg status "mismatch" '. + {($part): $status}')
+            echo "$result" >> "$RESULT_FILE"
           fi
         done
+
+        chmod 644 "$RESULT_FILE"
+      '';
+    };
+    check-efi = prev.writeShellApplication {
+      name = "check-efi";
+      runtimeInputs = with prev; [
+        coreutils
+        util-linux
+        jq
+      ];
+      text = ''
+        STATUS=$(jq -r 'to_entries[] | select(.value != "ok") | .key + ": " + .value' /var/lib/efi/verify-efi-result.json)
+
+        if [[ -n "$STATUS" ]]; then
+          notify-send "Boot Integrity Warning" "$STATUS"
+        fi
       '';
     };
   in
@@ -479,6 +504,7 @@ final: prev: {
         hash-efi
         dump-efi
         verify-efi
+        check-efi
       ];
     };
 }
