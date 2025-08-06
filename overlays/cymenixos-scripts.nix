@@ -422,6 +422,7 @@ final: prev: {
         coreutils
         util-linux
         jq
+        gawk
       ];
       text = ''
         set -euo pipefail
