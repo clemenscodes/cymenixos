@@ -494,7 +494,7 @@ final: prev: {
         jq
       ];
       text = ''
-        STATUS=$(jq -r 'to_entries[] | select(.value != "ok") | .key + ": " + .value' /var/lib/efi/verify-efi-result.json)
+        STATUS=$(jq -r 'to_entries[] | select(.value != "ok")' /var/lib/efi/verify-efi-result.json)
 
         if [[ -n "$STATUS" ]]; then
           notify-send "Boot Integrity Warning" "$STATUS"
