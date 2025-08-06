@@ -358,6 +358,78 @@ final: prev: {
         fi
       '';
     };
+    hash-efi = prev.writeShellApplication {
+      name = "hash-efi";
+      runtimeInputs = with prev; [
+        coreutils
+        util-linux
+        jq
+      ];
+      text = ''
+        set -euo pipefail
+
+        HASH_DIR="~/Public"
+
+        echo "🔐 Hashing EFI/BIOS boot partitions..."
+
+        for part in $(lsblk -J -o NAME,FSTYPE,TYPE | jq -r '
+          .blockdevices[]
+          | select(.type == "disk")
+          | .children[]
+          | select(.type == "part")
+          | select((.fstype == null) or (.fstype | test("(?i)^(vfat|fat16|fat32|msdos)$")))
+          | .name'); do
+
+          HASH_FILE="$HASH_DIR/efi_hash_$part.txt"
+          PARTITION="/dev/$part"
+
+          sudo dd if="$PARTITION" bs=1M status=none | sha256sum > "$HASH_FILE"
+        done
+      '';
+    };
+    verify-efi = prev.writeShellApplication {
+      name = "verify-efi";
+      runtimeInputs = with prev; [
+        coreutils
+        util-linux
+        jq
+      ];
+      text = ''
+        set -euo pipefail
+
+        HASH_DIR="~/Public"
+
+        echo "🔐 Verifying EFI/BIOS boot partition integrity..."
+
+        for part in $(lsblk -J -o NAME,FSTYPE,TYPE | jq -r '
+          .blockdevices[]
+          | select(.type == "disk")
+          | .children[]
+          | select(.type == "part")
+          | select((.fstype == null) or (.fstype | test("(?i)^(vfat|fat16|fat32|msdos)$")))
+          | .name'); do
+
+          HASH_FILE="$HASH_DIR/efi_hash_$part.txt"
+          PARTITION="/dev/$part"
+
+          echo -n "🔍 Checking $part... "
+
+          if [[ ! -f "$HASH_FILE" ]]; then
+            echo "⚠️ No hash file found for $part — generating..."
+            sudo dd if="$PARTITION" bs=1M status=none | sha256sum > "$HASH_FILE"
+            echo "✅ Hash stored at $HASH_FILE"
+            continue
+          fi
+
+          if sudo dd if="$PARTITION" bs=1M status=none | sha256sum | cmp -s "$HASH_FILE" -; then
+            echo "✅ OK"
+          else
+            echo "❌ Hash mismatch for $part!"
+            notify-send "‼️ SYSTEM MAY BE COMPROMISED - ALTERED BOOT PARTITIONS ‼️"
+          fi
+        done
+      '';
+    };
   in
     prev.symlinkJoin {
       name = "cymenixos-scripts";
@@ -375,6 +447,8 @@ final: prev: {
         qemu-run-iso
         copyro
         btrfs-swap-resume-offset
+        hash-efi
+        verify-efi
       ];
     };
 }
