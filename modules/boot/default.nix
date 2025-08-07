@@ -56,18 +56,18 @@ in {
         };
       };
     };
-    systemd.services.verify-efi = {
-      description = "Verify EFI/BIOS boot partition integrity";
-      wantedBy = ["multi-user.target"];
-      after = ["local-fs.target"];
-      before = ["graphical.target"];
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.cymenixos-scripts}/bin/verify-efi";
-        StandardOutput = "journal";
-        StandardError = "journal";
-      };
-    };
+    # systemd.services.verify-efi = {
+    #   description = "Verify EFI/BIOS boot partition integrity";
+    #   wantedBy = ["multi-user.target"];
+    #   after = ["local-fs.target"];
+    #   before = ["graphical.target"];
+    #   serviceConfig = {
+    #     Type = "oneshot";
+    #     ExecStart = "${pkgs.cymenixos-scripts}/bin/verify-efi";
+    #     StandardOutput = "journal";
+    #     StandardError = "journal";
+    #   };
+    # };
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];
