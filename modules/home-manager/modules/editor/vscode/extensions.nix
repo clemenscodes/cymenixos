@@ -26,7 +26,6 @@ in {
             rust-lang.rust-analyzer
             redhat.vscode-yaml
             moonrepo.moon-console
-            catppuccin.catppuccin-vsc
             ms-azuretools.vscode-docker
             exiasr.hadolint
           ]
