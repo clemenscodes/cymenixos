@@ -33,10 +33,15 @@ in {
           inherit efiSupport biosSupport;
           biosDevice = device;
           efiInstallAsRemovable = efiSupport;
+          panicOnChecksumMismatch = true;
+          partitionIndex = 2;
           secureBoot = {
             enable = false;
             sbctl = pkgs.sbctl;
           };
+          extraConfig = ''
+
+          '';
         };
       };
       # lanzaboote = {
