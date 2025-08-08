@@ -121,7 +121,7 @@ in {
                   priority = 2;
                   label = "efi";
                   type = "EF00";
-                  size = "2G";
+                  size = "512M";
                   content = {
                     type = "filesystem";
                     format = "vfat";
