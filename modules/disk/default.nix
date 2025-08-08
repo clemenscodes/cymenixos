@@ -125,7 +125,10 @@ in {
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint = "/boot";
+                    mountpoint =
+                      if (!cfg.disk.luks.yubikey)
+                      then "/boot/efi"
+                      else "/boot";
                     mountOptions = ["umask=0077"];
                   };
                 };
@@ -274,6 +277,10 @@ in {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
+                    bootSubvol = {
+                      mountpoint = "/boot";
+                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
+                    };
                     logSubvol = {
                       mountpoint = "/var/log";
                       mountOptions = ["subvol=logs" "compress=zstd" "noatime"];
@@ -310,6 +317,7 @@ in {
                     }
                     else {
                       "/root" = rootSubvol;
+                      "/boot" = bootSubvol;
                       "/var/log" = logSubvol;
                       "/snapshots" = snapshotSubvol;
                       "/nix" = nixSubvol;

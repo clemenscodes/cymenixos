@@ -49,6 +49,25 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
+    environment = {
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = ["/var/lib/efi"];
+        };
+      };
+    };
+    # systemd.services.verify-efi = {
+    #   description = "Verify EFI/BIOS boot partition integrity";
+    #   wantedBy = ["multi-user.target"];
+    #   after = ["local-fs.target"];
+    #   before = ["graphical.target"];
+    #   serviceConfig = {
+    #     Type = "oneshot";
+    #     ExecStart = "${pkgs.cymenixos-scripts}/bin/verify-efi";
+    #     StandardOutput = "journal";
+    #     StandardError = "journal";
+    #   };
+    # };
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];
@@ -91,7 +110,10 @@ in {
       };
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         efi = {
-          efiSysMountPoint = "/boot";
+          efiSysMountPoint =
+            if (efiSupport && !cfg.disk.luks.yubikey)
+            then "/boot/efi"
+            else "/boot";
           canTouchEfiVariables = lib.mkForce false;
         };
         grub = {
@@ -111,7 +133,10 @@ in {
           };
           mirroredBoots = lib.mkIf (!cfg.disk.luks.yubikey) (lib.mkForce [
             {
-              path = "/boot";
+              path =
+                if !cfg.disk.luks.yubikey && efiSupport
+                then "/boot/efi"
+                else "/boot";
               devices = [
                 (lib.mkIf (biosSupport || libreboot) device)
                 (lib.mkIf efiSupport "nodev")

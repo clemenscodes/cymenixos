@@ -5,9 +5,8 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.boot;
-  inherit (cfg) biosSupport efiSupport device;
 in {
-  # imports = [inputs.lanzaboote.nixosModules.lanzaboote];
+  imports = [inputs.lanzaboote.nixosModules.lanzaboote];
   options = {
     modules = {
       boot = {
@@ -18,36 +17,19 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.secureboot.enable) {
-    # environment = {
-    #   systemPackages = [pkgs.sbctl];
-    #   persistence = {
-    #     ${config.modules.boot.impermanence.persistPath} = {
-    #       directories = [config.booot.lanzaboote.pkiBundle];
-    #     };
-    #   };
-    # };
-    boot = {
-      loader = {
-        limine = {
-          enable = true;
-          inherit efiSupport biosSupport;
-          biosDevice = device;
-          efiInstallAsRemovable = efiSupport;
-          panicOnChecksumMismatch = true;
-          partitionIndex = 2;
-          secureBoot = {
-            enable = false;
-            sbctl = pkgs.sbctl;
-          };
-          extraConfig = ''
-
-          '';
+    environment = {
+      systemPackages = [pkgs.sbctl];
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = [config.booot.lanzaboote.pkiBundle];
         };
       };
-      # lanzaboote = {
-      #   inherit (cfg.secureboot) enable;
-      #   pkiBundle = "/etc/secureboot";
-      # };
+    };
+    boot = {
+      lanzaboote = {
+        inherit (cfg.secureboot) enable;
+        pkiBundle = "/etc/secureboot";
+      };
     };
   };
 }
