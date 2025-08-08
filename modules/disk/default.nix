@@ -121,14 +121,11 @@ in {
                   priority = 2;
                   label = "efi";
                   type = "EF00";
-                  size = "512M";
+                  size = "2G";
                   content = {
                     type = "filesystem";
                     format = "vfat";
-                    mountpoint =
-                      if (!cfg.disk.luks.yubikey)
-                      then "/boot/efi"
-                      else "/boot";
+                    mountpoint = "/boot";
                     mountOptions = ["umask=0077"];
                   };
                 };
@@ -277,10 +274,6 @@ in {
                       mountpoint = "/";
                       mountOptions = ["subvol=root" "compress=zstd" "noatime"];
                     };
-                    bootSubvol = {
-                      mountpoint = "/boot";
-                      mountOptions = ["subvol=boot" "compress=zstd" "noatime"];
-                    };
                     logSubvol = {
                       mountpoint = "/var/log";
                       mountOptions = ["subvol=logs" "compress=zstd" "noatime"];
@@ -317,7 +310,6 @@ in {
                     }
                     else {
                       "/root" = rootSubvol;
-                      "/boot" = bootSubvol;
                       "/var/log" = logSubvol;
                       "/snapshots" = snapshotSubvol;
                       "/nix" = nixSubvol;

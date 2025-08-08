@@ -91,10 +91,7 @@ in {
       };
       loader = lib.mkIf (!cfg.boot.secureboot.enable) {
         efi = {
-          efiSysMountPoint =
-            if (efiSupport && !cfg.disk.luks.yubikey)
-            then "/boot/efi"
-            else "/boot";
+          efiSysMountPoint = "/boot";
           canTouchEfiVariables = lib.mkForce false;
         };
         grub = {
@@ -114,10 +111,7 @@ in {
           };
           mirroredBoots = lib.mkIf (!cfg.disk.luks.yubikey) (lib.mkForce [
             {
-              path =
-                if !cfg.disk.luks.yubikey && efiSupport
-                then "/boot/efi"
-                else "/boot";
+              path = "/boot";
               devices = [
                 (lib.mkIf (biosSupport || libreboot) device)
                 (lib.mkIf efiSupport "nodev")
