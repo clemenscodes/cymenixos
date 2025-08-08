@@ -383,7 +383,6 @@ in {
             env = XDG_CURRENT_DESKTOP,Hyprland
             env = MOZ_ENABLE_WAYLAND,1
 
-            exec-once = check-efi
             exec-once = ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
             exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME
             exec-once = wl-paste --type text --watch cliphist store

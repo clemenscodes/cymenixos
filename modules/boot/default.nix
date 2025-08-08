@@ -49,25 +49,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.boot.enable) {
-    environment = {
-      persistence = {
-        ${config.modules.boot.impermanence.persistPath} = {
-          directories = ["/var/lib/efi"];
-        };
-      };
-    };
-    # systemd.services.verify-efi = {
-    #   description = "Verify EFI/BIOS boot partition integrity";
-    #   wantedBy = ["multi-user.target"];
-    #   after = ["local-fs.target"];
-    #   before = ["graphical.target"];
-    #   serviceConfig = {
-    #     Type = "oneshot";
-    #     ExecStart = "${pkgs.cymenixos-scripts}/bin/verify-efi";
-    #     StandardOutput = "journal";
-    #     StandardError = "journal";
-    #   };
-    # };
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];
