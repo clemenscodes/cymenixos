@@ -26,7 +26,7 @@ in {
         pkgs.age
         pkgs.ssh-to-age
       ];
-      persistence = lib.mkIf (cfg.enable && cfg.sops.enable) {
+      persistence = lib.mkIf (cfg.enable && cfg.sops.enable && config.modules.boot.enable) {
         ${persistPath} = {
           users = {
             ${user} = {
@@ -39,11 +39,19 @@ in {
         };
       };
     };
-    sops = lib.mkIf (cfg.enable && cfg.sops.enable) {
-      age = {
-        keyFile = "${persistPath}/home/${user}/.config/sops/age/keys.txt";
-        sshKeyPaths = ["${persistPath}/home/${user}/.ssh/id_ed25519"];
+    sops =
+      if (cfg.enable && cfg.sops.enable && config.modules.boot.enable)
+      then {
+        age = {
+          keyFile = "${persistPath}/home/${user}/.config/sops/age/keys.txt";
+          sshKeyPaths = ["${persistPath}/home/${user}/.ssh/id_ed25519"];
+        };
+      }
+      else {
+        age = {
+          keyFile = "/home/${user}/.config/sops/age/keys.txt";
+          sshKeyPaths = ["/home/${user}/.ssh/id_ed25519"];
+        };
       };
-    };
   };
 }

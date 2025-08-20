@@ -59,7 +59,7 @@ in {
   };
   config = lib.mkIf (hasSecretsEnabled && cfg.enable && cfg.email.enable) {
     home = {
-      persistence = {
+      persistence = lib.mkIf (osConfig.modules.boot.enable) {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [
             ".local/share/mail"

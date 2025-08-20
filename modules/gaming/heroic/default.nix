@@ -27,7 +27,7 @@ in {
         pkgs.heroic
         pkgs.gogdl
       ];
-      persistence = {
+      persistence = lib.mkIf (config.modules.boot.enable) {
         ${persistPath} = {
           users = {
             ${name} = {

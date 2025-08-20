@@ -21,7 +21,7 @@ in {
       users = {
         ${config.modules.users.user} = {
           home = {
-            persistence = {
+            persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}/home/${user}" = {
                 directories = [
                   {
@@ -36,7 +36,7 @@ in {
       };
     };
     environment = {
-      persistence = {
+      persistence = lib.mkIf (config.modules.boot.enable) {
         ${persistPath} = {
           users = {
             ${user} = {

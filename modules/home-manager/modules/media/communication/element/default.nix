@@ -24,7 +24,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.element.enable && isDesktop) {
     home = {
       packages = [pkgs.element];
-      persistence = {
+      persistence = lib.mkIf (osConfig.modules.boot.enable) {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [".config/Element"];
         };

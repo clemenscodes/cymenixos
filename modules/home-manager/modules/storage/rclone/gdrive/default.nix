@@ -153,7 +153,7 @@ in {
         GDRIVE_STORAGE = cfg.rclone.gdrive.storage;
         GDRIVE_SYNC = cfg.rclone.gdrive.sync;
       };
-      persistence = {
+      persistence = lib.mkIf (osConfig.modules.boot.enable) {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [".local/share/sync/${cfg.rclone.gdrive.mount}"];
         };

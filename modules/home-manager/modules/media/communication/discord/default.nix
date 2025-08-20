@@ -30,7 +30,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.discord.enable && isDesktop) {
     home = {
-      persistence = {
+      persistence = lib.mkIf (osConfig.modules.boot.enable) {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [".config/discord"];
         };

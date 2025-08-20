@@ -51,7 +51,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.obs.enable && isDesktop) {
     home = {
-      persistence = {
+      persistence = lib.mkIf (osConfig.modules.boot.enable) {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
           directories = [".config/obs-studio"];
         };

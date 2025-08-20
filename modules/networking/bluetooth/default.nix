@@ -19,7 +19,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.bluetooth.enable) {
     environment = {
       systemPackages = [pkgs.python311Packages.ds4drv];
-      persistence = {
+      persistence = lib.mkIf (config.modules.boot.enable) {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = ["/var/lib/bluetooth"];
         };

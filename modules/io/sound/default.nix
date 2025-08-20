@@ -18,7 +18,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.sound.enable) {
     environment = {
-      persistence = {
+      persistence = lib.mkIf (config.modules.boot.enable) {
         ${persistPath} = {
           enable = true;
           hideMounts = true;
