@@ -35,7 +35,7 @@ in {
         register = true;
       };
       docker-desktop = {
-        enable = false;
+        enable = true;
       };
       extraBin = with pkgs; [
         {src = "${coreutils}/bin/mkdir";}
