@@ -39,19 +39,17 @@ in {
         };
       };
     };
-    sops =
-      if (cfg.enable && cfg.sops.enable && config.modules.boot.enable)
-      then {
-        age = {
+    sops = lib.mkIf (cfg.enable && cfg.sops.enable) {
+      age =
+        if config.modules.boot.enable
+        then {
           keyFile = "${persistPath}/home/${user}/.config/sops/age/keys.txt";
           sshKeyPaths = ["${persistPath}/home/${user}/.ssh/id_ed25519"];
-        };
-      }
-      else {
-        age = {
+        }
+        else {
           keyFile = "/home/${user}/.config/sops/age/keys.txt";
           sshKeyPaths = ["/home/${user}/.ssh/id_ed25519"];
         };
-      };
+    };
   };
 }

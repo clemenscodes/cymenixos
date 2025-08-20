@@ -23,11 +23,18 @@ in {
   };
   config = lib.mkIf (osConfig.modules.security.sops.enable && cfg.enable && cfg.sops.enable) {
     sops = {
-      age = {
-        generateKey = true;
-        keyFile = "${persistPath}/${home}/.config/sops/age/keys.txt";
-        sshKeyPaths = ["${persistPath}/${home}/.ssh/id_ed25519"];
-      };
+      age =
+        if osConfig.modules.boot.enable
+        then {
+          generateKey = true;
+          keyFile = "${persistPath}/${home}/.config/sops/age/keys.txt";
+          sshKeyPaths = ["${persistPath}/${home}/.ssh/id_ed25519"];
+        }
+        else {
+          generateKey = true;
+          keyFile = "/${home}/.config/sops/age/keys.txt";
+          sshKeyPaths = ["/${home}/.ssh/id_ed25519"];
+        };
     };
   };
 }
