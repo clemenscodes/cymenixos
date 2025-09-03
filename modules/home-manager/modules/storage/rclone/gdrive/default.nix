@@ -17,66 +17,43 @@
 
     ${pkgs.coreutils}/bin/mkdir -p "$STORAGE" "$RCLONE_HOME"
 
-    CLIENT_ID="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.clientId} --style=plain)"
-    CLIENT_SECRET="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.clientSecret} --style=plain)"
-    TOKEN="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.token} --style=plain)"
-    RAW_PASS="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.encryption_password} --style=plain)"
-    RAW_SALT="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.encryption_salt} --style=plain)"
+    CLIENT_ID="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.clientId})"
+    CLIENT_SECRET="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.clientSecret})"
+    TOKEN="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.token})"
+    RAW_PASS="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.encryption_password})"
+    RAW_SALT="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.encryption_salt})"
     OBSCURED_PASS="$(${pkgs.rclone}/bin/rclone obscure "$RAW_PASS")"
     OBSCURED_SALT="$(${pkgs.rclone}/bin/rclone obscure "$RAW_SALT")"
 
-    cat > "$CONFIG_FILE" <<EOF
-[${cfg.rclone.gdrive.mount}]
-type = drive
-scope = drive
-team_drive =
-client_id = $CLIENT_ID
-client_secret = $CLIENT_SECRET
-token = $TOKEN
-
-[${cfg.rclone.gdrive.mount}_crypt]
-type = crypt
-remote = ${cfg.rclone.gdrive.mount}:
-filename_encryption = standard
-directory_name_encryption = true
-password = $OBSCURED_PASS
-password2 = $OBSCURED_SALT
-
-[${cfg.rclone.gdrive.mount}_mount]
-type = alias
-remote = ${cfg.rclone.gdrive.mount}_crypt:
-vfs_cache_mode = full
-vfs_cache_max_size = 262144
-poll_interval = 10m
-cache_dir = $XDG_RUNTIME_DIR
-EOF
+    {
+      echo "[${cfg.rclone.gdrive.mount}]"
+      echo "type = drive"
+      echo "scope = drive"
+      echo "team_drive ="
+      echo "client_id = $CLIENT_ID"
+      echo "client_secret = $CLIENT_SECRET"
+      echo "token = $TOKEN"
+      echo
+      echo "[${cfg.rclone.gdrive.mount}_crypt]"
+      echo "type = crypt"
+      echo "remote = ${cfg.rclone.gdrive.mount}:"
+      echo "filename_encryption = standard"
+      echo "directory_name_encryption = true"
+      echo "password = $OBSCURED_PASS"
+      echo "password2 = $OBSCURED_SALT"
+      echo
+      echo "[${cfg.rclone.gdrive.mount}_mount]"
+      echo "type = alias"
+      echo "remote = ${cfg.rclone.gdrive.mount}_crypt:"
+      echo "vfs_cache_mode = full"
+      echo "vfs_cache_max_size = 262144"
+      echo "poll_interval = 10m"
+      echo "cache_dir = $XDG_RUNTIME_DIR"
+    } > "$CONFIG_FILE"
 
     ${pkgs.rclone}/bin/rclone \
       --config "$CONFIG_FILE" \
       mount ${cfg.rclone.gdrive.mount}_mount: "$STORAGE"
-  '';
-  unmountGoogleDrive = pkgs.writeShellScriptBin "unmount-gdrive" ''
-    MOUNT="${cfg.rclone.gdrive.storage}"
-
-    ${pkgs.psmisc}/bin/fuser -Mk -SIGTERM -m "$MOUNT"
-
-    while true;
-    do
-      if ${pkgs.psmisc}/bin/fuser -m "$MOUNT";
-      then
-        echo "Mount $MOUNT is busy, waiting..."
-        ${pkgs.coreutils}/bin/sleep 1
-      else
-        echo "Unmounting $MOUNT"
-        if fusermount -u "$MOUNT"; then
-            echo "Successfully unmounted $MOUNT"
-            exit 0
-        else
-            echo "Failed to unmount $MOUNT" >&2
-            exit 1
-        fi
-      fi
-    done
   '';
   syncGoogleDrive = pkgs.writeShellScriptBin "sync-gdrive" ''
     RCLONE_HOME="$XDG_CONFIG_HOME/rclone"
