@@ -12,7 +12,7 @@
     RCLONE_HOME="$XDG_CONFIG_HOME/rclone"
     STORAGE="${cfg.rclone.gdrive.storage}"
 
-    mkdir -p $STORAGE $RCLONE_HOME
+    ${pkgs.coreutils}/bin/mkdir -p $STORAGE $RCLONE_HOME
 
     echo "[${cfg.rclone.gdrive.mount}]" > $RCLONE_HOME/${cfg.rclone.gdrive.config}
     echo "type = drive" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
