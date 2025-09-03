@@ -9,36 +9,51 @@
 }: let
   cfg = config.modules.storage;
   mountGoogleDrive = pkgs.writeShellScriptBin "mount-gdrive" ''
+    set -euo pipefail
+
     RCLONE_HOME="$XDG_CONFIG_HOME/rclone"
     STORAGE="${cfg.rclone.gdrive.storage}"
+    CONFIG_FILE="$RCLONE_HOME/${cfg.rclone.gdrive.config}"
 
-    ${pkgs.coreutils}/bin/mkdir -p $STORAGE $RCLONE_HOME
+    ${pkgs.coreutils}/bin/mkdir -p "$STORAGE" "$RCLONE_HOME"
 
-    echo "[${cfg.rclone.gdrive.mount}]" > $RCLONE_HOME/${cfg.rclone.gdrive.config}
-    echo "type = drive" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
-    echo "scope = drive" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
-    echo "team_drive = " >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
+    CLIENT_ID="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.clientId} --style=plain)"
+    CLIENT_SECRET="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.clientSecret} --style=plain)"
+    TOKEN="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.token} --style=plain)"
+    RAW_PASS="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.encryption_password} --style=plain)"
+    RAW_SALT="$(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.encryption_salt} --style=plain)"
+    OBSCURED_PASS="$(${pkgs.rclone}/bin/rclone obscure "$RAW_PASS")"
+    OBSCURED_SALT="$(${pkgs.rclone}/bin/rclone obscure "$RAW_SALT")"
 
-    echo >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
+    cat > "$CONFIG_FILE" <<EOF
+[${cfg.rclone.gdrive.mount}]
+type = drive
+scope = drive
+team_drive =
+client_id = $CLIENT_ID
+client_secret = $CLIENT_SECRET
+token = $TOKEN
 
-    echo "[${cfg.rclone.gdrive.mount}_crypt]" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
-    echo "type = crypt" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
-    echo "remote = ${cfg.rclone.gdrive.mount}:" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
-    echo "filename_encryption = standard" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
-    echo "directory_name_encryption = true" >> $RCLONE_HOME/${cfg.rclone.gdrive.config}
+[${cfg.rclone.gdrive.mount}_crypt]
+type = crypt
+remote = ${cfg.rclone.gdrive.mount}:
+filename_encryption = standard
+directory_name_encryption = true
+password = $OBSCURED_PASS
+password2 = $OBSCURED_SALT
+
+[${cfg.rclone.gdrive.mount}_mount]
+type = alias
+remote = ${cfg.rclone.gdrive.mount}_crypt:
+vfs_cache_mode = full
+vfs_cache_max_size = 262144
+poll_interval = 10m
+cache_dir = \${XDG_RUNTIME_DIR}
+EOF
 
     ${pkgs.rclone}/bin/rclone \
-      --config $RCLONE_HOME/${cfg.rclone.gdrive.config} \
-      --drive-client-id $(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.clientId} --style=plain) \
-      --drive-client-secret $(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.clientSecret} --style=plain) \
-      --drive-token $(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.token} --style=plain) \
-      --crypt-password $(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.encryption_password} --style=plain) \
-      --crypt-password2 $(${pkgs.bat}/bin/bat ${cfg.rclone.gdrive.encryption_salt} --style=plain) \
-      --cache-dir "$XDG_RUNTIME_DIR" \
-      --vfs-cache-mode full \
-      --vfs-cache-max-size 262144 \
-      --poll-interval 10m \
-      mount ${cfg.rclone.gdrive.crypt}: $STORAGE
+      --config "$CONFIG_FILE" \
+      mount ${cfg.rclone.gdrive.mount}_mount: "$STORAGE"
   '';
   unmountGoogleDrive = pkgs.writeShellScriptBin "unmount-gdrive" ''
     MOUNT="${cfg.rclone.gdrive.storage}"
