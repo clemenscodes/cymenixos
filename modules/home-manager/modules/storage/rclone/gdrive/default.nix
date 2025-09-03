@@ -144,7 +144,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.rclone.enable && cfg.rclone.gdrive.enable) {
     home = {
       packages = [
-        pkgs.fuse
+        pkgs.fuse3
         mountGoogleDrive
         unmountGoogleDrive
         syncGoogleDrive
@@ -175,9 +175,23 @@ in {
               Description = cfg.rclone.gdrive.mount;
               After = ["network-online.target" "sops-nix.service"];
             };
+
             Install = {
               WantedBy = ["default.target"];
             };
+
+            Environment = [
+              "XDG_CONFIG_HOME=%h/.config"
+              "XDG_RUNTIME_DIR=%t"
+            ];
+
+            NoNewPrivileges = false;
+            PrivateDevices = "no";
+            ProtectSystem = "no";
+            ProtectHome = "no";
+
+            SupplementaryGroups = ["fuse"];
+
             Service = {
               Type = "simple";
               Restart = "always";
@@ -186,6 +200,7 @@ in {
               ExecStop = lib.getExe unmountGoogleDrive;
             };
           };
+
           "rclone-${cfg.rclone.gdrive.mount}-sync" = {
             Unit = {
               Description = "${cfg.rclone.gdrive.mount} sync";
@@ -194,6 +209,20 @@ in {
             Install = {
               WantedBy = ["default.target"];
             };
+
+            Environment = [
+              "XDG_CONFIG_HOME=%h/.config"
+              "XDG_RUNTIME_DIR=%t"
+            ];
+
+            NoNewPrivileges = false;
+            PrivateDevices = "no";
+            ProtectSystem = "no";
+            ProtectHome = "no";
+
+            SupplementaryGroups = ["fuse"];
+
+
             Service = {
               Type = "simple";
               ExecStart = lib.getExe syncGoogleDrive;

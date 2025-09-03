@@ -28,6 +28,13 @@ in {
         userAllowOther = lib.mkForce true;
       };
     };
+    users = {
+      users = {
+        "${cfg.users.name}" = {
+          extraGroups = ["fuse"];
+        };
+      };
+    };
     boot = {
       initrd = {
         postDeviceCommands = lib.mkAfter ''
