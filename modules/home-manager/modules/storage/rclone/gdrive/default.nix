@@ -22,6 +22,7 @@
     TOKEN="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.token})"
     RAW_PASS="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.encryption_password})"
     RAW_SALT="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.encryption_salt})"
+
     OBSCURED_PASS="$(${pkgs.rclone}/bin/rclone obscure "$RAW_PASS")"
     OBSCURED_SALT="$(${pkgs.rclone}/bin/rclone obscure "$RAW_SALT")"
 
@@ -54,6 +55,29 @@
     ${pkgs.rclone}/bin/rclone \
       --config "$CONFIG_FILE" \
       mount ${cfg.rclone.gdrive.mount}_mount: "$STORAGE"
+  '';
+  unmountGoogleDrive = pkgs.writeShellScriptBin "unmount-gdrive" ''
+    MOUNT="${cfg.rclone.gdrive.storage}"
+
+    ${pkgs.psmisc}/bin/fuser -Mk -SIGTERM -m "$MOUNT"
+
+    while true;
+    do
+      if ${pkgs.psmisc}/bin/fuser -m "$MOUNT";
+      then
+        echo "Mount $MOUNT is busy, waiting..."
+        ${pkgs.coreutils}/bin/sleep 1
+      else
+        echo "Unmounting $MOUNT"
+        if fusermount -u "$MOUNT"; then
+            echo "Successfully unmounted $MOUNT"
+            exit 0
+        else
+            echo "Failed to unmount $MOUNT" >&2
+            exit 1
+        fi
+      fi
+    done
   '';
   syncGoogleDrive = pkgs.writeShellScriptBin "sync-gdrive" ''
     RCLONE_HOME="$XDG_CONFIG_HOME/rclone"
