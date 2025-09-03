@@ -48,7 +48,7 @@ remote = ${cfg.rclone.gdrive.mount}_crypt:
 vfs_cache_mode = full
 vfs_cache_max_size = 262144
 poll_interval = 10m
-cache_dir = \${XDG_RUNTIME_DIR}
+cache_dir = $XDG_RUNTIME_DIR
 EOF
 
     ${pkgs.rclone}/bin/rclone \
