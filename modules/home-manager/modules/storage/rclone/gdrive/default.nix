@@ -180,11 +180,6 @@ in {
               WantedBy = ["default.target"];
             };
 
-            Environment = [
-              "XDG_CONFIG_HOME=%h/.config"
-              "XDG_RUNTIME_DIR=%t"
-            ];
-
             NoNewPrivileges = false;
             PrivateDevices = "no";
             ProtectSystem = "no";
@@ -209,11 +204,6 @@ in {
             Install = {
               WantedBy = ["default.target"];
             };
-
-            Environment = [
-              "XDG_CONFIG_HOME=%h/.config"
-              "XDG_RUNTIME_DIR=%t"
-            ];
 
             NoNewPrivileges = false;
             PrivateDevices = "no";
