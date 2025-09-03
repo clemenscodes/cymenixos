@@ -180,8 +180,6 @@ in {
               WantedBy = ["default.target"];
             };
 
-            SupplementaryGroups = ["fuse"];
-
             Service = {
               Type = "simple";
               Restart = "always";
@@ -200,8 +198,6 @@ in {
             Install = {
               WantedBy = ["default.target"];
             };
-
-            SupplementaryGroups = ["fuse"];
 
             Service = {
               Type = "simple";
