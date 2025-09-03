@@ -23,9 +23,6 @@
     RAW_PASS="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.encryption_password})"
     RAW_SALT="$(${pkgs.coreutils}/bin/cat ${cfg.rclone.gdrive.encryption_salt})"
 
-    OBSCURED_PASS="$(${pkgs.rclone}/bin/rclone obscure "$RAW_PASS")"
-    OBSCURED_SALT="$(${pkgs.rclone}/bin/rclone obscure "$RAW_SALT")"
-
     {
       echo "[${cfg.rclone.gdrive.mount}]"
       echo "type = drive"
@@ -40,8 +37,8 @@
       echo "remote = ${cfg.rclone.gdrive.mount}:"
       echo "filename_encryption = standard"
       echo "directory_name_encryption = true"
-      echo "password = $OBSCURED_PASS"
-      echo "password2 = $OBSCURED_SALT"
+      echo "password = $RAW_PASS"
+      echo "password2 = $RAW_SALT"
       echo
       echo "[${cfg.rclone.gdrive.mount}_mount]"
       echo "type = alias"
