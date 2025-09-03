@@ -180,11 +180,6 @@ in {
               WantedBy = ["default.target"];
             };
 
-            NoNewPrivileges = false;
-            PrivateDevices = "no";
-            ProtectSystem = "no";
-            ProtectHome = "no";
-
             SupplementaryGroups = ["fuse"];
 
             Service = {
@@ -201,17 +196,12 @@ in {
               Description = "${cfg.rclone.gdrive.mount} sync";
               After = ["rclone-${cfg.rclone.gdrive.mount}.service"];
             };
+
             Install = {
               WantedBy = ["default.target"];
             };
 
-            NoNewPrivileges = false;
-            PrivateDevices = "no";
-            ProtectSystem = "no";
-            ProtectHome = "no";
-
             SupplementaryGroups = ["fuse"];
-
 
             Service = {
               Type = "simple";
