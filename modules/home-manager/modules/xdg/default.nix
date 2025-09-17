@@ -121,7 +121,7 @@ in {
           "application/x-object" = ["nvim.desktop"];
         };
       };
-      portal = {
+      portal = lib.mkIf (osCfg.display.gui.type != "headless") {
         inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
         extraPortals = [
