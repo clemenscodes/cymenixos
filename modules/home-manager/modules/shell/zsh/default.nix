@@ -110,14 +110,12 @@ in {
         historySubstringSearch = {
           enable = true;
         };
-        initExtraBeforeCompInit = ''
-          autoload -U colors && colors
-        '';
-        initExtra =
+        initContent =
           /*
           bash
           */
           ''
+            autoload -U colors && colors
             zstyle ':completion*' menu select
             bindkey -v
             bindkey -M menuselect 'h' vi-backward-char
