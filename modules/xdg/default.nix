@@ -32,7 +32,7 @@ in {
       mime = {
         inherit (cfg.xdg) enable;
       };
-      portal = {
+      portal = lib.mkIf (cfg.display.gui.type != "headless") {
         enable = true;
         xdgOpenUsePortal = true;
         extraPortals = [
