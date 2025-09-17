@@ -85,7 +85,7 @@ in {
             "colorize"
           ];
         };
-        dotDir = "`\${config.xdg.configHome}/zsh`";
+        dotDir = "${config.xdg.configHome}/zsh";
         shellAliases = {
           sudo = "sudo ";
           ssh = "kitten ssh";
