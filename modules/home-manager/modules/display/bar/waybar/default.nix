@@ -194,7 +194,7 @@ in {
             "image#logo" = {
               path = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               size = height - 12;
-              on-click = "sleep 0.3; ${pkgs.rofi-wayland}/bin/rofi -show drun";
+              on-click = "sleep 0.3; ${pkgs.rofi}/bin/rofi -show drun";
             };
             "wlr/taskbar" = {
               format = "{icon}";

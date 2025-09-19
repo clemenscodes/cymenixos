@@ -31,7 +31,7 @@ in {
     programs = {
       rofi = {
         enable = cfg.rofi.enable;
-        package = pkgs.rofi-wayland;
+        package = pkgs.rofi;
         plugins = [pkgs.rofi-emoji];
         terminal = "${config.modules.terminal.defaultTerminal}";
         font = "${osConfig.modules.fonts.defaultFont} ${builtins.toString osConfig.modules.fonts.size}";

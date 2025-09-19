@@ -15,14 +15,14 @@ pkgs.writeShellScriptBin "logoutlaunch" ''
   no='✗'
 
   rofi_cmd() {
-    ${pkgs.rofi-wayland}/bin/rofi -dmenu \
+    ${pkgs.rofi}/bin/rofi -dmenu \
       -p "  $USER@$host" \
       -mesg "  Uptime: $uptime" \
       -theme ''${dir}/''${theme}.rasi
   }
 
   confirm_cmd() {
-    ${pkgs.rofi-wayland}/bin/rofi -theme-str 'window {location: center; anchor: center; fullscreen: false; width: 350px;}' \
+    ${pkgs.rofi}/bin/rofi -theme-str 'window {location: center; anchor: center; fullscreen: false; width: 350px;}' \
       -theme-str 'mainbox {orientation: vertical; children: [ "message", "listview" ];}' \
       -theme-str 'listview {columns: 2; lines: 1;}' \
       -theme-str 'element-text {horizontal-align: 0.5;}' \
