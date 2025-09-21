@@ -123,11 +123,6 @@ in {
               };
             };
 
-            gestures = {
-              workspace_swipe = "on";
-              workspace_swipe_fingers = 3;
-            };
-
             misc = {
               enable_swallow = true;
               disable_hyprland_logo = true;
