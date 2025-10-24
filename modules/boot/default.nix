@@ -77,14 +77,6 @@ in {
       consoleLogLevel = lib.mkDefault 0;
       extraModulePackages = with config.boot.kernelPackages; [
         v4l2loopback.out
-        (rtw88.overrideAttrs (oldAttrs: {
-          src = pkgs.fetchFromGitHub {
-            owner = "clemenscodes";
-            repo = "rtw88";
-            rev = "33c6239c5a2f8a0aa85cf698cf86fb7929e57a2b";
-            hash = "sha256-p9GXUfE/pp1kUXULYWEvN/L1ie4pebmd2keigBybHqg=";
-          };
-        }))
       ];
       extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
