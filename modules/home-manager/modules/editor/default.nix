@@ -9,7 +9,6 @@ in {
   imports = [
     (import ./jetbrains {inherit inputs pkgs lib;})
     (import ./nvim {inherit inputs pkgs lib;})
-    (import ./vscode {inherit inputs pkgs lib;})
     (import ./zed {inherit inputs pkgs lib;})
   ];
   options = {
