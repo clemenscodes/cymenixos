@@ -22,7 +22,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.ncmpcpp.enable) {
     home = {
-      packages = [pkgs.mpc-cli];
+      packages = [pkgs.mpc];
     };
     programs = {
       ncmpcpp = {

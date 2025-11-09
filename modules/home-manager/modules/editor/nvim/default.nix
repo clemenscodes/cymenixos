@@ -10,7 +10,7 @@
   ...
 }: let
   cfg = config.modules.editor;
-  nvim = inputs.cymenixvim.packages.${system}.minimal;
+  nvim = inputs.cymenixvim.packages.${system}.default;
 in {
   options = {
     modules = {
