@@ -51,11 +51,11 @@ in {
                 manualCommit: false
                 squashMergeMessage: Squash merge {{selectedRef}} into {{currentBranch}}
               overrideGpg: false
-              paging:
-                colorArg: always
-                externalDiffCommand: ${pkgs.difftastic}/bin/difft --color=always
-                pager: '''
-                useConfig: false
+              pagers:
+                - colorArg: always
+                  externalDiffCommand: ${pkgs.difftastic}/bin/difft --color=always
+                  pager: '''
+                  useConfig: false
               parseEmoji: false
               skipHookPrefix: WIP
               truncateCopiedCommitHashesTo: 12
@@ -206,7 +206,6 @@ in {
                 fetch: f
                 findBaseCommitForFixup: <c-f>
                 ignoreFile: i
-                openMergeTool: M
                 openStatusFilter: <c-b>
                 refreshFiles: r
                 stashAllChanges: s
