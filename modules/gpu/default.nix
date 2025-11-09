@@ -25,7 +25,7 @@ in {
     environment = {
       systemPackages = [
         pkgs.clinfo
-        pkgs.glxinfo
+        pkgs.mesa-demos
         pkgs.glmark2
         pkgs.libva
         pkgs.libva-utils
