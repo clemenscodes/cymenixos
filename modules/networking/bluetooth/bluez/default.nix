@@ -6,7 +6,7 @@
   pythonPath = with pkgs.python3.pkgs; [
     dbus-python
     pygobject3
-    recursive-pth-Loader
+    recursive-pth-loader
   ];
 in
   pkgs.stdenv.mkDerivation rec {
