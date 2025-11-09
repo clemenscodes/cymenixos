@@ -18,7 +18,7 @@ in {
     programs = {
       nix-ld = {
         enable = cfg.ld.enable;
-        package = pkgs.nix-ld-rs;
+        package = pkgs.nix-ld;
         libraries = [
           pkgs.webkitgtk_4_1
           pkgs.gtk3
