@@ -12,6 +12,7 @@ in {
     (import ./docker {inherit inputs pkgs lib;})
     (import ./podman {inherit inputs pkgs lib;})
     (import ./virt-manager {inherit inputs pkgs lib;})
+    (import ./waydroid {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
