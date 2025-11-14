@@ -19,7 +19,7 @@ in {
     environment = {
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
-          directories = ["/var/lib/waydroid"];
+          directories = ["/etc/waydroid-extra"];
         };
       };
     };
