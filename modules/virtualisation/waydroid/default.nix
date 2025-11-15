@@ -32,7 +32,7 @@ in {
             pkgs.wl-clipboard
           ];
           text = ''
-            sudo waydroid shell -- sh -c "sqlite3 /data/data/*/*/gservices.db 'select * from main where name = \"android_id\";'" | awk -F '|' '{print $1}' | wl-copy
+            sudo waydroid shell -- sh -c "sqlite3 /data/data/*/*/gservices.db 'select * from main where name = \"android_id\";'" | awk -F '|' '{print $2}' | wl-copy
           '';
         })
       ];
