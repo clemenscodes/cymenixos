@@ -22,6 +22,20 @@ in {
           directories = ["/etc/waydroid-extra" "/var/lib/waydroid"];
         };
       };
+      systemPackages = [
+        pkgs.waydroid-helper
+        (pkgs.writeShellApplication {
+          name = "waydroid-aid";
+          runtimeInputs = [
+            pkgs.waydroid
+            pkgs.waydroid-helper
+            pkgs.wl-clipboard
+          ];
+          text = ''
+            sudo waydroid shell -- sh -c "sqlite3 /data/data/*/*/gservices.db 'select * from main where name = \"android_id\";'" | awk -F '|' '{print $1}' | wl-copy
+          '';
+        })
+      ];
     };
     virtualisation = {
       waydroid = {
