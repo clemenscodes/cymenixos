@@ -5,6 +5,8 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.virtualisation;
+  inherit (config.modules.boot.impermanence) persistPath;
+  inherit (config.modules.users) user;
 in {
   options = {
     modules = {
@@ -18,8 +20,13 @@ in {
   config = lib.mkIf (cfg.enable && cfg.waydroid.enable) {
     environment = {
       persistence = {
-        ${config.modules.boot.impermanence.persistPath} = {
+        ${persistPath} = {
           directories = ["/etc/waydroid-extra" "/var/lib/waydroid"];
+          users = {
+            ${user} = {
+              directories = [".local/share/waydroid"];
+            };
+          };
         };
       };
       systemPackages = [
@@ -36,7 +43,7 @@ in {
             echo "Paste clipboard in this website below"
             echo "https://www.google.com/android/uncertified"
             echo "Then run"
-            echo "waydroid-session-stop"
+            echo "waydroid session stop"
             sudo mount --bind ~/Documents ~/.local/share/waydroid/data/media/0/Documents
             sudo mount --bind ~/Downloads ~/.local/share/waydroid/data/media/0/Download
             sudo mount --bind ~/Music ~/.local/share/waydroid/data/media/0/Music
