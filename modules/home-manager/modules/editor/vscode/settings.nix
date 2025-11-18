@@ -88,7 +88,6 @@ in {
               "scm.inputFontFamily" = "Iosevka NF";
               "security.workspace.trust.untrustedFiles" = "open";
               "security.workspace.trust.banner" = "never";
-
               "terminal.integrated.scrollback" = 50000;
               "terminal.integrated.persistentSessionScrollback" = 10000;
               "terminal.integrated.allowMnemonics" = true;
@@ -101,7 +100,6 @@ in {
               "terminal.integrated.altClickMovesCursor" = false;
               "terminal.integrated.env.linux" = {};
               "terminal.integrated.smoothScrolling" = true;
-              "terminal.integrated.defaultProfile.windows" = "PowerShell";
               "terminal.integrated.shellIntegration.history" = 1000;
               "terminal.integrated.fontLigatures.enabled" = true;
               "terminal.integrated.enableMultiLinePasteWarning" = "never";
@@ -124,9 +122,7 @@ in {
               "vscode-neovim.logOutputToConsole" = true;
               "vscode-neovim.neovimClean" = true;
               "vscode-neovim.neovimInitVimPaths.linux" = "$HOME/.config/nvim/init.vscode.lua";
-              "vscode-neovim.neovimExecutablePaths.darwin" = "/usr/local/bin/nvim";
-              "vscode-neovim.neovimInitVimPaths.darwin" = "$HOME/.config/nvim/init.vscode.lua";
-              "vscode-neovim.neovimExecutablePaths.win32" = "C:\\tools\\neovim\\nvim-win64\\bin\\nvim.exe";
+              "vscode-neovim.neovimExecutablePaths.linux" = "codevim";
               "vsicons.dontShowNewVersionMessage" = true;
               "vs-kubernetes" = {
                 "vs-kubernetes.crd-code-completion" = "disabled";
