@@ -11,6 +11,22 @@
   cfg = config.modules;
   osCfg = osConfig.modules.home-manager;
   user = osConfig.modules.users.user;
+  fileOptionAttrPaths = [["home" "file"] ["xdg" "configFile"] ["xdg" "dataFile"]];
+  mergeAttrsList = builtins.foldl' (lib.mergeAttrs) {};
+  fileAttrsType = lib.types.attrsOf (lib.types.submodule ({config, ...}: {
+    options.mutable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Whether to copy the file without the read-only attribute instead of
+        symlinking. If you set this to `true`, you must also set `force` to
+        `true`. Mutable files are not removed when you remove them from your
+        configuration.
+        This option is useful for programs that don't have a very good
+        support for read-only configurations.
+      '';
+    };
+  }));
 in {
   imports = [
     inputs.impermanence.homeManagerModules.impermanence
@@ -32,11 +48,15 @@ in {
     (import ./utils {inherit inputs pkgs lib;})
     (import ./xdg {inherit inputs pkgs lib;})
   ];
-  options = {
-    modules = {
-      enable = lib.mkEnableOption "Enable home-manager modules" // {default = false;};
-    };
-  };
+  options =
+    {
+      modules = {
+        enable = lib.mkEnableOption "Enable home-manager modules" // {default = false;};
+      };
+    }
+    // mergeAttrsList (map (attrPath:
+      lib.setAttrByPath attrPath (lib.mkOption {type = fileAttrsType;}))
+    fileOptionAttrPaths);
   config = lib.mkIf (cfg.enable && osCfg.enable) {
     programs = {
       home-manager = {
@@ -71,6 +91,28 @@ in {
           rm -rf ${config.home.homeDirectory}/.nix-defexpr
           rm -rf ${config.home.homeDirectory}/.nix-profile
         '';
+        mutableFileGeneration = let
+          allFiles = builtins.concatLists (map
+            (attrPath: builtins.attrValues (lib.getAttrFromPath attrPath config))
+            fileOptionAttrPaths);
+          filterMutableFiles = builtins.filter (file:
+            (file.mutable or false)
+            && lib.assertMsg file.force
+            "if you specify `mutable` to `true` on a file, you must also set `force` to `true`");
+          mutableFiles = filterMutableFiles allFiles;
+          toCommand = file: let
+            source = lib.escapeShellArg file.source;
+            target = lib.escapeShellArg file.target;
+          in ''
+            $VERBOSE_ECHO "${source} -> ${target}"
+            $DRY_RUN_CMD cp --remove-destination --no-preserve=mode ${source} ${target}
+          '';
+          command =
+            ''
+              echo "Copying mutable home files for $HOME"
+            ''
+            + lib.concatLines (map toCommand mutableFiles);
+        in (inputs.home-manager.lib.hm.dag.entryAfter ["linkGeneration"] command);
       };
       file = {
         ".local/src/README.md" = {
