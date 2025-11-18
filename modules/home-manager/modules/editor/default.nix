@@ -3,12 +3,17 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  osConfig,
+  ...
+}: let
   cfg = config.modules;
 in {
   imports = [
     (import ./jetbrains {inherit inputs pkgs lib;})
     (import ./nvim {inherit inputs pkgs lib;})
+    (import ./vscode {inherit inputs pkgs lib;})
     (import ./zed {inherit inputs pkgs lib;})
   ];
   options = {
@@ -26,6 +31,14 @@ in {
     home = {
       sessionVariables = {
         EDITOR = cfg.editor.defaultEditor;
+      };
+      persistence = lib.mkIf osConfig.modules.boot.enable {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+          directories = [
+            ".vscode"
+            ".config/Code"
+          ];
+        };
       };
     };
   };
