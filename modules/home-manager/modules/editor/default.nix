@@ -3,11 +3,7 @@
   pkgs,
   lib,
   ...
-}: {
-  config,
-  osConfig,
-  ...
-}: let
+}: {config, ...}: let
   cfg = config.modules;
 in {
   imports = [
@@ -31,14 +27,6 @@ in {
     home = {
       sessionVariables = {
         EDITOR = cfg.editor.defaultEditor;
-      };
-      persistence = lib.mkIf osConfig.modules.boot.enable {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
-          directories = [
-            ".vscode"
-            ".config/Code"
-          ];
-        };
       };
     };
   };

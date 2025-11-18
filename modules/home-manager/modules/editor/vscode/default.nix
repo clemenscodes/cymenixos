@@ -4,6 +4,7 @@
   ...
 }: {
   config,
+  osConfig,
   system,
   ...
 }: let
@@ -44,6 +45,14 @@ in {
   config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
     home = {
       packages = [codevim];
+      persistence = lib.mkIf osConfig.modules.boot.enable {
+        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+          directories = [
+            ".vscode"
+            ".config/Code"
+          ];
+        };
+      };
     };
     programs = {
       vscode = {
