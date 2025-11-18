@@ -44,6 +44,17 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
     home = {
+      file = {
+        ".config/nvim/init.vscode.lua" = {
+          text = ''
+            if vim.g.vscode then
+                -- VSCode extension
+            else
+                -- ordinary Neovim
+            end
+          '';
+        };
+      };
       activation = {
         makeVSCodeConfigWritable = let
           configDirName =
