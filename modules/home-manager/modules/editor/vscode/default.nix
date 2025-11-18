@@ -2,7 +2,11 @@
   inputs,
   lib,
   ...
-}: {system, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
@@ -20,6 +24,7 @@
   codevim = pkgs.writeShellScriptBin "codevim" ''
     nix run github:clemenscodes/codevim -- "$@"
   '';
+  cfg = config.modules.editor;
 in {
   imports = [
     (import ./keybindings.nix {inherit inputs pkgs lib;})
@@ -27,13 +32,24 @@ in {
     (import ./extensions.nix {inherit inputs pkgs lib;})
     (import ./launcher.nix {inherit inputs pkgs lib;})
   ];
-  home = {
-    packages = [codevim];
+  options = {
+    modules = {
+      editor = {
+        vscode = {
+          enable = lib.mkEnableOption "Enable VSCode" // {default = false;};
+        };
+      };
+    };
   };
-  programs = {
-    vscode = {
-      enable = true;
-      package = pkgs.vscode;
+  config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
+    home = {
+      packages = [codevim];
+    };
+    programs = {
+      vscode = {
+        enable = true;
+        package = pkgs.vscode;
+      };
     };
   };
 }
