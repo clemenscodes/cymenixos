@@ -26,11 +26,8 @@
     nix run github:clemenscodes/codevim -- "$@"
   '';
   cfg = config.modules.editor;
-
   vscodeCfg = config.programs.vscode;
-
   vscodePname = vscodeCfg.package.pname;
-
   configDir =
     {
       "vscode" = "Code";
@@ -39,20 +36,19 @@
     }.${
       vscodePname
     };
-
   userDir = "${config.xdg.configHome}/${configDir}/User";
   configFilePath = "${userDir}/settings.json";
   tasksFilePath = "${userDir}/tasks.json";
   keybindingsFilePath = "${userDir}/keybindings.json";
   snippetDir = "${userDir}/snippets";
   pathsToMakeWritable = lib.flatten [
-    (lib.optional (cfg.profiles.default.userTasks != {}) tasksFilePath)
-    (lib.optional (cfg.profiles.default.userSettings != {}) configFilePath)
-    (lib.optional (cfg.profiles.default.keybindings != []) keybindingsFilePath)
-    (lib.optional (cfg.profiles.default.globalSnippets != {})
+    (lib.optional (vscodeCfg.profiles.default.userTasks != {}) tasksFilePath)
+    (lib.optional (vscodeCfg.profiles.default.userSettings != {}) configFilePath)
+    (lib.optional (vscodeCfg.profiles.default.keybindings != []) keybindingsFilePath)
+    (lib.optional (vscodeCfg.profiles.default.globalSnippets != {})
       "${snippetDir}/global.code-snippets")
     (lib.mapAttrsToList (language: _: "${snippetDir}/${language}.json")
-      cfg.profiles.default.languageSnippets)
+      vscodeCfg.profiles.default.languageSnippets)
   ];
 in {
   imports = [
