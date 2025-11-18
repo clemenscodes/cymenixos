@@ -18,10 +18,7 @@ in {
             yazi = {
               enable = false;
             };
-            firefox = {
-              enable = false;
-            };
-            starship = {
+            vscode = {
               enable = false;
             };
           };
