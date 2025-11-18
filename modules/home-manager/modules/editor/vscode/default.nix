@@ -44,6 +44,25 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
     home = {
+      activation = {
+        makeVSCodeConfigWritable = let
+          configDirName =
+            {
+              "vscode" = "Code";
+              "vscode-insiders" = "Code - Insiders";
+              "vscodium" = "VSCodium";
+            }.${
+              config.programs.vscode.package.pname
+            };
+          configPath = "${config.xdg.configHome}/${configDirName}/User/settings.json";
+        in {
+          after = ["writeBoundary"];
+          before = [];
+          data = ''
+            install -m 0640 "$(readlink ${configPath})" ${configPath}
+          '';
+        };
+      };
       packages = [codevim];
       persistence = lib.mkIf osConfig.modules.boot.enable {
         "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
