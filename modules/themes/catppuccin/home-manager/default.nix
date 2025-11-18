@@ -21,6 +21,9 @@ in {
             firefox = {
               enable = false;
             };
+            starship = {
+              enable = false;
+            };
           };
         };
       };
