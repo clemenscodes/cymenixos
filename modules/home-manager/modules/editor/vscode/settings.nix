@@ -1,4 +1,4 @@
-{lib, ...}: {config}: let
+{lib, ...}: {config, ...}: let
   cfg = config.modules.editor;
 in {
   config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
