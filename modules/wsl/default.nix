@@ -31,8 +31,8 @@ in {
       inherit (cfg.wsl) enable;
       defaultUser = user;
       interop = {
-        includePath = true;
-        register = true;
+        includePath = false;
+        register = false;
       };
       docker-desktop = {
         enable = true;
@@ -62,8 +62,8 @@ in {
           root = "/mnt";
         };
         interop = {
-          enabled = true;
-          appendWindowsPath = true;
+          enabled = false;
+          appendWindowsPath = false;
         };
         network = {
           generateHosts = true;
