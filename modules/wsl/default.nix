@@ -62,7 +62,7 @@ in {
           root = "/mnt";
         };
         interop = {
-          enabled = false;
+          enabled = true;
           appendWindowsPath = false;
         };
         network = {
