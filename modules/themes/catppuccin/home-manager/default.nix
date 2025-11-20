@@ -18,6 +18,9 @@ in {
             yazi = {
               enable = false;
             };
+            vscode = {
+              enable = false;
+            };
           };
         };
       };
