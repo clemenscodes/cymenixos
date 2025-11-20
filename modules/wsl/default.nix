@@ -31,8 +31,8 @@ in {
       inherit (cfg.wsl) enable;
       defaultUser = user;
       interop = {
-        includePath = false;
-        register = false;
+        includePath = true;
+        register = true;
       };
       docker-desktop = {
         enable = true;
