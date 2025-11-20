@@ -206,10 +206,6 @@
             nvim = {
               enable = false;
             };
-            vscode = {
-              enable = false;
-              proprietary = false;
-            };
             zed = {
               enable = false;
             };
