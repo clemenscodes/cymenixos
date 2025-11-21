@@ -1,6 +1,5 @@
 {lib, ...}: {config, ...}: let
   cfg = config.modules.virtualisation;
-  inherit (config.modules.users) user;
 in {
   options = {
     modules = {
@@ -26,12 +25,15 @@ in {
           enable = true;
         };
         enableOnBoot = lib.mkDefault false;
-      };
-    };
-    users = {
-      users = {
-        ${user} = {
-          extraGroups = ["docker"];
+        rootless = {
+          enable = true;
+          setSocketVariable = true;
+          daemon = {
+            settings = {
+              dns = ["1.1.1.1" "8.8.8.8"];
+              registry-mirrors = ["https://mirror.gcr.io"];
+            };
+          };
         };
       };
     };
