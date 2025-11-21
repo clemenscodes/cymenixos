@@ -63,7 +63,7 @@ in {
         };
         interop = {
           enabled = true;
-          appendWindowsPath = true;
+          appendWindowsPath = false;
         };
         network = {
           generateHosts = true;

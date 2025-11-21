@@ -18,6 +18,7 @@ in {
         settings = {
           add_newline = false;
           command_timeout = 500;
+          scan_timeout = 10000;
           hostname = {
             style = "bold #ff5555";
           };
