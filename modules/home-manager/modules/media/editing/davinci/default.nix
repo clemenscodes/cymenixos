@@ -13,7 +13,7 @@
     config = {
       allowUnfreePredicate = pkg:
         builtins.elem (lib.getName pkg) [
-          "davici-resolve"
+          "davinci-resolve"
         ];
     };
   };
