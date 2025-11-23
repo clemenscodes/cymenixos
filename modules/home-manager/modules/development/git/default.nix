@@ -15,15 +15,13 @@ in {
       development = {
         git = {
           enable = lib.mkEnableOption "Enable Git" // {default = false;};
-          settings = {
-            userName = lib.mkOption {
-              type = lib.types.str;
-              default = null;
-            };
-            userEmail = lib.mkOption {
-              type = lib.types.str;
-              default = null;
-            };
+          userName = lib.mkOption {
+            type = lib.types.str;
+            default = null;
+          };
+          userEmail = lib.mkOption {
+            type = lib.types.str;
+            default = null;
           };
           signing = {
             enable = lib.mkEnableOption "Enable commit signing using PGP" // {default = false;};
@@ -48,7 +46,7 @@ in {
         };
       };
       git = {
-        inherit (cfg.git) enable userName userEmail;
+        inherit (cfg.git) enable;
         package = pkgs.gitFull;
         attributes = [
           "*.pdf diff=pdf"
@@ -67,6 +65,7 @@ in {
           };
         };
         settings = {
+          inherit (cfg.git) userName userEmail;
           core = {
             whitespace = "trailing-space,space-before-tab";
             autocrlf = "input";
