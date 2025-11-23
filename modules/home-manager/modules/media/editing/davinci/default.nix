@@ -11,7 +11,10 @@
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
-      allowUnfree = true;
+      allowUnfreePredicate = pkg:
+        builtins.elem (lib.getName pkg) [
+          "davici-resolve"
+        ];
     };
   };
 in {
@@ -21,6 +24,7 @@ in {
         editing = {
           davinci = {
             enable = lib.mkEnableOption "Enable DaVinci Resolve" // {default = false;};
+            studio = lib.mkEnableOption "Enable DaVinci Resolve Studio" // {default = false;};
           };
         };
       };
@@ -28,7 +32,13 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.davinci.enable) {
     home = {
-      packages = [pkgs.davinci-resolve];
+      packages = [
+        (
+          if cfg.davinci.studio
+          then pkgs.davinci-resolve-studio
+          else pkgs.davinci-resolve
+        )
+      ];
     };
   };
 }
