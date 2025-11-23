@@ -41,6 +41,11 @@ in {
     programs = {
       difftastic = {
         inherit (cfg.git) enable;
+        options = {
+          display = "inline";
+          background = "dark";
+          color = "always";
+        };
         git = {
           enable = true;
         };
@@ -56,13 +61,6 @@ in {
           format = "openpgp";
           signer = "${pkgs.gnupg}/bin/gpg2";
           key = cfg.git.signing.gpgFingerprint;
-        };
-        difftastic = {
-          options = {
-            display = "inline";
-            background = "dark";
-            color = "always";
-          };
         };
         settings = {
           user = let

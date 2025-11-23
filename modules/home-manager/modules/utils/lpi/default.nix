@@ -19,7 +19,7 @@ in {
     home = {
       packages = [
         pkgs.moon
-        inputs.lpi.packages.${pkgs.system}.default
+        inputs.lpi.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
     };
   };
