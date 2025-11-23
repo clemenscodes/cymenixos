@@ -147,6 +147,24 @@
       tpm = {
         enable = true;
       };
+      yubikey = {
+        enable = true;
+        pam = {
+          enable = true;
+          identifiers = {
+            sequwitie = 31631244;
+            matcha = 31861924;
+          };
+          token-ids = [
+            "vvcccbudlijr" # sequwitie
+            "vvcccbuhdrlf" # matcha
+          ];
+          u2f-mappings = [
+            "BIy34cqfJbjqbGflC1sK064geZZm9ma8PEcv+lNyBcy9PPQuJx1jlYTfx6wBdtyST4a493/hy/bCvjtygHM8cg==,zvs4JcxffM814ItVLiVmNoMAL7rf1W/ZxLFbA9xkf1CEWiHI7LGdQVIp4NiOzTHMZFUobJwN4emnmGcrR3zKGg==,es256,+presence" # sequwitie
+            "PvMKJy6Uqzqkb+YXyRhOnLn3rj+d1unpIZ3hnXE0rwfCnKePv5qfa8QFFq7sFIioq8lKvtN2kdYDLvC7+FRiFg==,iDqLO5PXwW3frmeWeZwyzCjLnTey+dC7DIz6OfCsMgNC1sAkiEnbnR1EK+Dt0V7frD5h3iopxrf6QdC8Tg37cg==,es256,+presence"
+          ];
+        };
+      };
     };
     shell = {
       enable = true;
@@ -296,9 +314,6 @@
             enable = true;
             audio = {
               enable = true;
-              audacity = {
-                enable = true;
-              };
               interfaces = {
                 enable = true;
                 scarlett = {
@@ -314,9 +329,6 @@
             };
             music = {
               enable = true;
-              dlplaylist = {
-                enable = true;
-              };
               ncmpcpp = {
                 enable = true;
               };
