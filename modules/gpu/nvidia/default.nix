@@ -79,6 +79,11 @@ in {
         pkgs.nvtopPackages.nvidia
       ];
     };
+    services = {
+      xserver = {
+        videoDrivers = ["nvidia"];
+      };
+    };
     hardware = {
       nvidia = {
         modesetting = {
