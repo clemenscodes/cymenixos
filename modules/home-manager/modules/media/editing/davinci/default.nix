@@ -14,6 +14,7 @@
       allowUnfreePredicate = pkg:
         builtins.elem (lib.getName pkg) [
           "davinci-resolve"
+          "davinci-resolve-studio"
         ];
     };
   };
