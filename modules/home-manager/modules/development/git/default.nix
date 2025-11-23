@@ -65,7 +65,12 @@ in {
           };
         };
         settings = {
-          inherit (cfg.git) userName userEmail;
+          user = let
+            inherit (cfg.git) userName userEmail;
+          in {
+            name = userName;
+            email = userEmail;
+          };
           core = {
             whitespace = "trailing-space,space-before-tab";
             autocrlf = "input";
