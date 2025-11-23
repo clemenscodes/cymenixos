@@ -56,18 +56,6 @@ in {
         };
       };
     };
-    # systemd.services.verify-efi = {
-    #   description = "Verify EFI/BIOS boot partition integrity";
-    #   wantedBy = ["multi-user.target"];
-    #   after = ["local-fs.target"];
-    #   before = ["graphical.target"];
-    #   serviceConfig = {
-    #     Type = "oneshot";
-    #     ExecStart = "${pkgs.cymenixos-scripts}/bin/verify-efi";
-    #     StandardOutput = "journal";
-    #     StandardError = "journal";
-    #   };
-    # };
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];
@@ -116,8 +104,8 @@ in {
           efiInstallAsRemovable = efiSupport;
           gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
-          extraGrubInstallArgs = ["--modules=part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2"];
-          extraFiles = lib.mkIf (!libreboot) {
+          extraGrubInstallArgs = ["--modules=part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2 tpm"];
+          extraFiles = {
             "grub/${pkgs.grub2.grubTarget}/argon2.mod" = lib.mkIf biosSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2.grubTarget}/argon2.mod";
             "grub/${pkgs.grub2.grubTarget}/argon2.module" = lib.mkIf biosSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2.grubTarget}/argon2.module";
             "grub/${pkgs.grub2_efi.grubTarget}/argon2.mod" = lib.mkIf efiSupport "${pkgs.grub2_efi}/lib/grub/${pkgs.grub2_efi.grubTarget}/argon2.mod";

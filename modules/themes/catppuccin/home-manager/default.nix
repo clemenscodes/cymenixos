@@ -19,7 +19,11 @@ in {
               enable = false;
             };
             vscode = {
-              enable = false;
+              profiles = {
+                default = {
+                  enable = false;
+                };
+              };
             };
           };
         };

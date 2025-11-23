@@ -175,7 +175,11 @@
     devShells = {
       ${system} = {
         default = pkgs.mkShell {
-          nativeBuildInputs = [pkgs.cymenixos-scripts];
+          nativeBuildInputs = with pkgs; [
+            cymenixos-scripts
+            nil
+            alejandra
+          ];
         };
       };
     };

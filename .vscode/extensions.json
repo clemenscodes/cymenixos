@@ -1,0 +1,29 @@
+{
+  "recommendations": [
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+    "moonrepo.moon-console",
+    "ahmadalli.vscode-nginx-conf",
+    "angular.ng-template",
+    "biomejs.biome",
+    "dbaeumer.vscode-eslint",
+    "tamasfe.even-better-toml",
+    "exiasr.hadolint",
+    "arrterian.nix-env-selector",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "rluvaton.vscode-vitest",
+    "redhat.vscode-yaml",
+    "ms-playwright.playwright",
+    "fill-labs.dependi",
+    "ms-vscode-remote.remote-wsl",
+    "vscode-icons-team.vscode-icons",
+    "ms-azuretools.vscode-containers",
+    "editorconfig.editorconfig",
+    "eamodio.gitlens",
+    "bierner.markdown-mermaid",
+    "jnoortheen.nix-ide",
+    "mkhl.direnv",
+    "vadimcn.vscode-lldb"
+  ]
+}

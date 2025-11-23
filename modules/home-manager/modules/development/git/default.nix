@@ -15,13 +15,15 @@ in {
       development = {
         git = {
           enable = lib.mkEnableOption "Enable Git" // {default = false;};
-          userName = lib.mkOption {
-            type = lib.types.str;
-            default = null;
-          };
-          userEmail = lib.mkOption {
-            type = lib.types.str;
-            default = null;
+          settings = {
+            userName = lib.mkOption {
+              type = lib.types.str;
+              default = null;
+            };
+            userEmail = lib.mkOption {
+              type = lib.types.str;
+              default = null;
+            };
           };
           signing = {
             enable = lib.mkEnableOption "Enable commit signing using PGP" // {default = false;};
@@ -39,25 +41,32 @@ in {
       packages = [pkgs.gitflow];
     };
     programs = {
+      difftastic = {
+        inherit (cfg.git) enable;
+        git = {
+          enable = true;
+        };
+      };
       git = {
         inherit (cfg.git) enable userName userEmail;
         package = pkgs.gitFull;
         attributes = [
           "*.pdf diff=pdf"
         ];
-        difftastic = {
-          inherit (cfg.git) enable;
-          display = "inline";
-          background = "dark";
-          color = "always";
-        };
         signing = lib.mkIf cfg.git.signing.enable {
           signByDefault = true;
           format = "openpgp";
           signer = "${pkgs.gnupg}/bin/gpg2";
           key = cfg.git.signing.gpgFingerprint;
         };
-        extraConfig = {
+        difftastic = {
+          options = {
+            display = "inline";
+            background = "dark";
+            color = "always";
+          };
+        };
+        settings = {
           core = {
             whitespace = "trailing-space,space-before-tab";
             autocrlf = "input";

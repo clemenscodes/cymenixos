@@ -30,7 +30,7 @@ in {
     };
     users = {
       users = {
-        "${cfg.users.name}" = {
+        ${cfg.users.name} = {
           extraGroups = ["fuse"];
         };
       };
@@ -39,7 +39,7 @@ in {
       initrd = {
         postDeviceCommands = lib.mkAfter ''
           mkdir /btrfs_tmp
-          mount /dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume} /btrfs_tmp
+          mount -n /dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume} /btrfs_tmp
 
           delete_subvolume_recursively() {
               IFS=$'\n'
