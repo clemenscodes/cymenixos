@@ -104,7 +104,7 @@ in {
           efiInstallAsRemovable = efiSupport;
           gfxmodeBios = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
           gfxmodeEfi = "1920x1080x32,1920x1080x24,1024x768x32,1024x768x24,auto";
-          extraGrubInstallArgs = ["--modules=part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2 tpm"];
+          extraGrubInstallArgs = ["--modules=part_gpt btrfs luks2 cryptodisk gcry_rijndael gcry_sha256 gcry_sha512 pbkdf2 argon2"];
           extraFiles = {
             "grub/${pkgs.grub2.grubTarget}/argon2.mod" = lib.mkIf biosSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2.grubTarget}/argon2.mod";
             "grub/${pkgs.grub2.grubTarget}/argon2.module" = lib.mkIf biosSupport "${pkgs.grub2}/lib/grub/${pkgs.grub2.grubTarget}/argon2.module";
