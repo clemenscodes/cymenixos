@@ -43,11 +43,5 @@ in {
       };
       kernelModules = [driver];
     };
-    services = {
-      xserver = {
-        enable = true;
-        videoDrivers = [driver];
-      };
-    };
   };
 }
