@@ -282,10 +282,6 @@ in {
               allowedBridges = ["virbr0"];
               qemu = {
                 runAsRoot = true;
-                ovmf = {
-                  inherit (config.modules.virtualisation.virt-manager) enable;
-                  packages = [ovmf];
-                };
               };
               hooks = {
                 qemu = {
