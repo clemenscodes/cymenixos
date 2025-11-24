@@ -85,7 +85,7 @@ in {
                 };
               };
               shortcuts = {};
-              panels = {};
+              panels = [];
               powerdevil = {};
               file = {};
               configFile = {};
