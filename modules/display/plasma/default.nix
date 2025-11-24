@@ -49,14 +49,16 @@ in {
       users = {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
-          file = {
-            ".config/kwalletrc" = {
-              text = ''
-                [Wallet]
-                Enabled=false
-              '';
-              force = true;
-              mutable = true;
+          home = {
+            file = {
+              ".config/kwalletrc" = {
+                text = ''
+                  [Wallet]
+                  Enabled=false
+                '';
+                force = true;
+                mutable = true;
+              };
             };
           };
           programs = {
@@ -160,10 +162,10 @@ in {
                   "Setup Window Shortcut" = [];
                   "ShowDesktopGrid" = "Meta+F8";
                   "Suspend Compositing" = "Alt+Shift+F12";
-                  "Switch One Desktop Down" = ["Meta+J"];
-                  "Switch One Desktop Up" = ["Meta+K"];
-                  "Switch One Desktop to the Left" = ["Meta+H"];
-                  "Switch One Desktop to the Right" = ["Meta+L"];
+                  "Switch One Desktop Down" = [];
+                  "Switch One Desktop Up" = [];
+                  "Switch One Desktop to the Left" = ["Meta+Shift+Tab"];
+                  "Switch One Desktop to the Right" = ["Meta+Tab"];
                   "Switch Window Down" = "Meta+Alt+Down";
                   "Switch Window Left" = "Meta+Alt+Left";
                   "Switch Window Right" = "Meta+Alt+Right";
@@ -178,8 +180,8 @@ in {
                   "Walk Through Desktop List (Reverse)" = [];
                   "Walk Through Desktops" = [];
                   "Walk Through Desktops (Reverse)" = [];
-                  "Walk Through Windows" = "Alt+Tab";
-                  "Walk Through Windows (Reverse)" = "Alt+Shift+Backtab";
+                  "Walk Through Windows" = "Meta+L";
+                  "Walk Through Windows (Reverse)" = "Meta+H";
                   "Walk Through Windows Alternative" = [];
                   "Walk Through Windows Alternative (Reverse)" = [];
                   "Walk Through Windows of Current Application" = "Alt+`";
