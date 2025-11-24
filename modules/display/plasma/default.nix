@@ -323,7 +323,7 @@ in {
                 {
                   location = "bottom";
                   floating = true;
-                  height = 60;
+                  height = 40;
 
                   widgets = [
                     {
