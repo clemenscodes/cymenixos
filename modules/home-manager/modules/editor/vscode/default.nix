@@ -55,7 +55,6 @@ in {
     (import ./keybindings.nix {inherit inputs pkgs lib;})
     (import ./settings.nix {inherit inputs pkgs lib;})
     (import ./extensions.nix {inherit inputs pkgs lib;})
-    (import ./launcher.nix {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
