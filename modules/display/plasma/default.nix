@@ -98,7 +98,8 @@ in {
                 };
               };
               shortcuts = {
-                "services/kitty.desktop"."_launch" = "Meta+Enter";
+                "kitty.desktop"."_launch" = "Meta+Enter";
+                "brave-browser.desktop"."_launch" = "Meta+W";
                 "services/org.kde.konsole.desktop"."_launch" = "None";
                 "kwin"."Overview" = "Meta+Tab";
                 "kwin"."Show Desktop" = "Meta+D";
@@ -147,7 +148,7 @@ in {
                 {
                   location = "bottom";
                   floating = true;
-                  height = 40;
+                  height = 60;
 
                   widgets = [
                     {
@@ -158,10 +159,10 @@ in {
 
                     {
                       iconTasks = {
-                        iconsOnly = false;
+                        iconsOnly = true;
                         behavior.grouping.method = "none";
                         launchers = [
-                          "applications:com.discordapp.Discord.desktop"
+                          "applications:kitty.desktop"
                           "preferred://browser"
                         ];
                         settings = {
@@ -176,12 +177,34 @@ in {
 
                     {
                       systemTray = {
-                        items.hidden = [
-                          "org.kde.plasma.brightness"
-                          "org.kde.plasma.clipboard"
-                          "org.kde.plasma.networkmanagement"
-                          "org.kde.plasma.volume"
-                        ];
+                        icons = {
+                          spacing = "large";
+                          scaleToFit = true;
+                        };
+                        items = {
+                          shown = [
+                            "org.kde.plasma.battery"
+                            "org.kde.plasma.networkmanagement"
+                            "org.kde.plasma.volume"
+                            "org.kde.kdeconnect"
+                            "discord"
+                          ];
+                          hidden = [
+                            "org.kde.plasma.bluetooth"
+                            "org.kde.plasma.clipboard"
+                            "org.kde.plasma.brightness"
+                            "org.kde.plasma.keyboardlayout"
+                            "org.kde.plasma.manage-inputmethod"
+                            "org.kde.plasma.weather"
+                            "org.kde.kscreen"
+                            "aw-qt"
+                            "tail-tray"
+                          ];
+                          extra = [
+                            "org.kde.plasma.devicenotifier"
+                            "org.kde.plasma.mediacontroller"
+                          ];
+                        };
                       };
                     }
 
@@ -203,6 +226,7 @@ in {
                     }
 
                     "org.kde.plasma.minimizeall"
+                    "org.kde.plasma.showdesktop"
                   ];
                 }
               ];
