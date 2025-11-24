@@ -69,9 +69,6 @@ in {
         extest = {
           inherit (cfg.steam) enable;
         };
-        platformOptimizations = {
-          inherit (cfg.steam) enable;
-        };
         extraPackages = [
           pkgs.xorg.libXcursor
           pkgs.xorg.libXi
