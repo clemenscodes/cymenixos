@@ -8,6 +8,8 @@
   ...
 }: let
   cfg = config.modules.display;
+  inherit (cfg.boot.impermanence) persistPath;
+  inherit (config.modules.users) name;
   pkgs = import inputs.nixpkgs {
     inherit system;
     overlays = [
@@ -31,9 +33,18 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.plasma.enable) {
+    persistence = lib.mkIf (config.modules.boot.enable) {
+      ${persistPath} = {
+        users = {
+          ${name} = {
+            directories = [".config"];
+          };
+        };
+      };
+    };
     home-manager = {
       users = {
-        ${config.modules.users.name} = {
+        ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
           programs = {
             elisa = {
@@ -53,7 +64,7 @@ in {
             };
             plasma = {
               inherit (cfg.plasma) enable;
-              overrideConfig = false;
+              overrideConfig = true;
               resetFiles = [];
               resetFilesExclude = [];
               startup = {
@@ -70,6 +81,13 @@ in {
                 colorScheme = "BreezeDark";
                 enableMiddleClickPaste = true;
                 cursor = {};
+                soundTheme = "freedesktop";
+                splashScreen = {
+                  theme = "Breeze";
+                };
+                windowDecorations = {
+                  library = "org.kde.kwin.aurorae";
+                };
                 iconTheme = "Papirus-Dark";
                 lookAndFeel = "org.kde.breezedark.desktop";
                 theme = "breeze-dark";
@@ -88,7 +106,14 @@ in {
               panels = [];
               powerdevil = {};
               file = {};
-              configFile = {};
+              configFile = {
+                kdeglobals = {
+                  General = {
+                    TerminalApplication = "kitty";
+                    TerminalService = "kitty.desktop";
+                  };
+                };
+              };
               dataFile = {};
               desktop = {
                 icons = {};
