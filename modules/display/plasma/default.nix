@@ -38,7 +38,10 @@ in {
         ${persistPath} = {
           users = {
             ${name} = {
-              directories = [".local/share/kwalletd"];
+              directories = [
+                ".local/share/kwalletd"
+                ".local/share/kscreen"
+              ];
             };
           };
         };
