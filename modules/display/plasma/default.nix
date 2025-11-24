@@ -149,10 +149,10 @@ in {
                   "Setup Window Shortcut" = [];
                   "ShowDesktopGrid" = "Meta+F8";
                   "Suspend Compositing" = "Alt+Shift+F12";
-                  "Switch One Desktop Down" = [];
-                  "Switch One Desktop Up" = [];
-                  "Switch One Desktop to the Left" = [];
-                  "Switch One Desktop to the Right" = [];
+                  "Switch One Desktop Down" = ["Meta+J"];
+                  "Switch One Desktop Up" = ["Meta+K"];
+                  "Switch One Desktop to the Left" = ["Meta+H"];
+                  "Switch One Desktop to the Right" = ["Meta+L"];
                   "Switch Window Down" = "Meta+Alt+Down";
                   "Switch Window Left" = "Meta+Alt+Left";
                   "Switch Window Right" = "Meta+Alt+Right";
