@@ -61,7 +61,7 @@ in {
                 desktopScript = {};
                 startupScript = {};
               };
-              window-rules = {};
+              window-rules = [];
               windows = {
                 allowWindowsToRememberPositions = true;
               };
