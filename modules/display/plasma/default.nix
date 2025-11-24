@@ -31,6 +31,17 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.plasma.enable) {
+    home-manager = {
+      sharedModules = [inputs.plasma-manager.homeModules.plasma-manager];
+    };
+    programs = {
+      plasma = {
+        inherit (cfg.plasma) enable;
+        kate = {
+          enable = false;
+        };
+      };
+    };
     environment = {
       plasma6 = {
         excludePackages = with pkgs.kdePackages; [
