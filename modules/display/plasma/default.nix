@@ -372,6 +372,8 @@ in {
                           "applications:mullvad.desktop"
                           "applications:virt-manager.desktop"
                           "applications:steam.desktop"
+                          "applications:bitwarden.desktop"
+                          "applications:discord.desktop"
                           "preferred://browser"
                         ];
                       };
