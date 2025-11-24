@@ -64,12 +64,14 @@ in {
         pkgs.gst_all_1.gst-plugins-ugly
         pkgs.gst_all_1.gst-libav
         pkgs.gst_all_1.gst-vaapi
+        pkgs.nv-codec-headers-12
         obs-cmd
       ];
     };
     programs = {
       obs-studio = {
         inherit (cfg.obs) enable;
+        packages = pkgs.obs-studio.override {cudaSupport = true;};
         plugins = [
           pkgs.obs-studio-plugins.wlrobs
           pkgs.obs-studio-plugins.input-overlay
