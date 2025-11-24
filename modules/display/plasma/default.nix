@@ -424,7 +424,13 @@ in {
                 widgets = [];
               };
               hotkeys = {
-                commands = {};
+                commands = {
+                  system-actions = {
+                    name = "System Actions";
+                    keys = ["Meta+Backspace"];
+                    command = "qdbus org.kde.LogoutPrompt /LogoutPrompt promptAll";
+                  };
+                };
               };
               input = {
                 keyboard = {
