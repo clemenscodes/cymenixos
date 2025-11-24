@@ -230,7 +230,7 @@ in {
                   family = "Iosevka";
                   pointSize = 12;
                 };
-                fixedWith = {
+                fixedWidth = {
                   family = "Iosevka";
                   pointSize = 16;
                 };
