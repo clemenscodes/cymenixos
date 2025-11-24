@@ -325,7 +325,6 @@ in {
                   location = "bottom";
                   floating = true;
                   height = 60;
-                  screen = "all";
 
                   widgets = [
                     {
@@ -374,14 +373,14 @@ in {
                         ];
                       };
                     }
+                    "org.kde.plasma.panelspacer"
                     "org.kde.plasma.marginsseparator"
                     {
                       systemTray = {
                         icons = {
-                          scaleToFit = true;
+                          scaleToFit = false;
                           spacing = "small";
                         };
-                        pin = false;
                         items = {
                           shown = [
                             "org.kde.plasma.volume"
