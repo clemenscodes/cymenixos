@@ -45,6 +45,9 @@ in {
             pkgs.kdePackages.qtvirtualkeyboard
           ];
           settings = {
+            General = {
+              DisplayServer = "wayland";
+            };
             Theme = lib.mkForce {
               CursorTheme = "catppuccin-macchiato-blue-cursors";
             };

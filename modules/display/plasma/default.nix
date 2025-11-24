@@ -8,7 +8,7 @@
   ...
 }: let
   cfg = config.modules.display;
-  pkgs = inputs.nixpkgs {
+  pkgs = import inputs.nixpkgs {
     inherit system;
     overlays = [
       (final: prev: {
