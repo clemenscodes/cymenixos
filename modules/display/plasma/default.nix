@@ -87,9 +87,6 @@ in {
                 splashScreen = {
                   theme = "Breeze";
                 };
-                windowDecorations = {
-                  library = "org.kde.kwin.aurorae";
-                };
                 iconTheme = "Papirus-Dark";
                 lookAndFeel = "org.kde.breezedark.desktop";
                 theme = "breeze-dark";
