@@ -8,7 +8,7 @@
   ...
 }: let
   cfg = config.modules.display;
-  inherit (cfg.boot.impermanence) persistPath;
+  inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) name;
   pkgs = import inputs.nixpkgs {
     inherit system;
