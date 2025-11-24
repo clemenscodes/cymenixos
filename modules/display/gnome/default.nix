@@ -16,11 +16,9 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.gnome.enable) {
     services = {
-      xserver = {
-        desktopManager = {
-          gnome = {
-            inherit (cfg.gnome) enable;
-          };
+      desktopManager = {
+        gnome = {
+          inherit (cfg.gnome) enable;
         };
       };
       udev = {
