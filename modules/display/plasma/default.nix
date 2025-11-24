@@ -49,9 +49,8 @@ in {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
           home = {
-            file = lib.genAttrs [] (_: {
+            file = lib.genAttrs [".config/gtkrc-2.0"] (_: {
               force = true;
-              mutable = true;
             });
           };
           programs = {

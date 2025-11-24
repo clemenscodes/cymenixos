@@ -69,6 +69,12 @@ in {
         name = "${osConfig.modules.fonts.defaultFont}";
         inherit (osConfig.modules.fonts) size;
       };
+      gtk2 = {
+        configLocation = "${config.xdg.configHome}/.config/.gtkrc-2.0";
+        extraConfig = ''
+          gtk-application-prefer-dark-theme=1
+        '';
+      };
       gtk3 = {
         extraConfig = {
           gtk-application-prefer-dark-theme = 1;
