@@ -365,6 +365,13 @@ in {
                           "applications:kitty.desktop"
                           "applications:yazi.desktop"
                           "applications:code.desktop"
+                          "applications:teams-for-linux.desktop"
+                          "applications:com.obsproject.Studio.desktop"
+                          "applications:btop.desktop"
+                          "applications:gparted.desktop"
+                          "applications:mullvad.desktop"
+                          "applications:virt-manager.desktop"
+                          "applications:steam.desktop"
                           "preferred://browser"
                         ];
                       };
