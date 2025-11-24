@@ -85,7 +85,7 @@ in {
 
     home-manager = lib.mkIf cfg.gnome.enable {
       users = {
-        ${config.modules.user.name} = {
+        ${config.modules.users.name} = {
           dconf = {
             settings = {
               "org/gnome/shell" = {
