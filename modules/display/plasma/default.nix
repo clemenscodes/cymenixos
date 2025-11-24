@@ -333,15 +333,7 @@ in {
                   widgets = [
                     {
                       kickoff = {
-                        applicationsDisplayMode = "list";
-                        compactDisplayStyle = false;
-                        favoritesDisplayMode = "grid";
                         icon = "nix-snowflake";
-                        label = null;
-                        pin = false;
-                        showActionButtonCaptions = true;
-                        showButtonsFor = "power";
-                        sidebarPosition = "right";
                         sortAlphabetically = true;
                       };
                     }
@@ -353,10 +345,6 @@ in {
                           highlightWindows = true;
                           iconSpacing = "medium";
                           indicateAudioStreams = true;
-                          rows = {
-                            multirowView = "never";
-                            maximum = null;
-                          };
                           showTooltips = true;
                         };
                         behavior = {
@@ -373,7 +361,6 @@ in {
                             onlyMinimized = false;
                             onlyInCurrentScreen = false;
                           };
-                          sortingMethod = "manually";
                           unhideOnAttentionNeeded = true;
                           wheel = {
                             ignoreMinimizedTasks = true;
@@ -381,63 +368,16 @@ in {
                           };
                         };
                         launchers = [
-                          "preferred://browser"
                           "applications:systemsettings.desktop"
                           "applications:thunderbird.desktop"
                           "applications:kitty.desktop"
                           "applications:yazi.desktop"
                           "applications:code.desktop"
+                          "preferred://browser"
                         ];
                       };
                     }
                     "org.kde.plasma.marginsseparator"
-                    {
-                      applicationTitleBar = {
-                        behavior = {
-                          activeTaskSource = "activeTask";
-                          disableButtonsForNotHovered = false;
-                          disableForNotMaximized = false;
-                          filterByActivity = true;
-                          filterByScreen = true;
-                          filterByVirtualDesktop = true;
-                        };
-                        layout = {
-                          elements = ["windowTitle"];
-                          fillFreeSpace = false;
-                          horizontalAlignment = "left";
-                          showDisabledElements = "deactivated";
-                          spacingBetweenElements = 0;
-                          verticalAlignment = "center";
-                          widgetMargins = 1;
-                        };
-                        overrideForMaximized.enable = false;
-                        windowControlButtons = {
-                          auroraeTheme = null;
-                          buttonsAnimationSpeed = 100;
-                          buttonsAspectRatio = 100;
-                          buttonsMargin = 0;
-                          iconSource = "plasma";
-                        };
-                        windowTitle = {
-                          font = {
-                            bold = false;
-                            fit = "fixedSize";
-                            size = 12;
-                          };
-                          hideEmptyTitle = true;
-                          margins = {
-                            bottom = 0;
-                            left = 10;
-                            right = 5;
-                            top = 0;
-                          };
-                          maximumWidth = 640;
-                          minimumWidth = 0;
-                          source = "appName";
-                          undefinedWindowTitle = "";
-                        };
-                      };
-                    }
                     {
                       systemTray = {
                         icons = {
@@ -445,6 +385,12 @@ in {
                           spacing = "small";
                         };
                         pin = false;
+                        items = {
+                          hidden = [
+                            "org.kde.plasma.brightness"
+                            "org.kde.plasma.clipboard"
+                          ];
+                        };
                       };
                     }
                     {
@@ -453,7 +399,7 @@ in {
                         time.format = "24h";
                         font = {
                           family = "Iosevka";
-                          size = 10;
+                          size = 12;
                           weight = 400;
                           italic = false;
                           style = "Medium";
