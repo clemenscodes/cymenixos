@@ -39,7 +39,6 @@ in {
           users = {
             ${name} = {
               files = [
-
               ];
             };
           };
@@ -100,8 +99,115 @@ in {
                   restoreOpenApplicationsOnLogin = "startWithEmptySession";
                 };
               };
-              shortcuts = {};
-              panels = [];
+              shortcuts = {
+                "services/kitty.desktop"."_launch" = "Meta+Enter";
+                "services/org.kde.konsole.desktop"."_launch" = "None";
+                "kwin"."Overview" = "Meta+Tab";
+                "kwin"."Show Desktop" = "Meta+D";
+                "kwin"."Switch to Desktop 1" = "Meta+1";
+                "kwin"."Switch to Desktop 2" = "Meta+2";
+                "kwin"."Switch to Desktop 3" = "Meta+3";
+                "kwin"."Switch to Desktop 4" = "Meta+4";
+                "kwin"."Switch to Desktop 5" = "Meta+5";
+                "kwin"."Switch to Desktop 6" = "Meta+6";
+                "kwin"."Switch to Desktop 7" = "Meta+7";
+                "kwin"."Switch to Desktop 8" = "Meta+8";
+                "kwin"."Switch to Desktop 9" = "Meta+9";
+                "kwin"."Switch to Desktop 10" = "Meta+0";
+                "kwin"."Window Close" = ["Meta+Q"];
+                "kwin"."Window Fullscreen" = [];
+                "kwin"."Window Shrink Horizontal" = [];
+                "kwin"."Window Shrink Vertical" = [];
+                "kwin"."Window to Desktop 1" = "Meta+Shift+1";
+                "kwin"."Window to Desktop 2" = "Meta+Shift+2";
+                "kwin"."Window to Desktop 3" = "Meta+Shift+3";
+                "kwin"."Window to Desktop 4" = "Meta+Shift+4";
+                "kwin"."Window to Desktop 5" = "Meta+Shift+5";
+                "kwin"."Window to Desktop 6" = "Meta+Shift+6";
+                "kwin"."Window to Desktop 7" = "Meta+Shift+7";
+                "kwin"."Window to Desktop 8" = "Meta+Shift+8";
+                "kwin"."Window to Desktop 9" = "Meta+Shift+9";
+                "kwin"."Window to Desktop 10" = "Meta+Shift+0";
+                "plasmashell"."activate task manager entry 1" = [];
+                "plasmashell"."activate task manager entry 2" = [];
+                "plasmashell"."activate task manager entry 3" = [];
+                "plasmashell"."activate task manager entry 4" = [];
+                "plasmashell"."activate task manager entry 5" = [];
+                "plasmashell"."activate task manager entry 6" = [];
+                "plasmashell"."activate task manager entry 7" = [];
+                "plasmashell"."activate task manager entry 8" = [];
+                "plasmashell"."activate task manager entry 9" = [];
+                "plasmashell"."activate task manager entry 10" = [];
+                "services/org.kde.dolphin.desktop"."_launch" = "Meta+E";
+                "services/org.kde.spectacle.desktop"."ActiveWindowScreenShot" = [];
+                "services/org.kde.spectacle.desktop"."FullScreenScreenShot" = "Meta+Shift+S";
+                "services/org.kde.spectacle.desktop"."RectangularRegionScreenShot" = "Meta+S";
+                "services/org.kde.spectacle.desktop"."WindowUnderCursorScreenShot" = "Meta+Alt+S";
+                "services/org.kde.spectacle.desktop"."_launch" = "Print";
+              };
+              panels = [
+                {
+                  location = "bottom";
+                  floating = true;
+                  height = 40;
+
+                  widgets = [
+                    {
+                      kickoff = {
+                        icon = "nix-snowflake";
+                      };
+                    }
+
+                    {
+                      iconTasks = {
+                        iconsOnly = false;
+                        behavior.grouping.method = "none";
+                        launchers = [
+                          "applications:com.discordapp.Discord.desktop"
+                          "preferred://browser"
+                        ];
+                        settings = {
+                          General = {
+                            interactiveMute = false;
+                          };
+                        };
+                      };
+                    }
+
+                    "org.kde.plasma.marginsseparator"
+
+                    {
+                      systemTray = {
+                        items.hidden = [
+                          "org.kde.plasma.brightness"
+                          "org.kde.plasma.clipboard"
+                          "org.kde.plasma.networkmanagement"
+                          "org.kde.plasma.volume"
+                        ];
+                      };
+                    }
+
+                    {
+                      name = "org.kde.plasma.weather";
+                      config = {
+                        Appearance.showTemperatureInCompactMode = true;
+                        Appearance.showPressureInTooltip = true;
+                        WeatherStation.source = "dwd|weather|Eindhoven|06370";
+                      };
+                    }
+
+                    {
+                      digitalClock = {
+                        date.enable = false;
+                        time.showSeconds = "onlyInTooltip";
+                        calendar.showWeekNumbers = true;
+                      };
+                    }
+
+                    "org.kde.plasma.minimizeall"
+                  ];
+                }
+              ];
               powerdevil = {};
               file = {};
               configFile = {
@@ -116,7 +222,18 @@ in {
               desktop = {
                 icons = {};
                 mouseActions = {};
-                widgets = [];
+                widgets = [
+                  {
+                    name = "org.kde.plasma.icontasks";
+                    config = {
+                      General.launchers = [
+                        "applications:brave.desktop"
+                        "applications:org.kde.dolphin.desktop"
+                        "applications:org.kde.spectacle.desktop"
+                      ];
+                    };
+                  }
+                ];
               };
               hotkeys = {
                 commands = {};
@@ -240,25 +357,25 @@ in {
                   family = "Iosevka";
                   pointSize = 12;
                 };
-                menu = {
-                  family = "Iosevka";
-                  pointSize = 12;
-                };
-                small = {
-                  family = "Iosevka";
-                  pointSize = 8;
-                };
                 fixedWidth = {
                   family = "Iosevka";
                   pointSize = 12;
                 };
+                menu = {
+                  family = "Iosevka";
+                  pointSize = 10;
+                };
+                small = {
+                  family = "Iosevka";
+                  pointSize = 10;
+                };
                 toolbar = {
                   family = "Iosevka";
-                  pointSize = 12;
+                  pointSize = 10;
                 };
                 windowTitle = {
                   family = "Iosevka";
-                  pointSize = 12;
+                  pointSize = 10;
                 };
               };
             };
