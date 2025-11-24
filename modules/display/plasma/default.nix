@@ -1,9 +1,25 @@
 {
-  pkgs,
+  inputs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.display;
+  pkgs = inputs.nixpkgs {
+    inherit system;
+    overlays = [
+      (final: prev: {
+        kdePackages = prev.kdePackages.overrideScope (kdeFinal: kdePrev: {
+          powerdevil = kdePrev.powerdevil.overrideAttrs (oldAttrs: {
+            patches = oldAttrs.patches or [];
+          });
+        });
+      })
+    ];
+  };
 in {
   options = {
     modules = {
@@ -20,23 +36,29 @@ in {
         excludePackages = with pkgs.kdePackages; [
           plasma-browser-integration
           konsole
-          oxygen
+          elisa
         ];
       };
     };
     services = {
-      xserver = {
-        enable = true;
-      };
       displayManager = {
         defaultSession = "plasma";
         sddm = {
           enable = true;
+          wayland = {
+            enable = true;
+          };
+          settings = {
+            General = {
+              DisplayServer = "wayland";
+            };
+          };
         };
       };
       desktopManager = {
         plasma6 = {
           enable = true;
+          enableQt5Integration = true;
         };
       };
     };
