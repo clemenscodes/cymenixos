@@ -49,13 +49,10 @@ in {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
           home = {
-            file =
-              lib.genAttrs [
-                ".config/baloofilerc"
-              ] (_: {
-                force = true;
-                mutable = true;
-              });
+            file = lib.genAttrs [] (_: {
+              force = true;
+              mutable = true;
+            });
           };
           programs = {
             elisa = {
