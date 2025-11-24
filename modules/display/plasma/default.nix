@@ -51,6 +51,7 @@ in {
           home = {
             file = {
               ".config/gtk-2.0/settings.ini" = {
+                source = lib.mkForce "";
                 force = true;
               };
             };
