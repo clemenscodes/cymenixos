@@ -373,6 +373,7 @@ in {
                           hidden = [
                             "org.kde.plasma.clipboard"
                             "org.kde.plasma.bluetooth"
+                            "org.kde.plasma.networkmanagement"
                           ];
                         };
                       };
