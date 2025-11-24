@@ -51,13 +51,16 @@ in {
           login = {
             kwallet = {
               enable = true;
-              package = pkgs.kdePackages.kwallet-pam;
             };
           };
           kde = {
             kwallet = {
               enable = true;
-              package = pkgs.kdePackages.kwallet-pam;
+            };
+          };
+          sddm = {
+            kwallet = {
+              enable = true;
             };
           };
         };
