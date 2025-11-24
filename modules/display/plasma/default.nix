@@ -48,14 +48,6 @@ in {
       users = {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
-          home = {
-            file = {
-              ".config/gtk-2.0/settings.ini" = {
-                source = lib.mkForce "";
-                force = true;
-              };
-            };
-          };
           programs = {
             elisa = {
               enable = false;
@@ -393,6 +385,9 @@ in {
                           showAll = false;
                           shown = [
                             "org.kde.plasma.volume"
+                          ];
+                          hidden = [
+                            "org.kde.plasma.clipboard"
                           ];
                         };
                       };
