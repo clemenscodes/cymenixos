@@ -14,7 +14,7 @@ in {
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.hyprland.enable && cfg.sddm.enable) {
+  config = lib.mkIf (cfg.enable && cfg.sddm.enable) {
     environment = {
       systemPackages = [
         pkgs.libsForQt5.qt5.qtquickcontrols2
