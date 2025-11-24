@@ -32,9 +32,9 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.plasma.enable) {
     home-manager = {
-      sharedModules = [inputs.plasma-manager.homeModules.plasma-manager];
       users = {
         ${config.modules.users.name} = {
+          imports = [inputs.plasma-manager.homeModules.plasma-manager];
           programs = {
             elisa = {
               enable = false;
