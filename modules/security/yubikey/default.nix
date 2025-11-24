@@ -259,20 +259,6 @@ in {
         };
       };
     };
-    system = {
-      activationScripts = {
-        yubikey-guide = let
-          homeDir = "/home/${config.modules.users.name}";
-          desktopDir = "${homeDir}/Desktop";
-          documentsDir = "${homeDir}/Documents";
-        in ''
-          mkdir -p ${desktopDir} ${documentsDir} ${homeDir}/.config/Yubico
-          chown ${config.modules.users.name} ${homeDir} ${desktopDir} ${documentsDir}
-          ln -sf ${yubikeyGuide}/share/applications/yubikey-guide.desktop ${desktopDir}
-          ln -sfT ${inputs.yubikey-guide} ${documentsDir}/YubiKey-Guide
-        '';
-      };
-    };
     home-manager = lib.mkIf config.modules.home-manager.enable {
       users = {
         ${config.modules.users.name} = {
