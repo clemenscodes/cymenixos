@@ -114,7 +114,7 @@ in {
                 "kwin"."Switch to Desktop 9" = "Meta+9";
                 "kwin"."Switch to Desktop 10" = "Meta+0";
                 "kwin"."Window Close" = ["Meta+Q"];
-                "kwin"."Window Fullscreen" = ["Meta+Shift+F"];
+                "kwin"."Window Fullscreen" = ["Meta+F"];
                 "kwin"."Window Shrink Horizontal" = [];
                 "kwin"."Window Shrink Vertical" = [];
                 "kwin"."Window to Desktop 1" = "Meta+!";
@@ -163,6 +163,10 @@ in {
                         behavior.grouping.method = "none";
                         launchers = [
                           "applications:kitty.desktop"
+                          "applications:discord.desktop"
+                          "applications:code.desktop"
+                          "applications:yazi.desktop"
+                          "applications:yazi.desktop"
                           "preferred://browser"
                         ];
                         settings = {
@@ -176,11 +180,27 @@ in {
                     "org.kde.plasma.marginsseparator"
 
                     {
-                      name = "org.kde.plasma.weather";
-                      config = {
-                        Appearance.showTemperatureInCompactMode = true;
-                        Appearance.showPressureInTooltip = true;
-                        WeatherStation.source = "dwd|weather|Eindhoven|06370";
+                      systemTray = {
+                        items = {
+                          shown = [
+                            "org.kde.plasma.battery"
+                            "org.kde.plasma.networkmanagement"
+                            "org.kde.plasma.volume"
+                            "org.kde.kdeconnect"
+                            "discord"
+                          ];
+                          hidden = [
+                            "org.kde.plasma.bluetooth"
+                            "org.kde.plasma.clipboard"
+                            "org.kde.plasma.brightness"
+                            "org.kde.plasma.keyboardlayout"
+                            "org.kde.plasma.manage-inputmethod"
+                            "org.kde.plasma.weather"
+                            "org.kde.kscreen"
+                            "aw-qt"
+                            "tail-tray"
+                          ];
+                        };
                       };
                     }
 
