@@ -45,31 +45,20 @@ in {
         };
       };
     };
-    security = {
-      pam = {
-        services = {
-          login = {
-            kwallet = {
-              enable = true;
-            };
-          };
-          kde = {
-            kwallet = {
-              enable = true;
-            };
-          };
-          sddm = {
-            kwallet = {
-              enable = true;
-            };
-          };
-        };
-      };
-    };
     home-manager = {
       users = {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
+          file = {
+            ".config/kwalletrc" = {
+              text = ''
+                [Wallet]
+                Enabled=false
+              '';
+              force = true;
+              mutable = true;
+            };
+          };
           programs = {
             elisa = {
               enable = false;
