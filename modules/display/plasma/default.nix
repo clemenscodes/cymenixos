@@ -49,6 +49,13 @@ in {
       users = {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
+          xdg = {
+            portal = {
+              extraPortals = [
+                pkgs.xdg-desktop-portal-kde
+              ];
+            };
+          };
           home = {
             file = {
               ".config/kwalletrc" = {
