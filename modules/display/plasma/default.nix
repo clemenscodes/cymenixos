@@ -103,9 +103,6 @@ in {
                 enableMiddleClickPaste = true;
                 cursor = {};
                 soundTheme = "freedesktop";
-                splashScreen = {
-                  theme = "Breeze";
-                };
                 iconTheme = "Papirus-Dark";
                 lookAndFeel = "org.kde.breezedark.desktop";
                 theme = "breeze-dark";
