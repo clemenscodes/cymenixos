@@ -462,7 +462,7 @@ in {
                     enable = true;
                   };
                   minimization = {
-                    animation = "magiclamp";
+                    animation = "squash";
                   };
                   shakeCursor = {
                     enable = true;
