@@ -38,8 +38,7 @@ in {
         ${persistPath} = {
           users = {
             ${name} = {
-              files = [
-              ];
+              files = [];
             };
           };
         };
@@ -83,7 +82,6 @@ in {
                 clickItemTo = "open";
                 colorScheme = "BreezeDark";
                 enableMiddleClickPaste = true;
-                cursor = {};
                 soundTheme = "freedesktop";
                 iconTheme = "Papirus-Dark";
                 lookAndFeel = "org.kde.breezedark.desktop";
@@ -222,18 +220,7 @@ in {
               desktop = {
                 icons = {};
                 mouseActions = {};
-                widgets = [
-                  {
-                    name = "org.kde.plasma.icontasks";
-                    config = {
-                      General.launchers = [
-                        "applications:brave.desktop"
-                        "applications:org.kde.dolphin.desktop"
-                        "applications:org.kde.spectacle.desktop"
-                      ];
-                    };
-                  }
-                ];
+                widgets = [];
               };
               hotkeys = {
                 commands = {};
