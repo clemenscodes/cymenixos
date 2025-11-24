@@ -38,7 +38,7 @@ in {
         ${persistPath} = {
           users = {
             ${name} = {
-              files = [];
+              directories = [".local/share/kwalletd"];
             };
           };
         };
@@ -180,10 +180,8 @@ in {
                   "Window Grow Horizontal" = [];
                   "Window Grow Vertical" = [];
                   "Window Lower" = [];
-                  "Window Maximize" = "Meta+PgUp";
                   "Window Maximize Horizontal" = [];
                   "Window Maximize Vertical" = [];
-                  "Window Minimize" = "Meta+PgDown";
                   "Window Move" = [];
                   "Window Move Center" = [];
                   "Window No Border" = [];
@@ -204,28 +202,14 @@ in {
                   "Window Raise" = [];
                   "Window Resize" = [];
                   "Window Shade" = [];
-                  "Window to Desktop 11" = [];
-                  "Window to Desktop 12" = [];
-                  "Window to Desktop 13" = [];
-                  "Window to Desktop 14" = [];
-                  "Window to Desktop 15" = [];
-                  "Window to Desktop 16" = [];
-                  "Window to Desktop 17" = [];
-                  "Window to Desktop 18" = [];
-                  "Window to Desktop 19" = [];
-                  "Window to Desktop 20" = [];
                   "Window to Next Desktop" = [];
                   "Window to Next Screen" = "Meta+Shift+Right";
                   "Window to Previous Desktop" = [];
                   "Window to Previous Screen" = "Meta+Shift+Left";
-                  "view_actual_size" = "Meta+0";
-                  "view_zoom_in" = ["Meta++" "Meta+="];
-                  "view_zoom_out" = "Meta+-";
                 };
                 "kitty.desktop"."_launch" = "Meta+Return";
                 "brave-browser.desktop"."_launch" = "Meta+W";
                 "yazi.desktop"."_launch" = "Meta+E";
-                "rofi.desktop"."_launch" = "Meta+D";
                 "thunderbird.desktop"."_launch" = "Meta+Shift+E";
                 "services/org.kde.konsole.desktop"."_launch" = "None";
                 "services/org.kde.spectacle.desktop" = {
@@ -252,7 +236,7 @@ in {
                   "cycleNextAction" = [];
                   "cyclePrevAction" = [];
                   "edit_clipboard" = [];
-                  "next activity" = "Meta+Shift+Tab";
+                  "next activity" = "Meta+Tab";
                   "previous activity" = "Meta+Shift+Tab";
                   "repeat_action" = "Meta+Ctrl+R";
                   "show dashboard" = "Ctrl+F12";
@@ -293,7 +277,7 @@ in {
                 };
                 "org.kde.krunner.desktop" = {
                   "RunClipboard" = "Alt+Shift+F2";
-                  "_launch" = ["Meta+Shift+D"];
+                  "_launch" = ["Meta+D"];
                 };
                 "org.kde.plasma.emojier.desktop" = {
                   "_launch" = ["Meta+." "Meta+Ctrl+Alt+Shift+Space"];
@@ -600,6 +584,7 @@ in {
           ghostwriter
           okular
           kate
+          kwallet
         ];
       };
     };
