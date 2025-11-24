@@ -26,8 +26,6 @@
   };
 in {
   imports = [
-    inputs.nix-gaming.nixosModules.pipewireLowLatency
-    inputs.nix-gaming.nixosModules.platformOptimizations
     (import ./emulation {inherit inputs pkgs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./gamescope {inherit inputs pkgs lib;})
@@ -50,15 +48,6 @@ in {
   config = lib.mkIf (cfg.enable) {
     environment = {
       systemPackages = [pkgs.winetricks];
-    };
-    services = {
-      pipewire = {
-        lowLatency = {
-          inherit (cfg) enable;
-          quantum = 64;
-          rate = 48000;
-        };
-      };
     };
   };
 }

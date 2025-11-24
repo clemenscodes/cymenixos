@@ -7,6 +7,7 @@
   cfg = config.modules;
 in {
   imports = [
+    (import ./gnome {inherit inputs pkgs lib;})
     (import ./gtk {inherit inputs pkgs lib;})
     (import ./hyprland {inherit inputs pkgs lib;})
     (import ./plasma {inherit inputs pkgs lib;})
