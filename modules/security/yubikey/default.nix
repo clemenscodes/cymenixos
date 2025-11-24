@@ -7,23 +7,6 @@
   inherit (config.modules.boot.impermanence) persistPath;
   cfg = config.modules.security;
   homeDirectory = "/home/${config.modules.users.name}";
-  viewYubikeyGuide = pkgs.writeShellScriptBin "view-yubikey-guide" ''
-    exec ${pkgs.glow}/bin/glow -p "${inputs.yubikey-guide}/README.md"
-  '';
-  shortcut = pkgs.makeDesktopItem {
-    name = "yubikey-guide";
-    icon = "${pkgs.yubioath-flutter}/share/icons/com.yubico.yubioath.png";
-    desktopName = "drduh's YubiKey Guide";
-    genericName = "Guide to using YubiKey for GnuPG and SSH";
-    comment = "Open the guide in a reader program";
-    categories = ["Documentation"];
-    terminal = true;
-    exec = "${viewYubikeyGuide}/bin/view-yubikey-guide";
-  };
-  yubikeyGuide = pkgs.symlinkJoin {
-    name = "yubikey-guide";
-    paths = [viewYubikeyGuide shortcut];
-  };
   pbkdf2Sha512 = pkgs.stdenv.mkDerivation rec {
     name = "pbkdf2-sha512";
     version = "latest";
@@ -242,7 +225,6 @@ in {
         pkgs.yubico-piv-tool
         pkgs.yubico-pam
         pkgs.pam_u2f
-        yubikeyGuide
         yubikey-scripts
       ];
       persistence = {

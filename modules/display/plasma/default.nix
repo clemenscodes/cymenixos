@@ -154,7 +154,7 @@ in {
                 timeout = 15;
               };
               kwin = {
-                borderlessMaximizedWindows = true;
+                borderlessMaximizedWindows = false;
                 cornerBarrier = true;
                 edgeBarrier = 0;
                 nightLight = {
@@ -172,6 +172,7 @@ in {
                 virtualDesktops = {
                   number = 10;
                   names = ["1" "2" "3" "4" "5" "6" "7" "8" "9" "0"];
+                  rows = 1;
                 };
                 effects = {
                   blur = {
@@ -237,11 +238,11 @@ in {
               fonts = {
                 general = {
                   family = "Iosevka";
-                  pointSize = 10;
+                  pointSize = 12;
                 };
                 menu = {
                   family = "Iosevka";
-                  pointSize = 10;
+                  pointSize = 12;
                 };
                 small = {
                   family = "Iosevka";
@@ -249,15 +250,15 @@ in {
                 };
                 fixedWidth = {
                   family = "Iosevka";
-                  pointSize = 10;
+                  pointSize = 12;
                 };
                 toolbar = {
                   family = "Iosevka";
-                  pointSize = 10;
+                  pointSize = 12;
                 };
                 windowTitle = {
                   family = "Iosevka";
-                  pointSize = 10;
+                  pointSize = 12;
                 };
               };
             };
