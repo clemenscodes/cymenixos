@@ -53,10 +53,11 @@ in {
               lib.genAttrs [
                 ".config/gtk-2.0/settings.ini"
                 ".config/baloofilerc"
-              ] (_: {
-                force = true;
-                mutable = true;
-              });
+              ] (_:
+                lib.mkForce {
+                  force = true;
+                  mutable = true;
+                });
           };
           programs = {
             elisa = {
