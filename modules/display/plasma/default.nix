@@ -33,11 +33,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.plasma.enable) {
-    persistence = lib.mkIf (config.modules.boot.enable) {
-      ${persistPath} = {
-        users = {
-          ${name} = {
-            directories = [".config"];
+    environment = {
+      persistence = lib.mkIf (config.modules.boot.enable) {
+        ${persistPath} = {
+          users = {
+            ${name} = {
+              directories = [".config"];
+            };
           };
         };
       };
