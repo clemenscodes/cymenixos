@@ -136,11 +136,14 @@ in {
                 edgeBarrier = 0;
                 nightLight = {
                   enable = false;
-                  location = {};
-                  mode = "location";
+                  mode = "times";
                   temperature = {
                     day = 4500;
                     night = 6500;
+                  };
+                  time = {
+                    morning = "06:00";
+                    evening = "18:00";
                   };
                 };
                 tiling = {
