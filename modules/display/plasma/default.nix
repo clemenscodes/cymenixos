@@ -39,21 +39,7 @@ in {
           users = {
             ${name} = {
               files = [
-                ".config/baloofilerc"
-                ".config/gtkrc"
-                ".config/gtkrc-2.0"
-                ".config/kactivitymanagerd-statsrc"
-                ".config/kactivitymanagerdrc"
-                ".config/kconf_updaterc"
-                ".config/kded5rc"
-                ".config/kdeglobalshortcutsrc"
-                ".config/ktimezonedrc"
-                ".config/kwinrc"
-                ".config/plasma-localerc"
-                ".config/plasma-org.kde.plasma.desktop-appletsrc"
-                ".config/plasmashellrc"
-                ".config/powermanagementprofilesrc"
-                ".config/Trolltech"
+
               ];
             };
           };
