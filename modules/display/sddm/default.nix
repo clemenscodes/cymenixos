@@ -30,7 +30,6 @@ in {
         };
         sddm = {
           inherit (cfg.sddm) enable;
-          package = pkgs.kdePackages.sddm;
           autoLogin = {
             relogin = true;
           };
