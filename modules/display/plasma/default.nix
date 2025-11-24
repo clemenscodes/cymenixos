@@ -38,7 +38,6 @@ in {
         ${persistPath} = {
           users = {
             ${name} = {
-              directories = [".config/kdeglobals"];
               files = [
                 ".config/baloofilerc"
                 ".config/gtkrc"
