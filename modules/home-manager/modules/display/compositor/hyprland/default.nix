@@ -134,6 +134,10 @@ in {
               allow_workspace_cycles = true;
             };
 
+            ecosystem = {
+              no_update_news = true;
+            };
+
             "$mod" = "SUPER";
 
             bind = [
