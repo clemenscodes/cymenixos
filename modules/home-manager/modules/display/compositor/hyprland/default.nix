@@ -94,6 +94,7 @@ in {
               repeat_delay = 300;
               touchpad = {
                 natural_scroll = "no";
+
               };
               sensitivity = 0;
               accel_profile = "flat";
