@@ -38,7 +38,26 @@ in {
         ${persistPath} = {
           users = {
             ${name} = {
-              directories = [".config"];
+              directories = [".config/kdeglobals"];
+              files = [
+                ".config/baloofilerc"
+                ".config/gtkrc"
+                ".config/gtkrc-2.0"
+                ".config/kactivitymanagerd-statsrc"
+                ".config/kactivitymanagerdrc"
+                ".config/kconf_updaterc"
+                ".config/kded5rc"
+                ".config/kdeglobals"
+                ".config/kdeglobalshortcutsrc"
+                ".config/ktimezonedrc"
+                ".config/kwinoutputconfig.json"
+                ".config/kwinrc"
+                ".config/plasma-localerc"
+                ".config/plasma-org.kde.plasma.desktop-appletsrc"
+                ".config/plasmashellrc"
+                ".config/powermanagementprofilesrc"
+                ".config/Trolltech"
+              ];
             };
           };
         };
