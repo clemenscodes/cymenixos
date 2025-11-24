@@ -52,7 +52,8 @@ in {
           xdg = {
             portal = {
               extraPortals = [
-                pkgs.xdg-desktop-portal-kde
+                pkgs.kdePackages.xdg-desktop-portal-kde
+                pkgs.kdePackages.kwallet
               ];
             };
           };
