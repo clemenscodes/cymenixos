@@ -83,7 +83,6 @@ in {
                 colorScheme = "BreezeDark";
                 enableMiddleClickPaste = true;
                 soundTheme = "freedesktop";
-                iconTheme = "Papirus-Dark";
                 lookAndFeel = "org.kde.breezedark.desktop";
                 theme = "breeze-dark";
                 widgetStyle = "breeze";
