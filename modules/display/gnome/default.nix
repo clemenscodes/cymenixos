@@ -14,34 +14,24 @@ in {
       };
     };
   };
-
   config = lib.mkIf (cfg.enable && cfg.gnome.enable) {
     services = {
       xserver = {
-        inherit (cfg.gnome) enable;
         desktopManager = {
           gnome = {
             inherit (cfg.gnome) enable;
           };
         };
-        displayManager = {
-          gdm = {
-            inherit (cfg.gnome) enable;
-          };
-        };
       };
-
       udev = {
         packages = [pkgs.gnome-settings-daemon];
       };
     };
-
     programs = {
       dconf = {
         inherit (cfg.gnome) enable;
       };
     };
-
     environment = {
       systemPackages = [
         pkgs.adwaita-icon-theme
@@ -82,7 +72,6 @@ in {
         ];
       };
     };
-
     home-manager = lib.mkIf cfg.gnome.enable {
       users = {
         ${config.modules.users.name} = {
