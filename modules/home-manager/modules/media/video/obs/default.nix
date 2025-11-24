@@ -71,7 +71,7 @@ in {
     programs = {
       obs-studio = {
         inherit (cfg.obs) enable;
-        packages = pkgs.obs-studio.override {cudaSupport = true;};
+        package = pkgs.obs-studio.override {cudaSupport = true;};
         plugins = [
           pkgs.obs-studio-plugins.wlrobs
           pkgs.obs-studio-plugins.input-overlay
