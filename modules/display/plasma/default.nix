@@ -48,6 +48,14 @@ in {
       users = {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
+          file =
+            lib.genAttrs [
+              ".config/gtk-2.0/settings.ini"
+              ".config/baloofilerc"
+            ] (_: {
+              force = true;
+              mutable = true;
+            });
           programs = {
             elisa = {
               enable = false;
