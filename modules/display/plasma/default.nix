@@ -104,253 +104,367 @@ in {
                 };
               };
               shortcuts = {
+                kwin = {
+                  "Overview" = "Meta+Space";
+                  "Show Desktop" = "Meta+Shift+U";
+                  "Window Close" = ["Meta+Q"];
+                  "Window Fullscreen" = ["Meta+F"];
+                  "Window Shrink Horizontal" = [];
+                  "Window Shrink Vertical" = [];
+                  "Window Quick Tile Bottom" = "Meta+Shift+J";
+                  "Window Quick Tile Left" = "Meta+Shift+H";
+                  "Window Quick Tile Right" = "Meta+Shift+L";
+                  "Window Quick Tile Top" = "Meta+Shift+K";
+                  "Window Quick Tile Bottom Left" = [];
+                  "Window Quick Tile Bottom Right" = [];
+                  "Window Quick Tile Top Left" = [];
+                  "Window Quick Tile Top Right" = [];
+                  "Switch to Desktop 1" = "Meta+1";
+                  "Switch to Desktop 2" = "Meta+2";
+                  "Switch to Desktop 3" = "Meta+3";
+                  "Switch to Desktop 4" = "Meta+4";
+                  "Switch to Desktop 5" = "Meta+5";
+                  "Switch to Desktop 6" = "Meta+6";
+                  "Switch to Desktop 7" = "Meta+7";
+                  "Switch to Desktop 8" = "Meta+8";
+                  "Switch to Desktop 9" = "Meta+9";
+                  "Switch to Desktop 10" = "Meta+0";
+                  "Window to Desktop 1" = "Meta+!";
+                  "Window to Desktop 2" = "Meta+\"";
+                  "Window to Desktop 3" = "Meta+§";
+                  "Window to Desktop 4" = "Meta+$";
+                  "Window to Desktop 5" = "Meta+%";
+                  "Window to Desktop 6" = "Meta+&";
+                  "Window to Desktop 7" = "Meta+/";
+                  "Window to Desktop 8" = "Meta+(";
+                  "Window to Desktop 9" = "Meta+)";
+                  "Window to Desktop 10" = "Meta+=";
+                  "Activate Window Demanding Attention" = "Meta+Ctrl+A";
+                  "Decrease Opacity" = [];
+                  "Edit Tiles" = "Meta+T";
+                  "Expose" = "Ctrl+F9";
+                  "ExposeAll" = ["Ctrl+F10" "Launch (C)"];
+                  "ExposeClass" = "Ctrl+F7";
+                  "ExposeClassCurrentDesktop" = [];
+                  "Increase Opacity" = [];
+                  "MoveMouseToCenter" = "Meta+F6";
+                  "MoveMouseToFocus" = "Meta+F5";
+                  "MoveZoomDown" = [];
+                  "MoveZoomLeft" = [];
+                  "MoveZoomRight" = [];
+                  "MoveZoomUp" = [];
+                  "Setup Window Shortcut" = [];
+                  "ShowDesktopGrid" = "Meta+F8";
+                  "Suspend Compositing" = "Alt+Shift+F12";
+                  "Switch One Desktop Down" = [];
+                  "Switch One Desktop Up" = [];
+                  "Switch One Desktop to the Left" = [];
+                  "Switch One Desktop to the Right" = [];
+                  "Switch Window Down" = "Meta+Alt+Down";
+                  "Switch Window Left" = "Meta+Alt+Left";
+                  "Switch Window Right" = "Meta+Alt+Right";
+                  "Switch Window Up" = "Meta+Alt+Up";
+                  "Switch to Next Desktop" = [];
+                  "Switch to Next Screen" = [];
+                  "Switch to Previous Desktop" = [];
+                  "Switch to Previous Screen" = [];
+                  "Toggle Night Color" = [];
+                  "Toggle Window Raise/Lower" = [];
+                  "Walk Through Desktop List" = [];
+                  "Walk Through Desktop List (Reverse)" = [];
+                  "Walk Through Desktops" = [];
+                  "Walk Through Desktops (Reverse)" = [];
+                  "Walk Through Windows" = "Alt+Tab";
+                  "Walk Through Windows (Reverse)" = "Alt+Shift+Backtab";
+                  "Walk Through Windows Alternative" = [];
+                  "Walk Through Windows Alternative (Reverse)" = [];
+                  "Walk Through Windows of Current Application" = "Alt+`";
+                  "Walk Through Windows of Current Application (Reverse)" = "Alt+~";
+                  "Walk Through Windows of Current Application Alternative" = [];
+                  "Walk Through Windows of Current Application Alternative (Reverse)" = [];
+                  "Window Above Other Windows" = [];
+                  "Window Below Other Windows" = [];
+                  "Window Grow Horizontal" = [];
+                  "Window Grow Vertical" = [];
+                  "Window Lower" = [];
+                  "Window Maximize" = "Meta+PgUp";
+                  "Window Maximize Horizontal" = [];
+                  "Window Maximize Vertical" = [];
+                  "Window Minimize" = "Meta+PgDown";
+                  "Window Move" = [];
+                  "Window Move Center" = [];
+                  "Window No Border" = [];
+                  "Window On All Desktops" = [];
+                  "Window One Desktop Down" = "Meta+Ctrl+Shift+Down";
+                  "Window One Desktop Up" = "Meta+Ctrl+Shift+Up";
+                  "Window One Desktop to the Left" = "Meta+Ctrl+Shift+Left";
+                  "Window One Desktop to the Right" = "Meta+Ctrl+Shift+Right";
+                  "Window One Screen Down" = [];
+                  "Window One Screen Up" = [];
+                  "Window One Screen to the Left" = [];
+                  "Window One Screen to the Right" = [];
+                  "Window Operations Menu" = "Alt+F3";
+                  "Window Pack Down" = [];
+                  "Window Pack Left" = [];
+                  "Window Pack Right" = [];
+                  "Window Pack Up" = [];
+                  "Window Raise" = [];
+                  "Window Resize" = [];
+                  "Window Shade" = [];
+                  "Window to Desktop 11" = [];
+                  "Window to Desktop 12" = [];
+                  "Window to Desktop 13" = [];
+                  "Window to Desktop 14" = [];
+                  "Window to Desktop 15" = [];
+                  "Window to Desktop 16" = [];
+                  "Window to Desktop 17" = [];
+                  "Window to Desktop 18" = [];
+                  "Window to Desktop 19" = [];
+                  "Window to Desktop 20" = [];
+                  "Window to Next Desktop" = [];
+                  "Window to Next Screen" = "Meta+Shift+Right";
+                  "Window to Previous Desktop" = [];
+                  "Window to Previous Screen" = "Meta+Shift+Left";
+                  "view_actual_size" = "Meta+0";
+                  "view_zoom_in" = ["Meta++" "Meta+="];
+                  "view_zoom_out" = "Meta+-";
+                };
                 "kitty.desktop"."_launch" = "Meta+Return";
                 "brave-browser.desktop"."_launch" = "Meta+W";
                 "yazi.desktop"."_launch" = "Meta+E";
                 "rofi.desktop"."_launch" = "Meta+D";
                 "thunderbird.desktop"."_launch" = "Meta+Shift+E";
                 "services/org.kde.konsole.desktop"."_launch" = "None";
-                "services/org.kde.spectacle.desktop"."ActiveWindowScreenShot" = [];
-                "services/org.kde.spectacle.desktop"."FullScreenScreenShot" = "Meta+Shift+S";
-                "services/org.kde.spectacle.desktop"."RectangularRegionScreenShot" = "Meta+S";
-                "services/org.kde.spectacle.desktop"."WindowUnderCursorScreenShot" = "Meta+Alt+S";
-                "services/org.kde.spectacle.desktop"."_launch" = "Print";
-                "kwin"."Overview" = "Meta+Space";
-                "kwin"."Show Desktop" = "Meta+Shift+D";
-                "kwin"."Switch to Desktop 1" = "Meta+1";
-                "kwin"."Switch to Desktop 2" = "Meta+2";
-                "kwin"."Switch to Desktop 3" = "Meta+3";
-                "kwin"."Switch to Desktop 4" = "Meta+4";
-                "kwin"."Switch to Desktop 5" = "Meta+5";
-                "kwin"."Switch to Desktop 6" = "Meta+6";
-                "kwin"."Switch to Desktop 7" = "Meta+7";
-                "kwin"."Switch to Desktop 8" = "Meta+8";
-                "kwin"."Switch to Desktop 9" = "Meta+9";
-                "kwin"."Switch to Desktop 10" = "Meta+0";
-                "kwin"."Window Close" = ["Meta+Q"];
-                "kwin"."Window Fullscreen" = ["Meta+F"];
-                "kwin"."Window Shrink Horizontal" = [];
-                "kwin"."Window Shrink Vertical" = [];
-                "kwin"."Window to Desktop 1" = "Meta+!";
-                "kwin"."Window to Desktop 2" = "Meta+\"";
-                "kwin"."Window to Desktop 3" = "Meta+§";
-                "kwin"."Window to Desktop 4" = "Meta+$";
-                "kwin"."Window to Desktop 5" = "Meta+%";
-                "kwin"."Window to Desktop 6" = "Meta+&";
-                "kwin"."Window to Desktop 7" = "Meta+/";
-                "kwin"."Window to Desktop 8" = "Meta+(";
-                "kwin"."Window to Desktop 9" = "Meta+)";
-                "kwin"."Window to Desktop 10" = "Meta+=";
-                "plasmashell"."activate task manager entry 1" = [];
-                "plasmashell"."activate task manager entry 2" = [];
-                "plasmashell"."activate task manager entry 3" = [];
-                "plasmashell"."activate task manager entry 4" = [];
-                "plasmashell"."activate task manager entry 5" = [];
-                "plasmashell"."activate task manager entry 6" = [];
-                "plasmashell"."activate task manager entry 7" = [];
-                "plasmashell"."activate task manager entry 8" = [];
-                "plasmashell"."activate task manager entry 9" = [];
-                "plasmashell"."activate task manager entry 10" = [];
-                "ActivityManager"."switch-to-activity-b155094f-8179-4234-8069-7a86c76acadf" = [];
-                "KDE Keyboard Layout Switcher"."Switch to Next Keyboard Layout" = "Meta+Alt+K";
-                "kaccess"."Toggle Screen Reader On and Off" = "Meta+Alt+S";
-                "kcm_touchpad"."Disable Touchpad" = "Touchpad Off";
-                "kcm_touchpad"."Enable Touchpad" = "Touchpad On";
-                "kcm_touchpad"."Toggle Touchpad" = "Touchpad Toggle";
-                "kded5"."Show System Activity" = "Ctrl+Esc";
-                "kded5"."display" = ["Display" "Meta+P"];
-                "khotkeys"."{d03619b6-9b3c-48cc-9d9c-a2aadb485550}" = [];
-                "kmix"."decrease_microphone_volume" = "Microphone Volume Down";
-                "kmix"."decrease_volume" = "Volume Down";
-                "kmix"."increase_microphone_volume" = "Microphone Volume Up";
-                "kmix"."increase_volume" = "Volume Up";
-                "kmix"."mic_mute" = ["Microphone Mute" "Meta+Volume Mute"];
-                "kmix"."mute" = "Volume Mute";
-                "ksmserver"."Halt Without Confirmation" = [];
-                "ksmserver"."Lock Session" = [];
-                "ksmserver"."Log Out Without Confirmation" = [];
-                "ksmserver"."Reboot Without Confirmation" = [];
-                "kwin"."Activate Window Demanding Attention" = "Meta+Ctrl+A";
-                "kwin"."Decrease Opacity" = [];
-                "kwin"."Edit Tiles" = "Meta+T";
-                "kwin"."Expose" = "Ctrl+F9";
-                "kwin"."ExposeAll" = ["Ctrl+F10" "Launch (C)"];
-                "kwin"."ExposeClass" = "Ctrl+F7";
-                "kwin"."ExposeClassCurrentDesktop" = [];
-                "kwin"."Increase Opacity" = [];
-                "kwin"."MoveMouseToCenter" = "Meta+F6";
-                "kwin"."MoveMouseToFocus" = "Meta+F5";
-                "kwin"."MoveZoomDown" = [];
-                "kwin"."MoveZoomLeft" = [];
-                "kwin"."MoveZoomRight" = [];
-                "kwin"."MoveZoomUp" = [];
-                "kwin"."Setup Window Shortcut" = [];
-                "kwin"."ShowDesktopGrid" = "Meta+F8";
-                "kwin"."Suspend Compositing" = "Alt+Shift+F12";
-                "kwin"."Switch One Desktop Down" = [];
-                "kwin"."Switch One Desktop Up" = [];
-                "kwin"."Switch One Desktop to the Left" = [];
-                "kwin"."Switch One Desktop to the Right" = [];
-                "kwin"."Switch Window Down" = "Meta+Alt+Down";
-                "kwin"."Switch Window Left" = "Meta+Alt+Left";
-                "kwin"."Switch Window Right" = "Meta+Alt+Right";
-                "kwin"."Switch Window Up" = "Meta+Alt+Up";
-                "kwin"."Switch to Desktop 11" = [];
-                "kwin"."Switch to Desktop 12" = [];
-                "kwin"."Switch to Desktop 13" = [];
-                "kwin"."Switch to Desktop 14" = [];
-                "kwin"."Switch to Desktop 15" = [];
-                "kwin"."Switch to Desktop 16" = [];
-                "kwin"."Switch to Desktop 17" = [];
-                "kwin"."Switch to Desktop 18" = [];
-                "kwin"."Switch to Desktop 19" = [];
-                "kwin"."Switch to Desktop 20" = [];
-                "kwin"."Switch to Next Desktop" = [];
-                "kwin"."Switch to Next Screen" = [];
-                "kwin"."Switch to Previous Desktop" = [];
-                "kwin"."Switch to Previous Screen" = [];
-                "kwin"."Toggle Night Color" = [];
-                "kwin"."Toggle Window Raise/Lower" = [];
-                "kwin"."Walk Through Desktop List" = [];
-                "kwin"."Walk Through Desktop List (Reverse)" = [];
-                "kwin"."Walk Through Desktops" = [];
-                "kwin"."Walk Through Desktops (Reverse)" = [];
-                "kwin"."Walk Through Windows" = "Alt+Tab";
-                "kwin"."Walk Through Windows (Reverse)" = "Alt+Shift+Backtab";
-                "kwin"."Walk Through Windows Alternative" = [];
-                "kwin"."Walk Through Windows Alternative (Reverse)" = [];
-                "kwin"."Walk Through Windows of Current Application" = "Alt+`";
-                "kwin"."Walk Through Windows of Current Application (Reverse)" = "Alt+~";
-                "kwin"."Walk Through Windows of Current Application Alternative" = [];
-                "kwin"."Walk Through Windows of Current Application Alternative (Reverse)" = [];
-                "kwin"."Window Above Other Windows" = [];
-                "kwin"."Window Below Other Windows" = [];
-                "kwin"."Window Grow Horizontal" = [];
-                "kwin"."Window Grow Vertical" = [];
-                "kwin"."Window Lower" = [];
-                "kwin"."Window Maximize" = "Meta+PgUp";
-                "kwin"."Window Maximize Horizontal" = [];
-                "kwin"."Window Maximize Vertical" = [];
-                "kwin"."Window Minimize" = "Meta+PgDown";
-                "kwin"."Window Move" = [];
-                "kwin"."Window Move Center" = [];
-                "kwin"."Window No Border" = [];
-                "kwin"."Window On All Desktops" = [];
-                "kwin"."Window One Desktop Down" = "Meta+Ctrl+Shift+Down";
-                "kwin"."Window One Desktop Up" = "Meta+Ctrl+Shift+Up";
-                "kwin"."Window One Desktop to the Left" = "Meta+Ctrl+Shift+Left";
-                "kwin"."Window One Desktop to the Right" = "Meta+Ctrl+Shift+Right";
-                "kwin"."Window One Screen Down" = [];
-                "kwin"."Window One Screen Up" = [];
-                "kwin"."Window One Screen to the Left" = [];
-                "kwin"."Window One Screen to the Right" = [];
-                "kwin"."Window Operations Menu" = "Alt+F3";
-                "kwin"."Window Pack Down" = [];
-                "kwin"."Window Pack Left" = [];
-                "kwin"."Window Pack Right" = [];
-                "kwin"."Window Pack Up" = [];
-                "kwin"."Window Quick Tile Bottom" = "Meta+Down";
-                "kwin"."Window Quick Tile Bottom Left" = [];
-                "kwin"."Window Quick Tile Bottom Right" = [];
-                "kwin"."Window Quick Tile Left" = "Meta+Left";
-                "kwin"."Window Quick Tile Right" = "Meta+Right";
-                "kwin"."Window Quick Tile Top" = "Meta+Up";
-                "kwin"."Window Quick Tile Top Left" = [];
-                "kwin"."Window Quick Tile Top Right" = [];
-                "kwin"."Window Raise" = [];
-                "kwin"."Window Resize" = [];
-                "kwin"."Window Shade" = [];
-                "kwin"."Window to Desktop 11" = [];
-                "kwin"."Window to Desktop 12" = [];
-                "kwin"."Window to Desktop 13" = [];
-                "kwin"."Window to Desktop 14" = [];
-                "kwin"."Window to Desktop 15" = [];
-                "kwin"."Window to Desktop 16" = [];
-                "kwin"."Window to Desktop 17" = [];
-                "kwin"."Window to Desktop 18" = [];
-                "kwin"."Window to Desktop 19" = [];
-                "kwin"."Window to Desktop 20" = [];
-                "kwin"."Window to Next Desktop" = [];
-                "kwin"."Window to Next Screen" = "Meta+Shift+Right";
-                "kwin"."Window to Previous Desktop" = [];
-                "kwin"."Window to Previous Screen" = "Meta+Shift+Left";
-                "kwin"."view_actual_size" = "Meta+0";
-                "kwin"."view_zoom_in" = ["Meta++" "Meta+="];
-                "kwin"."view_zoom_out" = "Meta+-";
-                "org.kde.krunner.desktop"."RunClipboard" = "Alt+Shift+F2";
-                "org.kde.krunner.desktop"."_launch" = ["Meta+D"];
-                "org.kde.plasma.emojier.desktop"."_launch" = ["Meta+." "Meta+Ctrl+Alt+Shift+Space"];
-                "org_kde_powerdevil"."Decrease Keyboard Brightness" = "Keyboard Brightness Down";
-                "org_kde_powerdevil"."Decrease Screen Brightness" = "Monitor Brightness Down";
-                "org_kde_powerdevil"."Hibernate" = "Hibernate";
-                "org_kde_powerdevil"."Increase Keyboard Brightness" = "Keyboard Brightness Up";
-                "org_kde_powerdevil"."Increase Screen Brightness" = "Monitor Brightness Up";
-                "org_kde_powerdevil"."PowerDown" = "Power Down";
-                "org_kde_powerdevil"."PowerOff" = "Power Off";
-                "org_kde_powerdevil"."Sleep" = "Sleep";
-                "org_kde_powerdevil"."Toggle Keyboard Backlight" = "Keyboard Light On/Off";
-                "org_kde_powerdevil"."Turn Off Screen" = [];
-                "plasmashell"."clear-history" = [];
-                "plasmashell"."clipboard_action" = "Meta+Ctrl+X";
-                "plasmashell"."cycle-panels" = "Meta+Alt+P";
-                "plasmashell"."cycleNextAction" = [];
-                "plasmashell"."cyclePrevAction" = [];
-                "plasmashell"."edit_clipboard" = [];
-                "plasmashell"."next activity" = "Meta+Shift+Tab";
-                "plasmashell"."previous activity" = "Meta+Shift+Tab";
-                "plasmashell"."repeat_action" = "Meta+Ctrl+R";
-                "plasmashell"."show dashboard" = "Ctrl+F12";
-                "plasmashell"."show-barcode" = [];
-                "plasmashell"."show-on-mouse-pos" = "Meta+V";
-                "plasmashell"."switch to next activity" = [];
-                "plasmashell"."switch to previous activity" = [];
-                "plasmashell"."toggle do not disturb" = [];
-                "systemsettings.desktop"."_launch" = "Tools";
-                "systemsettings.desktop"."kcm-kscreen" = [];
-                "systemsettings.desktop"."kcm-lookandfeel" = [];
-                "systemsettings.desktop"."kcm-users" = [];
-                "systemsettings.desktop"."powerdevilprofilesconfig" = [];
-                "systemsettings.desktop"."screenlocker" = [];
+                "services/org.kde.spectacle.desktop" = {
+                  "ActiveWindowScreenShot" = [];
+                  "FullScreenScreenShot" = "Meta+Shift+S";
+                  "RectangularRegionScreenShot" = "Meta+S";
+                  "WindowUnderCursorScreenShot" = "Meta+Alt+S";
+                  "_launch" = "Print";
+                };
+                plasmashell = {
+                  "activate task manager entry 1" = [];
+                  "activate task manager entry 2" = [];
+                  "activate task manager entry 3" = [];
+                  "activate task manager entry 4" = [];
+                  "activate task manager entry 5" = [];
+                  "activate task manager entry 6" = [];
+                  "activate task manager entry 7" = [];
+                  "activate task manager entry 8" = [];
+                  "activate task manager entry 9" = [];
+                  "activate task manager entry 10" = [];
+                  "clear-history" = [];
+                  "clipboard_action" = "Meta+Ctrl+X";
+                  "cycle-panels" = "Meta+Alt+P";
+                  "cycleNextAction" = [];
+                  "cyclePrevAction" = [];
+                  "edit_clipboard" = [];
+                  "next activity" = "Meta+Shift+Tab";
+                  "previous activity" = "Meta+Shift+Tab";
+                  "repeat_action" = "Meta+Ctrl+R";
+                  "show dashboard" = "Ctrl+F12";
+                  "show-barcode" = [];
+                  "show-on-mouse-pos" = "Meta+V";
+                  "switch to next activity" = [];
+                  "switch to previous activity" = [];
+                  "toggle do not disturb" = [];
+                };
+                "KDE Keyboard Layout Switcher" = {
+                  "Switch to Next Keyboard Layout" = "Meta+Alt+K";
+                };
+                kaccess = {
+                  "Toggle Screen Reader On and Off" = "Meta+Alt+S";
+                };
+                kcm_touchpad = {
+                  "Disable Touchpad" = "Touchpad Off";
+                  "Enable Touchpad" = "Touchpad On";
+                  "Toggle Touchpad" = "Touchpad Toggle";
+                };
+                kded5 = {
+                  "Show System Activity" = "Ctrl+Esc";
+                  "display" = ["Display" "Meta+P"];
+                };
+                kmix = {
+                  decrease_microphone_volume = "Microphone Volume Down";
+                  decrease_volume = "Volume Down";
+                  increase_microphone_volume = "Microphone Volume Up";
+                  increase_volume = "Volume Up";
+                  mic_mute = ["Microphone Mute" "Meta+Volume Mute"];
+                  mute = "Volume Mute";
+                };
+                ksmserver = {
+                  "Halt Without Confirmation" = [];
+                  "Lock Session" = [];
+                  "Log Out Without Confirmation" = [];
+                  "Reboot Without Confirmation" = [];
+                };
+                "org.kde.krunner.desktop" = {
+                  "RunClipboard" = "Alt+Shift+F2";
+                  "_launch" = ["Meta+Shift+D"];
+                };
+                "org.kde.plasma.emojier.desktop" = {
+                  "_launch" = ["Meta+." "Meta+Ctrl+Alt+Shift+Space"];
+                };
+                "org_kde_powerdevil" = {
+                  "Decrease Keyboard Brightness" = "Keyboard Brightness Down";
+                  "Decrease Screen Brightness" = "Monitor Brightness Down";
+                  "Hibernate" = "Hibernate";
+                  "Increase Keyboard Brightness" = "Keyboard Brightness Up";
+                  "Increase Screen Brightness" = "Monitor Brightness Up";
+                  "PowerDown" = "Power Down";
+                  "PowerOff" = "Power Off";
+                  "Sleep" = "Sleep";
+                  "Toggle Keyboard Backlight" = "Keyboard Light On/Off";
+                  "Turn Off Screen" = [];
+                };
+                "systemsettings.desktop" = {
+                  "_launch" = "Tools";
+                  "kcm-kscreen" = [];
+                  "kcm-lookandfeel" = [];
+                  "kcm-users" = [];
+                  "powerdevilprofilesconfig" = [];
+                  "screenlocker" = [];
+                };
               };
               panels = [
                 {
                   location = "bottom";
                   floating = true;
                   height = 60;
+                  alignment = "center";
+                  lengthMode = "fit";
+                  hiding = "dodgewindows";
+                  screen = "all";
 
                   widgets = [
                     {
                       kickoff = {
+                        applicationsDisplayMode = "list";
+                        compactDisplayStyle = false;
+                        favoritesDisplayMode = "grid";
                         icon = "nix-snowflake";
+                        label = null;
+                        pin = false;
+                        showActionButtonCaptions = true;
+                        showButtonsFor = "power";
+                        sidebarPosition = "right";
+                        sortAlphabetically = true;
                       };
                     }
 
                     {
                       iconTasks = {
-                        iconsOnly = true;
-                        behavior.grouping.method = "none";
+                        appearance = {
+                          fill = false;
+                          highlightWindows = true;
+                          iconSpacing = "medium";
+                          indicateAudioStreams = true;
+                          rows = {
+                            multirowView = "never";
+                            maximum = null;
+                          };
+                          showTooltips = true;
+                        };
+                        behavior = {
+                          grouping = {
+                            clickAction = "showPresentWindowsEffect";
+                            method = "byProgramName";
+                          };
+                          middleClickAction = "newInstance";
+                          minimizeActiveTaskOnClick = true;
+                          newTasksAppearOn = "right";
+                          showTasks = {
+                            onlyInCurrentActivity = true;
+                            onlyInCurrentDesktop = true;
+                            onlyMinimized = false;
+                            onlyInCurrentScreen = false;
+                          };
+                          sortingMethod = "manually";
+                          unhideOnAttentionNeeded = true;
+                          wheel = {
+                            ignoreMinimizedTasks = true;
+                            switchBetweenTasks = true;
+                          };
+                        };
                         launchers = [
                           "preferred://browser"
+                          "applications:systemsettings.desktop"
                           "applications:thunderbird.desktop"
                           "applications:kitty.desktop"
                           "applications:yazi.desktop"
                           "applications:code.desktop"
                         ];
-                        settings = {
-                          General = {
-                            interactiveMute = false;
+                      };
+                    }
+                    "org.kde.plasma.marginsseparator"
+                    {
+                      applicationTitleBar = {
+                        behavior = {
+                          activeTaskSource = "activeTask";
+                          disableButtonsForNotHovered = false;
+                          disableForNotMaximized = false;
+                          filterByActivity = true;
+                          filterByScreen = true;
+                          filterByVirtualDesktop = true;
+                        };
+                        layout = {
+                          elements = ["windowTitle"];
+                          fillFreeSpace = false;
+                          horizontalAlignment = "left";
+                          showDisabledElements = "deactivated";
+                          spacingBetweenElements = 0;
+                          verticalAlignment = "center";
+                          widgetMargins = 1;
+                        };
+                        overrideForMaximized.enable = false;
+                        windowControlButtons = {
+                          auroraeTheme = null;
+                          buttonsAnimationSpeed = 100;
+                          buttonsAspectRatio = 100;
+                          buttonsMargin = 0;
+                          iconSource = "plasma";
+                        };
+                        windowTitle = {
+                          font = {
+                            bold = false;
+                            fit = "fixedSize";
+                            size = 12;
                           };
+                          hideEmptyTitle = true;
+                          margins = {
+                            bottom = 0;
+                            left = 10;
+                            right = 5;
+                            top = 0;
+                          };
+                          maximumWidth = 640;
+                          minimumWidth = 0;
+                          source = "appName";
+                          undefinedWindowTitle = "";
                         };
                       };
                     }
-
-                    "org.kde.plasma.marginsseparator"
-
+                    {
+                      systemTray = {
+                        icons = {
+                          scaleToFit = true;
+                          spacing = "small";
+                        };
+                        pin = false;
+                      };
+                    }
                     {
                       digitalClock = {
                         date.enable = false;
-                        time.showSeconds = "onlyInTooltip";
-                        calendar.showWeekNumbers = true;
+                        time.format = "24h";
+                        font = {
+                          family = "Iosevka";
+                          size = 10;
+                          weight = 400;
+                          italic = false;
+                          style = "Medium";
+                        };
+                        calendar.firstDayOfWeek = "monday";
                       };
                     }
                   ];
@@ -411,6 +525,32 @@ in {
                 borderlessMaximizedWindows = false;
                 cornerBarrier = true;
                 edgeBarrier = 0;
+                tiling = {
+                  padding = 15;
+                  layout = {
+                    id = "82dece0e-5d1e-527e-a891-21c2c84c6f64";
+                    tiles = {
+                      layoutDirection = "horizontal";
+                      tiles = [
+                        {
+                          width = 0.5;
+                        }
+                        {
+                          layoutDirection = "vertical";
+                          tiles = [
+                            {
+                              height = 0.5;
+                            }
+                            {
+                              height = 0.5;
+                            }
+                          ];
+                          width = 0.5;
+                        }
+                      ];
+                    };
+                  };
+                };
                 nightLight = {
                   enable = false;
                   mode = "times";
@@ -492,11 +632,11 @@ in {
               fonts = {
                 general = {
                   family = "Iosevka";
-                  pointSize = 12;
+                  pointSize = 10;
                 };
                 fixedWidth = {
                   family = "Iosevka";
-                  pointSize = 12;
+                  pointSize = 10;
                 };
                 menu = {
                   family = "Iosevka";
@@ -504,7 +644,7 @@ in {
                 };
                 small = {
                   family = "Iosevka";
-                  pointSize = 10;
+                  pointSize = 8;
                 };
                 toolbar = {
                   family = "Iosevka";
