@@ -38,10 +38,8 @@ in {
         ${persistPath} = {
           users = {
             ${name} = {
-              directories = [
-                ".local/share/kwalletd"
-                ".local/share/kscreen"
-              ];
+              directories = [".local/share/kwalletd"];
+              files = [".config/kwinoutputconfig.json"];
             };
           };
         };
