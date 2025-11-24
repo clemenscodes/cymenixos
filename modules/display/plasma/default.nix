@@ -98,7 +98,7 @@ in {
                 };
               };
               shortcuts = {
-                "kitty.desktop"."_launch" = "Meta+Enter";
+                "kitty.desktop"."_launch" = "Meta+Return";
                 "brave-browser.desktop"."_launch" = "Meta+W";
                 "services/org.kde.konsole.desktop"."_launch" = "None";
                 "kwin"."Overview" = "Meta+Tab";
@@ -114,19 +114,19 @@ in {
                 "kwin"."Switch to Desktop 9" = "Meta+9";
                 "kwin"."Switch to Desktop 10" = "Meta+0";
                 "kwin"."Window Close" = ["Meta+Q"];
-                "kwin"."Window Fullscreen" = [];
+                "kwin"."Window Fullscreen" = ["Meta+Shift+F"];
                 "kwin"."Window Shrink Horizontal" = [];
                 "kwin"."Window Shrink Vertical" = [];
-                "kwin"."Window to Desktop 1" = "Meta+Shift+1";
-                "kwin"."Window to Desktop 2" = "Meta+Shift+2";
-                "kwin"."Window to Desktop 3" = "Meta+Shift+3";
-                "kwin"."Window to Desktop 4" = "Meta+Shift+4";
-                "kwin"."Window to Desktop 5" = "Meta+Shift+5";
-                "kwin"."Window to Desktop 6" = "Meta+Shift+6";
-                "kwin"."Window to Desktop 7" = "Meta+Shift+7";
-                "kwin"."Window to Desktop 8" = "Meta+Shift+8";
-                "kwin"."Window to Desktop 9" = "Meta+Shift+9";
-                "kwin"."Window to Desktop 10" = "Meta+Shift+0";
+                "kwin"."Window to Desktop 1" = "Meta+!";
+                "kwin"."Window to Desktop 2" = "Meta+\"";
+                "kwin"."Window to Desktop 3" = "Meta+§";
+                "kwin"."Window to Desktop 4" = "Meta+$";
+                "kwin"."Window to Desktop 5" = "Meta+%";
+                "kwin"."Window to Desktop 6" = "Meta+&";
+                "kwin"."Window to Desktop 7" = "Meta+/";
+                "kwin"."Window to Desktop 8" = "Meta+(";
+                "kwin"."Window to Desktop 9" = "Meta+)";
+                "kwin"."Window to Desktop 10" = "Meta+=";
                 "plasmashell"."activate task manager entry 1" = [];
                 "plasmashell"."activate task manager entry 2" = [];
                 "plasmashell"."activate task manager entry 3" = [];
@@ -176,39 +176,6 @@ in {
                     "org.kde.plasma.marginsseparator"
 
                     {
-                      systemTray = {
-                        icons = {
-                          spacing = "large";
-                          scaleToFit = true;
-                        };
-                        items = {
-                          shown = [
-                            "org.kde.plasma.battery"
-                            "org.kde.plasma.networkmanagement"
-                            "org.kde.plasma.volume"
-                            "org.kde.kdeconnect"
-                            "discord"
-                          ];
-                          hidden = [
-                            "org.kde.plasma.bluetooth"
-                            "org.kde.plasma.clipboard"
-                            "org.kde.plasma.brightness"
-                            "org.kde.plasma.keyboardlayout"
-                            "org.kde.plasma.manage-inputmethod"
-                            "org.kde.plasma.weather"
-                            "org.kde.kscreen"
-                            "aw-qt"
-                            "tail-tray"
-                          ];
-                          extra = [
-                            "org.kde.plasma.devicenotifier"
-                            "org.kde.plasma.mediacontroller"
-                          ];
-                        };
-                      };
-                    }
-
-                    {
                       name = "org.kde.plasma.weather";
                       config = {
                         Appearance.showTemperatureInCompactMode = true;
@@ -226,7 +193,6 @@ in {
                     }
 
                     "org.kde.plasma.minimizeall"
-                    "org.kde.plasma.showdesktop"
                   ];
                 }
               ];
