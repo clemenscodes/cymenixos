@@ -43,7 +43,6 @@ in {
                 esbenp.prettier-vscode
                 rust-lang.rust-analyzer
                 bradlc.vscode-tailwindcss
-                vitest.explorer
                 rluvaton.vscode-vitest
                 redhat.vscode-yaml
                 ms-vscode-remote.remote-containers
