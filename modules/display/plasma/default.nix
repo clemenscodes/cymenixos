@@ -125,7 +125,7 @@ in {
                 };
                 autoLock = true;
                 lockOnResume = true;
-                lockOnStartup = true;
+                lockOnStartup = false;
                 passwordRequired = true;
                 passwordRequiredDelay = 10;
                 timeout = 15;
@@ -201,9 +201,6 @@ in {
                   windowOpenClose = {
                     animation = "glide";
                   };
-                  wobblyWindows = {
-                    enable = true;
-                  };
                   zoom = {
                     enable = true;
                     focusTracking = {
@@ -217,27 +214,27 @@ in {
               fonts = {
                 general = {
                   family = "Iosevka";
-                  pointSize = 16;
+                  pointSize = 10;
                 };
                 menu = {
                   family = "Iosevka";
-                  pointSize = 16;
+                  pointSize = 10;
                 };
                 small = {
                   family = "Iosevka";
-                  pointSize = 12;
+                  pointSize = 8;
                 };
                 fixedWidth = {
                   family = "Iosevka";
-                  pointSize = 16;
+                  pointSize = 10;
                 };
                 toolbar = {
                   family = "Iosevka";
-                  pointSize = 16;
+                  pointSize = 10;
                 };
                 windowTitle = {
                   family = "Iosevka";
-                  pointSize = 16;
+                  pointSize = 10;
                 };
               };
             };
