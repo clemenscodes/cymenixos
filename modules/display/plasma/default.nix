@@ -183,9 +183,6 @@ in {
                   invert = {
                     enable = true;
                   };
-                  magnifier = {
-                    enable = true;
-                  };
                   minimization = {
                     animation = "magiclamp";
                   };
