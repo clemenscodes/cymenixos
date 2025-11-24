@@ -377,7 +377,7 @@ in {
                     {
                       systemTray = {
                         icons = {
-                          scaleToFit = false;
+                          scaleToFit = true;
                           spacing = "small";
                         };
                         items = {
@@ -387,6 +387,7 @@ in {
                           ];
                           hidden = [
                             "org.kde.plasma.clipboard"
+                            "org.kde.plasma.bluetooth"
                           ];
                         };
                       };
