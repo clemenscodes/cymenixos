@@ -169,7 +169,7 @@ in {
                   dimInactive = {
                     enable = true;
                   };
-                  fallPart = {
+                  fallApart = {
                     enable = false;
                   };
                   fps = {
