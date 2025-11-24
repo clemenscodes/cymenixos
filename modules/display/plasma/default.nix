@@ -85,7 +85,16 @@ in {
               startup = {
                 dataDir = "data";
                 desktopScript = {};
-                startupScript = {};
+                startupScript = {
+                  mullvad = {
+                    priority = 0;
+                    restartServices = [];
+                    runAlways = true;
+                    text = ''
+                      mullvad-vpn
+                    '';
+                  };
+                };
               };
               window-rules = [];
               windows = {
@@ -369,7 +378,7 @@ in {
                           "applications:com.obsproject.Studio.desktop"
                           "applications:btop.desktop"
                           "applications:gparted.desktop"
-                          "applications:mullvad.desktop"
+                          "applications:mullvad-vpn.desktop"
                           "applications:virt-manager.desktop"
                           "applications:steam.desktop"
                           "applications:bitwarden.desktop"
