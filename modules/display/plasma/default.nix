@@ -48,6 +48,11 @@ in {
       users = {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
+          file = {
+            ".config/gtk-2.0/settings.ini" = {
+              force = true;
+            };
+          };
           programs = {
             elisa = {
               enable = false;
@@ -382,6 +387,7 @@ in {
                           spacing = "small";
                         };
                         items = {
+                          showAll = false;
                           shown = [
                             "org.kde.plasma.volume"
                           ];
