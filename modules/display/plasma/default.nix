@@ -325,9 +325,6 @@ in {
                   location = "bottom";
                   floating = true;
                   height = 60;
-                  alignment = "center";
-                  lengthMode = "fit";
-                  hiding = "dodgewindows";
                   screen = "all";
 
                   widgets = [
@@ -386,9 +383,8 @@ in {
                         };
                         pin = false;
                         items = {
-                          hidden = [
-                            "org.kde.plasma.brightness"
-                            "org.kde.plasma.clipboard"
+                          shown = [
+                            "org.kde.plasma.volume"
                           ];
                         };
                       };
