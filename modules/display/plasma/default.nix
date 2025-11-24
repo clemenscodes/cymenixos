@@ -48,9 +48,11 @@ in {
       users = {
         ${name} = {
           imports = [inputs.plasma-manager.homeModules.plasma-manager];
-          file = {
-            ".config/gtk-2.0/settings.ini" = {
-              force = true;
+          home = {
+            file = {
+              ".config/gtk-2.0/settings.ini" = {
+                force = true;
+              };
             };
           };
           programs = {
@@ -559,14 +561,6 @@ in {
                   };
                   windowOpenClose = {
                     animation = "glide";
-                  };
-                  zoom = {
-                    enable = true;
-                    focusTracking = {
-                      enable = true;
-                    };
-                    mousePointer = "keep";
-                    mouseTracking = "proportional";
                   };
                 };
               };
