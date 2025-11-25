@@ -5,6 +5,7 @@
   ...
 }: {...}: {
   imports = [
+    (import ./anyrun {inherit inputs pkgs lib;})
     (import ./rofi {inherit inputs pkgs lib;})
   ];
   options = {
