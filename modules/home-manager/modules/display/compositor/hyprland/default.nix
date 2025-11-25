@@ -19,6 +19,7 @@
   useNcmpcpp = config.modules.media.music.ncmpcpp.enable;
   useScreenshots = displayCfg.screenshots.enable;
   useRofi = displayCfg.launcher.rofi.enable;
+  useAnyrun = displayCfg.launcher.anyrun.enable;
   useSwaync = displayCfg.notifications.swaync.enable;
   useWaybar = displayCfg.bar.waybar.enable;
   useBtop = config.modules.monitoring.btop.enable;
@@ -209,7 +210,7 @@ in {
               (lib.mkIf useWaybar "$mod SHIFT, B, exec, waybar-reload")
               (lib.mkIf useSwaync "$mod, N, exec, swaync-client -t -sw")
               (lib.mkIf useRofi "$mod SHIFT, V, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy")
-              (lib.mkIf useRofi "$mod, D, exec, rofi -show drun")
+              (lib.mkIf useAnyrun "$mod, D, exec, anyrun")
               (lib.mkIf useRofi "$mod, BACKSPACE, exec, logoutlaunch")
               (lib.mkIf useScreenshots "$mod, S, exec, screenshot")
               (lib.mkIf useScreenshots "$mod SHIFT, D, exec, fullscreenshot")

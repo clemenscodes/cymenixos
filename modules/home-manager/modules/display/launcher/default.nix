@@ -13,7 +13,7 @@
         launcher = {
           enable = lib.mkEnableOption "Enable launchers" // {default = false;};
           defaultLauncher = lib.mkOption {
-            type = lib.types.enum ["rofi"];
+            type = lib.types.enum ["rofi" "anyrun"];
             default = "rofi";
           };
         };
