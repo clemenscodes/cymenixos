@@ -64,14 +64,13 @@ in {
             }
 
             box.main {
-              padding: 10px;
-              margin: 10px;
+              padding: 2px;
+              margin: 2px;
               border-radius: 10px;
               border: 2px solid @accent;
               background-color: @bg-color;
               box-shadow: 0 0 5px black;
             }
-
 
             text {
               min-height: 30px;
@@ -83,6 +82,8 @@ in {
             .matches {
               background-color: rgba(0, 0, 0, 0);
               border-radius: 10px;
+              padding: 10px;
+              margin: 10px;
             }
 
             box.plugin:first-child {
@@ -95,7 +96,6 @@ in {
 
             list.plugin {
               background-color: rgba(0, 0, 0, 0);
-              padding: 10px;
             }
 
             label.match {
@@ -114,7 +114,6 @@ in {
 
             #match {
               background: transparent;
-              margin: 10px;
             }
 
             #match:selected {
@@ -133,38 +132,36 @@ in {
               }
             }
           '';
-        extraConfigFiles = {
+        extraLines = {
           "keybinds.ron" = {
             text = ''
-              Config(
-                keybinds: [
-                  Keybind(
-                    key: "Return",
-                    action: Select,
-                  ),
-                  Keybind(
-                    key: "Up",
-                    action: Up,
-                  ),
-                  Keybind(
-                    key: "Down",
-                    action: Down,
-                  ),
-                  Keybind(
-                    key: "ISO_Left_Tab",
-                    action: Up,
-                    shift: true,
-                  ),
-                  Keybind(
-                    key: "Tab",
-                    action: Down,
-                  ),
-                  Keybind(
-                    key: "Escape",
-                    action: Close,
-                  ),
-                ],
-              )
+              keybinds: [
+                Keybind(
+                  key: "Return",
+                  action: Select,
+                ),
+                Keybind(
+                  key: "Up",
+                  action: Up,
+                ),
+                Keybind(
+                  key: "Down",
+                  action: Down,
+                ),
+                Keybind(
+                  key: "ISO_Left_Tab",
+                  action: Up,
+                  shift: true,
+                ),
+                Keybind(
+                  key: "Tab",
+                  action: Down,
+                ),
+                Keybind(
+                  key: "Escape",
+                  action: Close,
+                ),
+              ],
             '';
           };
         };
