@@ -22,6 +22,9 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.anyrun.enable) {
+    home = {
+      packages = [pkgs.anyrun];
+    };
     programs = {
       anyrun = {
         enable = true;
