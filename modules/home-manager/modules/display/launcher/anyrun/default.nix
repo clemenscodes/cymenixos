@@ -6,7 +6,6 @@
 }: {
   osConfig,
   config,
-  modulesPath,
   ...
 }: let
   cfg = config.modules.display.launcher;
@@ -23,7 +22,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.anyrun.enable) {
-    disabledModules = ["${modulesPath}/programs/anyrun.nix"];
     home = {
       packages = [pkgs.anyrun];
     };

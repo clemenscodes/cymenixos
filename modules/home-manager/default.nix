@@ -6,6 +6,7 @@
 }: {
   config,
   system,
+  modulesPath,
   ...
 }: let
   cfg = config.modules;
@@ -22,6 +23,7 @@ in {
     system = {
       stateVersion = lib.mkDefault (lib.versions.majorMinor lib.version);
     };
+    disabledModules = ["${modulesPath}/programs/anyrun.nix"];
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
