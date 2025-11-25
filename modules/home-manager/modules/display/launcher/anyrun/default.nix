@@ -10,6 +10,7 @@
   ...
 }: let
   cfg = config.modules.display.launcher;
+  anyrun = inputs.anyrun.packages.${pkgs.stdenv.hostPlatform.system};
 in {
   imports = [inputs.anyrun.homeManagerModules.anyrun];
   disabledModules = ["${modulesPath}/programs/anyrun.nix"];
@@ -25,9 +26,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.anyrun.enable) {
+    home = {
+      packages = [anyrun.default];
+    };
     programs = {
       anyrun = {
         enable = true;
+        package = anyrun.default;
         config = {
           layer = "overlay";
           x = {
@@ -45,8 +50,8 @@ in {
           closeOnClick = false;
           showResultsImmediately = false;
           maxEntries = null;
-          plugins = [
-            "${pkgs.anyrun}/lib/libapplications.so"
+          plugins = with anyrun; [
+            applications
           ];
           extraLines = ''
             keybinds: [
@@ -83,52 +88,82 @@ in {
           css
           */
           ''
+            @define-color bg-color #313244;
+            @define-color fg-color #cdd6f4;
+            @define-color primary-color #89b4fa;
+            @define-color secondary-color #cba6f7;
+            @define-color border-color @primary-color;
+            @define-color selected-bg-color @primary-color;
+            @define-color selected-fg-color @bg-color;
+
             * {
               all: unset;
-              font-size: 1.2rem;
+              font-family: JetBrainsMono Nerd Font;
             }
 
-            #window,
-            #match,
-            #entry,
-            #plugin,
-            #main {
+            #window {
               background: transparent;
             }
 
-            #match.activatable {
-              border-radius: 8px;
-              margin: 4px 0;
-              padding: 4px;
-            }
-            #match.activatable:first-child {
-              margin-top: 12px;
-            }
-            #match.activatable:last-child {
-              margin-bottom: 0;
-            }
-
-            #match:hover {
-              background: rgba(255, 255, 255, 0.05);
-            }
-            #match:selected {
-              background: rgba(255, 255, 255, 0.1);
-            }
-
-            #entry {
-              background: rgba(255, 255, 255, 0.05);
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              border-radius: 8px;
-              padding: 4px 8px;
-            }
-
             box#main {
-              background: rgba(0, 0, 0, 0.5);
-              box-shadow:
-                inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-                0 30px 30px 15px rgba(0, 0, 0, 0.5);
-              border-radius: 20px;
-              padding: 12px;
+              border-radius: 16px;
+              background-color: alpha(@bg-color, 0.6);
+              border: 0.5px solid alpha(@fg-color, 0.25);
+            }
+
+            entry#entry {
+              font-size: 1.25rem;
+              background: transparent;
+              box-shadow: none;
+              border: none;
+              border-radius: 16px;
+              padding: 16px 24px;
+              min-height: 40px;
+              caret-color: @primary-color;
+            }
+
+            list#main {
+              background-color: transparent;
+            }
+
+            #plugin {
+              background-color: transparent;
+              padding-bottom: 4px;
+            }
+
+            #match {
+              font-size: 1.1rem;
+              padding: 2px 4px;
+            }
+
+            #match:selected,
+            #match:hover {
+              background-color: @selected-bg-color;
+              color: @selected-fg-color;
+            }
+
+            #match:selected label#info,
+            #match:hover label#info {
+              color: @selected-fg-color;
+            }
+
+            #match:selected label#match-desc,
+            #match:hover label#match-desc {
+              color: alpha(@selected-fg-color, 0.9);
+            }
+
+            #match label#info {
+              color: transparent;
+              color: @fg-color;
+            }
+
+            label#match-desc {
+              font-size: 1rem;
+              color: @fg-color;
+            }
+
+            label#plugin {
+              font-size: 16px;
             }
           '';
       };
