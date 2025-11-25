@@ -83,6 +83,8 @@ in {
             .matches {
               background-color: rgba(0, 0, 0, 0);
               border-radius: 10px;
+              padding: 5px;
+              margin: 10px;
             }
 
             box.plugin:first-child {
@@ -111,11 +113,13 @@ in {
               color: @fg-color;
             }
 
-            .match {
+            #match {
               background: transparent;
+              padding: 5px;
+              margin: 10px;
             }
 
-            .match:selected {
+            #match:selected {
               border-left: 4px solid @accent;
               background: transparent;
               animation: fade 0.1s linear;
