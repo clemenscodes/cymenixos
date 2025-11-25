@@ -48,6 +48,39 @@ in {
           plugins = [
             "${pkgs.anyrun}/lib/libapplications.so"
           ];
+          extraLines = {
+            "keybinds.ron" = {
+              text = ''
+                keybinds: [
+                  Keybind(
+                    key: "Return",
+                    action: Select,
+                  ),
+                  Keybind(
+                    key: "Up",
+                    action: Up,
+                  ),
+                  Keybind(
+                    key: "Down",
+                    action: Down,
+                  ),
+                  Keybind(
+                    key: "ISO_Left_Tab",
+                    action: Up,
+                    shift: true,
+                  ),
+                  Keybind(
+                    key: "Tab",
+                    action: Down,
+                  ),
+                  Keybind(
+                    key: "Escape",
+                    action: Close,
+                  ),
+                ],
+              '';
+            };
+          };
         };
         extraCss =
           /*
@@ -132,39 +165,6 @@ in {
               }
             }
           '';
-        extraLines = {
-          "keybinds.ron" = {
-            text = ''
-              keybinds: [
-                Keybind(
-                  key: "Return",
-                  action: Select,
-                ),
-                Keybind(
-                  key: "Up",
-                  action: Up,
-                ),
-                Keybind(
-                  key: "Down",
-                  action: Down,
-                ),
-                Keybind(
-                  key: "ISO_Left_Tab",
-                  action: Up,
-                  shift: true,
-                ),
-                Keybind(
-                  key: "Tab",
-                  action: Down,
-                ),
-                Keybind(
-                  key: "Escape",
-                  action: Close,
-                ),
-              ],
-            '';
-          };
-        };
       };
     };
   };
