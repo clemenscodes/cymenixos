@@ -22,6 +22,7 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.anyrun.enable) {
+    imports = [inputs.anyrun.homeManagerModules.anyrun];
     home = {
       packages = [pkgs.anyrun];
     };

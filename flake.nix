@@ -65,6 +65,14 @@
         };
       };
     };
+    anyrun = {
+      url = "github:anyrun-org/anyrun";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     cymenixvim = {
       url = "github:clemenscodes/cymenixvim";
     };
