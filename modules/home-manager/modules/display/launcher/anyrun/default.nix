@@ -33,6 +33,19 @@ in {
       anyrun = {
         enable = true;
         package = anyrun.default;
+        extraConfigFiles = {
+          "applications.ron" = {
+            text = ''
+              Config(
+                desktop_actions: true,
+                terminal: Some(Terminal(
+                  command: "kitty",
+                  args: "{}",
+                )),
+              )
+            '';
+          };
+        };
         config = {
           layer = "overlay";
           x = {
