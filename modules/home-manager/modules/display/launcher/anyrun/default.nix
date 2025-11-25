@@ -109,8 +109,8 @@ in {
 
             box.main {
               border-radius: 16px;
-              background-color: color-mix(in srgb, var(--bg-color) 80%, transparent);
-              border: 0.5px solid color-mix(in srgb, var(--fg-color) 25%, transparent);
+              background-color: var(--bg-color);
+              border: 0.5px solid var(--fg-color);
               padding: 12px;
             }
 
@@ -154,7 +154,7 @@ in {
 
             .match:selected label.match.description,
             .match:hover label.match.description {
-              color: color-mix(in srgb, var(--selected-fg-color) 90%, transparent);
+              color: var(--selected-fg-color);
             }
 
             label.plugin.info {
