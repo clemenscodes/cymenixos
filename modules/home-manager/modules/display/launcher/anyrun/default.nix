@@ -83,47 +83,89 @@ in {
           css
           */
           ''
-            * {
-              all: unset;
-              font-size: 1.2rem;
+            @define-color accent #5599d2;
+            @define-color bg-color #161616;
+            @define-color fg-color #eeeeee;
+            @define-color desc-color #cccccc;
+
+            window {
+              background: transparent;
             }
-            #window,
-            #match,
-            #entry,
-            #plugin,
-            #main {
+
+            box.main {
+              border-radius: 10px;
+              border: 2px solid @accent;
+              background-color: @bg-color;
+              box-shadow: 0 0 5px black;
             }
-            #match.activatable {
-              border-radius: 8px;
-              margin: 4px 0;
-              padding: 4px;
+
+            text {
+              min-height: 30px;
+              border-radius: 5px;
+              color: @fg-color;
             }
-            #match.activatable:first-child {
-              margin-top: 12px;
+
+            #matches {
+              background-color: rgba(0, 0, 0, 0);
+              border-radius: 10px;
+              padding: 5px;
+              margin: 5px;
             }
-            #match.activatable:last-child {
-              margin-bottom: 0;
+
+            box.plugin:first-child {
+              margin-top: 5px;
             }
-            #match:hover {
-              background: rgba(255, 255, 255, 0.05);
+
+            box.plugin.info {
+              min-width: 200px;
             }
-            #match:selected {
-              background: rgba(255, 255, 255, 0.1);
+
+            list.plugin {
+              background-color: rgba(0, 0, 0, 0);
+            }
+
+            label.match {
+              color: @fg-color;
+            }
+
+            label.match.description {
+              font-size: 10px;
+              color: @desc-color;
+            }
+
+            label.plugin.info {
+              font-size: 14px;
+              color: @fg-color;
+            }
+
+            #match {
+              background: transparent;
+              padding: 5px;
+              margin: 5px;
             }
             #entry {
-              background: rgba(255, 255, 255, 0.05);
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              border-radius: 8px;
-              padding: 4px 8px;
+              background: transparent;
+              padding: 5px;
+              margin: 5px;
             }
-            box#main {
-              background: rgba(0, 0, 0, 0.5);
-              box-shadow:
-                inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-                0 30px 30px 15px rgba(0, 0, 0, 0.5);
-              border-radius: 20px;
-              padding: 12px;
+            #match:selected {
+              border-left: 4px solid @accent;
+              background: transparent;
+              animation: fade 0.1s linear;
+              padding: 5px;
+              margin: 5px;
             }
+
+            @keyframes fade {
+              0% {
+                opacity: 0;
+              }
+
+              100% {
+                opacity: 1;
+              }
+            }
+
           '';
       };
     };
