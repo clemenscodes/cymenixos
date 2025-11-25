@@ -88,78 +88,91 @@ in {
           css
           */
           ''
-            @define-color accent #5599d2;
-            @define-color bg-color #161616;
-            @define-color fg-color #eeeeee;
-            @define-color desc-color #cccccc;
+            :root {
+              --bg-color: #313244;
+              --fg-color: #cdd6f4;
+              --primary-color: #89b4fa;
+              --secondary-color: #cba6f7;
+              --border-color: var(--primary-color);
+              --selected-bg-color: var(--primary-color);
+              --selected-fg-color: var(--bg-color);
+            }
+
+            * {
+              all: unset;
+              font-family: "Iosevka Nerd Font", monospace;
+            }
 
             window {
               background: transparent;
             }
 
             box.main {
-              padding: 5px;
-              margin: 10px;
-              border-radius: 10px;
-              border: 2px solid @accent;
-              background-color: @bg-color;
-              box-shadow: 0 0 5px black;
+              border-radius: 16px;
+              background-color: color-mix(in srgb, var(--bg-color) 80%, transparent);
+              border: 0.5px solid color-mix(in srgb, var(--fg-color) 25%, transparent);
+              padding: 12px;
             }
 
-
             text {
-              min-height: 30px;
-              padding: 5px;
-              border-radius: 5px;
-              color: @fg-color;
+              font-size: 1.3rem;
+              background: transparent;
+              border: 1px solid var(--border-color);
+              border-radius: 16px;
+              margin-bottom: 12px;
+              padding: 5px 10px;
+              min-height: 44px;
+              caret-color: var(--primary-color);
             }
 
             .matches {
-              background-color: rgba(0, 0, 0, 0);
-              border-radius: 10px;
-            }
-
-            box.plugin:first-child {
-              margin-top: 5px;
-            }
-
-            box.plugin.info {
-              min-width: 200px;
-            }
-
-            list.plugin {
-              background-color: rgba(0, 0, 0, 0);
-            }
-
-            label.match {
-              color: @fg-color;
-            }
-
-            label.match.description {
-              font-size: 10px;
-              color: @desc-color;
-            }
-
-            label.plugin.info {
-              font-size: 14px;
-              color: @fg-color;
+              background-color: transparent;
             }
 
             .match {
-              background: transparent;
+              font-size: 1.1rem;
+              padding: 4px 10px;
+              border-radius: 6px;
             }
 
-            .match:selected {
-              border-left: 4px solid @accent;
-              background: transparent;
-              animation: fade 0.1s linear;
+            .match * {
+              margin: 0;
+              padding: 0;
+              line-height: 1;
+            }
+
+            .match:selected,
+            .match:hover {
+              background-color: var(--selected-bg-color);
+              color: var(--selected-fg-color);
+            }
+
+            .match:selected label.plugin.info,
+            .match:hover label.plugin.info {
+              color: var(--selected-fg-color);
+            }
+
+            .match:selected label.match.description,
+            .match:hover label.match.description {
+              color: color-mix(in srgb, var(--selected-fg-color) 90%, transparent);
+            }
+
+            label.plugin.info {
+              color: var(--fg-color);
+              font-size: 1rem;
+              min-width: 160px;
+              text-align: left;
+            }
+
+            label.match.description {
+              font-size: 0rem;
+              color: var(--fg-color);
             }
 
             @keyframes fade {
               0% {
                 opacity: 0;
               }
-
               100% {
                 opacity: 1;
               }
