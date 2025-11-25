@@ -23,12 +23,12 @@ in {
     system = {
       stateVersion = lib.mkDefault (lib.versions.majorMinor lib.version);
     };
-    disabledModules = ["${modulesPath}/programs/anyrun.nix"];
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
       extraSpecialArgs = {inherit inputs pkgs system;};
       backupFileExtension = "home-manager-backup";
+      disabledModules = ["${modulesPath}/programs/anyrun.nix"];
       users = {
         ${cfg.users.user} = {
           imports = [(import ./modules {inherit inputs pkgs lib;})];
