@@ -30,7 +30,6 @@
 in {
   imports = [
     inputs.impermanence.homeManagerModules.impermanence
-    inputs.anyrun.homeManagerModules.anyrun
     (import ./browser {inherit inputs pkgs lib;})
     (import ./development {inherit inputs pkgs lib;})
     (import ./display {inherit inputs pkgs lib;})

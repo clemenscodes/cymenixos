@@ -11,6 +11,7 @@
 }: let
   cfg = config.modules.display.launcher;
 in {
+  imports = [inputs.anyrun.homeManagerModules.anyrun];
   disabledModules = ["${modulesPath}/programs/anyrun.nix"];
   options = {
     modules = {
