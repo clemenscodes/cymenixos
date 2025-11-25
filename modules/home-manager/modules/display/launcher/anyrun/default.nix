@@ -88,82 +88,81 @@ in {
           css
           */
           ''
-            @define-color bg-color #313244;
-            @define-color fg-color #cdd6f4;
-            @define-color primary-color #89b4fa;
-            @define-color secondary-color #cba6f7;
-            @define-color border-color @primary-color;
-            @define-color selected-bg-color @primary-color;
-            @define-color selected-fg-color @bg-color;
+            @define-color accent #5599d2;
+            @define-color bg-color #161616;
+            @define-color fg-color #eeeeee;
+            @define-color desc-color #cccccc;
 
-            * {
-              all: unset;
-              font-family: JetBrainsMono Nerd Font;
-            }
-
-            #window {
+            window {
               background: transparent;
             }
 
-            box#main {
-              border-radius: 16px;
-              background-color: alpha(@bg-color, 0.6);
-              border: 0.5px solid alpha(@fg-color, 0.25);
+            box.main {
+              padding: 5px;
+              margin: 10px;
+              border-radius: 10px;
+              border: 2px solid @accent;
+              background-color: @bg-color;
+              box-shadow: 0 0 5px black;
             }
 
-            entry#entry {
-              font-size: 1.25rem;
+
+            text {
+              min-height: 30px;
+              padding: 5px;
+              border-radius: 5px;
+              color: @fg-color;
+            }
+
+            .matches {
+              background-color: rgba(0, 0, 0, 0);
+              border-radius: 10px;
+            }
+
+            box.plugin:first-child {
+              margin-top: 5px;
+            }
+
+            box.plugin.info {
+              min-width: 200px;
+            }
+
+            list.plugin {
+              background-color: rgba(0, 0, 0, 0);
+            }
+
+            label.match {
+              color: @fg-color;
+            }
+
+            label.match.description {
+              font-size: 10px;
+              color: @desc-color;
+            }
+
+            label.plugin.info {
+              font-size: 14px;
+              color: @fg-color;
+            }
+
+            .match {
               background: transparent;
-              box-shadow: none;
-              border: none;
-              border-radius: 16px;
-              padding: 16px 24px;
-              min-height: 40px;
-              caret-color: @primary-color;
             }
 
-            list#main {
-              background-color: transparent;
+            .match:selected {
+              border-left: 4px solid @accent;
+              background: transparent;
+              animation: fade 0.1s linear;
             }
 
-            #plugin {
-              background-color: transparent;
-              padding-bottom: 4px;
-            }
+            @keyframes fade {
+              0% {
+                opacity: 0;
+              }
 
-            #match {
-              font-size: 1.1rem;
-              padding: 2px 4px;
-            }
-
-            #match:selected,
-            #match:hover {
-              background-color: @selected-bg-color;
-              color: @selected-fg-color;
-            }
-
-            #match:selected label#info,
-            #match:hover label#info {
-              color: @selected-fg-color;
-            }
-
-            #match:selected label#match-desc,
-            #match:hover label#match-desc {
-              color: alpha(@selected-fg-color, 0.9);
-            }
-
-            #match label#info {
-              color: transparent;
-              color: @fg-color;
-            }
-
-            label#match-desc {
-              font-size: 1rem;
-              color: @fg-color;
-            }
-
-            label#plugin {
-              font-size: 16px;
+              100% {
+                opacity: 1;
+              }
             }
           '';
       };
