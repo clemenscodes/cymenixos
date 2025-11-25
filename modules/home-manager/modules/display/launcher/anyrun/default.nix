@@ -64,7 +64,7 @@ in {
             }
 
             box.main {
-              padding: 5px;
+              padding: 10px;
               margin: 10px;
               border-radius: 10px;
               border: 2px solid @accent;
@@ -75,7 +75,7 @@ in {
 
             text {
               min-height: 30px;
-              padding: 5px;
+              padding: 10px;
               border-radius: 5px;
               color: @fg-color;
             }
@@ -83,8 +83,6 @@ in {
             .matches {
               background-color: rgba(0, 0, 0, 0);
               border-radius: 10px;
-              padding: 5px;
-              margin: 10px;
             }
 
             box.plugin:first-child {
@@ -97,6 +95,7 @@ in {
 
             list.plugin {
               background-color: rgba(0, 0, 0, 0);
+              padding: 10px;
             }
 
             label.match {
@@ -115,7 +114,6 @@ in {
 
             #match {
               background: transparent;
-              padding: 5px;
               margin: 10px;
             }
 
@@ -135,6 +133,41 @@ in {
               }
             }
           '';
+        extraConfigFiles = {
+          "keybinds.ron" = {
+            text = ''
+              Config(
+                keybinds: [
+                  Keybind(
+                    key: "Return",
+                    action: Select,
+                  ),
+                  Keybind(
+                    key: "Up",
+                    action: Up,
+                  ),
+                  Keybind(
+                    key: "Down",
+                    action: Down,
+                  ),
+                  Keybind(
+                    key: "ISO_Left_Tab",
+                    action: Up,
+                    shift: true,
+                  ),
+                  Keybind(
+                    key: "Tab",
+                    action: Down,
+                  ),
+                  Keybind(
+                    key: "Escape",
+                    action: Close,
+                  ),
+                ],
+              )
+            '';
+          };
+        };
       };
     };
   };
