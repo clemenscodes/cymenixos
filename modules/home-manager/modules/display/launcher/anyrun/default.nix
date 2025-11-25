@@ -143,7 +143,11 @@ in {
               padding: 5px;
               margin: 5px;
             }
-
+            #entry {
+              background: transparent;
+              padding: 5px;
+              margin: 5px;
+            }
             #match:selected {
               border-left: 4px solid @accent;
               background: transparent;
