@@ -120,7 +120,7 @@ in {
               border: 1px solid var(--border-color);
               border-radius: 16px;
               margin-bottom: 12px;
-              padding: 5px 10px;
+              padding: 5px;
               min-height: 44px;
               caret-color: var(--primary-color);
             }
@@ -131,7 +131,7 @@ in {
 
             .match {
               font-size: 1.1rem;
-              padding: 4px 10px;
+              padding: 5px;
               border-radius: 6px;
             }
 
