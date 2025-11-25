@@ -93,8 +93,6 @@ in {
             }
 
             box.main {
-              padding: 2px;
-              margin: 2px;
               border-radius: 10px;
               border: 2px solid @accent;
               background-color: @bg-color;
@@ -103,16 +101,15 @@ in {
 
             text {
               min-height: 30px;
-              padding: 10px;
               border-radius: 5px;
               color: @fg-color;
             }
 
-            .matches {
+            #matches {
               background-color: rgba(0, 0, 0, 0);
               border-radius: 10px;
-              padding: 10px;
-              margin: 10px;
+              padding: 5px;
+              margin: 5px;
             }
 
             box.plugin:first-child {
@@ -143,12 +140,16 @@ in {
 
             #match {
               background: transparent;
+              padding: 5px;
+              margin: 5px;
             }
 
             #match:selected {
               border-left: 4px solid @accent;
               background: transparent;
               animation: fade 0.1s linear;
+              padding: 5px;
+              margin: 5px;
             }
 
             @keyframes fade {
