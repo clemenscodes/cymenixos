@@ -28,7 +28,6 @@ in {
       useUserPackages = true;
       extraSpecialArgs = {inherit inputs pkgs system;};
       backupFileExtension = "home-manager-backup";
-      disabledModules = ["${modulesPath}/programs/anyrun.nix"];
       users = {
         ${cfg.users.user} = {
           imports = [(import ./modules {inherit inputs pkgs lib;})];

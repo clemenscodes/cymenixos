@@ -6,10 +6,12 @@
 }: {
   osConfig,
   config,
+  modulesPath,
   ...
 }: let
   cfg = config.modules.display.launcher;
 in {
+  disabledModules = ["${modulesPath}/programs/anyrun.nix"];
   options = {
     modules = {
       display = {
