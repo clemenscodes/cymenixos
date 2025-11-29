@@ -104,10 +104,6 @@ in {
               "terminal.integrated.fontLigatures.enabled" = true;
               "terminal.integrated.enableMultiLinePasteWarning" = "never";
               "terminal.integrated.profiles.linux" = {
-                bash = {
-                  path = "bash";
-                  icon = "terminal-bash";
-                };
                 zsh = {
                   path = "/bin/zsh";
                   args = ["-l" "-i"];
