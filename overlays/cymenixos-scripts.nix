@@ -308,6 +308,7 @@ final: prev: {
     };
     copyro = prev.writeShellApplication {
       name = "copyro";
+      excludeShellChecks = ["SC2045"];
       text = ''
         SOURCE_DIR=$1
         DEST_DIR=$2
@@ -325,7 +326,7 @@ final: prev: {
             local item
             local dest_item
 
-            for base in "$(ls -A $src)"; do
+            for base in $(ls -A "$src"); do
               item="$src/$base"
               dest_item="$dest/$base"
 
