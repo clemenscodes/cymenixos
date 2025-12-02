@@ -27,5 +27,12 @@ in {
         enableOnBoot = lib.mkDefault false;
       };
     };
+    users = {
+      users = {
+        ${config.modules.users.name} = {
+          extraGroups = ["docker"];
+        };
+      };
+    };
   };
 }
