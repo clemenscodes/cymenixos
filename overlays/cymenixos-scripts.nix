@@ -325,7 +325,7 @@ final: prev: {
             local item
             local dest_item
 
-            for base in $(ls -A "$src"); do
+            for base in "$(ls -A $src)"; do
               item="$src/$base"
               dest_item="$dest/$base"
 
