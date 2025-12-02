@@ -29,7 +29,6 @@ in {
       localBinInPath = true;
       homeBinInPath = true;
       systemPackages = [
-        pkgs.neovim
         pkgs.cymenixos-scripts
       ];
     };

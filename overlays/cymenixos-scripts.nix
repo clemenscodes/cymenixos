@@ -312,33 +312,29 @@ final: prev: {
         SOURCE_DIR=$1
         DEST_DIR=$2
 
-        # Check if the destination directory exists and if writable
         if [ ! -d "$DEST_DIR" ]; then
           echo "Destination does not exist. Starting copy process."
 
           copy_directory() {
-            local src
-            local dest
+            local src="$1"
+            local dest="$2"
 
-            src="$1"
-            dest="$2"
+            mkdir -p "$dest" || exit 0
 
-            if ! mkdir -p "$dest"; then
-              echo "Permission denied while creating $dest. Exiting successfully."
-              exit 0
-            fi
+            local base
+            local item
+            local dest_item
 
-            find "$src" -mindepth 1 -maxdepth 1 | while IFS= read -r item; do
-              local base
-              base=$(basename "$item")
-              local dest_item="$dest/$base"
+            for base in $(ls -A "$src"); do
+              item="$src/$base"
+              dest_item="$dest/$base"
+
+              echo "Copying $item -> $dest_item"
 
               if [ -d "$item" ]; then
                 copy_directory "$item" "$dest_item"
               elif [ -f "$item" ]; then
-                if ! cp "$item" "$dest_item"; then
-                  echo "Permission denied while copying $item. Skipping."
-                fi
+                cat "$item" > "$dest_item"
               fi
             done
           }
