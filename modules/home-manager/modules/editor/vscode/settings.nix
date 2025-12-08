@@ -82,6 +82,7 @@ in {
               "git.ignoreMissingGitWarning" = true;
               "git.openRepositoryInParentFolders" = "never";
               "javascript.updateImportsOnFileMove.enabled" = "always";
+              "jestrunner.codeLensSelector" = "**/*.{test,spec,it-spec,e2e-spec,e2e,it}.{js,jsx,ts,tsx}";
               "nixEnvSelector.suggestion" = false;
               "nixEnvSelector.useFlakes" = true;
               "redhat.telemetry.enabled" = false;
