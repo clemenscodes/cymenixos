@@ -27,6 +27,7 @@
   useEmail = config.modules.organization.email.enable;
   useThunderbird = config.modules.organization.email.thunderbird.enable;
   useLf = config.modules.explorer.lf.enable;
+  useGnomeKeyring = osConfig.modules.security.gnome-keyring.enable;
   useYazi = config.modules.explorer.yazi.enable;
   useNvim = config.modules.editor.nvim.enable;
   useFirefox = config.modules.browser.firefox.enable;
@@ -95,7 +96,6 @@ in {
               repeat_delay = 300;
               touchpad = {
                 natural_scroll = "no";
-
               };
               sensitivity = 0;
               accel_profile = "flat";
@@ -375,6 +375,12 @@ in {
                 exec-once = ${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify
               ''
               else "";
+            keyring =
+              if useGnomeKeyring
+              then ''
+                exec-once = unlock-keyring
+              ''
+              else "";
           in ''
             monitor = , highrr, auto, 1
 
@@ -415,6 +421,7 @@ in {
             ${hypridle}
             ${hyprsunset}
             ${yubikey}
+            ${keyring}
           '';
         };
       };
