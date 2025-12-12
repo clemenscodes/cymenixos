@@ -50,12 +50,12 @@ in {
   config = lib.mkIf (cfg.enable) {
     environment = {
       systemPackages = [pkgs.winetricks];
-    };
-    persistence = {
-      ${persistPath} = {
-        users = {
-          ${name} = {
-            directories = ["Games"];
+      persistence = {
+        ${persistPath} = {
+          users = {
+            ${name} = {
+              directories = ["Games"];
+            };
           };
         };
       };
