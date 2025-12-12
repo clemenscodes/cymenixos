@@ -19,6 +19,7 @@ in {
       hardware = {
         openrgb = {
           inherit enable;
+          package = pkgs.openrgb-with-all-plugins;
         };
       };
     };
