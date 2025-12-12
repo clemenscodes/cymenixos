@@ -26,6 +26,7 @@
     (import ./networking {inherit inputs pkgs lib;})
     (import ./nyx {inherit inputs pkgs lib;})
     (import ./performance {inherit inputs pkgs lib;})
+    (import ./rgb {inherit inputs pkgs lib;})
     (import ./security {inherit inputs pkgs lib;})
     (import ./shell {inherit inputs pkgs lib cymenixos;})
     (import ./themes {inherit inputs pkgs lib;})
