@@ -24,6 +24,8 @@
       (inputs.lutris-overlay.overlays.lutris)
     ];
   };
+  inherit (config.modules.boot.impermanence) persistPath;
+  inherit (config.modules.users) name;
 in {
   imports = [
     (import ./emulation {inherit inputs pkgs lib;})
@@ -48,6 +50,15 @@ in {
   config = lib.mkIf (cfg.enable) {
     environment = {
       systemPackages = [pkgs.winetricks];
+    };
+    persistence = {
+      ${persistPath} = {
+        users = {
+          ${name} = {
+            directories = ["Games"];
+          };
+        };
+      };
     };
   };
 }
