@@ -9019,11 +9019,11 @@
         "wine-overlays": "wine-overlays"
       },
       "locked": {
-        "lastModified": 1765535924,
-        "narHash": "sha256-VhJAqeIH/envzxAaj8Tu/MxzX4OVLuehvbUkrZa6YqA=",
+        "lastModified": 1765538008,
+        "narHash": "sha256-whRAoiCdF/eTIHga0DyWGsbRflRSu1UtOETaFE350rY=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "a1fe3150f1ead9cacb0da13470b68241b1bc91f4",
+        "rev": "734c7afc128b32c81b7cee7a82053a4aa4f73910",
         "type": "github"
       },
       "original": {
