@@ -7465,11 +7465,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1765614166,
-        "narHash": "sha256-bsXSzb+R/+QK8FUVYkiigUgxWHClYcHBrwGjyKKy+Kg=",
+        "lastModified": 1765618403,
+        "narHash": "sha256-qW/jTAo4j1EnCe0avrDfL+kKzenjOs7YWphV1oz/wu0=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "3f0d134e1913307ab947081b937d65e984ced920",
+        "rev": "1003d297304079e34fd9d2ef3b932fe111fcabd4",
         "type": "github"
       },
       "original": {
@@ -9019,11 +9019,11 @@
         "wine-overlays": "wine-overlays"
       },
       "locked": {
-        "lastModified": 1765616025,
-        "narHash": "sha256-87Ps2YBa8sQ2CYbcbBysA9iA36XwpiSiI8Cc8vhm5vk=",
+        "lastModified": 1765621421,
+        "narHash": "sha256-/mSo6ltvMnQTm7vT8IkkmLu6Huy0nxCpVDTOGb7vV38=",
         "owner": "clemenscodes",
         "repo": "W3ChampionsOnLinux",
-        "rev": "b8feb15ed8fd4f1f742f814fd166c07903f963a4",
+        "rev": "ee3260af407c11c46b4bdb25600ff006e928993c",
         "type": "github"
       },
       "original": {
