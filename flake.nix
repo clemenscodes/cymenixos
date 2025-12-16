@@ -127,7 +127,7 @@
       url = "github:clemenscodes/lutris-overlay";
     };
     nix-vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions";
+      url = "github:dseum/nix-vscode-extensions";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
