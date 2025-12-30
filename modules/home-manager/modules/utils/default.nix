@@ -15,6 +15,7 @@
     (import ./nix-prefetch-git {inherit inputs pkgs lib;})
     (import ./ripgrep {inherit inputs pkgs lib;})
     (import ./tldr {inherit inputs pkgs lib;})
+    (import ./unrar {inherit inputs pkgs lib;})
     (import ./unzip {inherit inputs pkgs lib;})
     (import ./wget {inherit inputs pkgs lib;})
     (import ./zip {inherit inputs pkgs lib;})
