@@ -22,9 +22,8 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.binaryninja.enable) {
-    programs.binary-ninja = {
-      enable = true;
-      package = inputs.binaryninja.packages.${system}.binary-ninja-free-wayland;
+    home = {
+      packages = [inputs.binaryninja.packages.${system}.binary-ninja-free-wayland];
     };
   };
 }
