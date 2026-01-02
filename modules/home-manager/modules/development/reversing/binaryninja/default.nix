@@ -1,6 +1,5 @@
 {
   inputs,
-  pkgs,
   lib,
   ...
 }: {
@@ -9,6 +8,12 @@
   ...
 }: let
   cfg = config.modules.development.reversing;
+  pkgs = import inputs.nixpkgs {
+    inherit system;
+    config = {
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["binaryninja-free"];
+    };
+  };
 in {
   options = {
     modules = {
@@ -23,7 +28,9 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.binaryninja.enable) {
     home = {
-      packages = [inputs.binaryninja.packages.${system}.binary-ninja-free-wayland];
+      packages = [
+        pkgs.binaryninja-free
+      ];
     };
   };
 }
