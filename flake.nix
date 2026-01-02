@@ -6,6 +6,14 @@
     impermanence = {
       url = "github:nix-community/impermanence";
     };
+    binaryninja = {
+      url = "github:jchv/nix-binary-ninja";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     disko = {
       url = "github:nix-community/disko";
       inputs = {
