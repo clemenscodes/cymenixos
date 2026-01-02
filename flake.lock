@@ -237,15 +237,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1763127756,
-        "narHash": "sha256-rGQSZM+KxrUCObF607C/RnPGef6i+Q6mYB5PtBBdpm4=",
-        "owner": "jchv",
+        "lastModified": 1767378239,
+        "narHash": "sha256-APreJNfEjSiwBqwYdLhTQm467c6sgfLVLNoA8bDjF90=",
+        "owner": "clemenscodes",
         "repo": "nix-binary-ninja",
-        "rev": "17a8d181e2a7d3982f284ede9582fb193b49cc9f",
+        "rev": "df7f3dda8b94e70d7a473ad404b1e5b2dd69ef57",
         "type": "github"
       },
       "original": {
-        "owner": "jchv",
+        "owner": "clemenscodes",
         "repo": "nix-binary-ninja",
         "type": "github"
       }
