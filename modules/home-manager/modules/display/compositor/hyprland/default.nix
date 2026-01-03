@@ -288,31 +288,30 @@ in {
             firefox =
               if useFirefox
               then ''
-                windowrule = center 1,class:(firefox)
-                windowrule = size 80% 80%,class:(firefox)
-                windowrule = unset,title:^(.*)(Firefox)$
+                windowrule = center 1, size (monitor_w*0.8) (monitor_h*0.8), match:class (firefox)
+                windowrule = unset on, match:title ^(.*)(Firefox)$
               ''
               else "";
             davinci =
               if useDavinci
               then ''
-                windowrule = unset,class:(resolve),title:(resolve)
-                windowrule = tile,title:^(DaVinci Resolve)(.*)$
+                windowrule = unset on, match:class (resolve), match:title (resolve)
+                windowrule = tile on, match:title ^(DaVinci Resolve)(.*)$
               ''
               else "";
             blueman =
               if useBlueman
               then ''
                 exec-once = blueman-applet
-                windowrule = float,class:^(blueman-manager)$
+                windowrule = float on, match:class ^(blueman-manager)$
               ''
               else "";
             nm =
               if useNm
               then ''
                 exec-once = nm-applet --indicator
-                windowrule = float,class:^(nm-applet)$
-                windowrule = float,class:^(nm-connection-editor)$
+                windowrule = float on, match:class ^(nm-applet)$
+                windowrule = float on, match:class ^(nm-connection-editor)$
               ''
               else "";
             torrent =
@@ -336,13 +335,13 @@ in {
             kitty =
               if useKitty
               then ''
-                windowrule = opacity 0.90,class:kitty
+                windowrule = opacity 0.90, match:class kitty
               ''
               else "";
             rofi =
               if useRofi
               then ''
-                windowrule = float,class:Rofi
+                windowrule = float on, match:class Rofi
               ''
               else "";
             swayidle =
@@ -398,7 +397,7 @@ in {
             exec-once = ${pkgs.swww}/bin/swww-daemon
             exec-once = wallpaper
 
-            windowrule = float,class:^(org.kde.polkit-kde-authentication-agent-1)$
+            windowrule = float on, match:class ^(org.kde.polkit-kde-authentication-agent-1)$
 
             bind = $mod SHIFT, Q,submap,passthru
             submap = passthru
