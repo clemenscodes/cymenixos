@@ -289,13 +289,11 @@ in {
               if useFirefox
               then ''
                 windowrule = center 1, size (monitor_w*0.8) (monitor_h*0.8), match:class (firefox)
-                windowrule = unset on, match:title ^(.*)(Firefox)$
               ''
               else "";
             davinci =
               if useDavinci
               then ''
-                windowrule = unset on, match:class (resolve), match:title (resolve)
                 windowrule = tile on, match:title ^(DaVinci Resolve)(.*)$
               ''
               else "";
