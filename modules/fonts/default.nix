@@ -4,7 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  font = "VictorMono";
+  font = "Lilex";
   monospace = "${font} Nerd Font Mono";
   sansSerif = "${font} Nerd Font";
   serif = "${font} Nerd Font";
@@ -41,6 +41,7 @@ in {
       packages = [
         pkgs.nerd-fonts.iosevka
         pkgs.nerd-fonts.victor-mono
+        pkgs.nerd-fonts.lilex
       ];
     };
   };
