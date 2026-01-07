@@ -74,7 +74,7 @@
       };
     };
     cymenixvim = {
-      url = "github:clemenscodes/cymenixvim";
+      url = "github:clemenscodes/cymenixvim/fix";
     };
     codevim = {
       url = "github:clemenscodes/codevim";

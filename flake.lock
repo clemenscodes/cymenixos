@@ -1199,15 +1199,16 @@
         "telescope-manix": "telescope-manix"
       },
       "locked": {
-        "lastModified": 1766333928,
-        "narHash": "sha256-JmNCPvLggMYJElzKrdcPCmjl/uroaILG6NGJ/fylqf0=",
+        "lastModified": 1767486336,
+        "narHash": "sha256-0efMNMTz7tqU58mzID+WJWMglT1FC5xxBnuiwu8IrDY=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "ce0539cd0f3e80281a731db4bc47c7d291540820",
+        "rev": "3916244abdd4d92a68537df81e24f0d74737087a",
         "type": "github"
       },
       "original": {
         "owner": "clemenscodes",
+        "ref": "fix",
         "repo": "cymenixvim",
         "type": "github"
       }
@@ -7110,11 +7111,11 @@
     },
     "nixpkgs_37": {
       "locked": {
-        "lastModified": 1767116409,
-        "narHash": "sha256-5vKw92l1GyTnjoLzEagJy5V5mDFck72LiQWZSOnSicw=",
+        "lastModified": 1767379071,
+        "narHash": "sha256-EgE0pxsrW9jp9YFMkHL9JMXxcqi/OoumPJYwf+Okucw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "cad22e7d996aea55ecab064e84834289143e44a0",
+        "rev": "fb7944c166a3b630f177938e478f0378e64ce108",
         "type": "github"
       },
       "original": {
@@ -7416,11 +7417,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1767435810,
-        "narHash": "sha256-2r5pCxuMYPFi5CToA1Egsi5/cHsxc5O1c72OkHqc78w=",
+        "lastModified": 1767476746,
+        "narHash": "sha256-8MoEw+0uOURkd2xbUyWrfrEjh+/hSZyCFGjWYPN+Tdw=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "fed43ae44806c3a2fe0f49fb030b07a3c820859d",
+        "rev": "ed59c24d452493c9c0d3d297c1b6c0412d353b4c",
         "type": "github"
       },
       "original": {
