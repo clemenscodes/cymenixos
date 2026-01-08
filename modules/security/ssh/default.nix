@@ -28,6 +28,7 @@ in {
       "/etc/ssh" = {
         depends = [persistPath];
         neededForBoot = true;
+        inherit (config.modules.disk) device;
       };
     };
     environment = {
