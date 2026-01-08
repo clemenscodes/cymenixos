@@ -29,7 +29,6 @@
   }));
 in {
   imports = [
-    inputs.impermanence.homeManagerModules.impermanence
     (import ./browser {inherit inputs pkgs lib;})
     (import ./development {inherit inputs pkgs lib;})
     (import ./display {inherit inputs pkgs lib;})
@@ -65,8 +64,7 @@ in {
     };
     home = {
       persistence = lib.mkIf osConfig.modules.boot.enable {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
-          allowOther = true;
+        "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [
             ".local/src"
             ".local/bin"

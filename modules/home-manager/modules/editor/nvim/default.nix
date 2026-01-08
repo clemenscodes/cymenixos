@@ -25,7 +25,7 @@ in {
     home = {
       packages = [nvim];
       persistence = lib.mkIf osConfig.modules.boot.enable {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [
             ".local/state/nvim"
             ".local/share/nvim"

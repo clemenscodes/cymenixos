@@ -23,7 +23,7 @@ in {
     home = {
       packages = [pkgs.zotero];
       persistence = lib.mkIf (osConfig.modules.boot.enable) {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+       "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [
             ".cache/zotero"
             ".zotero"

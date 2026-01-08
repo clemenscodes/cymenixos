@@ -60,7 +60,7 @@ in {
   config = lib.mkIf (hasSecretsEnabled && cfg.enable && cfg.email.enable) {
     home = {
       persistence = lib.mkIf (osConfig.modules.boot.enable) {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [
             ".local/share/mail"
             (lib.mkIf cfg.email.thunderbird.enable ".thunderbird")

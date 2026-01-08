@@ -41,7 +41,7 @@ in {
   config = lib.mkIf (osCfg.enable && cfg.enable && cfg.xdg.enable) {
     home = {
       persistence = lib.mkIf osCfg.boot.enable {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [
             desktop
             documents

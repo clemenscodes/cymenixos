@@ -23,7 +23,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.pnpm.enable) {
     home = {
       persistence = lib.mkIf osConfig.modules.boot.enable {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+       "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [
             ".local/share/pnpm"
           ];

@@ -33,7 +33,7 @@ in {
     home = {
       packages = [pkgs.pince];
       persistence = lib.mkIf (osConfig.modules.boot.enable) {
-        "${osConfig.modules.boot.impermanence.persistPath}${config.home.homeDirectory}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [".config/PINCE"];
         };
       };
