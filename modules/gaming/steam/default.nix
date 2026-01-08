@@ -22,7 +22,7 @@ in {
         ${config.modules.users.user} = {
           home = {
             persistence = lib.mkIf (config.modules.boot.enable) {
-              "${persistPath}/home/${user}" = {
+              "${persistPath}" = {
                 directories = [
                   {
                     directory = ".local/share/Steam";
