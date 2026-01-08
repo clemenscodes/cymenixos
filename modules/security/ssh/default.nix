@@ -24,13 +24,6 @@ in {
         };
       };
     };
-    fileSystems = lib.mkIf config.modules.boot.enable {
-      "/etc/ssh" = {
-        depends = [persistPath];
-        neededForBoot = true;
-        device = "/dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume}";
-      };
-    };
     environment = {
       persistence = lib.mkIf config.modules.boot.enable {
         "${persistPath}" = {
@@ -75,7 +68,7 @@ in {
         hostKeys = [
           {
             comment = "${config.networking.hostName}.local";
-            path = "/etc/ssh/ssh_host_ed25519_key";
+            path = "/persist/etc/ssh/ssh_host_ed25519_key";
             rounds = 100;
             type = "ed25519";
           }
