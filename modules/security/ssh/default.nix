@@ -28,7 +28,7 @@ in {
       "/etc/ssh" = {
         depends = [persistPath];
         neededForBoot = true;
-        inherit (config.modules.disk) device;
+        device = "/dev/${config.modules.disk.vg}/${config.modules.disk.lvm_volume}";
       };
     };
     environment = {
