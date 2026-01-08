@@ -27,9 +27,7 @@ in {
     networking = {
       wireless = lib.mkIf config.modules.security.sops.enable {
         inherit (cfg.wireless) enable;
-        userControlled = {
-          enable = true;
-        };
+        userControlled = true;
       };
     };
   };
