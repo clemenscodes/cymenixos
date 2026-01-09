@@ -23,12 +23,7 @@ in {
           home = {
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
-                directories = [
-                  {
-                    directory = ".local/share/Steam";
-                    method = "symlink";
-                  }
-                ];
+                directories = [".local/share/Steam"];
               };
             };
           };
