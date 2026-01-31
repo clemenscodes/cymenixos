@@ -26,7 +26,7 @@ in {
       windowManager = {
         hyprland = {
           xwayland = {
-            enable = cfg.xwayland.enable;
+            enable = false;
           };
           extraConfig =
             /*
