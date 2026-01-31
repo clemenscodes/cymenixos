@@ -87,7 +87,6 @@ in {
           systemd = {
             enable = false;
           };
-          package = pkgs.hyprland.override {enableXWayland = false;};
           settings = {
             input = {
               kb_layout = osConfig.modules.locale.defaultLocale;
