@@ -27,7 +27,6 @@ in {
               editorconfig.editorconfig
               dbaeumer.vscode-eslint
               tamasfe.even-better-toml
-              eamodio.gitlens
               exiasr.hadolint
               tim-koehler.helm-intellisense
               firsttris.vscode-jest-runner
