@@ -19,9 +19,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.xwayland.enable) {
-    home = {
-      packages = [pkgs.xwaylandvideobridge];
-    };
     wayland = {
       windowManager = {
         hyprland = {
