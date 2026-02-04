@@ -39,17 +39,6 @@ in {
       packages = [pkgs.gitflow];
     };
     programs = {
-      difftastic = {
-        inherit (cfg.git) enable;
-        options = {
-          display = "inline";
-          background = "dark";
-          color = "always";
-        };
-        git = {
-          enable = true;
-        };
-      };
       git = {
         inherit (cfg.git) enable;
         package = pkgs.gitFull;
