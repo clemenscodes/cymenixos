@@ -69,7 +69,7 @@
       url = "github:anyrun-org/anyrun";
     };
     cymenixvim = {
-      url = "github:clemenscodes/cymenixvim/fix";
+      url = "github:clemenscodes/cymenixvim";
     };
     codevim = {
       url = "github:clemenscodes/codevim";
