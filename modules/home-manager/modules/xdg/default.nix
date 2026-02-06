@@ -90,6 +90,7 @@ in {
           '';
         };
       };
+      sessionVariables = {} // config.home.xdg.userDirs.extraConfig;
     };
     xdg = {
       inherit (cfg.xdg) enable;
