@@ -38,8 +38,6 @@
           "cuda_nvrtc"
           "cuda_nvtx"
           "cuda_profiler_api"
-          "cuda_sanitizer_api"
-          "libcublas"
           "libcufft"
           "libcurand"
           "libcusolver"
@@ -65,9 +63,10 @@ in {
       blacklistedKernelModules = ["nouveau"];
       kernelModules = [
         "nvidia"
-        "nvidia_modeset"
-        "nvidia_uvm"
-        "nvidia_drm"
+        "nvidiafb"
+        "nvidia-modeset"
+        "nvidia-uvm"
+        "nvidia-drm"
       ];
     };
     environment = {
