@@ -198,6 +198,15 @@ in {
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${user} = {
+          wayland = {
+            windowManager = {
+              hyprland = {
+                extraConfig = ''
+                  windowrule = fullscreen, match:class (looking-glass-client)
+                '';
+              };
+            };
+          };
           xdg = {
             desktopEntries = {
               looking-glass-client = {
