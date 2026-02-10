@@ -742,7 +742,7 @@ in {
                           type = "virtio";
                         };
                         source = {
-                          bridge = "virbr0";
+                          network = "default";
                         };
                       };
                       shmem = {
