@@ -19,12 +19,6 @@
       done;
     '';
   };
-  ovmf =
-    (pkgs.OVMF.override {
-      secureBoot = true;
-      tpmSupport = true;
-    })
-    .fd;
   qemu = pkgs.writeShellApplication {
     name = "qemu";
     text = ''
@@ -202,16 +196,6 @@ in {
                       noDisplay = false;
                       startupNotify = true;
                       terminal = false;
-                    };
-                  };
-                };
-                wayland = {
-                  windowManager = {
-                    hyprland = {
-                      extraConfig = ''
-                        windowrule = content game,class:(looking-glass-client)
-                        windowrule = fullscreen,class:(looking-glass-client)
-                      '';
                     };
                   };
                 };

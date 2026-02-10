@@ -38,6 +38,15 @@ in {
           swtpm = {
             inherit (cfg.virtualisation) enable;
           };
+          ovmf = {
+            enable = true;
+            packages = [
+              (pkgs.OVMF.override {
+                secureBoot = true;
+                tpmSupport = true;
+              }).fd
+            ];
+          };
         };
       };
       spiceUSBRedirection = {
