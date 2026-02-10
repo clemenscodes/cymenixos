@@ -68,7 +68,7 @@ in {
           pkgs.libxcursor
           pkgs.libxi
           pkgs.libxinerama
-          pkgs.libxScrnSaver
+          pkgs.libxscrnsaver
           pkgs.libpng
           pkgs.libpulseaudio
           pkgs.libvorbis
