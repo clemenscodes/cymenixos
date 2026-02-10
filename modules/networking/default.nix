@@ -37,6 +37,9 @@ in {
           ];
         };
       };
+      systemPackages = [
+        pkgs.net-tools
+      ];
     };
     networking = {
       hostName = config.modules.hostname.defaultHostname;

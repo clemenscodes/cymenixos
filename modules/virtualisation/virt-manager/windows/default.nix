@@ -258,18 +258,6 @@ in {
       firewall = {
         allowedTCPPorts = [5900];
       };
-      nat = {
-        inherit (config.modules.virtualisation.virt-manager) enable;
-        internalInterfaces = ["enp15s0"];
-        externalInterface = "virbr0";
-        forwardPorts = [
-          {
-            destination = "192.168.122.1:5900";
-            proto = "tcp";
-            sourcePort = 5900;
-          }
-        ];
-      };
     };
     virtualisation = {
       libvirtd = {
@@ -749,7 +737,7 @@ in {
                         }
                       ];
                       interface = {
-                        type = "bridge";
+                        type = "network";
                         model = {
                           type = "virtio";
                         };
