@@ -44,10 +44,13 @@
     runtimeInputs = [pkgs.mullvad];
     text = ''
       if [ "$1" = "win11" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
+        echo "start hook $1 $2 $3"
       fi
       if [ "$1" = "win11-install" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
+        echo "start hook $1 $2 $3"
       fi
       if [ "$1" = "win11-display" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
+        echo "start hook $1 $2 $3"
       fi
     '';
   };
@@ -56,10 +59,13 @@
     runtimeInputs = [pkgs.mullvad];
     text = ''
       if [ "$1" = "win11" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
+        echo "stop hook $1 $2 $3"
       fi
       if [ "$1" = "win11-install" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
+        echo "stop hook $1 $2 $3"
       fi
       if [ "$1" = "win11-display" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
+        echo "stop hook $1 $2 $3"
       fi
     '';
   };
