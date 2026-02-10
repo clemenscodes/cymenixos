@@ -22,5 +22,8 @@ in {
         inherit (cfg.virt-manager) enable;
       };
     };
+    environment = {
+      systemPackages = with pkgs; [tigervnc];
+    };
   };
 }
