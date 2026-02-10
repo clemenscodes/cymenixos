@@ -283,585 +283,584 @@ in {
         };
         connections = {
           "qemu:///system" = {
-            domains = [
+            domains = let
+              source_address = bus: slot: function: {
+                inherit bus slot function;
+                domain = 0;
+              };
+            in [
               {
-                definition = let
-                  source_address = bus: slot: function: {
-                    inherit bus slot function;
-                    domain = 0;
+                definition = inputs.nixvirt.lib.domain.writeXML {
+                  "xmlns:qemu" = "http://libvirt.org/schemas/domain/qemu/1.0";
+                  "qemu:capabilities" = [
+                    {
+                      "qemu:del" = {
+                        capability = "usb-host.hostdevice";
+                      };
+                    }
+                  ];
+                  type = "kvm";
+                  name = "win11";
+                  uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
+                  metadata = with inputs.nixvirt.lib.xml; [
+                    (
+                      elem "libosinfo:libosinfo" [
+                        (attr "xmlns:libosinfo" "http://libosinfo.org/xmlns/libvirt/domain/1.0")
+                      ]
+                      [
+                        (
+                          elem "libosinfo:os" [
+                            (attr "id" "http://microsoft.com/win/11")
+                          ]
+                          []
+                        )
+                      ]
+                    )
+                  ];
+                  sysinfo = {
+                    type = "smbios";
+                    bios = {
+                      entry = [
+                        {
+                          name = "vendor";
+                          value = "American Megatrends Inc.";
+                        }
+                        {
+                          name = "version";
+                          value = "1.30";
+                        }
+                        {
+                          name = "date";
+                          value = "10/14/2020";
+                        }
+                        {
+                          name = "release";
+                          value = "5.17";
+                        }
+                      ];
+                    };
+                    system = {
+                      entry = [
+                        {
+                          name = "manufacturer";
+                          value = "Micro-Star International Co., Ltd.";
+                        }
+                        {
+                          name = "product";
+                          value = "MS-7C83";
+                        }
+                        {
+                          name = "version";
+                          value = "1.0";
+                        }
+                        {
+                          name = "serial";
+                          value = "Default string";
+                        }
+                        {
+                          name = "uuid";
+                          value = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
+                        }
+                        {
+                          name = "sku";
+                          value = "Default string";
+                        }
+                        {
+                          name = "family";
+                          value = "Default string";
+                        }
+                      ];
+                    };
+                    baseBoard = {
+                      entry = [
+                        {
+                          name = "manufacturer";
+                          value = "Micro-Star International Co., Ltd.";
+                        }
+                        {
+                          name = "product";
+                          value = "B460M PRO-VDH WIFI (MS-7C83)";
+                        }
+                        {
+                          name = "version";
+                          value = "1.0";
+                        }
+                        {
+                          name = "serial";
+                          value = "07C8310_KA1C078357";
+                        }
+                        {
+                          name = "asset";
+                          value = "Default string";
+                        }
+                      ];
+                    };
                   };
-                in
-                  inputs.nixvirt.lib.domain.writeXML {
-                    "xmlns:qemu" = "http://libvirt.org/schemas/domain/qemu/1.0";
-                    "qemu:capabilities" = [
+                  memory = {
+                    unit = "KiB";
+                    count = 16777216 * 2;
+                  };
+                  currentMemory = {
+                    unit = "KiB";
+                    count = 16777216 * 2;
+                  };
+                  memoryBacking = {
+                    source = {
+                      type = "memfd";
+                    };
+                    access = {
+                      mode = "shared";
+                    };
+                  };
+                  vcpu = {
+                    placement = "static";
+                    count = 16;
+                  };
+                  numatune = {
+                    memory = {
+                      mode = "strict";
+                      nodeset = "0";
+                    };
+                  };
+                  cputune = {
+                    vcpupin = [
                       {
-                        "qemu:del" = {
-                          capability = "usb-host.hostdevice";
+                        vcpu = 0;
+                        cpuset = "0";
+                      }
+                      {
+                        vcpu = 1;
+                        cpuset = "16";
+                      }
+                      {
+                        vcpu = 2;
+                        cpuset = "1";
+                      }
+                      {
+                        vcpu = 3;
+                        cpuset = "17";
+                      }
+                      {
+                        vcpu = 4;
+                        cpuset = "2";
+                      }
+                      {
+                        vcpu = 5;
+                        cpuset = "18";
+                      }
+                      {
+                        vcpu = 6;
+                        cpuset = "3";
+                      }
+                      {
+                        vcpu = 7;
+                        cpuset = "19";
+                      }
+                      {
+                        vcpu = 8;
+                        cpuset = "4";
+                      }
+                      {
+                        vcpu = 9;
+                        cpuset = "20";
+                      }
+                      {
+                        vcpu = 10;
+                        cpuset = "5";
+                      }
+                      {
+                        vcpu = 11;
+                        cpuset = "21";
+                      }
+                      {
+                        vcpu = 12;
+                        cpuset = "6";
+                      }
+                      {
+                        vcpu = 13;
+                        cpuset = "22";
+                      }
+                      {
+                        vcpu = 14;
+                        cpuset = "7";
+                      }
+                      {
+                        vcpu = 15;
+                        cpuset = "23";
+                      }
+                    ];
+                  };
+                  os = {
+                    hack = "efi";
+                    type = "hvm";
+                    arch = "x86_64";
+                    machine = "pc-q35-9.0";
+                    firmware = {
+                      feature = [
+                        {
+                          enabled = false;
+                          name = "enrolled-keys";
+                        }
+                        {
+                          enabled = true;
+                          name = "secure-boot";
+                        }
+                      ];
+                    };
+                    loader = {
+                      readonly = true;
+                      type = "pflash";
+                      secure = true;
+                      path = "${pkgs.qemu}/share/qemu/edk2-x86_64-secure-code.fd";
+                    };
+                    nvram = {
+                      template = "${pkgs.qemu}/share/qemu/edk2-i386-vars.fd";
+                      path = "/var/lib/libvirt/qemu/nvram/win11_VARS.fd";
+                    };
+                    bootmenu = {
+                      enable = false;
+                    };
+                    smbios = {
+                      mode = "host";
+                    };
+                  };
+                  features = {
+                    acpi = {};
+                    apic = {};
+                    hyperv = {
+                      mode = "custom";
+                      relaxed = {
+                        state = true;
+                      };
+                      vapic = {
+                        state = true;
+                      };
+                      spinlocks = {
+                        state = true;
+                        retries = 8191;
+                      };
+                      vpindex = {
+                        state = true;
+                      };
+                      runtime = {
+                        state = true;
+                      };
+                      synic = {
+                        state = true;
+                      };
+                      stimer = {
+                        state = true;
+                        direct = {
+                          state = true;
+                        };
+                      };
+                      reset = {
+                        state = true;
+                      };
+                      vendor_id = {
+                        state = true;
+                        value = "KVM Hv";
+                      };
+                      frequencies = {
+                        state = true;
+                      };
+                      reenlightenment = {
+                        state = true;
+                      };
+                      tlbflush = {
+                        state = true;
+                      };
+                      ipi = {
+                        state = true;
+                      };
+                      topoext = {
+                        state = true;
+                      };
+                    };
+                    kvm = {
+                      hidden = {
+                        state = true;
+                      };
+                    };
+                    vmport = {
+                      state = false;
+                    };
+                    ioapic = {
+                      driver = "kvm";
+                    };
+                  };
+                  cpu = {
+                    mode = "host-passthrough";
+                    check = "none";
+                    migratable = false;
+                    topology = {
+                      sockets = 1;
+                      dies = 1;
+                      cores = 8;
+                      threads = 2;
+                    };
+                    cache = {
+                      mode = "passthrough";
+                    };
+                    feature = [
+                      {
+                        policy = "disable";
+                        name = "hypervisor";
+                      }
+                      {
+                        policy = "require";
+                        name = "vmx";
+                      }
+                      {
+                        policy = "disable";
+                        name = "mpx";
+                      }
+                      {
+                        policy = "require";
+                        name = "topoext";
+                      }
+                      {
+                        policy = "require";
+                        name = "invtsc";
+                      }
+                    ];
+                  };
+                  clock = {
+                    offset = "localtime";
+                    timer = [
+                      {
+                        name = "rtc";
+                        tickpolicy = "catchup";
+                      }
+                      {
+                        name = "pit";
+                        tickpolicy = "delay";
+                      }
+                      {
+                        name = "hpet";
+                        present = false;
+                      }
+                      {
+                        name = "kvmclock";
+                        present = false;
+                      }
+                      {
+                        name = "hypervclock";
+                        present = true;
+                      }
+                    ];
+                  };
+                  on_poweroff = "destroy";
+                  on_reboot = "restart";
+                  on_crash = "destroy";
+                  pm = {
+                    suspend-to-mem = {
+                      enabled = false;
+                    };
+                    suspend-to-disk = {
+                      enabled = false;
+                    };
+                  };
+                  devices = {
+                    emulator = "/run/libvirt/nix-emulators/qemu-system-x86_64";
+                    disk = [
+                      {
+                        type = "file";
+                        device = "disk";
+                        driver = {
+                          name = "qemu";
+                          type = "qcow2";
+                          cache = "none";
+                          discard = "unmap";
+                        };
+                        source = {
+                          file = "/var/lib/libvirt/images/win11.qcow2";
+                        };
+                        target = {
+                          dev = "sda";
+                          bus = "sata";
+                        };
+                        boot = {
+                          order = 1;
+                        };
+                      }
+                      {
+                        type = "file";
+                        device = "cdrom";
+                        driver = {
+                          name = "qemu";
+                          type = "raw";
+                        };
+                        source = {
+                          file = "/var/lib/libvirt/images/win11.iso";
+                          startupPolicy = "mandatory";
+                        };
+                        target = {
+                          bus = "sata";
+                          dev = "sdb";
+                        };
+                        boot = {
+                          order = 2;
+                        };
+                        readonly = true;
+                      }
+                      {
+                        type = "file";
+                        device = "cdrom";
+                        driver = {
+                          name = "qemu";
+                          type = "raw";
+                        };
+                        source = {
+                          file = "${virtio-iso}";
+                        };
+                        target = {
+                          bus = "sata";
+                          dev = "sdc";
+                        };
+                        readonly = true;
+                      }
+                    ];
+                    filesystem = [
+                      {
+                        type = "mount";
+                        accessmode = "passthrough";
+                        driver = {
+                          type = "virtiofs";
+                        };
+                        source = {
+                          dir = "/home/${user}/Public";
+                        };
+                        target = {
+                          dir = "Public";
                         };
                       }
                     ];
-                    type = "kvm";
-                    name = "win11";
-                    uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
-                    metadata = with inputs.nixvirt.lib.xml; [
-                      (
-                        elem "libosinfo:libosinfo" [
-                          (attr "xmlns:libosinfo" "http://libosinfo.org/xmlns/libvirt/domain/1.0")
-                        ]
-                        [
-                          (
-                            elem "libosinfo:os" [
-                              (attr "id" "http://microsoft.com/win/11")
-                            ]
-                            []
-                          )
-                        ]
-                      )
-                    ];
-                    sysinfo = {
-                      type = "smbios";
-                      bios = {
-                        entry = [
-                          {
-                            name = "vendor";
-                            value = "American Megatrends Inc.";
-                          }
-                          {
-                            name = "version";
-                            value = "1.30";
-                          }
-                          {
-                            name = "date";
-                            value = "10/14/2020";
-                          }
-                          {
-                            name = "release";
-                            value = "5.17";
-                          }
-                        ];
+                    interface = {
+                      type = "network";
+                      model = {
+                        type = "virtio";
                       };
-                      system = {
-                        entry = [
-                          {
-                            name = "manufacturer";
-                            value = "Micro-Star International Co., Ltd.";
-                          }
-                          {
-                            name = "product";
-                            value = "MS-7C83";
-                          }
-                          {
-                            name = "version";
-                            value = "1.0";
-                          }
-                          {
-                            name = "serial";
-                            value = "Default string";
-                          }
-                          {
-                            name = "uuid";
-                            value = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
-                          }
-                          {
-                            name = "sku";
-                            value = "Default string";
-                          }
-                          {
-                            name = "family";
-                            value = "Default string";
-                          }
-                        ];
-                      };
-                      baseBoard = {
-                        entry = [
-                          {
-                            name = "manufacturer";
-                            value = "Micro-Star International Co., Ltd.";
-                          }
-                          {
-                            name = "product";
-                            value = "B460M PRO-VDH WIFI (MS-7C83)";
-                          }
-                          {
-                            name = "version";
-                            value = "1.0";
-                          }
-                          {
-                            name = "serial";
-                            value = "07C8310_KA1C078357";
-                          }
-                          {
-                            name = "asset";
-                            value = "Default string";
-                          }
-                        ];
-                      };
-                    };
-                    memory = {
-                      unit = "KiB";
-                      count = 16777216 * 2;
-                    };
-                    currentMemory = {
-                      unit = "KiB";
-                      count = 16777216 * 2;
-                    };
-                    memoryBacking = {
                       source = {
-                        type = "memfd";
-                      };
-                      access = {
-                        mode = "shared";
+                        network = "default";
                       };
                     };
-                    vcpu = {
-                      placement = "static";
-                      count = 16;
-                    };
-                    numatune = {
-                      memory = {
-                        mode = "strict";
-                        nodeset = "0";
+                    shmem = {
+                      name = "looking-glass";
+                      model = {
+                        type = "ivshmem-plain";
+                      };
+                      size = {
+                        unit = "M";
+                        count = 256;
                       };
                     };
-                    cputune = {
-                      vcpupin = [
-                        {
-                          vcpu = 0;
-                          cpuset = "0";
-                        }
-                        {
-                          vcpu = 1;
-                          cpuset = "16";
-                        }
-                        {
-                          vcpu = 2;
-                          cpuset = "1";
-                        }
-                        {
-                          vcpu = 3;
-                          cpuset = "17";
-                        }
-                        {
-                          vcpu = 4;
-                          cpuset = "2";
-                        }
-                        {
-                          vcpu = 5;
-                          cpuset = "18";
-                        }
-                        {
-                          vcpu = 6;
-                          cpuset = "3";
-                        }
-                        {
-                          vcpu = 7;
-                          cpuset = "19";
-                        }
-                        {
-                          vcpu = 8;
-                          cpuset = "4";
-                        }
-                        {
-                          vcpu = 9;
-                          cpuset = "20";
-                        }
-                        {
-                          vcpu = 10;
-                          cpuset = "5";
-                        }
-                        {
-                          vcpu = 11;
-                          cpuset = "21";
-                        }
-                        {
-                          vcpu = 12;
-                          cpuset = "6";
-                        }
-                        {
-                          vcpu = 13;
-                          cpuset = "22";
-                        }
-                        {
-                          vcpu = 14;
-                          cpuset = "7";
-                        }
-                        {
-                          vcpu = 15;
-                          cpuset = "23";
-                        }
-                      ];
-                    };
-                    os = {
-                      hack = "efi";
-                      type = "hvm";
-                      arch = "x86_64";
-                      machine = "pc-q35-9.0";
-                      firmware = {
-                        feature = [
-                          {
-                            enabled = false;
-                            name = "enrolled-keys";
-                          }
-                          {
-                            enabled = true;
-                            name = "secure-boot";
-                          }
-                        ];
-                      };
-                      loader = {
-                        readonly = true;
-                        type = "pflash";
-                        secure = true;
-                        path = "${pkgs.qemu}/share/qemu/edk2-x86_64-secure-code.fd";
-                      };
-                      nvram = {
-                        template = "${pkgs.qemu}/share/qemu/edk2-i386-vars.fd";
-                        path = "/var/lib/libvirt/qemu/nvram/win11_VARS.fd";
-                      };
-                      bootmenu = {
-                        enable = false;
-                      };
-                      smbios = {
-                        mode = "host";
-                      };
-                    };
-                    features = {
-                      acpi = {};
-                      apic = {};
-                      hyperv = {
-                        mode = "custom";
-                        relaxed = {
-                          state = true;
-                        };
-                        vapic = {
-                          state = true;
-                        };
-                        spinlocks = {
-                          state = true;
-                          retries = 8191;
-                        };
-                        vpindex = {
-                          state = true;
-                        };
-                        runtime = {
-                          state = true;
-                        };
-                        synic = {
-                          state = true;
-                        };
-                        stimer = {
-                          state = true;
-                          direct = {
-                            state = true;
-                          };
-                        };
-                        reset = {
-                          state = true;
-                        };
-                        vendor_id = {
-                          state = true;
-                          value = "KVM Hv";
-                        };
-                        frequencies = {
-                          state = true;
-                        };
-                        reenlightenment = {
-                          state = true;
-                        };
-                        tlbflush = {
-                          state = true;
-                        };
-                        ipi = {
-                          state = true;
-                        };
-                        topoext = {
-                          state = true;
-                        };
-                      };
-                      kvm = {
-                        hidden = {
-                          state = true;
-                        };
-                      };
-                      vmport = {
-                        state = false;
-                      };
-                      ioapic = {
-                        driver = "kvm";
-                      };
-                    };
-                    cpu = {
-                      mode = "host-passthrough";
-                      check = "none";
-                      migratable = false;
-                      topology = {
-                        sockets = 1;
-                        dies = 1;
-                        cores = 8;
-                        threads = 2;
-                      };
-                      cache = {
-                        mode = "passthrough";
-                      };
-                      feature = [
-                        {
-                          policy = "disable";
-                          name = "hypervisor";
-                        }
-                        {
-                          policy = "require";
-                          name = "vmx";
-                        }
-                        {
-                          policy = "disable";
-                          name = "mpx";
-                        }
-                        {
-                          policy = "require";
-                          name = "topoext";
-                        }
-                        {
-                          policy = "require";
-                          name = "invtsc";
-                        }
-                      ];
-                    };
-                    clock = {
-                      offset = "localtime";
-                      timer = [
-                        {
-                          name = "rtc";
-                          tickpolicy = "catchup";
-                        }
-                        {
-                          name = "pit";
-                          tickpolicy = "delay";
-                        }
-                        {
-                          name = "hpet";
-                          present = false;
-                        }
-                        {
-                          name = "kvmclock";
-                          present = false;
-                        }
-                        {
-                          name = "hypervclock";
-                          present = true;
-                        }
-                      ];
-                    };
-                    on_poweroff = "destroy";
-                    on_reboot = "restart";
-                    on_crash = "destroy";
-                    pm = {
-                      suspend-to-mem = {
-                        enabled = false;
-                      };
-                      suspend-to-disk = {
-                        enabled = false;
-                      };
-                    };
-                    devices = {
-                      emulator = "/run/libvirt/nix-emulators/qemu-system-x86_64";
-                      disk = [
-                        {
-                          type = "file";
-                          device = "disk";
-                          driver = {
-                            name = "qemu";
-                            type = "qcow2";
-                            cache = "none";
-                            discard = "unmap";
-                          };
-                          source = {
-                            file = "/var/lib/libvirt/images/win11.qcow2";
-                          };
-                          target = {
-                            dev = "sda";
-                            bus = "sata";
-                          };
-                          boot = {
-                            order = 1;
-                          };
-                        }
-                        {
-                          type = "file";
-                          device = "cdrom";
-                          driver = {
-                            name = "qemu";
-                            type = "raw";
-                          };
-                          source = {
-                            file = "/var/lib/libvirt/images/win11.iso";
-                            startupPolicy = "mandatory";
-                          };
-                          target = {
-                            bus = "sata";
-                            dev = "sdb";
-                          };
-                          boot = {
-                            order = 2;
-                          };
-                          readonly = true;
-                        }
-                        {
-                          type = "file";
-                          device = "cdrom";
-                          driver = {
-                            name = "qemu";
-                            type = "raw";
-                          };
-                          source = {
-                            file = "${virtio-iso}";
-                          };
-                          target = {
-                            bus = "sata";
-                            dev = "sdc";
-                          };
-                          readonly = true;
-                        }
-                      ];
-                      filesystem = [
-                        {
-                          type = "mount";
-                          accessmode = "passthrough";
-                          driver = {
-                            type = "virtiofs";
-                          };
-                          source = {
-                            dir = "/home/${user}/Public";
-                          };
-                          target = {
-                            dir = "Public";
-                          };
-                        }
-                      ];
-                      interface = {
-                        type = "network";
-                        model = {
+                    channel = [
+                      {
+                        type = "spicevmc";
+                        target = {
                           type = "virtio";
+                          name = "com.redhat.spice.0";
                         };
-                        source = {
-                          network = "default";
-                        };
+                      }
+                    ];
+                    input = [
+                      {
+                        type = "mouse";
+                        bus = "virtio";
+                      }
+                      {
+                        type = "keyboard";
+                        bus = "virtio";
+                      }
+                    ];
+                    tpm = {
+                      model = "tpm-crb";
+                      backend = {
+                        type = "emulator";
+                        version = "2.0";
                       };
-                      shmem = {
-                        name = "looking-glass";
-                        model = {
-                          type = "ivshmem-plain";
+                    };
+                    graphics = [
+                      {
+                        type = "spice";
+                        autoport = true;
+                        listen = {
+                          type = "address";
+                          address = "127.0.0.1";
                         };
-                        size = {
-                          unit = "M";
-                          count = 256;
+                        image = {
+                          compression = false;
                         };
-                      };
-                      channel = [
-                        {
-                          type = "spicevmc";
-                          target = {
-                            type = "virtio";
-                            name = "com.redhat.spice.0";
-                          };
-                        }
-                      ];
-                      input = [
-                        {
-                          type = "mouse";
-                          bus = "virtio";
-                        }
-                        {
-                          type = "keyboard";
-                          bus = "virtio";
-                        }
-                      ];
-                      tpm = {
-                        model = "tpm-crb";
-                        backend = {
-                          type = "emulator";
-                          version = "2.0";
+                        gl = {
+                          enable = false;
                         };
-                      };
-                      graphics = [
-                        {
-                          type = "spice";
-                          autoport = true;
-                          listen = {
-                            type = "address";
-                            address = "127.0.0.1";
-                          };
-                          image = {
-                            compression = false;
-                          };
-                          gl = {
-                            enable = false;
-                          };
-                        }
-                        {
-                          type = "vnc";
-                          port = -1;
-                          autoport = true;
-                          hack = "0.0.0.0";
-                          listen = {
-                            type = "address";
-                            address = "0.0.0.0";
-                          };
-                        }
-                      ];
-                      sound = {
-                        model = "ich9";
-                        audio = {
-                          id = 1;
+                      }
+                      {
+                        type = "vnc";
+                        port = -1;
+                        autoport = true;
+                        hack = "0.0.0.0";
+                        listen = {
+                          type = "address";
+                          address = "0.0.0.0";
                         };
-                      };
+                      }
+                    ];
+                    sound = {
+                      model = "ich9";
                       audio = {
                         id = 1;
-                        type = "spice";
-                      };
-                      video = {
-                        model = {
-                          type = "none";
-                        };
-                      };
-                      hostdev = [
-                        {
-                          mode = "subsystem";
-                          type = "pci";
-                          managed = true;
-                          driver = {
-                            name = "vfio";
-                          };
-                          source = {
-                            address = source_address 5 0 0;
-                          };
-                          rom = {
-                            bar = false;
-                          };
-                        }
-                        {
-                          mode = "subsystem";
-                          type = "pci";
-                          managed = true;
-                          driver = {
-                            name = "vfio";
-                          };
-                          source = {
-                            address = source_address 5 0 1;
-                          };
-                          rom = {
-                            bar = false;
-                          };
-                        }
-                      ];
-                      watchdog = {
-                        model = "itco";
-                        action = "reset";
-                      };
-                      memballoon = {
-                        model = "none";
                       };
                     };
+                    audio = {
+                      id = 1;
+                      type = "spice";
+                    };
+                    video = {
+                      model = {
+                        type = "none";
+                      };
+                    };
+                    hostdev = [
+                      {
+                        mode = "subsystem";
+                        type = "pci";
+                        managed = true;
+                        driver = {
+                          name = "vfio";
+                        };
+                        source = {
+                          address = source_address 5 0 0;
+                        };
+                        rom = {
+                          bar = false;
+                        };
+                      }
+                      {
+                        mode = "subsystem";
+                        type = "pci";
+                        managed = true;
+                        driver = {
+                          name = "vfio";
+                        };
+                        source = {
+                          address = source_address 5 0 1;
+                        };
+                        rom = {
+                          bar = false;
+                        };
+                      }
+                    ];
+                    watchdog = {
+                      model = "itco";
+                      action = "reset";
+                    };
+                    memballoon = {
+                      model = "none";
+                    };
                   };
+                };
               }
               {
                 definition = inputs.nixvirt.lib.domain.writeXML {
@@ -1921,6 +1920,36 @@ in {
                         listen = {
                           type = "address";
                           address = "0.0.0.0";
+                        };
+                      }
+                    ];
+                    hostdev = [
+                      {
+                        mode = "subsystem";
+                        type = "pci";
+                        managed = true;
+                        driver = {
+                          name = "vfio";
+                        };
+                        source = {
+                          address = source_address 5 0 0;
+                        };
+                        rom = {
+                          bar = false;
+                        };
+                      }
+                      {
+                        mode = "subsystem";
+                        type = "pci";
+                        managed = true;
+                        driver = {
+                          name = "vfio";
+                        };
+                        source = {
+                          address = source_address 5 0 1;
+                        };
+                        rom = {
+                          bar = false;
                         };
                       }
                     ];
