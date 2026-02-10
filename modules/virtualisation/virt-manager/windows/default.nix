@@ -1310,12 +1310,12 @@ in {
                       }
                     ];
                     interface = {
-                      type = "bridge";
+                      type = "network";
                       model = {
                         type = "virtio";
                       };
                       source = {
-                        bridge = "virbr0";
+                        network = "default";
                       };
                     };
                     shmem = {
@@ -1853,12 +1853,12 @@ in {
                       }
                     ];
                     interface = {
-                      type = "bridge";
+                      type = "network";
                       model = {
                         type = "virtio";
                       };
                       source = {
-                        bridge = "virbr0";
+                        network = "default";
                       };
                     };
                     shmem = {
