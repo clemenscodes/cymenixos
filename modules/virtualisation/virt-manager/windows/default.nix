@@ -44,13 +44,10 @@
     runtimeInputs = [pkgs.mullvad];
     text = ''
       if [ "$1" = "win11" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        mullvad disconnect
       fi
       if [ "$1" = "win11-install" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        mullvad disconnect
       fi
       if [ "$1" = "win11-display" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        mullvad disconnect
       fi
     '';
   };
@@ -59,13 +56,10 @@
     runtimeInputs = [pkgs.mullvad];
     text = ''
       if [ "$1" = "win11" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        mullvad connect
       fi
       if [ "$1" = "win11-install" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        mullvad connect
       fi
       if [ "$1" = "win11-display" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        mullvad connect
       fi
     '';
   };
