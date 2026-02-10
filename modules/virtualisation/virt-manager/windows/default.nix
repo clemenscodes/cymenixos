@@ -258,6 +258,7 @@ in {
       firewall = {
         allowedTCPPorts = [5900];
       };
+      trustedInterfaces = ["virbr0"];
     };
     virtualisation = {
       libvirtd = {
