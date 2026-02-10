@@ -33,23 +33,23 @@ in {
 
           # common requirement for several games
           pkgs.stdenv.cc.cc.lib
-          pkgs.xorg.libXcomposite
-          pkgs.xorg.libXtst
-          pkgs.xorg.libXrandr
-          pkgs.xorg.libXext
-          pkgs.xorg.libX11
-          pkgs.xorg.libXfixes
+          pkgs.libxcomposite
+          pkgs.libxtst
+          pkgs.libxrandr
+          pkgs.libxext
+          pkgs.libx11
+          pkgs.libxfixes
           pkgs.libGL
           pkgs.libva
           pkgs.fontconfig
           pkgs.freetype
-          pkgs.xorg.libXt
-          pkgs.xorg.libXmu
+          pkgs.libxt
+          pkgs.libxmu
           pkgs.libogg
           pkgs.libvorbis
           pkgs.SDL
           pkgs.SDL2_image
-          pkgs.glew110
+          pkgs.glew_1_10
           pkgs.libdrm
           pkgs.libidn
           pkgs.tbb

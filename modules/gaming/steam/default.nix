@@ -65,10 +65,10 @@ in {
           inherit (cfg.steam) enable;
         };
         extraPackages = [
-          pkgs.xorg.libXcursor
-          pkgs.xorg.libXi
-          pkgs.xorg.libXinerama
-          pkgs.xorg.libXScrnSaver
+          pkgs.libxcursor
+          pkgs.libxi
+          pkgs.libxinerama
+          pkgs.libxScrnSaver
           pkgs.libpng
           pkgs.libpulseaudio
           pkgs.libvorbis
