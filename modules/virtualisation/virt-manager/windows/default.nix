@@ -927,7 +927,7 @@ in {
                         }
                         {
                           name = "uuid";
-                          value = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
+                          value = "99901f8b-8c80-9518-a6a1-2cf05dcd371f";
                         }
                         {
                           name = "sku";
