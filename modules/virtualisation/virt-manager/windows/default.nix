@@ -172,6 +172,7 @@ in {
       };
     };
     boot = {
+      extraModulePackages = [config.boot.kernelPackages.kvmfr];
       kernelParams = [
         "amd_iommu=on"
         "iommu=pt"
@@ -186,47 +187,6 @@ in {
         "vfio_pci"
         "vfio"
         "vfio_iommu_type1"
-        "kvmfr"
-      ];
-      extraModulePackages = with config.boot.kernelPackages; let
-        kvmfr = {
-          stdenv,
-          lib,
-          fetchFromGitHub,
-          kernel,
-          kmod,
-          looking-glass-client,
-          ...
-        }:
-          stdenv.mkDerivation rec {
-            pname = "kvmfr-${version}-${kernel.version}";
-            version = looking-glass-client.version;
-
-            src = looking-glass-client.src;
-            sourceRoot = "source/module";
-            hardeningDisable = ["pic" "format"];
-            nativeBuildInputs = kernel.moduleBuildDependencies;
-
-            makeFlags = [
-              "KVER=${kernel.modDirVersion}"
-              "KDIR=${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
-            ];
-
-            installPhase = ''
-              install -D kvmfr.ko -t "$out/lib/modules/${kernel.modDirVersion}/kernel/drivers/misc/"
-            '';
-
-            meta = with lib; {
-              description = "This kernel module implements a basic interface to the IVSHMEM device for LookingGlass";
-              homepage = "https://github.com/gnif/LookingGlass";
-              license = licenses.gpl2Only;
-              maintainers = with maintainers; [j-brn];
-              platforms = ["x86_64-linux"];
-            };
-          };
-        kernelPackage = pkgs.callPackage kvmfr {inherit kernel;};
-      in [
-        kernelPackage
       ];
       extraModprobeConfig = ''
         options kvm_amd nested=1
@@ -235,6 +195,7 @@ in {
       '';
       initrd = {
         availableKernelModules = ["amdgpu" "vfio-pci"];
+        kernelModules = ["kvmfr"];
       };
     };
     services.udev.packages = lib.singleton (
@@ -242,7 +203,7 @@ in {
       {
         name = "kvmfr";
         text = ''
-          SUBSYSTEM=="kvmfr", GROUP="kvm", MODE="0660", TAG+="uaccess"
+          SUBSYSTEM=="kvmfr", OWNER="${user}" GROUP="kvm", MODE="0660", TAG+="uaccess"
         '';
         destination = "/etc/udev/rules.d/70-kvmfr.rules";
       }
@@ -932,7 +893,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 5 0 0;
+                          address = source_address 1 0 0;
                         };
                         rom = {
                           bar = false;
@@ -946,7 +907,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 5 0 1;
+                          address = source_address 1 0 1;
                         };
                         rom = {
                           bar = false;
