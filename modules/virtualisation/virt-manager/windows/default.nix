@@ -168,7 +168,7 @@ in {
         "isolcpus=0-7,16-23"
         "nohz_full=0-7,16-23"
         "rcu_nocbs=0-7,16-23"
-        # "kvmfr.static_size_mb=256"
+        "kvmfr.static_size_mb=256"
       ];
       kernelModules = [
         "kvm-amd"
@@ -176,7 +176,7 @@ in {
         "vfio_pci"
         "vfio"
         "vfio_iommu_type1"
-        # "kvmfr"
+        "kvmfr"
       ];
       extraModulePackages = with config.boot.kernelPackages; let
         kvmfr = {
@@ -216,7 +216,7 @@ in {
           };
         kernelPackage = pkgs.callPackage kvmfr {inherit kernel;};
       in [
-        # kernelPackage
+        kernelPackage
       ];
       extraModprobeConfig = ''
         options kvm_amd nested=1
@@ -227,13 +227,13 @@ in {
         availableKernelModules = ["amdgpu" "vfio-pci"];
       };
     };
-    # services = {
-    #   udev = {
-    #     extraRules = ''
-    #       SUBSYSTEM=="kvmfr", OWNER="${user}", GROUP="libvirtd", MODE="0600"
-    #     '';
-    #   };
-    # };
+    services = {
+      udev = {
+        extraRules = ''
+          SUBSYSTEM=="kvmfr", OWNER="${user}", GROUP="libvirtd", MODE="0600"
+        '';
+      };
+    };
     environment = {
       systemPackages = [
         pkgs.virt-manager
