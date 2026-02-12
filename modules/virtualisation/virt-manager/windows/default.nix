@@ -161,6 +161,16 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.windows.enable) {
+    environment = {
+      etc = {
+        "modules-load.d/kvmfr.conf".text = ''
+          kvmfr
+        '';
+        "modprobe.d/kvmfr.conf".text = ''
+          options kvmfr static_size_mb=256
+        '';
+      };
+    };
     boot = {
       kernelParams = [
         "amd_iommu=on"
