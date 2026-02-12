@@ -6,6 +6,7 @@
 }: {config, ...}: let
   cfg = config.modules.virtualisation.virt-manager;
   inherit (config.modules.users) user;
+
   iommu-check = pkgs.writeShellApplication {
     name = "iommu-check";
     runtimeInputs = [pkgs.pciutils];
@@ -168,8 +169,47 @@ in {
         "isolcpus=0-7,16-23"
         "nohz_full=0-7,16-23"
         "rcu_nocbs=0-7,16-23"
+        "kvmfr.static_size_mb=${toString 256}"
       ];
-      kernelModules = ["kvm-amd" "vfio_virqfd" "vfio_pci" "vfio" "vfio_iommu_type1"];
+      kernelModules = ["kvm-amd" "kvmfr" "vfio_virqfd" "vfio_pci" "vfio" "vfio_iommu_type1"];
+      extraModulePackages = let
+        kvmfr = {
+          stdenv,
+          lib,
+          fetchFromGitHub,
+          kernel,
+          kmod,
+          looking-glass-client,
+          ...
+        }:
+          stdenv.mkDerivation rec {
+            pname = "kvmfr-${version}-${kernel.version}";
+            version = looking-glass-client.version;
+
+            src = looking-glass-client.src;
+            sourceRoot = "source/module";
+            hardeningDisable = ["pic" "format"];
+            nativeBuildInputs = kernel.moduleBuildDependencies;
+
+            makeFlags = [
+              "KVER=${kernel.modDirVersion}"
+              "KDIR=${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
+            ];
+
+            installPhase = ''
+              install -D kvmfr.ko -t "$out/lib/modules/${kernel.modDirVersion}/kernel/drivers/misc/"
+            '';
+
+            meta = with lib; {
+              description = "This kernel module implements a basic interface to the IVSHMEM device for LookingGlass";
+              homepage = "https://github.com/gnif/LookingGlass";
+              license = licenses.gpl2Only;
+              maintainers = with maintainers; [j-brn];
+              platforms = ["x86_64-linux"];
+            };
+          };
+      in
+        with config.boot.kernelPackages; [(pkgs.callPackage kvmfr {inherit kernel;})];
       extraModprobeConfig = ''
         options kvm_amd nested=1
         options vfio_iommu_type1 allow_unsafe_interrupts=1
@@ -177,6 +217,23 @@ in {
       '';
       initrd = {
         availableKernelModules = ["amdgpu" "vfio-pci"];
+      };
+    };
+    services = {
+      udev = {
+        extraRules = ''
+          SUBSYSTEM=="kvmfr", OWNER="${user}", GROUP="libvirtd", MODE="0600"
+        '';
+        packages = lib.singleton (
+          pkgs.writeTextFile
+          {
+            name = "kvmfr";
+            text = ''
+              SUBSYSTEM=="kvmfr", GROUP="kvm", MODE="0660", TAG+="uaccess"
+            '';
+            destination = "/etc/udev/rules.d/70-kvmfr.rules";
+          }
+        );
       };
     };
     environment = {
