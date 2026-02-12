@@ -106,6 +106,13 @@ in {
         videos = "${config.home.homeDirectory}/${videos}";
         templates = null;
         extraConfig = {
+          XDG_DESKTOP_DIR = "${config.home.homeDirectory}/${desktop}";
+          XDG_DOCUMENTS_DIR = "${config.home.homeDirectory}/${documents}";
+          XDG_DOWNLOAD_DIR = "${config.home.homeDirectory}/${downloads}";
+          XDG_MUSIC_DIR = "${config.home.homeDirectory}/${music}";
+          XDG_PICTURES_DIR = "${config.home.homeDirectory}/${pictures}";
+          XDG_PUBLIC_DIR = "${config.home.homeDirectory}/${public}";
+          XDG_VIDEOS_DIR = "${config.home.homeDirectory}/${videos}";
           XDG_BIN_HOME = "${config.home.homeDirectory}/.local/bin";
           XDG_SCREENSHOT_DIR = "${config.xdg.userDirs.pictures}/screenshots";
           XDG_WALLPAPER_DIR = "${config.xdg.userDirs.pictures}/wallpaper";
