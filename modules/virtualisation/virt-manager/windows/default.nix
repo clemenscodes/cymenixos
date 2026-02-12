@@ -6,7 +6,6 @@
 }: {config, ...}: let
   cfg = config.modules.virtualisation.virt-manager;
   inherit (config.modules.users) user;
-
   iommu-check = pkgs.writeShellApplication {
     name = "iommu-check";
     runtimeInputs = [pkgs.pciutils];
@@ -169,7 +168,7 @@ in {
         "isolcpus=0-7,16-23"
         "nohz_full=0-7,16-23"
         "rcu_nocbs=0-7,16-23"
-        "kvmfr.static_size_mb=${toString 256}"
+        "kvmfr.static_size_mb=256"
       ];
       kernelModules = ["kvm-amd" "kvmfr" "vfio_virqfd" "vfio_pci" "vfio" "vfio_iommu_type1"];
       extraModulePackages = let
@@ -224,16 +223,6 @@ in {
         extraRules = ''
           SUBSYSTEM=="kvmfr", OWNER="${user}", GROUP="libvirtd", MODE="0600"
         '';
-        packages = lib.singleton (
-          pkgs.writeTextFile
-          {
-            name = "kvmfr";
-            text = ''
-              SUBSYSTEM=="kvmfr", GROUP="kvm", MODE="0660", TAG+="uaccess"
-            '';
-            destination = "/etc/udev/rules.d/70-kvmfr.rules";
-          }
-        );
       };
     };
     environment = {
