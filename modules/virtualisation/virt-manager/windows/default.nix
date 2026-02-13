@@ -762,42 +762,6 @@ in {
                           order = 1;
                         };
                       }
-                      {
-                        type = "file";
-                        device = "cdrom";
-                        driver = {
-                          name = "qemu";
-                          type = "raw";
-                        };
-                        source = {
-                          file = "/var/lib/libvirt/images/win11.iso";
-                          startupPolicy = "mandatory";
-                        };
-                        target = {
-                          bus = "sata";
-                          dev = "sdb";
-                        };
-                        boot = {
-                          order = 2;
-                        };
-                        readonly = true;
-                      }
-                      {
-                        type = "file";
-                        device = "cdrom";
-                        driver = {
-                          name = "qemu";
-                          type = "raw";
-                        };
-                        source = {
-                          file = "${virtio-iso}";
-                        };
-                        target = {
-                          bus = "sata";
-                          dev = "sdc";
-                        };
-                        readonly = true;
-                      }
                     ];
                     filesystem = [
                       {
@@ -823,16 +787,6 @@ in {
                         network = "default";
                       };
                     };
-                    # shmem = {
-                    #   name = "looking-glass";
-                    #   model = {
-                    #     type = "ivshmem-plain";
-                    #   };
-                    #   size = {
-                    #     unit = "M";
-                    #     count = 256;
-                    #   };
-                    # };
                     channel = [
                       {
                         type = "spicevmc";
