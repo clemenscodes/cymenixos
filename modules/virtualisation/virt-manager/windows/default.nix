@@ -1994,7 +1994,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 5 0 0;
+                          address = source_address 1 0 0;
                         };
                         rom = {
                           bar = false;
@@ -2008,7 +2008,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 5 0 1;
+                          address = source_address 1 0 1;
                         };
                         rom = {
                           bar = false;
