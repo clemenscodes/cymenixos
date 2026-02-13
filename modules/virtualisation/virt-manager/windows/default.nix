@@ -209,7 +209,7 @@ in {
       {
         name = "kvmfr";
         text = ''
-          SUBSYSTEM=="kvmfr", OWNER="${user}" GROUP="kvm", MODE="0660", TAG+="uaccess"
+          SUBSYSTEM=="kvmfr", OWNER="${user}", GROUP="kvm", MODE="0660", TAG+="uaccess"
         '';
         destination = "/etc/udev/rules.d/70-kvmfr.rules";
       }
@@ -352,6 +352,28 @@ in {
                     {
                       "qemu:del" = {
                         capability = "usb-host.hostdevice";
+                      };
+                    }
+                  ];
+                  "qemu:commandline" = [
+                    {
+                      "qemu:arg" = {
+                        value = "-device";
+                      };
+                    }
+                    {
+                      "qemu:arg" = {
+                        value = "{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}";
+                      };
+                    }
+                    {
+                      "qemu:arg" = {
+                        value = "-object";
+                      };
+                    }
+                    {
+                      "qemu:arg" = {
+                        value = "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':256M,'share':true}";
                       };
                     }
                   ];
@@ -801,16 +823,16 @@ in {
                         network = "default";
                       };
                     };
-                    shmem = {
-                      name = "looking-glass";
-                      model = {
-                        type = "ivshmem-plain";
-                      };
-                      size = {
-                        unit = "M";
-                        count = 256;
-                      };
-                    };
+                    # shmem = {
+                    #   name = "looking-glass";
+                    #   model = {
+                    #     type = "ivshmem-plain";
+                    #   };
+                    #   size = {
+                    #     unit = "M";
+                    #     count = 256;
+                    #   };
+                    # };
                     channel = [
                       {
                         type = "spicevmc";
