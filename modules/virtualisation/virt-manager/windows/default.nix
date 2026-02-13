@@ -373,7 +373,7 @@ in {
                     }
                     {
                       "qemu:arg" = {
-                        value = "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':256M,'share':true}";
+                        value = "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':268435456,'share':true}";
                       };
                     }
                   ];
