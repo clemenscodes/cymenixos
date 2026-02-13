@@ -181,12 +181,18 @@ in {
         "rcu_nocbs=0-7,16-23"
         "kvmfr.static_size_mb=256"
       ];
+      blacklistedKernelModules = [
+        "nvidia"
+        "nvidia_drm"
+        "nvidia_modeset"
+        "nouveau"
+      ];
       kernelModules = [
-        "kvm-amd"
         "vfio_virqfd"
         "vfio_pci"
         "vfio"
         "vfio_iommu_type1"
+        "kvm-amd"
       ];
       extraModprobeConfig = ''
         options kvm_amd nested=1
@@ -194,7 +200,7 @@ in {
         options vfio_pci disable_vga=1
       '';
       initrd = {
-        availableKernelModules = ["amdgpu" "vfio-pci"];
+        availableKernelModules = ["vfio-pci"];
         kernelModules = ["kvmfr"];
       };
     };
