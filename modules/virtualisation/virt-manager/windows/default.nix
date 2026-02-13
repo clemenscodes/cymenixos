@@ -209,7 +209,7 @@ in {
       {
         name = "kvmfr";
         text = ''
-          SUBSYSTEM=="kvmfr", OWNER="${user}", GROUP="kvm", MODE="0660", TAG+="uaccess"
+          SUBSYSTEM=="kvmfr", GROUP="kvm", MODE="0660", TAG+="uaccess"
         '';
         destination = "/etc/udev/rules.d/70-kvmfr.rules";
       }
