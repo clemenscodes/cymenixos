@@ -349,28 +349,6 @@ in {
                       };
                     }
                   ];
-                  "qemu:commandline" = [
-                    {
-                      "qemu:arg" = {
-                        value = "-device";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "-object";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':256M,'share':true}";
-                      };
-                    }
-                  ];
                   type = "kvm";
                   name = "win11";
                   uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
@@ -815,6 +793,16 @@ in {
                       };
                       source = {
                         network = "default";
+                      };
+                    };
+                    shmem = {
+                      name = "looking-glass";
+                      model = {
+                        type = "ivshmem-plain";
+                      };
+                      size = {
+                        unit = "M";
+                        count = 256;
                       };
                     };
                     channel = [
