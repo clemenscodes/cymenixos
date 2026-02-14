@@ -20,14 +20,14 @@
     };
   };
 
-  version = "20.3.1";
+  version = "20.3.2";
 
   davinciStudioSrc =
     pkgs.runCommand "davinci-resolve-studio-src.zip"
     {
       outputHashMode = "recursive";
       outputHashAlgo = "sha256";
-      outputHash = "sha256-JaP0O+bSc9wd2YTqRwRQo35kdDkq//5WMb+7MtC9S/A=";
+      outputHash = "sha256-wUrx/cMIyMI+sYi8n8xHH4Q7c0MSAoGbpI0E1NtzcXg=";
 
       nativeBuildInputs = [pkgs.curl pkgs.jq];
       SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
