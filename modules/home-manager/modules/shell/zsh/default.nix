@@ -87,6 +87,8 @@ in {
         };
         dotDir = "${config.xdg.configHome}/zsh";
         shellAliases = {
+          hex = "printf '%x\n'";
+          dec = "printf '%d\n'";
           sudo = "sudo ";
           ssh = "kitten ssh";
           g = "lazygit";
