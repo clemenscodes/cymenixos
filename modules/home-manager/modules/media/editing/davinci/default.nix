@@ -36,7 +36,35 @@ in {
       packages = [
         (
           if cfg.davinci.studio
-          then pkgs.davinci-resolve-studio
+          then
+            pkgs.davinci-resolve-studio.overrideAttrs (old: {
+              passthru =
+                old.passthru
+                // {
+                  davinci = old.passthru.davinci.overrideAttrs (drv: {
+                    src = drv.src.overrideAttrs (srcOld: {
+                      buildCommand =
+                        lib.replaceStrings
+                        [
+                          ''                            curl \
+                                            --retry 3 --retry-delay 3''
+                        ]
+                        [
+                          ''                            curl \
+                                            -4 \
+                                            --http1.1 \
+                                            --retry 10 \
+                                            --retry-delay 5 \
+                                            --retry-connrefused \
+                                            --continue-at - \
+                                            --fail \
+                                            --location''
+                        ]
+                        srcOld.buildCommand;
+                    });
+                  });
+                };
+            })
           else pkgs.davinci-resolve
         )
       ];
