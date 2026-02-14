@@ -181,12 +181,6 @@ in {
         "rcu_nocbs=0-7,16-23"
         "kvmfr.static_size_mb=256"
       ];
-      blacklistedKernelModules = [
-        "nvidia"
-        "nvidia_drm"
-        "nvidia_modeset"
-        "nouveau"
-      ];
       kernelModules = [
         "vfio_virqfd"
         "vfio_pci"
@@ -198,6 +192,7 @@ in {
         options kvm_amd nested=1
         options vfio_iommu_type1 allow_unsafe_interrupts=1
         options vfio_pci disable_vga=1
+        options vfio-pci ids=10de:2206,10de:1aef
       '';
       initrd = {
         availableKernelModules = ["vfio-pci"];
@@ -863,7 +858,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 1 0 0;
+                          address = source_address 3 0 0;
                         };
                         rom = {
                           bar = false;
@@ -877,7 +872,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 1 0 1;
+                          address = source_address 3 0 1;
                         };
                         rom = {
                           bar = false;
@@ -1964,7 +1959,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 1 0 0;
+                          address = source_address 3 0 0;
                         };
                         rom = {
                           bar = false;
@@ -1978,7 +1973,7 @@ in {
                           name = "vfio";
                         };
                         source = {
-                          address = source_address 1 0 1;
+                          address = source_address 3 0 1;
                         };
                         rom = {
                           bar = false;
