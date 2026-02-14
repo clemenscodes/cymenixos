@@ -148,9 +148,6 @@
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux";
     };
-    mtkbt = {
-      url = "github:clemenscodes/linux-mediatek-mt6639-bluetooth-kernel-module";
-    };
   };
   outputs = {
     self,
