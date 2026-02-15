@@ -143,7 +143,7 @@
         virsh --connect qemu:///system start win11
       fi
 
-      looking-glass-client
+      __NV_DISABLE_EXPLICIT_SYNC=1 looking-glass-client
     '';
   };
   virtio-iso = pkgs.runCommand "virtio-win.iso" {} "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
@@ -370,16 +370,6 @@ in {
                     {
                       "qemu:arg" = {
                         value = "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':268435456,'share':true}";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "-global";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "q35-pcihost.pci-hole64-size=64G";
                       };
                     }
                   ];
