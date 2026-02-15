@@ -351,28 +351,6 @@ in {
                       };
                     }
                   ];
-                  "qemu:commandline" = [
-                    {
-                      "qemu:arg" = {
-                        value = "-device";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "-object";
-                      };
-                    }
-                    {
-                      "qemu:arg" = {
-                        value = "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':268435456,'share':true}";
-                      };
-                    }
-                  ];
                   type = "kvm";
                   name = "win11";
                   uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
@@ -758,22 +736,6 @@ in {
                           order = 1;
                         };
                       }
-                      {
-                        type = "file";
-                        device = "cdrom";
-                        driver = {
-                          name = "qemu";
-                          type = "raw";
-                        };
-                        source = {
-                          file = "${virtio-iso}";
-                        };
-                        target = {
-                          bus = "sata";
-                          dev = "sdc";
-                        };
-                        readonly = true;
-                      }
                     ];
                     filesystem = [
                       {
@@ -797,6 +759,16 @@ in {
                       };
                       source = {
                         network = "default";
+                      };
+                    };
+                    shmem = {
+                      name = "looking-glass";
+                      model = {
+                        type = "ivshmem-plain";
+                      };
+                      size = {
+                        unit = "M";
+                        count = 256;
                       };
                     };
                     channel = [
