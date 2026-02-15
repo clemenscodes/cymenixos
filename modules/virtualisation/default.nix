@@ -28,6 +28,7 @@ in {
           directories = ["/var/lib/libvirt"];
         };
       };
+      systemPackages = [pkgs.dnsmasq];
     };
     virtualisation = {
       libvirtd = {
