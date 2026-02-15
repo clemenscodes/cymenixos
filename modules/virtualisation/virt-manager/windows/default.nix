@@ -758,6 +758,22 @@ in {
                           order = 1;
                         };
                       }
+                      {
+                        type = "file";
+                        device = "cdrom";
+                        driver = {
+                          name = "qemu";
+                          type = "raw";
+                        };
+                        source = {
+                          file = "${virtio-iso}";
+                        };
+                        target = {
+                          bus = "sata";
+                          dev = "sdc";
+                        };
+                        readonly = true;
+                      }
                     ];
                     filesystem = [
                       {
