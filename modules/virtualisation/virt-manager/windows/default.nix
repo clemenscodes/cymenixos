@@ -372,6 +372,16 @@ in {
                         value = "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':268435456,'share':true}";
                       };
                     }
+                    {
+                      "qemu:arg" = {
+                        value = "-global";
+                      };
+                    }
+                    {
+                      "qemu:arg" = {
+                        value = "q35-pcihost.pci-hole64-size=64G";
+                      };
+                    }
                   ];
                   type = "kvm";
                   name = "win11";
