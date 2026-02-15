@@ -143,7 +143,7 @@
         virsh --connect qemu:///system start win11
       fi
 
-      __NV_DISABLE_EXPLICIT_SYNC=1 looking-glass-client
+      __NV_DISABLE_EXPLICIT_SYNC=1 looking-glass-client -f /dev/shm/looking-glass
     '';
   };
   virtio-iso = pkgs.runCommand "virtio-win.iso" {} "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
