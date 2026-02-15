@@ -664,13 +664,18 @@ in {
 
                 cputune.vcpupin =
                   builtins.genList
-                  (i: {
-                    vcpu = i;
-                    cpuset =
-                      if builtins.mod i 2 == 0
-                      then toString (i / 2)
-                      else toString (16 + (i / 2));
-                  })
+                  (
+                    i: let
+                      half = builtins.div i 2;
+                      isEven = i == builtins.mul half 2;
+                    in {
+                      vcpu = i;
+                      cpuset =
+                        if isEven
+                        then toString half
+                        else toString (16 + half);
+                    }
+                  )
                   16;
 
                 os = {
