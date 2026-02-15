@@ -63,13 +63,6 @@ in {
   config = lib.mkIf (cfg.enable && cfg.nvidia.enable) {
     boot = {
       blacklistedKernelModules = ["nouveau"];
-      kernelModules = [
-        "nvidia"
-        "nvidiafb"
-        "nvidia-modeset"
-        "nvidia-uvm"
-        "nvidia-drm"
-      ];
     };
     environment = {
       systemPackages = [

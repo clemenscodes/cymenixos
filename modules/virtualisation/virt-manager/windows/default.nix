@@ -172,7 +172,15 @@ in {
       };
     };
     boot = {
-      extraModulePackages = [config.boot.kernelPackages.kvmfr];
+      initrd = {
+        availableKernelModules = ["vfio-pci"];
+        kernelModules = [
+          "vfio_pci"
+          "vfio"
+          "vfio_iommu_type1"
+          "kvmfr"
+        ];
+      };
       kernelParams = [
         "amd_iommu=on"
         "iommu=pt"
@@ -182,10 +190,6 @@ in {
         "kvmfr.static_size_mb=256"
       ];
       kernelModules = [
-        "vfio_virqfd"
-        "vfio_pci"
-        "vfio"
-        "vfio_iommu_type1"
         "kvm-amd"
       ];
       extraModprobeConfig = ''
@@ -194,10 +198,7 @@ in {
         options vfio_pci disable_vga=1
         options vfio-pci ids=10de:2206,10de:1aef
       '';
-      initrd = {
-        availableKernelModules = ["vfio-pci"];
-        kernelModules = ["kvmfr"];
-      };
+      extraModulePackages = [config.boot.kernelPackages.kvmfr];
     };
     services.udev.packages = lib.singleton (
       pkgs.writeTextFile
