@@ -17,7 +17,7 @@
     if useLf
     then "lfcd"
     else if useYazi
-    then "yy"
+    then "y"
     else "cd";
 in {
   options = {
