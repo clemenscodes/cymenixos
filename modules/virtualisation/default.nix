@@ -33,7 +33,7 @@ in {
       libvirtd = {
         inherit (cfg.virtualisation) enable;
         qemu = {
-          package = pkgs.qemu_kvm;
+          package = pkgs.qemu_full;
           vhostUserPackages = [pkgs.virtiofsd];
           swtpm = {
             inherit (cfg.virtualisation) enable;
