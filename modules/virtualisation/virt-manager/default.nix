@@ -411,6 +411,10 @@ in {
           imports = [inputs.nixvirt.homeModules.default];
           virtualisation = {
             libvirt = {
+              inherit (cfg.virt-manager) enable;
+              swtpm = {
+                inherit (cfg.virt-manager) enable;
+              };
               connections = {
                 "qemu:///session" = {
                   inherit networks pools;
