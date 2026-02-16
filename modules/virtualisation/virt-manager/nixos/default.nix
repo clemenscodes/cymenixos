@@ -7,38 +7,36 @@
   cfg = config.modules.virtualisation.virt-manager;
   inherit (config.modules.users) user;
 
-  qemu-run-windows-looking-glass = pkgs.writeShellApplication {
-    name = "qemu-run-windows-looking-glass";
+  qemu-run-nixos-looking-glass = pkgs.writeShellApplication {
+    name = "qemu-run-nixos-looking-glass";
     runtimeInputs = [
       pkgs.libvirt
       pkgs.looking-glass-client
     ];
     text = ''
-      if ! virsh --connect qemu:///system domstate win11 | grep -q "running"; then
-        virsh --connect qemu:///system start win11
+      if ! virsh --connect qemu:///system domstate nixos | grep -q "running"; then
+        virsh --connect qemu:///system start nixos
       fi
 
       __NV_DISABLE_EXPLICIT_SYNC=1 looking-glass-client -f /dev/shm/looking-glass
     '';
   };
-
-  virtio-iso = pkgs.runCommand "virtio-win.iso" {} "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
 in {
   options = {
     modules = {
       virtualisation = {
         virt-manager = {
-          windows = {
-            enable = lib.mkEnableOption "Enable a Windows VM" // {default = false;};
+          nixos = {
+            enable = lib.mkEnableOption "Enable a NixOS VM" // {default = false;};
           };
         };
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.windows.enable) {
+  config = lib.mkIf (cfg.enable && cfg.nixos.enable) {
     environment = {
       systemPackages = [
-        qemu-run-windows-looking-glass
+        qemu-run-nixos-looking-glass
       ];
     };
 
@@ -47,11 +45,11 @@ in {
         ${user} = {
           xdg = {
             desktopEntries = {
-              win11 = {
-                name = "Windows 11™";
+              nixos = {
+                name = "NixOS™";
                 type = "Application";
-                exec = lib.getExe qemu-run-windows-looking-glass;
-                icon = ./win11.png;
+                exec = lib.getExe qemu-run-nixos-looking-glass;
+                icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
                 noDisplay = false;
                 startupNotify = true;
                 terminal = false;
@@ -78,7 +76,7 @@ in {
                   [
                     (
                       elem "libosinfo:os"
-                      [(attr "id" "http://microsoft.com/win/11")]
+                      [(attr "id" "http://nixos.org/nixos/unstable")]
                       []
                     )
                   ])
@@ -430,7 +428,7 @@ in {
                   };
                   nvram = {
                     template = "${pkgs.qemu}/share/qemu/edk2-i386-vars.fd";
-                    path = "/var/lib/libvirt/qemu/nvram/win11_VARS.fd";
+                    path = "/var/lib/libvirt/qemu/nvram/nixos_VARS.fd";
                   };
                   bootmenu.enable = false;
                   smbios.mode = "host";
@@ -463,22 +461,6 @@ in {
                           mode = "subsystem";
                           type = "pci";
                           managed = true;
-                          driver.name = "vfio";
-                          source.address = source_address 3 0 0;
-                          rom.bar = false;
-                        }
-                        {
-                          mode = "subsystem";
-                          type = "pci";
-                          managed = true;
-                          driver.name = "vfio";
-                          source.address = source_address 3 0 1;
-                          rom.bar = false;
-                        }
-                        {
-                          mode = "subsystem";
-                          type = "pci";
-                          managed = true;
                           source.address = source_address 10 0 0;
                         }
                       ];
@@ -490,33 +472,9 @@ in {
           in {
             domains = [
               (mkDomain {
-                name = "win11";
-                uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
+                name = "nixos";
+                uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd3721";
                 includeHostdev = true;
-                videoModel = "none";
-                disks = [
-                  {
-                    type = "file";
-                    device = "disk";
-                    driver = {
-                      name = "qemu";
-                      type = "qcow2";
-                      cache = "none";
-                      discard = "unmap";
-                    };
-                    source.file = "/var/lib/libvirt/images/win11.qcow2";
-                    target = {
-                      dev = "sda";
-                      bus = "sata";
-                    };
-                    boot.order = 1;
-                  }
-                ];
-              })
-
-              (mkDomain {
-                name = "win11-install";
-                uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371f";
                 videoModel = "virtio";
                 disks = [
                   {
@@ -527,80 +485,7 @@ in {
                       type = "raw";
                     };
                     source = {
-                      file = "/var/lib/libvirt/images/win11.iso";
-                      startupPolicy = "mandatory";
-                    };
-                    target = {
-                      bus = "sata";
-                      dev = "sdb";
-                    };
-                    boot.order = 1;
-                    readonly = true;
-                  }
-                  {
-                    type = "file";
-                    device = "disk";
-                    driver = {
-                      name = "qemu";
-                      type = "qcow2";
-                      cache = "none";
-                      discard = "unmap";
-                    };
-                    source.file = "/var/lib/libvirt/images/win11.qcow2";
-                    target = {
-                      dev = "sda";
-                      bus = "sata";
-                    };
-                    boot.order = 2;
-                  }
-                  {
-                    type = "file";
-                    device = "cdrom";
-                    driver = {
-                      name = "qemu";
-                      type = "raw";
-                    };
-                    source.file = "${virtio-iso}";
-                    target = {
-                      bus = "sata";
-                      dev = "sdc";
-                    };
-                    readonly = true;
-                  }
-                ];
-              })
-
-              (mkDomain {
-                name = "win11-display";
-                uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd3720";
-                includeHostdev = true;
-                videoModel = "virtio";
-                disks = [
-                  {
-                    type = "file";
-                    device = "disk";
-                    driver = {
-                      name = "qemu";
-                      type = "qcow2";
-                      cache = "none";
-                      discard = "unmap";
-                    };
-                    source.file = "/var/lib/libvirt/images/win11.qcow2";
-                    target = {
-                      dev = "sda";
-                      bus = "sata";
-                    };
-                    boot.order = 1;
-                  }
-                  {
-                    type = "file";
-                    device = "cdrom";
-                    driver = {
-                      name = "qemu";
-                      type = "raw";
-                    };
-                    source = {
-                      file = "/var/lib/libvirt/images/win11.iso";
+                      file = null;
                       startupPolicy = "mandatory";
                     };
                     target = {
@@ -612,17 +497,19 @@ in {
                   }
                   {
                     type = "file";
-                    device = "cdrom";
+                    device = "disk";
                     driver = {
                       name = "qemu";
-                      type = "raw";
+                      type = "qcow2";
+                      cache = "none";
+                      discard = "unmap";
                     };
-                    source.file = "${virtio-iso}";
+                    source.file = "/var/lib/libvirt/images/nixos.qcow2";
                     target = {
+                      dev = "sda";
                       bus = "sata";
-                      dev = "sdc";
                     };
-                    readonly = true;
+                    boot.order = 2;
                   }
                 ];
               })
