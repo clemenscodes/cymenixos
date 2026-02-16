@@ -5,7 +5,6 @@
   ...
 }: {
   imports = [
-    inputs.cymenixos.nixosModules.${system}.default
     inputs.mtkwifi.nixosModules.mt7927
   ];
   mt7927 = {
