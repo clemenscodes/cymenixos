@@ -11,22 +11,6 @@
 }: let
   cfg = config.modules.virtualisation.virt-manager;
   inherit (config.modules.users) user;
-
-  qemu-run-nixos-looking-glass = pkgs.writeShellApplication {
-    name = "qemu-run-nixos-looking-glass";
-    runtimeInputs = [
-      pkgs.libvirt
-      pkgs.looking-glass-client
-    ];
-    text = ''
-      if ! virsh --connect qemu:///system domstate nixos | grep -q "running"; then
-        virsh --connect qemu:///system start nixos
-      fi
-
-      __NV_DISABLE_EXPLICIT_SYNC=1 looking-glass-client -f /dev/shm/looking-glass
-    '';
-  };
-
   vmConfig = inputs.nixpkgs.lib.nixosSystem {
     specialArgs = {
       inherit system;
@@ -47,16 +31,10 @@
         ];
         environment = {
           systemPackages = with pkgs; [
-            tigervnc
-            virt-manager
-            virt-viewer
             spice
             spice-gtk
             spice-protocol
             libguestfs
-            virtio-win
-            win-spice
-            looking-glass-client
             scream
           ];
         };
@@ -445,36 +423,10 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.nixos.enable) {
-    environment = {
-      systemPackages = [
-        qemu-run-nixos-looking-glass
-      ];
-    };
-
-    home-manager = lib.mkIf (config.modules.home-manager.enable) {
-      users = {
-        ${user} = {
-          xdg = {
-            desktopEntries = {
-              nixos = {
-                name = "NixOS™";
-                type = "Application";
-                exec = lib.getExe qemu-run-nixos-looking-glass;
-                icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-                noDisplay = false;
-                startupNotify = true;
-                terminal = false;
-              };
-            };
-          };
-        };
-      };
-    };
-
     virtualisation = {
       libvirt = {
         connections = {
-          "qemu:///system" = let
+          "qemu:///session" = let
             source_address = bus: slot: function: {
               inherit bus slot function;
               domain = 0;
@@ -582,10 +534,6 @@ in {
                 {
                   policy = "disable";
                   name = "hypervisor";
-                }
-                {
-                  policy = "require";
-                  name = "vmx";
                 }
                 {
                   policy = "disable";
@@ -721,24 +669,8 @@ in {
 
               graphics = [
                 {
-                  type = "spice";
-                  autoport = true;
-                  listen = {
-                    type = "address";
-                    address = "127.0.0.1";
-                  };
-                  image.compression = false;
-                  gl.enable = false;
-                }
-                {
-                  type = "vnc";
-                  port = -1;
-                  autoport = true;
-                  hack = "0.0.0.0";
-                  listen = {
-                    type = "address";
-                    address = "0.0.0.0";
-                  };
+                  type = "sdl";
+                  gl.enable = true;
                 }
               ];
 
@@ -863,6 +795,7 @@ in {
                   // {
                     disk = disks;
                     video.model.type = videoModel;
+                    video.model.acceleration.accel3d = true;
                   }
                   // (
                     if includeHostdev

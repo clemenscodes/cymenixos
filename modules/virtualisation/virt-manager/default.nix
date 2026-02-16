@@ -346,52 +346,57 @@ in {
           inherit (config.modules.virtualisation) enable;
         };
 
-        connections = {
+        connections = let
+          networks = [
+            {
+              definition = inputs.nixvirt.lib.network.writeXML {
+                name = "default";
+                uuid = "fd64df3b-30ed-495c-ba06-b2f292c10d92";
+                forward.mode = "nat";
+                forward.nat.port = {
+                  start = 1024;
+                  end = 65535;
+                };
+                bridge = {
+                  name = "virbr0";
+                  stp = true;
+                  delay = 0;
+                };
+                ip = {
+                  address = "192.168.122.1";
+                  netmask = "255.255.255.0";
+                  dhcp.range = {
+                    start = "192.168.122.2";
+                    end = "192.168.122.254";
+                  };
+                };
+              };
+              active = true;
+            }
+          ];
+          pools = [
+            {
+              definition = inputs.nixvirt.lib.pool.writeXML {
+                name = "default";
+                uuid = "8c75fdf7-68e0-4089-8a34-0ab56c7c3c40";
+                type = "dir";
+                target = {
+                  path = "/var/lib/libvirt/images";
+                  permissions = {
+                    mode = "0711";
+                    owner = "0";
+                    group = "0";
+                  };
+                };
+              };
+            }
+          ];
+        in {
           "qemu:///system" = {
-            networks = [
-              {
-                definition = inputs.nixvirt.lib.network.writeXML {
-                  name = "default";
-                  uuid = "fd64df3b-30ed-495c-ba06-b2f292c10d92";
-                  forward.mode = "nat";
-                  forward.nat.port = {
-                    start = 1024;
-                    end = 65535;
-                  };
-                  bridge = {
-                    name = "virbr0";
-                    stp = true;
-                    delay = 0;
-                  };
-                  ip = {
-                    address = "192.168.122.1";
-                    netmask = "255.255.255.0";
-                    dhcp.range = {
-                      start = "192.168.122.2";
-                      end = "192.168.122.254";
-                    };
-                  };
-                };
-                active = true;
-              }
-            ];
-            pools = [
-              {
-                definition = inputs.nixvirt.lib.pool.writeXML {
-                  name = "default";
-                  uuid = "8c75fdf7-68e0-4089-8a34-0ab56c7c3c40";
-                  type = "dir";
-                  target = {
-                    path = "/var/lib/libvirt/images";
-                    permissions = {
-                      mode = "0711";
-                      owner = "0";
-                      group = "0";
-                    };
-                  };
-                };
-              }
-            ];
+            inherit networks pools;
+          };
+          "qemu:///session" = {
+            inherit networks pools;
           };
         };
       };
