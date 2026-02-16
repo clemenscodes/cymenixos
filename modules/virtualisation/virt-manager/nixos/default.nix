@@ -45,6 +45,21 @@
           (import "${cymenixos}/modules" {inherit inputs pkgs lib cymenixos;})
           inputs.mtkwifi.nixosModules.mt7927
         ];
+        environment = {
+          systemPackages = with pkgs; [
+            tigervnc
+            virt-manager
+            virt-viewer
+            spice
+            spice-gtk
+            spice-protocol
+            libguestfs
+            virtio-win
+            win-spice
+            looking-glass-client
+            scream
+          ];
+        };
         mt7927 = {
           enable = true;
         };
