@@ -751,7 +751,7 @@ in {
                           mode = "subsystem";
                           type = "pci";
                           managed = true;
-                          source.address = source_address "0x0a" 0 0;
+                          source.address = source_address 10 0 0;
                         }
                       ];
                     }
