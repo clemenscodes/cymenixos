@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   lib,
+  cymenixos,
   ...
 }: {
   config,
@@ -28,12 +29,14 @@
 
   vmConfig = inputs.nixpkgs.lib.nixosSystem {
     specialArgs = {
-      inherit inputs system;
-      inherit (inputs) nixpkgs;
+      inherit system;
+      inherit (cymenixos) inputs;
+      inherit (cymenixos.inputs) nixpkgs;
+      self = cymenixos;
     };
     modules = [
       ./configuration.nix
-      (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
+      (import "${cymenixos}/modules/iso" {inherit inputs pkgs lib;})
       ({...}: {
         modules = {
           iso = {

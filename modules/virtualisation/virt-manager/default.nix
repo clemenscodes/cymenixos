@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   lib,
+  cymenixos,
   ...
 }: {config, ...}: let
   cfg = config.modules.virtualisation;
@@ -168,7 +169,7 @@
 in {
   imports = [
     inputs.nixvirt.nixosModules.default
-    (import ./nixos {inherit inputs pkgs lib;})
+    (import ./nixos {inherit inputs pkgs lib cymenixos;})
     (import ./windows {inherit inputs pkgs lib;})
   ];
   options = {

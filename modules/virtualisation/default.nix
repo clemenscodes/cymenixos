@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   lib,
+  cymenixos,
   ...
 }: {config, ...}: let
   cfg = config.modules;
@@ -11,7 +12,7 @@ in {
   imports = [
     (import ./docker {inherit inputs pkgs lib;})
     (import ./podman {inherit inputs pkgs lib;})
-    (import ./virt-manager {inherit inputs pkgs lib;})
+    (import ./virt-manager {inherit inputs pkgs lib cymenixos;})
     (import ./waydroid {inherit inputs pkgs lib;})
   ];
   options = {

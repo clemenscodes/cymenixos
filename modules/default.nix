@@ -33,7 +33,7 @@
     (import ./themes {inherit inputs pkgs lib;})
     (import ./time {inherit inputs pkgs lib;})
     (import ./users {inherit inputs pkgs lib;})
-    (import ./virtualisation {inherit inputs pkgs lib;})
+    (import ./virtualisation {inherit inputs pkgs lib cymenixos;})
     (import ./wsl {inherit inputs pkgs lib;})
     (import ./xdg {inherit inputs pkgs lib;})
   ];
