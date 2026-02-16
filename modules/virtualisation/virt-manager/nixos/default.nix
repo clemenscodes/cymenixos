@@ -3,7 +3,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.virtualisation.virt-manager;
   inherit (config.modules.users) user;
 
@@ -21,6 +25,27 @@
       __NV_DISABLE_EXPLICIT_SYNC=1 looking-glass-client -f /dev/shm/looking-glass
     '';
   };
+
+  vmConfig = inputs.nixpkgs.lib.nixosSystem {
+    specialArgs = {
+      inherit inputs system;
+      inherit (inputs) nixpkgs;
+    };
+    modules = [
+      ./configuration.nix
+      (import "${inputs.cymenixos}/modules/iso" {inherit inputs pkgs lib;})
+      ({...}: {
+        modules = {
+          iso = {
+            enable = true;
+            fast = true;
+          };
+        };
+      })
+    ];
+  };
+
+  vmIso = vmConfig.config.system.build.isoImage;
 in {
   options = {
     modules = {
@@ -485,7 +510,7 @@ in {
                       type = "raw";
                     };
                     source = {
-                      file = null;
+                      file = "${vmIso}/iso/${vmIso.isoName}";
                       startupPolicy = "mandatory";
                     };
                     target = {
