@@ -417,7 +417,7 @@ in {
               };
               connections = {
                 "qemu:///session" = {
-                  inherit networks pools;
+                  inherit pools;
                 };
               };
             };
