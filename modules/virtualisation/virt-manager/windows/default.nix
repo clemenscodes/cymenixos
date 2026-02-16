@@ -188,7 +188,6 @@ in {
         "nohz_full=0-7,16-23"
         "rcu_nocbs=0-7,16-23"
         "kvmfr.static_size_mb=256"
-        "pcie_acs_override=downstream,multifunction"
       ];
       kernelModules = [
         "kvm-amd"
