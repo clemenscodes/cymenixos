@@ -492,7 +492,7 @@ in {
                       bus = "sata";
                       dev = "sdb";
                     };
-                    boot.order = 2;
+                    boot.order = 1;
                     readonly = true;
                   }
                   {
