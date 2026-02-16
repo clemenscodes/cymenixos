@@ -669,6 +669,16 @@ in {
 
               graphics = [
                 {
+                  type = "spice";
+                  autoport = true;
+                  listen = {
+                    type = "address";
+                    address = "127.0.0.1";
+                  };
+                  image.compression = false;
+                  gl.enable = false;
+                }
+                {
                   type = "sdl";
                   gl.enable = true;
                 }
