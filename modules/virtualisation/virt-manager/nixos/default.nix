@@ -42,7 +42,7 @@
         ...
       }: {
         imports = [
-          (import "${cymenixos}/modules" {inherit inputs pkgs lib;})
+          (import "${cymenixos}/modules" {inherit inputs pkgs lib cymenixos;})
           inputs.mtkwifi.nixosModules.mt7927
         ];
         mt7927 = {
