@@ -25,5 +25,15 @@ in {
     environment = {
       systemPackages = with pkgs; [tigervnc];
     };
+    services.udev.packages = lib.singleton (
+      pkgs.writeTextFile
+      {
+        name = "vfio";
+        text = ''
+          SUBSYSTEM=="vfio", GROUP="kvm", MODE="0660", TAG+="uaccess"
+        '';
+        destination = "/etc/udev/rules.d/70-vfio.rules";
+      }
+    );
   };
 }
