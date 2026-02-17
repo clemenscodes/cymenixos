@@ -203,7 +203,7 @@
 in {
   imports = [
     inputs.nixvirt.nixosModules.default
-    (import ./nixos {inherit inputs pkgs lib cymenixos;})
+    # (import ./nixos {inherit inputs pkgs lib cymenixos;})
     (import ./windows {inherit inputs pkgs lib;})
   ];
   options = {
