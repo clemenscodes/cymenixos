@@ -334,12 +334,13 @@ in {
           destination = "/etc/udev/rules.d/70-kvmfr.rules";
         }
       )
+
       (
-        pkgs.writeTextFile
-        {
+        pkgs.writeTextFile {
           name = "vfio";
           text = ''
-            SUBSYSTEM=="vfio", GROUP="kvm", MODE="0660", TAG+="uaccess"
+            KERNEL=="vfio", GROUP="kvm", MODE="0660"
+            SUBSYSTEM=="vfio", KERNEL=="[0-9]*", GROUP="kvm", MODE="0660"
           '';
           destination = "/etc/udev/rules.d/70-vfio.rules";
         }
