@@ -78,6 +78,22 @@ in {
             });
           '';
       };
+      pam = {
+        loginLimits = [
+          {
+            domain = user;
+            type = "soft";
+            item = "memlock";
+            value = "unlimited";
+          }
+          {
+            domain = user;
+            type = "hard";
+            item = "memlock";
+            value = "unlimited";
+          }
+        ];
+      };
     };
     home-manager = lib.mkIf (cfg.home-manager.enable && isDesktop) {
       users = {
