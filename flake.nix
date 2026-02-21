@@ -148,9 +148,6 @@
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux";
     };
-    mtkwifi = {
-      url = "github:clemenscodes/mt7927-rs";
-    };
   };
   outputs = {
     self,

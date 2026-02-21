@@ -27,7 +27,6 @@
       }: {
         imports = [
           (import "${cymenixos}/modules" {inherit inputs pkgs lib cymenixos;})
-          inputs.mtkwifi.nixosModules.mt7927
         ];
         environment = {
           systemPackages = with pkgs; [
@@ -37,9 +36,6 @@
             libguestfs
             scream
           ];
-        };
-        mt7927 = {
-          enable = true;
         };
         modules = {
           enable = true;
