@@ -24,7 +24,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.virtualisation.enable) {
     environment = {
-      persistence = {
+      persistence = lib.mkIf cfg.boot.enable {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = ["/var/lib/libvirt"];
         };
