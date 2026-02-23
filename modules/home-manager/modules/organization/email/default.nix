@@ -236,10 +236,11 @@ in {
       notmuch = let
         neomuttAccounts =
           lib.filter (a: a.useNeomutt) cfg.email.accounts;
+
         primaryAccount =
-          lib.findFirst (a: a.primary && a.useNeomutt) null cfg.email.accounts;
+          lib.findFirst (a: a.primary) null neomuttAccounts;
       in
-        lib.mkIf (cfg.email.enable && neomuttAccounts != []) {
+        lib.mkIf (cfg.email.enable && neomuttAccounts != [] && primaryAccount != null) {
           enable = true;
 
           maildir.synchronizeFlags = true;
