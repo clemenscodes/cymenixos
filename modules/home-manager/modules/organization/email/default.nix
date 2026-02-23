@@ -124,23 +124,27 @@ in {
           imapHost,
           imapPort,
           secretName,
+          useNeomutt ? true,
         }: let
           pw = "${pkgs.bat}/bin/bat ${config.sops.secrets.${secretName}.path} --style=plain";
         in {
           inherit primary address userName realName;
           passwordCommand = pw;
-          imapnotify = {
+
+          thunderbird = {
+            inherit (cfg.email.thunderbird) enable;
+            profiles = [user];
+          };
+
+          imapnotify = lib.mkIf useNeomutt {
             boxes = ["Inbox"];
             enable = true;
             onNotify = "${pkgs.isync}/bin/mbsync -a";
             onNotifyPost = ''${pkgs.notmuch}/bin/notmuch new && ${pkgs.libnotify}/bin/notify-send "===> 📬 <===" "Mail received"'';
           };
-          thunderbird = {
-            inherit (cfg.email.thunderbird) enable;
-            profiles = [user];
-          };
-          mbsync = {
-            inherit (cfg.email) enable;
+
+          mbsync = lib.mkIf useNeomutt {
+            enable = true;
             create = "both";
             expunge = "both";
             patterns = ["*"];
@@ -154,19 +158,20 @@ in {
               };
             };
           };
-          notmuch = {
-            inherit (cfg.email) enable;
-            neomutt = {
-              inherit (cfg.email) enable;
-            };
+
+          notmuch = lib.mkIf useNeomutt {
+            enable = true;
+            neomutt.enable = true;
           };
-          neomutt = {
-            inherit (cfg.email) enable;
+
+          neomutt = lib.mkIf useNeomutt {
+            enable = true;
             sendMailCommand = "${pkgs.msmtp}/bin/msmtp -a ${address}";
             extraConfig = ''
               set sort = reverse-date
             '';
           };
+
           msmtp = {
             inherit (cfg.email) enable;
             extraConfig = {
@@ -192,12 +197,27 @@ in {
       in {
         maildirBasePath = "${config.xdg.dataHome}/mail";
         accounts = let
-          mkAccount = config: {
-            "${config.address}" = mkEmailAccount {
-              inherit (config) primary address realName userName smtpHost smtpPort imapHost imapPort secretName;
+          mkAccount = accountCfg: {
+            "${accountCfg.address}" = mkEmailAccount {
+              inherit
+                (accountCfg)
+                primary
+                address
+                realName
+                userName
+                smtpHost
+                smtpPort
+                imapHost
+                imapPort
+                secretName
+                ;
+
+              useNeomutt = accountCfg.useNeomutt or true;
             };
           };
-          mergeAttrs = attrs: builtins.foldl' (acc: attr: acc // attr) {} attrs;
+
+          mergeAttrs = attrs:
+            builtins.foldl' (acc: attr: acc // attr) {} attrs;
         in
           mergeAttrs (map mkAccount cfg.email.accounts);
       };
