@@ -233,27 +233,31 @@ in {
       mbsync = {
         inherit (cfg.email) enable;
       };
-      notmuch = {
-        inherit (cfg.email) enable;
-        maildir = {
-          synchronizeFlags = true;
-        };
-        new = {
-          tags = [
-            "unread"
-            "inbox"
-          ];
-          ignore = [
-            ".mbsyncstate"
-            ".uivalidity"
-          ];
-        };
-        extraConfig = {
-          crypto = {
-            gpg_path = "gpg";
+      notmuch = let
+        neomuttAccounts =
+          lib.filter (a: a.useNeomutt) cfg.email.accounts;
+        primaryAccount =
+          lib.findFirst (a: a.primary && a.useNeomutt) null cfg.email.accounts;
+      in
+        lib.mkIf (cfg.email.enable && neomuttAccounts != []) {
+          enable = true;
+
+          maildir.synchronizeFlags = true;
+
+          new = {
+            tags = ["unread" "inbox"];
+            ignore = [".mbsyncstate" ".uivalidity"];
+          };
+
+          extraConfig = {
+            user = {
+              name = primaryAccount.realName;
+              primary_email = primaryAccount.address;
+            };
+
+            crypto.gpg_path = "gpg";
           };
         };
-      };
       neomutt = {
         inherit (cfg.email) enable;
         sidebar = {
