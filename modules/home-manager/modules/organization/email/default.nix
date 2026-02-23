@@ -49,6 +49,10 @@ in {
                 secretName = lib.mkOption {
                   type = lib.types.str;
                 };
+                useNeomutt = lib.mkOption {
+                  type = lib.types.bool;
+                  default = true;
+                };
               };
             });
             default = [];
