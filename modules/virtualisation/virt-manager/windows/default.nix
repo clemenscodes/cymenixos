@@ -475,12 +475,6 @@ in {
                           source.address = source_address 3 0 1;
                           rom.bar = false;
                         }
-                        {
-                          mode = "subsystem";
-                          type = "pci";
-                          managed = true;
-                          source.address = source_address 10 0 0;
-                        }
                       ];
                     }
                     else {}
