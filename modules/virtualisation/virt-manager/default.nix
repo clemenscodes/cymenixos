@@ -242,7 +242,7 @@ in {
         options kvm_amd nested=1
         options vfio_iommu_type1 allow_unsafe_interrupts=1
         options vfio_pci disable_vga=1
-        options vfio-pci ids=10de:2206,10de:1aef,14c3:7927
+        options vfio-pci ids=10de:2206,10de:1aef
       '';
       extraModulePackages = [config.boot.kernelPackages.kvmfr];
     };
