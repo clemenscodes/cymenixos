@@ -37,6 +37,7 @@ in {
               jnoortheen.nix-ide
               mkhl.direnv
               kamadorueda.alejandra
+              dioxuslabs.dioxus
               ms-playwright.playwright
               esbenp.prettier-vscode
               rust-lang.rust-analyzer

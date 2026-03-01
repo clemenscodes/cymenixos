@@ -14,6 +14,8 @@ in {
               "css.lint.unknownAtRules" = "ignore";
               "debug.terminal.clearBeforeReusing" = true;
               "debug.console.fontFamily" = "Lilex Nerd Font";
+              "dioxus.formatOnSave" = "followFormatOnSave";
+              "editor.formatOnSave" = true;
               "editor.suggestSelection" = "first";
               "editor.scrollbar.horizontal" = "hidden";
               "editor.scrollbar.vertical" = "hidden";
@@ -75,7 +77,7 @@ in {
                 "asvetliakov.vscode-neovim" = 1;
               };
               "extensions.ignoreRecommendations" = true;
-              "files.autoSave" = "afterDelay";
+              "files.autoSave" = "off";
               "files.autoSaveDelay" = 300;
               "files.eol" = "\n";
               "git.ignoreLimitWarning" = true;
@@ -144,9 +146,9 @@ in {
                 }
                 {
                   key = "i";
-                  name = "Format document";
+                  name = "Save document";
                   type = "command";
-                  command = "editor.action.formatDocument";
+                  command = "workbench.action.files.save";
                 }
                 {
                   key = "o";
