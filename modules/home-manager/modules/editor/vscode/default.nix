@@ -18,6 +18,7 @@
           "vscode-extension-ms-vscode-remote-remote-containers"
           "vscode-extension-ms-vscode-remote-remote-wsl"
           "vscode-extension-ms-vscode-remote-remote-ssh-edit"
+          "vscode-extension-anthropic-claude-code"
         ];
     };
     overlays = [inputs.nix-vscode-extensions.overlays.default];
@@ -85,7 +86,7 @@ in {
         };
       packages = [codevim];
       persistence = lib.mkIf osConfig.modules.boot.enable {
-       "${osConfig.modules.boot.impermanence.persistPath}" = {
+        "${osConfig.modules.boot.impermanence.persistPath}" = {
           directories = [
             ".vscode"
             ".config/Code"
