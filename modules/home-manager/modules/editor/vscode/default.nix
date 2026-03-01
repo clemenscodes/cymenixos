@@ -19,6 +19,7 @@
           "vscode-extension-ms-vscode-remote-remote-wsl"
           "vscode-extension-ms-vscode-remote-remote-ssh-edit"
           "vscode-extension-anthropic-claude-code"
+          "claude-code"
         ];
     };
     overlays = [inputs.nix-vscode-extensions.overlays.default];
