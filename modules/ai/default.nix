@@ -67,6 +67,9 @@ in {
       };
     };
     systemd = {
+      services.ollama.serviceConfig = {
+        StateDirectory = lib.mkForce [];
+      };
       tmpfiles = {
         rules = [
           "d /var/lib/ai 0777 root root -"
