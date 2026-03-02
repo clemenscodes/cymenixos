@@ -73,6 +73,7 @@ in {
       openFirewall = true;
       syncModels = true;
       package = pkgs.ollama-cuda;
+      acceleration = "cuda";
       user = "ollama";
       group = "ollama";
       home = "/var/lib/ai/ollama";
