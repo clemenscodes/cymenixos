@@ -47,13 +47,10 @@
     };
   };
 in {
-  options.modules.ai.enable =
-    lib.mkEnableOption "Enable AI support";
+  options.modules.ai.enable = lib.mkEnableOption "Enable AI support";
   config = lib.mkIf (cfg.enable && cfg.ai.enable) {
-    environment.persistence."${persistPath}" = {
-      directories = [
-        "/var/lib/ai"
-      ];
+    environment.persistence."${persistPath}" = lib.mkIf (config.modules.boot.enable) {
+      directories = ["/var/lib/ai"];
     };
     environment.systemPackages = with pkgs; [
       lmstudio
@@ -82,7 +79,6 @@ in {
       models = "/var/lib/ai/ollama/models";
       loadModels = ["qwen3-coder-next:q4_K_M"];
     };
-
     systemd.services.ollama.serviceConfig = {
       StateDirectory = lib.mkForce [];
       ProtectSystem = lib.mkForce "full";
@@ -96,6 +92,19 @@ in {
       users = {
         ${config.modules.users.user} = {
           imports = [inputs.peon-ping.homeManagerModules.default];
+          home.activation.peonPacksInstall = let
+            cfg = config.home-manager.${config.modules.users.user}.programs.peon-ping;
+          in
+            lib.mkIf (cfg.installPacks != []) (
+              lib.hm.dag.entryAfter ["writeBoundary"] ''
+                ${cfg.package}/bin/peon packs install ${lib.concatStringsSep "," cfg.installPacks}
+              ''
+            );
+          home.persistence = lib.mkIf (config.modules.boot.enable) {
+            "${persistPath}" = {
+              directories = [".openpeon"];
+            };
+          };
           programs.peon-ping = {
             enable = true;
             package = inputs.peon-ping.packages.${pkgs.system}.default;
