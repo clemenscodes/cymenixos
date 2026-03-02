@@ -8,6 +8,7 @@
   ...
 }: let
   cfg = config.modules;
+  inherit (config.modules.boot.impermanence) persistPath;
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
@@ -32,10 +33,20 @@ in {
         lmstudio
         claude-code
       ];
+      persistence = {
+        "${persistPath}" = {
+          directories = [config.services.ollama.home];
+        };
+      };
     };
     services.ollama = {
       enable = true;
-      loadModels = [];
+      openFirewall = true;
+      syncModels = true;
+      package = pkgs.ollama-cuda;
+      loadModels = [
+        "qwen3-coder-next:q4_K_M"
+      ];
     };
   };
 }
