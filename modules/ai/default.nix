@@ -62,7 +62,7 @@ in {
       ];
       persistence = {
         "${persistPath}" = {
-          directories = [config.services.ollama.home];
+          directories = ["${config.services.ollama.home}/models"];
         };
       };
     };
