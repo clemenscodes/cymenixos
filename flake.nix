@@ -148,6 +148,9 @@
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux";
     };
+    peon-ping = {
+      url = "github:PeonPing/peon-ping";
+    };
   };
   outputs = {
     self,

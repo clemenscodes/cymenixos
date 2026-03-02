@@ -92,5 +92,32 @@ in {
         "/var/lib/ai/ollama/models"
       ];
     };
+    home-manager = {
+      users = {
+        ${config.modules.users.user} = {
+          imports = [inputs.peon-ping.homeManagerModules.default];
+          programs.peon-ping = {
+            enable = true;
+            package = inputs.peon-ping.packages.${pkgs.system}.default;
+            settings = {
+              default_pack = "peasant";
+              volume = 0.7;
+              enabled = true;
+              desktop_notifications = true;
+              categories = {
+                "session.start" = true;
+                "task.complete" = true;
+                "task.error" = true;
+                "input.required" = true;
+                "resource.limit" = true;
+                "user.spam" = true;
+              };
+            };
+            installPacks = ["peon" "peasant"];
+            enableZshIntegration = true;
+          };
+        };
+      };
+    };
   };
 }
