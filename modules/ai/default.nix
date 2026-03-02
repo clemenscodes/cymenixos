@@ -62,7 +62,7 @@ in {
       ];
       persistence = {
         "${persistPath}" = {
-          directories = ["/var/lib/private/ollama"];
+          directories = ["/var/lib/ollama"];
         };
       };
     };
