@@ -62,7 +62,7 @@ in {
       ];
       persistence = {
         "${persistPath}" = {
-          # directories = ["${config.services.ollama.home}/models"];
+          directories = ["var/lib/private/ollama"];
         };
       };
     };
@@ -71,6 +71,7 @@ in {
       openFirewall = true;
       syncModels = true;
       package = pkgs.ollama-cuda;
+      home = "/var/lib/ollama";
       loadModels = [
         "qwen3-coder-next:q4_K_M"
       ];
