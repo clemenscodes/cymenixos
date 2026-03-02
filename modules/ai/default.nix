@@ -47,49 +47,49 @@
     };
   };
 in {
-  options = {
-    modules = {
-      ai = {
-        enable = lib.mkEnableOption "Enable AI support" // {default = false;};
-      };
-    };
-  };
+  options.modules.ai.enable =
+    lib.mkEnableOption "Enable AI support";
   config = lib.mkIf (cfg.enable && cfg.ai.enable) {
-    environment = {
-      systemPackages = with pkgs; [
-        lmstudio
-        claude-code
+    environment.persistence."${persistPath}" = {
+      directories = [
+        "/var/lib/ai"
       ];
-      persistence = {
-        "${persistPath}" = {
-          directories = ["/var/lib/ai"];
-        };
-      };
     };
-    systemd = {
-      services.ollama.serviceConfig = {
-        StateDirectory = lib.mkForce [];
-        ReadWritePaths = lib.mkForce [
-          "/var/lib/ai"
-          "/var/lib/ai/ollama"
-          "/var/lib/ai/ollama/models"
-        ];
-      };
-      tmpfiles = {
-        rules = [
-          "d /var/lib/ai 0755 root root -"
-          "d /var/lib/ai/ollama 0750 ollama ollama -"
-        ];
-      };
+    environment.systemPackages = with pkgs; [
+      lmstudio
+      claude-code
+    ];
+    users.users.ollama = {
+      isSystemUser = true;
+      group = "ollama";
+      home = "/var/lib/ai/ollama";
+      createHome = false;
     };
+    users.groups.ollama = {};
+    systemd.tmpfiles.rules = [
+      "d /var/lib/ai 0755 root root -"
+      "d /var/lib/ai/ollama 0750 ollama ollama -"
+      "d /var/lib/ai/ollama/models 0750 ollama ollama -"
+    ];
     services.ollama = {
       enable = true;
       openFirewall = true;
       syncModels = true;
       package = pkgs.ollama-cuda;
+      user = "ollama";
+      group = "ollama";
       home = "/var/lib/ai/ollama";
-      loadModels = [
-        "qwen3-coder-next:q4_K_M"
+      models = "/var/lib/ai/ollama/models";
+      loadModels = ["qwen3-coder-next:q4_K_M"];
+    };
+
+    systemd.services.ollama.serviceConfig = {
+      StateDirectory = lib.mkForce [];
+      ProtectSystem = lib.mkForce "full";
+      ReadWritePaths = lib.mkForce [
+        "/var/lib/ai"
+        "/var/lib/ai/ollama"
+        "/var/lib/ai/ollama/models"
       ];
     };
   };
