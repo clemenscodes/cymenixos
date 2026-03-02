@@ -62,8 +62,15 @@ in {
       ];
       persistence = {
         "${persistPath}" = {
-          directories = ["/var/lib"];
+          directories = ["/var/lib/ai"];
         };
+      };
+    };
+    systemd = {
+      tmpfiles = {
+        rules = [
+          "d /var/lib/ai 0777 root root -"
+        ];
       };
     };
     services.ollama = {
@@ -71,7 +78,7 @@ in {
       openFirewall = true;
       syncModels = true;
       package = pkgs.ollama-cuda;
-      home = "/var/lib/ollama";
+      home = "/var/lib/ai/ollama";
       loadModels = [
         "qwen3-coder-next:q4_K_M"
       ];
