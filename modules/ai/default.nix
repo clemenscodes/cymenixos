@@ -92,7 +92,7 @@ in {
       users = {
         ${config.modules.users.user} = {
           imports = [inputs.peon-ping.homeManagerModules.default];
-          home.activation.peonPacksInstall = let
+          home.activation.peonPacksInstallActual = let
             cfg = config.home-manager.users.${config.modules.users.user}.programs.peon-ping;
           in
             lib.mkIf (cfg.installPacks != []) (
