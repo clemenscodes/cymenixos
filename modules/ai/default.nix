@@ -12,10 +12,37 @@
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
+      cudaSupport = true;
       allowUnfreePredicate = pkg:
         builtins.elem (lib.getName pkg) [
           "lmstudio"
           "claude-code"
+          "nvidia-x11"
+          "nvidia-settings"
+          "nvidia-persistenced"
+          "cuda-merged"
+          "cuda_cuobjdump"
+          "cuda_gdb"
+          "cuda_nvcc"
+          "cuda_nvdisasm"
+          "cuda_nvprune"
+          "cuda_cccl"
+          "cuda_cudart"
+          "cuda_cupti"
+          "cuda_cuxxfilt"
+          "cuda_nvml_dev"
+          "cuda_nvrtc"
+          "cuda_nvtx"
+          "cuda_profiler_api"
+          "cuda_sanitizer_api"
+          "libcublas"
+          "libcufft"
+          "libcurand"
+          "libcusolver"
+          "libnvjitlink"
+          "libcusparse"
+          "libnpp"
+          "cudnn"
         ];
     };
   };
