@@ -96,7 +96,7 @@ in {
             cfg = config.home-manager.users.${config.modules.users.user}.programs.peon-ping;
           in
             lib.mkIf (cfg.installPacks != []) (
-              lib.hm.dag.entryAfter ["writeBoundary"] ''
+              inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
                 ${cfg.package}/bin/peon packs install ${lib.concatStringsSep "," cfg.installPacks}
               ''
             );
