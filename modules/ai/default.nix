@@ -93,7 +93,7 @@ in {
         ${config.modules.users.user} = {
           imports = [inputs.peon-ping.homeManagerModules.default];
           home.activation.peonPacksInstall = let
-            cfg = config.home-manager.${config.modules.users.user}.programs.peon-ping;
+            cfg = config.home-manager.users.${config.modules.users.user}.programs.peon-ping;
           in
             lib.mkIf (cfg.installPacks != []) (
               lib.hm.dag.entryAfter ["writeBoundary"] ''
