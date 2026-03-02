@@ -69,10 +69,16 @@ in {
     systemd = {
       services.ollama.serviceConfig = {
         StateDirectory = lib.mkForce [];
+        ReadWritePaths = lib.mkForce [
+          "/var/lib/ai"
+          "/var/lib/ai/ollama"
+          "/var/lib/ai/ollama/models"
+        ];
       };
       tmpfiles = {
         rules = [
-          "d /var/lib/ai 0777 root root -"
+          "d /var/lib/ai 0755 root root -"
+          "d /var/lib/ai/ollama 0750 ollama ollama -"
         ];
       };
     };
