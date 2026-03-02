@@ -92,14 +92,6 @@ in {
       users = {
         ${config.modules.users.user} = {
           imports = [inputs.peon-ping.homeManagerModules.default];
-          home.activation.peonPacksInstallActual = let
-            cfg = config.home-manager.users.${config.modules.users.user}.programs.peon-ping;
-          in
-            lib.mkIf (cfg.installPacks != []) (
-              inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
-                ${cfg.package}/bin/peon packs install ${lib.concatStringsSep "," cfg.installPacks}
-              ''
-            );
           home.persistence = lib.mkIf (config.modules.boot.enable) {
             "${persistPath}" = {
               directories = [".openpeon"];
@@ -113,6 +105,7 @@ in {
               volume = 0.7;
               enabled = true;
               desktop_notifications = true;
+              enableZshIntegration = true;
               categories = {
                 "session.start" = true;
                 "task.complete" = true;
@@ -122,8 +115,6 @@ in {
                 "user.spam" = true;
               };
             };
-            installPacks = ["peon" "peasant"];
-            enableZshIntegration = true;
           };
         };
       };
