@@ -28,6 +28,18 @@
     '';
   };
   peon = inputs.peon-ping.packages.${pkgs.system}.default;
+  peonsh = pkgs.stdenv.mkDerivation {
+    inherit (peon) pname version;
+    dontUnpack = true;
+    nativeBuildInputs = with pkgs; [makeWrapper];
+    installPhase = ''
+      mkdir -p $out/bin
+      makeyWrapper ${peon}/bin/peon $out/bin/peon \
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude
+      makeyWrapper ${peon}/bin/hook-handle-use $out/bin/hook-handle-use \
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude
+    '';
+  };
   packs = pkgs.fetchFromGitHub {
     owner = "PeonPing";
     repo = "og-packs";
@@ -52,7 +64,7 @@ in {
           home = {
             file = {
               ".claude/hooks/peon-ping/peon.sh" = {
-                source = "${peon}/bin/peon";
+                source = "${peonsh}/bin/peon";
               };
               ".claude/hooks/peon-ping/config.json" = {
                 source = (pkgs.formats.json {}).generate "peon-ping-config" config.home-manager.users.${user}.programs.peon-ping.settings;
@@ -68,8 +80,7 @@ in {
             };
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
-                directories = [".openpeon" ".claude"];
-                files = [".claude.json"];
+                directories = [".openpeon" ".config/claude"];
               };
             };
           };
@@ -85,7 +96,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                         }
                       ];
@@ -97,7 +108,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -110,7 +121,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -123,7 +134,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -134,7 +145,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/hook-handle-use";
+                          command = "${peonsh}/bin/hook-handle-use";
                           timeout = 5;
                         }
                       ];
@@ -146,7 +157,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -159,7 +170,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -172,7 +183,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -185,7 +196,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -198,7 +209,7 @@ in {
                       hooks = [
                         {
                           type = "command";
-                          command = "${peon}/bin/peon";
+                          command = "${peonsh}/bin/peon";
                           timeout = 10;
                           async = true;
                         }
@@ -210,7 +221,7 @@ in {
             };
             peon-ping = {
               enable = true;
-              package = inputs.peon-ping.packages.${pkgs.system}.default;
+              package = peonsh;
               enableZshIntegration = true;
               settings = {
                 default_pack = "peasant";
