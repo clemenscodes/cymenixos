@@ -68,7 +68,7 @@ in {
             packages = [claude peonsh];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
-                directories = [".openpeon" ".config/claude"];
+                directories = [".config/claude"];
               };
             };
             file = {
