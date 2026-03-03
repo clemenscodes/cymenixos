@@ -76,6 +76,14 @@ in {
                 source = "${peon}/share/peon-ping/skills";
                 recursive = true;
               };
+              ".config/claude/.claude/hooks/peon-ping/packs" = {
+                source = packs;
+                recursive = true;
+              };
+              ".openpeon/packs" = {
+                source = packs;
+                recursive = true;
+              };
               ".config/claude/.claude/settings.json" = {
                 source = (pkgs.formats.json {}).generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
@@ -208,10 +216,6 @@ in {
                     ];
                   };
                 };
-              };
-              ".openpeon/packs" = {
-                source = packs;
-                recursive = true;
               };
             };
             persistence = lib.mkIf (config.modules.boot.enable) {
