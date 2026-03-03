@@ -19,6 +19,7 @@
   };
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
+    dontUnpack = true;
     nativeBuildInputs = with pkgs; [makeBinaryWrapper];
     installPhase = ''
       mkdir -p $out/bin
