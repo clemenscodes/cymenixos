@@ -71,18 +71,18 @@ in {
               };
             };
             file = {
-              ".config/claude/.claude/hooks/peon-ping/peon.sh" = {
+              ".config/claude/hooks/peon-ping/peon.sh" = {
                 source = "${peonsh}/bin/peon";
               };
-              ".config/claude/.claude/hooks/peon-ping/skills" = {
+              ".config/claude/hooks/peon-ping/skills" = {
                 source = "${peon}/share/peon-ping/skills";
                 recursive = true;
               };
-              ".config/claude/.claude/hooks/peon-ping/packs" = {
+              ".config/claude/hooks/peon-ping/packs" = {
                 source = packs;
                 recursive = true;
               };
-              ".config/claude/.claude/hooks/peon-ping/config.json" = {
+              ".config/claude/hooks/peon-ping/config.json" = {
                 source = (pkgs.formats.json {}).generate "peon-ping-config" {
                   default_pack = "peasant";
                   volume = 0.7;
