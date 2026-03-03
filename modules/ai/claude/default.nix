@@ -18,7 +18,7 @@
     overlays = [inputs.claude.overlays.default];
   };
   claude = pkgs.stdenv.mkDerivation {
-    inherit (pkgs.claude-code) pname version src;
+    inherit (pkgs.claude-code) pname version;
     nativeBuildInputs = with pkgs; [makeBinaryWrapper];
     installPhase = ''
       mkdir -p $out/bin
