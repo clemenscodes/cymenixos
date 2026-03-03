@@ -45,6 +45,7 @@
           "cudnn"
         ];
     };
+    overlays = [inputs.claude.overlays.default];
   };
 in {
   options.modules.ai.enable = lib.mkEnableOption "Enable AI support";

@@ -151,6 +151,9 @@
     peon-ping = {
       url = "github:PeonPing/peon-ping";
     };
+    claude = {
+      url = "github:sadjow/claude-code-nix";
+    };
   };
   outputs = {
     self,
