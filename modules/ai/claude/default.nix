@@ -9,6 +9,7 @@
 }: let
   cfg = config.modules.ai;
   inherit (config.modules.boot.impermanence) persistPath;
+  inherit (config.modules.users) user;
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
@@ -30,13 +31,16 @@ in {
   config = lib.mkIf (cfg.enable && cfg.claude.enable) {
     home-manager = {
       users = {
-        ${config.modules.users.user} = {
+        ${user} = {
           imports = [inputs.peon-ping.homeManagerModules.default];
           home = {
             file = {
               ".claude/hooks/peon-ping/skills" = {
                 source = "${peon}/share/peon-ping/skills";
                 recursive = true;
+              };
+              ".claude/hooks/peon-ping/config.json" = {
+                source = (pkgs.formats.json {}).generate "peon-ping-config" config.home-manager.users.${user}.programs.peon-ping.settings;
               };
             };
             persistence = lib.mkIf (config.modules.boot.enable) {
