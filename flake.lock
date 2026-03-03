@@ -7701,11 +7701,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772533637,
-        "narHash": "sha256-M9ug3u/c2zpYC4oUybAKnHZv2B4f0ARQigibierHIEs=",
+        "lastModified": 1772558837,
+        "narHash": "sha256-rGA3gynruWorwIAiudxczr72VLvFe3oDVwCO35EYOQ0=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "ad2a19bb5c0da5d2cf293beefdf46d97f6cb10da",
+        "rev": "af814a1a85896dcb827bfb241a2cf6c8e014e964",
         "type": "github"
       },
       "original": {
@@ -7965,16 +7965,15 @@
         "nixpkgs": "nixpkgs_41"
       },
       "locked": {
-        "lastModified": 1772540392,
-        "narHash": "sha256-U0pYVqGuVihK2iToivbR+Ryj4pA54/mVaRCHVrBQbVg=",
+        "lastModified": 1772561630,
+        "narHash": "sha256-rnza10pU1zLAAqZKk0mWtE7V8Zq+o2OE+zE6zASEgTc=",
         "owner": "clemenscodes",
         "repo": "peon-ping",
-        "rev": "bff34e1326a2dfe006ae5449e11fad46630dd6e8",
+        "rev": "3b8aafd0288857f2316811279cf355c395cb4e21",
         "type": "github"
       },
       "original": {
         "owner": "clemenscodes",
-        "ref": "feature/nix-compatibility",
         "repo": "peon-ping",
         "type": "github"
       }

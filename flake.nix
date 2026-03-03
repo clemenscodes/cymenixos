@@ -149,7 +149,7 @@
       url = "github:clemenscodes/W3ChampionsOnLinux";
     };
     peon-ping = {
-      url = "github:clemenscodes/peon-ping/feature/nix-compatibility";
+      url = "github:clemenscodes/peon-ping";
     };
     claude = {
       url = "github:sadjow/claude-code-nix";
