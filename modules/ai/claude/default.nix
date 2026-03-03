@@ -70,7 +70,7 @@ in {
             packages = with pkgs; [claude peonsh codex];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
-                directories = [".config/claude"];
+                directories = [".config/claude" ".codex"];
               };
             };
             file = {
