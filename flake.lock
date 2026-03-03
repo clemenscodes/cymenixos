@@ -7965,11 +7965,11 @@
         "nixpkgs": "nixpkgs_41"
       },
       "locked": {
-        "lastModified": 1772539583,
-        "narHash": "sha256-ndcA75y0aGgeWysIiXK5+1vpsN+dil1Xg4lwCf+34Qg=",
+        "lastModified": 1772540392,
+        "narHash": "sha256-U0pYVqGuVihK2iToivbR+Ryj4pA54/mVaRCHVrBQbVg=",
         "owner": "clemenscodes",
         "repo": "peon-ping",
-        "rev": "120a7dbc16b9b7eb867ed532f0e9e8e5ddf375f4",
+        "rev": "bff34e1326a2dfe006ae5449e11fad46630dd6e8",
         "type": "github"
       },
       "original": {
