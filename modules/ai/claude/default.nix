@@ -35,12 +35,15 @@ in {
           imports = [inputs.peon-ping.homeManagerModules.default];
           home = {
             file = {
-              ".claude/hooks/peon-ping/skills" = {
-                source = "${peon}/share/peon-ping/skills";
-                recursive = true;
+              ".claude/hooks/peon-ping/peon.sh" = {
+                source = "${peon}/bin/peon";
               };
               ".claude/hooks/peon-ping/config.json" = {
                 source = (pkgs.formats.json {}).generate "peon-ping-config" config.home-manager.users.${user}.programs.peon-ping.settings;
+              };
+              ".claude/hooks/peon-ping/skills" = {
+                source = "${peon}/share/peon-ping/skills";
+                recursive = true;
               };
             };
             persistence = lib.mkIf (config.modules.boot.enable) {
