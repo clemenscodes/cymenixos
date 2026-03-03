@@ -61,8 +61,8 @@ in {
       users = {
         ${user} = {
           imports = [inputs.peon-ping.homeManagerModules.default];
-          packages = [claude];
           home = {
+            packages = [claude];
             file = {
               ".config/claude/.claude/hooks/peon-ping/peon.sh" = {
                 source = "${peonsh}/bin/peon";
