@@ -52,6 +52,12 @@ in {
   config = lib.mkIf (cfg.enable && cfg.ai.enable) {
     environment.persistence."${persistPath}" = lib.mkIf (config.modules.boot.enable) {
       directories = ["/var/lib/ai"];
+      users = {
+        ${config.modules.users.user} = {
+          directories = [".claude"];
+          files = [".claude.json"];
+        };
+      };
     };
     environment.systemPackages = with pkgs; [
       lmstudio
