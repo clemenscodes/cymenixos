@@ -35,9 +35,11 @@
     installPhase = ''
       mkdir -p $out/bin
       makeWrapper ${peon}/bin/peon $out/bin/peon \
-        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude \
+        --set PEON_DIR /home/${user}/.openpeon \
       makeWrapper ${peon}/bin/hook-handle-use $out/bin/hook-handle-use \
-        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude \
+        --set PEON_DIR /home/${user}/.openpeon \
     '';
   };
   packs = pkgs.fetchFromGitHub {
