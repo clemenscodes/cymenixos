@@ -24,7 +24,9 @@
     installPhase = ''
       mkdir -p $out/bin
       makeBinaryWrapper ${pkgs.claude-code}/bin/claude $out/bin/claude \
-        --set HOME /home/${user}/.config/claude
+        --set HOME /home/${user}/.config/claude \
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude \
+        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/.claude/hooks/peon-ping
     '';
   };
   peon = inputs.peon-ping.packages.${pkgs.system}.default;
