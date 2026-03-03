@@ -61,17 +61,151 @@ in {
       users = {
         ${user} = {
           imports = [inputs.peon-ping.homeManagerModules.default];
+          packages = [claude];
           home = {
             file = {
-              ".config/claude/hooks/peon-ping/peon.sh" = {
+              ".config/claude/.claude/hooks/peon-ping/peon.sh" = {
                 source = "${peonsh}/bin/peon";
               };
-              ".config/claude/hooks/peon-ping/config.json" = {
+              ".config/claude/.claude/hooks/peon-ping/config.json" = {
                 source = (pkgs.formats.json {}).generate "peon-ping-config" config.home-manager.users.${user}.programs.peon-ping.settings;
               };
-              ".config/claude/hooks/peon-ping/skills" = {
+              ".config/claude/.claude/hooks/peon-ping/skills" = {
                 source = "${peon}/share/peon-ping/skills";
                 recursive = true;
+              };
+              ".config/claude/.claude/settings.json" = {
+                source = (pkgs.formats.json {}).generate "claude-code-settings.json" {
+                  "$schema" = "https://json.schemastore.org/claude-code-settings.json";
+                  hooks = {
+                    SessionStart = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                          }
+                        ];
+                      }
+                    ];
+                    SessionEnd = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                    ];
+                    SubagentStart = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                    ];
+                    UserPromptSubmit = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/hook-handle-use";
+                            timeout = 5;
+                          }
+                        ];
+                      }
+                    ];
+                    Stop = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                    ];
+                    Notification = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                    ];
+                    PermissionRequest = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                    ];
+                    PostToolUseFailure = [
+                      {
+                        matcher = "Bash";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                    ];
+                    PreCompact = [
+                      {
+                        matcher = "";
+                        hooks = [
+                          {
+                            type = "command";
+                            command = "${peonsh}/bin/peon";
+                            timeout = 10;
+                            async = true;
+                          }
+                        ];
+                      }
+                    ];
+                  };
+                };
               };
               ".openpeon/packs" = {
                 source = packs;
@@ -88,136 +222,6 @@ in {
             claude-code = {
               enable = true;
               package = claude;
-              settings = {
-                hooks = {
-                  SessionStart = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                        }
-                      ];
-                    }
-                  ];
-                  SessionEnd = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                  ];
-                  SubagentStart = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                  ];
-                  UserPromptSubmit = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/hook-handle-use";
-                          timeout = 5;
-                        }
-                      ];
-                    }
-                  ];
-                  Stop = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                  ];
-                  Notification = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                  ];
-                  PermissionRequest = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                  ];
-                  PostToolUseFailure = [
-                    {
-                      matcher = "Bash";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                  ];
-                  PreCompact = [
-                    {
-                      matcher = "";
-                      hooks = [
-                        {
-                          type = "command";
-                          command = "${peonsh}/bin/peon";
-                          timeout = 10;
-                          async = true;
-                        }
-                      ];
-                    }
-                  ];
-                };
-              };
             };
             peon-ping = {
               enable = true;
