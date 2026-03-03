@@ -17,6 +17,15 @@
     };
     overlays = [inputs.claude.overlays.default];
   };
+  claude = pkgs.stdenv.mkDerivation {
+    inherit (pkgs.claude-code) pname version src;
+    nativeBuildInputs = with pkgs; [makeBinaryWrapper];
+    installPhase = ''
+      mkdir -p $out/bin
+      makeBinaryWrapper ${pkgs.claude-code}/bin/claude $out/bin/claude \
+        --set HOME /home/${user}/.config/claude
+    '';
+  };
   peon = inputs.peon-ping.packages.${pkgs.system}.default;
   packs = pkgs.fetchFromGitHub {
     owner = "PeonPing";
@@ -66,7 +75,7 @@ in {
           programs = {
             claude-code = {
               enable = true;
-              package = pkgs.claude-code;
+              package = claude;
               settings = {
                 hooks = {
                   SessionStart = [
