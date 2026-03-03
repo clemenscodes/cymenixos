@@ -219,10 +219,6 @@ in {
             };
           };
           programs = {
-            claude-code = {
-              enable = true;
-              package = claude;
-            };
             peon-ping = {
               enable = true;
               package = peonsh;
