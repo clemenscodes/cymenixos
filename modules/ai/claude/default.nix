@@ -18,6 +18,12 @@
     overlays = [inputs.claude.overlays.default];
   };
   peon = inputs.peon-ping.packages.${pkgs.system}.default;
+  packs = pkgs.fetchFromGitHub {
+    owner = "PeonPing";
+    repo = "og-packs";
+    rev = "v1.3.0";
+    hash = "sha256-zrpdEQFWWeX0V2nGRU8MYLB8HnoSpP+kFij+A5Ymj74=";
+  };
 in {
   options = {
     modules = {
@@ -43,6 +49,10 @@ in {
               };
               ".claude/hooks/peon-ping/skills" = {
                 source = "${peon}/share/peon-ping/skills";
+                recursive = true;
+              };
+              ".openpeon/packs" = {
+                source = packs;
                 recursive = true;
               };
             };
@@ -192,7 +202,6 @@ in {
               enable = true;
               package = inputs.peon-ping.packages.${pkgs.system}.default;
               enableZshIntegration = true;
-              installPacks = ["peon" "peasant"];
               settings = {
                 default_pack = "peasant";
                 volume = 0.7;
