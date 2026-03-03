@@ -37,11 +37,11 @@
       makeWrapper ${peon}/bin/peon $out/bin/peon \
         --set HOME /home/${user} \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude \
-        --set CLAUDE_PEON_DIR /home/${user}/.openpeon
+        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/.claude/hooks/peon-ping
       makeWrapper ${peon}/bin/hook-handle-use $out/bin/hook-handle-use \
         --set HOME /home/${user} \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude \
-        --set CLAUDE_PEON_DIR /home/${user}/.openpeon
+        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/.claude/hooks/peon-ping
     '';
   };
   packs = pkgs.fetchFromGitHub {
@@ -64,15 +64,16 @@ in {
     home-manager = {
       users = {
         ${user} = {
-          imports = [inputs.peon-ping.homeManagerModules.default];
           home = {
-            packages = [claude];
+            packages = [claude peonsh];
+            persistence = lib.mkIf (config.modules.boot.enable) {
+              "${persistPath}" = {
+                directories = [".openpeon" ".config/claude"];
+              };
+            };
             file = {
               ".config/claude/.claude/hooks/peon-ping/peon.sh" = {
                 source = "${peonsh}/bin/peon";
-              };
-              ".config/claude/.claude/hooks/peon-ping/config.json" = {
-                source = (pkgs.formats.json {}).generate "peon-ping-config" config.home-manager.users.${user}.programs.peon-ping.settings;
               };
               ".config/claude/.claude/hooks/peon-ping/skills" = {
                 source = "${peon}/share/peon-ping/skills";
@@ -82,9 +83,21 @@ in {
                 source = packs;
                 recursive = true;
               };
-              ".openpeon/packs" = {
-                source = packs;
-                recursive = true;
+              ".config/claude/.claude/hooks/peon-ping/config.json" = {
+                source = (pkgs.formats.json {}).generate "peon-ping-config" {
+                  default_pack = "peasant";
+                  volume = 0.7;
+                  enabled = true;
+                  desktop_notifications = true;
+                  categories = {
+                    "session.start" = true;
+                    "task.complete" = true;
+                    "task.error" = true;
+                    "input.required" = true;
+                    "resource.limit" = true;
+                    "user.spam" = true;
+                  };
+                };
               };
               ".config/claude/.claude/settings.json" = {
                 source = (pkgs.formats.json {}).generate "claude-code-settings.json" {
@@ -217,32 +230,6 @@ in {
                       }
                     ];
                   };
-                };
-              };
-            };
-            persistence = lib.mkIf (config.modules.boot.enable) {
-              "${persistPath}" = {
-                directories = [".openpeon" ".config/claude"];
-              };
-            };
-          };
-          programs = {
-            peon-ping = {
-              enable = true;
-              package = peonsh;
-              enableZshIntegration = true;
-              settings = {
-                default_pack = "peasant";
-                volume = 0.7;
-                enabled = true;
-                desktop_notifications = true;
-                categories = {
-                  "session.start" = true;
-                  "task.complete" = true;
-                  "task.error" = true;
-                  "input.required" = true;
-                  "resource.limit" = true;
-                  "user.spam" = true;
                 };
               };
             };
