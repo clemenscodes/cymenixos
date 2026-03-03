@@ -43,6 +43,7 @@ in {
           };
           programs = {
             claude-code = {
+              enable = true;
               hooks = {
                 "peon-ping/peon.sh" = ''
                   #!/usr/bin/env bash
