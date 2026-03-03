@@ -98,7 +98,7 @@ in {
                   };
                 };
               };
-              ".config/claude/.claude/settings.json" = {
+              ".config/claude/settings.json" = {
                 source = (pkgs.formats.json {}).generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
                   hooks = {
