@@ -35,9 +35,11 @@
     installPhase = ''
       mkdir -p $out/bin
       makeWrapper ${peon}/bin/peon $out/bin/peon \
+        --set HOME /home/${user}/.config/claude \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude \
         --set CLAUDE_PEON_DIR /home/${user}/.openpeon
       makeWrapper ${peon}/bin/hook-handle-use $out/bin/hook-handle-use \
+        --set HOME /home/${user}/.config/claude \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude/.claude \
         --set CLAUDE_PEON_DIR /home/${user}/.openpeon
     '';
