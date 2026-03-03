@@ -7701,11 +7701,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772529094,
-        "narHash": "sha256-njGEHBc0xWgrcJGOe9T8DIquGdcus6ApswoAhzuEDyI=",
+        "lastModified": 1772533637,
+        "narHash": "sha256-M9ug3u/c2zpYC4oUybAKnHZv2B4f0ARQigibierHIEs=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "a9ddc80bfd06659043506a0ca8cb5780b98eb50f",
+        "rev": "ad2a19bb5c0da5d2cf293beefdf46d97f6cb10da",
         "type": "github"
       },
       "original": {
@@ -7965,15 +7965,16 @@
         "nixpkgs": "nixpkgs_41"
       },
       "locked": {
-        "lastModified": 1772489552,
-        "narHash": "sha256-l8eE2AXMbNIYw41BUO4Hz501Bx4XDXti9eOPNn1VgTU=",
-        "owner": "PeonPing",
+        "lastModified": 1772539583,
+        "narHash": "sha256-ndcA75y0aGgeWysIiXK5+1vpsN+dil1Xg4lwCf+34Qg=",
+        "owner": "clemenscodes",
         "repo": "peon-ping",
-        "rev": "fb2baa038e769d45695bbc0ca2288de9baf99666",
+        "rev": "120a7dbc16b9b7eb867ed532f0e9e8e5ddf375f4",
         "type": "github"
       },
       "original": {
-        "owner": "PeonPing",
+        "owner": "clemenscodes",
+        "ref": "feature/nix-compatibility",
         "repo": "peon-ping",
         "type": "github"
       }
