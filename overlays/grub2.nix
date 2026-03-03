@@ -51,7 +51,7 @@ final: pkgs: {
 
     preConfigure = let
       gnulib = pkgs.fetchgit {
-        url = "https://git.savannah.gnu.org/r/gnulib.git";
+        url = "git://git.savannah.gnu.org/gnulib.git";
         rev = "06b2e943be39284783ff81ac6c9503200f41dba3";
         sha256 = "sha256-xhxN8Tw15ENAMSE/cTkigl5yHR3T2d7B1RMFqiMvmxU=";
       };
