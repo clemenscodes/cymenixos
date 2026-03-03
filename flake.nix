@@ -154,6 +154,9 @@
     claude = {
       url = "github:sadjow/claude-code-nix";
     };
+    codex = {
+      url = "github:sadjow/codex-cli-nix";
+    };
   };
   outputs = {
     self,

@@ -15,7 +15,10 @@
     config = {
       allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["claude-code"];
     };
-    overlays = [inputs.claude.overlays.default];
+    overlays = [
+      inputs.claude.overlays.default
+      inputs.codex.overlays.default
+    ];
   };
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
@@ -64,7 +67,7 @@ in {
       users = {
         ${user} = {
           home = {
-            packages = [claude peonsh];
+            packages = with pkgs; [claude peonsh codex];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
                 directories = [".config/claude"];
