@@ -185,12 +185,12 @@ in {
               enable = true;
               package = inputs.peon-ping.packages.${pkgs.system}.default;
               enableZshIntegration = true;
+              installPacks = ["peon" "peasant"];
               settings = {
                 default_pack = "peasant";
                 volume = 0.7;
                 enabled = true;
                 desktop_notifications = true;
-                installPacks = ["peon" "peasant"];
                 categories = {
                   "session.start" = true;
                   "task.complete" = true;
