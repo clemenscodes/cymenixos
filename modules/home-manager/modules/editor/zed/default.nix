@@ -165,6 +165,9 @@ in {
             CSS = {
               language_servers = ["tailwindcss-intellisense-css" "!vscode-css-language-server"];
             };
+            Rust = {
+              language_servers = ["tailwindcss-language-server" "rust-analyzer"];
+            };
           };
 
           lsp = {
@@ -183,7 +186,7 @@ in {
                 path_lookup = true;
               };
               settings = {
-                classFunctions = ["cva" "cx"];
+                classFunctions = ["tw" "cva" "cx"];
                 includeLanguages = {
                   rust = "html";
                 };
