@@ -38,6 +38,9 @@
     nativeBuildInputs = with pkgs; [makeWrapper];
     installPhase = ''
       mkdir -p $out/bin
+      makeWrapper ${peon}/bin/peon-codex-adapter $out/bin/codex \
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
+        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
       makeWrapper ${peon}/bin/peon $out/bin/peon \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
@@ -66,8 +69,18 @@ in {
     home-manager = {
       users = {
         ${user} = {
+          programs = {
+            codex = {
+              enable = true;
+              package = pkgs.codex;
+              settings = {
+                model = "gpt-5.3-codex";
+                notify = ["${peonsh}/bin/codex"];
+              };
+            };
+          };
           home = {
-            packages = with pkgs; [claude peonsh codex];
+            packages = [claude peonsh];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
                 directories = [".config/claude" ".codex"];
