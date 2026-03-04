@@ -3,10 +3,13 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  config,
+  osConfig,
+  ...
+}: let
   cfg = config.modules.editor;
-  inherit (config.modules.boot.impermanence) persistPath;
-  inherit (config.modules.users) user;
+  inherit (osConfig.modules.boot.impermanence) persistPath;
 in {
   options = {
     modules = {
