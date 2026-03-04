@@ -18,7 +18,7 @@ in {
     programs = {
       zed-editor = {
         inherit (cfg.zed) enable;
-        extensions = ["nix" "toml" "rust"];
+        extensions = ["nix" "toml" "yaml" "json5" "git-firefly" "angular" "rust" "vscode-icons"];
         extraPackages = with pkgs; [nil];
         mutableUserKeymaps = true;
         mutableUserSettings = true;
