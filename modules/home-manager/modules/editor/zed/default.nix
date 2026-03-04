@@ -20,7 +20,24 @@ in {
       zed-editor = {
         inherit (cfg.zed) enable;
         package = inputs.zed.packages.${pkgs.system}.default;
-        extensions = ["nix" "toml" "yaml" "json5" "git-firefly" "angular" "rust" "crates-lsp" "vscode-icons"];
+        extensions = [
+          "nix"
+          "toml"
+          "yaml"
+          "json5"
+          "git-firefly"
+          "angular"
+          "rust"
+          "crates-lsp"
+          "vscode-icons"
+          "dockerfile"
+          "sql"
+          "make"
+          "scss"
+          "biome"
+          "ini"
+          "neocmake"
+        ];
         extraPackages = with pkgs; [nil nixd];
         mutableUserKeymaps = true;
         mutableUserSettings = true;
@@ -142,6 +159,14 @@ in {
               binary = {
                 path_lookup = true;
               };
+            };
+          };
+          agent_servers = {
+            codex-acp = {
+              type = "registry";
+            };
+            claude-acp = {
+              type = "registry";
             };
           };
         };
