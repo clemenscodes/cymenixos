@@ -48,6 +48,7 @@ in {
           "biome"
           "ini"
           "neocmake"
+          "color-highlight"
         ];
         extraPackages = with pkgs; [nil nixd codex-acp];
         mutableUserKeymaps = true;
@@ -160,6 +161,12 @@ in {
             max_scroll_history_lines = 50000;
           };
 
+          languages = {
+            CSS = {
+              language_servers = ["tailwindcss-intellisense-css" "!vscode-css-language-server"];
+            };
+          };
+
           lsp = {
             rust-analyzer = {
               binary = {
@@ -171,7 +178,22 @@ in {
                 path_lookup = true;
               };
             };
+            tailwindcss-language-server = {
+              settings = {
+                classFunctions = ["cva" "cx"];
+                includeLanguages = {
+                  rust = "html";
+                };
+                experimental = {
+                  classRegex = [
+                    "[cls|className]\\s\\:\\=\\s\"([^\"]*)"
+                    "class: \"(.*)\""
+                  ];
+                };
+              };
+            };
           };
+
           agent_servers = {
             claude-acp = {
               type = "registry";
