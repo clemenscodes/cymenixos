@@ -31,6 +31,17 @@
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
     '';
   };
+  codex = pkgs.stdenv.mkDerivation {
+    inherit (pkgs.codex) pname version;
+    dontUnpack = true;
+    nativeBuildInputs = with pkgs; [makeBinaryWrapper];
+    installPhase = ''
+      mkdir -p $out/bin
+      makeBinaryWrapper ${pkgs.codex}/bin/codex $out/bin/codex \
+        --set CODEX_HOME /home/${user}/.config/codex \
+        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
+    '';
+  };
   peon = inputs.peon-ping.packages.${pkgs.system}.default;
   peonsh = pkgs.stdenv.mkDerivation {
     inherit (peon) pname version;
@@ -39,6 +50,7 @@
     installPhase = ''
       mkdir -p $out/bin
       makeWrapper ${peon}/bin/peon-codex-adapter $out/bin/peon-codex-adapter \
+        --set CODEX_HOME /home/${user}/.config/codex \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
       makeWrapper ${peon}/bin/peon $out/bin/peon \
@@ -72,7 +84,7 @@ in {
           programs = {
             codex = {
               enable = true;
-              package = pkgs.codex;
+              package = codex;
               settings = {
                 model = "gpt-5.3-codex";
                 model_reasoning_effort = "xhigh";
@@ -81,10 +93,10 @@ in {
             };
           };
           home = {
-            packages = [claude peonsh];
+            packages = [claude codex peonsh];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
-                directories = [".config/claude" ".codex"];
+                directories = [".config/claude" ".config/codex"];
               };
             };
             file = {
