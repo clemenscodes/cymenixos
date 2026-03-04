@@ -179,6 +179,9 @@ in {
               };
             };
             tailwindcss-language-server = {
+              binary = {
+                path_lookup = true;
+              };
               settings = {
                 classFunctions = ["cva" "cx"];
                 includeLanguages = {
