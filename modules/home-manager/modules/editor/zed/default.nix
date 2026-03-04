@@ -84,8 +84,8 @@ in {
           icon_theme = "VSCode Icons";
           theme = {
             mode = "system";
-            dark = "Catppuccin Macchiato (blue)";
-            light = "Catppuccin Macchiato (blue)";
+            dark = "One Dark";
+            light = "One Dark";
           };
         };
       };
