@@ -46,8 +46,8 @@ in {
 
           theme = {
             mode = "system";
-            dark = "One Dark";
-            light = "One Light";
+            dark = "Catppuccin Macchiato (blue)";
+            light = "Catppuccin Macchiato (blue)";
           };
         };
       };
