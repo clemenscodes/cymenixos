@@ -75,14 +75,14 @@ in {
               "space e" = "workspace::ToggleLeftDock";
               "space i" = "workspace::Save";
               "space f f" = "file_finder::Toggle";
-              "space f g" = "search::ToggleReplace";
-              "space f r" = "search::ToggleRegex";
+              "space f g" = "project_search::ToggleFocus";
             };
           }
           {
             "context" = "ProjectPanel && not_editing";
             "bindings" = {
               "space e" = "workspace::ToggleLeftDock";
+              "space space" = "terminal_panel::Toggle";
               "l" = "project_panel::Open";
               "r" = "project_panel::Rename";
               "d" = "project_panel::Delete";
