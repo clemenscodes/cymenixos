@@ -77,6 +77,14 @@ in {
               "space i" = "workspace::Save";
               "space f f" = "file_finder::Toggle";
               "space f g" = "project_search::ToggleFocus";
+              "ctrl-o" = "pane::CloseInactiveItems";
+            };
+          }
+          {
+            "context" = "Editor && showing_completions";
+            "bindings" = {
+              "tab" = "editor::ContextMenuNext";
+              "shift-tab" = "editor::ContextMenuPrev";
             };
           }
           {
