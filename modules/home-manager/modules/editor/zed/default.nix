@@ -10,6 +10,7 @@
 }: let
   cfg = config.modules.editor;
   inherit (osConfig.modules.boot.impermanence) persistPath;
+  inherit (osConfig.modules.users) user;
 in {
   options = {
     modules = {
@@ -182,7 +183,9 @@ in {
               type = "custom";
               command = "${pkgs.codex-acp}/bin/codex-acp";
               args = [];
-              env = {};
+              env = {
+                CODEX_HOME = "/home/${user}/.config/codex";
+              };
             };
           };
         };
