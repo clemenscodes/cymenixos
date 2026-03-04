@@ -15,8 +15,42 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.zed.enable) {
-    home = {
-      packages = [pkgs.zed-editor];
+    programs = {
+      zed-editor = {
+        inherit (cfg.zed) enable;
+        extensions = ["nix" "toml" "rust"];
+        extraPackages = with pkgs; [nil];
+        mutableUserKeymaps = true;
+        mutableUserSettings = true;
+        userSettings = {
+          auto_update = false;
+          ui_font_size = 16;
+          buffer_font_size = 16;
+          vim_mode = true;
+          load_direnv = "shell_hook";
+          hour_format = "hour24";
+          base_keymap = "VSCode";
+
+          lsp = {
+            rust-analyzer = {
+              binary = {
+                path_lookup = true;
+              };
+            };
+            nix = {
+              binary = {
+                path_lookup = true;
+              };
+            };
+          };
+
+          theme = {
+            mode = "system";
+            dark = "One Dark";
+            light = "One Light";
+          };
+        };
+      };
     };
   };
 }
