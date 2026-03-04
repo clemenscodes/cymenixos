@@ -38,7 +38,7 @@ in {
           "ini"
           "neocmake"
         ];
-        extraPackages = with pkgs; [nil nixd];
+        extraPackages = with pkgs; [nil nixd libcap];
         mutableUserKeymaps = true;
         mutableUserSettings = true;
         userKeymaps = [
