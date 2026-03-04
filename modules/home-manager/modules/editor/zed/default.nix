@@ -23,11 +23,9 @@ in {
         extensions = [
           "nix"
           "toml"
-          "yaml"
           "json5"
           "git-firefly"
           "angular"
-          "rust"
           "crates-lsp"
           "vscode-icons"
           "dockerfile"
