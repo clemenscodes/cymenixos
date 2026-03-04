@@ -22,7 +22,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.zed.enable) {
     home = {
-      persistence = lib.mkIf (config.modules.boot.enable) {
+      persistence = lib.mkIf (osConfig.modules.boot.enable) {
         "${persistPath}" = {
           directories = [".local/share/zed" ".config/zed"];
         };
