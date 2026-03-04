@@ -84,8 +84,7 @@ in {
           icon_theme = lib.mkForce "VSCode Icons";
           theme = {
             mode = "system";
-            dark = "One Dark";
-            light = "One Dark";
+            dark = lib.mkForce "One Dark";
           };
         };
       };
