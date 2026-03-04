@@ -31,6 +31,44 @@ in {
               space = null;
             };
           }
+          {
+            "context" = "Editor";
+            "bindings" = {
+              "ctrl-h" = ["workspace::ActivatePaneInDirection" "Left"];
+              "ctrl-l" = ["workspace::ActivatePaneInDirection" "Right"];
+              "ctrl-k" = ["workspace::ActivatePaneInDirection" "Up"];
+              "ctrl-j" = ["workspace::ActivatePaneInDirection" "Down"];
+            };
+          }
+          {
+            "context" = "Editor && vim_mode == normal";
+            "bindings" = {
+              "space e" = "workspace::ToggleLeftDock";
+              "space i" = "editor::Save";
+              "space f f" = "file_finder::Toggle";
+            };
+          }
+          {
+            "context" = "ProjectPanel";
+            "bindings" = {
+              "space e" = "workspace::ToggleLeftDock";
+            };
+          }
+          {
+            "context" = "Terminal";
+            "bindings" = {
+              "ctrl-/" = "workspace::ToggleBottomDock";
+            };
+          }
+          {
+            context = "Dock";
+            bindings = {
+              "ctrl-h" = ["workspace::ActivatePaneInDirection" "Left"];
+              "ctrl-l" = ["workspace::ActivatePaneInDirection" "Right"];
+              "ctrl-k" = ["workspace::ActivatePaneInDirection" "Up"];
+              "ctrl-j" = ["workspace::ActivatePaneInDirection" "Down"];
+            };
+          }
         ];
         userSettings = {
           telemetry = {
