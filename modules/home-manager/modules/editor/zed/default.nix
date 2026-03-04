@@ -24,6 +24,14 @@ in {
         extraPackages = with pkgs; [nil nixd];
         mutableUserKeymaps = true;
         mutableUserSettings = true;
+        userKeymaps = [
+          {
+            context = "(VimControl && !menu)";
+            bindings = {
+              space = null;
+            };
+          }
+        ];
         userSettings = {
           telemetry = {
             diagnostics = false;
@@ -42,11 +50,17 @@ in {
           ui_font_size = 16;
           buffer_font_size = 16;
           vim_mode = true;
-          autosave = "on_focus_change";
+          autosave = "off";
+          format_on_save = "on";
           buffer_font_family = "Lilex Nerd Font";
           load_direnv = "shell_hook";
           hour_format = "hour24";
           base_keymap = "VSCode";
+
+          which_key = {
+            enabled = true;
+            delay_ms = 100;
+          };
 
           terminal = {
             font_family = "Lilex Nerd Font";
@@ -67,7 +81,7 @@ in {
             };
           };
 
-          icon_theme = "Catppuccin Macchiato";
+          icon_theme = "VSCode Icons";
           theme = {
             mode = "system";
             dark = "Catppuccin Macchiato (blue)";
