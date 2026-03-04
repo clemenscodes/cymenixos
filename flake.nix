@@ -157,6 +157,9 @@
     codex = {
       url = "github:sadjow/codex-cli-nix";
     };
+    zed = {
+      url = "github:zed-industries/zed";
+    };
   };
   outputs = {
     self,

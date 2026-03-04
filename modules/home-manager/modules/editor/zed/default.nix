@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
@@ -18,6 +19,7 @@ in {
     programs = {
       zed-editor = {
         inherit (cfg.zed) enable;
+        package = inputs.zed.packages.${pkgs.system}.default;
         extensions = ["nix" "toml" "yaml" "json5" "git-firefly" "angular" "rust" "vscode-icons"];
         extraPackages = with pkgs; [nil nixd];
         mutableUserKeymaps = true;
@@ -40,7 +42,7 @@ in {
           ui_font_size = 16;
           buffer_font_size = 16;
           vim_mode = true;
-          autosave = true;
+          autosave = "on_focus_change";
           buffer_font_family = "Lilex Nerd Font";
           load_direnv = "shell_hook";
           hour_format = "hour24";
