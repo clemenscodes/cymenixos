@@ -38,7 +38,7 @@
     nativeBuildInputs = with pkgs; [makeWrapper];
     installPhase = ''
       mkdir -p $out/bin
-      makeWrapper ${peon}/bin/peon-codex-adapter $out/bin/codex \
+      makeWrapper ${peon}/bin/peon-codex-adapter $out/bin/peon-codex-adapter \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
       makeWrapper ${peon}/bin/peon $out/bin/peon \
@@ -76,7 +76,7 @@ in {
               settings = {
                 model = "gpt-5.3-codex";
                 model_reasoning_effort = "xhigh";
-                notify = ["${peonsh}/bin/codex"];
+                notify = ["${peonsh}/bin/peon-codex-adapter"];
               };
             };
           };
