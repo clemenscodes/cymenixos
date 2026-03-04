@@ -119,10 +119,11 @@ in {
             };
           };
 
-          icon_theme = lib.mkForce "VSCode Icons";
+          icon_theme = lib.mkForce "VSCode Icons for Zed (Dark)";
           theme = {
             mode = "system";
-            dark = lib.mkForce "One Dark";
+            dark = lib.mkForce "Catppuccin Macchiato (blue)";
+            light = lib.mkForce "Catppuccin Macchiato (blue)";
           };
         };
       };
