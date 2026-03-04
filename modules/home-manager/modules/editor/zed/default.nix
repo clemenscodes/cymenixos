@@ -5,6 +5,8 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.editor;
+  inherit (config.modules.boot.impermanence) persistPath;
+  inherit (config.modules.users) user;
 in {
   options = {
     modules = {
@@ -16,6 +18,13 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.zed.enable) {
+    home = {
+      persistence = lib.mkIf (config.modules.boot.enable) {
+        "${persistPath}" = {
+          directories = [".local/share/zed" ".config/zed"];
+        };
+      };
+    };
     programs = {
       zed-editor = {
         inherit (cfg.zed) enable;
