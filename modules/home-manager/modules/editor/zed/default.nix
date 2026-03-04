@@ -166,7 +166,7 @@ in {
                 CLAUDE_CODE_EXECUTABLE = "claude";
               };
             };
-            "Codex CLI" = {
+            codex-acp = {
               type = "custom";
               command = "${pkgs.codex-acp}/bin/codex-acp";
               args = [];
