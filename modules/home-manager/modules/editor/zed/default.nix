@@ -187,7 +187,17 @@ in {
                 experimental = {
                   classRegex = [
                     "[cls|className]\\s\\:\\=\\s\"([^\"]*)"
+                    "class=\"([^\"]*)\""
                     "class: \"(.*)\""
+                    "\\.className\\s*[+]?=\\s*['\"]([^'\"]*)['\"]"
+                    "\\.setAttributeNS\\(.*,\\s*['\"]class['\"],\\s*['\"]([^'\"]*)['\"]"
+                    "\\.setAttribute\\(['\"]class['\"],\\s*['\"]([^'\"]*)['\"]"
+                    "\\.classList\\.add\\(['\"]([^'\"]*)['\"]"
+                    "\\.classList\\.remove\\(['\"]([^'\"]*)['\"]"
+                    "\\.classList\\.toggle\\(['\"]([^'\"]*)['\"]"
+                    "\\.classList\\.contains\\(['\"]([^'\"]*)['\"]"
+                    "\\.classList\\.replace\\(\\s*['\"]([^'\"]*)['\"]"
+                    "\\.classList\\.replace\\([^,)]+,\\s*['\"]([^'\"]*)['\"]"
                   ];
                 };
               };
