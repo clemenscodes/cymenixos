@@ -47,8 +47,8 @@ in {
               "space e" = "workspace::ToggleLeftDock";
               "space i" = "workspace::Save";
               "space f f" = "file_finder::Toggle";
-              "space f g" = "search::Toggle";
-              "space f r" = "search::ToggleReplace";
+              "space f g" = "search::ToggleReplace";
+              "space f r" = "search::ToggleRegex";
             };
           }
           {
