@@ -75,6 +75,7 @@ in {
               package = pkgs.codex;
               settings = {
                 model = "gpt-5.3-codex";
+                model_reasoning_effort = "xhigh";
                 notify = ["${peonsh}/bin/codex"];
               };
             };
