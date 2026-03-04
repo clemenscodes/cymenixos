@@ -45,7 +45,6 @@ in {
           "sql"
           "make"
           "scss"
-          "biome"
           "ini"
           "neocmake"
           "color-highlight"
