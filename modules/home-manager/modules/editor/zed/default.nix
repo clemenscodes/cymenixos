@@ -44,7 +44,7 @@ in {
             "context" = "Editor && vim_mode == normal";
             "bindings" = {
               "space e" = "workspace::ToggleLeftDock";
-              "space i" = "editor::Save";
+              "space i" = "workspace::Save";
               "space f f" = "file_finder::Toggle";
             };
           }
