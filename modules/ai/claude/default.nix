@@ -89,6 +89,11 @@ in {
                 model = "gpt-5.3-codex";
                 model_reasoning_effort = "xhigh";
                 notify = ["${peonsh}/bin/peon-codex-adapter"];
+                projects = {
+                  "/home/${user}" = {
+                    trust_level = "trusted";
+                  };
+                };
               };
             };
           };
