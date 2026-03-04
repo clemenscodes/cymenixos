@@ -106,6 +106,7 @@ in {
             "context" = "Terminal";
             "bindings" = {
               "ctrl-/" = "workspace::ToggleBottomDock";
+              "ctrl-l" = ["terminal::SendKeystroke" "ctrl-l"];
             };
           }
           {
