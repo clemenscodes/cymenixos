@@ -47,12 +47,22 @@ in {
               "space e" = "workspace::ToggleLeftDock";
               "space i" = "workspace::Save";
               "space f f" = "file_finder::Toggle";
+              "space f g" = "search::Toggle";
+              "space f r" = "search::ToggleReplace";
             };
           }
           {
-            "context" = "ProjectPanel";
+            "context" = "ProjectPanel && not_editing";
             "bindings" = {
               "space e" = "workspace::ToggleLeftDock";
+              "l" = "project_panel::Open";
+              "r" = "project_panel::Rename";
+              "d" = "project_panel::Delete";
+              "shift-d" = "project_panel::Trash";
+              "a" = "project_panel::NewFile";
+              "y" = "project_panel::Copy";
+              "p" = "project_panel::Paste";
+              "x" = "project_panel::Cut";
             };
           }
           {
