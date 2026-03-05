@@ -23,6 +23,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.zed.enable) {
     home = {
+      packages = with pkgs; [television];
       persistence = lib.mkIf (osConfig.modules.boot.enable) {
         "${persistPath}" = {
           directories = [".local/share/zed" ".config/zed"];
@@ -63,7 +64,7 @@ in {
           "neocmake"
           "color-highlight"
         ];
-        extraPackages = with pkgs; [nil nixd codex-acp];
+        extraPackages = with pkgs; [nil nixd codex-acp television];
         mutableUserKeymaps = true;
         mutableUserSettings = true;
         mutableUserTasks = true;
@@ -87,7 +88,7 @@ in {
           }
           {
             "label" = "file_finder";
-            "command" = "zed \"$(tv files)\"";
+            "command" = "${pkgs.tv}/bin/tv files";
             "hide" = "always";
             "reveal" = "always";
             "use_new_terminal" = true;
@@ -102,7 +103,7 @@ in {
           }
           {
             "label" = "fulltext_search";
-            "command" = "zed \"$(tv text)\"";
+            "command" = "${pkgs.tv}/bin/tv text";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
@@ -117,7 +118,7 @@ in {
           }
           {
             "label" = "find_selected_text";
-            "command" = "zed \"$(tv text -i \"$ZED_SELECTED_TEXT\")\"";
+            "command" = "${pkgs.tv}/bin/tv text -i \"$ZED_SELECTED_TEXT\"";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
