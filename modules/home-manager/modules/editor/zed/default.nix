@@ -87,22 +87,47 @@ in {
           }
           {
             "label" = "file_finder";
-            "command" = "tv files";
-            "allow_concurrent_runs" = true;
+            "command" = "zeditor \"$(tv files)\"";
             "hide" = "always";
+            "reveal" = "always";
             "use_new_terminal" = true;
+            "allow_concurrent_runs" = true;
+            "cwd" = "$ZED_WORKTREE_ROOT";
             "shell" = {
-              "program" = "sh";
+              "with_arguments" = {
+                "program" = "sh";
+                "args" = ["--noediting" "--norc" "--noprofile"];
+              };
             };
           }
           {
             "label" = "fulltext_search";
-            "command" = "tv text";
-            "allow_concurrent_runs" = true;
+            "command" = "zeditor \"$(tv text)\"";
+            "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
+            "reveal" = "always";
             "use_new_terminal" = true;
+            "allow_concurrent_runs" = true;
             "shell" = {
-              "program" = "sh";
+              "with_arguments" = {
+                "program" = "sh";
+                "args" = ["--noediting" "--norc" "--noprofile"];
+              };
+            };
+          }
+          {
+            "label" = "find_selected_text";
+            "command" = "zeditor \"$(tv text -i \"$ZED_SELECTED_TEXT\")\"";
+            "cwd" = "$ZED_WORKTREE_ROOT";
+            "hide" = "always";
+            "reveal" = "always";
+            "use_new_terminal" = true;
+            "allow_concurrent_runs" = true;
+            "shell" = {
+              "with_arguments" = {
+                "program" = "sh";
+                "args" = ["--noediting" "--norc" "--noprofile"];
+              };
             };
           }
         ];
@@ -139,6 +164,13 @@ in {
                 "task::Spawn"
                 {
                   "task_name" = "fulltext_search";
+                  "reveal_target" = "center";
+                }
+              ];
+              "space f s" = [
+                "task::Spawn"
+                {
+                  "task_name" = "find_selected_text";
                   "reveal_target" = "center";
                 }
               ];
@@ -202,7 +234,13 @@ in {
           auto_update = false;
           ui_font_size = 20;
           buffer_font_size = 20;
+          agent_ui_font_size = 20;
           vim_mode = true;
+          scroll_beyond_last_line = "off";
+          vertical_scroll_margin = 0;
+          double_click_in_multibuffer = "open";
+          close_on_file_delete = true;
+          use_smartcase_search = true;
           autosave = "off";
           format_on_save = "on";
           ui_font_family = "Lilex Nerd Font";
@@ -211,6 +249,10 @@ in {
           hour_format = "hour24";
           base_keymap = "VSCode";
 
+          cursor_blink = false;
+          rounded_selection = false;
+          colorize_brackets = true;
+          document_symbols = "on";
           icon_theme = lib.mkForce "VSCode Icons for Zed (Dark)";
           theme = {
             mode = "system";
