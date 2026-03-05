@@ -35,13 +35,27 @@ in {
         package = inputs.zed.packages.${pkgs.system}.default;
         extensions = [
           "nix"
+          "basher"
           "toml"
           "json5"
           "git-firefly"
+          "github-actions"
           "angular"
           "crates-lsp"
           "vscode-icons"
           "dockerfile"
+          "csv"
+          "env"
+          "log"
+          "lua"
+          "latex"
+          "html"
+          "helm"
+          "docker-compose"
+          "nginx"
+          "markdown-oxide"
+          "terraform"
+          "prisma"
           "sql"
           "make"
           "scss"
@@ -53,6 +67,8 @@ in {
         mutableUserKeymaps = true;
         mutableUserSettings = true;
         mutableUserTasks = true;
+        mutableUserDebug = true;
+        userDebug = [];
         userTasks = [
           {
             "label" = "lazygit";
@@ -67,6 +83,26 @@ in {
                 "program" = "sh";
                 "args" = ["--noediting" "--norc" "--noprofile"];
               };
+            };
+          }
+          {
+            "label" = "file_finder";
+            "command" = "tv files";
+            "allow_concurrent_runs" = true;
+            "hide" = "always";
+            "use_new_terminal" = true;
+            "shell" = {
+              "program" = "sh";
+            };
+          }
+          {
+            "label" = "fulltext_search";
+            "command" = "tv text";
+            "allow_concurrent_runs" = true;
+            "hide" = "always";
+            "use_new_terminal" = true;
+            "shell" = {
+              "program" = "sh";
             };
           }
         ];
@@ -92,8 +128,20 @@ in {
               "space space" = "terminal_panel::Toggle";
               "space e" = "workspace::ToggleLeftDock";
               "space i" = "workspace::Save";
-              "space f f" = "file_finder::Toggle";
-              "space f g" = "project_search::ToggleFocus";
+              "space f f" = [
+                "task::Spawn"
+                {
+                  "task_name" = "file_finder";
+                  "reveal_target" = "center";
+                }
+              ];
+              "space f g" = [
+                "task::Spawn"
+                {
+                  "task_name" = "fulltext_search";
+                  "reveal_target" = "center";
+                }
+              ];
               "space g g" = ["task::Spawn" {"task_name" = "lazygit";}];
               "ctrl-o" = "pane::CloseInactiveItems";
               "space c a" = "editor::ToggleCodeActions";
@@ -187,7 +235,70 @@ in {
 
           which_key = {
             enabled = true;
-            delay_ms = 100;
+            delay_ms = 300;
+          };
+
+          vim = {
+            use_smartcase_find = true;
+            highlight_on_yank_duration = 500;
+          };
+
+          git = {
+            inline_blame = {
+              delay_ms = 200;
+              show_commit_summary = true;
+            };
+          };
+
+          indent_guides = {
+            coloring = "indent_aware";
+          };
+
+          seed_search_query_from_cursor = "selection";
+
+          diagnostics = {
+            inline = {
+              enabled = true;
+            };
+          };
+
+          excerpt_context_lines = 3;
+          expand_excerpt_lines = 10;
+
+          title_bar = {
+            show_menus = true;
+            show_branch_icon = true;
+            show_sign_in = false;
+          };
+
+          tab_bar = {
+            show_nav_history_buttons = false;
+            show_tab_bar_buttons = false;
+          };
+
+          tabs = {
+            show_diagnostics = "errors";
+            git_status = true;
+            file_icons = true;
+
+            activate_on_close = "neighbour";
+          };
+
+          project_panel = {
+            default_width = 300;
+            auto_fold_dirs = false;
+            auto_reveal_entries = false;
+            entry_spacing = "standard";
+          };
+
+          outline_panel = {
+            dock = "right";
+          };
+
+          git_panel = {
+            tree_view = true;
+            sort_by_path = true;
+            default_width = 300;
           };
 
           terminal = {
@@ -203,12 +314,54 @@ in {
             Rust = {
               language_servers = ["tailwindcss-language-server" "rust-analyzer"];
             };
+            Terraform = {
+              format_on_save = "on";
+              formatter = {
+                external = {
+                  command = "tofu";
+                  arguments = ["fmt" "-"];
+                };
+              };
+            };
           };
 
           lsp = {
             rust-analyzer = {
               binary = {
                 path_lookup = true;
+              };
+              initialization_options = {
+                check = {
+                  command = "clippy";
+                };
+                cargo = {
+                  allFeatures = true;
+                  loadOutDirsFromCheck = true;
+                  buildScripts = {
+                    enable = true;
+                  };
+                };
+                procMacro = {
+                  enable = true;
+                  ignored = {
+                    async-trait = ["async_trait"];
+                    napi-derive = ["napi"];
+                    async-recursion = ["async_recursion"];
+                  };
+                };
+                rust = {
+                  analyzerTargetDir = true;
+                };
+                inlayHints = {
+                  maxLength = null;
+                  lifetimeElisionHints = {
+                    enable = "skip_trivial";
+                    useParameterNames = true;
+                  };
+                  closureReturnTypeHints = {
+                    enable = "always";
+                  };
+                };
               };
             };
             nix = {
