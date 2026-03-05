@@ -213,9 +213,9 @@ in {
           };
 
           auto_update = false;
-          ui_font_size = 20;
-          buffer_font_size = 20;
-          agent_ui_font_size = 20;
+          ui_font_size = 16;
+          buffer_font_size = 16;
+          agent_ui_font_size = 16;
           vim_mode = true;
           scroll_beyond_last_line = "off";
           vertical_scroll_margin = 0;
