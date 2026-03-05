@@ -88,7 +88,7 @@ in {
           }
           {
             "label" = "file_finder";
-            "command" = "${pkgs.television}/bin/tv files";
+            "command" = "zed \"$(${pkgs.television}/bin/tv files)\"";
             "hide" = "always";
             "reveal" = "always";
             "use_new_terminal" = true;
@@ -103,7 +103,7 @@ in {
           }
           {
             "label" = "fulltext_search";
-            "command" = "${pkgs.television}/bin/tv text";
+            "command" = "zed \"$(${pkgs.television}/bin/tv text)\"";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
@@ -118,7 +118,7 @@ in {
           }
           {
             "label" = "find_selected_text";
-            "command" = "${pkgs.television}/bin/tv text -i \"$ZED_SELECTED_TEXT\"";
+            "command" = "zed \"$(${pkgs.television}/bin/tv text -i \"$ZED_SELECTED_TEXT\")\"";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
@@ -154,30 +154,11 @@ in {
               "space space" = "terminal_panel::Toggle";
               "space e" = "workspace::ToggleLeftDock";
               "space i" = "workspace::Save";
-              "space f f" = [
-                "task::Spawn"
-                {
-                  "task_name" = "file_finder";
-                  "reveal_target" = "center";
-                }
-              ];
-              "space f g" = [
-                "task::Spawn"
-                {
-                  "task_name" = "fulltext_search";
-                  "reveal_target" = "center";
-                }
-              ];
-              "space f s" = [
-                "task::Spawn"
-                {
-                  "task_name" = "find_selected_text";
-                  "reveal_target" = "center";
-                }
-              ];
+              "space f f" = "file_finder::Toggle";
+              "space f g" = "project_search::ToggleFocus";
               "space g g" = ["task::Spawn" {"task_name" = "lazygit";}];
               "ctrl-o" = "pane::CloseInactiveItems";
-              "space c a" = "editor::ToggleCodeActions";
+              "c a" = "editor::ToggleCodeActions";
               "g r" = "editor::FindAllReferences";
             };
           }
