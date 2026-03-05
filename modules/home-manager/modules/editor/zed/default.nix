@@ -87,7 +87,7 @@ in {
           }
           {
             "label" = "file_finder";
-            "command" = "zeditor \"$(tv files)\"";
+            "command" = "zed \"$(tv files)\"";
             "hide" = "always";
             "reveal" = "always";
             "use_new_terminal" = true;
@@ -102,7 +102,7 @@ in {
           }
           {
             "label" = "fulltext_search";
-            "command" = "zeditor \"$(tv text)\"";
+            "command" = "zed \"$(tv text)\"";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
@@ -117,7 +117,7 @@ in {
           }
           {
             "label" = "find_selected_text";
-            "command" = "zeditor \"$(tv text -i \"$ZED_SELECTED_TEXT\")\"";
+            "command" = "zed \"$(tv text -i \"$ZED_SELECTED_TEXT\")\"";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
