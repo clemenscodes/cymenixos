@@ -134,9 +134,9 @@ in {
         ];
         userKeymaps = [
           {
-            context = "(VimControl && !menu)";
-            bindings = {
-              space = null;
+            "context" = "(VimControl && !menu)";
+            "bindings" = {
+              "space" = null;
             };
           }
           {
@@ -157,7 +157,6 @@ in {
               "space f f" = "file_finder::Toggle";
               "space f g" = "project_search::ToggleFocus";
               "space g g" = ["task::Spawn" {"task_name" = "lazygit";}];
-              "ctrl-o" = "pane::CloseInactiveItems";
               "c a" = "editor::ToggleCodeActions";
               "g r" = "editor::FindAllReferences";
             };
@@ -198,8 +197,8 @@ in {
             };
           }
           {
-            context = "Dock";
-            bindings = {
+            "context" = "Dock";
+            "bindings" = {
               "ctrl-h" = ["workspace::ActivatePaneInDirection" "Left"];
               "ctrl-l" = ["workspace::ActivatePaneInDirection" "Right"];
               "ctrl-k" = ["workspace::ActivatePaneInDirection" "Up"];
