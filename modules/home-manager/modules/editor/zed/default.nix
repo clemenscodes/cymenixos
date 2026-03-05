@@ -52,6 +52,24 @@ in {
         extraPackages = with pkgs; [nil nixd codex-acp];
         mutableUserKeymaps = true;
         mutableUserSettings = true;
+        mutableUserTasks = true;
+        userTasks = [
+          {
+            "label" = "lazygit";
+            "command" = "lazygit";
+            "use_new_terminal" = false;
+            "allow_concurrent_runs" = false;
+            "hide" = "always";
+            "reveal" = "always";
+            "cwd" = "$ZED_DIRNAME";
+            "shell" = {
+              "with_arguments" = {
+                "program" = "sh";
+                "args" = ["--noediting" "--norc" "--noprofile"];
+              };
+            };
+          }
+        ];
         userKeymaps = [
           {
             context = "(VimControl && !menu)";
@@ -60,7 +78,7 @@ in {
             };
           }
           {
-            "context" = "Editor";
+            "context" = "Dock || Terminal || Editor || ProjectPanel || AssistantPanel || CollabPanel || OutlinePanel || ChatPanel || VimControl || EmptyPane || SharedScreen || MarkdownPreview || KeyContextView || Diagnostics";
             "bindings" = {
               "ctrl-h" = ["workspace::ActivatePaneInDirection" "Left"];
               "ctrl-l" = ["workspace::ActivatePaneInDirection" "Right"];
@@ -69,14 +87,17 @@ in {
             };
           }
           {
-            "context" = "Editor && vim_mode == normal";
+            "context" = "ProjectPanel || EmptyPane || (Editor && VimControl && !VimWaiting && !menu)";
             "bindings" = {
               "space space" = "terminal_panel::Toggle";
               "space e" = "workspace::ToggleLeftDock";
               "space i" = "workspace::Save";
               "space f f" = "file_finder::Toggle";
               "space f g" = "project_search::ToggleFocus";
+              "space g g" = ["task::Spawn" {"task_name" = "lazygit";}];
               "ctrl-o" = "pane::CloseInactiveItems";
+              "space c a" = "editor::ToggleCodeActions";
+              "g r" = "editor::FindAllReferences";
             };
           }
           {
@@ -87,6 +108,12 @@ in {
             };
           }
           {
+            "context" = "Editor && vim_mode == normal && (vim_operator == none || vim_operator == n) && !VimWaiting";
+            "bindings" = {
+              "space q" = "pane::CloseActiveItem";
+            };
+          }
+          {
             "context" = "ProjectPanel && not_editing";
             "bindings" = {
               "space e" = "workspace::ToggleLeftDock";
@@ -94,7 +121,7 @@ in {
               "l" = "project_panel::Open";
               "r" = "project_panel::Rename";
               "d" = "project_panel::Delete";
-              "shift-d" = "project_panel::Trash";
+              "shift-d" = ["project_panel::Trash" {"skip_prompt" = true;}];
               "a" = "project_panel::NewFile";
               "y" = "project_panel::Copy";
               "p" = "project_panel::Paste";
