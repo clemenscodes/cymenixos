@@ -88,7 +88,7 @@ in {
           }
           {
             "label" = "file_finder";
-            "command" = "${pkgs.tv}/bin/tv files";
+            "command" = "${pkgs.television}/bin/tv files";
             "hide" = "always";
             "reveal" = "always";
             "use_new_terminal" = true;
@@ -103,7 +103,7 @@ in {
           }
           {
             "label" = "fulltext_search";
-            "command" = "${pkgs.tv}/bin/tv text";
+            "command" = "${pkgs.television}/bin/tv text";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
@@ -118,7 +118,7 @@ in {
           }
           {
             "label" = "find_selected_text";
-            "command" = "${pkgs.tv}/bin/tv text -i \"$ZED_SELECTED_TEXT\"";
+            "command" = "${pkgs.television}/bin/tv text -i \"$ZED_SELECTED_TEXT\"";
             "cwd" = "$ZED_WORKTREE_ROOT";
             "hide" = "always";
             "reveal" = "always";
