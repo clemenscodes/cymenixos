@@ -46,7 +46,7 @@
     };
   };
   hyprwhspr = pkgs.hyprwhspr-rs.override {
-    whispercpp = pkgs.whisper-cpp.override {cudaSupport = true;};
+    whisper-cpp = pkgs.whisper-cpp.override {cudaSupport = true;};
     onnxruntime = pkgs.onnxruntime.override {cudaSupport = true;};
   };
 in {
