@@ -38,6 +38,9 @@ in {
           };
           systemd.user.services.voxtype.Service.Environment = [
             "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib"
+            "ALSA_CONFIG_PATH=/run/current-system/sw/share/alsa/alsa.conf"
+            "LD_LIBRARY_PATH=/run/current-system/sw/lib"
+            "PATH=/run/current-system/sw/bin"
           ];
           home = {
             persistence = lib.mkIf (config.modules.boot.enable) {
