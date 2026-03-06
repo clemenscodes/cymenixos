@@ -11,7 +11,6 @@
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
 in {
-  imports = [inputs.voxtype.homeManagerModules.default];
   options = {
     modules = {
       ai = {
@@ -25,6 +24,7 @@ in {
     home-manager = {
       users = {
         ${user} = {
+          imports = [inputs.voxtype.homeManagerModules.default];
           programs.voxtype = {
             enable = true;
             package = inputs.voxtype.packages.${system}.vulkan;
