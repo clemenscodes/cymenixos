@@ -45,11 +45,11 @@
   claude-monitor = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-monitor) pname version;
     dontUnpack = true;
-    nativeBuildInputs = with pkgs; [makeBinaryWrapper];
+    nativeBuildInputs = with pkgs; [makeWrapper];
     installPhase = ''
       mkdir -p $out/bin
-      makeBinaryWrapper ${pkgs.codex}/bin/claude-monitor $out/bin/claude-monitor \
-        --set CODEX_HOME /home/${user}/.config/codex \
+      makeWrapper ${pkgs.codex}/bin/claude-monitor $out/bin/claude-monitor \
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
     '';
   };
