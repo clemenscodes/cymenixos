@@ -36,6 +36,9 @@ in {
               whisper.language = "en";
             };
           };
+          systemd.user.services.voxtype.Service.Environment = [
+            "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib"
+          ];
           home = {
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
