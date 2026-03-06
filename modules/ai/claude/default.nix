@@ -42,6 +42,17 @@
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
     '';
   };
+  claude-monitor = pkgs.stdenv.mkDerivation {
+    inherit (pkgs.claude-monitor) pname version;
+    dontUnpack = true;
+    nativeBuildInputs = with pkgs; [makeBinaryWrapper];
+    installPhase = ''
+      mkdir -p $out/bin
+      makeBinaryWrapper ${pkgs.codex}/bin/claude-monitor $out/bin/claude-monitor \
+        --set CODEX_HOME /home/${user}/.config/codex \
+        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
+    '';
+  };
   peon = inputs.peon-ping.packages.${pkgs.system}.default;
   peonsh = pkgs.stdenv.mkDerivation {
     inherit (peon) pname version;
@@ -98,7 +109,7 @@ in {
             };
           };
           home = {
-            packages = [claude codex peonsh];
+            packages = [claude codex peonsh claude-monitor];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
                 directories = [".config/claude" ".config/codex"];
