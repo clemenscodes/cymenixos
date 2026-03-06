@@ -48,7 +48,7 @@
     nativeBuildInputs = with pkgs; [makeWrapper];
     installPhase = ''
       mkdir -p $out/bin
-      makeWrapper ${pkgs.codex}/bin/claude-monitor $out/bin/claude-monitor \
+      makeWrapper ${pkgs.claude-monitor}/bin/claude-monitor $out/bin/claude-monitor \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
     '';
