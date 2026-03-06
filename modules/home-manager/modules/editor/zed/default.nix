@@ -134,6 +134,12 @@ in {
         ];
         userKeymaps = [
           {
+            "context" = "Terminal";
+            "bindings" = {
+              "ctrl-d" = "pane::CloseActiveItem";
+            };
+          }
+          {
             "context" = "(VimControl && !menu)";
             "bindings" = {
               "space" = null;
