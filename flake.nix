@@ -160,6 +160,9 @@
     zed = {
       url = "github:zed-industries/zed/v0.225.13";
     };
+    voxtype = {
+      url = "github:peteonrails/voxtype";
+    };
   };
   outputs = {
     self,

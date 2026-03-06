@@ -7,6 +7,7 @@
   imports = [
     (import ./claude {inherit inputs pkgs lib;})
     (import ./ollama {inherit inputs pkgs lib;})
+    (import ./voxtype {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
