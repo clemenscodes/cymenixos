@@ -460,6 +460,7 @@ in {
           #custom-powermenu,
           #custom-mail,
           #custom-idle,
+          #custom-voxtype,
           #mpd {
             ${padding}
             ${defaultColor}
@@ -538,11 +539,6 @@ in {
           #tray > .needs-attention {
             -gtk-icon-effect: highlight;
             background-color: #eb4d4b;
-          }
-
-          #custom-voxtype {
-              padding: 0 8px;
-              font-size: 14px;
           }
 
           #custom-voxtype.recording {
