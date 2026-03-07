@@ -183,6 +183,12 @@ in {
               exec = "${config.programs.voxtype.package}/bin/voxtype status --follow --format json";
               return-type = "json";
               format = "{icon}";
+              format-icons = {
+                idle = "🟢";
+                recording = "🔴";
+                transcribing = "🟡";
+                stopped = "⚪";
+              };
               on-click = "${pkgs.systemd}/bin/systemctl --user restart voxtype";
             };
             systemd-failed-units = {
