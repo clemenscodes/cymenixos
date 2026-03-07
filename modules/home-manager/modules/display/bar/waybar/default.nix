@@ -540,29 +540,22 @@ in {
           }
 
           #custom-voxtype {
-            padding: 0 10px;
+              padding: 0 8px;
+              font-size: 14px;
           }
-
+          
           #custom-voxtype.recording {
-            color: #ff5555;
-            animation: pulse 1s ease-in-out infinite;
+              color: #ff5555;
+              animation: pulse 1s infinite;
           }
-
+          
           #custom-voxtype.transcribing {
-            color: #f1fa8c;
+              color: #f1fa8c;
           }
-
-          #custom-voxtype.idle {
-            color: #50fa7b;
-          }
-
-          #custom-voxtype.stopped {
-            color: #6272a4;
-          }
-
+          
           @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.5; }
           }
         '';
       };
