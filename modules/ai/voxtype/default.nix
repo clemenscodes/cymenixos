@@ -30,8 +30,7 @@ in {
             windowManager = {
               hyprland = {
                 extraConfig = ''
-                  bind = $mod, T, exec, ${voxtype}/bin/voxtype record start
-                  bindr = $mod, T, exec, ${voxtype}/bin/voxtype record stop
+                  bind = $mod, T, exec, ${voxtype}/bin/voxtype record toggle --clipboard
                 '';
               };
             };
