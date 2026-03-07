@@ -11,11 +11,11 @@
 }: let
   cfg = config.modules.display.bar;
   isLaptop = osConfig.modules.machine.kind == "laptop";
-  isNvidia = osConfig.modules.gpu.nvidia.enable;
   useEmail = config.modules.organization.email.enable;
   useMusic = config.modules.media.music.enable;
   useHyprland = config.modules.display.compositor.hyprland.enable;
   useSwaync = config.modules.display.notifications.swaync.enable;
+  useVoxtype = osConfig.modules.ai.voxtype.enable;
 in {
   options = {
     modules = {
@@ -168,6 +168,7 @@ in {
             ];
             modules-center = [];
             modules-right = [
+              (lib.mkIf useVoxtype "custom/voxtype")
               "hyprland/submap"
               "privacy"
               (lib.mkIf useSwaync "custom/notification")
@@ -178,6 +179,18 @@ in {
               (lib.mkIf useMusic "pulseaudio#mic")
               "custom/clock"
             ];
+            "custom/voxtype" = lib.mkIf useVoxtype {
+              exec = "${config.programs.voxtype.package}/bin/voxtype status --follow --format json";
+              return-type = "json";
+              format = "{icon}";
+              format-icons = {
+                idle = "\uf130";
+                recording = "\uf111";
+                transcribing = "\uf110";
+                stopped = "\uf131";
+              };
+              on-click = "systemctl --user restart voxtype";
+            };
             systemd-failed-units = {
               hide-on-ok = false;
               format = "{nr_failed}";
@@ -524,6 +537,32 @@ in {
           #tray > .needs-attention {
             -gtk-icon-effect: highlight;
             background-color: #eb4d4b;
+          }
+
+          #custom-voxtype {
+            padding: 0 10px;
+          }
+
+          #custom-voxtype.recording {
+            color: #ff5555;
+            animation: pulse 1s ease-in-out infinite;
+          }
+
+          #custom-voxtype.transcribing {
+            color: #f1fa8c;
+          }
+
+          #custom-voxtype.idle {
+            color: #50fa7b;
+          }
+
+          #custom-voxtype.stopped {
+            color: #6272a4;
+          }
+
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
           }
         '';
       };
