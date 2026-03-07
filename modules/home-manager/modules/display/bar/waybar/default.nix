@@ -183,13 +183,7 @@ in {
               exec = "${config.programs.voxtype.package}/bin/voxtype status --follow --format json";
               return-type = "json";
               format = "{icon}";
-              format-icons = {
-                idle = "\uf130";
-                recording = "\uf111";
-                transcribing = "\uf110";
-                stopped = "\uf131";
-              };
-              on-click = "systemctl --user restart voxtype";
+              on-click = "${pkgs.systemd}/bin/systemctl --user restart voxtype";
             };
             systemd-failed-units = {
               hide-on-ok = false;
@@ -489,6 +483,7 @@ in {
           #backlight,
           #pulseaudio,
           #pulseaudio.mic,
+          #custom-voxtype,
           #custom-clock {
             margin: 0px 4px ${defaultMargin} 4px;
           }
@@ -543,18 +538,18 @@ in {
               padding: 0 8px;
               font-size: 14px;
           }
-          
+
           #custom-voxtype.recording {
               color: #ff5555;
               animation: pulse 1s infinite;
           }
-          
+
           #custom-voxtype.transcribing {
               color: #f1fa8c;
           }
-          
+
           @keyframes pulse {
-              0% { opacity: 1; } 
+              0% { opacity: 1; }
               50% { opacity: 0.5; }
               100% { opacity: 1; }
           }

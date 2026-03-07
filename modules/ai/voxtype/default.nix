@@ -30,7 +30,7 @@ in {
             windowManager = {
               hyprland = {
                 extraConfig = ''
-                  bind = SUPER SHIFT, T, exec, ${voxtype}/bin/voxtype record stop
+                  bind = SUPER SHIFT, T, exec, ${voxtype}/bin/voxtype record start
                   bindr = SUPER SHIFT, T, exec, ${voxtype}/bin/voxtype record stop
                 '';
               };
@@ -50,7 +50,7 @@ in {
               settings = {
                 state_file = "auto";
                 status = {
-                  icon_theme = "nerd-font";
+                  icon_theme = "emoji";
                 };
                 hotkey = {
                   enabled = false;
