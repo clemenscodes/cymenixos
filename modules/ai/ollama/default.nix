@@ -45,10 +45,6 @@
         ];
     };
   };
-  hyprwhspr = pkgs.hyprwhspr-rs.override {
-    whisper-cpp = pkgs.whisper-cpp.override {cudaSupport = true;};
-    onnxruntime = pkgs.onnxruntime.override {cudaSupport = true;};
-  };
 in {
   options = {
     modules = {
@@ -61,7 +57,6 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.ollama.enable) {
     environment = {
-      systemPackages = [hyprwhspr];
       persistence = {
         "${persistPath}" = lib.mkIf (config.modules.boot.enable) {
           directories = ["/var/lib/ai"];
@@ -85,11 +80,6 @@ in {
       };
     };
     services = {
-      hyprwhspr-rs = {
-        enable = true;
-        package = hyprwhspr;
-        environmentFile = "/path/to/hyprwhspr_secret_file";
-      };
       ollama = {
         enable = true;
         openFirewall = true;
