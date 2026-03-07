@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   lib,
   ...
 }: {
@@ -8,7 +9,6 @@
   ...
 }: let
   cfg = config.modules.ai;
-  inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
 in {
   options = {
@@ -27,20 +27,13 @@ in {
           imports = [inputs.voxtype.homeManagerModules.default];
           programs.voxtype = {
             enable = true;
-            package = inputs.voxtype.packages.${system}.vulkan;
+            package = pkgs.voxtype-vulkan;
             service.enable = true;
             engine = "whisper";
-            model.name = "base.en";
+            model.name = "large-v3-turbo";
             settings = {
               hotkey.enabled = false;
               whisper.language = "en";
-            };
-          };
-          home = {
-            persistence = lib.mkIf (config.modules.boot.enable) {
-              "${persistPath}" = {
-                directories = [];
-              };
             };
           };
         };
