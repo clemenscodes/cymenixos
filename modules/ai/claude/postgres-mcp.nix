@@ -17,6 +17,16 @@ python312Packages.buildPythonApplication {
 
   build-system = [python312Packages.hatchling];
 
+  # psycopg-pool defaults to 30s timeout for acquiring connections, causing MCP initialize
+  # to time out in Claude Code. Reduce to 5s so the server starts quickly even when DB
+  # is temporarily unreachable.
+  postPatch = ''
+    substituteInPlace src/postgres_mcp/sql/sql_driver.py \
+      --replace-fail \
+        "min_size=1," \
+        "min_size=1, timeout=5.0,"
+  '';
+
   dependencies = with python312Packages; [
     mcp
     psycopg
