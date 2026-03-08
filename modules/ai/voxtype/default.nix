@@ -14,7 +14,7 @@
   parakeetModel = import ./parakeet-model.nix {inherit pkgs lib;};
   voxtypePkg =
     if cfg.voxtype.parakeet
-    then inputs.voxtype.packages.${system}."parakeet-cuda"
+    then pkgs.voxtype-onnx
     else pkgs.voxtype-vulkan;
 in {
   options = {
