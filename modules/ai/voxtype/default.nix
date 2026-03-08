@@ -11,13 +11,18 @@
   cfg = config.modules.ai;
   inherit (config.modules.users) user;
   inherit (config.modules.boot.impermanence) persistPath;
-  voxtype = pkgs.voxtype-vulkan;
+  parakeetModel = import ./parakeet-model.nix {inherit pkgs lib;};
+  voxtypePkg =
+    if cfg.voxtype.parakeet
+    then inputs.voxtype.packages.${system}."parakeet-cuda"
+    else pkgs.voxtype-vulkan;
 in {
   options = {
     modules = {
       ai = {
         voxtype = {
           enable = lib.mkEnableOption "Enable voxtype speech to text";
+          parakeet = lib.mkEnableOption "Use Parakeet CUDA engine instead of Whisper";
         };
       };
     };
@@ -38,7 +43,7 @@ in {
             windowManager = {
               hyprland = {
                 extraConfig = ''
-                  bind = $mod, T, exec, ${voxtype}/bin/voxtype record toggle --clipboard
+                  bind = $mod, T, exec, ${voxtypePkg}/bin/voxtype record toggle --clipboard
                 '';
               };
             };
@@ -46,43 +51,50 @@ in {
           programs = {
             voxtype = {
               inherit (cfg.voxtype) enable;
-              package = voxtype;
+              package = voxtypePkg;
               service = {
                 inherit (cfg.voxtype) enable;
               };
-              engine = "whisper";
-              model = {
-                name = "large-v3-turbo";
-              };
-              settings = {
-                meeting = {
-                  enabled = true;
-                  mic_device = "default";
-                  loopback_device = "auto";
-                  echo_cancel = "auto";
-                };
-                state_file = "auto";
-                status = {
-                  icon_theme = "emoji";
-                };
-                hotkey = {
-                  enabled = false;
-                };
-                whisper = {
-                  language = "en";
-                  translate = false;
-                };
-                text = {
-                  spoken_punctuation = true;
-                };
-                output = {
-                  notification = {
-                    on_recording_start = false;
-                    on_recording_stop = false;
-                    on_transcription = false;
+              engine =
+                if cfg.voxtype.parakeet
+                then "parakeet"
+                else "whisper";
+              model =
+                if cfg.voxtype.parakeet
+                then {path = "${parakeetModel}";}
+                else {name = "large-v3-turbo";};
+              settings =
+                {
+                  meeting = {
+                    enabled = true;
+                    mic_device = "default";
+                    loopback_device = "auto";
+                    echo_cancel = "auto";
+                  };
+                  state_file = "auto";
+                  status = {
+                    icon_theme = "emoji";
+                  };
+                  hotkey = {
+                    enabled = false;
+                  };
+                  text = {
+                    spoken_punctuation = true;
+                  };
+                  output = {
+                    notification = {
+                      on_recording_start = false;
+                      on_recording_stop = false;
+                      on_transcription = false;
+                    };
+                  };
+                }
+                // lib.optionalAttrs (!cfg.voxtype.parakeet) {
+                  whisper = {
+                    language = "en";
+                    translate = false;
                   };
                 };
-              };
             };
           };
         };
