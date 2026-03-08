@@ -46,13 +46,13 @@ in {
               model = {
                 name = "large-v3-turbo";
               };
-              meeting = {
-                enabled = true;
-                mic_device = "default";
-                loopback_device = "auto";
-                echo_cancel = "auto";
-              };
               settings = {
+                meeting = {
+                  enabled = true;
+                  mic_device = "default";
+                  loopback_device = "auto";
+                  echo_cancel = "auto";
+                };
                 state_file = "auto";
                 status = {
                   icon_theme = "emoji";
