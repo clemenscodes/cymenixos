@@ -16,7 +16,7 @@ buildNpmPackage {
     hash = "sha256-BKchv31/6ubnXO6dV3hBkS1OAiGNbt49bgsd4oIonzU=";
   };
 
-  npmDepsHash = "sha256-+74TOErtz+moqZi+5yrMj7c0eUkPdJT5QPDwfE4qkMI=";
+  npmDepsHash = "sha256-v3tmEjcr6GCoi6GgT8TKVYfxxJ/zGFBqoqebMqQVZpw=";
   nodejs = nodejs_22;
 
   nativeBuildInputs = [makeWrapper];
