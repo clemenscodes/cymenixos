@@ -21,6 +21,7 @@
     ];
   };
   jsonFormat = pkgs.formats.json {};
+  azure-devops-mcp = pkgs.callPackage ./azure-devops-mcp.nix {};
   mcpServers = {
     nixos = {
       command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
@@ -34,6 +35,13 @@
     };
     playwright = {
       command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
+    };
+    azure-devops = {
+      command = "${azure-devops-mcp}/bin/mcp-server-azuredevops";
+      args = ["--authentication" "envvar"];
+      env = {
+        ADO_MCP_AUTH_TOKEN = ''''${AZURE_DEVOPS_EXT_PAT}'';
+      };
     };
   };
   claude = pkgs.stdenv.mkDerivation {
