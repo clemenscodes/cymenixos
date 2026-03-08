@@ -41,6 +41,12 @@ stdenv.mkDerivation (finalAttrs: {
       --chdir "$out/lib/mongodb-mcp-server"
   '';
 
+  # pnpm creates a symlink node_modules/.pnpm/node_modules/browser -> tests/browser
+  # which we don't ship; remove all dangling symlinks before noBrokenSymlinks check
+  preFixup = ''
+    find $out -xtype l -delete
+  '';
+
   meta = {
     description = "Official MongoDB MCP server";
     homepage = "https://github.com/mongodb-js/mongodb-mcp-server";
