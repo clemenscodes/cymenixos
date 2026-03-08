@@ -85,7 +85,7 @@ in {
         hyprland = {
           inherit (cfg.hyprland) enable;
           systemd = {
-            enable = false;
+            enable = true;
           };
           settings = {
             input = {
