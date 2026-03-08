@@ -18,7 +18,7 @@ in {
     programs = {
       gamescope = {
         inherit (cfg.gamescope) enable;
-        package = pkgs.gamescope_git;
+        package = pkgs.gamescope;
       };
     };
   };

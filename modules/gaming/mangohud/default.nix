@@ -23,7 +23,7 @@ in {
             mangohud = {
               inherit (cfg.mangohud) enable;
               enableSessionWide = false;
-              package = pkgs.mangohud_git;
+              package = pkgs.mangohud;
               settings = {
                 legacy_layout = false;
                 custom_text_center = "MangoHud";
@@ -114,8 +114,7 @@ in {
     };
     environment = {
       systemPackages = [
-        pkgs.mangohud_git
-        pkgs.mangohud32_git
+        pkgs.mangohud
         pkgs.goverlay
       ];
     };

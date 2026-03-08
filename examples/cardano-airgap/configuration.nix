@@ -9,9 +9,6 @@
     enable = true;
     airgap = {
       enable = true;
-      cardano = {
-        enable = false;
-      };
     };
     disk = {
       enable = true;

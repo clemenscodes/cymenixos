@@ -46,7 +46,6 @@ in {
           initialHashedPassword = lib.mkForce cfg.users.initialHashedPassword;
           extraGroups = [
             (mkIf cfg.users.wheel "wheel")
-            (mkIf cfg.crypto.cardanix.enable "cardano-node")
           ];
         };
       };

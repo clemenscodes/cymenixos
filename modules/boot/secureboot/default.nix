@@ -21,7 +21,7 @@ in {
       systemPackages = [pkgs.sbctl];
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
-          directories = [config.booot.lanzaboote.pkiBundle];
+          directories = [config.boot.lanzaboote.pkiBundle];
         };
       };
     };

@@ -1,4 +1,12 @@
 {
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+  };
   inputs = {
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -71,9 +79,6 @@
     cymenixvim = {
       url = "github:clemenscodes/cymenixvim";
     };
-    codevim = {
-      url = "github:clemenscodes/codevim";
-    };
     xremap-flake = {
       url = "github:xremap/nix-flake/8001f37b1ffe86e76b62f36afadee2f4acf90e70";
       inputs = {
@@ -91,7 +96,7 @@
       };
     };
     lanzaboote = {
-      url = "github:clemenscodes/lanzaboote";
+      url = "github:nix-community/lanzaboote";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
@@ -101,11 +106,6 @@
     pwndbg = {
       url = "github:pwndbg/pwndbg";
     };
-    nix-gaming = {
-      url = "github:fufexan/nix-gaming";
-    };
-    lsfg-vk-flake.url = "github:pabloaul/lsfg-vk-flake/main";
-    lsfg-vk-flake.inputs.nixpkgs.follows = "nixpkgs";
     joymouse = {
       url = "github:clemenscodes/joymouse-rs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -132,18 +132,9 @@
     lpi = {
       url = "github:cymenix/lpi";
     };
-    cardanix = {
-      url = "github:clemenscodes/cardanix/develop";
-    };
-    templates = {
-      url = "github:NixOS/templates";
-    };
     yubikey-guide = {
       url = "github:drduh/YubiKey-Guide";
       flake = false;
-    };
-    chaotic = {
-      url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     };
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux";

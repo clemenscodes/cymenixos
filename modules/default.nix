@@ -25,7 +25,6 @@
     (import ./locale {inherit inputs pkgs lib;})
     (import ./machine {inherit inputs pkgs lib;})
     (import ./networking {inherit inputs pkgs lib;})
-    (import ./nyx {inherit inputs pkgs lib;})
     (import ./performance {inherit inputs pkgs lib;})
     (import ./rgb {inherit inputs pkgs lib;})
     (import ./security {inherit inputs pkgs lib;})

@@ -4,9 +4,6 @@
     airgap = {
       enable = false;
       offline = false;
-      cardano = {
-        enable = false;
-      };
     };
     disk = {
       enable = true;
@@ -69,9 +66,6 @@
     };
     crypto = {
       enable = false;
-      cardanix = {
-        enable = false;
-      };
       ledger-live = {
         enable = false;
       };
@@ -163,9 +157,6 @@
         rpcs3 = {
           enable = false;
         };
-      };
-      lossless = {
-        enable = false;
       };
       gamemode = {
         enable = false;
@@ -407,9 +398,6 @@
       enable = false;
     };
     xdg = {
-      enable = false;
-    };
-    nyx = {
       enable = false;
     };
   };

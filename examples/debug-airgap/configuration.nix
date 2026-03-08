@@ -10,9 +10,6 @@
     airgap = {
       enable = true;
       offline = true;
-      cardano = {
-        enable = true;
-      };
     };
     disk = {
       enable = true;

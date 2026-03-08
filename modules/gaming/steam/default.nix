@@ -75,11 +75,8 @@ in {
           pkgs.stdenv.cc.cc.lib
           pkgs.libkrb5
           pkgs.keyutils
-          pkgs.mangohud_git
-          pkgs.mangohud32_git
-          pkgs.gamescope_git
-          pkgs.gamescope-wsi_git
-          pkgs.gamescope-wsi32_git
+          pkgs.mangohud
+          pkgs.gamescope
         ];
         extraCompatPackages = [pkgs.proton-ge-bin];
       };

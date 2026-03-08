@@ -24,9 +24,6 @@
         enable = true;
       };
     };
-    nyx = {
-      enable = true;
-    };
     users = {
       enable = true;
       wheel = true;

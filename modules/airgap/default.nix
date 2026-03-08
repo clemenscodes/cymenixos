@@ -1,5 +1,4 @@
 {
-  inputs,
   pkgs,
   lib,
   cymenixos,
@@ -11,8 +10,6 @@
   ...
 }: let
   cfg = config.modules;
-  cardanix = inputs.cardanix.packages.${system};
-  inherit (cardanix) bech32 cardano-address cardano-cli cc-sign orchestrator-cli;
   flakesClosure = flakes:
     if flakes == []
     then []
@@ -45,9 +42,6 @@ in {
       airgap = {
         enable = lib.mkEnableOption "Enable airgap mode" // {default = false;};
         offline = lib.mkEnableOption "Enable offline building" // {default = false;};
-        cardano = {
-          enable = lib.mkEnableOption "Enable cardano airgap tools" // {default = false;};
-        };
       };
     };
   };
@@ -141,35 +135,23 @@ in {
           source = "${closureInfo}/store-paths";
         };
       };
-      systemPackages =
-        [
-          pkgs.cfssl
-          pkgs.cryptsetup
-          pkgs.pgpdump
-          pkgs.paperkey
-          pkgs.rng-tools
-          pkgs.ent
-          pkgs.gnupg
-          pkgs.pcsctools
-          pkgs.jq
-          pkgs.lvm2
-          pkgs.openssl
-          pkgs.pwgen
-          pkgs.usbutils
-          pkgs.util-linux
-          pkgs.disko
-        ]
-        ++ (
-          if config.modules.airgap.cardano.enable
-          then [
-            bech32
-            cardano-address
-            cardano-cli
-            orchestrator-cli
-            cc-sign
-          ]
-          else []
-        );
+      systemPackages = [
+        pkgs.cfssl
+        pkgs.cryptsetup
+        pkgs.pgpdump
+        pkgs.paperkey
+        pkgs.rng-tools
+        pkgs.ent
+        pkgs.gnupg
+        pkgs.pcsctools
+        pkgs.jq
+        pkgs.lvm2
+        pkgs.openssl
+        pkgs.pwgen
+        pkgs.usbutils
+        pkgs.util-linux
+        pkgs.disko
+      ];
     };
   };
 }
