@@ -68,9 +68,7 @@
     };
     neon = {
       command = "${neon-mcp}/bin/mcp-server-neon";
-      env = {
-        NEON_API_KEY = ''''${NEON_API_KEY}'';
-      };
+      args = ["start" ''''${NEON_API_KEY}''];
     };
     redis = {
       command = "${redis-mcp}/bin/mcp-server-redis";

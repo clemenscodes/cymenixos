@@ -33,7 +33,7 @@ buildNpmPackage {
 
   installPhase = ''
     mkdir -p $out/bin $out/lib/context7-mcp
-    cp dist/index.js $out/lib/context7-mcp/
+    cp -r dist/. $out/lib/context7-mcp/
     cp -r node_modules $out/lib/context7-mcp/
     chmod +x $out/lib/context7-mcp/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/context7-mcp \
