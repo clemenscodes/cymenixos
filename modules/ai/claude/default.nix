@@ -20,6 +20,12 @@
       inputs.codex.overlays.default
     ];
   };
+  jsonFormat = pkgs.formats.json {};
+  mcpServers = {
+    nixos = {
+      command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
+    };
+  };
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
     dontUnpack = true;
@@ -28,7 +34,9 @@
       mkdir -p $out/bin
       makeBinaryWrapper ${pkgs.claude-code}/bin/claude $out/bin/claude \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
-        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
+        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping \
+        "--append-flags" \
+        "--mcp-config ${jsonFormat.generate "claude-code-mcp-config.json" {inherit mcpServers;}}"
     '';
   };
   codex = pkgs.stdenv.mkDerivation {
@@ -93,6 +101,16 @@ in {
       users = {
         ${user} = {
           programs = {
+            mcp = {
+              enable = true;
+              servers = mcpServers;
+            };
+            opencode = {
+              enable = true;
+              enableMcpIntegration = true;
+            };
+            claude-code = {
+            };
             codex = {
               enable = true;
               package = codex;
@@ -128,7 +146,7 @@ in {
                 recursive = true;
               };
               ".config/claude/hooks/peon-ping/config.json" = {
-                source = (pkgs.formats.json {}).generate "peon-ping-config" {
+                source = jsonFormat.generate "peon-ping-config" {
                   default_pack = "peasant";
                   volume = 0.7;
                   enabled = true;
@@ -144,7 +162,7 @@ in {
                 };
               };
               ".config/claude/settings.json" = {
-                source = (pkgs.formats.json {}).generate "claude-code-settings.json" {
+                source = jsonFormat.generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
                   hooks = {
                     SessionStart = [
