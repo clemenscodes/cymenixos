@@ -34,6 +34,11 @@
   context7-mcp = pkgs.callPackage ./context7-mcp.nix {};
   nx-mcp = pkgs.callPackage ./nx-mcp.nix {};
   prisma-mcp = pkgs.callPackage ./prisma-mcp.nix {prisma = pkgs.prisma;};
+  # postgres server reads connection string as a positional arg, not env var;
+  # wrap it so the MCP env block can supply POSTGRES_CONNECTION_STRING
+  postgres-mcp-start = pkgs.writeShellScript "mcp-server-postgres" ''
+    exec ${postgres-mcp}/bin/mcp-server-postgres "$POSTGRES_CONNECTION_STRING"
+  '';
   mcpServers = {
     nixos = {
       command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
@@ -63,8 +68,10 @@
       };
     };
     postgres = {
-      command = "${postgres-mcp}/bin/mcp-server-postgres";
-      args = [''''${POSTGRES_CONNECTION_STRING}''];
+      command = "${postgres-mcp-start}";
+      env = {
+        POSTGRES_CONNECTION_STRING = ''''${POSTGRES_CONNECTION_STRING}'';
+      };
     };
     neon = {
       command = "${neon-mcp}/bin/mcp-server-neon";
