@@ -34,8 +34,7 @@ buildNpmPackage {
     cp -r node_modules $out/lib/git-mcp-server/
     chmod +x $out/lib/git-mcp-server/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/git-mcp-server \
-      --add-flags "$out/lib/git-mcp-server/index.js" \
-      --chdir "$out/lib/git-mcp-server"
+      --add-flags "$out/lib/git-mcp-server/index.js"
   '';
 
   meta = {

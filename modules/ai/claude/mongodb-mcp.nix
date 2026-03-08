@@ -34,9 +34,11 @@ stdenv.mkDerivation (finalAttrs: {
   installPhase = ''
     mkdir -p $out/bin $out/lib/mongodb-mcp-server
     cp -r dist/esm $out/lib/mongodb-mcp-server/
+    cp -r node_modules $out/lib/mongodb-mcp-server/
     chmod +x $out/lib/mongodb-mcp-server/esm/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/mongodb-mcp-server \
-      --add-flags "$out/lib/mongodb-mcp-server/esm/index.js"
+      --add-flags "$out/lib/mongodb-mcp-server/esm/index.js" \
+      --chdir "$out/lib/mongodb-mcp-server"
   '';
 
   meta = {

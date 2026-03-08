@@ -64,9 +64,7 @@
     };
     postgres = {
       command = "${postgres-mcp}/bin/mcp-server-postgres";
-      env = {
-        POSTGRES_CONNECTION_STRING = ''''${POSTGRES_CONNECTION_STRING}'';
-      };
+      args = [''''${POSTGRES_CONNECTION_STRING}''];
     };
     neon = {
       command = "${neon-mcp}/bin/mcp-server-neon";

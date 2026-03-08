@@ -28,10 +28,11 @@ buildNpmPackage {
 
   installPhase = ''
     mkdir -p $out/bin $out/lib/mcp-server-redis
-    cp dist/redis_server.js $out/lib/mcp-server-redis/
+    cp -r dist $out/lib/mcp-server-redis/
     cp -r node_modules $out/lib/mcp-server-redis/
+    chmod +x $out/lib/mcp-server-redis/dist/redis_server.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/mcp-server-redis \
-      --add-flags "$out/lib/mcp-server-redis/redis_server.js" \
+      --add-flags "$out/lib/mcp-server-redis/dist/redis_server.js" \
       --chdir "$out/lib/mcp-server-redis"
   '';
 
