@@ -101,7 +101,7 @@ in {
                 model_reasoning_effort = "xhigh";
                 notify = ["${peonsh}/bin/peon-codex-adapter"];
                 projects = {
-                  "/home/${user}" = {
+                  "/home/${user}/.local/src" = {
                     trust_level = "trusted";
                   };
                 };
@@ -132,11 +132,11 @@ in {
                   default_pack = "peasant";
                   volume = 0.7;
                   enabled = true;
-                  desktop_notifications = true;
+                  desktop_notifications = false;
                   categories = {
                     "session.start" = true;
                     "task.complete" = true;
-                    "task.error" = true;
+                    "task.error" = false;
                     "input.required" = true;
                     "resource.limit" = true;
                     "user.spam" = true;

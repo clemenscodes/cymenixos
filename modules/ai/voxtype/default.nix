@@ -58,6 +58,16 @@ in {
                   language = "en";
                   translate = false;
                 };
+                text = {
+                  spoken_punctuation = true;
+                };
+                output = {
+                  notification = {
+                    on_recording_start = false;
+                    on_recording_stop = false;
+                    on_transcription = false;
+                  };
+                };
               };
             };
           };
