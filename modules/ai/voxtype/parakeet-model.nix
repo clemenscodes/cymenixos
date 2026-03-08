@@ -12,8 +12,9 @@ in
   pkgs.runCommand "parakeet-tdt-0.6b-v3" {} ''
     mkdir -p $out
     ${lib.concatMapStringsSep "\n" (file: "cp ${file} $out/${file.name}") [
-      (fetchFile "encoder-model.int8.onnx" "sha256-YTnS+n4bCGCXsnfHFJcl7bq4nMfHrmSyPHQb5AVa/wk=")
-      (fetchFile "decoder_joint-model.int8.onnx" "sha256-7qdIPuPRowN12u3I7YPjlgyRsJiBISeg2Z0ciXdmenA=")
+      (fetchFile "encoder-model.onnx" "sha256-mKdLIbTMABfB5wMDGaSpb0qVBuUPBwjzpRbQKnfJa7E=")
+      (fetchFile "encoder-model.onnx.data" "sha256-miLTcsUUVcNPE0BdolILrvtxJb0WmBOXVhQj7TLSTzY=")
+      (fetchFile "decoder_joint-model.onnx" "sha256-6Xjd9miFJxgsEP3i60uDBoQhZImF7yP3qGvnMr6HBsE=")
       (fetchFile "vocab.txt" "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=")
       (fetchFile "config.json" "sha256-ZmkDx2uXmMrywhCv1PbNYLCKjb+YAOyNejvA0hSKxGY=")
     ]}

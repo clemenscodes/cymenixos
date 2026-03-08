@@ -94,6 +94,12 @@ in {
                     language = "en";
                     translate = false;
                   };
+                }
+                // lib.optionalAttrs (cfg.voxtype.parakeet) {
+                  parakeet = {
+                    model_type = "tdt";
+                    on_demand_loading = true;
+                  };
                 };
             };
           };
