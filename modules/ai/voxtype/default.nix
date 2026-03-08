@@ -10,6 +10,7 @@
 }: let
   cfg = config.modules.ai;
   inherit (config.modules.users) user;
+  inherit (config.modules.boot.impermanence) persistPath;
   voxtype = pkgs.voxtype-vulkan;
 in {
   options = {
@@ -26,6 +27,13 @@ in {
       users = {
         ${user} = {
           imports = [inputs.voxtype.homeManagerModules.default];
+          home = {
+            persistence = lib.mkIf (config.modules.boot.enable) {
+              "${persistPath}" = {
+                directories = [".local/share/voxtype"];
+              };
+            };
+          };
           wayland = {
             windowManager = {
               hyprland = {
