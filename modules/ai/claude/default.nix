@@ -25,6 +25,13 @@
     nixos = {
       command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
     };
+    github = {
+      command = "${pkgs.github-mcp-server}/bin/github-mcp-server";
+      args = ["stdio"];
+      env = {
+        GITHUB_PERSONAL_ACCESS_TOKEN = ''"''${GH_TOKEN}"'';
+      };
+    };
   };
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
