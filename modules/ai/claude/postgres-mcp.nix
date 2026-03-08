@@ -1,7 +1,7 @@
 {
   lib,
   buildNpmPackage,
-  fetchFromGitHub,
+  fetchurl,
   nodejs_22,
   makeWrapper,
 }:
@@ -9,29 +9,30 @@ buildNpmPackage {
   pname = "mcp-server-postgres";
   version = "0.6.2";
 
-  src = fetchFromGitHub {
-    owner = "modelcontextprotocol";
-    repo = "servers";
-    rev = "typescript-servers-0.6.2";
-    hash = "sha256-FKotJUzP29iZzfRqfWGhdZosWxGX7BBOExxznfLi7Us=";
+  # Use the pre-built npm tarball (dist/index.js included)
+  src = fetchurl {
+    url = "https://registry.npmjs.org/@modelcontextprotocol/server-postgres/-/server-postgres-0.6.2.tgz";
+    hash = "sha256-r1UgCgGxOuMZSftKiGTuYEO4kdAP+DMw0XebGKpbom8=";
   };
 
-  npmDepsHash = "sha256-fuJQxbHrv/x49I3WDMQxXC/+kuv/JiTDdHiAEaN94Zw=";
+  postPatch = ''
+    cp ${./postgres-package-lock.json} package-lock.json
+  '';
+
+  npmDepsHash = "sha256-e2jHhGuSHBf3bQeHmlIfYbOsEV/mrPwEWPwodOUXe48=";
   nodejs = nodejs_22;
+  dontNpmBuild = true;
 
   nativeBuildInputs = [makeWrapper];
-
-  buildPhase = ''
-    cd src/postgres
-    npm run build
-  '';
 
   installPhase = ''
     mkdir -p $out/bin $out/lib/mcp-server-postgres
     cp dist/index.js $out/lib/mcp-server-postgres/
+    cp -r node_modules $out/lib/mcp-server-postgres/
     chmod +x $out/lib/mcp-server-postgres/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/mcp-server-postgres \
-      --add-flags "$out/lib/mcp-server-postgres/index.js"
+      --add-flags "$out/lib/mcp-server-postgres/index.js" \
+      --chdir "$out/lib/mcp-server-postgres"
   '';
 
   meta = {

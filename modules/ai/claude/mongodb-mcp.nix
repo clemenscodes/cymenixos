@@ -25,7 +25,7 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-QFjC2nT1fBj41dV3lx1SHdhK7JsF59PaAmnBMqhlwlk=";
   };
 
-  nativeBuildInputs = [pnpmConfigHook nodejs_22 makeWrapper];
+  nativeBuildInputs = [pnpm_10 pnpmConfigHook nodejs_22 makeWrapper];
 
   buildPhase = ''
     pnpm run build:esm

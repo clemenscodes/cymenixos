@@ -1,7 +1,7 @@
 {
   lib,
   buildNpmPackage,
-  fetchFromGitHub,
+  fetchurl,
   nodejs_22,
   makeWrapper,
 }:
@@ -9,29 +9,29 @@ buildNpmPackage {
   pname = "mcp-server-memory";
   version = "0.6.2";
 
-  src = fetchFromGitHub {
-    owner = "modelcontextprotocol";
-    repo = "servers";
-    rev = "typescript-servers-0.6.2";
-    hash = "sha256-FKotJUzP29iZzfRqfWGhdZosWxGX7BBOExxznfLi7Us=";
+  src = fetchurl {
+    url = "https://registry.npmjs.org/@modelcontextprotocol/server-memory/-/server-memory-0.6.2.tgz";
+    hash = "sha256-5JIbSQ0MQJbymt7yQMUy50s9hHbGDZIu6zIDclHgf1w=";
   };
 
-  npmDepsHash = "sha256-fuJQxbHrv/x49I3WDMQxXC/+kuv/JiTDdHiAEaN94Zw=";
+  postPatch = ''
+    cp ${./memory-package-lock.json} package-lock.json
+  '';
+
+  npmDepsHash = "sha256-bUEeqOlwv/hfbT7tQYL9kbwYy6Ul5Nu8mTyhCTB6bM8=";
   nodejs = nodejs_22;
+  dontNpmBuild = true;
 
   nativeBuildInputs = [makeWrapper];
-
-  buildPhase = ''
-    cd src/memory
-    npm run build
-  '';
 
   installPhase = ''
     mkdir -p $out/bin $out/lib/mcp-server-memory
     cp dist/index.js $out/lib/mcp-server-memory/
+    cp -r node_modules $out/lib/mcp-server-memory/
     chmod +x $out/lib/mcp-server-memory/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/mcp-server-memory \
-      --add-flags "$out/lib/mcp-server-memory/index.js"
+      --add-flags "$out/lib/mcp-server-memory/index.js" \
+      --chdir "$out/lib/mcp-server-memory"
   '';
 
   meta = {

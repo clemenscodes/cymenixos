@@ -18,6 +18,9 @@ buildNpmPackage {
   npmDepsHash = "sha256-zjhuCwMU3dsz0GI3komvOy2Vw6XzE7i0xTYIDclBuRk=";
   nodejs = nodejs_22;
 
+  # bun is in devDeps and its postinstall tries to download a binary; skip all scripts
+  npmFlags = ["--ignore-scripts"];
+
   meta = {
     description = "MCP server for Neon serverless Postgres — manage databases and run SQL";
     homepage = "https://github.com/neondatabase/mcp-server-neon";

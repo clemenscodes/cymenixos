@@ -1,7 +1,7 @@
 {
   lib,
   buildNpmPackage,
-  fetchFromGitHub,
+  fetchurl,
   nodejs_22,
   makeWrapper,
 }:
@@ -9,29 +9,29 @@ buildNpmPackage {
   pname = "mcp-server-sequential-thinking";
   version = "0.6.2";
 
-  src = fetchFromGitHub {
-    owner = "modelcontextprotocol";
-    repo = "servers";
-    rev = "typescript-servers-0.6.2";
-    hash = "sha256-FKotJUzP29iZzfRqfWGhdZosWxGX7BBOExxznfLi7Us=";
+  src = fetchurl {
+    url = "https://registry.npmjs.org/@modelcontextprotocol/server-sequential-thinking/-/server-sequential-thinking-0.6.2.tgz";
+    hash = "sha256-9RKojbXO5zqyYZ0KtYmRNvmfiLkwiPpq6OLujCkkKeg=";
   };
 
-  npmDepsHash = "sha256-fuJQxbHrv/x49I3WDMQxXC/+kuv/JiTDdHiAEaN94Zw=";
+  postPatch = ''
+    cp ${./sequential-thinking-package-lock.json} package-lock.json
+  '';
+
+  npmDepsHash = "sha256-23JquybSxH5Ku3d7OwrEDaRiscYCzrCh7/lvcuujqGw=";
   nodejs = nodejs_22;
+  dontNpmBuild = true;
 
   nativeBuildInputs = [makeWrapper];
-
-  buildPhase = ''
-    cd src/sequentialthinking
-    npm run build
-  '';
 
   installPhase = ''
     mkdir -p $out/bin $out/lib/mcp-server-sequential-thinking
     cp dist/index.js $out/lib/mcp-server-sequential-thinking/
+    cp -r node_modules $out/lib/mcp-server-sequential-thinking/
     chmod +x $out/lib/mcp-server-sequential-thinking/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/mcp-server-sequential-thinking \
-      --add-flags "$out/lib/mcp-server-sequential-thinking/index.js"
+      --add-flags "$out/lib/mcp-server-sequential-thinking/index.js" \
+      --chdir "$out/lib/mcp-server-sequential-thinking"
   '';
 
   meta = {

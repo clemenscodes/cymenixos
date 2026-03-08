@@ -18,6 +18,10 @@ buildNpmPackage {
 
   npmDepsHash = "sha256-di/EDkHKQrUySc5wtyK2z/nqwAT1UEymx69bVPf+oaM=";
   nodejs = nodejs_22;
+  makeCacheWritable = true;
+
+  # esbuild's postinstall downloads a platform binary; skip all scripts since tsc builds the package
+  npmFlags = ["--ignore-scripts"];
 
   nativeBuildInputs = [makeWrapper];
 
