@@ -32,6 +32,9 @@
         GITHUB_PERSONAL_ACCESS_TOKEN = ''''${GH_TOKEN}'';
       };
     };
+    playwright = {
+      command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
+    };
   };
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
