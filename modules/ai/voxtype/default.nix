@@ -67,9 +67,15 @@ in {
                 {
                   meeting = {
                     enabled = true;
-                    mic_device = "default";
-                    loopback_device = "auto";
-                    echo_cancel = "auto";
+                    chunk_duration_secs = 30;
+                    storage_path = "auto";
+                    max_duration_mins = 180;
+                    retain_audio = false;
+                    audio = {
+                      mic_device = "default";
+                      loopback_device = "auto";
+                      echo_cancel = "auto";
+                    };
                   };
                   state_file = "auto";
                   status = {
@@ -87,17 +93,12 @@ in {
                     threshold = 0.5;
                     min_speech_duration_ms = 100;
                   };
-                  profiles = {
-                    teams = {
-
-                    };
-                    code = {
-
-                    };
-
-                  };
                   output = {
                     mode = "clipboard";
+                    post_process = lib.mkIf (cfg.ollama.enable) {
+                      command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription. Fix grammar and remove filler words and replace technical punctuation with the symbols. Output only the cleaned text'";
+                      timeout_ms = 30000;
+                    };
                     notification = {
                       on_recording_start = false;
                       on_recording_stop = false;
