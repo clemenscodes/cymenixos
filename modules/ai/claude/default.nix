@@ -187,7 +187,7 @@ in {
 
                   ## Nix Derivations
 
-                  **Always build and verify before committing** any Nix derivation:
+                  **Always build and verify after writing** any Nix derivation. The task is not done until it builds:
                   ```
                   nix build --no-link --impure --expr \
                     'let pkgs = import <nixpkgs> {}; in import ./path/to/file.nix { inherit pkgs; /* required args */ }'
