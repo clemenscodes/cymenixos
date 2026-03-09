@@ -96,10 +96,23 @@ in {
                   hotkey = {
                     enabled = false;
                   };
+                  profiles = lib.mkIf (cfg.ollama.enable) {
+                    teams = {
+                      post_process_command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription for Microsoft Teams. Keep it casual and concise. Output only the cleaned text'";
+                    };
+                    email = {
+                      post_process_command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription to a professional email text. Output only the cleaned text'";
+                    };
+                  };
                   text = {
                     spoken_punctuation = true;
                   };
                   output = {
+                    mode = "clipboard";
+                    post_process = lib.mkIf (cfg.ollama.enable) {
+                      command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription to great prompt for Claude Code. Fix grammar and remove filler words and replace technical punctuation with the symbols. Output only the cleaned text'";
+                      timeout_ms = 30000;
+                    };
                     notification = {
                       on_recording_start = false;
                       on_recording_stop = false;
