@@ -44,9 +44,9 @@ in
           h=$(( secs_left / 3600 ))
           m=$(( (secs_left % 3600) / 60 ))
           if [ "$h" -gt 0 ]; then
-            reset_str="${h}h ${m}m"
+            reset_str="$h h $m m"
           else
-            reset_str="${m}m"
+            reset_str="$m m"
           fi
         fi
         reset_at=$(date -d "@$reset_epoch" +%H:%M)
