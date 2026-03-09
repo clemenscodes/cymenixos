@@ -9,8 +9,7 @@ writeShellApplication {
   runtimeInputs = [voxtype libnotify];
   text = ''
     meetings_dir="$HOME/.local/share/voxtype/meetings"
-    latest_dir=$(ls -td "$meetings_dir"/*/ 2>/dev/null | head -1)
-    latest_dir="''${latest_dir%/}"
+    latest_dir=$(find "$meetings_dir" -mindepth 1 -maxdepth 1 -type d -printf '%T@\t%p\n' 2>/dev/null | sort -rn | head -1 | cut -f2-)
     out_file="$latest_dir/export.md"
 
     if ! transcript=$(voxtype meeting export latest --format markdown --timestamps --speakers --metadata 2>&1) || echo "$transcript" | grep -qi "no meeting"; then
