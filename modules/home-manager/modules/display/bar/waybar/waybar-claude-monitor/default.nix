@@ -46,7 +46,7 @@ in
 
       if [ -z "$block_start_epoch" ]; then
         # No active block — show 0% so the widget stays visible
-        jq -cn '{"text":"🤖 0% ↻ --","tooltip":"No active Claude Code block.","class":"normal"}'
+        jq -cn '{"text":"Claude 0%","tooltip":"No active Claude Code block.","class":"normal"}'
         exit 0
       fi
 
@@ -91,18 +91,18 @@ in
         h=$((secs_left / 3600))
         m=$(((secs_left % 3600) / 60))
         if [ "$h" -gt 0 ]; then
-          reset_str="$h h $m m"
+          reset_str="''${h}h ''${m}m"
         elif [ "$m" -gt 0 ]; then
-          reset_str="$m m"
+          reset_str="''${m}m"
         else
-          reset_str="<1 m"
+          reset_str="<1m"
         fi
       fi
 
       text=$(jq -r --arg reset "$reset_str" '
         (.input + .output) as $total |
         ($total * 100 / .quota) as $pct |
-        "🤖 \($pct | round)% ↻ \($reset)"
+        "Claude \($pct | round)% · \($reset)"
       ' <<< "$totals")
 
       tooltip=$(jq -r --arg reset_at "$reset_at" '
