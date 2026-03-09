@@ -20,9 +20,9 @@
   # Estimated token quotas per 5-hour rolling window per subscription tier.
   # Anthropic does not publish exact numbers; tune quotaTokens if needed.
   planQuotas = {
-    pro = 5_000_000;
-    max5 = 25_000_000;
-    max20 = 100_000_000;
+    pro = 5000000;
+    max5 = 25000000;
+    max20 = 100000000;
   };
   claudeQuota =
     if cfg.waybar.claudeMonitor.quotaTokens != null
