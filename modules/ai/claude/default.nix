@@ -198,7 +198,7 @@ in {
 
                   **Grep for unintended antiquotations** before finishing:
                   ```
-                  grep -n '\${' file.nix
+                  grep -n '\''${' file.nix
                   ```
 
                   **No underscore separators in integer literals** — `5_000_000` is invalid Nix; use `5000000`.
