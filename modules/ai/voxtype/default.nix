@@ -19,6 +19,9 @@
   meeting-toggle = pkgs.callPackage ./voxtype-meeting-toggle.nix {voxtype = voxtypePkg;};
   meeting-pause-toggle = pkgs.callPackage ./voxtype-meeting-pause-toggle.nix {voxtype = voxtypePkg;};
   meeting-export = pkgs.callPackage ./voxtype-meeting-export.nix {voxtype = voxtypePkg;};
+  ollama = "${config.services.ollama.package}/bin/ollama";
+  ollamaModel = "llama3.2:3b";
+  mkOllamaCmd = instruction: "${pkgs.bash}/bin/bash -c '${ollama} run ${ollamaModel} \"${instruction}\n\n$(cat)\"'";
 in {
   options = {
     modules = {
@@ -98,10 +101,10 @@ in {
                   };
                   profiles = lib.mkIf (cfg.ollama.enable) {
                     teams = {
-                      post_process_command = "${config.services.ollama.package}/bin/ollama run llama3.2:3b 'Fix grammar and remove filler words (um, uh, like, you know). Replace spoken punctuation with symbols. Keep the tone casual and concise for a chat message. Do NOT rephrase or summarize. Output only the corrected text.'";
+                      post_process_command = mkOllamaCmd "Fix grammar and remove filler words (um, uh, like, you know). Replace spoken punctuation with symbols. Keep the tone casual and concise for a chat message. Do NOT rephrase or summarize. Output only the corrected text:";
                     };
                     email = {
-                      post_process_command = "${config.services.ollama.package}/bin/ollama run llama3.2:3b 'Fix grammar and remove filler words. Replace spoken punctuation with symbols. Adjust tone to be professional and suitable for an email. Do NOT add greetings, closings, or subject lines. Output only the corrected text.'";
+                      post_process_command = mkOllamaCmd "Fix grammar and remove filler words. Replace spoken punctuation with symbols. Adjust tone to be professional and suitable for an email. Do NOT add greetings, closings, or subject lines. Output only the corrected text:";
                     };
                   };
                   text = {
@@ -110,7 +113,7 @@ in {
                   output = {
                     mode = "clipboard";
                     post_process = lib.mkIf (cfg.ollama.enable) {
-                      command = "${config.services.ollama.package}/bin/ollama run llama3.2:3b 'Fix only grammar, spelling, and filler words (um, uh, like, you know) in this dictated text. Replace spoken punctuation (comma, period, question mark, exclamation mark, colon, semicolon) with the actual symbols. Do NOT rephrase, summarize, or change the meaning. Output only the corrected text with no commentary.'";
+                      command = mkOllamaCmd "Fix only grammar, spelling, and filler words (um, uh, like, you know) in this dictated text. Replace spoken punctuation (comma, period, question mark, exclamation mark, colon, semicolon) with the actual symbols. Do NOT rephrase, summarize, or change the meaning. Output only the corrected text with no commentary:";
                       timeout_ms = 30000;
                     };
                     notification = {

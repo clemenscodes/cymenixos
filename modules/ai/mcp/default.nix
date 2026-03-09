@@ -4,6 +4,7 @@
   ...
 }: {...}: {
   imports = [
+    (import ./atlassian {inherit lib;})
     (import ./azure-devops {inherit pkgs lib;})
     (import ./context7 {inherit pkgs lib;})
     (import ./docker {inherit pkgs lib;})
