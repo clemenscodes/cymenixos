@@ -157,6 +157,35 @@ in {
                   };
                 };
               };
+              ".config/claude/CLAUDE.md" = {
+                text = ''
+                  # NixOS System
+
+                  This system runs NixOS. Most tools (`python`, `jq`, `curl`, `node`, etc.) are NOT in PATH.
+
+                  **Always use `nix run nixpkgs#<pkg>` — never try a bare binary first.**
+
+                  ```
+                  nix run nixpkgs#jq -- -r '.key' file.json
+                  nix run nixpkgs#python3 -- script.py
+                  nix shell nixpkgs#jq nixpkgs#curl   # multi-tool
+                  ```
+
+                  Use the NixOS MCP (`mcp__nixos__nix`) or `nix search nixpkgs <name>` to find package names.
+
+                  ## System Configuration
+
+                  The active system config is at `$FLAKE/configuration.nix`. It uses the CymenixOS module library,
+                  with all options namespaced under `modules.*`.
+
+                  To add an option: edit `$FLAKE/configuration.nix`, then rebuild:
+                  ```
+                  sudo nixos-rebuild switch --flake "$FLAKE#${user}"
+                  ```
+
+                  To understand available options, check the CymenixOS `api/os.nix` (system) or `api/home.nix` (home-manager).
+                '';
+              };
               ".config/claude/settings.json" = {
                 source = jsonFormat.generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
