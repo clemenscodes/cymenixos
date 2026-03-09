@@ -3,6 +3,7 @@
   buildNpmPackage,
   fetchFromGitHub,
   nodejs_22,
+  makeWrapper,
 }:
 buildNpmPackage {
   pname = "mcp-server-neon";
@@ -17,9 +18,24 @@ buildNpmPackage {
 
   npmDepsHash = "sha256-zjhuCwMU3dsz0GI3komvOy2Vw6XzE7i0xTYIDclBuRk=";
   nodejs = nodejs_22;
+  makeCacheWritable = true;
 
   # bun is in devDeps and its postinstall tries to download a binary; skip all scripts
   npmFlags = ["--ignore-scripts"];
+
+  nativeBuildInputs = [makeWrapper];
+
+  # Use explicit install like other MCP servers instead of relying on default npm pack behavior
+  dontNpmInstall = true;
+
+  installPhase = ''
+    mkdir -p $out/bin $out/lib/mcp-server-neon
+    cp -r dist node_modules $out/lib/mcp-server-neon/
+    chmod +x $out/lib/mcp-server-neon/dist/index.js
+    makeWrapper ${nodejs_22}/bin/node $out/bin/mcp-server-neon \
+      --add-flags "$out/lib/mcp-server-neon/dist/index.js" \
+      --chdir "$out/lib/mcp-server-neon"
+  '';
 
   meta = {
     description = "MCP server for Neon serverless Postgres — manage databases and run SQL";

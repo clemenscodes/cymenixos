@@ -4,3 +4,4 @@
 **/*.qcow2
 examples/**/update
 logs
+.claude/settings.local.json
