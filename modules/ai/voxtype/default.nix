@@ -16,7 +16,10 @@
     if cfg.voxtype.parakeet
     then pkgs.voxtype-onnx
     else pkgs.voxtype-vulkan;
-  meeting-toggle = pkgs.callPackage ./voxtype-meeting-toggle.nix {voxtype = voxtypePkg; voxtype-meeting-export = meeting-export;};
+  meeting-toggle = pkgs.callPackage ./voxtype-meeting-toggle.nix {
+    voxtype = voxtypePkg;
+    voxtype-meeting-export = meeting-export;
+  };
   meeting-pause-toggle = pkgs.callPackage ./voxtype-meeting-pause-toggle.nix {voxtype = voxtypePkg;};
   meeting-export = pkgs.callPackage ./voxtype-meeting-export.nix {voxtype = voxtypePkg;};
 in {
@@ -81,11 +84,9 @@ in {
                     storage_path = "auto";
                     max_duration_mins = 180;
                     retain_audio = false;
-                    audio = {
-                      mic_device = "default";
-                      loopback_device = "auto";
-                      echo_cancel = "auto";
-                    };
+                    mic_device = "default";
+                    loopback_device = "auto";
+                    echo_cancel = "auto";
                   };
                   state_file = "auto";
                   status = {
