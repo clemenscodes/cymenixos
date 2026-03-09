@@ -217,7 +217,7 @@ in {
               return-type = "json";
               interval = 5;
               exec = "waybar-nvidia";
-              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.nvtopPackages.nvidia}/bin/nvtop";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty nvtop";
             };
             "custom/claude-monitor" = lib.mkIf useClaude {
               return-type = "json";
