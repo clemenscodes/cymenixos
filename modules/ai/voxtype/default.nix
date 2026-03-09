@@ -80,7 +80,7 @@ in {
                 {
                   meeting = {
                     enabled = true;
-                    chunk_duration_secs = 30;
+                    chunk_duration_secs = 10;
                     storage_path = "auto";
                     max_duration_mins = 180;
                     retain_audio = false;
