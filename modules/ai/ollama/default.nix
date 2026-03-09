@@ -89,7 +89,7 @@ in {
         group = "ollama";
         home = "/var/lib/ai/ollama";
         models = "/var/lib/ai/ollama/models";
-        loadModels = ["qwen3-coder-next:q4_K_M" "qwen3-coder:30b" "llama3.2:1b"];
+        loadModels = ["qwen3-coder-next:q4_K_M" "qwen3-coder:30b" "llama3.2:3b"];
       };
     };
     systemd = {
