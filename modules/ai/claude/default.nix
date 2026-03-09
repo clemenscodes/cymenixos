@@ -193,8 +193,8 @@ in {
                     'let pkgs = import <nixpkgs> {}; in import ./path/to/file.nix { inherit pkgs; /* required args */ }'
                   ```
 
-                  **In `''` multi-line Nix strings**, `${...}` is Nix antiquotation — shell variables with braces
-                  like `${h}` will cause "undefined variable" errors. Use bare `$h` (no braces) or escape with `''${h}`.
+                  **In multi-line Nix strings**, `''${...}` is Nix antiquotation — shell variables with braces
+                  like `''${h}` will cause "undefined variable" errors. Use bare `$h` (no braces) or escape with `''''`.
 
                   **Grep for unintended antiquotations** before finishing:
                   ```
