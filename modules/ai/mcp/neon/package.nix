@@ -35,7 +35,7 @@ buildNpmPackage {
 
   installPhase = ''
     mkdir -p $out/bin $out/lib/mcp-server-neon
-    cp -r dist node_modules $out/lib/mcp-server-neon/
+    cp -r dist node_modules package.json $out/lib/mcp-server-neon/
     makeWrapper ${nodejs_22}/bin/node $out/bin/mcp-server-neon \
       --add-flags "$out/lib/mcp-server-neon/dist/index.js" \
       --chdir "$out/lib/mcp-server-neon"

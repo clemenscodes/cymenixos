@@ -106,7 +106,6 @@ in {
                     min_speech_duration_ms = 100;
                   };
                   output = {
-                    mode = "clipboard";
                     notification = {
                       on_recording_start = false;
                       on_recording_stop = false;

@@ -14,6 +14,9 @@ in {
     modules.ai.mcp.servers.neon = {
       command = "${neon-mcp}/bin/mcp-server-neon";
       args = ["start" ''''${NEON_API_KEY}''];
+      env = {
+        NEON_API_KEY = ''''${NEON_API_KEY}'';
+      };
     };
   };
 }
