@@ -16,6 +16,9 @@
     if cfg.voxtype.parakeet
     then pkgs.voxtype-onnx
     else pkgs.voxtype-vulkan;
+  meeting-toggle = pkgs.callPackage ./voxtype-meeting-toggle.nix {voxtype = voxtypePkg;};
+  meeting-pause-toggle = pkgs.callPackage ./voxtype-meeting-pause-toggle.nix {voxtype = voxtypePkg;};
+  meeting-export = pkgs.callPackage ./voxtype-meeting-export.nix {voxtype = voxtypePkg;};
 in {
   options = {
     modules = {
@@ -33,6 +36,7 @@ in {
         ${user} = {
           imports = [inputs.voxtype.homeManagerModules.default];
           home = {
+            packages = [meeting-toggle meeting-pause-toggle meeting-export];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
                 directories = [".local/share/voxtype"];
@@ -43,7 +47,15 @@ in {
             windowManager = {
               hyprland = {
                 extraConfig = ''
+                  # Recording
                   bind = $mod, T, exec, ${voxtypePkg}/bin/voxtype record toggle --clipboard
+                  bind = $mod SHIFT, T, exec, ${voxtypePkg}/bin/voxtype record toggle --clipboard --profile teams
+                  bind = $mod ALT, T, exec, ${voxtypePkg}/bin/voxtype record toggle --clipboard --profile email
+                  bind = $mod CTRL, T, exec, ${voxtypePkg}/bin/voxtype record cancel
+                  # Meetings
+                  bind = $mod, I, exec, ${meeting-toggle}/bin/voxtype-meeting-toggle
+                  bind = $mod SHIFT, I, exec, ${meeting-pause-toggle}/bin/voxtype-meeting-pause-toggle
+                  bind = $mod ALT, I, exec, ${meeting-export}/bin/voxtype-meeting-export
                 '';
               };
             };
@@ -84,6 +96,14 @@ in {
                   hotkey = {
                     enabled = false;
                   };
+                  profiles = lib.mkIf (cfg.ollama.enable) {
+                    teams = {
+                      post_process_command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription for Microsoft Teams. Keep it casual and concise. Output only the cleaned text'";
+                    };
+                    email = {
+                      post_process_command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription to a professional email text. Output only the cleaned text'";
+                    };
+                  };
                   text = {
                     spoken_punctuation = true;
                   };
@@ -96,7 +116,7 @@ in {
                   output = {
                     mode = "clipboard";
                     post_process = lib.mkIf (cfg.ollama.enable) {
-                      command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription. Fix grammar and remove filler words and replace technical punctuation with the symbols. Output only the cleaned text'";
+                      command = "${config.services.ollama.package}/bin/ollama run llama3.2:1b 'Clean up this technical transcription to great prompt for Claude Code. Fix grammar and remove filler words and replace technical punctuation with the symbols. Output only the cleaned text'";
                       timeout_ms = 30000;
                     };
                     notification = {

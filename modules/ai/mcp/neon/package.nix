@@ -20,18 +20,22 @@ buildNpmPackage {
   nodejs = nodejs_22;
   makeCacheWritable = true;
 
-  # bun is in devDeps and its postinstall tries to download a binary; skip all scripts
+  # bun is in devDeps and its postinstall tries to download a binary; skip lifecycle scripts
   npmFlags = ["--ignore-scripts"];
 
   nativeBuildInputs = [makeWrapper];
 
-  # Use explicit install like other MCP servers instead of relying on default npm pack behavior
+  # Default buildNpmPackage runs `npm run build` which invokes tsc; make it explicit
+  buildPhase = ''
+    npx tsc
+    chmod +x dist/index.js
+  '';
+
   dontNpmInstall = true;
 
   installPhase = ''
     mkdir -p $out/bin $out/lib/mcp-server-neon
     cp -r dist node_modules $out/lib/mcp-server-neon/
-    chmod +x $out/lib/mcp-server-neon/dist/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/mcp-server-neon \
       --add-flags "$out/lib/mcp-server-neon/dist/index.js" \
       --chdir "$out/lib/mcp-server-neon"
