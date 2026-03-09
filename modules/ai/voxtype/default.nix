@@ -99,12 +99,6 @@ in {
                   text = {
                     spoken_punctuation = true;
                   };
-                  vad = {
-                    enabled = true;
-                    backend = "auto";
-                    threshold = 0.5;
-                    min_speech_duration_ms = 100;
-                  };
                   output = {
                     notification = {
                       on_recording_start = false;
