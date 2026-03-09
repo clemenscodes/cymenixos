@@ -102,6 +102,7 @@ in {
               "memory"
               "temperature"
               "cpu"
+              (lib.mkIf useNvidia "custom/nvidia")
               (lib.mkIf isLaptop "battery")
               "custom/powermenu"
             ];
@@ -200,7 +201,6 @@ in {
             ];
             modules-center = [];
             modules-right = [
-              (lib.mkIf useNvidia "custom/nvidia")
               (lib.mkIf useClaude "custom/claude-monitor")
               (lib.mkIf useVoxtype "custom/voxtype")
               "hyprland/submap"
@@ -522,6 +522,7 @@ in {
           #memory,
           #cpu,
           #temperature,
+          #custom-nvidia,
           #battery,
           #custom-powermenu {
             margin: ${defaultMargin} 4px 0px 4px;
@@ -539,7 +540,6 @@ in {
           #pulseaudio,
           #pulseaudio.mic,
           #custom-voxtype,
-          #custom-nvidia,
           #custom-claude-monitor,
           #custom-clock {
             margin: 0px 4px ${defaultMargin} 4px;
