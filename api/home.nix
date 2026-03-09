@@ -101,6 +101,10 @@
               enable = false;
               waybar = {
                 enable = false;
+                claudeMonitor = {
+                  plan = "pro";
+                  quotaTokens = null;
+                };
               };
             };
             compositor = {

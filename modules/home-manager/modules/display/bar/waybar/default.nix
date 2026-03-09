@@ -17,6 +17,17 @@
   useSwaync = config.modules.display.notifications.swaync.enable;
   useVoxtype = osConfig.modules.ai.voxtype.enable;
   useClaude = osConfig.modules.ai.claude.enable;
+  # Estimated token quotas per 5-hour rolling window per subscription tier.
+  # Anthropic does not publish exact numbers; tune quotaTokens if needed.
+  planQuotas = {
+    pro = 5_000_000;
+    max5 = 25_000_000;
+    max20 = 100_000_000;
+  };
+  claudeQuota =
+    if cfg.waybar.claudeMonitor.quotaTokens != null
+    then cfg.waybar.claudeMonitor.quotaTokens
+    else planQuotas.${cfg.waybar.claudeMonitor.plan};
 in {
   options = {
     modules = {
@@ -24,6 +35,18 @@ in {
         bar = {
           waybar = {
             enable = lib.mkEnableOption "Enable Waybar" // {default = false;};
+            claudeMonitor = {
+              plan = lib.mkOption {
+                type = lib.types.enum ["pro" "max5" "max20"];
+                default = "pro";
+                description = "Claude subscription plan, used to estimate the 5-hour token quota.";
+              };
+              quotaTokens = lib.mkOption {
+                type = lib.types.nullOr lib.types.int;
+                default = null;
+                description = "Override the token quota per 5-hour window. If null, derived from plan.";
+              };
+            };
           };
         };
       };
@@ -41,7 +64,7 @@ in {
         (import ./waybar-swaync {inherit inputs pkgs lib;})
         (import ./waybar-toggle {inherit inputs pkgs lib;})
         (import ./waybar-watch {inherit inputs pkgs lib;})
-        (import ./waybar-claude-monitor {inherit pkgs;})
+        (import ./waybar-claude-monitor {inherit pkgs; quota = claudeQuota;})
       ];
     };
     programs = {
