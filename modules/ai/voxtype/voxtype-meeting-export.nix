@@ -85,6 +85,21 @@ $summary"
     fi
 
     printf '%s\n' "$output" | prettier --prose-wrap always --print-width 80 --parser markdown > "$out_file"
+
+    # Create a human-readable symlink named by recording time for easy navigation
+    ended_at=$(jq -r '.ended_at // ""' "$metadata")
+    if [[ -n "$ended_at" ]] && [[ "$ended_at" != "null" ]]; then
+      readable_name=$(date -d "$ended_at" "+%Y-%m-%d_%H-%M" 2>/dev/null || true)
+      if [[ -n "$readable_name" ]]; then
+        link_path="$meetings_dir/$readable_name"
+        # Append short id suffix on collision (two meetings in the same minute)
+        if [[ -e "$link_path" ]] && [[ "$(readlink -f "$link_path")" != "$meeting_dir" ]]; then
+          link_path="''${link_path}_''${meeting_id:0:8}"
+        fi
+        ln -sfn "$meeting_dir" "$link_path"
+      fi
+    fi
+
     notify-send "VoxType Meeting" "Transcript saved to $out_file"
   '';
   meta = {
