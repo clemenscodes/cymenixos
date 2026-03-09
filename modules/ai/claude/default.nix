@@ -10,6 +10,7 @@
   cfg = config.modules.ai;
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
+  mcpServers = config.modules.ai.mcp.servers;
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
@@ -21,107 +22,6 @@
     ];
   };
   jsonFormat = pkgs.formats.json {};
-  azure-devops-mcp = pkgs.callPackage ./azure-devops-mcp.nix {};
-  mongodb-mcp = pkgs.callPackage ./mongodb-mcp.nix {};
-  postgres-mcp = pkgs.callPackage ./postgres-mcp.nix {};
-  docker-mcp = pkgs.callPackage ./docker-mcp.nix {};
-  git-mcp = pkgs.callPackage ./git-mcp.nix {};
-  filesystem-mcp = pkgs.callPackage ./filesystem-mcp.nix {};
-  memory-mcp = pkgs.callPackage ./memory-mcp.nix {};
-  sequential-thinking-mcp = pkgs.callPackage ./sequential-thinking-mcp.nix {};
-  redis-mcp = pkgs.callPackage ./redis-mcp.nix {};
-  neon-mcp = pkgs.callPackage ./neon-mcp.nix {};
-  context7-mcp = pkgs.callPackage ./context7-mcp.nix {};
-  nx-mcp = pkgs.callPackage ./nx-mcp.nix {};
-  prisma-mcp = pkgs.callPackage ./prisma-mcp.nix {prisma = pkgs.prisma;};
-  mcpServers = {
-    nixos = {
-      command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
-    };
-    github = {
-      command = "${pkgs.github-mcp-server}/bin/github-mcp-server";
-      args = ["stdio"];
-      env = {
-        GITHUB_PERSONAL_ACCESS_TOKEN = ''''${GH_TOKEN}'';
-      };
-    };
-    playwright = {
-      command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
-    };
-    azure-devops = {
-      command = "${azure-devops-mcp}/bin/mcp-server-azuredevops";
-      args = ["--authentication" "envvar"];
-      env = {
-        ADO_MCP_AUTH_TOKEN = ''''${AZURE_DEVOPS_EXT_PAT}'';
-      };
-    };
-    # --- Databases ---
-    mongodb = {
-      command = "${mongodb-mcp}/bin/mongodb-mcp-server";
-      env = {
-        MONGODB_URI = ''''${MONGODB_URI}'';
-      };
-    };
-    postgres = {
-      command = "${postgres-mcp}/bin/postgres-mcp";
-      env = {
-        DATABASE_URI = ''''${POSTGRES_CONNECTION_STRING}'';
-      };
-    };
-    neon = {
-      command = "${neon-mcp}/bin/mcp-server-neon";
-      args = ["start" ''''${NEON_API_KEY}''];
-    };
-    redis = {
-      command = "${redis-mcp}/bin/mcp-server-redis";
-      env = {
-        REDIS_URL = ''''${REDIS_URL}'';
-      };
-    };
-    # --- Infrastructure ---
-    docker = {
-      command = "${docker-mcp}/bin/mcp-server-docker";
-    };
-    kubernetes = {
-      command = "${pkgs.mcp-k8s-go}/bin/mcp-k8s-go";
-    };
-    terraform = {
-      command = "${pkgs.terraform-mcp-server}/bin/terraform-mcp-server";
-    };
-    grafana = {
-      command = "${pkgs.mcp-grafana}/bin/mcp-grafana";
-      env = {
-        GRAFANA_URL = ''''${GRAFANA_URL}'';
-        GRAFANA_API_KEY = ''''${GRAFANA_API_KEY}'';
-      };
-    };
-    # --- Filesystem & Version Control ---
-    filesystem = {
-      command = "${filesystem-mcp}/bin/mcp-server-filesystem";
-      args = ["/home/${user}/.local/src"];
-    };
-    git = {
-      command = "${git-mcp}/bin/git-mcp-server";
-    };
-    # --- Development Tools ---
-    nx = {
-      command = "${nx-mcp}/bin/nx-mcp";
-    };
-    prisma = {
-      command = "${prisma-mcp}/bin/prisma-mcp";
-    };
-    # --- AI Utilities ---
-    memory = {
-      command = "${memory-mcp}/bin/mcp-server-memory";
-    };
-    sequential-thinking = {
-      command = "${sequential-thinking-mcp}/bin/mcp-server-sequential-thinking";
-    };
-    # --- Documentation ---
-    context7 = {
-      command = "${context7-mcp}/bin/context7-mcp";
-    };
-  };
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
     dontUnpack = true;

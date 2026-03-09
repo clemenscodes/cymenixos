@@ -81,7 +81,23 @@ in {
                   text = {
                     spoken_punctuation = true;
                   };
+                  vad = {
+                    enabled = true;
+                    backend = "auto";
+                    threshold = 0.5;
+                    min_speech_duration_ms = 100;
+                  };
+                  profiles = {
+                    teams = {
+
+                    };
+                    code = {
+
+                    };
+
+                  };
                   output = {
+                    mode = "clipboard";
                     notification = {
                       on_recording_start = false;
                       on_recording_stop = false;

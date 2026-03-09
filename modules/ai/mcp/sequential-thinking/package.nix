@@ -15,7 +15,7 @@ buildNpmPackage {
   };
 
   postPatch = ''
-    cp ${./sequential-thinking-package-lock.json} package-lock.json
+    cp ${./package-lock.json} package-lock.json
   '';
 
   npmDepsHash = "sha256-23JquybSxH5Ku3d7OwrEDaRiscYCzrCh7/lvcuujqGw=";

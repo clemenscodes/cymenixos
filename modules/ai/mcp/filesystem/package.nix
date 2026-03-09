@@ -15,7 +15,7 @@ buildNpmPackage {
   };
 
   postPatch = ''
-    cp ${./filesystem-package-lock.json} package-lock.json
+    cp ${./package-lock.json} package-lock.json
   '';
 
   npmDepsHash = "sha256-wL5EtK4sey3CPy4zdPEf1aoZ6dD9+tx/xcCZGE45NgA=";

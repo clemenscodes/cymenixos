@@ -18,7 +18,7 @@ buildNpmPackage {
 
   # context7 uses bun.lock; inject a generated npm package-lock.json
   postPatch = ''
-    cp ${./context7-package-lock.json} package-lock.json
+    cp ${./package-lock.json} package-lock.json
   '';
 
   npmDepsHash = "sha256-WKm1M8oeB/YfC1gXpzhNMsRCMwuXXJ+d9KEpDdeB9PA=";

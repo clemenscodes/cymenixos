@@ -17,7 +17,7 @@ buildNpmPackage {
 
   # Use a generated package-lock.json for the 3 runtime deps
   postPatch = ''
-    cp ${./git-mcp-package-lock.json} package-lock.json
+    cp ${./package-lock.json} package-lock.json
   '';
 
   npmDepsHash = "sha256-7Pf6qBWkXA8fGoY4yOlOUHzOQdVSSw6Ti5LgjEwxwKc=";

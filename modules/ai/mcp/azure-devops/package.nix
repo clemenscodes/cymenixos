@@ -8,8 +8,7 @@
   bash,
   gnused,
   coreutils,
-}:
-let
+}: let
   server = buildNpmPackage rec {
     pname = "azure-devops-mcp-server";
     version = "2.4.0";
