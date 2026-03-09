@@ -3,12 +3,16 @@
   writeShellApplication,
   voxtype,
   libnotify,
-  wl-clipboard,
 }:
 writeShellApplication {
   name = "voxtype-meeting-export";
-  runtimeInputs = [voxtype libnotify wl-clipboard];
+  runtimeInputs = [voxtype libnotify];
   text = ''
+    meetings_dir="$HOME/.local/share/voxtype/meetings"
+    latest_dir=$(ls -td "$meetings_dir"/*/ 2>/dev/null | head -1)
+    latest_dir="${latest_dir%/}"
+    out_file="$latest_dir/export.md"
+
     if ! transcript=$(voxtype meeting export latest --format markdown --timestamps --speakers --metadata 2>&1) || echo "$transcript" | grep -qi "no meeting"; then
       notify-send "VoxType Meeting" "No meeting to export"
       exit 0
@@ -18,18 +22,18 @@ writeShellApplication {
     if summary=$(voxtype meeting summarize latest --format markdown 2>&1) && ! echo "$summary" | grep -qi "error"; then
       output="$output
 
-    ---
+---
 
-    # Summary
+# Summary
 
-    $summary"
+$summary"
     fi
 
-    echo "$output" | fold -s -w 80 | wl-copy
-    notify-send "VoxType Meeting" "Transcript and summary copied to clipboard"
+    echo "$output" | fold -s -w 80 > "$out_file"
+    notify-send "VoxType Meeting" "Transcript saved to $out_file"
   '';
   meta = {
-    description = "Export latest VoxType meeting transcript with AI summary to clipboard";
+    description = "Export latest VoxType meeting transcript with AI summary to disk";
     license = lib.licenses.mit;
     mainProgram = "voxtype-meeting-export";
   };
