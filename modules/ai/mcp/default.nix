@@ -23,6 +23,7 @@
     (import ./redis {inherit pkgs lib;})
     (import ./sequential-thinking {inherit pkgs lib;})
     (import ./terraform {inherit pkgs lib;})
+    (import ./time {inherit pkgs lib;})
   ];
   options.modules.ai.mcp = {
     enable = lib.mkEnableOption "Enable MCP server integration";
