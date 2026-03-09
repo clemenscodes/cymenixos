@@ -129,9 +129,6 @@
         };
       };
     };
-    lpi = {
-      url = "github:cymenix/lpi";
-    };
     yubikey-guide = {
       url = "github:drduh/YubiKey-Guide";
       flake = false;

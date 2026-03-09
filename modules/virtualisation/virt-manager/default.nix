@@ -77,38 +77,25 @@
 
   qemu-start-hook = pkgs.writeShellApplication {
     name = "qemu-start-hook";
-    runtimeInputs = [pkgs.mullvad];
     text = ''
-      if [ "$1" = "nixos" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        echo "start hook $1 $2 $3"
-      fi
-      if [ "$1" = "win11" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        echo "start hook $1 $2 $3"
-      fi
-      if [ "$1" = "win11-install" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        echo "start hook $1 $2 $3"
-      fi
-      if [ "$1" = "win11-display" ] && [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
-        echo "start hook $1 $2 $3"
+      # Switch isolated cores to performance governor on VM start to prevent
+      # the host power management from throttling pinned vCPUs mid-frame.
+      if [ "$2" = "prepare" ] && [ "$3" = "begin" ]; then
+        for i in 0 1 2 3 4 5 6 7 16 17 18 19 20 21 22 23; do
+          echo performance > /sys/devices/system/cpu/cpu''${i}/cpufreq/scaling_governor
+        done
       fi
     '';
   };
 
   qemu-stop-hook = pkgs.writeShellApplication {
     name = "qemu-stop-hook";
-    runtimeInputs = [pkgs.mullvad];
     text = ''
-      if [ "$1" = "nixos" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        echo "stop hook $1 $2 $3"
-      fi
-      if [ "$1" = "win11" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        echo "stop hook $1 $2 $3"
-      fi
-      if [ "$1" = "win11-install" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        echo "stop hook $1 $2 $3"
-      fi
-      if [ "$1" = "win11-display" ] && [ "$2" = "release" ] && [ "$3" = "end" ]; then
-        echo "stop hook $1 $2 $3"
+      # Restore isolated cores to schedutil governor when VM stops.
+      if [ "$2" = "release" ] && [ "$3" = "end" ]; then
+        for i in 0 1 2 3 4 5 6 7 16 17 18 19 20 21 22 23; do
+          echo schedutil > /sys/devices/system/cpu/cpu''${i}/cpufreq/scaling_governor
+        done
       fi
     '';
   };
@@ -234,13 +221,20 @@ in {
         "rcu_nocbs=0-7,16-23"
         "kvmfr.static_size_mb=256"
         "pcie_acs_override=downstream,multifunction"
+        # Pre-allocate 32 GB in 2 MB hugepages (16384 × 2 MB).
+        # Reduces TLB pressure from ~8 M entries to ~16 K for the VM's RAM,
+        # improving frame pacing stability. Host must have > 48 GB total RAM.
+        "hugepagesz=2M"
+        "hugepages=16384"
+        # Disable transparent hugepages: THP's background compaction competes
+        # with real-time vCPU workloads and causes unpredictable latency spikes.
+        "transparent_hugepage=never"
       ];
       kernelModules = [
         "kvm-amd"
       ];
       extraModprobeConfig = ''
         options kvm_amd nested=1
-        options vfio_iommu_type1 allow_unsafe_interrupts=1
         options vfio_pci disable_vga=1
         options vfio-pci ids=10de:2206,10de:1aef
       '';

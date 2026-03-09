@@ -433,9 +433,6 @@
             fzf = {
               enable = true;
             };
-            lpi = {
-              enable = true;
-            };
             nix-prefetch-git = {
               enable = true;
             };

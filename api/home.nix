@@ -487,9 +487,6 @@
             gparted = {
               enable = false;
             };
-            lpi = {
-              enable = false;
-            };
             lsusb = {
               enable = false;
             };

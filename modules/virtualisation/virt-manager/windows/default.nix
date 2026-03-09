@@ -175,7 +175,9 @@ in {
                   name = "hypervisor";
                 }
                 {
-                  policy = "require";
+                  # Disable VMX exposure to prevent Windows from activating
+                  # Hyper-V / VBS which regresses gaming performance by ~5-12%
+                  policy = "disable";
                   name = "vmx";
                 }
                 {
@@ -253,6 +255,37 @@ in {
               ioapic.driver = "kvm";
             };
 
+            # SPICE is required even on the GPU passthrough VM: Looking Glass uses
+            # the SPICE channel for clipboard sync and keyboard mapping (spicevmc).
+            # VNC is only needed for the install/display variants.
+            spiceGraphics = [
+              {
+                type = "spice";
+                autoport = true;
+                listen = {
+                  type = "address";
+                  address = "127.0.0.1";
+                };
+                image.compression = false;
+                gl.enable = false;
+              }
+            ];
+
+            installGraphics =
+              spiceGraphics
+              ++ [
+                {
+                  type = "vnc";
+                  port = -1;
+                  autoport = true;
+                  hack = "0.0.0.0";
+                  listen = {
+                    type = "address";
+                    address = "0.0.0.0";
+                  };
+                }
+              ];
+
             commonDevices = {
               emulator = "/run/libvirt/nix-emulators/qemu-system-x86_64";
 
@@ -310,29 +343,6 @@ in {
                 };
               };
 
-              graphics = [
-                {
-                  type = "spice";
-                  autoport = true;
-                  listen = {
-                    type = "address";
-                    address = "127.0.0.1";
-                  };
-                  image.compression = false;
-                  gl.enable = false;
-                }
-                {
-                  type = "vnc";
-                  port = -1;
-                  autoport = true;
-                  hack = "0.0.0.0";
-                  listen = {
-                    type = "address";
-                    address = "0.0.0.0";
-                  };
-                }
-              ];
-
               sound = {
                 model = "ich9";
                 audio.id = 1;
@@ -354,6 +364,7 @@ in {
               disks,
               videoModel,
               includeHostdev ? false,
+              graphics ? [],
             }: {
               definition = inputs.nixvirt.lib.domain.writeXML {
                 "xmlns:qemu" = "http://libvirt.org/schemas/domain/qemu/1.0";
@@ -379,6 +390,10 @@ in {
                 memoryBacking = {
                   source.type = "memfd";
                   access.mode = "shared";
+                  # 2 MB hugepages collapse 32 GB from ~8M TLB entries to ~16K,
+                  # directly improving frame pacing and reducing VRAM stall latency.
+                  # Requires hugepages=16384 in boot.kernelParams.
+                  hugepages = {};
                 };
 
                 vcpu = {
@@ -386,26 +401,36 @@ in {
                   count = 16;
                 };
 
+                # Dedicated I/O thread keeps disk completions off the vCPU threads,
+                # eliminating storage-induced microstutter during asset streaming.
+                iothreads = 1;
+
                 numatune.memory = {
                   mode = "strict";
                   nodeset = "0";
                 };
 
-                cputune.vcpupin =
-                  builtins.genList
-                  (
-                    i: let
-                      half = builtins.div i 2;
-                      isEven = i == builtins.mul half 2;
-                    in {
-                      vcpu = i;
-                      cpuset =
-                        if isEven
-                        then toString half
-                        else toString (16 + half);
-                    }
-                  )
-                  16;
+                cputune = {
+                  vcpupin =
+                    builtins.genList
+                    (
+                      i: let
+                        half = builtins.div i 2;
+                        isEven = i == builtins.mul half 2;
+                      in {
+                        vcpu = i;
+                        cpuset =
+                          if isEven
+                          then toString half
+                          else toString (16 + half);
+                      }
+                    )
+                    16;
+                  # Pin QEMU emulator and I/O threads to non-isolated host CPUs so
+                  # they cannot preempt guest vCPUs and cause microstutter.
+                  emulatorpin = {cpuset = "8-15,24-31";};
+                  iothreadpin = [{iothread = 1; cpuset = "8-15,24-31";}];
+                };
 
                 os = {
                   hack = "efi";
@@ -454,6 +479,7 @@ in {
                   // {
                     disk = disks;
                     video.model.type = videoModel;
+                    graphics = graphics;
                   }
                   // (
                     if includeHostdev
@@ -483,11 +509,17 @@ in {
             };
           in {
             domains = [
+              # Production VM: GPU passthrough + Looking Glass display.
+              # SPICE kept for clipboard and keyboard mapping via spicevmc channel.
+              # VNC removed — display is handled entirely via IVSHMEM (Looking Glass).
+              # NOTE: Windows must have VirtIO storage drivers installed before
+              # switching from SATA; boot win11-install once to pre-install them.
               (mkDomain {
                 name = "win11";
                 uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371e";
                 includeHostdev = true;
                 videoModel = "none";
+                graphics = spiceGraphics;
                 disks = [
                   {
                     type = "file";
@@ -497,21 +529,25 @@ in {
                       type = "qcow2";
                       cache = "none";
                       discard = "unmap";
+                      iothread = 1;
                     };
                     source.file = "/var/lib/libvirt/images/win11.qcow2";
                     target = {
-                      dev = "sda";
-                      bus = "sata";
+                      dev = "vda";
+                      bus = "virtio";
                     };
                     boot.order = 1;
                   }
                 ];
               })
 
+              # Installation VM: no GPU passthrough, VirtIO drivers ISO attached.
+              # Boot this first to install VirtIO storage drivers before using win11.
               (mkDomain {
                 name = "win11-install";
                 uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd371f";
                 videoModel = "virtio";
+                graphics = installGraphics;
                 disks = [
                   {
                     type = "file";
@@ -539,11 +575,12 @@ in {
                       type = "qcow2";
                       cache = "none";
                       discard = "unmap";
+                      iothread = 1;
                     };
                     source.file = "/var/lib/libvirt/images/win11.qcow2";
                     target = {
-                      dev = "sda";
-                      bus = "sata";
+                      dev = "vda";
+                      bus = "virtio";
                     };
                     boot.order = 2;
                   }
@@ -564,11 +601,13 @@ in {
                 ];
               })
 
+              # Display VM: GPU passthrough with a fallback virtio video model + SPICE/VNC.
               (mkDomain {
                 name = "win11-display";
                 uuid = "99901f8b-8c80-9518-a6a1-2cf05dcd3720";
                 includeHostdev = true;
                 videoModel = "virtio";
+                graphics = installGraphics;
                 disks = [
                   {
                     type = "file";
@@ -578,11 +617,12 @@ in {
                       type = "qcow2";
                       cache = "none";
                       discard = "unmap";
+                      iothread = 1;
                     };
                     source.file = "/var/lib/libvirt/images/win11.qcow2";
                     target = {
-                      dev = "sda";
-                      bus = "sata";
+                      dev = "vda";
+                      bus = "virtio";
                     };
                     boot.order = 1;
                   }
