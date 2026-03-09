@@ -184,6 +184,24 @@ in {
                   ```
 
                   To understand available options, check the CymenixOS `api/os.nix` (system) or `api/home.nix` (home-manager).
+
+                  ## Nix Derivations
+
+                  **Always build and verify before committing** any Nix derivation:
+                  ```
+                  nix build --no-link --impure --expr \
+                    'let pkgs = import <nixpkgs> {}; in import ./path/to/file.nix { inherit pkgs; /* required args */ }'
+                  ```
+
+                  **In `''` multi-line Nix strings**, `${...}` is Nix antiquotation — shell variables with braces
+                  like `${h}` will cause "undefined variable" errors. Use bare `$h` (no braces) or escape with `''${h}`.
+
+                  **Grep for unintended antiquotations** before finishing:
+                  ```
+                  grep -n '\${' file.nix
+                  ```
+
+                  **No underscore separators in integer literals** — `5_000_000` is invalid Nix; use `5000000`.
                 '';
               };
               ".config/claude/settings.json" = {
