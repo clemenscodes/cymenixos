@@ -20,42 +20,40 @@ in
       #
       # jq emits "epoch<space>timestamp" per entry; sort orders them chronologically;
       # awk applies the cascade and prints the last (current) block's start timestamp.
-      block_start_ts=$(
+      block_start_epoch=$(
         find "$projects_dir" -name '*.jsonl' 2>/dev/null \
         | while IFS= read -r f; do
             jq -r 'select(.type == "assistant" and .timestamp != null)
                    | ( .timestamp | split(".")[0] | rtrimstr("Z")
-                       | strptime("%Y-%m-%dT%H:%M:%S") | mktime | tostring )
-                     + " " + .timestamp' \
+                       | strptime("%Y-%m-%dT%H:%M:%S") | mktime | tostring )' \
               "$f" 2>/dev/null
           done \
-        | sort \
+        | sort -n \
         | awk -v ws=18000 -v now="$now_epoch" '
             {
-              ep = $1 + 0; ts = $2
-              if (block_start == "" || ep > block_end) {
-                block_start = ts
-                block_end   = ep + ws
+              ep = $1 + 0
+              if (block_start_ep == "" || ep >= block_end) {
+                block_start_ep = int(ep / 3600) * 3600
+                block_end      = block_start_ep + ws
               }
             }
             END {
-              if (block_start != "" && block_end > now)
-                print block_start
+              if (block_start_ep != "" && block_end > now)
+                print block_start_ep
             }
           '
       )
 
-      if [ -z "$block_start_ts" ]; then
-        jq -cn '{"text":"🤖 --%","tooltip":"No active Claude usage block.","class":"inactive"}'
+      if [ -z "$block_start_epoch" ]; then
+        # No active block — show 0% so the widget stays visible
+        jq -cn '{"text":"🤖 0% ↻ --","tooltip":"No active Claude Code block.","class":"normal"}'
         exit 0
       fi
 
-      block_start_epoch=$(date -d "$block_start_ts" +%s)
+      # block_start_epoch is already floored to the hour (matches upstream algorithm)
       reset_epoch=$((block_start_epoch + window_secs))
-      # Round reset time down to the nearest hour (Claude Code always shows full hours)
-      reset_epoch_hour=$(( (reset_epoch / 3600) * 3600 ))
-      secs_left=$((reset_epoch_hour - now_epoch))
-      reset_at=$(date -d "@$reset_epoch_hour" +%H:%M)
+      secs_left=$((reset_epoch - now_epoch))
+      reset_at=$(date -d "@$reset_epoch" +%H:%M)
 
       block_start_utc=$(date -u -d "@$block_start_epoch" +%Y-%m-%dT%H:%M:%S)
       block_end_utc=$(date -u -d "@$reset_epoch" +%Y-%m-%dT%H:%M:%S)
