@@ -86,9 +86,9 @@ in {
     };
     systemd = {
       tmpfiles = {
-        rules = [
-          (lib.mkIf cfg.home-manager.enable "d ${persistPath}/home/ 0777 root root -")
-          (lib.mkIf cfg.home-manager.enable "d ${persistPath}/home/${user} 0770 ${user} ${user} -")
+        rules = lib.optionals cfg.home-manager.enable [
+          "d ${persistPath}/home/ 0777 root root -"
+          "d ${persistPath}/home/${user} 0770 ${user} ${user} -"
         ];
       };
     };

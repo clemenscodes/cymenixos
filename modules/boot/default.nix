@@ -40,7 +40,7 @@ in {
           '';
         };
         swapResumeOffset = lib.mkOption {
-          type = lib.types.int;
+          type = lib.types.nullOr lib.types.int;
           default = null;
           example = 533760;
           description = "The result of running ${lib.getExe pkgs.btrfs-swap-resume-offset} on an installed system.";
@@ -122,10 +122,9 @@ in {
                 if !cfg.disk.luks.yubikey && efiSupport
                 then "/boot/efi"
                 else "/boot";
-              devices = [
-                (lib.mkIf (biosSupport || libreboot) device)
-                (lib.mkIf efiSupport "nodev")
-              ];
+              devices =
+                lib.optional (biosSupport || libreboot) device
+                ++ lib.optional efiSupport "nodev";
               inherit (config.boot.loader.efi) efiSysMountPoint;
             }
           ]);

@@ -54,18 +54,6 @@
         enable = true;
       };
     };
-    databases = {
-      enable = true;
-      mongodb = {
-        enable = false;
-      };
-    };
-    crypto = {
-      enable = true;
-      ledger-live = {
-        enable = true;
-      };
-    };
     display = {
       enable = true;
       gui = "wayland"; # or "headless"

@@ -389,7 +389,7 @@ in {
                 };
                 ${persistPath} = {
                   inherit snapshot_create;
-                  subvolume = "/persist";
+                  subvolume = persistPath;
                   snapshot_dir = "/snapshots/persist";
                 };
               };
@@ -415,7 +415,6 @@ in {
           "d /snapshots 0755 root root"
           "d /snapshots/persist 0755 root root"
           "d /snapshots/logs 0755 root root"
-          "d /snapshots/boots 0755 root root"
         ];
       };
     };

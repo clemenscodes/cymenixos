@@ -11,8 +11,6 @@
     (import ./boot {inherit inputs pkgs lib;})
     (import ./config {inherit inputs pkgs lib cymenixos;})
     (import ./cpu {inherit inputs pkgs lib;})
-    (import ./crypto {inherit inputs pkgs lib;})
-    (import ./databases {inherit inputs pkgs lib;})
     (import ./disk {inherit inputs pkgs lib;})
     (import ./display {inherit inputs pkgs lib;})
     (import ./docs {inherit inputs pkgs lib;})

@@ -190,14 +190,6 @@ in {
                   fi
                 ''
                 else "";
-              cachix_auth_token =
-                if cfg.security.sops.enable
-                then ''
-                  if [[ -o interactive ]]; then
-                    export CACHIX_AUTH_TOKEN=$(${pkgs.bat}/bin/bat ${homeCfg.sops.secrets.cachix_auth_token.path} --style=plain)
-                  fi
-                ''
-                else "";
             in
               lib.mkOrder 550
               /*
@@ -206,7 +198,6 @@ in {
               ''
                 ${builtins.toString gh_token}
                 ${builtins.toString hetzner_token}
-                ${builtins.toString cachix_auth_token}
               '';
           };
         };
@@ -222,7 +213,6 @@ in {
             "email/horn_clemens@t-online.de/password" = {};
             "email/me@clemenshorn.com/password" = {};
             github_token = {};
-            cachix_auth_token = {};
             hetzner_token = {};
             nix_access_tokens = {};
             thmvpnuser = {};

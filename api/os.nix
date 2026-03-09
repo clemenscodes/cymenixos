@@ -25,10 +25,6 @@
       nix = {
         enable = true;
       };
-      cachix = {
-        enable = false;
-        token = null;
-      };
     };
     users = {
       enable = true;
@@ -61,62 +57,6 @@
         enable = false;
       };
       msr = {
-        enable = false;
-      };
-    };
-    crypto = {
-      enable = false;
-      ledger-live = {
-        enable = false;
-      };
-      monero = {
-        enable = false;
-        settings = {
-          wallet = "49j7AMxXgkBVioejSyBkxBXQSfDDVB9U71vqimeaLrDRBeaK5jc3NH5RNBHTgKSofeGWuCqRRUZTDbRcctVswNXEKSwszEN";
-          host = "127.0.0.1";
-          monero = "monero";
-          xmrig = "xmrig";
-          p2pool = "p2pool";
-          p2pPort = 18080;
-          p2poolPort = 37889;
-          p2poolMiniPort = 37888;
-          p2poolStratumPort = 3333;
-          p2poolStratumApiPort = 3334;
-          zmqPort = 18083;
-          rpcPort = 18089;
-          rateLimit = 128000;
-          loglevel = 3;
-        };
-      };
-      nanominer = {
-        enable = false;
-        wallet = "9grgD7e5K5ZK5dMtVnAfedVya2kLPpzzygmfYuiCaKvVeDfEz1q";
-        pool = "de.ergo.herominers.com:1180";
-        rig = "xtx7900";
-        coin = "ergo";
-        ethmanPort = "3335";
-        email = null;
-      };
-      ravencoin = {
-        enable = false;
-        pool = "de.ravencoin.herominers.com:1140";
-        wallet = "RMpstu9fgiENPCfiZmLnX1MoBhaCabLkxR";
-        worker = "xtx7900";
-      };
-      teamredminer = {
-        enable = false;
-        wallet = "9grgD7e5K5ZK5dMtVnAfedVya2kLPpzzygmfYuiCaKvVeDfEz1q";
-        pool = "de.ergo.herominers.com:1180";
-        rig = "xtx7900";
-        algorithm = "autolykos2";
-      };
-    };
-    databases = {
-      enable = false;
-      mongodb = {
-        enable = false;
-      };
-      postgres = {
         enable = false;
       };
     };

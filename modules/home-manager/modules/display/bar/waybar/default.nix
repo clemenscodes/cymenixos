@@ -16,6 +16,7 @@
   useHyprland = config.modules.display.compositor.hyprland.enable;
   useSwaync = config.modules.display.notifications.swaync.enable;
   useVoxtype = osConfig.modules.ai.voxtype.enable;
+  useClaude = osConfig.modules.ai.claude.enable;
 in {
   options = {
     modules = {
@@ -40,6 +41,7 @@ in {
         (import ./waybar-swaync {inherit inputs pkgs lib;})
         (import ./waybar-toggle {inherit inputs pkgs lib;})
         (import ./waybar-watch {inherit inputs pkgs lib;})
+        (import ./waybar-claude-monitor {inherit pkgs;})
       ];
     };
     programs = {
@@ -168,6 +170,7 @@ in {
             ];
             modules-center = [];
             modules-right = [
+              (lib.mkIf useClaude "custom/claude-monitor")
               (lib.mkIf useVoxtype "custom/voxtype")
               "hyprland/submap"
               "privacy"
@@ -179,6 +182,12 @@ in {
               (lib.mkIf useMusic "pulseaudio#mic")
               "custom/clock"
             ];
+            "custom/claude-monitor" = lib.mkIf useClaude {
+              return-type = "json";
+              interval = 60;
+              exec = "waybar-claude-monitor";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty claude-monitor";
+            };
             "custom/voxtype" = lib.mkIf useVoxtype {
               exec = "${config.programs.voxtype.package}/bin/voxtype status --follow --format json";
               return-type = "json";
@@ -461,6 +470,7 @@ in {
           #custom-mail,
           #custom-idle,
           #custom-voxtype,
+          #custom-claude-monitor,
           #mpd {
             ${padding}
             ${defaultColor}
@@ -491,6 +501,7 @@ in {
           #pulseaudio,
           #pulseaudio.mic,
           #custom-voxtype,
+          #custom-claude-monitor,
           #custom-clock {
             margin: 0px 4px ${defaultMargin} 4px;
           }
@@ -554,6 +565,19 @@ in {
               0% { opacity: 1; }
               50% { opacity: 0.5; }
               100% { opacity: 1; }
+          }
+
+          #custom-claude-monitor.inactive {
+            color: #6272a4;
+          }
+
+          #custom-claude-monitor.warning {
+            color: #f1fa8c;
+          }
+
+          #custom-claude-monitor.critical {
+            color: #ff5555;
+            animation: pulse 2s infinite;
           }
         '';
       };

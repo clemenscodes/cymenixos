@@ -6,7 +6,6 @@
   ...
 }: {...}: {
   imports = [
-    (import ./cachix {inherit inputs pkgs lib;})
     (import ./nix {inherit inputs pkgs lib cymenixos;})
   ];
   options = {
