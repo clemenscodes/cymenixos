@@ -3,10 +3,11 @@
   writeShellApplication,
   voxtype,
   libnotify,
+  prettier,
 }:
 writeShellApplication {
   name = "voxtype-meeting-export";
-  runtimeInputs = [voxtype libnotify];
+  runtimeInputs = [voxtype libnotify prettier];
   text = ''
     meetings_dir="$HOME/.local/share/voxtype/meetings"
     latest_dir=$(find "$meetings_dir" -mindepth 1 -maxdepth 1 -type d -printf '%T@\t%p\n' 2>/dev/null | sort -rn | head -1 | cut -f2-)
@@ -28,7 +29,7 @@ writeShellApplication {
 $summary"
     fi
 
-    echo "$output" | fold -s -w 80 > "$out_file"
+    printf '%s\n' "$output" | prettier --prose-wrap always --print-width 80 --parser markdown > "$out_file"
     notify-send "VoxType Meeting" "Transcript saved to $out_file"
   '';
   meta = {
