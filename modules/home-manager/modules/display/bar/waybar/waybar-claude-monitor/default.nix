@@ -12,41 +12,69 @@ in
       quota=${quotaStr}
       now_epoch=$(date +%s)
       window_secs=$((5 * 3600))
-      window_start_epoch=$((now_epoch - window_secs))
-      window_start=$(date -u -d "@$window_start_epoch" +%Y-%m-%dT%H:%M:%S)
 
-      window_raw=$({
+      # Look back 24h — sufficient to find the current 5-hour block
+      lookback_start=$(date -u -d "@$((now_epoch - 86400))" +%Y-%m-%dT%H:%M:%S)
+
+      # Collect assistant entries from the last 24h, including dedup key.
+      # Dedup key = message_id:request_id (matches upstream Claude-Code-Usage-Monitor).
+      all_entries=$({
         while IFS= read -r f; do
-          jq -c --arg ws "$window_start" \
-            'select(.type == "assistant" and ((.timestamp // "") | ltrimstr("Z") | split(".")[0]) >= $ws)
-             | {u: .message.usage, ts: (.timestamp // "")}' \
+          jq -c --arg ls "$lookback_start" \
+            'select(.type == "assistant" and
+                    ((.timestamp // "") | split(".")[0] | rtrimstr("Z")) >= $ls)
+             | {
+                 u:    .message.usage,
+                 ts:   (.timestamp // ""),
+                 hash: ((.message_id // .message.id // "") + ":"
+                        + (.requestId // .request_id // ""))
+               }' \
             "$f" 2>/dev/null
         done < <(find "$projects_dir" -name '*.jsonl' 2>/dev/null)
-      } | jq -sc .)
+      } | jq -sc 'sort_by(.ts)')
 
-      usage=$(jq --argjson quota "$quota" '{
-        input:       ([.[].u.input_tokens                      // 0] | add // 0),
-        cache_write: ([.[].u.cache_creation_input_tokens       // 0] | add // 0),
-        cache_read:  ([.[].u.cache_read_input_tokens           // 0] | add // 0),
-        output:      ([.[].u.output_tokens                     // 0] | add // 0),
-        oldest_ts:   (map(select(.ts != "")) | map(.ts) | min // ""),
-        quota:       $quota
-      }' <<< "$window_raw")
+      # Group into fixed 5-hour blocks (block_end = block_start + 5h; next entry
+      # after block_end starts a new block). Deduplicate by hash. Count only
+      # input_tokens + output_tokens — cache tokens do not count toward the quota
+      # (matches upstream behaviour).
+      current_block=$(jq --argjson quota "$quota" '
+        if length == 0 then
+          {input: 0, output: 0, block_start: "", quota: $quota}
+        else
+          (reduce .[] as $e (
+            {bs: null, be: null, seen: {}, input: 0, output: 0};
+            ($e.ts | split(".")[0] | rtrimstr("Z")
+                   | strptime("%Y-%m-%dT%H:%M:%S") | mktime) as $ep |
+            (if .bs == null or $ep > .be then
+              {bs: $e.ts, be: ($ep + 18000), seen: {}, input: 0, output: 0}
+            else . end) |
+            if (.seen[$e.hash] // false) then .
+            else
+              . + {seen: (.seen + {($e.hash): true}),
+                   input:  (.input  + ($e.u.input_tokens  // 0)),
+                   output: (.output + ($e.u.output_tokens // 0))}
+            end
+          )) |
+          {block_start: .bs, input: .input, output: .output, quota: $quota}
+        end
+      ' <<< "$all_entries")
 
-      oldest_ts=$(jq -r '.oldest_ts' <<< "$usage")
-      if [ -n "$oldest_ts" ]; then
-        oldest_epoch=$(date -d "$oldest_ts" +%s)
-        reset_epoch=$((oldest_epoch + window_secs))
-        secs_left=$(( reset_epoch - now_epoch ))
+      block_start_ts=$(jq -r '.block_start' <<< "$current_block")
+      if [ -n "$block_start_ts" ]; then
+        block_start_epoch=$(date -d "$block_start_ts" +%s)
+        reset_epoch=$((block_start_epoch + window_secs))
+        secs_left=$((reset_epoch - now_epoch))
         if [ "$secs_left" -le 0 ]; then
           reset_str="now"
         else
-          h=$(( secs_left / 3600 ))
-          m=$(( (secs_left % 3600) / 60 ))
+          h=$((secs_left / 3600))
+          m=$(((secs_left % 3600) / 60))
           if [ "$h" -gt 0 ]; then
             reset_str="$h h $m m"
-          else
+          elif [ "$m" -gt 0 ]; then
             reset_str="$m m"
+          else
+            reset_str="<1 m"
           fi
         fi
         reset_at=$(date -d "@$reset_epoch" +%H:%M)
@@ -56,39 +84,29 @@ in
       fi
 
       text=$(jq -r --arg reset "$reset_str" '
-        (.input + .cache_write + .cache_read + .output) as $total |
+        (.input + .output) as $total |
         ($total * 100 / .quota) as $pct |
         "🤖 \($pct | round)% ↻ \($reset)"
-      ' <<< "$usage")
+      ' <<< "$current_block")
 
-      cost=$(jq '
-        (.input       * 3.0   / 1000000) +
-        (.cache_write * 3.75  / 1000000) +
-        (.cache_read  * 0.30  / 1000000) +
-        (.output      * 15.0  / 1000000)
-      ' <<< "$usage")
-      cost_fmt=$(jq -r '. * 100 | round / 100 | tostring' <<< "$cost")
-
-      tooltip=$(jq -r --arg reset_at "$reset_at" --arg cost "$cost_fmt" '
-        (.input + .cache_write + .cache_read + .output) as $total |
+      tooltip=$(jq -r --arg reset_at "$reset_at" '
+        (.input + .output) as $total |
         ($total * 100 / .quota | round) as $pct |
-        "Claude Code — 5h window (\($pct)% of quota)\n" +
-        "Input:       \(.input       | tostring) tokens\n" +
-        "Cache write: \(.cache_write | tostring) tokens\n" +
-        "Cache read:  \(.cache_read  | tostring) tokens\n" +
-        "Output:      \(.output      | tostring) tokens\n" +
-        "Cost:        $\($cost)\n" +
+        "Claude Code — 5h block (\($pct)% of quota)\n" +
+        "Tokens used: \($total | tostring) / \(.quota | tostring)\n" +
+        "Input:       \(.input  | tostring) tokens\n" +
+        "Output:      \(.output | tostring) tokens\n" +
         "Resets at:   \($reset_at)"
-      ' <<< "$usage")
+      ' <<< "$current_block")
 
       class=$(jq -r '
-        (.input + .cache_write + .cache_read + .output) as $total |
+        (.input + .output) as $total |
         ($total * 100 / .quota) as $pct |
         if $pct >= 80 then "critical"
         elif $pct >= 50 then "warning"
         else "normal"
         end
-      ' <<< "$usage")
+      ' <<< "$current_block")
 
       jq -cn \
         --arg text    "$text" \

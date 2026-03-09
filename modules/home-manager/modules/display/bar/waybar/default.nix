@@ -17,12 +17,12 @@
   useSwaync = config.modules.display.notifications.swaync.enable;
   useVoxtype = osConfig.modules.ai.voxtype.enable;
   useClaude = osConfig.modules.ai.claude.enable;
-  # Estimated token quotas per 5-hour rolling window per subscription tier.
-  # Anthropic does not publish exact numbers; tune quotaTokens if needed.
+  # Token quotas per 5-hour block per subscription tier.
+  # Source: https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
   planQuotas = {
-    pro = 5000000;
-    max5 = 25000000;
-    max20 = 100000000;
+    pro = 19000;
+    max5 = 88000;
+    max20 = 220000;
   };
   claudeQuota =
     if cfg.waybar.claudeMonitor.quotaTokens != null
