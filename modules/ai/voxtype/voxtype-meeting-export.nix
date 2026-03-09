@@ -25,7 +25,7 @@ writeShellApplication {
     $summary"
     fi
 
-    echo "$output" | wl-copy
+    echo "$output" | fold -s -w 80 | wl-copy
     notify-send "VoxType Meeting" "Transcript and summary copied to clipboard"
   '';
   meta = {

@@ -16,7 +16,7 @@
     if cfg.voxtype.parakeet
     then pkgs.voxtype-onnx
     else pkgs.voxtype-vulkan;
-  meeting-toggle = pkgs.callPackage ./voxtype-meeting-toggle.nix {voxtype = voxtypePkg;};
+  meeting-toggle = pkgs.callPackage ./voxtype-meeting-toggle.nix {voxtype = voxtypePkg; voxtype-meeting-export = meeting-export;};
   meeting-pause-toggle = pkgs.callPackage ./voxtype-meeting-pause-toggle.nix {voxtype = voxtypePkg;};
   meeting-export = pkgs.callPackage ./voxtype-meeting-export.nix {voxtype = voxtypePkg;};
 in {
