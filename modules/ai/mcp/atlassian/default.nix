@@ -8,6 +8,9 @@
     modules.ai.mcp.servers.atlassian = {
       type = "http";
       url = "https://mcp.atlassian.com/v1/mcp";
+      headers = {
+        Authorization = "Basic ''${ATLASSIAN_MCP_TOKEN}";
+      };
     };
   };
 }
