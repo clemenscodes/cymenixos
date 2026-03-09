@@ -10,7 +10,7 @@ writeShellApplication {
   text = ''
     meetings_dir="$HOME/.local/share/voxtype/meetings"
     latest_dir=$(ls -td "$meetings_dir"/*/ 2>/dev/null | head -1)
-    latest_dir="${latest_dir%/}"
+    latest_dir="''${latest_dir%/}"
     out_file="$latest_dir/export.md"
 
     if ! transcript=$(voxtype meeting export latest --format markdown --timestamps --speakers --metadata 2>&1) || echo "$transcript" | grep -qi "no meeting"; then
