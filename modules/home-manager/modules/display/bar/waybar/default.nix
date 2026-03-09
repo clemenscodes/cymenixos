@@ -17,6 +17,12 @@
   useSwaync = config.modules.display.notifications.swaync.enable;
   useVoxtype = osConfig.modules.ai.voxtype.enable;
   useClaude = osConfig.modules.ai.claude.enable;
+  useNvidia = osConfig.modules.gpu.nvidia.enable;
+  cpuVendor = osConfig.modules.cpu.vendor;
+  cpuHwmonPath =
+    if cpuVendor == "amd"
+    then "/sys/devices/pci0000:00/0000:00:18.3/hwmon"
+    else "/sys/devices/platform/coretemp.0/hwmon";
   # Token quotas per 5-hour block per subscription tier.
   # Source: https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
   planQuotas = {
@@ -65,6 +71,7 @@ in {
         (import ./waybar-toggle {inherit inputs pkgs lib;})
         (import ./waybar-watch {inherit inputs pkgs lib;})
         (import ./waybar-claude-monitor {inherit pkgs; quota = claudeQuota;})
+        (import ./waybar-nvidia {inherit pkgs;})
       ];
     };
     programs = {
@@ -155,7 +162,7 @@ in {
             };
             temperature = {
               critical-threshold = 80;
-              hwmon-path-abs = "/sys/devices/platform/coretemp.0/hwmon";
+              hwmon-path-abs = cpuHwmonPath;
               input-filename = "temp1_input";
               interval = 0.1;
               format = "{temperatureC}°C {icon}";
@@ -193,6 +200,7 @@ in {
             ];
             modules-center = [];
             modules-right = [
+              (lib.mkIf useNvidia "custom/nvidia")
               (lib.mkIf useClaude "custom/claude-monitor")
               (lib.mkIf useVoxtype "custom/voxtype")
               "hyprland/submap"
@@ -205,6 +213,12 @@ in {
               (lib.mkIf useMusic "pulseaudio#mic")
               "custom/clock"
             ];
+            "custom/nvidia" = lib.mkIf useNvidia {
+              return-type = "json";
+              interval = 5;
+              exec = "waybar-nvidia";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.nvtopPackages.nvidia}/bin/nvtop";
+            };
             "custom/claude-monitor" = lib.mkIf useClaude {
               return-type = "json";
               interval = 60;
@@ -493,6 +507,7 @@ in {
           #custom-mail,
           #custom-idle,
           #custom-voxtype,
+          #custom-nvidia,
           #custom-claude-monitor,
           #mpd {
             ${padding}
@@ -524,6 +539,7 @@ in {
           #pulseaudio,
           #pulseaudio.mic,
           #custom-voxtype,
+          #custom-nvidia,
           #custom-claude-monitor,
           #custom-clock {
             margin: 0px 4px ${defaultMargin} 4px;
@@ -588,6 +604,15 @@ in {
               0% { opacity: 1; }
               50% { opacity: 0.5; }
               100% { opacity: 1; }
+          }
+
+          #custom-nvidia.warning {
+            color: #f1fa8c;
+          }
+
+          #custom-nvidia.critical {
+            color: #ff5555;
+            animation: pulse 2s infinite;
           }
 
           #custom-claude-monitor.inactive {
