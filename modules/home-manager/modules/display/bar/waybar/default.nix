@@ -70,7 +70,10 @@ in {
         (import ./waybar-swaync {inherit inputs pkgs lib;})
         (import ./waybar-toggle {inherit inputs pkgs lib;})
         (import ./waybar-watch {inherit inputs pkgs lib;})
-        (import ./waybar-claude-monitor {inherit pkgs; quota = claudeQuota;})
+        (import ./waybar-claude-monitor {
+          inherit pkgs;
+          quota = claudeQuota;
+        })
         (import ./waybar-nvidia {inherit pkgs;})
       ];
     };
@@ -183,6 +186,12 @@ in {
               format-alt = "{time} {icon}";
               format-icons = ["💀" "🪫" "🔋"];
             };
+            "custom/nvidia" = lib.mkIf useNvidia {
+              return-type = "json";
+              interval = 5;
+              exec = "waybar-nvidia";
+              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty nvtop";
+            };
             "custom/powermenu" = {
               format = "";
               on-click = "sleep 0.1 && logoutlaunch";
@@ -213,12 +222,6 @@ in {
               (lib.mkIf useMusic "pulseaudio#mic")
               "custom/clock"
             ];
-            "custom/nvidia" = lib.mkIf useNvidia {
-              return-type = "json";
-              interval = 5;
-              exec = "waybar-nvidia";
-              on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty nvtop";
-            };
             "custom/claude-monitor" = lib.mkIf useClaude {
               return-type = "json";
               interval = 60;
