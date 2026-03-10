@@ -2,9 +2,11 @@
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"
+      "https://attic.xuyh0120.win/lantian"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
     ];
   };
   inputs = {
@@ -151,6 +153,14 @@
     voxtype = {
       url = "github:peteonrails/voxtype";
     };
+    nix-cachyos-kernel = {
+      url = "github:xddxdd/nix-cachyos-kernel/release";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
   };
   outputs = {
     self,
@@ -161,7 +171,8 @@
     system = "x86_64-linux";
     overlays = import ./overlays {inherit inputs pkgs lib;};
     pkgs = import nixpkgs {
-      inherit system overlays;
+      inherit system;
+      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.pinned];
       config = {
         allowUnfreePredicate = pkg:
           builtins.elem (lib.getName pkg) [

@@ -46,6 +46,10 @@
       secureboot = {
         enable = false;
       };
+      cachyos = {
+        enable = false;
+        variant = "linuxPackages-cachyos-latest";
+      };
     };
     cpu = {
       enable = false;

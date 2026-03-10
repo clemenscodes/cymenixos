@@ -45,6 +45,24 @@ in {
           example = 533760;
           description = "The result of running ${lib.getExe pkgs.btrfs-swap-resume-offset} on an installed system.";
         };
+        cachyos = {
+          enable = lib.mkEnableOption "Use CachyOS optimized kernel";
+          variant = lib.mkOption {
+            type = lib.types.str;
+            default = "linuxPackages-cachyos-latest";
+            example = "linuxPackages-cachyos-lts";
+            description = ''
+              CachyOS kernel variant to use. Available variants:
+              linuxPackages-cachyos-latest, linuxPackages-cachyos-latest-lto,
+              linuxPackages-cachyos-lts, linuxPackages-cachyos-lts-lto,
+              linuxPackages-cachyos-bore, linuxPackages-cachyos-bore-lto,
+              linuxPackages-cachyos-hardened, linuxPackages-cachyos-hardened-lto,
+              linuxPackages-cachyos-rt-bore, linuxPackages-cachyos-rt-bore-lto,
+              linuxPackages-cachyos-server, linuxPackages-cachyos-server-lto,
+              and x86_64-v2/v3/v4/zen4 variants.
+            '';
+          };
+        };
       };
     };
   };
@@ -59,7 +77,11 @@ in {
     boot = {
       supportedFilesystems = lib.mkForce ["btrfs" "vfat" "reiserfs" "f2fs" "xfs" "ntfs" "cifs"];
       kernelModules = ["v4l2loopback"];
-      kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+      kernelPackages = lib.mkDefault (
+        if cfg.boot.cachyos.enable
+        then pkgs.cachyosKernels.${cfg.boot.cachyos.variant}
+        else pkgs.linuxPackages_latest
+      );
       kernelParams = lib.mkIf hibernation ["resume_offset=${builtins.toString swapResumeOffset}"];
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       consoleLogLevel = lib.mkDefault 0;
@@ -129,6 +151,12 @@ in {
             }
           ]);
         };
+      };
+    };
+    nix = lib.mkIf cfg.boot.cachyos.enable {
+      settings = {
+        substituters = ["https://attic.xuyh0120.win/lantian"];
+        trusted-public-keys = ["lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="];
       };
     };
   };
