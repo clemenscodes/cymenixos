@@ -31,7 +31,7 @@ in {
         clock24 = true;
         baseIndex = 1;
         keyMode = "vi";
-        shortcut = "a";
+        shortcut = "Space";
         customPaneNavigationAndResize = true;
         disableConfirmationPrompt = true;
         mouse = true;
