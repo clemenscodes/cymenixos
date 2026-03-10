@@ -35,10 +35,20 @@ buildNpmPackage {
     mkdir -p $out/bin $out/lib/ms-365-mcp-server
     cp -r dist $out/lib/ms-365-mcp-server/
     cp -r node_modules $out/lib/ms-365-mcp-server/
+    cp package.json $out/lib/ms-365-mcp-server/
+
+    # Patch logger to write logs to $HOME/.cache instead of the read-only nix store
+    substituteInPlace $out/lib/ms-365-mcp-server/dist/logger.js \
+      --replace-fail \
+        'const logsDir = path.join(__dirname, "..", "logs");' \
+        'const logsDir = path.join(process.env.HOME || "/tmp", ".cache", "ms-365-mcp-server", "logs");' \
+      --replace-fail \
+        'fs.mkdirSync(logsDir);' \
+        'fs.mkdirSync(logsDir, { recursive: true });'
+
     chmod +x $out/lib/ms-365-mcp-server/dist/index.js
     makeWrapper ${nodejs_22}/bin/node $out/bin/ms-365-mcp-server \
-      --add-flags "$out/lib/ms-365-mcp-server/dist/index.js" \
-      --chdir "$out/lib/ms-365-mcp-server"
+      --add-flags "$out/lib/ms-365-mcp-server/dist/index.js"
   '';
 
   # remove dangling symlinks before noBrokenSymlinks check
