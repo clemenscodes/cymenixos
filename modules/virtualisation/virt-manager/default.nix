@@ -220,7 +220,7 @@ in {
         "nohz_full=0-7,16-23"
         "rcu_nocbs=0-7,16-23"
         "kvmfr.static_size_mb=256"
-        "pcie_acs_override=downstream,multifunction"
+        # "pcie_acs_override=downstream,multifunction" only needed for mt7927 dev
         # Pre-allocate 32 GB in 2 MB hugepages (16384 × 2 MB).
         # Reduces TLB pressure from ~8 M entries to ~16 K for the VM's RAM,
         # improving frame pacing stability. Host must have > 48 GB total RAM.
