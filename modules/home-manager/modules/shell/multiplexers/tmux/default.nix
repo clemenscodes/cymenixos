@@ -116,7 +116,9 @@ in {
           # Reload config
           bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded!"
 
-          # Status bar at top
+          # Minimal status bar — windows only, no right/left content
+          set -g status-right ""
+          set -g status-left ""
           set -g status-position top
 
           # Renumber windows when one is closed
