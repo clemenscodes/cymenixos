@@ -18,6 +18,14 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.tmux.enable) {
     programs = {
+      zsh = {
+        initContent = lib.mkAfter ''
+          # Auto-attach to tmux session on terminal start (outside of tmux)
+          if [[ -z "$TMUX" ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
+            exec tmux new-session -A -s main
+          fi
+        '';
+      };
       tmux = {
         inherit (cfg.tmux) enable;
         clock24 = true;
@@ -53,20 +61,6 @@ in {
             '';
           }
           pkgs.tmuxPlugins.yank
-          {
-            plugin = pkgs.tmuxPlugins.resurrect;
-            extraConfig = ''
-              set -g @resurrect-strategy-nvim 'session'
-              set -g @resurrect-capture-pane-contents 'on'
-            '';
-          }
-          {
-            plugin = pkgs.tmuxPlugins.continuum;
-            extraConfig = ''
-              set -g @continuum-restore 'on'
-              set -g @continuum-save-interval '10'
-            '';
-          }
         ];
         extraConfig = ''
           # Terminal features
@@ -75,6 +69,9 @@ in {
 
           # Forward Ctrl+L to the pane so shell clear always works
           bind -n C-l send-keys C-l
+
+          # Forward Ctrl+O to the pane so zsh yazi binding works
+          bind -n C-o send-keys C-o
 
           # Intuitive splits that preserve current directory
           bind | split-window -h -c "#{pane_current_path}"
