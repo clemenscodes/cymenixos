@@ -31,7 +31,7 @@ in {
         clock24 = true;
         baseIndex = 1;
         keyMode = "vi";
-        shortcut = "Space";
+        shortcut = "a";
         customPaneNavigationAndResize = true;
         disableConfirmationPrompt = true;
         mouse = true;
@@ -75,11 +75,9 @@ in {
           # Forward Ctrl+O to the pane so zsh yazi binding works
           bind -n C-o send-keys C-o
 
-          # Intuitive splits that preserve current directory
-          bind | split-window -h -c "#{pane_current_path}"
-          bind - split-window -v -c "#{pane_current_path}"
-          bind '"' split-window -v -c "#{pane_current_path}"
-          bind % split-window -h -c "#{pane_current_path}"
+          # Letter-based splits (keyboard-layout agnostic)
+          bind v split-window -h -c "#{pane_current_path}"
+          bind s split-window -v -c "#{pane_current_path}"
 
           # Prefix-free pane navigation with Alt+hjkl (no Ctrl+L conflict)
           bind -n M-h select-pane -L
