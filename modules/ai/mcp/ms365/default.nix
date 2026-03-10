@@ -66,9 +66,9 @@ in {
         which are expected to be set in your shell session before launching Claude:
 
         ```sh
-        export MS365_CLIENT_ID="<Application (client) ID>"
-        export MS365_CLIENT_SECRET="<client secret value>"
-        export MS365_TENANT_ID="<Directory (tenant) ID>"
+        export MS365_MCP_CLIENT_ID="<Application (client) ID>"
+        export MS365_MCP_CLIENT_SECRET="<client secret value>"
+        export MS365_MCP_TENANT_ID="<Directory (tenant) ID>"
         ```
 
         Add these to `~/.zshrc` (or a secrets file sourced by it — consider using
@@ -162,9 +162,9 @@ in {
       command = "${ms365-mcp}/bin/ms-365-mcp-server";
       args = readOnlyArgs ++ orgModeArgs ++ presetArgs;
       env = {
-        AZURE_CLIENT_ID = ''''${MS365_CLIENT_ID}'';
-        AZURE_CLIENT_SECRET = ''''${MS365_CLIENT_SECRET}'';
-        AZURE_TENANT_ID = ''''${MS365_TENANT_ID}'';
+        MS365_MCP_CLIENT_ID = ''''${MS365_MCP_CLIENT_ID}'';
+        MS365_MCP_CLIENT_SECRET = ''''${MS365_MCP_CLIENT_SECRET}'';
+        MS365_MCP_TENANT_ID = ''''${MS365_MCP_TENANT_ID}'';
       };
     };
   };
