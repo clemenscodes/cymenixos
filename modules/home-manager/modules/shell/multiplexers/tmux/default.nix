@@ -67,6 +67,12 @@ in {
           set -as terminal-features ",xterm-kitty:RGB"
           set -g focus-events on
 
+          # Allow kitty graphics protocol to pass through tmux to the terminal
+          # (prevents yazi from falling back to tmux-popup image previews)
+          set -g allow-passthrough on
+          set -ga update-environment TERM
+          set -ga update-environment TERM_PROGRAM
+
           # Forward Ctrl+L to the pane so shell clear always works
           bind -n C-l send-keys C-l
 
