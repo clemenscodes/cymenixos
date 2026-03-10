@@ -97,9 +97,9 @@ in {
           bind -n M-K resize-pane -U 5
           bind -n M-L resize-pane -R 5
 
-          # Window navigation
-          bind -n M-[ previous-window
-          bind -n M-] next-window
+          # Window navigation (avoid M-[ / M-] — they collide with CSI escape sequences)
+          bind -n M-p previous-window
+          bind -n M-n next-window
 
           # Move windows left/right
           bind -n M-< swap-window -t -1\; select-window -t -1
