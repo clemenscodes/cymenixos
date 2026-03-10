@@ -37,8 +37,8 @@ in {
         mouse = true;
         shell = "${pkgs.zsh}/bin/zsh";
         sensibleOnTop = true;
-        escapeTime = 0;
-        terminal = "xterm-kitty";
+        escapeTime = 10;
+        terminal = "tmux-256color";
         historyLimit = 50000;
         plugins = [
           {
@@ -62,6 +62,10 @@ in {
           # Terminal features
           set -as terminal-features ",xterm-kitty:RGB"
           set -g focus-events on
+
+          # Extended key protocol — fixes Neovim input lag and key combo recognition
+          set -g extended-keys on
+          set -as terminal-features ",xterm-kitty:extkeys"
 
           # Allow kitty graphics protocol to pass through tmux to the terminal
           # (prevents yazi from falling back to tmux-popup image previews)
