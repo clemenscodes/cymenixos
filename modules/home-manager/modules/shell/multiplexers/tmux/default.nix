@@ -73,8 +73,8 @@ in {
           set -as terminal-features ",xterm-kitty:RGB"
           set -g focus-events on
 
-          # Ensure Ctrl+L is never intercepted (clear screen must always work)
-          unbind -n C-l
+          # Forward Ctrl+L to the pane so shell clear always works
+          bind -n C-l send-keys C-l
 
           # Intuitive splits that preserve current directory
           bind | split-window -h -c "#{pane_current_path}"
