@@ -242,14 +242,6 @@ in {
     };
 
     systemd = {
-      services = {
-        libvirtd = {
-          preStart = ''
-            ${lib.getExe qemu-mkdisk-win}
-            ${lib.getExe qemu-mkdisk-nixos}
-          '';
-        };
-      };
       user.services.scream-ivshmem = {
         enable = true;
         description = "Scream IVSHMEM";
