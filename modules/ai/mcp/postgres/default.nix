@@ -7,7 +7,7 @@
 in {
   options.modules.ai.mcp.postgres.enable = lib.mkOption {
     type = lib.types.bool;
-    default = true;
+    default = false;
     description = "Enable PostgreSQL MCP server";
   };
   config = lib.mkIf (config.modules.ai.enable && config.modules.ai.mcp.enable && config.modules.ai.mcp.postgres.enable) {

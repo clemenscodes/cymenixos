@@ -31,7 +31,7 @@ in {
         clock24 = true;
         baseIndex = 1;
         keyMode = "vi";
-        shortcut = "Space";
+        shortcut = "a";
         customPaneNavigationAndResize = true;
         disableConfirmationPrompt = true;
         mouse = true;
@@ -79,44 +79,51 @@ in {
           # Forward Ctrl+O to the pane so zsh yazi binding works
           bind -n C-o send-keys C-o
 
-          # Letter-based splits (keyboard-layout agnostic)
-          bind v split-window -h -c "#{pane_current_path}"
-          bind s split-window -v -c "#{pane_current_path}"
+          # Override prefix to Alt+a (home-manager sets C-a, we override here)
+          set -g prefix M-a
+          unbind C-a
+          bind M-a send-prefix
 
-          # Prefix-free pane navigation with Alt+hjkl (no Ctrl+L conflict)
+          # ── Prefix-free: pane navigation (Alt+hjkl) ─────────────────────────
           bind -n M-h select-pane -L
           bind -n M-j select-pane -D
           bind -n M-k select-pane -U
           bind -n M-l select-pane -R
 
-          # Prefix-free pane resize with Alt+HJKL
+          # ── Prefix-free: pane resize (Alt+HJKL) ──────────────────────────────
           bind -n M-H resize-pane -L 5
           bind -n M-J resize-pane -D 5
           bind -n M-K resize-pane -U 5
           bind -n M-L resize-pane -R 5
 
-          # Window navigation (avoid M-[ / M-] — they collide with CSI escape sequences)
+          # ── Prefix-free: splits ───────────────────────────────────────────────
+          bind -n M-v split-window -h -c "#{pane_current_path}"
+          bind -n M-x split-window -v -c "#{pane_current_path}"
+
+          # ── Prefix-free: windows ─────────────────────────────────────────────
+          bind -n M-t new-window -c "#{pane_current_path}"
           bind -n M-p previous-window
           bind -n M-n next-window
-
-          # Move windows left/right
           bind -n M-< swap-window -t -1\; select-window -t -1
           bind -n M-> swap-window -t +1\; select-window -t +1
 
-          # Session picker
-          bind -n M-s choose-tree -Zs
+          # ── Prefix-free: misc ─────────────────────────────────────────────────
+          bind -n M-z resize-pane -Z            # zoom/unzoom current pane
+          bind -n M-q confirm-before kill-pane  # close pane (with confirm)
+          bind -n M-s choose-tree -Zs           # session picker
+          bind -n M-e copy-mode                 # enter copy/scroll mode (like Vim visual)
 
-          # New window in current directory
+          # ── Prefix bindings (rare operations) ────────────────────────────────
+          bind v split-window -h -c "#{pane_current_path}"
+          bind s split-window -v -c "#{pane_current_path}"
           bind c new-window -c "#{pane_current_path}"
+          bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded!"
 
-          # Vi copy mode bindings
+          # ── Vi copy mode ──────────────────────────────────────────────────────
           bind-key -T copy-mode-vi v send-keys -X begin-selection
           bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
           bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
           bind-key -T copy-mode-vi Escape send-keys -X cancel
-
-          # Reload config
-          bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded!"
 
           # Minimal status bar — windows only, no right/left content
           set -g status-right ""

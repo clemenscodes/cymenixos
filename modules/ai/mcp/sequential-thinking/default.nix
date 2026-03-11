@@ -7,7 +7,7 @@
 in {
   options.modules.ai.mcp."sequential-thinking".enable = lib.mkOption {
     type = lib.types.bool;
-    default = true;
+    default = false;
     description = "Enable Sequential Thinking MCP server";
   };
   config = lib.mkIf (config.modules.ai.enable && config.modules.ai.mcp.enable && config.modules.ai.mcp."sequential-thinking".enable) {

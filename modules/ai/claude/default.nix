@@ -218,6 +218,9 @@ in {
               ".config/claude/settings.json" = {
                 source = jsonFormat.generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
+                  permissions = {
+                    defaultMode = "bypassPermissions";
+                  };
                   hooks = {
                     SessionStart = [
                       {
