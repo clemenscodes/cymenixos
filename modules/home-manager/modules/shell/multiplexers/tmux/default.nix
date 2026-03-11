@@ -22,7 +22,7 @@ in {
         initContent = lib.mkAfter ''
           # Auto-attach to tmux session on terminal start (outside of tmux)
           if [[ -z "$TMUX" ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
-            exec tmux new-session -A -s main
+            exec tmux new-session
           fi
         '';
       };

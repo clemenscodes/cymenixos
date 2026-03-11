@@ -11,6 +11,7 @@
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
   mcpServers = config.modules.ai.mcp.servers;
+
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
@@ -82,6 +83,12 @@
     rev = "v1.3.0";
     hash = "sha256-zrpdEQFWWeX0V2nGRU8MYLB8HnoSpP+kFij+A5Ymj74=";
   };
+  agents = pkgs.fetchFromGitHub {
+    owner = "msitarzewski";
+    repo = "agency-agents";
+    rev = "746efaa6b4e8a0ea15cf9c7fe6f5b5425ed1ba8e";
+    hash = "sha256-YPC8QXrq2uv6iM3z7MuZ4Zi7XMkTVTprYnq+VCywGzc=";
+  };
 in {
   options = {
     modules = {
@@ -130,6 +137,10 @@ in {
               };
             };
             file = {
+              ".config/claude/agents" = {
+                source = agents;
+                recursive = true;
+              };
               ".config/claude/hooks/peon-ping/peon.sh" = {
                 source = "${peonsh}/bin/peon";
               };
