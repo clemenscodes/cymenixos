@@ -242,6 +242,19 @@ in {
     };
 
     systemd = {
+      services = {
+        libvirtd = {
+          preStart = ''
+            mkdir -p /var/lib/libvirt/vgabios
+            ln -sf ${qemu}/bin/qemu /var/lib/libvirt/hooks/qemu
+            ${lib.getExe qemu-mkdisk-win}
+            ${lib.getExe qemu-mkdisk-nixos}
+          '';
+          serviceConfig = {
+            LoadCredentialEncrypted = lib.mkForce "";
+          };
+        };
+      };
       user.services.scream-ivshmem = {
         enable = true;
         description = "Scream IVSHMEM";
