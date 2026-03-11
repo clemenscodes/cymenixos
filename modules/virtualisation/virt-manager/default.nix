@@ -221,9 +221,16 @@ in {
         "rcu_nocbs=0-7,16-23"
         "kvmfr.static_size_mb=256"
         # "pcie_acs_override=downstream,multifunction" only needed for mt7927 dev
-        # Pre-allocate 32 GB in 2 MB hugepages (16384 × 2 MB).
+        # Pre-allocate 32 GB in 2 MB hugepages (16384 × 2 MB) for the Windows VM.
         # Reduces TLB pressure from ~8 M entries to ~16 K for the VM's RAM,
-        # improving frame pacing stability. Host must have > 48 GB total RAM.
+        # improving frame pacing and GPU passthrough stability.
+        #
+        # VISIBILITY: These 32 GB appear as "used" in free/btop/htop even when
+        # no process is actively using them — this is normal kernel behaviour for
+        # statically reserved huge pages (HugePages_Total=16384, HugePages_Free=16384
+        # in /proc/meminfo while the VM is not running).
+        # Scoped to this module: disabling virt-manager removes these params
+        # automatically on the next rebuild + reboot.
         "hugepagesz=2M"
         "hugepages=16384"
         # Disable transparent hugepages: THP's background compaction competes

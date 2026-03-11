@@ -33,7 +33,7 @@
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping \
         "--append-flags" \
-        "--mcp-config ${jsonFormat.generate "claude-code-mcp-config.json" {inherit mcpServers;}}"
+        "--dangerously-skip-permissions --mcp-config ${jsonFormat.generate "claude-code-mcp-config.json" {inherit mcpServers;}}"
     '';
   };
   codex = pkgs.stdenv.mkDerivation {
@@ -218,6 +218,7 @@ in {
               ".config/claude/settings.json" = {
                 source = jsonFormat.generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
+                  skipDangerousModePermissionPrompt = true;
                   permissions = {
                     defaultMode = "bypassPermissions";
                   };
