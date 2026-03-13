@@ -90,7 +90,7 @@ in {
         in [
           {
             inherit height;
-            layer = "bottom";
+            layer = "top";
             position = "top";
             name = "topBar";
             modules-left = [
@@ -202,7 +202,7 @@ in {
           {
             inherit height;
             name = "bottomBar";
-            layer = "bottom";
+            layer = "top";
             position = "bottom";
             modules-left = [
               "image#logo"
@@ -254,7 +254,7 @@ in {
               default-submap = "NORMAL";
             };
             "image#logo" = {
-              path = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              path = "${pkgs.nixos-icons}/share/icons/hicolor/48x48/apps/nix-snowflake.png";
               size = height - 12;
               on-click = "sleep 0.3; ${pkgs.rofi}/bin/rofi -show drun";
             };
