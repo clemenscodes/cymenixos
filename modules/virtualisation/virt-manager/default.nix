@@ -187,6 +187,8 @@
       };
     }
   ];
+  virtManagerEnabled = cfg.enable && cfg.virt-manager.enable;
+  vfioEnabled = virtManagerEnabled && cfg.virt-manager.vfio.enable;
 in {
   imports = [
     inputs.nixvirt.nixosModules.default
@@ -198,235 +200,277 @@ in {
       virtualisation = {
         virt-manager = {
           enable = lib.mkEnableOption "Enable virt-manager" // {default = false;};
+          vfio = {
+            enable = lib.mkEnableOption "Enable VFIO GPU passthrough (huge pages, IOMMU, kvmfr, scream)" // {default = false;};
+          };
         };
       };
     };
   };
-  config = lib.mkIf (cfg.enable && cfg.virt-manager.enable) {
-    boot = {
-      initrd = {
-        availableKernelModules = ["vfio-pci"];
-        kernelModules = [
-          "vfio_pci"
-          "vfio"
-          "vfio_iommu_type1"
-          "kvmfr"
-        ];
+  config = lib.mkMerge [
+    (lib.mkIf virtManagerEnabled {
+      boot = {
+        kernelModules = ["kvm-amd"];
+        extraModprobeConfig = ''
+          options kvm_amd nested=1
+        '';
       };
-      kernelParams = [
-        "amd_iommu=on"
-        "iommu=pt"
-        "isolcpus=0-7,16-23"
-        "nohz_full=0-7,16-23"
-        "rcu_nocbs=0-7,16-23"
-        "kvmfr.static_size_mb=256"
-        # "pcie_acs_override=downstream,multifunction" only needed for mt7927 dev
-        # Pre-allocate 32 GB in 2 MB hugepages (16384 × 2 MB) for the Windows VM.
-        # Reduces TLB pressure from ~8 M entries to ~16 K for the VM's RAM,
-        # improving frame pacing and GPU passthrough stability.
-        #
-        # VISIBILITY: These 32 GB appear as "used" in free/btop/htop even when
-        # no process is actively using them — this is normal kernel behaviour for
-        # statically reserved huge pages (HugePages_Total=16384, HugePages_Free=16384
-        # in /proc/meminfo while the VM is not running).
-        # Scoped to this module: disabling virt-manager removes these params
-        # automatically on the next rebuild + reboot.
-        "hugepagesz=2M"
-        "hugepages=16384"
-        # Disable transparent hugepages: THP's background compaction competes
-        # with real-time vCPU workloads and causes unpredictable latency spikes.
-        "transparent_hugepage=never"
-      ];
-      kernelModules = [
-        "kvm-amd"
-      ];
-      extraModprobeConfig = ''
-        options kvm_amd nested=1
-        options vfio_pci disable_vga=1
-        options vfio-pci ids=10de:2206,10de:1aef
-      '';
-      extraModulePackages = [config.boot.kernelPackages.kvmfr];
-    };
 
-    systemd = {
-      services = {
-        libvirtd = {
-          preStart = ''
-            mkdir -p /var/lib/libvirt/vgabios
-            ln -sf ${qemu}/bin/qemu /var/lib/libvirt/hooks/qemu
-            ${lib.getExe qemu-mkdisk-win}
-            ${lib.getExe qemu-mkdisk-nixos}
-          '';
-          serviceConfig = {
-            LoadCredentialEncrypted = lib.mkForce "";
+      systemd = {
+        services = {
+          libvirtd = {
+            preStart = ''
+              mkdir -p /var/lib/libvirt/vgabios
+              ln -sf ${qemu}/bin/qemu /var/lib/libvirt/hooks/qemu
+              ${lib.getExe qemu-mkdisk-win}
+              ${lib.getExe qemu-mkdisk-nixos}
+            '';
+            serviceConfig = {
+              LoadCredentialEncrypted = lib.mkForce "";
+            };
+          };
+        };
+        tmpfiles = {
+          rules = let
+            firmware = pkgs.runCommandLocal "qemu-firmware" {} ''
+              mkdir $out
+              cp ${pkgs.qemu}/share/qemu/firmware/*.json $out
+            '';
+          in [
+            "L+ /var/lib/qemu/firmware - - - - ${firmware}"
+          ];
+        };
+      };
+
+      users = {
+        users = {
+          ${user} = {
+            extraGroups = ["libvirtd" "libvirt" "kvm" "input"];
           };
         };
       };
-      user.services.scream-ivshmem = {
-        enable = true;
-        description = "Scream IVSHMEM";
-        serviceConfig = {
-          ExecStart = "${pkgs.scream}/bin/scream -m /dev/shm/scream";
-          Restart = "always";
+
+      networking = {
+        firewall = {
+          allowedTCPPorts = [5900];
+          trustedInterfaces = ["virbr0"];
         };
-        wantedBy = ["multi-user.target"];
-        requires = ["pulseaudio.service"];
       };
-      tmpfiles = {
-        rules = let
-          firmware = pkgs.runCommandLocal "qemu-firmware" {} ''
-            mkdir $out
-            cp ${pkgs.qemu}/share/qemu/firmware/*.json $out
-          '';
-        in [
-          "L+ /var/lib/qemu/firmware - - - - ${firmware}"
-          "f /dev/shm/scream 0660 ${user} kvm -"
-          "f /dev/shm/looking-glass 0660 ${user} kvm -"
+
+      environment = {
+        systemPackages =
+          (with pkgs; [
+            virt-manager
+            virt-viewer
+            spice
+            spice-gtk
+            spice-protocol
+            libguestfs
+          ])
+          ++ [qemu];
+      };
+
+      virtualisation = {
+        libvirtd = {
+          onBoot = "ignore";
+          onShutdown = "shutdown";
+          allowedBridges = ["virbr0"];
+          qemu = {
+            runAsRoot = true;
+            verbatimConfig = ''
+              namespaces = []
+              cgroup_device_acl = [
+                "/dev/null", "/dev/full", "/dev/zero",
+                "/dev/random", "/dev/urandom",
+                "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+                "/dev/rtc","/dev/hpet", "/dev/vfio/vfio"
+              ]
+            '';
+          };
+          hooks = {
+            qemu = {
+              vnc = lib.getExe qemu-vnc-hook;
+            };
+          };
+        };
+
+        libvirt = {
+          inherit (config.modules.virtualisation) enable;
+
+          swtpm = {
+            inherit (config.modules.virtualisation) enable;
+          };
+
+          connections = {
+            "qemu:///system" = {
+              inherit networks pools;
+            };
+          };
+        };
+      };
+
+      programs = {
+        virt-manager = {
+          inherit (cfg.virt-manager) enable;
+        };
+      };
+
+      home-manager = lib.mkIf (config.modules.home-manager.enable) {
+        users = {
+          ${user} = {
+            imports = [inputs.nixvirt.homeModules.default];
+            virtualisation = {
+              libvirt = {
+                inherit (cfg.virt-manager) enable;
+                swtpm = {
+                  inherit (cfg.virt-manager) enable;
+                };
+                connections = {
+                  "qemu:///session" = {
+                    inherit pools;
+                  };
+                };
+              };
+            };
+          };
+        };
+      };
+    })
+
+    (lib.mkIf vfioEnabled {
+      boot = {
+        initrd = {
+          availableKernelModules = ["vfio-pci"];
+          kernelModules = [
+            "vfio_pci"
+            "vfio"
+            "vfio_iommu_type1"
+            "kvmfr"
+          ];
+        };
+        kernelParams = [
+          "amd_iommu=on"
+          "iommu=pt"
+          "isolcpus=0-7,16-23"
+          "nohz_full=0-7,16-23"
+          "rcu_nocbs=0-7,16-23"
+          "kvmfr.static_size_mb=256"
+          # Pre-allocate 32 GB in 2 MB hugepages (16384 × 2 MB) for the Windows VM.
+          # Reduces TLB pressure from ~8 M entries to ~16 K for the VM's RAM,
+          # improving frame pacing and GPU passthrough stability.
+          #
+          # VISIBILITY: These 32 GB appear as "used" in free/btop/htop even when
+          # no process is actively using them — this is normal kernel behaviour for
+          # statically reserved huge pages (HugePages_Total=16384, HugePages_Free=16384
+          # in /proc/meminfo while the VM is not running).
+          "hugepagesz=2M"
+          "hugepages=16384"
+          # Disable transparent hugepages: THP's background compaction competes
+          # with real-time vCPU workloads and causes unpredictable latency spikes.
+          "transparent_hugepage=never"
         ];
+        extraModprobeConfig = ''
+          options vfio_pci disable_vga=1
+          options vfio-pci ids=10de:2206,10de:1aef
+        '';
+        extraModulePackages = [config.boot.kernelPackages.kvmfr];
       };
-    };
 
-    users = {
-      users = {
-        ${user} = {
-          extraGroups = ["libvirtd" "libvirt" "kvm" "input"];
+      systemd = {
+        user.services.scream-ivshmem = {
+          enable = true;
+          description = "Scream IVSHMEM";
+          serviceConfig = {
+            ExecStart = "${pkgs.scream}/bin/scream -m /dev/shm/scream";
+            Restart = "always";
+          };
+          wantedBy = ["multi-user.target"];
+          requires = ["pulseaudio.service"];
+        };
+        tmpfiles = {
+          rules = [
+            "f /dev/shm/scream 0660 ${user} kvm -"
+            "f /dev/shm/looking-glass 0660 ${user} kvm -"
+          ];
         };
       };
-    };
 
-    networking = {
-      firewall = {
-        allowedTCPPorts = [5900];
-        trustedInterfaces = ["virbr0"];
-      };
-    };
-
-    environment = {
-      systemPackages =
-        (with pkgs; [
+      environment = {
+        systemPackages = with pkgs; [
           tigervnc
-          virt-manager
-          virt-viewer
-          spice
-          spice-gtk
-          spice-protocol
-          libguestfs
           virtio-win
           win-spice
           looking-glass-client
           scream
-        ])
-        ++ [iommu-check qemu];
-      etc = {
-        "modules-load.d/kvmfr.conf".text = ''
-          kvmfr
-        '';
-        "modprobe.d/kvmfr.conf".text = ''
-          options kvmfr static_size_mb=256
-        '';
+          iommu-check
+        ];
+        etc = {
+          "modules-load.d/kvmfr.conf".text = ''
+            kvmfr
+          '';
+          "modprobe.d/kvmfr.conf".text = ''
+            options kvmfr static_size_mb=256
+          '';
+        };
       };
-    };
 
-    services.udev.packages = [
-      (
-        pkgs.writeTextFile
-        {
+      services.udev.packages = [
+        (pkgs.writeTextFile {
           name = "kvmfr";
           text = ''
             SUBSYSTEM=="kvmfr", GROUP="kvm", MODE="0660", TAG+="uaccess"
           '';
           destination = "/etc/udev/rules.d/70-kvmfr.rules";
-        }
-      )
+        })
 
-      (
-        pkgs.writeTextFile {
+        (pkgs.writeTextFile {
           name = "vfio";
           text = ''
             KERNEL=="vfio", GROUP="kvm", MODE="0660"
             SUBSYSTEM=="vfio", KERNEL=="[0-9]*", GROUP="kvm", MODE="0660"
           '';
           destination = "/etc/udev/rules.d/70-vfio.rules";
-        }
-      )
-    ];
+        })
+      ];
 
-    virtualisation = {
-      libvirtd = {
-        onBoot = "ignore";
-        onShutdown = "shutdown";
-        allowedBridges = ["virbr0"];
-        qemu = {
-          runAsRoot = true;
-          verbatimConfig = ''
-            namespaces = []
-            cgroup_device_acl = [
-              "/dev/null", "/dev/full", "/dev/zero",
-              "/dev/random", "/dev/urandom",
-              "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
-              "/dev/rtc","/dev/hpet", "/dev/vfio/vfio",
-              "/dev/kvmfr0"
-            ]
-          '';
-        };
-        hooks = {
+      virtualisation = {
+        libvirtd = {
           qemu = {
-            start = lib.getExe qemu-start-hook;
-            stop = lib.getExe qemu-stop-hook;
-            vnc = lib.getExe qemu-vnc-hook;
+            verbatimConfig = lib.mkForce ''
+              namespaces = []
+              cgroup_device_acl = [
+                "/dev/null", "/dev/full", "/dev/zero",
+                "/dev/random", "/dev/urandom",
+                "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+                "/dev/rtc","/dev/hpet", "/dev/vfio/vfio",
+                "/dev/kvmfr0"
+              ]
+            '';
+          };
+          hooks = {
+            qemu = {
+              start = lib.getExe qemu-start-hook;
+              stop = lib.getExe qemu-stop-hook;
+            };
           };
         };
       };
 
-      libvirt = {
-        inherit (config.modules.virtualisation) enable;
-
-        swtpm = {
-          inherit (config.modules.virtualisation) enable;
-        };
-
-        connections = {
-          "qemu:///system" = {
-            inherit networks pools;
-          };
-        };
-      };
-    };
-
-    programs = {
-      virt-manager = {
-        inherit (cfg.virt-manager) enable;
-      };
-    };
-
-    home-manager = lib.mkIf (config.modules.home-manager.enable) {
-      users = {
-        ${user} = {
-          imports = [inputs.nixvirt.homeModules.default];
-          virtualisation = {
-            libvirt = {
-              inherit (cfg.virt-manager) enable;
-              swtpm = {
-                inherit (cfg.virt-manager) enable;
-              };
-              connections = {
-                "qemu:///session" = {
-                  inherit pools;
+      home-manager = lib.mkIf (config.modules.home-manager.enable) {
+        users = {
+          ${user} = {
+            wayland = {
+              windowManager = {
+                hyprland = {
+                  extraConfig = ''
+                    windowrule = fullscreen on, match:class (looking-glass-client)
+                  '';
                 };
               };
             };
           };
-          wayland = {
-            windowManager = {
-              hyprland = {
-                extraConfig = ''
-                  windowrule = fullscreen on, match:class (looking-glass-client)
-                '';
-              };
-            };
-          };
         };
       };
-    };
-  };
+    })
+  ];
 }
