@@ -336,6 +336,9 @@
       };
       virt-manager = {
         enable = false;
+        vfio = {
+          enable = false;
+        };
       };
     };
     wsl = {

@@ -7,7 +7,7 @@
 in {
   options.modules.ai.mcp.mongodb.enable = lib.mkOption {
     type = lib.types.bool;
-    default = true;
+    default = false;
     description = "Enable MongoDB MCP server";
   };
   config = lib.mkIf (config.modules.ai.enable && config.modules.ai.mcp.enable && config.modules.ai.mcp.mongodb.enable) {

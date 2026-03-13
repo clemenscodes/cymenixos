@@ -6,6 +6,7 @@
   imports = [
     (import ./atlassian {inherit lib;})
     (import ./azure-devops {inherit pkgs lib;})
+    (import ./chrome-devtools {inherit pkgs lib;})
     (import ./context7 {inherit pkgs lib;})
     (import ./docker {inherit pkgs lib;})
     (import ./filesystem {inherit pkgs lib;})
@@ -14,6 +15,7 @@
     (import ./grafana {inherit pkgs lib;})
     (import ./kubernetes {inherit pkgs lib;})
     (import ./lokka {inherit pkgs lib;})
+    (import ./markitdown {inherit pkgs lib;})
     (import ./memory {inherit pkgs lib;})
     (import ./mongodb {inherit pkgs lib;})
     (import ./ms365 {inherit pkgs lib;})

@@ -5,7 +5,7 @@
 }: {config, ...}: {
   options.modules.ai.mcp.kubernetes.enable = lib.mkOption {
     type = lib.types.bool;
-    default = true;
+    default = false;
     description = "Enable Kubernetes MCP server";
   };
   config = lib.mkIf (config.modules.ai.enable && config.modules.ai.mcp.enable && config.modules.ai.mcp.kubernetes.enable) {

@@ -403,7 +403,7 @@ in {
 
                 # Dedicated I/O thread keeps disk completions off the vCPU threads,
                 # eliminating storage-induced microstutter during asset streaming.
-                iothreads = 1;
+                iothreads = {count = 1;};
 
                 numatune.memory = {
                   mode = "strict";
