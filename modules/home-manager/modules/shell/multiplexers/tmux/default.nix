@@ -79,10 +79,10 @@ in {
           # Forward Ctrl+O to the pane so zsh yazi binding works
           bind -n C-o send-keys C-o
 
-          # Override prefix to Alt+a (home-manager sets C-a, we override here)
-          set -g prefix M-a
+          # Override prefix to Alt+Escape (home-manager sets C-a, we override here)
+          set -g prefix M-Escape
           unbind C-a
-          bind M-a send-prefix
+          bind M-Escape send-prefix
 
           # ── Prefix-free: pane navigation (Alt+hjkl) ─────────────────────────
           bind -n M-h select-pane -L
