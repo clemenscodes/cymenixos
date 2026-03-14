@@ -10,6 +10,7 @@
     (import ./context7 {inherit pkgs lib;})
     (import ./docker {inherit pkgs lib;})
     (import ./filesystem {inherit pkgs lib;})
+    (import ./fly {inherit pkgs lib;})
     (import ./git {inherit pkgs lib;})
     (import ./github {inherit pkgs lib;})
     (import ./grafana {inherit pkgs lib;})
