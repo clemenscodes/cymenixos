@@ -51,6 +51,9 @@
     };
   };
 in {
+  imports = [
+    (import ./pyroveil {inherit lib;})
+  ];
   options = {
     modules = {
       gpu = {
