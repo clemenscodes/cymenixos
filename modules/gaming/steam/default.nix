@@ -40,7 +40,6 @@ in {
           };
         };
       };
-      systemPackages = [pkgs.steamtinkerlaunch];
     };
     programs = {
       steam = {
@@ -50,7 +49,7 @@ in {
           inherit (cfg.steam) enable;
         };
         gamescopeSession = {
-          inherit (cfg.gamescope) enable;
+          inherit (cfg.steam) enable;
           env = {
             DXVK_HDR = "1";
             ENABLE_GAMESCOPE_WSI = "1";
@@ -83,6 +82,9 @@ in {
           pkgs.stdenv.cc.cc.lib
           pkgs.libkrb5
           pkgs.keyutils
+          pkgs.mangohud
+          pkgs.gamescope
+          pkgs.gamescope-wsi
         ];
         extraCompatPackages = [pkgs.proton-ge-bin];
       };
