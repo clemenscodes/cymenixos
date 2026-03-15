@@ -50,16 +50,25 @@ in {
           variant = lib.mkOption {
             type = lib.types.str;
             default = "linuxPackages-cachyos-latest";
-            example = "linuxPackages-cachyos-lts";
+            example = "linuxPackages-cachyos-bore";
             description = ''
-              CachyOS kernel variant to use. Available variants:
-              linuxPackages-cachyos-latest, linuxPackages-cachyos-latest-lto,
-              linuxPackages-cachyos-lts, linuxPackages-cachyos-lts-lto,
-              linuxPackages-cachyos-bore, linuxPackages-cachyos-bore-lto,
-              linuxPackages-cachyos-hardened, linuxPackages-cachyos-hardened-lto,
-              linuxPackages-cachyos-rt-bore, linuxPackages-cachyos-rt-bore-lto,
-              linuxPackages-cachyos-server, linuxPackages-cachyos-server-lto,
-              and x86_64-v2/v3/v4/zen4 variants.
+              CachyOS kernel variant to use. Each variant also has a -lto suffix
+              for ThinLTO builds, and -x86_64-v2/-x86_64-v3/-x86_64-v4/-zen4
+              suffixes for microarchitecture-optimised builds.
+
+              Stable variants:
+                linuxPackages-cachyos-latest      — latest stable CachyOS kernel
+                linuxPackages-cachyos-lts         — long-term support kernel
+                linuxPackages-cachyos-bore        — BORE scheduler (gaming/desktop)
+                linuxPackages-cachyos-eevdf       — EEVDF scheduler
+                linuxPackages-cachyos-bmq         — BMQ scheduler
+                linuxPackages-cachyos-hardened    — hardened security kernel
+                linuxPackages-cachyos-rt-bore     — real-time BORE kernel
+                linuxPackages-cachyos-server      — server (EEVDF, 300Hz, no preempt)
+                linuxPackages-cachyos-deckify     — Steam Deck / handheld optimised
+
+              Bleeding edge:
+                linuxPackages-cachyos-rc          — release candidate (7.0-rc3)
             '';
           };
         };

@@ -172,7 +172,7 @@
     overlays = import ./overlays {inherit inputs pkgs lib;};
     pkgs = import nixpkgs {
       inherit system;
-      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.pinned];
+      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.default];
       config = {
         allowUnfreePredicate = pkg:
           builtins.elem (lib.getName pkg) [
