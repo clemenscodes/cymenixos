@@ -51,6 +51,14 @@ in {
         };
         gamescopeSession = {
           inherit (cfg.gamescope) enable;
+          env = {
+            DXVK_HDR = "1";
+            ENABLE_GAMESCOPE_WSI = "1";
+          };
+          args = [
+            "--hdr-enabled"
+            "--hdr-itm-enable"
+          ];
         };
         remotePlay = {
           openFirewall = cfg.steam.enable;
@@ -75,8 +83,6 @@ in {
           pkgs.stdenv.cc.cc.lib
           pkgs.libkrb5
           pkgs.keyutils
-          pkgs.mangohud
-          pkgs.gamescope
         ];
         extraCompatPackages = [pkgs.proton-ge-bin];
       };

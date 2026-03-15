@@ -77,9 +77,19 @@
     };
     anyrun = {
       url = "github:anyrun-org/anyrun";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     cymenixvim = {
       url = "github:clemenscodes/cymenixvim";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     xremap-flake = {
       url = "github:xremap/nix-flake/8001f37b1ffe86e76b62f36afadee2f4acf90e70";
@@ -122,6 +132,11 @@
     };
     lutris-overlay = {
       url = "github:clemenscodes/lutris-overlay";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
@@ -137,9 +152,19 @@
     };
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     peon-ping = {
       url = "github:clemenscodes/peon-ping";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     claude = {
       url = "github:sadjow/claude-code-nix";
