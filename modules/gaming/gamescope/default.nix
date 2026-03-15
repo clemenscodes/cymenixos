@@ -15,9 +15,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.gamescope.enable) {
-    environment = {
-      systemPackages = with pkgs; [gamescope-wsi];
-    };
     programs = {
       gamescope = {
         inherit (cfg.gamescope) enable;

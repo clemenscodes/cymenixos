@@ -47,7 +47,7 @@ in {
   };
   config = lib.mkIf (cfg.enable) {
     environment = {
-      systemPackages = [pkgs.winetricks];
+      systemPackages = with pkgs; [winetricks gamescope-wsi];
       persistence = {
         ${persistPath} = {
           users = {
