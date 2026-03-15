@@ -85,11 +85,6 @@
     };
     cymenixvim = {
       url = "github:clemenscodes/cymenixvim";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
-        };
-      };
     };
     xremap-flake = {
       url = "github:xremap/nix-flake/8001f37b1ffe86e76b62f36afadee2f4acf90e70";
