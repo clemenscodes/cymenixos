@@ -29,7 +29,6 @@ in {
   imports = [
     (import ./emulation {inherit inputs pkgs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
-    (import ./gamescope {inherit inputs pkgs lib;})
     (import ./heroic {inherit inputs pkgs lib;})
     (import ./lutris {inherit inputs pkgs lib;})
     (import ./mangohud {inherit inputs pkgs lib;})
