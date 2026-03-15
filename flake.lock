@@ -276,11 +276,11 @@
         "telescope-manix": "telescope-manix"
       },
       "locked": {
-        "lastModified": 1773584993,
-        "narHash": "sha256-2RX178NNkRGkhGvgsYeF5goTvXkleMsvgI/0QhGL+/g=",
+        "lastModified": 1773586146,
+        "narHash": "sha256-9i/R9ddro8LphH1IfqhyoT4Yk58BpjHk0ufrZYVK00I=",
         "owner": "clemenscodes",
         "repo": "cymenixvim",
-        "rev": "688bc5b32aa2f5845d5fb57ddc721653ba9fad0c",
+        "rev": "c08362e4c6cd649289ea710485cbcb26311464be",
         "type": "github"
       },
       "original": {
@@ -2828,11 +2828,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773584332,
-        "narHash": "sha256-uqdhwdKEgJeSazbDOopQ/MuKqVfGLCucgVZCx6cl3U8=",
+        "lastModified": 1773585225,
+        "narHash": "sha256-DqNLrCrIAblgN6buGlxED1XQm9AfG2dOPG2nmRed3ys=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "7a302a2690620bc8f8086dd1e621b0f6069685cb",
+        "rev": "3cd64eb34756cc370c98da2434cbc5be28bd3760",
         "type": "github"
       },
       "original": {
