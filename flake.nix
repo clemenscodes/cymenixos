@@ -13,6 +13,10 @@
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
+    nixpkgs-electron-fix = {
+      url = "github:NixOS/nixpkgs/c51afdb93a3bab937293514fa2cf20f200dd399a";
+      flake = false;
+    };
     impermanence = {
       url = "github:nix-community/impermanence";
     };
@@ -190,9 +194,18 @@
     inherit (pkgs) lib;
     system = "x86_64-linux";
     overlays = import ./overlays {inherit inputs pkgs lib;};
+    electronOverlay = final: prev: {
+      inherit
+        ((import inputs.nixpkgs-electron-fix {
+          inherit system;
+          config.allowUnfree = true;
+        }))
+        electron_39
+        ;
+    };
     pkgs = import nixpkgs {
       inherit system;
-      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.default];
+      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.default electronOverlay];
       config = {
         allowUnfreePredicate = pkg:
           builtins.elem (lib.getName pkg) [
