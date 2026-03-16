@@ -639,7 +639,7 @@ in {
     wayland.windowManager.hyprland = lib.mkIf (useHyprland && obsCfg.keybinds.enable) {
       settings = {
         bind = [
-          "$mod, O, exec, obs-launch"
+          "$mod, O, exec, ${obs-launch}/bin/obs-launch"
           "$mod CTRL, O, exec, obs-record-toggle"
           "$mod CTRL, T, exec, obs-stream-toggle"
           "$mod CTRL, B, exec, obs-replay-toggle"
@@ -712,6 +712,20 @@ in {
           pkgs.obs-studio-plugins.obs-plugin-countdown
         ];
       };
+    };
+
+    # Override the OBS desktop entry so app launchers (anyrun, rofi, etc.)
+    # all go through obs-launch, which patches the profile before OBS reads it.
+    xdg.desktopEntries."com.obsproject.Studio" = {
+      name = "OBS Studio";
+      genericName = "Streaming/Recording Software";
+      comment = "Free and Open Source Streaming/Recording Software";
+      exec = "${obs-launch}/bin/obs-launch %F";
+      icon = "com.obsproject.Studio";
+      terminal = false;
+      type = "Application";
+      categories = ["AudioVideo" "Recorder"];
+      startupNotify = true;
     };
 
   };
