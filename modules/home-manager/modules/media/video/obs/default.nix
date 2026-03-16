@@ -46,7 +46,6 @@
     ConfirmOnExit=false
     LastVersion=30000000
     CurrentProfile=${obsCfg.profile.name}
-    CurrentProfilePath=basic/profiles/${obsCfg.profile.name}
 
     [BasicWindow]
     RecordWhenStreaming=false
@@ -418,10 +417,11 @@ in {
         obs-reset-config
       ];
 
-      # Seeds OBS config files on a fresh system (or after obs-reset-config).
-      # Only writes if the file is absent or a stale Nix symlink — OBS can
-      # freely modify them between rebuilds. Run obs-reset-config to restore
-      # Nix defaults on an existing install.
+      # global.ini is always overwritten — it controls which profile OBS opens,
+      # and OBS rewrites it on every launch (so seed-if-absent would leave the
+      # wrong profile selected after the first run).
+      # Profile/encoder files use seed-if-absent so OBS can tune settings freely.
+      # Run obs-reset-config to restore Nix defaults for those files.
       activation.obsInitConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
         OBS_DIR="$HOME/.config/obs-studio"
         PROFILE_DIR="$OBS_DIR/basic/profiles/${obsCfg.profile.name}"
@@ -437,11 +437,11 @@ in {
           fi
         }
 
-        seed "$WS_DIR/config.json"                        ${websocketConfigFile}
-        seed "$OBS_DIR/global.ini"                        ${globalIniFile}
-        seed "$PROFILE_DIR/basic.ini"                     ${profileIniFile}
-        seed "$PROFILE_DIR/recordEncoder.json"            ${recordEncoderFile}
-        seed "$PROFILE_DIR/streamEncoder.json"            ${streamEncoderFile}
+        seed "$WS_DIR/config.json"             ${websocketConfigFile}
+        run cp ${globalIniFile} "$OBS_DIR/global.ini"
+        seed "$PROFILE_DIR/basic.ini"          ${profileIniFile}
+        seed "$PROFILE_DIR/recordEncoder.json" ${recordEncoderFile}
+        seed "$PROFILE_DIR/streamEncoder.json" ${streamEncoderFile}
 
         run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
       '';
