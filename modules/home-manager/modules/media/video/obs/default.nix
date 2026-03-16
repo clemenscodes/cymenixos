@@ -96,25 +96,23 @@
               rot = 0.0;
               scale = {x = 1.0; y = 1.0;};
               align = 5;
-              vis = true;
-              muted = false;
+              visible = true;
               locked = false;
               crop_top = 0;
               crop_right = 0;
               crop_bottom = 0;
               crop_left = 0;
-              crop_to_bounding_box = false;
-              bounds_type = 2; # Scale to inner bounds
+              bounds_type = 2;
               bounds_align = 0;
+              bounds_crop = false;
               bounds = {x = obsCfg.profile.outputWidth * 1.0; y = obsCfg.profile.outputHeight * 1.0;};
-              blend_method = 0;
-              blend_type = 0;
               group_item_backup = false;
-              scale_filter = 0;
-              deinterlace_mode = 0;
-              deinterlace_field_order = 0;
-              show_transition = {};
-              hide_transition = {};
+              scale_filter = "disable";
+              blend_method = "default";
+              blend_type = "normal";
+              show_transition = {duration = 0;};
+              hide_transition = {duration = 0;};
+              private_settings = {};
             }
           ];
         };
@@ -135,13 +133,13 @@
         monitoring_type = 0;
         private_settings = {};
       }
-      # Source: VK Capture (linux-vkcapture, cursor disabled)
+      # Source: VK Capture (vkcapture-source, cursor disabled)
       {
         prev_ver = 536870916;
         name = "VK Capture";
         uuid = "cyme0001-0001-0001-0001-000000000004";
-        id = "linux-vkcapture";
-        versioned_id = "linux-vkcapture";
+        id = "vkcapture-source";
+        versioned_id = "vkcapture-source";
         settings = {show_cursor = false;};
         mixers = 0;
         sync = 0;
