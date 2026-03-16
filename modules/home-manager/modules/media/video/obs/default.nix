@@ -12,9 +12,6 @@
   obsCfg = cfg.obs;
   isDesktop = osConfig.modules.display.gui != "headless";
   useHyprland = config.modules.display.compositor.hyprland.enable;
-  obsLaunchCmd =
-    "obs --disable-shutdown-check"
-    + lib.optionalString obsCfg.replayBuffer.enable " --startreplaybuffer";
   isPersisted = osConfig.modules.boot.enable;
   persistPath = osConfig.modules.boot.impermanence.persistPath;
 
@@ -38,6 +35,142 @@
   streamEncoderFile = pkgs.writeText "obs-stream-encoder.json" (builtins.toJSON {
     rate_control = "CBR";
     bitrate = obsCfg.stream.bitrate;
+  });
+
+  # Minimal audio source entry (reused for desktop + mic global slots)
+  mkAudioSource = name: uuid: pluginId: {
+    prev_ver = 536870916;
+    inherit name uuid;
+    id = pluginId;
+    versioned_id = pluginId;
+    settings = {device_id = "default";};
+    mixers = 255;
+    sync = 0;
+    flags = 0;
+    volume = 1.0;
+    balance = 0.5;
+    enabled = true;
+    muted = false;
+    push-to-mute = false;
+    push-to-mute-delay = 0;
+    push-to-talk = false;
+    push-to-talk-delay = 0;
+    hotkeys = {
+      "libobs.mute" = [];
+      "libobs.unmute" = [];
+      "libobs.push-to-mute" = [];
+      "libobs.push-to-talk" = [];
+    };
+    deinterlace_mode = 0;
+    deinterlace_field_order = 0;
+    monitoring_type = 0;
+    private_settings = {};
+  };
+
+  sceneCollectionFile = pkgs.writeText "obs-scene-collection.json" (builtins.toJSON {
+    # Global audio devices
+    DesktopAudioDevice1 = mkAudioSource "Desktop" "cyme0001-0001-0001-0001-000000000001" "pulse_output_capture";
+    AuxAudioDevice1 = mkAudioSource "Mic" "cyme0001-0001-0001-0001-000000000002" "pulse_input_capture";
+
+    current_scene = "Game";
+    current_program_scene = "Game";
+    scene_order = [{name = "Game";}];
+    name = obsCfg.scenes.name;
+
+    sources = [
+      # Scene: "Game"
+      {
+        prev_ver = 536870916;
+        name = "Game";
+        uuid = "cyme0001-0001-0001-0001-000000000003";
+        id = "scene";
+        versioned_id = "scene";
+        settings = {
+          id_counter = 1;
+          items = [
+            {
+              name = "VK Capture";
+              source_uuid = "cyme0001-0001-0001-0001-000000000004";
+              id = 1;
+              pos = {x = 0.0; y = 0.0;};
+              rot = 0.0;
+              scale = {x = 1.0; y = 1.0;};
+              align = 5;
+              vis = true;
+              muted = false;
+              locked = false;
+              crop_top = 0;
+              crop_right = 0;
+              crop_bottom = 0;
+              crop_left = 0;
+              crop_to_bounding_box = false;
+              bounds_type = 2; # Scale to inner bounds
+              bounds_align = 0;
+              bounds = {x = obsCfg.profile.outputWidth * 1.0; y = obsCfg.profile.outputHeight * 1.0;};
+              blend_method = 0;
+              blend_type = 0;
+              group_item_backup = false;
+              scale_filter = 0;
+              deinterlace_mode = 0;
+              deinterlace_field_order = 0;
+              show_transition = {};
+              hide_transition = {};
+            }
+          ];
+        };
+        mixers = 0;
+        sync = 0;
+        flags = 0;
+        volume = 1.0;
+        balance = 0.5;
+        enabled = true;
+        muted = false;
+        push-to-mute = false;
+        push-to-mute-delay = 0;
+        push-to-talk = false;
+        push-to-talk-delay = 0;
+        hotkeys = {};
+        deinterlace_mode = 0;
+        deinterlace_field_order = 0;
+        monitoring_type = 0;
+        private_settings = {};
+      }
+      # Source: VK Capture (linux-vkcapture, cursor disabled)
+      {
+        prev_ver = 536870916;
+        name = "VK Capture";
+        uuid = "cyme0001-0001-0001-0001-000000000004";
+        id = "linux-vkcapture";
+        versioned_id = "linux-vkcapture";
+        settings = {show_cursor = false;};
+        mixers = 0;
+        sync = 0;
+        flags = 0;
+        volume = 1.0;
+        balance = 0.5;
+        enabled = true;
+        muted = false;
+        push-to-mute = false;
+        push-to-mute-delay = 0;
+        push-to-talk = false;
+        push-to-talk-delay = 0;
+        hotkeys = {};
+        deinterlace_mode = 0;
+        deinterlace_field_order = 0;
+        monitoring_type = 0;
+        private_settings = {};
+      }
+    ];
+
+    quick_transitions = [
+      {name = "Fade"; duration = 300; hotkeys = []; id = 1; is_default = false;}
+      {name = "Cut"; duration = 0; hotkeys = []; id = 2; is_default = false;}
+    ];
+    transitions = [];
+    saved_projectors = [];
+    groups = [];
+    modules = {};
+    version = 2;
   });
 
   globalIniFile = pkgs.writeText "obs-global.ini" ''
@@ -162,6 +295,40 @@
       '';
     };
 
+  # Launcher: force-sets the active profile in both config files before OBS reads them.
+  # OBS 30+ stores the active profile in user.ini [Basic] Profile= / ProfileDir=.
+  # OBS also overwrites global.ini on exit, so patching on every launch is the only reliable fix.
+  obs-launch = pkgs.writeShellApplication {
+    name = "obs-launch";
+    runtimeInputs = [pkgs.gnused];
+    text = ''
+      OBS_DIR="$HOME/.config/obs-studio"
+      PROFILE="${obsCfg.profile.name}"
+
+      patch_ini_key() {
+        local file="$1" section="$2" key="$3" value="$4"
+        [[ -f "$file" ]] || return
+        if grep -q "^$key=" "$file"; then
+          sed -i "s|^$key=.*|$key=$value|" "$file"
+        else
+          sed -i "/^\[$section\]/a $key=$value" "$file"
+        fi
+      }
+
+      # global.ini — legacy CurrentProfile key (OBS <30 / fallback)
+      patch_ini_key "$OBS_DIR/global.ini"  "General" "CurrentProfile"        "$PROFILE"
+      # user.ini — OBS 30+ active profile and scene collection keys
+      patch_ini_key "$OBS_DIR/user.ini"    "Basic"   "Profile"               "$PROFILE"
+      patch_ini_key "$OBS_DIR/user.ini"    "Basic"   "ProfileDir"            "$PROFILE"
+      ${lib.optionalString obsCfg.scenes.enable ''
+        patch_ini_key "$OBS_DIR/user.ini"  "Basic"   "SceneCollection"       "${obsCfg.scenes.name}"
+        patch_ini_key "$OBS_DIR/user.ini"  "Basic"   "SceneCollectionFile"   "${obsCfg.scenes.name}.json"
+      ''}
+
+      exec obs --disable-shutdown-check ${lib.optionalString obsCfg.replayBuffer.enable "--startreplaybuffer"} "$@"
+    '';
+  };
+
   obs-cmd-wrapped = mkObsScript "obs-cmd" ''exec obs-cmd "$@"'';
   obs-record-toggle = mkObsScript "obs-record-toggle" "obs-cmd recording toggle";
   obs-stream-toggle = mkObsScript "obs-stream-toggle" "obs-cmd streaming toggle";
@@ -188,6 +355,7 @@
       rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/basic.ini"
       rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/recordEncoder.json"
       rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/streamEncoder.json"
+      rm -f "$OBS_DIR/basic/scenes/${obsCfg.scenes.name}.json"
       echo "Done. Run 'sudo nixos-rebuild switch' to re-apply Nix defaults."
     '';
   };
@@ -384,6 +552,23 @@ in {
                 description = "Register Hyprland keybinds for OBS control";
               };
             };
+
+            scenes = {
+              enable = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = ''
+                  Seed a declarative scene collection on first run.
+                  Contains a single "Game" scene with a VK Capture source (cursor disabled).
+                  Seeded once — OBS can freely modify it afterward. Use obs-reset-config to re-seed.
+                '';
+              };
+              name = lib.mkOption {
+                type = lib.types.str;
+                default = "Default";
+                description = "Scene collection name (shown in OBS menu and used as the filename).";
+              };
+            };
           };
         };
       };
@@ -399,6 +584,7 @@ in {
       };
 
       packages = [
+        obs-launch
         pkgs.gst_all_1.gstreamer
         pkgs.gst_all_1.gst-plugins-base
         pkgs.gst_all_1.gst-plugins-good
@@ -429,6 +615,7 @@ in {
 
         run mkdir -p "$PROFILE_DIR"
         run mkdir -p "$WS_DIR"
+        run mkdir -p "$OBS_DIR/basic/scenes"
 
         seed() {
           local dest="$1" src="$2"
@@ -442,7 +629,9 @@ in {
         seed "$PROFILE_DIR/basic.ini"          ${profileIniFile}
         seed "$PROFILE_DIR/recordEncoder.json" ${recordEncoderFile}
         seed "$PROFILE_DIR/streamEncoder.json" ${streamEncoderFile}
-
+        ${lib.optionalString obsCfg.scenes.enable ''
+          seed "$OBS_DIR/basic/scenes/${obsCfg.scenes.name}.json" ${sceneCollectionFile}
+        ''}
         run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
       '';
     };
@@ -450,7 +639,7 @@ in {
     wayland.windowManager.hyprland = lib.mkIf (useHyprland && obsCfg.keybinds.enable) {
       settings = {
         bind = [
-          "$mod, O, exec, ${obsLaunchCmd}"
+          "$mod, O, exec, obs-launch"
           "$mod CTRL, O, exec, obs-record-toggle"
           "$mod CTRL, T, exec, obs-stream-toggle"
           "$mod CTRL, B, exec, obs-replay-toggle"
