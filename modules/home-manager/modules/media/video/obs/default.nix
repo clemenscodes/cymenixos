@@ -293,38 +293,16 @@
       '';
     };
 
-  # Launcher: force-sets the active profile in both config files before OBS reads them.
-  # OBS 30+ stores the active profile in user.ini [Basic] Profile= / ProfileDir=.
-  # OBS also overwrites global.ini on exit, so patching on every launch is the only reliable fix.
+  # Launcher: passes --profile (and optionally --collection / --startreplaybuffer)
+  # directly so OBS always opens the right profile regardless of user.ini state.
+  obsArgs =
+    ["--profile" obsCfg.profile.name]
+    ++ lib.optionals obsCfg.scenes.enable ["--collection" obsCfg.scenes.name]
+    ++ lib.optional obsCfg.replayBuffer.enable "--startreplaybuffer";
+
   obs-launch = pkgs.writeShellApplication {
     name = "obs-launch";
-    runtimeInputs = [pkgs.gnused];
-    text = ''
-      OBS_DIR="$HOME/.config/obs-studio"
-      PROFILE="${obsCfg.profile.name}"
-
-      patch_ini_key() {
-        local file="$1" section="$2" key="$3" value="$4"
-        [[ -f "$file" ]] || return
-        if grep -q "^$key=" "$file"; then
-          sed -i "s|^$key=.*|$key=$value|" "$file"
-        else
-          sed -i "/^\[$section\]/a $key=$value" "$file"
-        fi
-      }
-
-      # global.ini — legacy CurrentProfile key (OBS <30 / fallback)
-      patch_ini_key "$OBS_DIR/global.ini"  "General" "CurrentProfile"        "$PROFILE"
-      # user.ini — OBS 30+ active profile and scene collection keys
-      patch_ini_key "$OBS_DIR/user.ini"    "Basic"   "Profile"               "$PROFILE"
-      patch_ini_key "$OBS_DIR/user.ini"    "Basic"   "ProfileDir"            "$PROFILE"
-      ${lib.optionalString obsCfg.scenes.enable ''
-        patch_ini_key "$OBS_DIR/user.ini"  "Basic"   "SceneCollection"       "${obsCfg.scenes.name}"
-        patch_ini_key "$OBS_DIR/user.ini"  "Basic"   "SceneCollectionFile"   "${obsCfg.scenes.name}.json"
-      ''}
-
-      exec obs --disable-shutdown-check ${lib.optionalString obsCfg.replayBuffer.enable "--startreplaybuffer"} "$@"
-    '';
+    text = "exec obs ${lib.escapeShellArgs obsArgs} \"$@\"";
   };
 
   obs-cmd-wrapped = mkObsScript "obs-cmd" ''exec obs-cmd "$@"'';
