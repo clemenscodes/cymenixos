@@ -596,12 +596,12 @@ in {
         seed() {
           local dest="$1" src="$2"
           if [[ ! -f "$dest" ]] || [[ -L "$dest" ]]; then
-            run cp "$src" "$dest"
+            run install -m 644 "$src" "$dest"
           fi
         }
 
         seed "$WS_DIR/config.json"             ${websocketConfigFile}
-        run cp ${globalIniFile} "$OBS_DIR/global.ini"
+        run install -m 644 ${globalIniFile} "$OBS_DIR/global.ini"
         seed "$PROFILE_DIR/basic.ini"          ${profileIniFile}
         seed "$PROFILE_DIR/recordEncoder.json" ${recordEncoderFile}
         seed "$PROFILE_DIR/streamEncoder.json" ${streamEncoderFile}
