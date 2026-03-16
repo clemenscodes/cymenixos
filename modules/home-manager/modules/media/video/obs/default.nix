@@ -15,11 +15,21 @@
   isPersisted = osConfig.modules.boot.enable;
   persistPath = osConfig.modules.boot.impermanence.persistPath;
 
+  # Bitmask: enable first N audio tracks (1=0b1, 2=0b11, 3=0b111 … 6=0b111111)
+  trackMask = builtins.foldl' (acc: _: acc * 2 + 1) 0 (lib.range 1 obsCfg.audio.tracks);
+
+  # Files precomputed in the Nix store — copied to ~/.config/obs-studio on first run
+  # (or on demand via obs-reset-config)
   websocketConfigFile = pkgs.writeText "obs-websocket-config.json" (builtins.toJSON {
     alerts_enabled = true;
     server_enabled = true;
     server_port = obsCfg.websocket.port;
     server_password = obsCfg.websocket.password;
+  });
+
+  recordEncoderFile = pkgs.writeText "obs-record-encoder.json" (builtins.toJSON {
+    rate_control = "CQP";
+    cqp = obsCfg.output.cqp;
   });
 
   globalIniFile = pkgs.writeText "obs-global.ini" ''
@@ -31,8 +41,8 @@
     [BasicWindow]
     RecordWhenStreaming=false
     KeepRecordingWhenStreamStops=false
-    SysTrayEnabled=false
-    SysTrayWhenStarted=false
+    SysTrayEnabled=true
+    SysTrayWhenStarted=true
     SnappingEnabled=true
     SnapDistance=10
     OverflowHidden=false
@@ -55,22 +65,53 @@
     ColorDepth=10
     ColorSpace=${obsCfg.profile.colorSpace}
     ColorRange=Full
+    SdrWhiteLevel=${toString obsCfg.profile.sdrWhiteLevel}
+    HdrNominalPeakLevel=${toString obsCfg.profile.hdrNominalPeakLevel}
+    ScaleType=bicubic
 
     [Output]
     Mode=Advanced
-
-    [SimpleOutput]
-    RecFormat2=${obsCfg.output.format}
-    FilePath=${obsCfg.output.path}
+    FilenameFormatting=%CCYY-%MM-%DD %hh-%mm-%ss
+    DelayEnable=false
+    Reconnect=true
+    RetryDelay=2
+    MaxRetries=25
+    IPFamily=IPv4+IPv6
 
     [AdvOut]
     RecFormat2=${obsCfg.output.format}
     RecFilePath=${obsCfg.output.path}
     RecEncoder=${obsCfg.output.encoder}
-    RecTracks=1
+    RecAudioEncoder=${obsCfg.audio.encoder}
+    RecTracks=${toString trackMask}
+    RecType=Standard
+    RecUseRescale=false
+    RecSplitFileType=Time
+    RecFileNameWithoutSpace=true
+    Track1Bitrate=${toString obsCfg.audio.trackBitrate}
+    Track2Bitrate=${toString obsCfg.audio.trackBitrate}
+    Track3Bitrate=${toString obsCfg.audio.trackBitrate}
+    Track4Bitrate=${toString obsCfg.audio.trackBitrate}
+    Track5Bitrate=${toString obsCfg.audio.trackBitrate}
+    Track6Bitrate=${toString obsCfg.audio.trackBitrate}
+    Track1Name=Desktop
+    Track2Name=Mic
+    Track3Name=Browser
+    Track4Name=Game
+    Track5Name=AUX 1
+    Track6Name=AUX 2
+
+    [SimpleOutput]
+    RecFormat2=${obsCfg.output.format}
+    FilePath=${obsCfg.output.path}
+    RecAudioEncoder=${obsCfg.audio.encoder}
 
     [ReplayBuffer]
     Duration=${toString obsCfg.replayBuffer.seconds}
+
+    [Audio]
+    SampleRate=48000
+    ChannelSetup=Stereo
 
     [Hotkeys]
     OBSBasic.StartRecording=[{"key":"OBS_KEY_O","modifiers":{"shift":false,"control":true,"alt":false,"command":true}}]
@@ -119,6 +160,21 @@
     vcam=$(obs-cmd virtual-cam status 2>/dev/null | jq -r '.outputActive // false')
     echo "rec=$rec stream=$stream replay=$replay vcam=$vcam"
   '';
+
+  # Deletes the seeded config files so the next nixos-rebuild re-applies Nix defaults.
+  # Scenes and plugin configs are untouched.
+  obs-reset-config = pkgs.writeShellApplication {
+    name = "obs-reset-config";
+    text = ''
+      OBS_DIR="$HOME/.config/obs-studio"
+      echo "Removing OBS seeded config files..."
+      rm -f "$OBS_DIR/global.ini"
+      rm -f "$OBS_DIR/plugin_config/obs-websocket/config.json"
+      rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/basic.ini"
+      rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/recordEncoder.json"
+      echo "Done. Run 'sudo nixos-rebuild switch' to re-apply Nix defaults."
+    '';
+  };
 in {
   options = {
     modules = {
@@ -178,13 +234,54 @@ in {
                   OBS internal color format.
                   P010 = semi-planar 4:2:0 10-bit, NVENC native — use for HDR on NVIDIA.
                   NV12 = semi-planar 4:2:0 8-bit — safe default for SDR on any hardware.
-                  I444 = 4:4:4 SDR only (HDR+4:4:4 unsupported in OBS).
                 '';
               };
               colorSpace = lib.mkOption {
-                type = lib.types.enum ["sRGB" "601" "709" "2100pq" "2100hlg"];
+                type = lib.types.enum ["sRGB" "601" "709" "2100PQ" "2100HLG"];
                 default = "709";
-                description = "OBS color space. 2100pq = HDR PQ, requires 10-bit colorFormat.";
+                description = "OBS color space. 2100PQ = HDR PQ (requires 10-bit colorFormat).";
+              };
+              sdrWhiteLevel = lib.mkOption {
+                type = lib.types.int;
+                default = 300;
+                description = "SDR white level in nits (used when tonemapping HDR→SDR)";
+              };
+              hdrNominalPeakLevel = lib.mkOption {
+                type = lib.types.int;
+                default = 1000;
+                description = "HDR nominal peak brightness in nits";
+              };
+            };
+
+            audio = {
+              encoder = lib.mkOption {
+                type = lib.types.enum [
+                  "ffmpeg_aac"
+                  "ffmpeg_opus"
+                  "ffmpeg_pcm_f32le"
+                  "ffmpeg_pcm_s16le"
+                  "libfdk_aac"
+                  "ffmpeg_flac"
+                ];
+                default = "ffmpeg_aac";
+                description = ''
+                  Audio encoder for recording.
+                  ffmpeg_pcm_f32le — 32-bit float PCM, uncompressed, universally compatible
+                                     (use this for DaVinci Resolve — Opus breaks there).
+                  ffmpeg_flac      — lossless compressed, ~50% smaller than PCM, also compatible.
+                  ffmpeg_aac       — lossy AAC, smallest files, fine for streaming/delivery.
+                  ffmpeg_opus      — better quality than AAC but breaks DaVinci Resolve.
+                '';
+              };
+              tracks = lib.mkOption {
+                type = lib.types.ints.between 1 6;
+                default = 1;
+                description = "Number of audio tracks to record (1–6). Enables the first N tracks.";
+              };
+              trackBitrate = lib.mkOption {
+                type = lib.types.int;
+                default = 320;
+                description = "Per-track bitrate in kbps (only applies to lossy encoders like AAC/Opus; ignored for PCM/FLAC)";
               };
             };
 
@@ -214,8 +311,15 @@ in {
                   Video encoder for recording.
                   obs_x264          — software H.264, works on any hardware (safe default).
                   obs_nvenc_av1_tex — NVENC AV1, best quality/size, requires Ada Lovelace (RTX 40xx+).
-                  obs_nvenc_hevc_tex — NVENC HEVC, good HDR10 support, works on all NVENC hardware.
-                  ffmpeg_hevc_vaapi / ffmpeg_av1_vaapi — AMD/Intel hardware encode.
+                  obs_nvenc_hevc_tex — NVENC HEVC, good HDR10 support, all NVENC hardware.
+                '';
+              };
+              cqp = lib.mkOption {
+                type = lib.types.ints.between 0 51;
+                default = 20;
+                description = ''
+                  CQP quality level for NVENC recording (0 = best, 51 = worst).
+                  20 is visually lossless for AV1/HEVC at 4K. Lower = larger files.
                 '';
               };
             };
@@ -270,8 +374,13 @@ in {
         obs-replay-toggle
         obs-vcam-toggle
         obs-status
+        obs-reset-config
       ];
 
+      # Seeds OBS config files on a fresh system (or after obs-reset-config).
+      # Only writes if the file is absent or a stale Nix symlink — OBS can
+      # freely modify them between rebuilds. Run obs-reset-config to restore
+      # Nix defaults on an existing install.
       activation.obsInitConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
         OBS_DIR="$HOME/.config/obs-studio"
         PROFILE_DIR="$OBS_DIR/basic/profiles/${obsCfg.profile.name}"
@@ -280,21 +389,19 @@ in {
         run mkdir -p "$PROFILE_DIR"
         run mkdir -p "$WS_DIR"
 
-        WS_CFG="$WS_DIR/config.json"
-        if [[ ! -f "$WS_CFG" ]] || [[ -L "$WS_CFG" ]]; then
-          run cp ${websocketConfigFile} "$WS_CFG"
-          run chmod 600 "$WS_CFG"
-        fi
+        seed() {
+          local dest="$1" src="$2"
+          if [[ ! -f "$dest" ]] || [[ -L "$dest" ]]; then
+            run cp "$src" "$dest"
+          fi
+        }
 
-        GLOBAL_INI="$OBS_DIR/global.ini"
-        if [[ ! -f "$GLOBAL_INI" ]] || [[ -L "$GLOBAL_INI" ]]; then
-          run cp ${globalIniFile} "$GLOBAL_INI"
-        fi
+        seed "$WS_DIR/config.json"                        ${websocketConfigFile}
+        seed "$OBS_DIR/global.ini"                        ${globalIniFile}
+        seed "$PROFILE_DIR/basic.ini"                     ${profileIniFile}
+        seed "$PROFILE_DIR/recordEncoder.json"            ${recordEncoderFile}
 
-        PROFILE_INI="$PROFILE_DIR/basic.ini"
-        if [[ ! -f "$PROFILE_INI" ]] || [[ -L "$PROFILE_INI" ]]; then
-          run cp ${profileIniFile} "$PROFILE_INI"
-        fi
+        run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
       '';
     };
 
@@ -359,16 +466,13 @@ in {
           pkgs.obs-studio-plugins.input-overlay
           pkgs.obs-studio-plugins.obs-tuna
           pkgs.obs-studio-plugins.obs-plugin-countdown
-
-          # === Vertical / Mobile ===
-          pkgs.obs-studio-plugins.obs-vertical-canvas
         ];
       };
     };
 
-    wayland.windowManager.hyprland = lib.mkIf useHyprland {
+    wayland.windowManager.hyprland = lib.mkIf (useHyprland && obsCfg.keybinds.enable) {
       settings = {
-        bind = lib.optionals obsCfg.keybinds.enable [
+        bind = [
           "$mod, O, exec, obs --disable-shutdown-check --multi${lib.optionalString obsCfg.replayBuffer.enable " --startreplaybuffer"}"
           "$mod CTRL, O, exec, obs-record-toggle"
           "$mod CTRL, T, exec, obs-stream-toggle"
