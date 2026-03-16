@@ -219,11 +219,7 @@ in {
               (lib.mkIf useMusic ''$mod SHIFT, COMMA, exec, mpc seek "0%"'')
               (lib.mkIf useMusic "$mod, PERIOD, exec, mpc next")
               (lib.mkIf useMusic "$mod SHIFT, PERIOD, exec, mpc repeat")
-              (lib.mkIf useObs "$mod, O, exec, obs --disable-shutdown-check --multi --startreplaybuffer")
-              (lib.mkIf useObs "SHIFT, F8, pass,class:^(com\.obsproject\.Studio)$")
-              (lib.mkIf useObs "SHIFT, F9, pass,class:^(com\.obsproject\.Studio)$")
-              (lib.mkIf useObs "SHIFT, F10, pass,class:^(com\.obsproject\.Studio)$")
-              (lib.mkIf useObs "SHIFT, F11, pass,class:^(com\.obsproject\.Studio)$")
+              # OBS keybinds are declared in the OBS module itself
               (lib.mkIf useMusic ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
               (lib.mkIf useMusic ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle")
               (lib.mkIf useMusic ", XF86AudioAudioPrev, exec, mpc prev")
