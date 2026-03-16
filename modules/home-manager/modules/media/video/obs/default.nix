@@ -35,11 +35,18 @@
     cqp = obsCfg.output.cqp;
   });
 
+  streamEncoderFile = pkgs.writeText "obs-stream-encoder.json" (builtins.toJSON {
+    rate_control = "CBR";
+    bitrate = obsCfg.stream.bitrate;
+  });
+
   globalIniFile = pkgs.writeText "obs-global.ini" ''
     [General]
     EnableAutoUpdates=false
     ConfirmOnExit=false
     LastVersion=30000000
+    CurrentProfile=${obsCfg.profile.name}
+    CurrentProfilePath=basic/profiles/${obsCfg.profile.name}
 
     [BasicWindow]
     RecordWhenStreaming=false
@@ -106,6 +113,9 @@
     Track4Name=Game
     Track5Name=AUX 1
     Track6Name=AUX 2
+    RecRB=${lib.boolToString obsCfg.replayBuffer.enable}
+    RecRBTime=${toString obsCfg.replayBuffer.seconds}
+    RecRBSize=512
 
     [SimpleOutput]
     RecFormat2=${obsCfg.output.format}
@@ -178,6 +188,7 @@
       rm -f "$OBS_DIR/plugin_config/obs-websocket/config.json"
       rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/basic.ini"
       rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/recordEncoder.json"
+      rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/streamEncoder.json"
       echo "Done. Run 'sudo nixos-rebuild switch' to re-apply Nix defaults."
     '';
   };
@@ -308,6 +319,11 @@ in {
                 default = "ffmpeg_aac";
                 description = "Audio encoder for streaming.";
               };
+              bitrate = lib.mkOption {
+                type = lib.types.int;
+                default = 6000;
+                description = "Stream video bitrate in kbps (CBR).";
+              };
             };
 
             output = {
@@ -425,6 +441,7 @@ in {
         seed "$OBS_DIR/global.ini"                        ${globalIniFile}
         seed "$PROFILE_DIR/basic.ini"                     ${profileIniFile}
         seed "$PROFILE_DIR/recordEncoder.json"            ${recordEncoderFile}
+        seed "$PROFILE_DIR/streamEncoder.json"            ${streamEncoderFile}
 
         run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
       '';
