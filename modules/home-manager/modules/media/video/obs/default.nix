@@ -12,6 +12,9 @@
   obsCfg = cfg.obs;
   isDesktop = osConfig.modules.display.gui != "headless";
   useHyprland = config.modules.display.compositor.hyprland.enable;
+  obsLaunchCmd =
+    "obs --disable-shutdown-check"
+    + lib.optionalString obsCfg.replayBuffer.enable " --startreplaybuffer";
   isPersisted = osConfig.modules.boot.enable;
   persistPath = osConfig.modules.boot.impermanence.persistPath;
 
@@ -56,6 +59,7 @@
     [Video]
     FPSType=1
     FPSNum=${toString obsCfg.profile.fpsNum}
+    FPSInt=${toString obsCfg.profile.fpsNum}
     FPSDen=1
     BaseCX=${toString obsCfg.profile.baseWidth}
     BaseCY=${toString obsCfg.profile.baseHeight}
@@ -84,6 +88,8 @@
     RecEncoder=${obsCfg.output.encoder}
     RecAudioEncoder=${obsCfg.audio.encoder}
     RecTracks=${toString trackMask}
+    Encoder=${obsCfg.stream.encoder}
+    AudioEncoder=${obsCfg.stream.audioEncoder}
     RecType=Standard
     RecUseRescale=false
     RecSplitFileType=Time
@@ -285,11 +291,30 @@ in {
               };
             };
 
+            stream = {
+              encoder = lib.mkOption {
+                type = lib.types.enum [
+                  "obs_nvenc_h264_tex"
+                  "obs_nvenc_hevc_tex"
+                  "obs_nvenc_av1_tex"
+                  "ffmpeg_hevc_vaapi"
+                  "obs_x264"
+                ];
+                default = "obs_nvenc_h264_tex";
+                description = "Video encoder for streaming (lower latency than recording encoder).";
+              };
+              audioEncoder = lib.mkOption {
+                type = lib.types.enum ["ffmpeg_aac" "ffmpeg_opus" "libfdk_aac"];
+                default = "ffmpeg_aac";
+                description = "Audio encoder for streaming.";
+              };
+            };
+
             output = {
               path = lib.mkOption {
                 type = lib.types.str;
-                default = "%HOME/Videos/OBS";
-                description = "Recording output directory";
+                default = "/home/${osConfig.modules.users.user}/Videos";
+                description = "Recording output directory (absolute path — OBS %HOME expansion is unreliable on NixOS/Wayland).";
               };
               format = lib.mkOption {
                 type = lib.types.enum ["mkv" "mp4" "mov" "flv" "fragmented_mp4"];
@@ -405,6 +430,19 @@ in {
       '';
     };
 
+    wayland.windowManager.hyprland = lib.mkIf (useHyprland && obsCfg.keybinds.enable) {
+      settings = {
+        bind = [
+          "$mod, O, exec, ${obsLaunchCmd}"
+          "$mod CTRL, O, exec, obs-record-toggle"
+          "$mod CTRL, T, exec, obs-stream-toggle"
+          "$mod CTRL, B, exec, obs-replay-toggle"
+          "$mod CTRL, S, exec, obs-replay-save"
+          "$mod CTRL, V, exec, obs-vcam-toggle"
+        ];
+      };
+    };
+
     programs = {
       obs-studio = {
         inherit (obsCfg) enable;
@@ -470,17 +508,5 @@ in {
       };
     };
 
-    wayland.windowManager.hyprland = lib.mkIf (useHyprland && obsCfg.keybinds.enable) {
-      settings = {
-        bind = [
-          "$mod, O, exec, obs --disable-shutdown-check --multi${lib.optionalString obsCfg.replayBuffer.enable " --startreplaybuffer"}"
-          "$mod CTRL, O, exec, obs-record-toggle"
-          "$mod CTRL, T, exec, obs-stream-toggle"
-          "$mod CTRL, B, exec, obs-replay-toggle"
-          "$mod CTRL, S, exec, obs-replay-save"
-          "$mod CTRL, V, exec, obs-vcam-toggle"
-        ];
-      };
-    };
   };
 }

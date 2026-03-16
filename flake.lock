@@ -2137,6 +2137,23 @@
         "type": "github"
       }
     },
+    "nixpkgs-electron-fix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773516723,
+        "narHash": "sha256-PMEAzwD5yQgR1ga4A+PVc4XL3oiP+hwU9tx78JiJYqM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c51afdb93a3bab937293514fa2cf20f200dd399a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c51afdb93a3bab937293514fa2cf20f200dd399a",
+        "type": "github"
+      }
+    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1743296961,
@@ -3064,6 +3081,7 @@
         "nix-cachyos-kernel": "nix-cachyos-kernel",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixpkgs": "nixpkgs_18",
+        "nixpkgs-electron-fix": "nixpkgs-electron-fix",
         "nixvirt": "nixvirt",
         "nur": "nur",
         "peon-ping": "peon-ping",
