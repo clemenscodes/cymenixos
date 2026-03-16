@@ -376,13 +376,6 @@ in {
           "$mod CTRL, S, exec, obs-replay-save"
           "$mod CTRL, V, exec, obs-vcam-toggle"
         ];
-        windowrule = [
-          "float on,  match:class ^(com\\.obsproject\\.Studio)$"
-          "size 1400 900, match:class ^(com\\.obsproject\\.Studio)$"
-          "center 1, match:class ^(com\\.obsproject\\.Studio)$"
-          "fullscreen on, match:title ^(OBS.*(Fullscreen|Projector))$"
-          "monitor 0,    match:title ^(OBS.*(Fullscreen|Projector))$"
-        ];
       };
     };
   };
