@@ -205,7 +205,7 @@
     };
     pkgs = import nixpkgs {
       inherit system;
-      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.default];
+      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.default electronOverlay];
       config = {
         allowUnfreePredicate = pkg:
           builtins.elem (lib.getName pkg) [
