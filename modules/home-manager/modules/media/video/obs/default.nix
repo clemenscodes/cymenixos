@@ -579,11 +579,12 @@ in {
         obs-reset-config
       ];
 
-      # global.ini is always overwritten — it controls which profile OBS opens,
-      # and OBS rewrites it on every launch (so seed-if-absent would leave the
-      # wrong profile selected after the first run).
-      # Profile/encoder files use seed-if-absent so OBS can tune settings freely.
-      # Run obs-reset-config to restore Nix defaults for those files.
+      # All config files use seed-if-absent so OBS can freely update them at runtime.
+      # The --profile flag in obs-launch ensures the correct profile is always loaded
+      # regardless of what global.ini says, so global.ini does not need force-writing.
+      # Forcing global.ini on every activation resets LastVersion, which triggers OBS's
+      # migration logic and causes "unable to migrate global configuration" errors.
+      # Run obs-reset-config to restore Nix defaults for all seeded files.
       activation.obsInitConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
         OBS_DIR="$HOME/.config/obs-studio"
         PROFILE_DIR="$OBS_DIR/basic/profiles/${obsCfg.profile.name}"
@@ -601,7 +602,7 @@ in {
         }
 
         seed "$WS_DIR/config.json"             ${websocketConfigFile}
-        run install -m 644 ${globalIniFile} "$OBS_DIR/global.ini"
+        seed "$OBS_DIR/global.ini"             ${globalIniFile}
         seed "$PROFILE_DIR/basic.ini"          ${profileIniFile}
         seed "$PROFILE_DIR/recordEncoder.json" ${recordEncoderFile}
         seed "$PROFILE_DIR/streamEncoder.json" ${streamEncoderFile}
@@ -632,7 +633,8 @@ in {
         plugins = [
           # === Capture ===
           pkgs.obs-studio-plugins.obs-vkcapture
-          pkgs.obs-studio-plugins.wlrobs
+          # wlrobs removed: relied on wlr-screencopy-unstable-v1, dropped in Hyprland 0.45+
+          # Use the built-in "Screen Capture (PipeWire/Portal)" source instead
           pkgs.obs-studio-plugins.looking-glass-obs
           pkgs.obs-studio-plugins.droidcam-obs
 

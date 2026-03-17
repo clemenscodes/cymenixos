@@ -40,6 +40,21 @@ in {
           pkgs.xdg-desktop-portal-hyprland
           pkgs.xdg-desktop-portal-gtk
         ];
+        # Explicit routing is required when multiple portal backends are installed.
+        # Without this, xdg-desktop-portal picks backends alphabetically and may
+        # choose gtk over hyprland, breaking screen capture in OBS and other apps.
+        # Hyprland sets XDG_CURRENT_DESKTOP=Hyprland, so the "Hyprland" block wins.
+        config = {
+          common = {
+            default = ["gtk"];
+          };
+          Hyprland = {
+            default = ["hyprland" "gtk"];
+            "org.freedesktop.impl.portal.ScreenCast" = ["hyprland"];
+            "org.freedesktop.impl.portal.Screenshot" = ["hyprland"];
+            "org.freedesktop.impl.portal.RemoteDesktop" = ["hyprland"];
+          };
+        };
       };
     };
   };
