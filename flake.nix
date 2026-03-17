@@ -14,7 +14,7 @@
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
     nixpkgs-electron-fix = {
-      url = "github:NixOS/nixpkgs/c51afdb93a3bab937293514fa2cf20f200dd399a";
+      url = "github:NixOS/nixpkgs/master";
       flake = false;
     };
     impermanence = {
