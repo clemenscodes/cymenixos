@@ -1709,11 +1709,11 @@
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1773845977,
-        "narHash": "sha256-zQVDU/2Z3AamoOSkAjhQooWA3u8QbaU7JrsDh1qWs3k=",
+        "lastModified": 1773847196,
+        "narHash": "sha256-I5NRed+h0yONQuthHIPuYoGFGnJQngdAbf3/IAC3qf8=",
         "owner": "clemenscodes",
         "repo": "Hyprland",
-        "rev": "52e2ad6107fb80deb4426cdc12f0ada314167501",
+        "rev": "fb83d532367078a3137f9e4236665f5f72065b5e",
         "type": "github"
       },
       "original": {
