@@ -185,6 +185,23 @@
         };
       };
     };
+    # Patched Hyprland fork with HDR screencopy color_info protocol (v4).
+    hyprland = {
+      url = "github:clemenscodes/Hyprland";
+    };
+    # Patched xdph fork that reads color_info and passes it to PipeWire.
+    # Sub-inputs follow hyprland's to keep the hyprwm ecosystem on a single
+    # consistent set of libraries.
+    xdg-desktop-portal-hyprland = {
+      url = "github:clemenscodes/xdg-desktop-portal-hyprland";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        hyprland-protocols.follows = "hyprland/hyprland-protocols";
+        hyprlang.follows = "hyprland/hyprlang";
+        hyprutils.follows = "hyprland/hyprutils";
+        hyprwayland-scanner.follows = "hyprland/hyprwayland-scanner";
+      };
+    };
   };
   outputs = {
     self,
@@ -193,7 +210,7 @@
   } @ inputs: let
     inherit (pkgs) lib;
     system = "x86_64-linux";
-    overlays = import ./overlays {inherit inputs pkgs lib;};
+    overlays = import ./overlays {inherit inputs pkgs lib system;};
     electronOverlay = final: prev: {
       inherit
         ((import inputs.nixpkgs-electron-fix {
