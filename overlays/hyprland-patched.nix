@@ -6,5 +6,5 @@
 }:
 final: prev: {
   hyprland = inputs.hyprland.packages.${system}.hyprland;
-  xdg-desktop-portal-hyprland = inputs.xdg-desktop-portal-hyprland.packages.${system}.xdg-desktop-portal-hyprland;
+  xdg-desktop-portal-hyprland = inputs.hyprland.packages.${system}.xdg-desktop-portal-hyprland;
 }
