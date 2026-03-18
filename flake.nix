@@ -185,13 +185,6 @@
         };
       };
     };
-    # Patched Hyprland fork with HDR screencopy color_info protocol (v4).
-    # xdg-desktop-portal-hyprland is taken from this flake's packages
-    # (inputs.xdph points to our patched fork) following the pattern
-    # documented in the xdph README: always consume xdph via the Hyprland flake.
-    hyprland = {
-      url = "github:clemenscodes/Hyprland";
-    };
   };
   outputs = {
     self,
