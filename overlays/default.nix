@@ -13,5 +13,5 @@
   # (reads color_info, forwards colorimetry to PipeWire).
   ((import ./hyprland-patched.nix) {inherit inputs system;})
   # PipeWire with SMPTE2084 PQ, HLG, and P3 primaries enum additions.
-  (import ./pipewire-hdr.nix)
+  # (import ./pipewire-hdr.nix)
 ]
