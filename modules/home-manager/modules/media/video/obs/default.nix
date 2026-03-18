@@ -92,9 +92,15 @@
               name = "VK Capture";
               source_uuid = "cyme0001-0001-0001-0001-000000000004";
               id = 1;
-              pos = {x = 0.0; y = 0.0;};
+              pos = {
+                x = 0.0;
+                y = 0.0;
+              };
               rot = 0.0;
-              scale = {x = 1.0; y = 1.0;};
+              scale = {
+                x = 1.0;
+                y = 1.0;
+              };
               align = 5;
               visible = true;
               locked = false;
@@ -105,7 +111,10 @@
               bounds_type = 2;
               bounds_align = 0;
               bounds_crop = false;
-              bounds = {x = obsCfg.profile.outputWidth * 1.0; y = obsCfg.profile.outputHeight * 1.0;};
+              bounds = {
+                x = obsCfg.profile.outputWidth * 1.0;
+                y = obsCfg.profile.outputHeight * 1.0;
+              };
               group_item_backup = false;
               scale_filter = "disable";
               blend_method = "default";
@@ -161,8 +170,20 @@
     ];
 
     quick_transitions = [
-      {name = "Fade"; duration = 300; hotkeys = []; id = 1; is_default = false;}
-      {name = "Cut"; duration = 0; hotkeys = []; id = 2; is_default = false;}
+      {
+        name = "Fade";
+        duration = 300;
+        hotkeys = [];
+        id = 1;
+        is_default = false;
+      }
+      {
+        name = "Cut";
+        duration = 0;
+        hotkeys = [];
+        id = 2;
+        is_default = false;
+      }
     ];
     transitions = [];
     saved_projectors = [];
@@ -297,8 +318,7 @@
   # directly so OBS always opens the right profile regardless of user.ini state.
   obsArgs =
     ["--profile" obsCfg.profile.name]
-    ++ lib.optionals obsCfg.scenes.enable ["--collection" obsCfg.scenes.name]
-    ++ lib.optional obsCfg.replayBuffer.enable "--startreplaybuffer";
+    ++ lib.optionals obsCfg.scenes.enable ["--collection" obsCfg.scenes.name];
 
   obs-launch = pkgs.writeShellApplication {
     name = "obs-launch";
@@ -342,7 +362,6 @@ in {
         video = {
           obs = {
             enable = lib.mkEnableOption "Enable OBS (open broadcast software)" // {default = false;};
-
             websocket = {
               port = lib.mkOption {
                 type = lib.types.port;
@@ -355,7 +374,6 @@ in {
                 description = "OBS WebSocket password. Use SOPS for secrets management.";
               };
             };
-
             profile = {
               name = lib.mkOption {
                 type = lib.types.str;
@@ -412,7 +430,6 @@ in {
                 description = "HDR nominal peak brightness in nits";
               };
             };
-
             audio = {
               encoder = lib.mkOption {
                 type = lib.types.enum [
@@ -444,7 +461,6 @@ in {
                 description = "Per-track bitrate in kbps (only applies to lossy encoders like AAC/Opus; ignored for PCM/FLAC)";
               };
             };
-
             stream = {
               encoder = lib.mkOption {
                 type = lib.types.enum [
@@ -468,7 +484,6 @@ in {
                 description = "Stream video bitrate in kbps (CBR).";
               };
             };
-
             output = {
               path = lib.mkOption {
                 type = lib.types.str;
@@ -507,7 +522,6 @@ in {
                 '';
               };
             };
-
             replayBuffer = {
               enable = lib.mkOption {
                 type = lib.types.bool;
@@ -520,7 +534,6 @@ in {
                 description = "Replay buffer duration in seconds";
               };
             };
-
             keybinds = {
               enable = lib.mkOption {
                 type = lib.types.bool;
@@ -528,7 +541,6 @@ in {
                 description = "Register Hyprland keybinds for OBS control";
               };
             };
-
             scenes = {
               enable = lib.mkOption {
                 type = lib.types.bool;
@@ -550,7 +562,6 @@ in {
       };
     };
   };
-
   config = lib.mkIf (cfg.enable && obsCfg.enable && isDesktop) {
     home = {
       persistence = lib.mkIf isPersisted {
@@ -558,7 +569,6 @@ in {
           directories = [".config/obs-studio"];
         };
       };
-
       packages = [
         obs-launch
         pkgs.gst_all_1.gstreamer
@@ -705,6 +715,5 @@ in {
       categories = ["AudioVideo" "Recorder"];
       startupNotify = true;
     };
-
   };
 }
