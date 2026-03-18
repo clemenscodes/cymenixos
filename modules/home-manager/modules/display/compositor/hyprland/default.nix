@@ -70,16 +70,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.hyprland.enable) {
-    # xdg-desktop-portal-hyprland is D-Bus activated (lazy) by default.
-    # OBS's linux-capture checks for the ScreenCast portal at startup; if the
-    # portal hasn't been activated yet, the check fails and the Screen Capture
-    # source type is never registered. Force it to start eagerly with the session.
-    systemd.user.services.xdg-desktop-portal-hyprland = {
-      Unit.After = ["hyprland-session.target"];
-      Unit.PartOf = ["hyprland-session.target"];
-      Install.WantedBy = ["hyprland-session.target"];
-    };
-
     home = {
       packages = [
         pkgs.brightnessctl
