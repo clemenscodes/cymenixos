@@ -2530,11 +2530,11 @@
     "nixpkgs-electron-fix": {
       "flake": false,
       "locked": {
-        "lastModified": 1773855604,
-        "narHash": "sha256-Z936UDOnGM6eEam1WFnBmEdn0Jc22IcZYqYXnohOGX4=",
+        "lastModified": 1773858199,
+        "narHash": "sha256-GTe8TAWnwt+O6fsLjzy7KLBczXz+e4yAVyl+3pRJ5dQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5db1ac51c404fa61bd579108a3ffa4d56628fa15",
+        "rev": "bb7d6e1997129070a24fa52f94be65f2616f05b1",
         "type": "github"
       },
       "original": {
@@ -3251,11 +3251,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773854278,
-        "narHash": "sha256-wlS9P3xMyN0Ay7UPBkV9PpU1GknrtpAfVsXCt1ieGVg=",
+        "lastModified": 1773858953,
+        "narHash": "sha256-8I/VcHcuAbEX4tDOMZv89RCDifZOGqn2HyOfgEHXDe0=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "db4039d18b2c83f893be64b84a4b19c03fa6f090",
+        "rev": "f01c1732a510f5832dea6fa401baff988205d38d",
         "type": "github"
       },
       "original": {
