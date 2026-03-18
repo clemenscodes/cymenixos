@@ -11,7 +11,7 @@
   inputs.lutris-overlay.overlays.lutris
   # HDR screencopy: patched Hyprland (wlr-screencopy v4 color_info) and xdph
   # (reads color_info, forwards colorimetry to PipeWire).
+  # PQ/HLG/P3 primaries are guarded by #ifdef in xdph; no pipewire patch needed
+  # since Hyprland screencopy output is always scRGB linear (ext_linear + bt2020).
   ((import ./hyprland-patched.nix) {inherit inputs system;})
-  # PipeWire with SMPTE2084 PQ, HLG, and P3 primaries enum additions.
-  # (import ./pipewire-hdr.nix)
 ]
