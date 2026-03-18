@@ -1,19 +1,20 @@
 --- a/spa/include/spa/param/video/color.h
 +++ b/spa/include/spa/param/video/color.h
-@@ -56,6 +56,12 @@ enum spa_video_transfer_function {
- 	SPA_VIDEO_TRANSFER_BT2020_12,	/**< Gamma 2.2 curve with a linear segment in the lower
+@@ -59,6 +59,8 @@ enum spa_video_transfer_function {
  					 *   range. Used for BT.2020 with 12 bits per
  					 *   component. \since 1.6. */
--	SPA_VIDEO_TRANSFER_ADOBERGB,	/**< Gamma 2.19921875. \since 1.8 */
-+	SPA_VIDEO_TRANSFER_ADOBERGB,	/**< Gamma 2.19921875. \since 1.8 */
+ 	SPA_VIDEO_TRANSFER_ADOBERGB,	/**< Gamma 2.19921875. \since 1.8 */
 +	SPA_VIDEO_TRANSFER_SMPTE2084_PQ,	/**< SMPTE ST 2084 Perceptual Quantizer (HDR10 PQ). */
 +	SPA_VIDEO_TRANSFER_HLG,		/**< Hybrid Log-Gamma (HLG, ARIB STD-B67). */
  };
 
  /**
-@@ -73,6 +79,10 @@ enum spa_video_color_primaries {
+@@ -75,6 +77,8 @@ enum spa_video_color_primaries {
+ 	SPA_VIDEO_COLOR_PRIMARIES_FILM,		/**< Generic film */
  	SPA_VIDEO_COLOR_PRIMARIES_BT2020,	/**< BT2020 primaries. \since 1.6. */
  	SPA_VIDEO_COLOR_PRIMARIES_ADOBERGB,	/**< Adobe RGB primaries. \since 1.8 */
 +	SPA_VIDEO_COLOR_PRIMARIES_DCI_P3,	/**< DCI-P3 primaries. */
 +	SPA_VIDEO_COLOR_PRIMARIES_DISPLAY_P3,	/**< Display P3 primaries. */
  };
+
+ /**
