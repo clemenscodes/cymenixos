@@ -1,0 +1,26 @@
+--- a/plugins/linux-pipewire/pipewire.c
++++ b/plugins/linux-pipewire/pipewire.c
+@@ -278,10 +278,10 @@
+ #define N_SUPPORTED_FORMATS_ASYNC (sizeof(supported_formats_async) / sizeof(supported_formats_async[0]))
+
+ static const uint32_t supported_formats_sync[] = {
+-	SPA_VIDEO_FORMAT_BGRA,       SPA_VIDEO_FORMAT_RGBA,       SPA_VIDEO_FORMAT_BGRx, SPA_VIDEO_FORMAT_RGBx,
+ #if PW_CHECK_VERSION(0, 3, 41)
+-	SPA_VIDEO_FORMAT_ABGR_210LE, SPA_VIDEO_FORMAT_xBGR_210LE,
++	SPA_VIDEO_FORMAT_xBGR_210LE, SPA_VIDEO_FORMAT_ABGR_210LE,
+ #endif
++	SPA_VIDEO_FORMAT_BGRA,       SPA_VIDEO_FORMAT_RGBA,       SPA_VIDEO_FORMAT_BGRx, SPA_VIDEO_FORMAT_RGBx,
+ };
+
+ #define N_SUPPORTED_FORMATS_SYNC (sizeof(supported_formats_sync) / sizeof(supported_formats_sync[0]))
+@@ -621,6 +621,10 @@
+ 		return VIDEO_CS_601;
+ 	case SPA_VIDEO_COLOR_MATRIX_BT709:
+ 		return VIDEO_CS_709;
++#ifdef SPA_VIDEO_COLOR_MATRIX_BT2020
++	case SPA_VIDEO_COLOR_MATRIX_BT2020:
++		return VIDEO_CS_2100_PQ;
++#endif
+ 	default:
+ 		return VIDEO_CS_DEFAULT;
+ 	}
