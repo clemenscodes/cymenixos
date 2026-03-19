@@ -38,7 +38,6 @@ in {
               mkhl.direnv
               kamadorueda.alejandra
               dioxuslabs.dioxus
-              anthropic.claude-code
               ms-playwright.playwright
               esbenp.prettier-vscode
               rust-lang.rust-analyzer
