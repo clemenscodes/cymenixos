@@ -2,6 +2,7 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  xz,
   kernel,
 }:
 stdenv.mkDerivation rec {
@@ -15,7 +16,7 @@ stdenv.mkDerivation rec {
     hash = "sha256-8dFfGaMkJfRdHU98P+qXcwb4lYh9fTtk6rFz5X7xjOg=";
   };
 
-  nativeBuildInputs = kernel.moduleBuildDependencies;
+  nativeBuildInputs = kernel.moduleBuildDependencies ++ [xz];
 
   makeFlags = [
     "KBUILD_DIR=${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
@@ -25,6 +26,7 @@ stdenv.mkDerivation rec {
     runHook preInstall
     install -D build/sc0710.ko \
       $out/lib/modules/${kernel.modDirVersion}/kernel/drivers/media/pci/sc0710/sc0710.ko
+    xz $out/lib/modules/${kernel.modDirVersion}/kernel/drivers/media/pci/sc0710/sc0710.ko
     runHook postInstall
   '';
 
