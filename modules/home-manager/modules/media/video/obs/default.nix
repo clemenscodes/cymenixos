@@ -643,8 +643,9 @@ in {
         plugins = [
           # === Capture ===
           pkgs.obs-studio-plugins.obs-vkcapture
-          # wlrobs removed: relied on wlr-screencopy-unstable-v1, dropped in Hyprland 0.45+
-          # Use the built-in "Screen Capture (PipeWire/Portal)" source instead
+          # wlrobs uses zwlr_screencopy_manager_v1 directly (bypasses xdph portal)
+          # The portal path is stuck at BGRA 8-bit; direct screencopy may give proper HDR format
+          pkgs.obs-studio-plugins.wlrobs
           pkgs.obs-studio-plugins.looking-glass-obs
           pkgs.obs-studio-plugins.droidcam-obs
 
