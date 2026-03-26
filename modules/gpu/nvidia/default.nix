@@ -90,7 +90,7 @@ in {
           enable = false;
           finegrained = false;
         };
-        # package = config.boot.kernelPackages.nvidiaPackages.beta;
+        package = config.boot.kernelPackages.nvidiaPackages.beta;
         open = true;
         nvidiaSettings = true;
         nvidiaPersistenced = false;
