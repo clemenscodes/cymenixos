@@ -26,7 +26,7 @@ stdenv.mkDerivation rec {
     runHook preInstall
     install -D build/sc0710.ko \
       $out/lib/modules/${kernel.modDirVersion}/kernel/drivers/media/pci/sc0710/sc0710.ko
-    xz --check=crc32 $out/lib/modules/${kernel.modDirVersion}/kernel/drivers/media/pci/sc0710/sc0710.ko
+    xz --check=crc32 --lzma2=dict=1MiB $out/lib/modules/${kernel.modDirVersion}/kernel/drivers/media/pci/sc0710/sc0710.ko
     runHook postInstall
   '';
 
