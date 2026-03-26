@@ -1,5 +1,4 @@
 {
-  lib,
   stdenv,
   fetchurl,
   p7zip,
@@ -23,11 +22,4 @@ stdenv.mkDerivation {
     install -D fw/SC0710.FWI.HEX $out/lib/firmware/sc0710/SC0710.FWI.HEX
     runHook postInstall
   '';
-
-  meta = {
-    description = "ECP5 FPGA firmware for Elgato 4K Pro (1cfa:0012) capture card";
-    homepage = "https://github.com/Nakildias/sc0710";
-    license = lib.licenses.unfree;
-    platforms = lib.platforms.linux;
-  };
 }
