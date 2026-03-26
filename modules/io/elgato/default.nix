@@ -25,11 +25,6 @@ in
           enable = lib.mkEnableOption "Enable YUAN/Elgato sc0710 PCIe capture card driver (12ab:0710)" // {
             default = false;
           };
-          firmware =
-            lib.mkEnableOption "Install ECP5 FPGA firmware (required for Elgato 4K Pro / subsystem 1cfa:0012)"
-            // {
-              default = false;
-            };
         };
       };
     };
@@ -40,7 +35,7 @@ in
       kernelModules = [ "sc0710" ];
     };
     hardware = {
-      firmware = lib.mkIf cfg.elgato.firmware [ sc0710-firmware ];
+      firmware = [ sc0710-firmware ];
     };
     environment = {
       systemPackages = [
