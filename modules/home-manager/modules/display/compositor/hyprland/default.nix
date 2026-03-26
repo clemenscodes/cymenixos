@@ -63,6 +63,12 @@ in {
         compositor = {
           hyprland = {
             enable = lib.mkEnableOption "Enable anime titties" // {default = false;};
+            monitors = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              description = "Extra monitor rules prepended before the catch-all. Each entry is a raw Hyprland monitor line (without the 'monitor = ' prefix).";
+              example = ["HDMI-A-2, 3840x2160@60, auto, 1, mirror, DP-3"];
+            };
           };
         };
       };
@@ -374,7 +380,7 @@ in {
               ''
               else "";
           in ''
-            monitor = , highrr, auto, 1
+            ${lib.concatMapStrings (m: "monitor = ${m}\n") cfg.hyprland.monitors}monitor = , highrr, auto, 1
 
             env = XCURSOR_SIZE,16
             env = XDG_SESSION_TYPE,wayland
