@@ -232,7 +232,6 @@ in {
                 sponsorblock
                 df-youtube
                 untrap-for-youtube
-                zotero-connector
                 vimium
               ];
             };
