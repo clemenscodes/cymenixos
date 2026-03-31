@@ -16,35 +16,7 @@
     inherit system;
     config = {
       cudaSupport = true;
-      allowUnfreePredicate = pkg:
-        builtins.elem (lib.getName pkg) [
-          "nvidia-x11"
-          "nvidia-settings"
-          "nvidia-persistenced"
-          "cuda-merged"
-          "cuda_cuobjdump"
-          "cuda_gdb"
-          "cuda_nvcc"
-          "cuda_nvdisasm"
-          "cuda_nvprune"
-          "cuda_cccl"
-          "cuda_cudart"
-          "cuda_cupti"
-          "cuda_cuxxfilt"
-          "cuda_nvml_dev"
-          "cuda_nvrtc"
-          "cuda_nvtx"
-          "cuda_profiler_api"
-          "cuda_sanitizer_api"
-          "libcublas"
-          "libcufft"
-          "libcurand"
-          "libcusolver"
-          "libnvjitlink"
-          "libcusparse"
-          "libnpp"
-          "cudnn"
-        ];
+      allowUnfree = true;
     };
   };
 
@@ -76,8 +48,12 @@ in {
   config = lib.mkIf (cfg.enable && cfg.vibevoice.enable) {
     environment = {
       systemPackages = [vibevoiceEnv];
-      persistence = {
-        "${persistPath}" = lib.mkIf (config.modules.boot.enable) {
+      # Only persist vibevoice's own subdirectory when ollama is not enabled.
+      # When ollama is enabled it already persists the parent /var/lib/ai,
+      # which covers /var/lib/ai/vibevoice — adding a nested bind-mount on
+      # top of that would be redundant and can confuse impermanence.
+      persistence = lib.mkIf (config.modules.boot.enable && !cfg.ollama.enable) {
+        "${persistPath}" = {
           directories = ["/var/lib/ai/vibevoice"];
         };
       };
