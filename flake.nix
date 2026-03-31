@@ -185,7 +185,7 @@
         };
       };
     };
-    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.url = "github:UjinT34/Hyprland/refactor-8-cm-automation";
     hyprland-plugins = {
       url = "github:hyprwm/hyprland-plugins";
       inputs.hyprland.follows = "hyprland";
