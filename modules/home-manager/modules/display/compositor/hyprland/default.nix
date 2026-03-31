@@ -380,13 +380,6 @@ in
                   ''
                 else
                   "";
-              udiskie =
-                if useUdiskie then
-                  ''
-                    exec-once = udiskie &
-                  ''
-                else
-                  "";
               yubikey =
                 if useYubikey then
                   ''
@@ -432,7 +425,6 @@ in
               ${swaync}
               ${swayidle}
               ${swayaudioidle}
-              ${udiskie}
               ${ssh}
               ${firefox}
               ${davinci}
