@@ -6,7 +6,7 @@
           settings = {
             wallet = lib.mkOption {
               type = lib.types.str;
-              default = "49j7AMxXgkBVioejSyBkxBXQSfDDVB9U71vqimeaLrDRBeaK5jc3NH5RNBHTgKSofeGWuCqRRUZTDbRcctVswNXEKSwszEN";
+              default = "YOUR_WALLET_ADDRESS_HERE";
               description = "Monero wallet address for mining rewards";
             };
             host = lib.mkOption {

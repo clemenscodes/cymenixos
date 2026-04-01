@@ -61,6 +61,15 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.monero.enable) {
+    assertions = [
+      {
+        assertion = cfg.monero.settings.wallet != "YOUR_WALLET_ADDRESS_HERE";
+        message = ''
+          modules.crypto.monero.settings.wallet is not set.
+          Run `generate-monero-wallet` to create one, then set the address in your config.
+        '';
+      }
+    ];
     environment = {
       systemPackages = [
         pkgs.feather      # recommended Monero wallet GUI
