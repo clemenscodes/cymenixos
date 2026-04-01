@@ -4,8 +4,23 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.crypto;
+  user = config.modules.users.name;
 in {
   config = lib.mkIf (cfg.enable && cfg.monero.enable) {
+    environment = {
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = [
+            "/var/lib/monero"
+          ];
+          users.${user} = {
+            directories = [
+              "Monero"
+            ];
+          };
+        };
+      };
+    };
     systemd = {
       services = with cfg.monero.settings; {
         "${monero}" = let
