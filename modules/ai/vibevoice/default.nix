@@ -94,7 +94,7 @@ in {
           serviceConfig = {
             User = "vibevoice";
             Group = "vibevoice";
-            ExecStart = "${vibevoiceEnv}/bin/python -m vibevoice.server --model ${cfg.vibevoice.model} --port ${toString cfg.vibevoice.port}";
+            ExecStart = "${vibevoiceEnv}/bin/python ${vibevoicePkg}/${cudaPkgs.python3.sitePackages}/demo/gradio_demo.py --model_path ${cfg.vibevoice.model} --port ${toString cfg.vibevoice.port}";
             Restart = "on-failure";
             RestartSec = 10;
             StateDirectory = lib.mkForce [];
