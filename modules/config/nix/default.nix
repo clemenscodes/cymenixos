@@ -51,9 +51,11 @@ in {
         trusted-users = ["@wheel"];
         substituters = lib.mkIf (!config.modules.airgap.enable) [
           "https://nix-community.cachix.org"
+          "https://cache.nixos-cuda.org"
         ];
         trusted-public-keys = lib.mkIf (!config.modules.airgap.enable) [
           "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+          "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
         ];
         experimental-features = ["nix-command" "flakes" "fetch-closure"];
         auto-optimise-store = false;
