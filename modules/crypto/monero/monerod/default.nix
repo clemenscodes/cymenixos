@@ -22,6 +22,11 @@ in {
       };
     };
     systemd = {
+      tmpfiles = {
+        rules = with cfg.monero.settings; [
+          "d ${config.modules.boot.impermanence.persistPath}/var/lib/${monero} 0755 ${monero} ${monero} -"
+        ];
+      };
       services = with cfg.monero.settings; {
         "${monero}" = let
           logsDirectory = "/var/log/${monero}";
@@ -52,6 +57,8 @@ in {
           serviceConfig = {
             User = "${monero}";
             Group = "${monero}";
+            StateDirectory = "${monero}";
+            StateDirectoryMode = "0755";
             LogsDirectory = "${monero}";
             LogsDirectoryMode = "0710";
             Restart = "always";
