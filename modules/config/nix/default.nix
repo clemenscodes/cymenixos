@@ -52,10 +52,12 @@ in {
         substituters = lib.mkIf (!config.modules.airgap.enable) [
           "https://nix-community.cachix.org"
           "https://cache.nixos-cuda.org"
+          "https://hyprland.cachix.org"
         ];
         trusted-public-keys = lib.mkIf (!config.modules.airgap.enable) [
           "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
           "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+          "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
         ];
         experimental-features = ["nix-command" "flakes" "fetch-closure"];
         auto-optimise-store = false;
