@@ -178,18 +178,21 @@ let
     HTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
   '';
 
-  # CLI wrapper: vibevoice "text" [--voice /path.wav] [-o out.wav]
+  # CLI wrapper: vibevoice "text" [--voice /path.wav] [-o out.wav] [-p]
   vibevoiceCli = pkgs.writeShellScriptBin "vibevoice" ''
     set -euo pipefail
     PORT="''${VIBEVOICE_PORT:-8020}"
     BASE="http://127.0.0.1:$PORT"
     VOICE=""
     OUTPUT="-"
+    PLAY=0
 
     usage() {
-      echo "Usage: vibevoice \"text to speak\" [--voice /path/to/ref.wav] [-o output.wav]"
+      echo "Usage: vibevoice \"text to speak\" [--voice /path/to/ref.wav] [-o output.wav] [-p]"
       echo "       vibevoice voices          # list available voices"
       echo "       vibevoice health          # check if server is ready"
+      echo ""
+      echo "  -p, --play    play audio immediately via pw-play"
       echo ""
       echo "The service must be running (systemctl status vibevoice)."
       echo "Drop .wav files in /var/lib/ai/vibevoice/voices/ to add voices."
@@ -210,6 +213,7 @@ let
       case "$1" in
         --voice) VOICE="$2"; shift 2 ;;
         -o|--output) OUTPUT="$2"; shift 2 ;;
+        -p|--play) PLAY=1; shift ;;
         *) echo "Unknown option: $1"; usage ;;
       esac
     done
@@ -217,7 +221,11 @@ let
     PAYLOAD=$(${pkgs.jq}/bin/jq -n --arg t "$TEXT" --arg v "$VOICE" \
       'if $v == "" then {text:$t} else {text:$t,voice:$v} end')
 
-    if [ "$OUTPUT" = "-" ]; then
+    if [ "$PLAY" = "1" ]; then
+      ${pkgs.curl}/bin/curl -sf -X POST "$BASE/generate" \
+        -H "Content-Type: application/json" -d "$PAYLOAD" \
+        | ${pkgs.pipewire}/bin/pw-play -
+    elif [ "$OUTPUT" = "-" ]; then
       ${pkgs.curl}/bin/curl -sf -X POST "$BASE/generate" \
         -H "Content-Type: application/json" -d "$PAYLOAD"
     else
