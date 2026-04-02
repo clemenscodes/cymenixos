@@ -42,6 +42,65 @@
     bitrate = obsCfg.stream.bitrate;
   });
 
+  # PipeWire audio input source with filters (for scene sources like SM7B)
+  mkPipeWireSource = name: uuid: targetName: filters: {
+    prev_ver = 536936448;
+    inherit name uuid filters;
+    id = "pipewire_audio_input_capture";
+    versioned_id = "pipewire_audio_input_capture";
+    settings = {TargetName = targetName; TargetId = 0;};
+    mixers = 255;
+    sync = 0;
+    flags = 0;
+    volume = 1.0;
+    balance = 0.5;
+    enabled = true;
+    muted = false;
+    push-to-mute = false;
+    push-to-mute-delay = 0;
+    push-to-talk = false;
+    push-to-talk-delay = 0;
+    hotkeys = {
+      "libobs.mute" = [];
+      "libobs.unmute" = [];
+      "libobs.push-to-mute" = [];
+      "libobs.push-to-talk" = [];
+    };
+    deinterlace_mode = 0;
+    deinterlace_field_order = 0;
+    monitoring_type = 0;
+    private_settings = {};
+  };
+
+  mkFilter = name: uuid: id: settings: {
+    prev_ver = 536936448;
+    inherit name uuid id settings;
+    versioned_id = id;
+    mixers = 255;
+    sync = 0;
+    flags = 0;
+    volume = 1.0;
+    balance = 0.5;
+    enabled = true;
+    muted = false;
+    push-to-mute = false;
+    push-to-mute-delay = 0;
+    push-to-talk = false;
+    push-to-talk-delay = 0;
+    hotkeys = {};
+    deinterlace_mode = 0;
+    deinterlace_field_order = 0;
+    monitoring_type = 0;
+    private_settings = {};
+  };
+
+  sm7bFilters = [
+    (mkFilter "RNNoise"    "cyme0001-0001-0001-0001-000000000010" "noise_suppress_filter_v2" {})
+    (mkFilter "Speex"      "cyme0001-0001-0001-0001-000000000011" "noise_suppress_filter_v2" {suppress_level = -15; method = "speex";})
+    (mkFilter "Kompressor" "cyme0001-0001-0001-0001-000000000012" "compressor_filter"        {ratio = 4.0;})
+    (mkFilter "Limiter"    "cyme0001-0001-0001-0001-000000000013" "limiter_filter"           {threshold = -2.0;})
+  ];
+
   # Minimal audio source entry (reused for desktop + mic global slots)
   mkAudioSource = name: uuid: pluginId: deviceId: {
     prev_ver = 536870916;
@@ -147,6 +206,8 @@
         monitoring_type = 0;
         private_settings = {};
       }
+      # Source: Shure SM7B mic via PipeWire filter-chain with broadcast processing
+      (mkPipeWireSource "Shure SM7B" "cyme0001-0001-0001-0001-000000000009" obsCfg.audio.mic sm7bFilters)
       # Source: VK Capture (vkcapture-source, cursor disabled)
       {
         prev_ver = 536870916;
