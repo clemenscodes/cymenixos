@@ -14,6 +14,11 @@
               default = "miner";
               description = "Wallet file/folder name under ~/Monero/wallets/";
             };
+            guiRestoreHeight = lib.mkOption {
+              type = lib.types.int;
+              default = 0;
+              description = "Block height monero-gui uses if the wallet cache is missing. Set to your wallet's creation height to avoid scanning from genesis.";
+            };
             host = lib.mkOption {
               type = lib.types.str;
               default = "127.0.0.1";

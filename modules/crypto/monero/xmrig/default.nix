@@ -14,6 +14,7 @@ in {
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = [
+            "/var/lib/${cfg.monero.settings.xmrig}"
             "/var/log/${cfg.monero.settings.xmrig}"
           ];
         };
@@ -22,6 +23,7 @@ in {
     systemd = with cfg.monero.settings; {
       tmpfiles = {
         rules = [
+          "d ${config.modules.boot.impermanence.persistPath}/var/lib/${xmrig} 0750 ${xmrig} ${xmrig} -"
           "d ${config.modules.boot.impermanence.persistPath}/var/log/${xmrig} 0750 ${xmrig} ${xmrig} -"
         ];
       };

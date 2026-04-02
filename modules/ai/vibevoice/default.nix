@@ -288,9 +288,10 @@ in
       tmpfiles = {
         rules = [
           "d /var/lib/ai 0755 root root -"
-          "d /var/lib/ai/vibevoice 0750 vibevoice vibevoice -"
-          "d /var/lib/ai/vibevoice/cache 0750 vibevoice vibevoice -"
-          "d /var/lib/ai/vibevoice/voices 0755 vibevoice vibevoice -"
+          "d ${persistPath}/var/lib/ai 0755 root root -"
+          "d ${persistPath}/var/lib/ai/vibevoice 0750 vibevoice vibevoice -"
+          "d ${persistPath}/var/lib/ai/vibevoice/cache 0750 vibevoice vibevoice -"
+          "d ${persistPath}/var/lib/ai/vibevoice/voices 0755 vibevoice vibevoice -"
         ];
       };
       services = {

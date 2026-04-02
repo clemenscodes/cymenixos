@@ -77,7 +77,7 @@ in {
         receiveShowAdvanced=false
         remoteNodeAddress=
         remoteNodesSerialized="{\"selected\":0,\"nodes\":[{\"address\":\"localhost:${builtins.toString rpcPort}\",\"username\":\"\",\"password\":\"\",\"trusted\":true}]}"
-        restore_height=0
+        restore_height=${builtins.toString guiRestoreHeight}
         segregatePreForkOutputs=true
         segregationHeight=0
         transferShowAdvanced=false
@@ -88,7 +88,9 @@ in {
     in {
       home.activation.moneroGuiConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
         mkdir -p "${homeDir}/.config/monero-project"
-        cp --no-preserve=mode ${guiConfig} "${homeDir}/.config/monero-project/monero-core.conf"
+        if [ ! -f "${homeDir}/.config/monero-project/monero-core.conf" ]; then
+          cp --no-preserve=mode ${guiConfig} "${homeDir}/.config/monero-project/monero-core.conf"
+        fi
       '';
     };
     systemd = {

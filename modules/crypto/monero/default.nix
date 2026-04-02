@@ -43,6 +43,7 @@
     description = "${user} daemon user";
     createHome = true;
     home = "/var/lib/${user}";
+    homeMode = "0750";
   };
   inherit (config.modules.users) user;
 in {
