@@ -48,7 +48,10 @@ in {
       };
     };
 
-    # WirePlumber rule: configure Scarlett Input 1 (SM7B) as mono, 48kHz, 32-bit
+    # WirePlumber rule: configure Scarlett Input 1 (SM7B) sample format and rate.
+    # Do NOT set audio.channels/audio.position/api.alsa.period-size here — those
+    # force PipeWire to reconfigure ALSA node ports mid-init and cause ENOSPC.
+    # Channel conversion (stereo→mono) is handled by the filter-chain below.
     services.pipewire.wireplumber.extraConfig."51-scarlett-sm7b" = {
       "monitor.alsa.rules" = [
         {
@@ -61,9 +64,6 @@ in {
             "update-props" = {
               "audio.format" = "S32LE";
               "audio.rate" = 48000;
-              "audio.channels" = 1;
-              "audio.position" = ["MONO"];
-              "api.alsa.period-size" = 512;
               "resample.quality" = 10;
               "node.description" = "Scarlett 2i2 Input 1 (SM7B)";
             };
