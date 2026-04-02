@@ -15,24 +15,38 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.scarlett.enable) {
-    # Systemd service: set Scarlett hardware controls at boot (Air on, 48V off)
+    # Udev rule: trigger scarlett-init whenever a Focusrite device appears (boot + hotplug)
+    # Vendor 1235 = Focusrite. Matching on SUBSYSTEM=="sound" ensures ALSA is already initialised.
+    services.udev.extraRules = ''
+      ACTION=="add", SUBSYSTEM=="sound", ATTRS{idVendor}=="1235", TAG+="systemd", ENV{SYSTEMD_WANTS}+="scarlett-init.service"
+    '';
+
+    # Systemd service: set Scarlett hardware controls (Air on, 48V off)
+    # Triggered by udev above rather than at boot so the card is guaranteed to exist.
     systemd.services.scarlett-init = {
       description = "Initialize Focusrite Scarlett 2i2 ALSA controls";
-      wantedBy = ["multi-user.target"];
-      after = ["sound.target"];
       path = [pkgs.alsa-utils];
       serviceConfig = {
         Type = "oneshot";
-        RemainAfterExit = true;
+        RemainAfterExit = false;
+        # Brief delay: udev fires on the first sound subsystem event for the device,
+        # but ALSA mixer controls may not be registered yet at that exact instant.
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
         ExecStart = "${pkgs.writeShellScript "scarlett-init" ''
           card=$(aplay -l 2>/dev/null | grep -i scarlett | head -1 | awk '{gsub(":", "", $2); print $2}')
           if [ -z "$card" ]; then
-            echo "Scarlett card not found, skipping"
-            exit 0
+            echo "scarlett-init: card not found" >&2
+            exit 1
           fi
-          amixer -c "$card" sset "Input 1 Air" on 2>/dev/null || true
-          amixer -c "$card" sset "Input 1 Phantom Power" off 2>/dev/null || true
+          echo "scarlett-init: using card $card"
+          # Air mode: 'Presence' enables the high-frequency boost for dynamic mics like SM7B
+          amixer -c "$card" cset name='Line In 1 Air Capture Enum' 'Presence'
+          # 48V phantom power: off (SM7B is dynamic — phantom power is not needed and may cause harm)
+          amixer -c "$card" cset name='Line In 1-2 Phantom Power Capture Switch' off
         ''}";
+        Restart = "on-failure";
+        RestartSec = 3;
+        StartLimitBurst = 5;
       };
     };
 
@@ -76,7 +90,7 @@ in {
                 {
                   type = "ladspa";
                   name = "rnnoise";
-                  plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa";
+                  plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
                   label = "noise_suppressor_mono";
                   control = {
                     "VAD Threshold (%)" = 50;
