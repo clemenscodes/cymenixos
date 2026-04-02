@@ -82,7 +82,7 @@ in
     home = {
       packages = [
         pkgs.brightnessctl
-        pkgs.swww
+        pkgs.awww
         pkgs.wl-clipboard
         pkgs.cliphist
         (lib.mkIf isLaptop (import ./lidhandle { inherit inputs pkgs lib; }))
@@ -408,7 +408,7 @@ in
               exec-once = wl-paste --type text --watch cliphist store
               exec-once = wl-paste --type image --watch cliphist store
               exec-once = polkitagent
-              exec-once = ${pkgs.swww}/bin/swww-daemon
+              exec-once = ${pkgs.awww}/bin/awww-daemon
               exec-once = wallpaper
 
               windowrule = float on, match:class ^(org.kde.polkit-kde-authentication-agent-1)$
