@@ -29,7 +29,12 @@
 
   recordEncoderFile = pkgs.writeText "obs-record-encoder.json" (builtins.toJSON {
     rate_control = "CQP";
+    preset = obsCfg.output.preset;
+    multipass = obsCfg.output.multipass;
     cqp = obsCfg.output.cqp;
+    lookahead = obsCfg.output.lookahead;
+    adaptive_quantization = obsCfg.output.adaptiveQuantization;
+    bf = obsCfg.output.bFrames;
   });
 
   streamEncoderFile = pkgs.writeText "obs-stream-encoder.json" (builtins.toJSON {
@@ -520,6 +525,39 @@ in {
                   CQP quality level for NVENC recording (0 = best, 51 = worst).
                   20 is visually lossless for AV1/HEVC at 4K. Lower = larger files.
                 '';
+              };
+              preset = lib.mkOption {
+                type = lib.types.enum ["p1" "p2" "p3" "p4" "p5" "p6" "p7"];
+                default = "p4";
+                description = ''
+                  NVENC encoder preset (p1 = fastest/lowest quality, p7 = slowest/best quality).
+                  p2 = low-latency, p4 = balanced, p7 = highest quality.
+                '';
+              };
+              multipass = lib.mkOption {
+                type = lib.types.enum ["disabled" "qres" "fullres"];
+                default = "fullres";
+                description = ''
+                  NVENC multipass encoding mode.
+                  fullres = best quality (two passes at full resolution).
+                  qres    = faster (first pass at quarter resolution).
+                  disabled = single pass.
+                '';
+              };
+              lookahead = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Enable NVENC lookahead for better rate control.";
+              };
+              adaptiveQuantization = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Enable NVENC adaptive quantization (improves perceptual quality).";
+              };
+              bFrames = lib.mkOption {
+                type = lib.types.ints.between 0 4;
+                default = 0;
+                description = "Number of B-frames. 0 disables B-frames (required for some encoders like AV1).";
               };
             };
             replayBuffer = {
