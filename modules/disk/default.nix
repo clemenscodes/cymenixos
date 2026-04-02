@@ -10,7 +10,10 @@
   inherit (cfg.disk.luks) slot keySize saltLength iterations cipher hash keyFile;
   defaultLuksFormatArgs = ["--cipher=${cipher}" "--hash=${hash}" "--key-size=${builtins.toString keySize}"];
 in {
-  imports = [inputs.disko.nixosModules.default];
+  imports = [
+    inputs.disko.nixosModules.default
+    (import ./raid.nix {inherit inputs lib;})
+  ];
   options = {
     modules = {
       disk = {
