@@ -14,6 +14,7 @@ in {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = [
             "/var/lib/monero"
+            "/var/log/monero"
           ];
           users.${user} = {
             directories = [
@@ -94,6 +95,7 @@ in {
       tmpfiles = {
         rules = with cfg.monero.settings; [
           "d ${config.modules.boot.impermanence.persistPath}/var/lib/${monero} 0755 ${monero} ${monero} -"
+          "d ${config.modules.boot.impermanence.persistPath}/var/log/${monero} 0755 ${monero} ${monero} -"
         ];
       };
       services = with cfg.monero.settings; {

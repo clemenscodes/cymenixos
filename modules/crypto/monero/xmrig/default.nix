@@ -10,8 +10,22 @@
     else "";
 in {
   config = lib.mkIf (cfg.enable && cfg.monero.enable) {
-    systemd = {
-      services = with cfg.monero.settings; {
+    environment = {
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = [
+            "/var/log/${cfg.monero.settings.xmrig}"
+          ];
+        };
+      };
+    };
+    systemd = with cfg.monero.settings; {
+      tmpfiles = {
+        rules = [
+          "d ${config.modules.boot.impermanence.persistPath}/var/log/${xmrig} 0755 ${xmrig} ${xmrig} -"
+        ];
+      };
+      services = {
         "${xmrig}" = let
           dependencies = ["network-online.target" "systemd-modules-load.service" "${p2pool}.service" "${monero}.service"];
         in {
@@ -25,11 +39,11 @@ in {
             AmbientCapabilities = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
             CapabilityBoundingSet = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
             LogsDirectory = "${xmrig}";
-            LogsDirectoryMode = "0710";
+            LogsDirectoryMode = "0755";
             Restart = "always";
             RestartSec = "30";
             Nice = "-10";
-            ExecStart = "${pkgs.xmrig}/bin/xmrig -o ${host}:${builtins.toString p2poolStratumPort} --coin monero -u ${wallet} --http-host ${host} --http-port ${builtins.toString p2poolStratumApiPort} --randomx-1gb-pages -k --api-worker-id ${xmrig}${threadFlag}";
+            ExecStart = "${pkgs.xmrig}/bin/xmrig -o ${host}:${builtins.toString p2poolStratumPort} --coin monero -u ${wallet} --http-host ${host} --http-port ${builtins.toString p2poolStratumApiPort} --randomx-1gb-pages -k --api-worker-id ${xmrig} --log-file /var/log/${xmrig}/${xmrig}.log${threadFlag}";
           };
         };
       };
