@@ -2,34 +2,33 @@
   inputs,
   lib,
   ...
-}:
-{ config, ... }:
-let
+}: {config, ...}: let
   cfg = config.modules.disk.raid;
-  diskEntries = lib.listToAttrs (
-    map (dev: {
-      name = builtins.baseNameOf dev;
-      value = {
-        type = "disk";
-        device = dev;
-        content = {
-          type = "gpt";
-          partitions = {
-            raid = {
-              size = "100%";
-              content = {
-                type = "mdraid";
-                name = cfg.name;
-              };
+  raidModule =
+    if builtins.elem cfg.level [4 5 6]
+    then "raid456"
+    else "raid${builtins.toString cfg.level}";
+  diskEntries = lib.listToAttrs (map (dev: {
+    name = builtins.baseNameOf dev;
+    value = {
+      type = "disk";
+      device = dev;
+      content = {
+        type = "gpt";
+        partitions = {
+          raid = {
+            size = "100%";
+            content = {
+              type = "mdraid";
+              name = cfg.name;
             };
           };
         };
       };
-    }) cfg.devices
-  );
-in
-{
-  imports = [ inputs.disko.nixosModules.default ];
+    };
+  }) cfg.devices);
+in {
+  imports = [inputs.disko.nixosModules.default];
   options = {
     modules = {
       disk = {
@@ -38,17 +37,12 @@ in
           name = lib.mkOption {
             type = lib.types.str;
             default = "storage";
-            description = "Name of the mdadm array (used as /dev/md/<name>)";
+            description = "Name of the mdadm array (used as /dev/md/<name> and btrfs label)";
           };
           devices = lib.mkOption {
             type = lib.types.listOf lib.types.str;
-            description = "Block devices to include in the array (e.g. [\"/dev/sda\" \"/dev/sdb\"])";
-            example = [
-              "/dev/sda"
-              "/dev/sdb"
-              "/dev/sdc"
-              "/dev/sdd"
-            ];
+            description = "Block devices to include in the array";
+            example = ["/dev/sda" "/dev/sdb" "/dev/sdc" "/dev/sdd"];
           };
           level = lib.mkOption {
             type = lib.types.int;
@@ -62,18 +56,17 @@ in
           };
           mountOptions = lib.mkOption {
             type = lib.types.listOf lib.types.str;
-            default = [
-              "compress=zstd"
-              "noatime"
-              "defaults"
-            ];
-            description = "btrfs mount options";
+            default = ["compress=zstd" "noatime" "nofail" "x-systemd.device-timeout=10s"];
+            description = "btrfs mount options — nofail ensures a degraded/missing array never prevents boot";
           };
         };
       };
     };
   };
   config = lib.mkIf (config.modules.enable && cfg.enable) {
+    # Disko owns the full pipeline: partition → mdadm → btrfs format → fileSystems entry.
+    # The generated fileSystems entry uses /dev/md/<name>, which works once
+    # boot.swraid assembles the array under that name on every boot.
     disko.devices = {
       disk = diskEntries;
       mdadm = {
@@ -85,36 +78,25 @@ in
             format = "btrfs";
             mountpoint = cfg.mountpoint;
             mountOptions = cfg.mountOptions;
-            extraArgs = [
-              "-L"
-              cfg.name
-              "-f"
-            ];
+            extraArgs = ["-L" cfg.name "-f"];
           };
         };
       };
     };
+
+    systemd.tmpfiles.rules = ["d ${cfg.mountpoint} 0755 root root"];
+
     boot = {
       swraid = {
         enable = true;
-        mdadmConf = "MAILADDR root";
+        # HOMEHOST any: assemble arrays regardless of hostname match.
+        # This ensures /dev/md/<name> is available before the filesystem mount.
+        mdadmConf = ''
+          HOMEHOST any
+          MAILADDR root
+        '';
       };
-      kernelModules = [
-        (
-          if
-            builtins.elem cfg.level [
-              4
-              5
-              6
-            ]
-          then
-            "raid456"
-          else
-            "raid${builtins.toString cfg.level}"
-        )
-        "md_mod"
-        "btrfs"
-      ];
+      kernelModules = [raidModule "md_mod" "btrfs"];
     };
   };
 }
