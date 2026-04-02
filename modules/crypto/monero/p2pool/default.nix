@@ -44,7 +44,7 @@ in {
             StandardOutput = "journal";
             StandardError = "journal";
             TimeoutStopSec = "60";
-            ExecStart = "${pkgs.p2pool}/bin/p2pool --wallet ${wallet} --host ${host} --zmq-port ${builtins.toString zmqPort} --rpc-port ${builtins.toString rpcPort} --p2p ${host}:${builtins.toString p2poolMiniPort} --stratum ${host}:${builtins.toString p2poolStratumPort} --loglevel ${builtins.toString loglevel} --data-api ${stateDirectory} --stratum-api${miniFlag}";
+            ExecStart = "${pkgs.p2pool}/bin/p2pool --wallet ${wallet} --host ${host} --zmq-port ${builtins.toString zmqPort} --rpc-port ${builtins.toString rpcPort} --p2p 0.0.0.0:${builtins.toString p2poolMiniPort} --stratum ${host}:${builtins.toString p2poolStratumPort} --loglevel ${builtins.toString loglevel} --data-api ${stateDirectory} --stratum-api${miniFlag}";
           };
         };
       };
