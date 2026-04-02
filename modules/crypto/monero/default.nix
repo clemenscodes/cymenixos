@@ -44,6 +44,7 @@
     createHome = true;
     home = "/var/lib/${user}";
   };
+  inherit (config.modules.users) user;
 in {
   imports = [
     (import ./monerod {inherit inputs pkgs lib;})
