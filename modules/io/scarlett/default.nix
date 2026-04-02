@@ -48,33 +48,11 @@ in {
       };
     };
 
-    # WirePlumber rule: configure Scarlett Input 1 (SM7B) sample format and rate.
-    # Do NOT set audio.channels/audio.position/api.alsa.period-size here — those
-    # force PipeWire to reconfigure ALSA node ports mid-init and cause ENOSPC.
-    # Channel conversion (stereo→mono) is handled by the filter-chain below.
-    services.pipewire.wireplumber.extraConfig."51-scarlett-sm7b" = {
-      "monitor.alsa.rules" = [
-        {
-          matches = [
-            {
-              "node.name" = "~alsa_input.usb-Focusrite_Scarlett_2i2.*Mic1.*";
-            }
-          ];
-          actions = {
-            "update-props" = {
-              "audio.format" = "S32LE";
-              "audio.rate" = 48000;
-              "resample.quality" = 10;
-              "node.description" = "Scarlett 2i2 Input 1 (SM7B)";
-            };
-          };
-        }
-      ];
-    };
 
     # PipeWire filter-chain: SM7B processing chain
-    # Chain: RNNoise -> HP 80Hz -> Bell -2dB 250Hz -> Bell +2.5dB 3.5kHz -> Bell +2dB 7.5kHz -> HiShelf +2dB 12kHz
-    # Output: "SM7B Processed" virtual source (becomes system default mic)
+    # RNNoise (VAD 50%) → HP 80Hz → low-cut -2dB@250Hz → presence +2.5dB@3.5kHz → clarity +2dB@7.5kHz → air shelf +2dB@12kHz
+    # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert DSP mode,
+    #       which exceeds the filter-chain's single-output SPA node, causing ENOSPC and breaking all audio.
     services.pipewire.extraConfig.pipewire."51-sm7b-chain" = {
       "context.modules" = [
         {
@@ -144,6 +122,7 @@ in {
                   };
                 }
               ];
+              inputs = ["rnnoise:Input"];
               links = [
                 {
                   output = "rnnoise:Output";
@@ -166,22 +145,21 @@ in {
                   input = "eq_air:In";
                 }
               ];
-              inputs = ["rnnoise:Input"];
               outputs = ["eq_air:Out"];
             };
-            "audio.channels" = 1;
-            "audio.position" = ["MONO"];
             "capture.props" = {
               "node.name" = "capture.sm7b";
+              "audio.position" = ["FL"];
+              "stream.dont-remix" = true;
               "node.passive" = true;
               "target.object" = "alsa_input.usb-Focusrite_Scarlett_2i2_4th_Gen_S2AJV133401118-00.HiFi__Mic1__source";
             };
             "playback.props" = {
               "node.name" = "SM7B_Processed";
               "node.description" = "SM7B Processed (Shure SM7B + Scarlett 2i2)";
-              "media.class" = "Audio/Source/Virtual";
+              "media.class" = "Audio/Source";
               "audio.channels" = 1;
-              "audio.position" = ["MONO"];
+              "audio.position" = ["FL"];
               "priority.session" = 2000;
             };
           };
