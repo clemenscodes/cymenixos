@@ -69,6 +69,10 @@ in {
           Run `generate-monero-wallet` to create one, then set the address in your config.
         '';
       }
+      {
+        assertion = !(cfg.monero.settings.useMini && cfg.monero.settings.useNano);
+        message = "modules.crypto.monero.settings: useMini and useNano are mutually exclusive.";
+      }
     ];
     environment = {
       systemPackages = [
@@ -114,6 +118,7 @@ in {
           rpcPort
           p2poolPort
           p2poolMiniPort
+          p2poolNanoPort
           p2poolStratumPort
         ];
       };

@@ -81,8 +81,18 @@
             };
             useMini = lib.mkOption {
               type = lib.types.bool;
+              default = false;
+              description = "Use P2Pool mini sidechain (recommended for miners ~1 KH/s–1 MH/s)";
+            };
+            useNano = lib.mkOption {
+              type = lib.types.bool;
               default = true;
-              description = "Use P2Pool mini sidechain (recommended for most miners, lower variance)";
+              description = "Use P2Pool nano sidechain (recommended for single-CPU miners below ~1 KH/s–100 KH/s, ~6x more shares than mini)";
+            };
+            p2poolNanoPort = lib.mkOption {
+              type = lib.types.int;
+              default = 37890;
+              description = "P2Pool nano sidechain P2P port";
             };
           };
         };
