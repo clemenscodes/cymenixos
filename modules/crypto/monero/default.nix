@@ -89,6 +89,8 @@ in {
         "${p2pool}" = {};
       };
     };
+    # Performance governor required for full clock speeds during mining
+    powerManagement.cpuFreqGovernor = "performance";
     # Hugepages for RandomX — 3072 x 2MB = 6GB, covers all threads on 9950X3D
     boot = {
       kernel = {
