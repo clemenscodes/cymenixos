@@ -6,6 +6,15 @@
   cfg = config.modules.crypto;
 in {
   config = lib.mkIf (cfg.enable && cfg.monero.enable) {
+    environment = {
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          directories = [
+            "/var/lib/${cfg.monero.settings.p2pool}"
+          ];
+        };
+      };
+    };
     systemd = with cfg.monero.settings; let
       runtimeDirectory = "/var/run/${p2pool}";
       stateDirectory = "/var/lib/${p2pool}";
@@ -20,6 +29,11 @@ in {
         then p2poolNanoPort
         else p2poolMiniPort;
     in {
+      tmpfiles = {
+        rules = [
+          "d ${config.modules.boot.impermanence.persistPath}/var/lib/${p2pool} 0755 ${p2pool} ${p2pool} -"
+        ];
+      };
       sockets = {
         "${p2pool}" = {
           description = "${p2pool} socket";
@@ -49,6 +63,8 @@ in {
             StandardInput = "socket";
             StandardOutput = "journal";
             StandardError = "journal";
+            Restart = "always";
+            RestartSec = "30";
             TimeoutStopSec = "60";
             ExecStart = "${pkgs.p2pool}/bin/p2pool --wallet ${wallet} --host ${host} --zmq-port ${builtins.toString zmqPort} --rpc-port ${builtins.toString rpcPort} --p2p 0.0.0.0:${builtins.toString p2pPort} --stratum ${host}:${builtins.toString p2poolStratumPort} --loglevel ${builtins.toString loglevel} --data-api ${stateDirectory} --stratum-api${chainFlag}";
           };

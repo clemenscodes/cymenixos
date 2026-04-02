@@ -1,10 +1,12 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
 }: {config, ...}: let
   cfg = config.modules.crypto;
   user = config.modules.users.name;
+  homeDir = "/home/${user}";
 in {
   config = lib.mkIf (cfg.enable && cfg.monero.enable) {
     environment = {
@@ -16,10 +18,77 @@ in {
           users.${user} = {
             directories = [
               "Monero"
+              ".config/monero-project"
             ];
           };
         };
       };
+    };
+    home-manager.users.${user} = with cfg.monero.settings; let
+      walletPath = "${homeDir}/Monero/wallets/${walletName}/${walletName}";
+      guiConfig = pkgs.writeText "monero-core.conf" ''
+        [General]
+        account_name=${walletName}
+        allowRemoteNodeMining=false
+        allow_background_mining=false
+        allow_p2pool_mining=false
+        askDesktopShortcut=false
+        askPasswordBeforeSending=true
+        askStopLocalNode=true
+        autosave=true
+        autosaveMinutes=10
+        blackTheme=true
+        blockchainDataDir=
+        bootstrapNodeAddress=
+        chainDropdownSelected=0
+        checkForUpdates=true
+        customDecorations=true
+        daemonFlags=
+        daemonPassword=
+        daemonUsername=
+        displayWalletNameInTitleBar=true
+        fiatPriceCurrency=xmrusd
+        fiatPriceEnabled=false
+        fiatPriceProvider=kraken
+        fiatPriceToggle=false
+        hideBalance=false
+        historyHumanDates=true
+        historyShowAdvanced=false
+        is_recovering=false
+        is_recovering_from_device=false
+        is_trusted_daemon=true
+        kdfRounds=1
+        keyReuseMitigation2=true
+        language=English (US)
+        language_wallet=English
+        locale=en_US
+        lockOnUserInActivity=true
+        lockOnUserInActivityInterval=10
+        logCategories=
+        logLevel=0
+        miningIgnoreBattery=true
+        miningModeSelected=0
+        nettype=0
+        p2poolFlags=
+        proxyAddress=127.0.0.1:9050
+        proxyEnabled=false
+        pruneBlockchain=true
+        receiveShowAdvanced=false
+        remoteNodeAddress=
+        remoteNodesSerialized="{\"selected\":0,\"nodes\":[{\"address\":\"localhost:${builtins.toString rpcPort}\",\"username\":\"\",\"password\":\"\",\"trusted\":true}]}"
+        restore_height=0
+        segregatePreForkOutputs=true
+        segregationHeight=0
+        transferShowAdvanced=false
+        useRemoteNode=true
+        walletMode=2
+        wallet_path=${walletPath}
+      '';
+    in {
+      home.activation.moneroGuiConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
+        mkdir -p "${homeDir}/.config/monero-project"
+        cp --no-preserve=mode ${guiConfig} "${homeDir}/.config/monero-project/monero-core.conf"
+      '';
     };
     systemd = {
       tmpfiles = {
@@ -48,6 +117,7 @@ in {
             add-priority-node=nodes.hashvault.pro:18080
             out-peers=32
             in-peers=64
+            prune-blockchain=1
             fast-block-sync=1
             limit-rate-up=${builtins.toString rateLimit}
             limit-rate-down=${builtins.toString rateLimit}

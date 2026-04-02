@@ -9,6 +9,11 @@
               default = "YOUR_WALLET_ADDRESS_HERE";
               description = "Monero wallet address for mining rewards";
             };
+            walletName = lib.mkOption {
+              type = lib.types.str;
+              default = "miner";
+              description = "Wallet file/folder name under ~/Monero/wallets/";
+            };
             host = lib.mkOption {
               type = lib.types.str;
               default = "127.0.0.1";
