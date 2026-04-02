@@ -641,6 +641,7 @@ in {
         run mkdir -p "$PROFILE_DIR"
         run mkdir -p "$WS_DIR"
         run mkdir -p "$OBS_DIR/basic/scenes"
+        run mkdir -p "${obsCfg.output.path}"
 
         seed() {
           local dest="$1" src="$2"
