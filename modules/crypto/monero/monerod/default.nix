@@ -42,10 +42,12 @@ in {
             no-igd=1
             restricted-rpc=1
             enable-dns-blocklist=1
-            disable-dns-checkpoints=1
+            enforce-dns-checkpointing=1
             confirm-external-bind=1
-            out-peers=50
-            in-peers=50
+            add-priority-node=p2pmd.xmrvsbeast.com:18080
+            add-priority-node=nodes.hashvault.pro:18080
+            out-peers=32
+            in-peers=64
             fast-block-sync=1
             limit-rate-up=${builtins.toString rateLimit}
             limit-rate-down=${builtins.toString rateLimit}
