@@ -768,7 +768,7 @@ in {
         seed "$PROFILE_DIR/recordEncoder.json" ${recordEncoderFile}
         seed "$PROFILE_DIR/streamEncoder.json" ${streamEncoderFile}
         ${lib.optionalString obsCfg.scenes.enable ''
-          seed "$OBS_DIR/basic/scenes/${obsCfg.scenes.name}.json" ${sceneCollectionFile}
+          run install -m 644 ${sceneCollectionFile} "$OBS_DIR/basic/scenes/${obsCfg.scenes.name}.json"
         ''}
         run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
       '';
