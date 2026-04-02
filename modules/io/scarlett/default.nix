@@ -4,12 +4,27 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.io;
+  scarlettCfg = cfg.scarlett;
+  phantomPower =
+    if scarlettCfg.useCloudLifter
+    then "on"
+    else "off";
 in {
   options = {
     modules = {
       io = {
         scarlett = {
           enable = lib.mkEnableOption "Enable Focusrite Scarlett 2i2 + SM7B declarative setup" // {default = false;};
+          useCloudLifter = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = ''
+              Enable 48V phantom power for CloudLifter/Fethead inline preamps.
+              The CloudLifter requires phantom power to operate its active circuit,
+              but does not pass voltage through to the SM7B (safe for dynamic mics).
+              Set to false if using the Scarlett directly without an inline preamp.
+            '';
+          };
         };
       };
     };
@@ -21,7 +36,7 @@ in {
       ACTION=="add", SUBSYSTEM=="sound", ATTRS{idVendor}=="1235", TAG+="systemd", ENV{SYSTEMD_WANTS}+="scarlett-init.service"
     '';
 
-    # Systemd service: set Scarlett hardware controls (Air on, 48V off)
+    # Systemd service: set Scarlett hardware controls (Air on, 48V configurable)
     # Runs at boot (after udev settle) and is re-triggered by udev on hotplug.
     systemd.services.scarlett-init = {
       description = "Initialize Focusrite Scarlett 2i2 ALSA controls";
@@ -42,12 +57,13 @@ in {
           echo "scarlett-init: using card $card"
           # Air mode: 'Presence' enables the high-frequency boost for dynamic mics like SM7B
           amixer -c "$card" cset name='Line In 1 Air Capture Enum' 'Presence'
-          # 48V phantom power: off (SM7B is dynamic — not needed, may cause harm)
-          amixer -c "$card" cset name='Line In 1-2 Phantom Power Capture Switch' off
+          # 48V phantom power: controlled by useCloudLifter option.
+          # CloudLifter/Fethead need phantom power to run their active circuit
+          # but do not pass voltage through to the SM7B (safe for dynamic mics).
+          amixer -c "$card" cset name='Line In 1-2 Phantom Power Capture Switch' ${phantomPower}
         ''}";
       };
     };
-
 
     # Declare SM7B_Processed as the default audio input device.
     # WirePlumber reads this at startup and sets it before any app connects.
@@ -58,9 +74,20 @@ in {
     };
 
     # PipeWire filter-chain: SM7B processing chain
-    # RNNoise (VAD 50%) → HP 80Hz → low-cut -2dB@250Hz → presence +2.5dB@3.5kHz → clarity +2dB@7.5kHz → air shelf +2dB@12kHz
-    # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert DSP mode,
-    #       which exceeds the filter-chain's single-output SPA node, causing ENOSPC and breaking all audio.
+    # HP(80Hz) → Gate(-40dB) → RNNoise(VAD=20%) → EQ
+    #
+    # Order matters:
+    #   HP first: strips 50Hz hum before RNNoise sees it — prevents metallic artifacts
+    #             that occur when RNNoise fights strong low-frequency hum tones.
+    #   Gate second: silences the mic completely during non-speech (preamp hiss at high gain).
+    #                Key filter 200–5000 Hz so hum doesn't falsely hold the gate open.
+    #   RNNoise third: suppresses residual noise during speech (VAD=20%, less aggressive
+    #                  than 50% to reduce musical-noise artifacts).
+    #   EQ last: presence and clarity shaping.
+    #
+    # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert
+    #       DSP mode, exceeding the filter-chain's single-output SPA node → ENOSPC → all audio
+    #       breaks system-wide.
     services.pipewire.extraConfig.pipewire."51-sm7b-chain" = {
       "context.modules" = [
         {
@@ -72,21 +99,37 @@ in {
             "filter.graph" = {
               nodes = [
                 {
-                  type = "ladspa";
-                  name = "rnnoise";
-                  plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
-                  label = "noise_suppressor_mono";
-                  control = {
-                    "VAD Threshold (%)" = 50;
-                  };
-                }
-                {
                   type = "builtin";
                   name = "eq_hp";
                   label = "bq_highpass";
                   control = {
                     "Freq" = 80.0;
                     "Q" = 0.707;
+                  };
+                }
+                {
+                  type = "ladspa";
+                  name = "gate";
+                  plugin = "${pkgs.ladspaPlugins}/lib/ladspa/gate_1410.so";
+                  label = "gate";
+                  control = {
+                    "LF key filter (Hz)" = 200.0;
+                    "HF key filter (Hz)" = 5000.0;
+                    "Threshold (dB)" = -40.0;
+                    "Attack (ms)" = 5.0;
+                    "Hold (ms)" = 200.0;
+                    "Decay (ms)" = 100.0;
+                    "Range (dB)" = -80.0;
+                    "Output select (-1 = key listen, 0 = gate, 1 = bypass)" = 0;
+                  };
+                }
+                {
+                  type = "ladspa";
+                  name = "rnnoise";
+                  plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
+                  label = "noise_suppressor_mono";
+                  control = {
+                    "VAD Threshold (%)" = 20;
                   };
                 }
                 {
@@ -130,28 +173,14 @@ in {
                   };
                 }
               ];
-              inputs = ["rnnoise:Input"];
+              inputs = ["eq_hp:In"];
               links = [
-                {
-                  output = "rnnoise:Output";
-                  input = "eq_hp:In";
-                }
-                {
-                  output = "eq_hp:Out";
-                  input = "eq_low_cut:In";
-                }
-                {
-                  output = "eq_low_cut:Out";
-                  input = "eq_presence:In";
-                }
-                {
-                  output = "eq_presence:Out";
-                  input = "eq_clarity:In";
-                }
-                {
-                  output = "eq_clarity:Out";
-                  input = "eq_air:In";
-                }
+                {output = "eq_hp:Out";       input = "gate:Input";}
+                {output = "gate:Output";     input = "rnnoise:Input";}
+                {output = "rnnoise:Output";  input = "eq_low_cut:In";}
+                {output = "eq_low_cut:Out";  input = "eq_presence:In";}
+                {output = "eq_presence:Out"; input = "eq_clarity:In";}
+                {output = "eq_clarity:Out";  input = "eq_air:In";}
               ];
               outputs = ["eq_air:Out"];
             };
