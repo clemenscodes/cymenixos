@@ -73,7 +73,7 @@ in {
         p2poolFlags=
         proxyAddress=127.0.0.1:9050
         proxyEnabled=false
-        pruneBlockchain=true
+        pruneBlockchain=false
         receiveShowAdvanced=false
         remoteNodeAddress=
         remoteNodesSerialized="{\"selected\":0,\"nodes\":[{\"address\":\"localhost:${builtins.toString rpcPort}\",\"username\":\"\",\"password\":\"\",\"trusted\":true}]}"
@@ -87,9 +87,23 @@ in {
       '';
     in {
       home.activation.moneroGuiConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
+        _configFile="${homeDir}/.config/monero-project/monero-core.conf"
         mkdir -p "${homeDir}/.config/monero-project"
-        if [ ! -f "${homeDir}/.config/monero-project/monero-core.conf" ]; then
-          cp --no-preserve=mode ${guiConfig} "${homeDir}/.config/monero-project/monero-core.conf"
+        if [ ! -f "$_configFile" ]; then
+          cp --no-preserve=mode ${guiConfig} "$_configFile"
+        else
+          # Always ensure restore_height is correct — never scan from 0
+          _current=$(grep '^restore_height=' "$_configFile" | cut -d= -f2)
+          if [ "$_current" != "${builtins.toString guiRestoreHeight}" ]; then
+            _tmp=$(mktemp)
+            while IFS= read -r _line; do
+              case "$_line" in
+                restore_height=*) echo "restore_height=${builtins.toString guiRestoreHeight}" ;;
+                *) echo "$_line" ;;
+              esac
+            done < "$_configFile" > "$_tmp"
+            mv "$_tmp" "$_configFile"
+          fi
         fi
       '';
     };
@@ -121,7 +135,6 @@ in {
             add-priority-node=nodes.hashvault.pro:18080
             out-peers=32
             in-peers=64
-            prune-blockchain=1
             fast-block-sync=1
             limit-rate-up=${builtins.toString rateLimit}
             limit-rate-down=${builtins.toString rateLimit}
