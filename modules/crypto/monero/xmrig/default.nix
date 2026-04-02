@@ -20,9 +20,10 @@ in {
           wants = dependencies;
           wantedBy = ["multi-user.target"];
           serviceConfig = {
-            # xmrig needs cap_ipc_lock for hugepages and cap_sys_nice for priority
-            AmbientCapabilities = ["CAP_IPC_LOCK" "CAP_SYS_NICE"];
-            CapabilityBoundingSet = ["CAP_IPC_LOCK" "CAP_SYS_NICE"];
+            # xmrig needs cap_ipc_lock for hugepages, cap_sys_nice for priority,
+            # and cap_sys_rawio to write AMD MSR registers for RandomX optimization
+            AmbientCapabilities = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
+            CapabilityBoundingSet = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
             LogsDirectory = "${xmrig}";
             LogsDirectoryMode = "0710";
             Restart = "always";
