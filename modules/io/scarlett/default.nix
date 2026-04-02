@@ -22,31 +22,29 @@ in {
     '';
 
     # Systemd service: set Scarlett hardware controls (Air on, 48V off)
-    # Triggered by udev above rather than at boot so the card is guaranteed to exist.
+    # Runs at boot (after udev settle) and is re-triggered by udev on hotplug.
     systemd.services.scarlett-init = {
       description = "Initialize Focusrite Scarlett 2i2 ALSA controls";
+      wantedBy = ["multi-user.target"];
+      after = ["systemd-udev-settle.service"];
       path = [pkgs.alsa-utils];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = false;
-        # Brief delay: udev fires on the first sound subsystem event for the device,
-        # but ALSA mixer controls may not be registered yet at that exact instant.
+        # Brief delay after udev settle to ensure ALSA mixer controls are registered.
         ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
         ExecStart = "${pkgs.writeShellScript "scarlett-init" ''
           card=$(aplay -l 2>/dev/null | grep -i scarlett | head -1 | awk '{gsub(":", "", $2); print $2}')
           if [ -z "$card" ]; then
-            echo "scarlett-init: card not found" >&2
-            exit 1
+            echo "scarlett-init: Scarlett card not found, skipping"
+            exit 0
           fi
           echo "scarlett-init: using card $card"
           # Air mode: 'Presence' enables the high-frequency boost for dynamic mics like SM7B
           amixer -c "$card" cset name='Line In 1 Air Capture Enum' 'Presence'
-          # 48V phantom power: off (SM7B is dynamic — phantom power is not needed and may cause harm)
+          # 48V phantom power: off (SM7B is dynamic — not needed, may cause harm)
           amixer -c "$card" cset name='Line In 1-2 Phantom Power Capture Switch' off
         ''}";
-        Restart = "on-failure";
-        RestartSec = 3;
-        StartLimitBurst = 5;
       };
     };
 
