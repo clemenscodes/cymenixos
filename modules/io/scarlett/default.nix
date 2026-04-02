@@ -15,6 +15,27 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.scarlett.enable) {
+    # Systemd service: set Scarlett hardware controls at boot (Air on, 48V off)
+    systemd.services.scarlett-init = {
+      description = "Initialize Focusrite Scarlett 2i2 ALSA controls";
+      wantedBy = ["multi-user.target"];
+      after = ["sound.target"];
+      path = [pkgs.alsa-utils];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.writeShellScript "scarlett-init" ''
+          card=$(aplay -l 2>/dev/null | grep -i scarlett | head -1 | awk '{gsub(":", "", $2); print $2}')
+          if [ -z "$card" ]; then
+            echo "Scarlett card not found, skipping"
+            exit 0
+          fi
+          amixer -c "$card" sset "Input 1 Air" on 2>/dev/null || true
+          amixer -c "$card" sset "Input 1 Phantom Power" off 2>/dev/null || true
+        ''}";
+      };
+    };
+
     # WirePlumber rule: configure Scarlett Input 1 (SM7B) as mono, 48kHz, 32-bit
     services.pipewire.wireplumber.extraConfig."51-scarlett-sm7b" = {
       "monitor.alsa.rules" = [

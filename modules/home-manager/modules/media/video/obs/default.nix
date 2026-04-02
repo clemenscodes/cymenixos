@@ -43,12 +43,12 @@
   });
 
   # Minimal audio source entry (reused for desktop + mic global slots)
-  mkAudioSource = name: uuid: pluginId: {
+  mkAudioSource = name: uuid: pluginId: deviceId: {
     prev_ver = 536870916;
     inherit name uuid;
     id = pluginId;
     versioned_id = pluginId;
-    settings = {device_id = "default";};
+    settings = {device_id = deviceId;};
     mixers = 255;
     sync = 0;
     flags = 0;
@@ -74,8 +74,8 @@
 
   sceneCollectionFile = pkgs.writeText "obs-scene-collection.json" (builtins.toJSON {
     # Global audio devices
-    DesktopAudioDevice1 = mkAudioSource "Desktop" "cyme0001-0001-0001-0001-000000000001" "pulse_output_capture";
-    AuxAudioDevice1 = mkAudioSource "Mic" "cyme0001-0001-0001-0001-000000000002" "pulse_input_capture";
+    DesktopAudioDevice1 = mkAudioSource "Desktop" "cyme0001-0001-0001-0001-000000000001" "pulse_output_capture" "default";
+    AuxAudioDevice1 = mkAudioSource "Mic" "cyme0001-0001-0001-0001-000000000002" "pulse_input_capture" obsCfg.audio.mic;
 
     current_scene = "Game";
     current_program_scene = "Game";
@@ -464,6 +464,15 @@ in {
                 type = lib.types.int;
                 default = 320;
                 description = "Per-track bitrate in kbps (only applies to lossy encoders like AAC/Opus; ignored for PCM/FLAC)";
+              };
+              mic = lib.mkOption {
+                type = lib.types.str;
+                default = "default";
+                description = ''
+                  PipeWire/PulseAudio source name for the microphone input in OBS.
+                  Use "default" for the system default input, or set to a specific
+                  PipeWire node name (e.g. "SM7B_Processed" for a filter-chain virtual source).
+                '';
               };
             };
             stream = {
