@@ -116,6 +116,5 @@ in
         "btrfs"
       ];
     };
-    environment.systemPackages = [ config.boot.swraid.mdadmPackage ];
   };
 }
