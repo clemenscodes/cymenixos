@@ -22,7 +22,7 @@ in {
     systemd = with cfg.monero.settings; {
       tmpfiles = {
         rules = [
-          "d ${config.modules.boot.impermanence.persistPath}/var/log/${xmrig} 0755 ${xmrig} ${xmrig} -"
+          "d ${config.modules.boot.impermanence.persistPath}/var/log/${xmrig} 0750 ${xmrig} ${xmrig} -"
         ];
       };
       services = {
@@ -39,7 +39,7 @@ in {
             AmbientCapabilities = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
             CapabilityBoundingSet = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
             LogsDirectory = "${xmrig}";
-            LogsDirectoryMode = "0755";
+            LogsDirectoryMode = "0750";
             Restart = "always";
             RestartSec = "30";
             Nice = "-10";

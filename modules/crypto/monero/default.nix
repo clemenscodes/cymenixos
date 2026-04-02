@@ -86,6 +86,9 @@ in {
         "${monero}" = mkUser monero;
         "${xmrig}" = mkUser xmrig;
         "${p2pool}" = mkUser p2pool;
+        ${user} = {
+          extraGroups = [monero xmrig p2pool];
+        };
       };
       groups = {
         "${monero}" = {};

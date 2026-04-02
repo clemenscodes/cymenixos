@@ -95,7 +95,7 @@ in {
       tmpfiles = {
         rules = with cfg.monero.settings; [
           "d ${config.modules.boot.impermanence.persistPath}/var/lib/${monero} 0755 ${monero} ${monero} -"
-          "d ${config.modules.boot.impermanence.persistPath}/var/log/${monero} 0755 ${monero} ${monero} -"
+          "d ${config.modules.boot.impermanence.persistPath}/var/log/${monero} 0750 ${monero} ${monero} -"
         ];
       };
       services = with cfg.monero.settings; {
@@ -134,7 +134,7 @@ in {
             StateDirectory = "${monero}";
             StateDirectoryMode = "0755";
             LogsDirectory = "${monero}";
-            LogsDirectoryMode = "0710";
+            LogsDirectoryMode = "0750";
             Restart = "always";
             RestartSec = "30";
             SuccessExitStatus = [0 1];
