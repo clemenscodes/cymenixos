@@ -49,6 +49,14 @@ in {
     };
 
 
+    # Declare SM7B_Processed as the default audio input device.
+    # WirePlumber reads this at startup and sets it before any app connects.
+    services.pipewire.wireplumber.extraConfig."50-sm7b-default" = {
+      "wireplumber.settings" = {
+        "default.audio.source" = "SM7B_Processed";
+      };
+    };
+
     # PipeWire filter-chain: SM7B processing chain
     # RNNoise (VAD 50%) → HP 80Hz → low-cut -2dB@250Hz → presence +2.5dB@3.5kHz → clarity +2dB@7.5kHz → air shelf +2dB@12kHz
     # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert DSP mode,
