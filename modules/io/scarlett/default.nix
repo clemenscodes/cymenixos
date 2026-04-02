@@ -74,16 +74,12 @@ in {
     };
 
     # PipeWire filter-chain: SM7B processing chain
-    # HP(80Hz) → Gate(-40dB) → RNNoise(VAD=20%) → EQ
+    # HP(80Hz) → EQ
     #
-    # Order matters:
-    #   HP first: strips 50Hz hum before RNNoise sees it — prevents metallic artifacts
-    #             that occur when RNNoise fights strong low-frequency hum tones.
-    #   Gate second: silences the mic completely during non-speech (preamp hiss at high gain).
-    #                Key filter 200–5000 Hz so hum doesn't falsely hold the gate open.
-    #   RNNoise third: suppresses residual noise during speech (VAD=20%, less aggressive
-    #                  than 50% to reduce musical-noise artifacts).
-    #   EQ last: presence and clarity shaping.
+    # Noise suppression is intentionally omitted here:
+    # all tested PipeWire suppressors (RNNoise LADSPA, DeepFilterNet, LSP Expander, WebRTC AEC)
+    # either cut word onsets or degrade voice quality. The OBS filter stack
+    # (RNNoise + Speex -15dB) handles noise suppression cleanly at the application layer.
     #
     # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert
     #       DSP mode, exceeding the filter-chain's single-output SPA node → ENOSPC → all audio
@@ -105,31 +101,6 @@ in {
                   control = {
                     "Freq" = 80.0;
                     "Q" = 0.707;
-                  };
-                }
-                {
-                  type = "ladspa";
-                  name = "gate";
-                  plugin = "${pkgs.ladspaPlugins}/lib/ladspa/gate_1410.so";
-                  label = "gate";
-                  control = {
-                    "LF key filter (Hz)" = 200.0;
-                    "HF key filter (Hz)" = 5000.0;
-                    "Threshold (dB)" = -40.0;
-                    "Attack (ms)" = 5.0;
-                    "Hold (ms)" = 200.0;
-                    "Decay (ms)" = 100.0;
-                    "Range (dB)" = -80.0;
-                    "Output select (-1 = key listen, 0 = gate, 1 = bypass)" = 0;
-                  };
-                }
-                {
-                  type = "ladspa";
-                  name = "rnnoise";
-                  plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
-                  label = "noise_suppressor_mono";
-                  control = {
-                    "VAD Threshold (%)" = 20;
                   };
                 }
                 {
@@ -175,9 +146,7 @@ in {
               ];
               inputs = ["eq_hp:In"];
               links = [
-                {output = "eq_hp:Out";       input = "gate:Input";}
-                {output = "gate:Output";     input = "rnnoise:Input";}
-                {output = "rnnoise:Output";  input = "eq_low_cut:In";}
+                {output = "eq_hp:Out";       input = "eq_low_cut:In";}
                 {output = "eq_low_cut:Out";  input = "eq_presence:In";}
                 {output = "eq_presence:Out"; input = "eq_clarity:In";}
                 {output = "eq_clarity:Out";  input = "eq_air:In";}
