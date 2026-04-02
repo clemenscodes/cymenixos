@@ -42,6 +42,36 @@
     bitrate = obsCfg.stream.bitrate;
   });
 
+  # PipeWire application audio output capture (game sound, SDL, etc.)
+  mkPipeWireAppSource = name: uuid: targetName: {
+    prev_ver = 536936448;
+    inherit name uuid;
+    id = "pipewire_audio_application_capture";
+    versioned_id = "pipewire_audio_application_capture";
+    settings = {TargetName = targetName; TargetId = 0;};
+    mixers = 255;
+    sync = 0;
+    flags = 0;
+    volume = 1.0;
+    balance = 0.5;
+    enabled = true;
+    muted = false;
+    push-to-mute = false;
+    push-to-mute-delay = 0;
+    push-to-talk = false;
+    push-to-talk-delay = 0;
+    hotkeys = {
+      "libobs.mute" = [];
+      "libobs.unmute" = [];
+      "libobs.push-to-mute" = [];
+      "libobs.push-to-talk" = [];
+    };
+    deinterlace_mode = 0;
+    deinterlace_field_order = 0;
+    monitoring_type = 0;
+    private_settings = {};
+  };
+
   # PipeWire audio input source with filters (for scene sources like SM7B)
   mkPipeWireSource = name: uuid: targetName: filters: {
     prev_ver = 536936448;
@@ -208,6 +238,8 @@
       }
       # Source: Shure SM7B mic via PipeWire filter-chain with broadcast processing
       (mkPipeWireSource "Shure SM7B" "cyme0001-0001-0001-0001-000000000009" obsCfg.audio.mic sm7bFilters)
+      # Source: Game audio via SDL Application (PipeWire app capture)
+      (mkPipeWireAppSource "Game Sound" "cyme0001-0001-0001-0001-000000000014" obsCfg.audio.gameSource)
       # Source: VK Capture (vkcapture-source, cursor disabled)
       {
         prev_ver = 536870916;
@@ -264,6 +296,7 @@
     ConfirmOnExit=false
     LastVersion=30000000
     CurrentProfile=${obsCfg.profile.name}
+    CurrentSceneCollection=${obsCfg.scenes.name}
 
     [BasicWindow]
     RecordWhenStreaming=false
@@ -533,6 +566,15 @@ in {
                   PipeWire/PulseAudio source name for the microphone input in OBS.
                   Use "default" for the system default input, or set to a specific
                   PipeWire node name (e.g. "SM7B_Processed" for a filter-chain virtual source).
+                '';
+              };
+              gameSource = lib.mkOption {
+                type = lib.types.str;
+                default = "SDL Application";
+                description = ''
+                  PipeWire application name to capture as game audio.
+                  Shown in the OBS "Game Sound" source (application_audio_output_capture).
+                  Common values: "SDL Application" (most games), or the specific process name.
                 '';
               };
             };
