@@ -39,7 +39,6 @@ let
   useSwayAudioIdle = displayCfg.lockscreen.sway-audio-idle-inhibit.enable;
   useSsh = config.modules.security.ssh.enable;
   useTorrent = osConfig.modules.networking.torrent.enable;
-  useUdiskie = osConfig.modules.io.udisks.enable;
   useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   useNewsboat = config.modules.media.rss.newsboat.enable;
