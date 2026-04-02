@@ -59,6 +59,21 @@ in {
             default = ["compress=zstd" "noatime" "nofail" "x-systemd.device-timeout=10s"];
             description = "btrfs mount options — nofail ensures a degraded/missing array never prevents boot";
           };
+          user = lib.mkOption {
+            type = lib.types.str;
+            default = "root";
+            description = "Owner of the mountpoint directory";
+          };
+          group = lib.mkOption {
+            type = lib.types.str;
+            default = "users";
+            description = "Group of the mountpoint directory";
+          };
+          mode = lib.mkOption {
+            type = lib.types.str;
+            default = "0775";
+            description = "Permissions of the mountpoint directory";
+          };
         };
       };
     };
@@ -84,7 +99,7 @@ in {
       };
     };
 
-    systemd.tmpfiles.rules = ["d ${cfg.mountpoint} 0755 root root"];
+    systemd.tmpfiles.rules = ["d ${cfg.mountpoint} ${cfg.mode} ${cfg.user} ${cfg.group}"];
 
     boot = {
       swraid = {
