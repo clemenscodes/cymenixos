@@ -135,7 +135,10 @@ let
 
   cs2StrafeLeftStart = pkgs.writeShellApplication {
     name = "cs2-strafe-left-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       log() { echo "$(date +%T.%3N) [left-start] $*" >> ${cs2Log}; }
       log "enter: switching to CS2_STRAFING_LEFT"
@@ -148,18 +151,18 @@ let
 
   cs2StrafeLeftStop = pkgs.writeShellApplication {
     name = "cs2-strafe-left-stop";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       log() { echo "$(date +%T.%3N) [left-stop] $*" >> ${cs2Log}; }
       log "enter: switching to CS2_COUNTER_RIGHT"
       hyprctl dispatch submap CS2_COUNTER_RIGHT
-      sleep 0.2
       log "inject A:0"
       ydotool key 30:0
-      sleep 0.2
       log "inject D:1 D:0 (counter-strafe)"
       ydotool key 32:1 32:0
-      sleep 0.2
       log "returning to CS2"
       hyprctl dispatch submap CS2
       log "done"
@@ -168,7 +171,10 @@ let
 
   cs2StrafeRightStart = pkgs.writeShellApplication {
     name = "cs2-strafe-right-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       log() { echo "$(date +%T.%3N) [right-start] $*" >> ${cs2Log}; }
       log "enter: switching to CS2_STRAFING_RIGHT"
@@ -181,18 +187,18 @@ let
 
   cs2StrafeRightStop = pkgs.writeShellApplication {
     name = "cs2-strafe-right-stop";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       log() { echo "$(date +%T.%3N) [right-stop] $*" >> ${cs2Log}; }
       log "enter: switching to CS2_COUNTER_LEFT"
       hyprctl dispatch submap CS2_COUNTER_LEFT
-      sleep 0.2
       log "inject D:0"
       ydotool key 32:0
-      sleep 0.2
       log "inject A:1 A:0 (counter-strafe)"
       ydotool key 30:1 30:0
-      sleep 0.2
       log "returning to CS2"
       hyprctl dispatch submap CS2
       log "done"
