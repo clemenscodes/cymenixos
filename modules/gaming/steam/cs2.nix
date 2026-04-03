@@ -131,17 +131,6 @@ let
     '';
   };
 
-  cs2StrafeLeftStart = pkgs.writeShellApplication {
-    name = "cs2-strafe-left-start";
-    runtimeInputs = [
-      pkgs.hyprland
-      pkgs.ydotool
-    ];
-    text = ''
-      hyprctl dispatch submap CS2_STRAFE_LEFT
-    '';
-  };
-
   cs2StrafeLeftStop = pkgs.writeShellApplication {
     name = "cs2-strafe-left-stop";
     runtimeInputs = [
@@ -149,20 +138,7 @@ let
       pkgs.ydotool
     ];
     text = ''
-      hyprctl dispatch submap CS2_COUNTER_RIGHT
-      ydotool key 30:0 32:1 32:0
-      hyprctl dispatch submap CS2
-    '';
-  };
-
-  cs2StrafeRightStart = pkgs.writeShellApplication {
-    name = "cs2-strafe-right-start";
-    runtimeInputs = [
-      pkgs.hyprland
-      pkgs.ydotool
-    ];
-    text = ''
-      hyprctl dispatch submap CS2_STRAFE_RIGHT
+      ydotool key -d 16 32:1 32:0
     '';
   };
 
@@ -173,9 +149,7 @@ let
       pkgs.ydotool
     ];
     text = ''
-      hyprctl dispatch submap CS2_COUNTER_LEFT
-      ydotool key 32:0 30:1 30:0
-      hyprctl dispatch submap CS2
+      ydotool key -d 16 30:1 30:0
     '';
   };
 
@@ -631,9 +605,7 @@ in
         # Expose scripts in PATH so they can be run and tested manually.
         environment.systemPackages = lib.mkIf hcfg.enable [
           cs2FocusDaemon
-          cs2StrafeLeftStart
           cs2StrafeLeftStop
-          cs2StrafeRightStart
           cs2StrafeRightStop
         ];
 
@@ -711,18 +683,8 @@ in
                 # A/D presses are intercepted; all other keys pass through.
                 submap = CS2
                 bind = ALT, W, submap, reset
-                bindn = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
-                bindn = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
-
-                submap = CS2_STRAFE_LEFT
-                bind = ALT, W, submap, reset
-                bindn = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
-                bindr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
-
-                submap = CS2_STRAFE_RIGHT
-                bind = ALT, W, submap, reset
-                bindn = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
-                bindr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
+                bindnr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
+                bindnr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
 
                 # Empty submaps used during counter-strafe injection.
                 # Injected D/A keys arrive here where they are unbound and pass
