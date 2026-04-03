@@ -736,8 +736,10 @@ in
                 # Injected D/A keys arrive here where they are unbound and pass
                 # through to the game without triggering another counter-strafe.
                 submap = CS2_COUNTER_RIGHT
+                bind = ALT, W, submap, reset
 
                 submap = CS2_COUNTER_LEFT
+                bind = ALT, W, submap, reset
 
                 submap = reset
               '';
