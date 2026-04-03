@@ -719,6 +719,7 @@ in
                 # CS2 submap — entered automatically when CS2 gains focus.
                 # A/D presses are intercepted; all other keys pass through.
                 submap = CS2
+                bind = ALT, W, submap, reset
                 bind = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
                 bind = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
 
