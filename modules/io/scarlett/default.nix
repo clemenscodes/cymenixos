@@ -4,6 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.io;
+  speexLadspa = import ./speex-ladspa.nix {inherit pkgs;};
   scarlettCfg = cfg.scarlett;
   phantomPower =
     if scarlettCfg.useCloudLifter
@@ -74,12 +75,13 @@ in {
     };
 
     # PipeWire filter-chain: SM7B processing chain
-    # HP(80Hz) → EQ
+    # HP(80Hz) → EQ → compressor → EQ → harmonics → maximiser → RNNoise → Speex
     #
-    # Noise suppression is intentionally omitted here:
-    # all tested PipeWire suppressors (RNNoise LADSPA, DeepFilterNet, LSP Expander, WebRTC AEC)
-    # either cut word onsets or degrade voice quality. The OBS filter stack
-    # (RNNoise + Speex -15dB) handles noise suppression cleanly at the application layer.
+    # Noise suppression applied last, matching OBS filter order exactly:
+    #   OBS: RNNoise (neural VAD) → Speex -15dB (spectral subtraction)
+    # Speex is a custom LADSPA derivation (speex-ladspa.nix) wrapping libspeexdsp —
+    # the same library OBS uses. No off-the-shelf LADSPA Speex plugin exists.
+    # To revert: remove nodes 12-13, restore outputs=["maximiser:Output"].
     #
     # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert
     #       DSP mode, exceeding the filter-chain's single-output SPA node → ENOSPC → all audio
@@ -197,21 +199,45 @@ in {
                     "Knee point (dB)" = -6.0;
                   };
                 }
+                # 12. RNNoise: neural noise suppressor — VAD-based, catches voice-frequency hum
+                {
+                  type = "ladspa";
+                  name = "rnnoise";
+                  plugin = "${pkgs.noise-suppression-for-voice}/lib/ladspa/librnnoise_ladspa.so";
+                  label = "noise_suppressor_mono";
+                  control = {
+                    "VAD Threshold (%)" = 30.0;
+                  };
+                }
+                # 13. Speex: spectral subtraction suppressor — stationary noise floor estimation
+                # Custom LADSPA derivation wrapping libspeexdsp (same lib OBS uses).
+                # -15dB matches the OBS Speex filter setting exactly.
+                {
+                  type = "ladspa";
+                  name = "speex";
+                  plugin = "${speexLadspa}/lib/ladspa/libspeex_noise_suppressor_ladspa.so";
+                  label = "speex_noise_suppressor_mono";
+                  control = {
+                    "Suppress Level (dB)" = -15.0;
+                  };
+                }
               ];
               inputs = ["eq_hp:In"];
               links = [
-                {output = "eq_hp:Out";          input = "eq_warmth:In";}
-                {output = "eq_warmth:Out";       input = "eq_box_cut:In";}
-                {output = "eq_box_cut:Out";      input = "eq_mud_cut:In";}
-                {output = "eq_mud_cut:Out";      input = "compressor:Input";}
-                {output = "compressor:Output";   input = "eq_presence:In";}
-                {output = "eq_presence:Out";     input = "eq_definition:In";}
-                {output = "eq_definition:Out";   input = "eq_clarity:In";}
-                {output = "eq_clarity:Out";      input = "eq_air:In";}
-                {output = "eq_air:Out";          input = "harmonics:Input";}
-                {output = "harmonics:Output";    input = "maximiser:Input";}
+                {output = "eq_hp:Out";        input = "eq_warmth:In";}
+                {output = "eq_warmth:Out";     input = "eq_box_cut:In";}
+                {output = "eq_box_cut:Out";    input = "eq_mud_cut:In";}
+                {output = "eq_mud_cut:Out";    input = "compressor:Input";}
+                {output = "compressor:Output"; input = "eq_presence:In";}
+                {output = "eq_presence:Out";   input = "eq_definition:In";}
+                {output = "eq_definition:Out"; input = "eq_clarity:In";}
+                {output = "eq_clarity:Out";    input = "eq_air:In";}
+                {output = "eq_air:Out";        input = "harmonics:Input";}
+                {output = "harmonics:Output";  input = "maximiser:Input";}
+                {output = "maximiser:Output";  input = "rnnoise:Input";}
+                {output = "rnnoise:Output";    input = "speex:Input";}
               ];
-              outputs = ["maximiser:Output"];
+              outputs = ["speex:Output"];
             };
             "capture.props" = {
               "node.name" = "capture.sm7b";
