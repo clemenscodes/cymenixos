@@ -5,8 +5,16 @@
 }: {config, ...}: let
   cfg = config.modules.crypto;
   threadFlag =
-    if cfg.monero.settings.threads != null
+    if cfg.monero.settings.threads != null && cfg.monero.settings.rxAffinity == null
     then " --threads ${builtins.toString cfg.monero.settings.threads}"
+    else "";
+  affinityConfigFlag =
+    if cfg.monero.settings.rxAffinity != null
+    then let
+      cpuConfig = pkgs.writeText "xmrig-cpu-config.json" (builtins.toJSON {
+        cpu.rx = map (a: {affinity = a;}) cfg.monero.settings.rxAffinity;
+      });
+    in " -c ${cpuConfig}"
     else "";
 in {
   config = lib.mkIf (cfg.enable && cfg.monero.enable) {
@@ -45,7 +53,7 @@ in {
             Restart = "always";
             RestartSec = "30";
             Nice = "-10";
-            ExecStart = "${pkgs.xmrig}/bin/xmrig -o ${host}:${builtins.toString p2poolStratumPort} --coin monero -u ${wallet} --http-host ${host} --http-port ${builtins.toString p2poolStratumApiPort} --randomx-1gb-pages -k --api-worker-id ${xmrig} --log-file /var/log/${xmrig}/${xmrig}.log${threadFlag}";
+            ExecStart = "${pkgs.xmrig}/bin/xmrig -o ${host}:${builtins.toString p2poolStratumPort} --coin monero -u ${wallet} --http-host ${host} --http-port ${builtins.toString p2poolStratumApiPort} --randomx-1gb-pages -k --api-worker-id ${xmrig} --log-file /var/log/${xmrig}/${xmrig}.log${threadFlag}${affinityConfigFlag}";
           };
         };
       };

@@ -87,7 +87,22 @@
             threads = lib.mkOption {
               type = lib.types.nullOr lib.types.int;
               default = null;
-              description = "XMRig CPU thread count (null = auto-detect)";
+              description = "XMRig CPU thread count (null = auto-detect). Ignored when rxAffinity is set — thread count is then derived from the list length.";
+            };
+            rxAffinity = lib.mkOption {
+              type = lib.types.nullOr (lib.types.listOf lib.types.int);
+              default = null;
+              description = ''
+                Per-thread CPU affinity list for RandomX. Each entry is a logical CPU index
+                and implicitly defines one miner thread. Order matters — pair HT siblings
+                consecutively so they share the same L3 cache slice.
+
+                Example for a 16-core/32-thread CPU (HT siblings at N and N+16):
+                  builtins.concatMap (c: [c (c+16)]) (builtins.genList (x: x) 16)
+                  → [0 16 1 17 2 18 … 15 31]
+
+                null = xmrig auto-detect (uses --threads if set).
+              '';
             };
             useMini = lib.mkOption {
               type = lib.types.bool;

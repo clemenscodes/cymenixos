@@ -8,7 +8,6 @@
   (import ./cymenixos-scripts.nix)
   (import ./grub2.nix)
   (import ./tongo.nix)
-  (import ./xmrig.nix)
   inputs.lutris-overlay.overlays.lutris
   # HDR screencopy: patched Hyprland (wlr-screencopy v4 color_info) and xdph
   # (reads color_info, forwards colorimetry to PipeWire).
