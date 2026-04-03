@@ -131,62 +131,71 @@ let
     '';
   };
 
+  cs2Log = "/tmp/cs2-strafe.log";
+
   cs2StrafeLeftStart = pkgs.writeShellApplication {
     name = "cs2-strafe-left-start";
-    runtimeInputs = [
-      pkgs.hyprland
-      pkgs.ydotool
-    ];
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
     text = ''
-      # Switch submap BEFORE injecting so the echo of the injected key
-      # arrives in CS2_STRAFING_LEFT where A is only bound on release.
+      log() { echo "$(date +%T.%3N) [left-start] $*" >> ${cs2Log}; }
+      log "enter: switching to CS2_STRAFING_LEFT"
       hyprctl dispatch submap CS2_STRAFING_LEFT
+      log "inject A:1"
       ydotool key 30:1
+      log "done"
     '';
   };
 
   cs2StrafeLeftStop = pkgs.writeShellApplication {
     name = "cs2-strafe-left-stop";
-    runtimeInputs = [
-      pkgs.hyprland
-      pkgs.ydotool
-    ];
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
     text = ''
-      # Switch to safe submap before injecting counter D so D is unbound there.
+      log() { echo "$(date +%T.%3N) [left-stop] $*" >> ${cs2Log}; }
+      log "enter: switching to CS2_COUNTER_RIGHT"
       hyprctl dispatch submap CS2_COUNTER_RIGHT
+      sleep 0.2
+      log "inject A:0"
       ydotool key 30:0
       sleep 0.2
-      ydotool 32:1 32:0
+      log "inject D:1 D:0 (counter-strafe)"
+      ydotool key 32:1 32:0
       sleep 0.2
+      log "returning to CS2"
       hyprctl dispatch submap CS2
+      log "done"
     '';
   };
 
   cs2StrafeRightStart = pkgs.writeShellApplication {
     name = "cs2-strafe-right-start";
-    runtimeInputs = [
-      pkgs.hyprland
-      pkgs.ydotool
-    ];
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
     text = ''
+      log() { echo "$(date +%T.%3N) [right-start] $*" >> ${cs2Log}; }
+      log "enter: switching to CS2_STRAFING_RIGHT"
       hyprctl dispatch submap CS2_STRAFING_RIGHT
+      log "inject D:1"
       ydotool key 32:1
+      log "done"
     '';
   };
 
   cs2StrafeRightStop = pkgs.writeShellApplication {
     name = "cs2-strafe-right-stop";
-    runtimeInputs = [
-      pkgs.hyprland
-      pkgs.ydotool
-    ];
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
     text = ''
+      log() { echo "$(date +%T.%3N) [right-stop] $*" >> ${cs2Log}; }
+      log "enter: switching to CS2_COUNTER_LEFT"
       hyprctl dispatch submap CS2_COUNTER_LEFT
+      sleep 0.2
+      log "inject D:0"
       ydotool key 32:0
       sleep 0.2
-      ydotool 30:1 30:0
+      log "inject A:1 A:0 (counter-strafe)"
+      ydotool key 30:1 30:0
       sleep 0.2
+      log "returning to CS2"
       hyprctl dispatch submap CS2
+      log "done"
     '';
   };
 
