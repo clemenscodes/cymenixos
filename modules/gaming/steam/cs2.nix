@@ -183,19 +183,29 @@ let
       cs2ModeStop
     ];
     text = ''
-      is_cs2_class() {
-        case "$1" in
-          cs2|cs2.*|gamescope*) return 0 ;;
-          *) return 1 ;;
+      # Match cs2 by native class OR gamescope wrapping CS2 specifically.
+      # Checking the title prevents matching other games running under gamescope.
+      is_cs2_window() {
+        local class="$1" title="$2"
+        case "$class" in
+          cs2|cs2.*) return 0 ;;
+          gamescope*)
+            case "$title" in
+              *"Counter-Strike"*) return 0 ;;
+            esac
+            ;;
         esac
+        return 1
       }
 
       CS2_FOCUSED=false
 
       # On startup: check whether CS2 is already the active window so we
       # enter CS2 mode immediately without waiting for the next focus event.
-      initial_class="$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // ""')"
-      if is_cs2_class "$initial_class"; then
+      active_json="$(hyprctl activewindow -j 2>/dev/null)"
+      initial_class="$(echo "$active_json" | jq -r '.class // ""')"
+      initial_title="$(echo "$active_json" | jq -r '.title // ""')"
+      if is_cs2_window "$initial_class" "$initial_title"; then
         cs2-mode-start
         CS2_FOCUSED=true
       fi
@@ -205,8 +215,11 @@ let
       while read -r line; do
         case "$line" in
           activewindow*)
-            class="$(echo "$line" | awk -F '>>' '{print $2}' | awk -F ',' '{print $1}')"
-            if is_cs2_class "$class"; then
+            # Event format: activewindow>>CLASS,TITLE
+            payload="$(echo "$line" | awk -F '>>' '{print $2}')"
+            class="$(echo "$payload" | awk -F ',' '{print $1}')"
+            title="$(echo "$payload" | cut -d',' -f2-)"
+            if is_cs2_window "$class" "$title"; then
               if [ "$CS2_FOCUSED" = "false" ]; then
                 cs2-mode-start
                 CS2_FOCUSED=true
@@ -221,7 +234,7 @@ let
           closewindow*)
             if [ "$CS2_FOCUSED" = "true" ]; then
               if ! hyprctl clients -j | \
-                   jq -e '.[] | select(.class | test("^cs2|^gamescope"; "i"))' \
+                   jq -e '.[] | select(.class | test("^cs2$"; "i") or (.class | test("^gamescope"; "i")) and (.title | test("Counter-Strike"; "i")))' \
                    > /dev/null 2>&1; then
                 cs2-mode-stop
                 CS2_FOCUSED=false
