@@ -28,15 +28,16 @@ let
   launchOptions =
     let
       envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
-      gamescopeStr = lib.optionalString cfg.gamescope.enable
-        "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
+      gamescopeStr = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
       gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
     in
-    lib.concatStringsSep " " (lib.filter (s: s != "") [
-      envStr
-      "${gamescopeStr}%command%"
-      gameArgsStr
-    ]);
+    lib.concatStringsSep " " (
+      lib.filter (s: s != "") [
+        envStr
+        "${gamescopeStr}%command%"
+        gameArgsStr
+      ]
+    );
 
   # Python script that patches localconfig.vdf with the CS2 launch options.
   # Reads the launch options string from $CS2_LAUNCH_OPTS to avoid shell quoting issues.
@@ -89,7 +90,11 @@ let
 
   cs2FocusDaemon = pkgs.writeShellApplication {
     name = "cs2-focus-daemon";
-    runtimeInputs = [ pkgs.hyprland pkgs.socat pkgs.jq ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.socat
+      pkgs.jq
+    ];
     text = ''
       enter_cs2() { hyprctl dispatch submap CS2   >/dev/null 2>&1; }
       leave_cs2()  { hyprctl dispatch submap reset >/dev/null 2>&1; }
@@ -128,7 +133,10 @@ let
 
   cs2StrafeLeftStart = pkgs.writeShellApplication {
     name = "cs2-strafe-left-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       # Switch submap BEFORE injecting so the echo of the injected key
       # arrives in CS2_STRAFING_LEFT where A is only bound on release.
@@ -139,7 +147,10 @@ let
 
   cs2StrafeLeftStop = pkgs.writeShellApplication {
     name = "cs2-strafe-left-stop";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       # Switch to safe submap before injecting counter D so D is unbound there.
       hyprctl dispatch submap CS2_COUNTER_RIGHT >/dev/null
@@ -152,7 +163,10 @@ let
 
   cs2StrafeRightStart = pkgs.writeShellApplication {
     name = "cs2-strafe-right-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       hyprctl dispatch submap CS2_STRAFING_RIGHT >/dev/null
       ydotool key 32:1
@@ -161,7 +175,10 @@ let
 
   cs2StrafeRightStop = pkgs.writeShellApplication {
     name = "cs2-strafe-right-stop";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       hyprctl dispatch submap CS2_COUNTER_LEFT >/dev/null
       ydotool key 32:0
