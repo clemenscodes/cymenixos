@@ -154,7 +154,6 @@ let
     text = ''
       hyprctl dispatch submap CS2_COUNTER_RIGHT
       ydotool key 30:0
-      sleep 0.1
       ydotool key 32:1 32:0
       hyprctl dispatch submap CS2
     '';
