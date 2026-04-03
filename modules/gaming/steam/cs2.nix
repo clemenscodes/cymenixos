@@ -142,7 +142,6 @@ let
       log() { echo "$(date +%T.%3N) [left-start]  $*" >> ${cs2Log}; }
       log "A pressed — switching to CS2_STRAFING_LEFT, injecting A:1"
       hyprctl dispatch submap CS2_STRAFING_LEFT >/dev/null
-      ydotool key 30:1
       log "done"
     '';
   };
@@ -154,7 +153,6 @@ let
       log() { echo "$(date +%T.%3N) [right-start] $*" >> ${cs2Log}; }
       log "D pressed — switching to CS2_STRAFING_RIGHT, injecting D:1"
       hyprctl dispatch submap CS2_STRAFING_RIGHT >/dev/null
-      ydotool key 32:1
       log "done"
     '';
   };
@@ -744,8 +742,8 @@ in
                 # and marks the key so bindr fires on the physical release.
                 submap = CS2
                 bind = ALT, W, submap, reset
-                bind = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
-                bind = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
+                binden = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
+                binden = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
 
                 # CS2_STRAFING_LEFT — active while player is strafing left (A held).
                 # binden: fires on injected A:1 AND on every physical A:2 repeat.
