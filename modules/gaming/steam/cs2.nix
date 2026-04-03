@@ -79,11 +79,22 @@ let
   cs2CounterStrafeScript = pkgs.writeText "cs2-counterstrafe.py" ''
     import asyncio, evdev, json, subprocess, sys, time
 
-    KEY_A = evdev.ecodes.KEY_A   # evdev code 30
-    KEY_D = evdev.ecodes.KEY_D   # evdev code 32
+    KEY_A = evdev.ecodes.KEY_A
+    KEY_D = evdev.ecodes.KEY_D
+
+    # Keys that only real keyboards have — used to reject mice/YubiKeys/macro pads
+    # that happen to report a few letter keys in their capabilities.
+    KEYBOARD_REQUIRED = {
+        evdev.ecodes.KEY_SPACE,
+        evdev.ecodes.KEY_ENTER,
+        evdev.ecodes.KEY_LEFTSHIFT,
+        evdev.ecodes.KEY_LEFTCTRL,
+        evdev.ecodes.KEY_TAB,
+        evdev.ecodes.KEY_BACKSPACE,
+    }
 
     # Minimum hold duration in seconds to be counted as movement, not a chat
-    # keystroke. Typing in chat presses keys for ~50–80 ms; strafing holds
+    # keystroke. Typing in chat presses keys for ~50-80 ms; strafing holds
     # keys for much longer. Keys held shorter than this are ignored.
     HOLD_THRESHOLD = 0.1
 
@@ -92,8 +103,10 @@ let
     VIRTUAL_KEYWORDS = ["xremap", "ydotool", "ydotoold", "virtual", "uinput"]
 
     def is_virtual(name):
-        n = name.lower()
-        return any(kw in n for kw in VIRTUAL_KEYWORDS)
+        return any(kw in name.lower() for kw in VIRTUAL_KEYWORDS)
+
+    def is_keyboard(keys):
+        return KEYBOARD_REQUIRED.issubset(set(keys))
 
     def cs2_focused():
         """Return True if CS2 or gamescope/CS2 is the active Hyprland window."""
@@ -114,7 +127,8 @@ let
         return False
 
     def inject(key):
-        """Fire a brief key tap via ydotool (non-blocking)."""
+        name = "D" if key == KEY_D else "A"
+        print(f"  -> injecting {name}", flush=True)
         subprocess.Popen(
             ["ydotool", "key", "--key-delay", "50",
              str(key) + ":1", str(key) + ":0"],
@@ -134,14 +148,22 @@ let
                 code = event.code
                 if code not in (KEY_A, KEY_D):
                     continue
+                key_name = "A" if code == KEY_A else "D"
                 if event.value == 1:  # key down
                     press_times[device.fd][code] = time.monotonic()
                 elif event.value == 0:  # key up
                     t0 = press_times[device.fd].pop(code, None)
                     if t0 is None:
                         continue
-                    held = time.monotonic() - t0
-                    if held >= HOLD_THRESHOLD and cs2_focused():
+                    held_ms = (time.monotonic() - t0) * 1000
+                    focused = cs2_focused()
+                    print(
+                        f"{key_name} released after {held_ms:.0f}ms"
+                        f" | threshold={'ok' if held_ms >= HOLD_THRESHOLD * 1000 else 'too short'}"
+                        f" | cs2={'focused' if focused else 'not focused'}",
+                        flush=True,
+                    )
+                    if held_ms >= HOLD_THRESHOLD * 1000 and focused:
                         inject(KEY_D if code == KEY_A else KEY_A)
         except OSError:
             pass
@@ -157,8 +179,9 @@ let
                     continue
                 caps = d.capabilities()
                 keys = caps.get(evdev.ecodes.EV_KEY, [])
-                if KEY_A in keys and KEY_D in keys and len(keys) > 50:
-                    devices.append(d)
+                if not is_keyboard(keys):
+                    continue
+                devices.append(d)
             except Exception:
                 pass
 
@@ -167,7 +190,7 @@ let
             sys.exit(1)
 
         for d in devices:
-            print("cs2-counterstrafe: monitoring " + d.name, file=sys.stderr)
+            print(f"cs2-counterstrafe: monitoring {d.name}", flush=True)
 
         await asyncio.gather(*(monitor(d) for d in devices))
 
