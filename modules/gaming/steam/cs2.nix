@@ -141,7 +141,7 @@ let
     ];
     text = ''
       hyprctl dispatch submap CS2_STRAFING_LEFT
-      ydotool key 32:0
+      ydotool key 30:0
     '';
   };
 
@@ -168,7 +168,7 @@ let
     ];
     text = ''
       hyprctl dispatch submap CS2_STRAFING_RIGHT
-      ydotool key 30:0
+      ydotool key 32:0
     '';
   };
 
