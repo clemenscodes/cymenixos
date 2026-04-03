@@ -715,10 +715,12 @@ in
                 bindn = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
 
                 submap = CS2_STRAFE_LEFT
+                bind = ALT, W, submap, reset
                 bindn = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
                 bindr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
 
                 submap = CS2_STRAFE_RIGHT
+                bind = ALT, W, submap, reset
                 bindn = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
                 bindr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
 
