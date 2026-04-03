@@ -138,7 +138,9 @@ let
       pkgs.ydotool
     ];
     text = ''
+      hyprctl dispatch submap CS2_STOP_LEFT
       ydotool key -d 16 32:1 32:0
+      hyprctl dispatch submap CS2
     '';
   };
 
@@ -149,7 +151,9 @@ let
       pkgs.ydotool
     ];
     text = ''
+      hyprctl dispatch submap CS2_STOP_RIGHT
       ydotool key -d 16 30:1 30:0
+      hyprctl dispatch submap CS2
     '';
   };
 
@@ -689,10 +693,10 @@ in
                 # Empty submaps used during counter-strafe injection.
                 # Injected D/A keys arrive here where they are unbound and pass
                 # through to the game without triggering another counter-strafe.
-                submap = CS2_COUNTER_RIGHT
+                submap = CS2_STOP_RIGHT
                 bind = ALT, W, submap, reset
 
-                submap = CS2_COUNTER_LEFT
+                submap = CS2_STOP_LEFT
                 bind = ALT, W, submap, reset
 
                 submap = reset
