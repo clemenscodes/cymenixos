@@ -74,17 +74,12 @@ let
   #   cs2-focus-daemon watches Hyprland IPC and dispatches to the CS2 submap
   #   whenever CS2 gains focus (and back to reset on any other window).
   #
-  #   CS2 submap: A/D presses consumed (no passthrough).
-  #     A press → cs2StrafeLeftStart: switch to CS2_STRAFING_LEFT, inject A:1.
-  #               Injected A:1 lands in CS2_STRAFING_LEFT where bindn fires,
-  #               passing A:1 to gamescope (starts movement + Hyprland repeat timer)
-  #               and marking A as bound so bindr fires on the physical A:0.
-  #     D press → symmetric (CS2_STRAFING_RIGHT, inject D:1).
+  #   CS2 submap: A/D use binden (passthrough press+repeat) + bindr (intercept release).
+  #     A held → binden passes A:1/A:2 to gamescope on every event (movement stays active).
+  #     A released → bindr fires in same submap (key was marked by binden here) → stop script.
+  #     Stop: switch to CS2_INJECT, inject A:1→D:1→A:0→D:0, return to CS2.
   #
-  #   CS2_STRAFING_LEFT: binden=A (passthrough on press+repeat, marks for bindr), bindr=A (intercept release).
-  #     A release → cs2StrafeLeftStop: CS2_INJECT → inject A:1,D:1,A:0,D:0 → CS2.
-  #
-  #   CS2_INJECT: empty — counter-strafe injections land here unbound and pass through.
+  #   CS2_INJECT: empty — injected counter-strafe keys land here unbound and pass through.
 
   cs2FocusDaemon = pkgs.writeShellApplication {
     name = "cs2-focus-daemon";
@@ -130,32 +125,6 @@ let
   };
 
   cs2Log = "/tmp/cs2-strafe.log";
-
-  # Consuming bind intercepts A/D in CS2 submap.
-  # Start script: switch to the strafing submap, then inject A:1/D:1 so the
-  # injected press lands in the new submap where bindn fires (passing it to
-  # gamescope and marking the key for bindr on release).
-  cs2StrafeLeftStart = pkgs.writeShellApplication {
-    name = "cs2-strafe-left-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
-    text = ''
-      log() { echo "$(date +%T.%3N) [left-start]  $*" >> ${cs2Log}; }
-      log "A pressed — switching to CS2_STRAFING_LEFT, injecting A:1"
-      hyprctl dispatch submap CS2_STRAFING_LEFT >/dev/null
-      log "done"
-    '';
-  };
-
-  cs2StrafeRightStart = pkgs.writeShellApplication {
-    name = "cs2-strafe-right-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
-    text = ''
-      log() { echo "$(date +%T.%3N) [right-start] $*" >> ${cs2Log}; }
-      log "D pressed — switching to CS2_STRAFING_RIGHT, injecting D:1"
-      hyprctl dispatch submap CS2_STRAFING_RIGHT >/dev/null
-      log "done"
-    '';
-  };
 
   # bindr intercepts the release (does NOT pass to game).
   # Sequence: keep direction held → press counter → release direction → release counter.
@@ -658,9 +627,7 @@ in
         # Expose scripts in PATH so they can be run and tested manually.
         environment.systemPackages = lib.mkIf hcfg.enable [
           cs2FocusDaemon
-          cs2StrafeLeftStart
           cs2StrafeLeftStop
-          cs2StrafeRightStart
           cs2StrafeRightStop
         ];
 
@@ -736,33 +703,22 @@ in
               wayland.windowManager.hyprland.extraConfig = lib.mkIf hcfg.enable ''
                 # CS2 submap — entered automatically by cs2-focus-daemon when CS2 gains focus.
                 #
-                # A/D are consumed here (no passthrough). The start script switches to the
-                # per-direction strafing submap and injects A:1/D:1, which lands in the new
-                # submap where bindn passes it to gamescope (starting movement + repeat timer)
-                # and marks the key so bindr fires on the physical release.
+                # binden = non-consuming press+repeat: every A/D event passes to gamescope
+                #          AND marks the key so bindr fires on the same-submap release.
+                # bindr  = consuming release: intercepts A/D:0, runs counter-strafe script.
+                #
+                # bindr fires because the key was consumed by binden IN THIS SAME SUBMAP.
+                # No submap switching needed — that was the bug.
                 submap = CS2
-                bind = ALT, W, submap, reset
-                binden = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
-                binden = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
-
-                # CS2_STRAFING_LEFT — active while player is strafing left (A held).
-                # binden: fires on injected A:1 AND on every physical A:2 repeat.
-                #         Passes each event to gamescope (movement stays active).
-                # bindr: physical A:0 intercepted — run counter-strafe sequence.
-                submap = CS2_STRAFING_LEFT
                 bind   = ALT, W, submap, reset
                 binden = , A, exec, true
                 bindr  = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
-
-                # CS2_STRAFING_RIGHT — active while player is strafing right (D held).
-                submap = CS2_STRAFING_RIGHT
-                bind   = ALT, W, submap, reset
                 binden = , D, exec, true
                 bindr  = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
 
                 # CS2_INJECT — empty landing zone for counter-strafe injection.
                 # Injected keys arrive here unbound and pass through to the game without
-                # re-triggering any counter-strafe binds.
+                # re-triggering the counter-strafe binds.
                 submap = CS2_INJECT
                 bind = ALT, W, submap, reset
 
