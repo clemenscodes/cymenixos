@@ -19,17 +19,49 @@ let
   vdfAttrs = attrs: lib.concatStringsSep "\n" (lib.mapAttrsToList vdfLine attrs);
 
   # ---------------------------------------------------------------------------
-  # Launch script
+  # Steam launch options string (stored in localconfig.vdf via activation)
+  # Uses Steam's %command% mechanism so gamescope wraps the CS2 executable
+  # directly — works correctly whether Steam is already running or not.
   # ---------------------------------------------------------------------------
 
-  envExports = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList (k: v: "export ${k}=${lib.escapeShellArg v}") cfg.env
-  );
-  gamescopePrefix = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
-  gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
-  launchScript = pkgs.writeShellScript "cs2-launch" ''
-    ${envExports}
-    exec ${gamescopePrefix}steam -applaunch 730 ${gameArgsStr}
+  launchOptions =
+    let
+      envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
+      gamescopeStr = lib.optionalString cfg.gamescope.enable
+        "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
+      gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
+    in
+    lib.concatStringsSep " " (lib.filter (s: s != "") [
+      envStr
+      "${gamescopeStr}%command%"
+      gameArgsStr
+    ]);
+
+  # Python script that patches localconfig.vdf with the CS2 launch options.
+  # Reads the launch options string from $CS2_LAUNCH_OPTS to avoid shell quoting issues.
+  python = pkgs.python3.withPackages (ps: [ ps.vdf ]);
+  updateLocalconfigScript = pkgs.writeText "update-cs2-localconfig.py" ''
+    import os, sys, vdf
+
+    path = sys.argv[1]
+    opts = os.environ["CS2_LAUNCH_OPTS"]
+
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = vdf.load(f)
+
+        apps = data["UserLocalConfigStore"]["Software"]["Valve"]["Steam"]["apps"]
+        if "730" not in apps:
+            apps["730"] = {}
+        apps["730"]["LaunchOptions"] = opts
+
+        with open(path, "w", encoding="utf-8") as f:
+            vdf.dump(data, f, pretty=True)
+
+        print("cs2: updated LaunchOptions in localconfig.vdf")
+    except Exception as e:
+        print("cs2: failed to update localconfig.vdf: " + str(e), file=sys.stderr)
+        sys.exit(1)
   '';
 
   # ---------------------------------------------------------------------------
@@ -474,7 +506,9 @@ in
                   cs2 = {
                     name = "Counter-Strike 2";
                     comment = "CS2 via Steam";
-                    exec = "${launchScript}";
+                    # Steam uses the LaunchOptions stored in localconfig.vdf (set via activation).
+                    # This correctly wraps CS2 (not Steam) in gamescope via %command%.
+                    exec = "steam -applaunch 730";
                     icon = "steam_icon_730";
                     categories = [ "Game" ];
                     settings = {
@@ -496,6 +530,17 @@ in
                       run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
                     else
                       echo "cs2: userdata cfg dir not found, skipping settings sync (CS2 not installed?)"
+                    fi
+
+                    # Update localconfig.vdf so Steam uses gamescope (%command%) as launch options.
+                    # This wraps the CS2 executable — not Steam — regardless of whether Steam is
+                    # already running when the desktop entry is clicked.
+                    localcfg="$HOME/.local/share/Steam/userdata/${cfg.steamId}/config/localconfig.vdf"
+                    if [ -f "$localcfg" ]; then
+                      export CS2_LAUNCH_OPTS="${launchOptions}"
+                      $DRY_RUN_CMD ${python}/bin/python3 ${updateLocalconfigScript} "$localcfg"
+                    else
+                      echo "cs2: localconfig.vdf not found, skipping launch options update (Steam not set up?)"
                     fi
                   '';
                 };
