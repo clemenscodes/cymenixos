@@ -81,7 +81,7 @@ let
   #               and marking A as bound so bindr fires on the physical A:0.
   #     D press → symmetric (CS2_STRAFING_RIGHT, inject D:1).
   #
-  #   CS2_STRAFING_LEFT: bindn=A (passthrough, marks for bindr), bindr=A (intercept release).
+  #   CS2_STRAFING_LEFT: binden=A (passthrough on press+repeat, marks for bindr), bindr=A (intercept release).
   #     A release → cs2StrafeLeftStop: CS2_INJECT → inject A:1,D:1,A:0,D:0 → CS2.
   #
   #   CS2_INJECT: empty — counter-strafe injections land here unbound and pass through.
@@ -748,18 +748,19 @@ in
                 bind = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
 
                 # CS2_STRAFING_LEFT — active while player is strafing left (A held).
-                # bindn: injected A:1 passes through to gamescope AND marks A for bindr.
+                # binden: fires on injected A:1 AND on every physical A:2 repeat.
+                #         Passes each event to gamescope (movement stays active).
                 # bindr: physical A:0 intercepted — run counter-strafe sequence.
                 submap = CS2_STRAFING_LEFT
-                bind  = ALT, W, submap, reset
-                bindn = , A, exec, true
-                bindr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
+                bind   = ALT, W, submap, reset
+                binden = , A, exec, true
+                bindr  = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
 
                 # CS2_STRAFING_RIGHT — active while player is strafing right (D held).
                 submap = CS2_STRAFING_RIGHT
-                bind  = ALT, W, submap, reset
-                bindn = , D, exec, true
-                bindr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
+                bind   = ALT, W, submap, reset
+                binden = , D, exec, true
+                bindr  = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
 
                 # CS2_INJECT — empty landing zone for counter-strafe injection.
                 # Injected keys arrive here unbound and pass through to the game without
