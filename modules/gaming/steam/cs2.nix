@@ -77,15 +77,10 @@ let
   pythonEvdev = pkgs.python3.withPackages (ps: [ ps.evdev ]);
 
   cs2CounterStrafeScript = pkgs.writeText "cs2-counterstrafe.py" ''
-    import asyncio
-    import evdev
-    import subprocess
-    import sys
-    import os
+    import asyncio, evdev, json, subprocess, sys
 
     KEY_A = evdev.ecodes.KEY_A   # evdev code 30
     KEY_D = evdev.ecodes.KEY_D   # evdev code 32
-    FLAG   = "/tmp/cs2-active"
 
     # Virtual/software devices to exclude — they re-emit physical events and
     # would cause feedback loops with the ydotool injection.
@@ -95,12 +90,27 @@ let
         n = name.lower()
         return any(kw in n for kw in VIRTUAL_KEYWORDS)
 
-    def active():
-        return os.path.exists(FLAG)
+    def cs2_focused():
+        """Return True if CS2 or gamescope/CS2 is the active Hyprland window."""
+        try:
+            r = subprocess.run(
+                ["hyprctl", "activewindow", "-j"],
+                capture_output=True, text=True, timeout=0.2,
+            )
+            w = json.loads(r.stdout)
+            cls   = w.get("class", "")
+            title = w.get("title", "")
+            if cls in ("cs2",) or cls.startswith("cs2."):
+                return True
+            if cls.startswith("gamescope") and "Counter-Strike" in title:
+                return True
+        except Exception:
+            pass
+        return False
 
     def inject(key):
         """Fire a brief key tap via ydotool (non-blocking)."""
-        if active():
+        if cs2_focused():
             subprocess.Popen(
                 ["ydotool", "key", "--key-delay", "50",
                  str(key) + ":1", str(key) + ":0"],
@@ -147,103 +157,9 @@ let
 
   cs2CounterStrafeDaemon = pkgs.writeShellApplication {
     name = "cs2-counterstrafe-daemon";
-    runtimeInputs = [ pythonEvdev pkgs.ydotool ];
+    runtimeInputs = [ pythonEvdev pkgs.ydotool pkgs.hyprland ];
     text = ''
       exec ${pythonEvdev}/bin/python3 ${cs2CounterStrafeScript}
-    '';
-  };
-
-  cs2ModeStart = pkgs.writeShellApplication {
-    name = "cs2-mode-start";
-    runtimeInputs = [ pkgs.hyprland ];
-    text = ''
-      hyprctl dispatch submap CS2
-      touch /tmp/cs2-active
-    '';
-  };
-
-  cs2ModeStop = pkgs.writeShellApplication {
-    name = "cs2-mode-stop";
-    runtimeInputs = [ pkgs.hyprland ];
-    text = ''
-      hyprctl dispatch submap reset
-      rm -f /tmp/cs2-active
-    '';
-  };
-
-  # Monitors Hyprland IPC events to enter/exit the CS2 submap when the
-  # CS2/gamescope window gains or loses focus.
-  cs2FocusDaemon = pkgs.writeShellApplication {
-    name = "cs2-focus-daemon";
-    runtimeInputs = [
-      pkgs.hyprland
-      pkgs.socat
-      pkgs.jq
-      cs2ModeStart
-      cs2ModeStop
-    ];
-    text = ''
-      # Match cs2 by native class OR gamescope wrapping CS2 specifically.
-      # Checking the title prevents matching other games running under gamescope.
-      is_cs2_window() {
-        local class="$1" title="$2"
-        case "$class" in
-          cs2|cs2.*) return 0 ;;
-          gamescope*)
-            case "$title" in
-              *"Counter-Strike"*) return 0 ;;
-            esac
-            ;;
-        esac
-        return 1
-      }
-
-      CS2_FOCUSED=false
-
-      # On startup: check whether CS2 is already the active window so we
-      # enter CS2 mode immediately without waiting for the next focus event.
-      active_json="$(hyprctl activewindow -j 2>/dev/null)"
-      initial_class="$(echo "$active_json" | jq -r '.class // ""')"
-      initial_title="$(echo "$active_json" | jq -r '.title // ""')"
-      if is_cs2_window "$initial_class" "$initial_title"; then
-        cs2-mode-start
-        CS2_FOCUSED=true
-      fi
-
-      # Use process substitution so the while loop runs in the current shell,
-      # not a subshell — CS2_FOCUSED changes persist across iterations.
-      while read -r line; do
-        case "$line" in
-          activewindow*)
-            # Event format: activewindow>>CLASS,TITLE
-            payload="$(echo "$line" | awk -F '>>' '{print $2}')"
-            class="$(echo "$payload" | awk -F ',' '{print $1}')"
-            title="$(echo "$payload" | cut -d',' -f2-)"
-            if is_cs2_window "$class" "$title"; then
-              if [ "$CS2_FOCUSED" = "false" ]; then
-                cs2-mode-start
-                CS2_FOCUSED=true
-              fi
-            else
-              if [ "$CS2_FOCUSED" = "true" ]; then
-                cs2-mode-stop
-                CS2_FOCUSED=false
-              fi
-            fi
-            ;;
-          closewindow*)
-            if [ "$CS2_FOCUSED" = "true" ]; then
-              if ! hyprctl clients -j | \
-                   jq -e '.[] | select(.class | test("^cs2$"; "i") or (.class | test("^gamescope"; "i")) and (.title | test("Counter-Strike"; "i")))' \
-                   > /dev/null 2>&1; then
-                cs2-mode-stop
-                CS2_FOCUSED=false
-              fi
-            fi
-            ;;
-        esac
-      done < <(socat -U - \
-        UNIX-CONNECT:"$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock")
     '';
   };
 
@@ -691,12 +607,9 @@ in
         # ydotool: needed for counter-strafe key injection via uinput.
         programs.ydotool.enable = lib.mkIf hcfg.enable (lib.mkDefault true);
 
-        # User must be in the ydotool group (uinput access) and input group (evdev read).
+        # User must be in the ydotool group (uinput access) and input group (raw evdev read).
         users.users.${config.modules.users.user} = lib.mkIf hcfg.enable {
-          extraGroups = [
-            config.programs.ydotool.group
-            "input"
-          ];
+          extraGroups = [ config.programs.ydotool.group "input" ];
         };
 
         home-manager = lib.mkIf config.modules.home-manager.enable {
@@ -748,28 +661,13 @@ in
               };
 
               # ---------------------------------------------------------------
-              # Hyprland integration (focus tracking + counter-strafing)
+              # Hyprland integration (counter-strafing)
               # ---------------------------------------------------------------
               systemd.user.services = lib.mkIf hcfg.enable {
-                # Watches Hyprland IPC: enters/exits the CS2 submap when the
-                # CS2/gamescope window is focused.
-                cs2-focus-daemon = {
-                  Unit = {
-                    Description = "CS2 Hyprland focus tracking daemon";
-                    After = [ "graphical-session.target" ];
-                    PartOf = [ "graphical-session.target" ];
-                  };
-                  Service = {
-                    ExecStart = "${cs2FocusDaemon}/bin/cs2-focus-daemon";
-                    Restart = "on-failure";
-                    RestartSec = "2s";
-                  };
-                  Install.WantedBy = [ "graphical-session.target" ];
-                };
-
                 # Reads physical keyboard evdev events; on A/D release injects
                 # the opposite strafe key via ydotool/uinput for counter-strafing.
-                # Only injects while /tmp/cs2-active exists (set by mode scripts).
+                # Checks hyprctl activewindow before injecting so it only fires
+                # when CS2 is actually focused — no flag file or focus daemon needed.
                 cs2-counterstrafe-daemon = {
                   Unit = {
                     Description = "CS2 counter-strafe daemon";
@@ -784,18 +682,6 @@ in
                   Install.WantedBy = [ "graphical-session.target" ];
                 };
               };
-
-              wayland.windowManager.hyprland.extraConfig =
-                lib.optionalString hcfg.enable ''
-                  # CS2 submap — entered when the CS2/gamescope window is focused.
-                  # Intercepts ESCAPE so that caps_lock (remapped to escape via xkb)
-                  # does not trigger in-game actions.
-                  # Counter-strafing is handled by the evdev daemon, not Hyprland binds,
-                  # to avoid the feedback loop of injected keys re-triggering binds.
-                  submap = CS2
-                  bind = , ESCAPE, exec, true
-                  submap = reset
-                '';
             };
           };
         };
