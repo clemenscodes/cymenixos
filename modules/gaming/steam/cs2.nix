@@ -66,142 +66,108 @@ let
   '';
 
   # ---------------------------------------------------------------------------
-  # Hyprland integration scripts
+  # Hyprland integration scripts (submap-based counter-strafing)
   # ---------------------------------------------------------------------------
+  #
+  # Flow:
+  #   cs2-focus-daemon watches Hyprland IPC and dispatches to the CS2 submap
+  #   whenever CS2 gains focus (and back to reset on any other window).
+  #
+  #   CS2 submap: A/D presses are intercepted.
+  #     A press → switch to CS2_STRAFING_LEFT, inject A:1 (passes through in
+  #               new submap since only bindr is present there)
+  #     D press → symmetric
+  #
+  #   CS2_STRAFING_LEFT: only A release is intercepted (bindr).
+  #     A release → switch to CS2_COUNTER_RIGHT, inject A:0, inject D:1 D:0
+  #                 (D is unbound in CS2_COUNTER_RIGHT → passes through),
+  #                 wait for echoes, return to CS2.
+  #
+  #   CS2_COUNTER_RIGHT / CS2_COUNTER_LEFT: empty submaps.  Injected counter-
+  #   strafe keys arrive here where they are NOT bound, so they pass through
+  #   to the game without triggering another counter-strafe.
 
-  # Python interpreter with evdev for the counter-strafe daemon.
-  # The daemon reads physical keyboard events (evdev, no grab) and injects
-  # the opposite strafe key via ydotool/uinput when a strafe key is released.
-  # Using physical evdev for input and uinput for output breaks the feedback
-  # loop — injected events never reach the evdev monitor.
-  pythonEvdev = pkgs.python3.withPackages (ps: [ ps.evdev ]);
-
-  cs2CounterStrafeScript = pkgs.writeText "cs2-counterstrafe.py" ''
-    import asyncio, evdev, json, subprocess, sys, time
-
-    KEY_A = evdev.ecodes.KEY_A
-    KEY_D = evdev.ecodes.KEY_D
-
-    # Keys that only real keyboards have — used to reject mice/YubiKeys/macro pads
-    # that happen to report a few letter keys in their capabilities.
-    KEYBOARD_REQUIRED = {
-        evdev.ecodes.KEY_SPACE,
-        evdev.ecodes.KEY_ENTER,
-        evdev.ecodes.KEY_LEFTSHIFT,
-        evdev.ecodes.KEY_LEFTCTRL,
-        evdev.ecodes.KEY_TAB,
-        evdev.ecodes.KEY_BACKSPACE,
-    }
-
-    # Minimum hold duration in seconds to be counted as movement, not a chat
-    # keystroke. Typing in chat presses keys for ~50-80 ms; strafing holds
-    # keys for much longer. Keys held shorter than this are ignored.
-    HOLD_THRESHOLD = 0.1
-
-    # Virtual/software devices to exclude — they re-emit physical events and
-    # would cause feedback loops with the ydotool injection.
-    VIRTUAL_KEYWORDS = ["xremap", "ydotool", "ydotoold", "virtual", "uinput"]
-
-    def is_virtual(name):
-        return any(kw in name.lower() for kw in VIRTUAL_KEYWORDS)
-
-    def is_keyboard(keys):
-        return KEYBOARD_REQUIRED.issubset(set(keys))
-
-    def cs2_focused():
-        """Return True if CS2 or gamescope/CS2 is the active Hyprland window."""
-        try:
-            r = subprocess.run(
-                ["hyprctl", "activewindow", "-j"],
-                capture_output=True, text=True, timeout=0.2,
-            )
-            w = json.loads(r.stdout)
-            cls   = w.get("class", "")
-            title = w.get("title", "")
-            if cls in ("cs2",) or cls.startswith("cs2."):
-                return True
-            if cls.startswith("gamescope") and "Counter-Strike" in title:
-                return True
-        except Exception:
-            pass
-        return False
-
-    def inject(key):
-        name = "D" if key == KEY_D else "A"
-        print(f"  -> injecting {name}", flush=True)
-        subprocess.Popen(
-            ["ydotool", "key", "--key-delay", "50",
-             str(key) + ":1", str(key) + ":0"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-
-    # Per-device key-down timestamps: {device_fd: {key_code: press_time}}
-    press_times: dict = {}
-
-    async def monitor(device):
-        press_times[device.fd] = {}
-        try:
-            async for event in device.async_read_loop():
-                if event.type != evdev.ecodes.EV_KEY:
-                    continue
-                code = event.code
-                if code not in (KEY_A, KEY_D):
-                    continue
-                key_name = "A" if code == KEY_A else "D"
-                if event.value == 1:  # key down
-                    press_times[device.fd][code] = time.monotonic()
-                elif event.value == 0:  # key up
-                    t0 = press_times[device.fd].pop(code, None)
-                    if t0 is None:
-                        continue
-                    held_ms = (time.monotonic() - t0) * 1000
-                    focused = cs2_focused()
-                    print(
-                        f"{key_name} released after {held_ms:.0f}ms"
-                        f" | threshold={'ok' if held_ms >= HOLD_THRESHOLD * 1000 else 'too short'}"
-                        f" | cs2={'focused' if focused else 'not focused'}",
-                        flush=True,
-                    )
-                    if held_ms >= HOLD_THRESHOLD * 1000 and focused:
-                        inject(KEY_D if code == KEY_A else KEY_A)
-        except OSError:
-            pass
-        finally:
-            press_times.pop(device.fd, None)
-
-    async def main():
-        devices = []
-        for path in evdev.list_devices():
-            try:
-                d    = evdev.InputDevice(path)
-                if is_virtual(d.name):
-                    continue
-                caps = d.capabilities()
-                keys = caps.get(evdev.ecodes.EV_KEY, [])
-                if not is_keyboard(keys):
-                    continue
-                devices.append(d)
-            except Exception:
-                pass
-
-        if not devices:
-            print("cs2-counterstrafe: no keyboard found", file=sys.stderr)
-            sys.exit(1)
-
-        for d in devices:
-            print(f"cs2-counterstrafe: monitoring {d.name}", flush=True)
-
-        await asyncio.gather(*(monitor(d) for d in devices))
-
-    asyncio.run(main())
-  '';
-
-  cs2CounterStrafeDaemon = pkgs.writeShellApplication {
-    name = "cs2-counterstrafe-daemon";
-    runtimeInputs = [ pythonEvdev pkgs.ydotool pkgs.hyprland ];
+  cs2FocusDaemon = pkgs.writeShellApplication {
+    name = "cs2-focus-daemon";
+    runtimeInputs = [ pkgs.hyprland pkgs.socat pkgs.jq ];
     text = ''
-      exec ${pythonEvdev}/bin/python3 ${cs2CounterStrafeScript}
+      enter_cs2() { hyprctl dispatch submap CS2   >/dev/null 2>&1; }
+      leave_cs2()  { hyprctl dispatch submap reset >/dev/null 2>&1; }
+
+      is_cs2() {
+        local class="$1" title="$2"
+        [[ "$class" == "cs2" ]] || { [[ "$class" == gamescope* ]] && [[ "$title" == *"Counter-Strike"* ]]; }
+      }
+
+      # Check which window is focused right now (service may start mid-session)
+      info=$(hyprctl activewindow -j 2>/dev/null || echo '{}')
+      class=$(printf '%s' "$info" | jq -r '.class // ""')
+      title=$(printf '%s' "$info" | jq -r '.title // ""')
+      if is_cs2 "$class" "$title"; then
+        enter_cs2
+      else
+        leave_cs2
+      fi
+
+      # React to every subsequent focus change via Hyprland IPC socket2
+      while IFS= read -r line; do
+        event="''${line%%>>*}"
+        data="''${line#*>>}"
+        if [[ "$event" == "activewindow" ]]; then
+          class="''${data%%,*}"
+          title="''${data#*,}"
+          if is_cs2 "$class" "$title"; then
+            enter_cs2
+          else
+            leave_cs2
+          fi
+        fi
+      done < <(socat -U - "UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock")
+    '';
+  };
+
+  cs2StrafeLeftStart = pkgs.writeShellApplication {
+    name = "cs2-strafe-left-start";
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    text = ''
+      # Switch submap BEFORE injecting so the echo of the injected key
+      # arrives in CS2_STRAFING_LEFT where A is only bound on release.
+      hyprctl dispatch submap CS2_STRAFING_LEFT >/dev/null
+      ydotool key 30:1
+    '';
+  };
+
+  cs2StrafeLeftStop = pkgs.writeShellApplication {
+    name = "cs2-strafe-left-stop";
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    text = ''
+      # Switch to safe submap before injecting counter D so D is unbound there.
+      hyprctl dispatch submap CS2_COUNTER_RIGHT >/dev/null
+      ydotool key 30:0
+      ydotool key --key-delay 16 32:1 32:0
+      sleep 0.05
+      hyprctl dispatch submap CS2 >/dev/null
+    '';
+  };
+
+  cs2StrafeRightStart = pkgs.writeShellApplication {
+    name = "cs2-strafe-right-start";
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    text = ''
+      hyprctl dispatch submap CS2_STRAFING_RIGHT >/dev/null
+      ydotool key 32:1
+    '';
+  };
+
+  cs2StrafeRightStop = pkgs.writeShellApplication {
+    name = "cs2-strafe-right-stop";
+    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    text = ''
+      hyprctl dispatch submap CS2_COUNTER_LEFT >/dev/null
+      ydotool key 32:0
+      ydotool key --key-delay 16 30:1 30:0
+      sleep 0.05
+      hyprctl dispatch submap CS2 >/dev/null
     '';
   };
 
@@ -649,14 +615,18 @@ in
         # ydotool: needed for counter-strafe key injection via uinput.
         programs.ydotool.enable = lib.mkIf hcfg.enable (lib.mkDefault true);
 
-        # User must be in the ydotool group (uinput access) and input group (raw evdev read).
+        # User must be in the ydotool group (uinput access for key injection).
         users.users.${config.modules.users.user} = lib.mkIf hcfg.enable {
-          extraGroups = [ config.programs.ydotool.group "input" ];
+          extraGroups = [ config.programs.ydotool.group ];
         };
 
         # Expose scripts in PATH so they can be run and tested manually.
         environment.systemPackages = lib.mkIf hcfg.enable [
-          cs2CounterStrafeDaemon
+          cs2FocusDaemon
+          cs2StrafeLeftStart
+          cs2StrafeLeftStop
+          cs2StrafeRightStart
+          cs2StrafeRightStop
         ];
 
         home-manager = lib.mkIf config.modules.home-manager.enable {
@@ -708,27 +678,51 @@ in
               };
 
               # ---------------------------------------------------------------
-              # Hyprland integration (counter-strafing)
+              # Hyprland integration (submap-based counter-strafing)
               # ---------------------------------------------------------------
               systemd.user.services = lib.mkIf hcfg.enable {
-                # Reads physical keyboard evdev events; on A/D release injects
-                # the opposite strafe key via ydotool/uinput for counter-strafing.
-                # Checks hyprctl activewindow before injecting so it only fires
-                # when CS2 is actually focused — no flag file or focus daemon needed.
-                cs2-counterstrafe-daemon = {
+                # Watches Hyprland IPC for window focus changes and dispatches
+                # to the CS2 submap when CS2 is focused, reset otherwise.
+                cs2-focus-daemon = {
                   Unit = {
-                    Description = "CS2 counter-strafe daemon";
+                    Description = "CS2 Hyprland focus daemon";
                     After = [ "graphical-session.target" ];
                     PartOf = [ "graphical-session.target" ];
                   };
                   Service = {
-                    ExecStart = "${cs2CounterStrafeDaemon}/bin/cs2-counterstrafe-daemon";
+                    ExecStart = "${cs2FocusDaemon}/bin/cs2-focus-daemon";
                     Restart = "on-failure";
                     RestartSec = "2s";
                   };
                   Install.WantedBy = [ "graphical-session.target" ];
                 };
               };
+
+              wayland.windowManager.hyprland.extraConfig = lib.mkIf hcfg.enable ''
+                # CS2 submap — entered automatically when CS2 gains focus.
+                # A/D presses are intercepted; all other keys pass through.
+                submap = CS2
+                bind = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
+                bind = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
+
+                # Entered while A is physically held for left strafe.
+                # Only the A release is intercepted (bindr); everything else passes through.
+                submap = CS2_STRAFING_LEFT
+                bindr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
+
+                # Entered while D is physically held for right strafe.
+                submap = CS2_STRAFING_RIGHT
+                bindr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
+
+                # Empty submaps used during counter-strafe injection.
+                # Injected D/A keys arrive here where they are unbound and pass
+                # through to the game without triggering another counter-strafe.
+                submap = CS2_COUNTER_RIGHT
+
+                submap = CS2_COUNTER_LEFT
+
+                submap = reset
+              '';
             };
           };
         };
