@@ -140,7 +140,7 @@ let
     text = ''
       # Switch submap BEFORE injecting so the echo of the injected key
       # arrives in CS2_STRAFING_LEFT where A is only bound on release.
-      hyprctl dispatch submap CS2_STRAFING_LEFT >/dev/null
+      hyprctl dispatch submap CS2_STRAFING_LEFT
       ydotool key 30:1
     '';
   };
@@ -154,10 +154,10 @@ let
     text = ''
       # Switch to safe submap before injecting counter D so D is unbound there.
       ydotool key 30:0
-      hyprctl dispatch submap CS2_COUNTER_RIGHT >/dev/null
+      hyprctl dispatch submap CS2_COUNTER_RIGHT
       ydotool 32:1 32:0
-      sleep 0.1
-      hyprctl dispatch submap CS2 >/dev/null
+      sleep 0.2
+      hyprctl dispatch submap CS2
     '';
   };
 
@@ -168,7 +168,7 @@ let
       pkgs.ydotool
     ];
     text = ''
-      hyprctl dispatch submap CS2_STRAFING_RIGHT >/dev/null
+      hyprctl dispatch submap CS2_STRAFING_RIGHT
       ydotool key 32:1
     '';
   };
@@ -181,10 +181,10 @@ let
     ];
     text = ''
       ydotool key 32:0
-      hyprctl dispatch submap CS2_COUNTER_LEFT >/dev/null
+      hyprctl dispatch submap CS2_COUNTER_LEFT
       ydotool 30:1 30:0
-      sleep 0.05
-      hyprctl dispatch submap CS2 >/dev/null
+      sleep 0.2
+      hyprctl dispatch submap CS2
     '';
   };
 
