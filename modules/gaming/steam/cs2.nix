@@ -726,10 +726,12 @@ in
                 # Only the A release is intercepted (bindr); everything else passes through.
                 submap = CS2_STRAFING_LEFT
                 bindr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
+                bind = ALT, W, submap, reset
 
                 # Entered while D is physically held for right strafe.
                 submap = CS2_STRAFING_RIGHT
                 bindr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
+                bind = ALT, W, submap, reset
 
                 # Empty submaps used during counter-strafe injection.
                 # Injected D/A keys arrive here where they are unbound and pass
