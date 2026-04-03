@@ -1,8 +1,11 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}:
+{ config, ... }:
+let
   cfg = config.modules.gaming.steam.cs2;
 
   # ---------------------------------------------------------------------------
@@ -13,8 +16,7 @@
   vdfLine = k: v: "\t\t\"${k}\"\t\t\"${v}\"";
 
   # Generate a VDF convars/bindings block from an attrset
-  vdfAttrs = attrs:
-    lib.concatStringsSep "\n" (lib.mapAttrsToList vdfLine attrs);
+  vdfAttrs = attrs: lib.concatStringsSep "\n" (lib.mapAttrsToList vdfLine attrs);
 
   # ---------------------------------------------------------------------------
   # Launch script
@@ -23,9 +25,7 @@
   envExports = lib.concatStringsSep "\n" (
     lib.mapAttrsToList (k: v: "export ${k}=${lib.escapeShellArg v}") cfg.env
   );
-  gamescopePrefix =
-    lib.optionalString cfg.gamescope.enable
-    "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
+  gamescopePrefix = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
   gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
   launchScript = pkgs.writeShellScript "cs2-launch" ''
     ${envExports}
@@ -127,8 +127,7 @@
     map (b: {
       name = b.key;
       value = b.command;
-    })
-    cfg.binds
+    }) cfg.binds
   );
   keysFile = pkgs.writeText "cs2_user_keys_0_slot0.vcfg" ''
     "config"
@@ -145,13 +144,16 @@
   # ---------------------------------------------------------------------------
 
   userdataCfgPath = ".local/share/Steam/userdata/${cfg.steamId}/730/local/cfg";
-in {
+in
+{
   options = {
     modules = {
       gaming = {
         steam = {
           cs2 = {
-            enable = lib.mkEnableOption "CS2 Steam desktop entry and settings" // {default = false;};
+            enable = lib.mkEnableOption "CS2 Steam desktop entry and settings" // {
+              default = false;
+            };
 
             steamId = lib.mkOption {
               type = lib.types.str;
@@ -166,7 +168,7 @@ in {
             # --- launch ---
             env = lib.mkOption {
               type = lib.types.attrsOf lib.types.str;
-              default = {};
+              default = { };
               description = "Environment variables set before launching CS2.";
               example = {
                 SDL_VIDEO_DRIVER = "wayland";
@@ -177,24 +179,43 @@ in {
               };
             };
             gamescope = {
-              enable = lib.mkEnableOption "Wrap CS2 launch in gamescope" // {default = false;};
+              enable = lib.mkEnableOption "Wrap CS2 launch in gamescope" // {
+                default = false;
+              };
               args = lib.mkOption {
                 type = lib.types.listOf lib.types.str;
-                default = [];
+                default = [ ];
                 description = "Arguments passed to gamescope before --.";
-                example = ["-f" "-W" "3840" "-H" "2160" "--force-grab-cursor"];
+                example = [
+                  "-f"
+                  "-W"
+                  "3840"
+                  "-H"
+                  "2160"
+                  "--force-grab-cursor"
+                ];
               };
             };
             gameArgs = lib.mkOption {
               type = lib.types.listOf lib.types.str;
-              default = [];
+              default = [ ];
               description = "Arguments passed to CS2 via steam -applaunch 730.";
-              example = ["-vulkan" "-w" "3840" "-h" "2160" "-nojoy" "-novid"];
+              example = [
+                "-vulkan"
+                "-w"
+                "3840"
+                "-h"
+                "2160"
+                "-nojoy"
+                "-novid"
+              ];
             };
 
             # --- video (cs2_video.txt) ---
             video = {
-              enable = lib.mkEnableOption "Manage cs2_video.txt" // {default = false;};
+              enable = lib.mkEnableOption "Manage cs2_video.txt" // {
+                default = false;
+              };
               vendorId = lib.mkOption {
                 type = lib.types.int;
                 default = 4318;
@@ -231,7 +252,11 @@ in {
                 };
               };
               displayMode = lib.mkOption {
-                type = lib.types.enum ["windowed" "borderless" "fullscreen"];
+                type = lib.types.enum [
+                  "windowed"
+                  "borderless"
+                  "fullscreen"
+                ];
                 default = "borderless";
                 description = ''
                   windowed: no border, no fullscreen
@@ -396,13 +421,15 @@ in {
 
             # --- binds (cs2_user_keys_0_slot0.vcfg) ---
             binds = lib.mkOption {
-              type = lib.types.listOf (lib.types.submodule {
-                options = {
-                  key = lib.mkOption {type = lib.types.str;};
-                  command = lib.mkOption {type = lib.types.str;};
-                };
-              });
-              default = [];
+              type = lib.types.listOf (
+                lib.types.submodule {
+                  options = {
+                    key = lib.mkOption { type = lib.types.str; };
+                    command = lib.mkOption { type = lib.types.str; };
+                  };
+                }
+              );
+              default = [ ];
               description = "Keybinds written to cs2_user_keys_0_slot0.vcfg.";
               example = [
                 {
@@ -423,7 +450,7 @@ in {
             # --- extra convars (merged into cs2_user_convars) ---
             extraConvars = lib.mkOption {
               type = lib.types.attrsOf lib.types.str;
-              default = {};
+              default = { };
               description = "Any additional convars merged into cs2_user_convars_0_slot0.vcfg.";
               example = {
                 "con_enable" = "true";
@@ -436,43 +463,45 @@ in {
     };
   };
 
-  config = lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable && cfg.enable) {
-    home-manager = lib.mkIf config.modules.home-manager.enable {
-      users = {
-        ${config.modules.users.user} = {
-          xdg = {
-            desktopEntries = {
-              cs2 = {
-                name = "Counter-Strike 2";
-                comment = "CS2 via Steam";
-                exec = "${launchScript}";
-                icon = "steam_icon_730";
-                categories = ["Game"];
-                settings = {
-                  StartupWMClass = "cs2";
+  config =
+    lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable && cfg.enable)
+      {
+        home-manager = lib.mkIf config.modules.home-manager.enable {
+          users = {
+            ${config.modules.users.user} = {
+              xdg = {
+                desktopEntries = {
+                  cs2 = {
+                    name = "Counter-Strike 2";
+                    comment = "CS2 via Steam";
+                    exec = "${launchScript}";
+                    icon = "steam_icon_730";
+                    categories = [ "Game" ];
+                    settings = {
+                      StartupWMClass = "cs2";
+                    };
+                  };
+                };
+              };
+
+              home = {
+                activation = lib.mkIf (cfg.steamId != "") {
+                  cs2Settings = inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+                    cfgDir="$HOME/${userdataCfgPath}"
+                    if [ -d "$cfgDir" ]; then
+                      ${lib.optionalString cfg.video.enable ''
+                        run install -m 644 ${videoFile} "$cfgDir/cs2_video.txt"
+                      ''}
+                      run install -m 644 ${convarsFile} "$cfgDir/cs2_user_convars_0_slot0.vcfg"
+                      run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
+                    else
+                      echo "cs2: userdata cfg dir not found, skipping settings sync (CS2 not installed?)"
+                    fi
+                  '';
                 };
               };
             };
           };
-
-          home = {
-            activation = lib.mkIf (cfg.steamId != "") {
-              cs2Settings = lib.hm.dag.entryAfter ["writeBoundary"] ''
-                cfgDir="$HOME/${userdataCfgPath}"
-                if [ -d "$cfgDir" ]; then
-                  ${lib.optionalString cfg.video.enable ''
-                  run install -m 644 ${videoFile} "$cfgDir/cs2_video.txt"
-                ''}
-                  run install -m 644 ${convarsFile} "$cfgDir/cs2_user_convars_0_slot0.vcfg"
-                  run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
-                else
-                  echo "cs2: userdata cfg dir not found, skipping settings sync (CS2 not installed?)"
-                fi
-              '';
-            };
-          };
         };
       };
-    };
-  };
 }
