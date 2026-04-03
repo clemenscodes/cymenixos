@@ -77,10 +77,15 @@ let
   pythonEvdev = pkgs.python3.withPackages (ps: [ ps.evdev ]);
 
   cs2CounterStrafeScript = pkgs.writeText "cs2-counterstrafe.py" ''
-    import asyncio, evdev, json, subprocess, sys
+    import asyncio, evdev, json, subprocess, sys, time
 
     KEY_A = evdev.ecodes.KEY_A   # evdev code 30
     KEY_D = evdev.ecodes.KEY_D   # evdev code 32
+
+    # Minimum hold duration in seconds to be counted as movement, not a chat
+    # keystroke. Typing in chat presses keys for ~50–80 ms; strafing holds
+    # keys for much longer. Keys held shorter than this are ignored.
+    HOLD_THRESHOLD = 0.1
 
     # Virtual/software devices to exclude — they re-emit physical events and
     # would cause feedback loops with the ydotool injection.
@@ -110,24 +115,38 @@ let
 
     def inject(key):
         """Fire a brief key tap via ydotool (non-blocking)."""
-        if cs2_focused():
-            subprocess.Popen(
-                ["ydotool", "key", "--key-delay", "50",
-                 str(key) + ":1", str(key) + ":0"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+        subprocess.Popen(
+            ["ydotool", "key", "--key-delay", "50",
+             str(key) + ":1", str(key) + ":0"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+    # Per-device key-down timestamps: {device_fd: {key_code: press_time}}
+    press_times: dict = {}
 
     async def monitor(device):
+        press_times[device.fd] = {}
         try:
             async for event in device.async_read_loop():
-                if event.type == evdev.ecodes.EV_KEY and event.value == 0:
-                    if event.code == KEY_A:
-                        inject(KEY_D)
-                    elif event.code == KEY_D:
-                        inject(KEY_A)
+                if event.type != evdev.ecodes.EV_KEY:
+                    continue
+                code = event.code
+                if code not in (KEY_A, KEY_D):
+                    continue
+                if event.value == 1:  # key down
+                    press_times[device.fd][code] = time.monotonic()
+                elif event.value == 0:  # key up
+                    t0 = press_times[device.fd].pop(code, None)
+                    if t0 is None:
+                        continue
+                    held = time.monotonic() - t0
+                    if held >= HOLD_THRESHOLD and cs2_focused():
+                        inject(KEY_D if code == KEY_A else KEY_A)
         except OSError:
             pass
+        finally:
+            press_times.pop(device.fd, None)
 
     async def main():
         devices = []
