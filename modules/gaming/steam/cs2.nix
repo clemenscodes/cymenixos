@@ -156,7 +156,10 @@ let
   # CS2_INJECT is empty so injected keys pass through without re-triggering CS2 binds.
   cs2StrafeLeftStop = pkgs.writeShellApplication {
     name = "cs2-strafe-left-stop";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       log() { echo "$(date +%T.%3N) [left-stop]  $*" >> ${cs2Log}; }
       log "A release intercepted — counter-strafe start"
@@ -176,7 +179,10 @@ let
 
   cs2StrafeRightStop = pkgs.writeShellApplication {
     name = "cs2-strafe-right-stop";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
       log() { echo "$(date +%T.%3N) [right-stop] $*" >> ${cs2Log}; }
       log "D release intercepted — counter-strafe start"
@@ -733,9 +739,9 @@ in
                 # preventing echo loops when returning to CS2.
                 submap = CS2
                 bind  = ALT, W, submap, reset
-                bindn = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
+                binden = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
                 bindr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
-                bindn = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
+                binden = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
                 bindr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
 
                 # Empty — injected keys land here, unbound, and pass through to the game.
