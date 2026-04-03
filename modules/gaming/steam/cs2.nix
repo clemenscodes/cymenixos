@@ -87,6 +87,14 @@ let
     KEY_D = evdev.ecodes.KEY_D   # evdev code 32
     FLAG   = "/tmp/cs2-active"
 
+    # Virtual/software devices to exclude — they re-emit physical events and
+    # would cause feedback loops with the ydotool injection.
+    VIRTUAL_KEYWORDS = ["xremap", "ydotool", "ydotoold", "virtual", "uinput"]
+
+    def is_virtual(name):
+        n = name.lower()
+        return any(kw in n for kw in VIRTUAL_KEYWORDS)
+
     def active():
         return os.path.exists(FLAG)
 
@@ -116,6 +124,8 @@ let
         for path in evdev.list_devices():
             try:
                 d    = evdev.InputDevice(path)
+                if is_virtual(d.name):
+                    continue
                 caps = d.capabilities()
                 keys = caps.get(evdev.ecodes.EV_KEY, [])
                 if KEY_A in keys and KEY_D in keys and len(keys) > 50:
@@ -173,28 +183,40 @@ let
       cs2ModeStop
     ];
     text = ''
+      is_cs2_class() {
+        case "$1" in
+          cs2|cs2.*|gamescope*) return 0 ;;
+          *) return 1 ;;
+        esac
+      }
+
       CS2_FOCUSED=false
 
-      socat -U - \
-        UNIX-CONNECT:"$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock" | \
+      # On startup: check whether CS2 is already the active window so we
+      # enter CS2 mode immediately without waiting for the next focus event.
+      initial_class="$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // ""')"
+      if is_cs2_class "$initial_class"; then
+        cs2-mode-start
+        CS2_FOCUSED=true
+      fi
+
+      # Use process substitution so the while loop runs in the current shell,
+      # not a subshell — CS2_FOCUSED changes persist across iterations.
       while read -r line; do
         case "$line" in
           activewindow*)
             class="$(echo "$line" | awk -F '>>' '{print $2}' | awk -F ',' '{print $1}')"
-            case "$class" in
-              cs2|cs2.*|gamescope*)
-                if [ "$CS2_FOCUSED" = "false" ]; then
-                  cs2-mode-start
-                  CS2_FOCUSED=true
-                fi
-                ;;
-              *)
-                if [ "$CS2_FOCUSED" = "true" ]; then
-                  cs2-mode-stop
-                  CS2_FOCUSED=false
-                fi
-                ;;
-            esac
+            if is_cs2_class "$class"; then
+              if [ "$CS2_FOCUSED" = "false" ]; then
+                cs2-mode-start
+                CS2_FOCUSED=true
+              fi
+            else
+              if [ "$CS2_FOCUSED" = "true" ]; then
+                cs2-mode-stop
+                CS2_FOCUSED=false
+              fi
+            fi
             ;;
           closewindow*)
             if [ "$CS2_FOCUSED" = "true" ]; then
@@ -207,7 +229,8 @@ let
             fi
             ;;
         esac
-      done
+      done < <(socat -U - \
+        UNIX-CONNECT:"$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock")
     '';
   };
 
