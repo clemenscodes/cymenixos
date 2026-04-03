@@ -3,11 +3,13 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   config,
   osConfig,
   ...
-}: let
+}:
+let
   cfg = config.modules.media.video;
   obsCfg = cfg.obs;
   isDesktop = osConfig.modules.display.gui != "headless";
@@ -20,27 +22,33 @@
 
   # Files precomputed in the Nix store — copied to ~/.config/obs-studio on first run
   # (or on demand via obs-reset-config)
-  websocketConfigFile = pkgs.writeText "obs-websocket-config.json" (builtins.toJSON {
-    alerts_enabled = true;
-    server_enabled = true;
-    server_port = obsCfg.websocket.port;
-    server_password = obsCfg.websocket.password;
-  });
+  websocketConfigFile = pkgs.writeText "obs-websocket-config.json" (
+    builtins.toJSON {
+      alerts_enabled = true;
+      server_enabled = true;
+      server_port = obsCfg.websocket.port;
+      server_password = obsCfg.websocket.password;
+    }
+  );
 
-  recordEncoderFile = pkgs.writeText "obs-record-encoder.json" (builtins.toJSON {
-    rate_control = "CQP";
-    preset = obsCfg.output.preset;
-    multipass = obsCfg.output.multipass;
-    cqp = obsCfg.output.cqp;
-    lookahead = obsCfg.output.lookahead;
-    adaptive_quantization = obsCfg.output.adaptiveQuantization;
-    bf = obsCfg.output.bFrames;
-  });
+  recordEncoderFile = pkgs.writeText "obs-record-encoder.json" (
+    builtins.toJSON {
+      rate_control = "CQP";
+      preset = obsCfg.output.preset;
+      multipass = obsCfg.output.multipass;
+      cqp = obsCfg.output.cqp;
+      lookahead = obsCfg.output.lookahead;
+      adaptive_quantization = obsCfg.output.adaptiveQuantization;
+      bf = obsCfg.output.bFrames;
+    }
+  );
 
-  streamEncoderFile = pkgs.writeText "obs-stream-encoder.json" (builtins.toJSON {
-    rate_control = "CBR";
-    bitrate = obsCfg.stream.bitrate;
-  });
+  streamEncoderFile = pkgs.writeText "obs-stream-encoder.json" (
+    builtins.toJSON {
+      rate_control = "CBR";
+      bitrate = obsCfg.stream.bitrate;
+    }
+  );
 
   # PipeWire application audio output capture (game sound, SDL, etc.)
   mkPipeWireAppSource = name: uuid: targetName: {
@@ -48,7 +56,9 @@
     inherit name uuid;
     id = "pipewire_audio_application_capture";
     versioned_id = "pipewire_audio_application_capture";
-    settings = {TargetName = targetName;};
+    settings = {
+      TargetName = targetName;
+    };
     mixers = 255;
     sync = 0;
     flags = 0;
@@ -61,15 +71,15 @@
     push-to-talk = false;
     push-to-talk-delay = 0;
     hotkeys = {
-      "libobs.mute" = [];
-      "libobs.unmute" = [];
-      "libobs.push-to-mute" = [];
-      "libobs.push-to-talk" = [];
+      "libobs.mute" = [ ];
+      "libobs.unmute" = [ ];
+      "libobs.push-to-mute" = [ ];
+      "libobs.push-to-talk" = [ ];
     };
     deinterlace_mode = 0;
     deinterlace_field_order = 0;
     monitoring_type = 0;
-    private_settings = {};
+    private_settings = { };
   };
 
   # PipeWire audio input source with filters (for scene sources like SM7B)
@@ -78,7 +88,10 @@
     inherit name uuid filters;
     id = "pipewire_audio_input_capture";
     versioned_id = "pipewire_audio_input_capture";
-    settings = {TargetName = targetName; TargetId = 0;};
+    settings = {
+      TargetName = targetName;
+      TargetId = 0;
+    };
     mixers = 255;
     sync = 0;
     flags = 0;
@@ -91,20 +104,25 @@
     push-to-talk = false;
     push-to-talk-delay = 0;
     hotkeys = {
-      "libobs.mute" = [];
-      "libobs.unmute" = [];
-      "libobs.push-to-mute" = [];
-      "libobs.push-to-talk" = [];
+      "libobs.mute" = [ ];
+      "libobs.unmute" = [ ];
+      "libobs.push-to-mute" = [ ];
+      "libobs.push-to-talk" = [ ];
     };
     deinterlace_mode = 0;
     deinterlace_field_order = 0;
     monitoring_type = 0;
-    private_settings = {};
+    private_settings = { };
   };
 
   mkFilter = name: uuid: id: settings: {
     prev_ver = 536936448;
-    inherit name uuid id settings;
+    inherit
+      name
+      uuid
+      id
+      settings
+      ;
     versioned_id = id;
     mixers = 255;
     sync = 0;
@@ -117,241 +135,509 @@
     push-to-mute-delay = 0;
     push-to-talk = false;
     push-to-talk-delay = 0;
-    hotkeys = {};
+    hotkeys = { };
     deinterlace_mode = 0;
     deinterlace_field_order = 0;
     monitoring_type = 0;
-    private_settings = {};
+    private_settings = { };
   };
 
   sm7bFilters = [
-    (mkFilter "RNNoise"    "37f2a665-504b-45a8-a991-4661e445fc59" "noise_suppress_filter_v2" {})
-    (mkFilter "Speex"      "0dc549b9-2c50-44e0-afec-6b84b763ca35" "noise_suppress_filter_v2" {suppress_level = -15; method = "speex";})
-    (mkFilter "Kompressor" "d6b36017-e914-44cc-b947-03b1f87219c5" "compressor_filter"        {ratio = 4.0;})
-    (mkFilter "Limiter"    "f98982cf-dd71-4a24-ac47-f1d5a3b13760" "limiter_filter"           {threshold = -2.0;})
+    (mkFilter "RNNoise" "37f2a665-504b-45a8-a991-4661e445fc59" "noise_suppress_filter_v2" { })
+    (mkFilter "Speex" "0dc549b9-2c50-44e0-afec-6b84b763ca35" "noise_suppress_filter_v2" {
+      suppress_level = -15;
+      method = "speex";
+    })
+    (mkFilter "Kompressor" "d6b36017-e914-44cc-b947-03b1f87219c5" "compressor_filter" { ratio = 4.0; })
+    (mkFilter "Limiter" "f98982cf-dd71-4a24-ac47-f1d5a3b13760" "limiter_filter" { threshold = -2.0; })
   ];
 
-  # Minimal audio source entry (reused for desktop + mic global slots)
-  mkAudioSource = name: uuid: pluginId: deviceId: {
-    prev_ver = 536936448;
-    inherit name uuid;
-    id = pluginId;
-    versioned_id = pluginId;
-    settings = {device_id = deviceId;};
-    mixers = 255;
-    sync = 0;
-    flags = 0;
-    volume = 1.0;
-    balance = 0.5;
-    enabled = true;
-    muted = false;
-    push-to-mute = false;
-    push-to-mute-delay = 0;
-    push-to-talk = false;
-    push-to-talk-delay = 0;
-    hotkeys = {
-      "libobs.mute" = [];
-      "libobs.unmute" = [];
-      "libobs.push-to-mute" = [];
-      "libobs.push-to-talk" = [];
-    };
-    deinterlace_mode = 0;
-    deinterlace_field_order = 0;
-    monitoring_type = 0;
-    private_settings = {};
-  };
+  sceneCollectionFile = pkgs.writeText "obs-scene-collection.json" (
+    builtins.toJSON {
+      name = obsCfg.scenes.name;
+      sources = [
+        # 1. VK Capture
+        {
+          prev_ver = 536936448;
+          name = "VK Capture";
+          uuid = "cyme0001-0001-0001-0001-000000000004";
+          id = "vkcapture-source";
+          versioned_id = "vkcapture-source";
+          settings = {
+            show_cursor = false;
+          };
+          mixers = 0;
+          sync = 0;
+          flags = 0;
+          volume = 1.0;
+          balance = 0.5;
+          enabled = true;
+          muted = false;
+          push-to-mute = false;
+          push-to-mute-delay = 0;
+          push-to-talk = false;
+          push-to-talk-delay = 0;
+          hotkeys = { };
+          deinterlace_mode = 0;
+          deinterlace_field_order = 0;
+          monitoring_type = 0;
+          private_settings = { };
+        }
+        # 2. GameSound (SDL Application via PipeWire app capture)
+        (mkPipeWireAppSource "GameSound" "b84d7fe9-1968-45f5-864d-d656d56b019b" obsCfg.audio.gameSource)
+        # 3. Shure SM7B (PipeWire input with broadcast filter chain)
+        (
+          (mkPipeWireSource "Shure SM7B" "9e0dd964-6f7e-4aca-9f09-f118d39826ab" obsCfg.audio.mic sm7bFilters)
+          // {
+            settings = {
+              TargetId = 43;
+              TargetName = obsCfg.audio.mic;
+            };
+          }
+        )
+        # 4. Game scene — contains VK Capture (video) + GameSound + SM7B (audio)
+        {
+          prev_ver = 536936448;
+          name = "Game";
+          uuid = "cyme0001-0001-0001-0001-000000000003";
+          id = "scene";
+          versioned_id = "scene";
+          settings = {
+            id_counter = 3;
+            custom_size = false;
+            items = [
+              {
+                name = "VK Capture";
+                source_uuid = "cyme0001-0001-0001-0001-000000000004";
+                visible = true;
+                locked = false;
+                rot = 0.0;
+                scale_ref = {
+                  x = 3840.0;
+                  y = 2160.0;
+                };
+                align = 5;
+                bounds_type = 2;
+                bounds_align = 0;
+                bounds_crop = false;
+                crop_left = 0;
+                crop_top = 0;
+                crop_right = 0;
+                crop_bottom = 0;
+                id = 1;
+                group_item_backup = false;
+                pos = {
+                  x = 0.0;
+                  y = 0.0;
+                };
+                pos_rel = {
+                  x = -1.7777777910232544;
+                  y = -1.0;
+                };
+                scale = {
+                  x = 1.0;
+                  y = 1.0;
+                };
+                scale_rel = {
+                  x = 1.0;
+                  y = 1.0;
+                };
+                bounds = {
+                  x = 3840.0;
+                  y = 2160.0;
+                };
+                bounds_rel = {
+                  x = 3.555555582046509;
+                  y = 2.0;
+                };
+                scale_filter = "disable";
+                blend_method = "default";
+                blend_type = "normal";
+                show_transition = {
+                  duration = 0;
+                };
+                hide_transition = {
+                  duration = 0;
+                };
+                private_settings = { };
+              }
+              {
+                name = "GameSound";
+                source_uuid = "b84d7fe9-1968-45f5-864d-d656d56b019b";
+                visible = true;
+                locked = false;
+                rot = 0.0;
+                scale_ref = {
+                  x = 3840.0;
+                  y = 2160.0;
+                };
+                align = 5;
+                bounds_type = 0;
+                bounds_align = 0;
+                bounds_crop = false;
+                crop_left = 0;
+                crop_top = 0;
+                crop_right = 0;
+                crop_bottom = 0;
+                id = 2;
+                group_item_backup = false;
+                pos = {
+                  x = 0.0;
+                  y = 0.0;
+                };
+                pos_rel = {
+                  x = -1.7777777910232544;
+                  y = -1.0;
+                };
+                scale = {
+                  x = 1.0;
+                  y = 1.0;
+                };
+                scale_rel = {
+                  x = 1.0;
+                  y = 1.0;
+                };
+                bounds = {
+                  x = 0.0;
+                  y = 0.0;
+                };
+                bounds_rel = {
+                  x = 0.0;
+                  y = 0.0;
+                };
+                scale_filter = "disable";
+                blend_method = "default";
+                blend_type = "normal";
+                show_transition = {
+                  duration = 300;
+                };
+                hide_transition = {
+                  duration = 300;
+                };
+                private_settings = { };
+              }
+              {
+                name = "Shure SM7B";
+                source_uuid = "9e0dd964-6f7e-4aca-9f09-f118d39826ab";
+                visible = true;
+                locked = false;
+                rot = 0.0;
+                scale_ref = {
+                  x = 3840.0;
+                  y = 2160.0;
+                };
+                align = 5;
+                bounds_type = 0;
+                bounds_align = 0;
+                bounds_crop = false;
+                crop_left = 0;
+                crop_top = 0;
+                crop_right = 0;
+                crop_bottom = 0;
+                id = 3;
+                group_item_backup = false;
+                pos = {
+                  x = 0.0;
+                  y = 0.0;
+                };
+                pos_rel = {
+                  x = -1.7777777910232544;
+                  y = -1.0;
+                };
+                scale = {
+                  x = 1.0;
+                  y = 1.0;
+                };
+                scale_rel = {
+                  x = 1.0;
+                  y = 1.0;
+                };
+                bounds = {
+                  x = 0.0;
+                  y = 0.0;
+                };
+                bounds_rel = {
+                  x = 0.0;
+                  y = 0.0;
+                };
+                scale_filter = "disable";
+                blend_method = "default";
+                blend_type = "normal";
+                show_transition = {
+                  duration = 300;
+                };
+                hide_transition = {
+                  duration = 300;
+                };
+                private_settings = { };
+              }
+            ];
+          };
+          mixers = 0;
+          sync = 0;
+          flags = 0;
+          volume = 1.0;
+          balance = 0.5;
+          enabled = true;
+          muted = false;
+          push-to-mute = false;
+          push-to-mute-delay = 0;
+          push-to-talk = false;
+          push-to-talk-delay = 0;
+          hotkeys = {
+            "OBSBasic.SelectScene" = [ ];
+            "libobs.show_scene_item.1" = [ ];
+            "libobs.hide_scene_item.1" = [ ];
+            "libobs.show_scene_item.2" = [ ];
+            "libobs.hide_scene_item.2" = [ ];
+            "libobs.show_scene_item.3" = [ ];
+            "libobs.hide_scene_item.3" = [ ];
+          };
+          deinterlace_mode = 0;
+          deinterlace_field_order = 0;
+          monitoring_type = 0;
+          canvas_uuid = "6c69626f-6273-4c00-9d88-c5136d61696e";
+          private_settings = { };
+        }
+      ];
 
-  sceneCollectionFile = pkgs.writeText "obs-scene-collection.json" (builtins.toJSON {
-    name = obsCfg.scenes.name;
-    DesktopAudioDevice1 = mkAudioSource "Desktop" "cyme0001-0001-0001-0001-000000000001" "pulse_output_capture" "default";
-    AuxAudioDevice1     = mkAudioSource "Mic"     "cyme0001-0001-0001-0001-000000000002" "pulse_input_capture" obsCfg.audio.mic;
-
-    sources = [
-      # 1. VK Capture
-      {
-        prev_ver = 536936448;
-        name = "VK Capture";
-        uuid = "cyme0001-0001-0001-0001-000000000004";
-        id = "vkcapture-source";
-        versioned_id = "vkcapture-source";
-        settings = {show_cursor = false;};
-        mixers = 0; sync = 0; flags = 0; volume = 1.0; balance = 0.5;
-        enabled = true; muted = false;
-        push-to-mute = false; push-to-mute-delay = 0;
-        push-to-talk = false; push-to-talk-delay = 0;
-        hotkeys = {};
-        deinterlace_mode = 0; deinterlace_field_order = 0; monitoring_type = 0;
-        private_settings = {};
-      }
-      # 2. GameSound (SDL Application via PipeWire app capture)
-      (mkPipeWireAppSource "GameSound" "b84d7fe9-1968-45f5-864d-d656d56b019b" obsCfg.audio.gameSource)
-      # 3. Shure SM7B (PipeWire input with broadcast filter chain)
-      ((mkPipeWireSource "Shure SM7B" "9e0dd964-6f7e-4aca-9f09-f118d39826ab" obsCfg.audio.mic sm7bFilters) // {
-        settings = {TargetId = 43; TargetName = obsCfg.audio.mic;};
-      })
-      # 4. Game scene — contains VK Capture (video) + GameSound + SM7B (audio)
-      {
-        prev_ver = 536936448;
-        name = "Game";
-        uuid = "cyme0001-0001-0001-0001-000000000003";
-        id = "scene";
-        versioned_id = "scene";
-        settings = {
-          id_counter = 3;
-          custom_size = false;
-          items = [
+      groups = [ ];
+      scene_order = [ { name = "Game"; } ];
+      current_scene = "Game";
+      current_program_scene = "Game";
+      canvases = [ ];
+      current_transition = "Überblende";
+      transition_duration = 300;
+      transitions = [ ];
+      quick_transitions = [ ];
+      saved_projectors = [ ];
+      preview_locked = false;
+      scaling_enabled = false;
+      scaling_level = -33;
+      scaling_off_x = 0.0;
+      scaling_off_y = 0.0;
+      "virtual-camera" = {
+        type2 = 3;
+      };
+      modules = {
+        tuna = {
+          vlc_prev_hotkey = [ ];
+          vlc_next_hotkey = [ ];
+        };
+        "transition-table" = {
+          transitions = [ ];
+          enable_hotkey = [ ];
+          disable_hotkey = [ ];
+        };
+        "advanced-scene-switcher" = {
+          sceneGroups = [ ];
+          macros = [ ];
+          macroSettings = {
+            highlightExecuted = false;
+            highlightConditions = false;
+            highlightActions = false;
+            newMacroCheckInParallel = false;
+            newMacroRegisterHotkey = false;
+            newMacroUseShortCircuitEvaluation = false;
+            saveSettingsOnMacroChange = true;
+          };
+          variables = [ ];
+          switches = [ ];
+          ignoreWindows = [ ];
+          screenRegion = [ ];
+          pauseEntries = [ ];
+          sceneRoundTrip = [ ];
+          sceneTransitions = [ ];
+          defaultTransitions = [ ];
+          defTransitionDelay = 0;
+          ignoreIdleWindows = [ ];
+          idleTargetType = 0;
+          idleSceneName = "";
+          idleTransitionName = "";
+          idleEnable = false;
+          idleTime = 60;
+          executableSwitches = [ ];
+          randomSwitches = [ ];
+          fileSwitches = [ ];
+          readEnabled = false;
+          readPath = "";
+          writeEnabled = false;
+          writePath = "";
+          mediaSwitches = [ ];
+          timeSwitches = [ ];
+          audioSwitches = [ ];
+          audioFallbackTargetType = 0;
+          audioFallbackScene = "";
+          audioFallbackTransition = "";
+          audioFallbackEnable = false;
+          audioFallbackDuration = {
+            value = {
+              value = 0.0;
+              type = 0;
+            };
+            unit = 0;
+            version = 1;
+          };
+          videoSwitches = [ ];
+          interval = 300;
+          noMatchScene = {
+            sceneSelection = {
+              type = 0;
+              name = "";
+              canvasSelection = "Main";
+            };
+          };
+          switch_if_not_matching = 0;
+          noMatchDelay = {
+            value = {
+              value = 0.0;
+              type = 0;
+            };
+            unit = 0;
+            version = 1;
+          };
+          cooldown = {
+            value = {
+              value = 0.0;
+              type = 0;
+            };
+            unit = 0;
+            version = 1;
+          };
+          enableCooldown = false;
+          active = true;
+          startup_behavior = 0;
+          autoStart = {
+            event = 0;
+            useAutoStartScene = false;
+            sceneSelection = {
+              type = 0;
+              name = "";
+              canvasSelection = "Main";
+            };
+            name = "";
+            regexConfig = {
+              enable = false;
+              partial = false;
+              options = 0;
+            };
+          };
+          logLevel = 0;
+          logLevelVersion = 1;
+          showSystemTrayNotifications = false;
+          disableHints = false;
+          disableFilterComboboxFilter = false;
+          warnPluginLoadFailure = true;
+          hideLegacyTabs = true;
+          priority0 = 10;
+          priority1 = 0;
+          priority2 = 2;
+          priority3 = 8;
+          priority4 = 6;
+          priority5 = 9;
+          priority6 = 7;
+          priority7 = 4;
+          priority8 = 1;
+          priority9 = 5;
+          priority10 = 3;
+          threadPriority = 3;
+          transitionOverrideOverride = false;
+          adjustActiveTransitionType = true;
+          lastImportPath = "";
+          startHotkey = [ ];
+          stopHotkey = [ ];
+          toggleHotkey = [ ];
+          newMacroHotkey = [
             {
-              name = "VK Capture";
-              source_uuid = "cyme0001-0001-0001-0001-000000000004";
-              visible = true; locked = false; rot = 0.0;
-              scale_ref = {x = 3840.0; y = 2160.0;};
-              align = 5; bounds_type = 2; bounds_align = 0; bounds_crop = false;
-              crop_left = 0; crop_top = 0; crop_right = 0; crop_bottom = 0;
-              id = 1; group_item_backup = false;
-              pos = {x = 0.0; y = 0.0;};
-              pos_rel = {x = -1.7777777910232544; y = -1.0;};
-              scale = {x = 1.0; y = 1.0;};
-              scale_rel = {x = 1.0; y = 1.0;};
-              bounds = {x = 3840.0; y = 2160.0;};
-              bounds_rel = {x = 3.555555582046509; y = 2.0;};
-              scale_filter = "disable"; blend_method = "default"; blend_type = "normal";
-              show_transition = {duration = 0;}; hide_transition = {duration = 0;};
-              private_settings = {};
-            }
-            {
-              name = "GameSound";
-              source_uuid = "b84d7fe9-1968-45f5-864d-d656d56b019b";
-              visible = true; locked = false; rot = 0.0;
-              scale_ref = {x = 3840.0; y = 2160.0;};
-              align = 5; bounds_type = 0; bounds_align = 0; bounds_crop = false;
-              crop_left = 0; crop_top = 0; crop_right = 0; crop_bottom = 0;
-              id = 2; group_item_backup = false;
-              pos = {x = 0.0; y = 0.0;};
-              pos_rel = {x = -1.7777777910232544; y = -1.0;};
-              scale = {x = 1.0; y = 1.0;};
-              scale_rel = {x = 1.0; y = 1.0;};
-              bounds = {x = 0.0; y = 0.0;};
-              bounds_rel = {x = 0.0; y = 0.0;};
-              scale_filter = "disable"; blend_method = "default"; blend_type = "normal";
-              show_transition = {duration = 300;}; hide_transition = {duration = 300;};
-              private_settings = {};
-            }
-            {
-              name = "Shure SM7B";
-              source_uuid = "9e0dd964-6f7e-4aca-9f09-f118d39826ab";
-              visible = true; locked = false; rot = 0.0;
-              scale_ref = {x = 3840.0; y = 2160.0;};
-              align = 5; bounds_type = 0; bounds_align = 0; bounds_crop = false;
-              crop_left = 0; crop_top = 0; crop_right = 0; crop_bottom = 0;
-              id = 3; group_item_backup = false;
-              pos = {x = 0.0; y = 0.0;};
-              pos_rel = {x = -1.7777777910232544; y = -1.0;};
-              scale = {x = 1.0; y = 1.0;};
-              scale_rel = {x = 1.0; y = 1.0;};
-              bounds = {x = 0.0; y = 0.0;};
-              bounds_rel = {x = 0.0; y = 0.0;};
-              scale_filter = "disable"; blend_method = "default"; blend_type = "normal";
-              show_transition = {duration = 300;}; hide_transition = {duration = 300;};
-              private_settings = {};
+              control = true;
+              key = "OBS_KEY_N";
             }
           ];
+          upMacroSegmentHotkey = [ ];
+          downMacroSegmentHotkey = [ ];
+          removeMacroSegmentHotkey = [ ];
+          tabWidgetOrder = [
+            { generalTab = 0; }
+            { macroTab = 1; }
+            { windowTitleTab = 2; }
+            { executableTab = 3; }
+            { screenRegionTab = 4; }
+            { mediaTab = 5; }
+            { fileTab = 6; }
+            { randomTab = 7; }
+            { timeTab = 8; }
+            { idleTab = 9; }
+            { sceneSequenceTab = 10; }
+            { audioTab = 11; }
+            { videoTab = 12; }
+            { sceneGroupTab = 13; }
+            { transitionsTab = 14; }
+            { pauseTab = 15; }
+            { websocketConnectionTab = 16; }
+            { twitchConnectionTab = 17; }
+            { variableTab = 18; }
+            { actionQueueTab = 19; }
+          ];
+          saveWindowGeo = false;
+          windowPosX = 0;
+          windowPosY = 0;
+          windowWidth = 0;
+          windowHeight = 0;
+          macroListMacroEditSplitterPosition = [ ];
+          version = "GITDIR-NOTFOUND";
+          macroSearchSettings = {
+            showAlways = false;
+            searchType = 0;
+            searchString = "";
+            regexConfig = {
+              enable = false;
+              partial = false;
+              options = 0;
+            };
+          };
+          tabSettings = {
+            searchType = 0;
+            searchString = "";
+            regexConfig = {
+              enable = false;
+              partial = false;
+              options = 0;
+            };
+          };
+          dockSettings = {
+            searchType = 0;
+            searchString = "";
+            regexConfig = {
+              enable = false;
+              partial = false;
+              options = 0;
+            };
+          };
+          addVariablesDock = false;
+          websocketConnections = [ ];
+          twitchConnections = [ ];
+          actionQueues = [ ];
+          dockWindows = {
+            docks = [ ];
+          };
+          alwaysShowTabs = false;
         };
-        mixers = 0; sync = 0; flags = 0; volume = 1.0; balance = 0.5;
-        enabled = true; muted = false;
-        push-to-mute = false; push-to-mute-delay = 0;
-        push-to-talk = false; push-to-talk-delay = 0;
-        hotkeys = {
-          "OBSBasic.SelectScene" = [];
-          "libobs.show_scene_item.1" = []; "libobs.hide_scene_item.1" = [];
-          "libobs.show_scene_item.2" = []; "libobs.hide_scene_item.2" = [];
-          "libobs.show_scene_item.3" = []; "libobs.hide_scene_item.3" = [];
+        "scripts-tool" = [ ];
+        "output-timer" = {
+          streamTimerHours = 0;
+          streamTimerMinutes = 0;
+          streamTimerSeconds = 0;
+          recordTimerHours = 0;
+          recordTimerMinutes = 0;
+          recordTimerSeconds = 0;
+          autoStartStreamTimer = false;
+          autoStartRecordTimer = false;
+          pauseRecordTimer = false;
         };
-        deinterlace_mode = 0; deinterlace_field_order = 0; monitoring_type = 0;
-        canvas_uuid = "6c69626f-6273-4c00-9d88-c5136d61696e";
-        private_settings = {};
-      }
-    ];
-
-    groups = [];
-    scene_order = [{name = "Game";}];
-    current_scene = "Game";
-    current_program_scene = "Game";
-    canvases = [];
-    current_transition = "Überblende";
-    transition_duration = 300;
-    transitions = [];
-    quick_transitions = [];
-    saved_projectors = [];
-    preview_locked = false;
-    scaling_enabled = false;
-    scaling_level = -33;
-    scaling_off_x = 0.0;
-    scaling_off_y = 0.0;
-    "virtual-camera" = {type2 = 3;};
-    modules = {
-      tuna = {vlc_prev_hotkey = []; vlc_next_hotkey = [];};
-      "transition-table" = {transitions = []; enable_hotkey = []; disable_hotkey = [];};
-      "advanced-scene-switcher" = {
-        sceneGroups = []; macros = [];
-        macroSettings = {
-          highlightExecuted = false; highlightConditions = false; highlightActions = false;
-          newMacroCheckInParallel = false; newMacroRegisterHotkey = false;
-          newMacroUseShortCircuitEvaluation = false; saveSettingsOnMacroChange = true;
-        };
-        variables = []; switches = []; ignoreWindows = []; screenRegion = []; pauseEntries = [];
-        sceneRoundTrip = []; sceneTransitions = []; defaultTransitions = []; defTransitionDelay = 0;
-        ignoreIdleWindows = []; idleTargetType = 0; idleSceneName = ""; idleTransitionName = "";
-        idleEnable = false; idleTime = 60; executableSwitches = []; randomSwitches = [];
-        fileSwitches = []; readEnabled = false; readPath = ""; writeEnabled = false; writePath = "";
-        mediaSwitches = []; timeSwitches = []; audioSwitches = [];
-        audioFallbackTargetType = 0; audioFallbackScene = ""; audioFallbackTransition = "";
-        audioFallbackEnable = false;
-        audioFallbackDuration = {value = {value = 0.0; type = 0;}; unit = 0; version = 1;};
-        videoSwitches = []; interval = 300;
-        noMatchScene = {sceneSelection = {type = 0; name = ""; canvasSelection = "Main";};};
-        switch_if_not_matching = 0;
-        noMatchDelay = {value = {value = 0.0; type = 0;}; unit = 0; version = 1;};
-        cooldown = {value = {value = 0.0; type = 0;}; unit = 0; version = 1;};
-        enableCooldown = false; active = true; startup_behavior = 0;
-        autoStart = {
-          event = 0; useAutoStartScene = false;
-          sceneSelection = {type = 0; name = ""; canvasSelection = "Main";};
-          name = ""; regexConfig = {enable = false; partial = false; options = 0;};
-        };
-        logLevel = 0; logLevelVersion = 1; showSystemTrayNotifications = false;
-        disableHints = false; disableFilterComboboxFilter = false;
-        warnPluginLoadFailure = true; hideLegacyTabs = true;
-        priority0 = 10; priority1 = 0; priority2 = 2; priority3 = 8; priority4 = 6;
-        priority5 = 9; priority6 = 7; priority7 = 4; priority8 = 1; priority9 = 5;
-        priority10 = 3; threadPriority = 3;
-        transitionOverrideOverride = false; adjustActiveTransitionType = true; lastImportPath = "";
-        startHotkey = []; stopHotkey = []; toggleHotkey = [];
-        newMacroHotkey = [{control = true; key = "OBS_KEY_N";}];
-        upMacroSegmentHotkey = []; downMacroSegmentHotkey = []; removeMacroSegmentHotkey = [];
-        tabWidgetOrder = [
-          {generalTab = 0;} {macroTab = 1;} {windowTitleTab = 2;} {executableTab = 3;}
-          {screenRegionTab = 4;} {mediaTab = 5;} {fileTab = 6;} {randomTab = 7;}
-          {timeTab = 8;} {idleTab = 9;} {sceneSequenceTab = 10;} {audioTab = 11;}
-          {videoTab = 12;} {sceneGroupTab = 13;} {transitionsTab = 14;} {pauseTab = 15;}
-          {websocketConnectionTab = 16;} {twitchConnectionTab = 17;} {variableTab = 18;} {actionQueueTab = 19;}
-        ];
-        saveWindowGeo = false; windowPosX = 0; windowPosY = 0; windowWidth = 0; windowHeight = 0;
-        macroListMacroEditSplitterPosition = []; version = "GITDIR-NOTFOUND";
-        macroSearchSettings = {showAlways = false; searchType = 0; searchString = ""; regexConfig = {enable = false; partial = false; options = 0;};};
-        tabSettings = {searchType = 0; searchString = ""; regexConfig = {enable = false; partial = false; options = 0;};};
-        dockSettings = {searchType = 0; searchString = ""; regexConfig = {enable = false; partial = false; options = 0;};};
-        addVariablesDock = false; websocketConnections = []; twitchConnections = [];
-        actionQueues = []; dockWindows = {docks = [];}; alwaysShowTabs = false;
       };
-      "scripts-tool" = [];
-      "output-timer" = {
-        streamTimerHours = 0; streamTimerMinutes = 0; streamTimerSeconds = 0;
-        recordTimerHours = 0; recordTimerMinutes = 0; recordTimerSeconds = 0;
-        autoStartStreamTimer = false; autoStartRecordTimer = false; pauseRecordTimer = false;
-      };
-    };
-    version = 2;
-  });
+      version = 2;
+    }
+  );
 
   globalIniFile = pkgs.writeText "obs-global.ini" ''
     [General]
@@ -395,7 +681,7 @@
 
     [Output]
     Mode=Advanced
-    FilenameFormatting=%CCYY-%MM-%DD %hh-%mm-%ss
+    FilenameFormatting=${obsCfg.filenameFormatting}
     DelayEnable=false
     Reconnect=true
     RetryDelay=2
@@ -454,10 +740,14 @@
     OBSBasic.StopVirtualCam=[{"key":"OBS_KEY_V","modifiers":{"shift":false,"control":true,"alt":false,"command":true}}]
   '';
 
-  mkObsScript = name: body:
+  mkObsScript =
+    name: body:
     pkgs.writeShellApplication {
       inherit name;
-      runtimeInputs = [pkgs.jq pkgs.obs-cmd];
+      runtimeInputs = [
+        pkgs.jq
+        pkgs.obs-cmd
+      ];
       text = ''
         CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
         if [[ ! -f "$CONFIG_PATH" ]]; then
@@ -478,9 +768,14 @@
 
   # Launcher: passes --profile (and optionally --collection / --startreplaybuffer)
   # directly so OBS always opens the right profile regardless of user.ini state.
-  obsArgs =
-    ["--profile" obsCfg.profile.name]
-    ++ lib.optionals obsCfg.scenes.enable ["--collection" obsCfg.scenes.name];
+  obsArgs = [
+    "--profile"
+    obsCfg.profile.name
+  ]
+  ++ lib.optionals obsCfg.scenes.enable [
+    "--collection"
+    obsCfg.scenes.name
+  ];
 
   obs-launch = pkgs.writeShellApplication {
     name = "obs-launch";
@@ -517,13 +812,16 @@
       echo "Done. Run 'sudo nixos-rebuild switch' to re-apply Nix defaults."
     '';
   };
-in {
+in
+{
   options = {
     modules = {
       media = {
         video = {
           obs = {
-            enable = lib.mkEnableOption "Enable OBS (open broadcast software)" // {default = false;};
+            enable = lib.mkEnableOption "Enable OBS (open broadcast software)" // {
+              default = false;
+            };
             websocket = {
               port = lib.mkOption {
                 type = lib.types.port;
@@ -568,7 +866,14 @@ in {
                 description = "Recording/streaming FPS";
               };
               colorFormat = lib.mkOption {
-                type = lib.types.enum ["NV12" "I420" "I444" "P010" "I010" "BGRA"];
+                type = lib.types.enum [
+                  "NV12"
+                  "I420"
+                  "I444"
+                  "P010"
+                  "I010"
+                  "BGRA"
+                ];
                 default = "NV12";
                 description = ''
                   OBS internal color format.
@@ -577,7 +882,13 @@ in {
                 '';
               };
               colorSpace = lib.mkOption {
-                type = lib.types.enum ["sRGB" "601" "709" "2100PQ" "2100HLG"];
+                type = lib.types.enum [
+                  "sRGB"
+                  "601"
+                  "709"
+                  "2100PQ"
+                  "2100HLG"
+                ];
                 default = "709";
                 description = "OBS color space. 2100PQ = HDR PQ (requires 10-bit colorFormat).";
               };
@@ -654,7 +965,11 @@ in {
                 description = "Video encoder for streaming (lower latency than recording encoder).";
               };
               audioEncoder = lib.mkOption {
-                type = lib.types.enum ["ffmpeg_aac" "ffmpeg_opus" "libfdk_aac"];
+                type = lib.types.enum [
+                  "ffmpeg_aac"
+                  "ffmpeg_opus"
+                  "libfdk_aac"
+                ];
                 default = "ffmpeg_aac";
                 description = "Audio encoder for streaming.";
               };
@@ -671,7 +986,13 @@ in {
                 description = "Recording output directory (absolute path — OBS %HOME expansion is unreliable on NixOS/Wayland).";
               };
               format = lib.mkOption {
-                type = lib.types.enum ["mkv" "mp4" "mov" "flv" "fragmented_mp4"];
+                type = lib.types.enum [
+                  "mkv"
+                  "mp4"
+                  "mov"
+                  "flv"
+                  "fragmented_mp4"
+                ];
                 default = "mkv";
                 description = "Recording container format. mkv is safest (no corruption on crash).";
               };
@@ -702,7 +1023,15 @@ in {
                 '';
               };
               preset = lib.mkOption {
-                type = lib.types.enum ["p1" "p2" "p3" "p4" "p5" "p6" "p7"];
+                type = lib.types.enum [
+                  "p1"
+                  "p2"
+                  "p3"
+                  "p4"
+                  "p5"
+                  "p6"
+                  "p7"
+                ];
                 default = "p4";
                 description = ''
                   NVENC encoder preset (p1 = fastest/lowest quality, p7 = slowest/best quality).
@@ -710,7 +1039,11 @@ in {
                 '';
               };
               multipass = lib.mkOption {
-                type = lib.types.enum ["disabled" "qres" "fullres"];
+                type = lib.types.enum [
+                  "disabled"
+                  "qres"
+                  "fullres"
+                ];
                 default = "fullres";
                 description = ''
                   NVENC multipass encoding mode.
@@ -754,6 +1087,11 @@ in {
                 description = "Register Hyprland keybinds for OBS control";
               };
             };
+            filenameFormatting = lib.mkOption {
+              type = lib.types.str;
+              default = "%CCYY-%MM-%DD_%hh-%mm-%ss";
+              description = "The recorded filename format";
+            };
             scenes = {
               enable = lib.mkOption {
                 type = lib.types.bool;
@@ -779,7 +1117,7 @@ in {
     home = {
       persistence = lib.mkIf isPersisted {
         "${persistPath}" = {
-          directories = [".config/obs-studio"];
+          directories = [ ".config/obs-studio" ];
         };
       };
       packages = [
@@ -808,7 +1146,7 @@ in {
       # Forcing global.ini on every activation resets LastVersion, which triggers OBS's
       # migration logic and causes "unable to migrate global configuration" errors.
       # Run obs-reset-config to restore Nix defaults for all seeded files.
-      activation.obsInitConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
+      activation.obsInitConfig = inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         OBS_DIR="$HOME/.config/obs-studio"
         PROFILE_DIR="$OBS_DIR/basic/profiles/${obsCfg.profile.name}"
         WS_DIR="$OBS_DIR/plugin_config/obs-websocket"
@@ -853,7 +1191,7 @@ in {
     programs = {
       obs-studio = {
         inherit (obsCfg) enable;
-        package = pkgs.obs-studio.override {cudaSupport = true;};
+        package = pkgs.obs-studio.override { cudaSupport = true; };
         plugins = [
           # === Capture ===
           pkgs.obs-studio-plugins.obs-vkcapture
@@ -927,7 +1265,10 @@ in {
       icon = "com.obsproject.Studio";
       terminal = false;
       type = "Application";
-      categories = ["AudioVideo" "Recorder"];
+      categories = [
+        "AudioVideo"
+        "Recorder"
+      ];
       startupNotify = true;
     };
   };
