@@ -631,6 +631,11 @@ in
           extraGroups = [ config.programs.ydotool.group "input" ];
         };
 
+        # Expose scripts in PATH so they can be run and tested manually.
+        environment.systemPackages = lib.mkIf hcfg.enable [
+          cs2CounterStrafeDaemon
+        ];
+
         home-manager = lib.mkIf config.modules.home-manager.enable {
           users = {
             ${config.modules.users.user} = {
