@@ -131,40 +131,43 @@ let
     '';
   };
 
-  # CS2_INJECT is an empty submap used as a landing zone for ydotool injections.
-  # bindr in Hyprland only fires for a key that was consumed by bind IN THE SAME submap.
-  # So bind + bindr both live in CS2 submap. We switch to CS2_INJECT before injecting
-  # so the injected key event is not re-consumed by the CS2 bind (no bind in CS2_INJECT),
-  # then immediately return to CS2 so bindr is live for the physical key release.
-
   cs2StrafeLeftStart = pkgs.writeShellApplication {
     name = "cs2-strafe-left-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
-      hyprctl dispatch submap CS2_INJECT >/dev/null
+      # Switch submap BEFORE injecting so the echo of the injected key
+      # arrives in CS2_STRAFING_LEFT where A is only bound on release.
+      hyprctl dispatch submap CS2_STRAFING_LEFT >/dev/null
       ydotool key 30:1
-      hyprctl dispatch submap CS2 >/dev/null
     '';
   };
 
   cs2StrafeLeftStop = pkgs.writeShellApplication {
     name = "cs2-strafe-left-stop";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
-      hyprctl dispatch submap CS2_INJECT >/dev/null
-      ydotool key 30:0
-      ydotool key 32:1 32:0
+      # Switch to safe submap before injecting counter D so D is unbound there.
+      hyprctl dispatch submap CS2_COUNTER_RIGHT >/dev/null
+      ydotool key 30:0 32:1 32:0
       hyprctl dispatch submap CS2 >/dev/null
     '';
   };
 
   cs2StrafeRightStart = pkgs.writeShellApplication {
     name = "cs2-strafe-right-start";
-    runtimeInputs = [ pkgs.hyprland pkgs.ydotool ];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.ydotool
+    ];
     text = ''
-      hyprctl dispatch submap CS2_INJECT >/dev/null
+      hyprctl dispatch submap CS2_STRAFING_RIGHT >/dev/null
       ydotool key 32:1
-      hyprctl dispatch submap CS2 >/dev/null
     '';
   };
 
@@ -175,9 +178,8 @@ let
       pkgs.ydotool
     ];
     text = ''
-      hyprctl dispatch submap CS2_INJECT >/dev/null
-      ydotool key 32:0
-      ydotool key 30:1 30:0
+      hyprctl dispatch submap CS2_COUNTER_LEFT >/dev/null
+      ydotool key 32:0 30:1 30:0
       hyprctl dispatch submap CS2 >/dev/null
     '';
   };
@@ -711,19 +713,27 @@ in
 
               wayland.windowManager.hyprland.extraConfig = lib.mkIf hcfg.enable ''
                 # CS2 submap — entered automatically when CS2 gains focus.
-                # bind fires on A/D press; bindr fires on A/D release (same submap required).
-                # Scripts switch to CS2_INJECT before injecting so echoes are not re-consumed
-                # by the bind here, then immediately return to CS2 so bindr stays live.
+                # A/D presses are intercepted; all other keys pass through.
                 submap = CS2
-                bind  = ALT, W, submap, reset
-                bind  = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
+                bind = ALT, W, submap, reset
+                bind = , A, exec, ${cs2StrafeLeftStart}/bin/cs2-strafe-left-start
+                bind = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
+
+                # Entered while A is physically held for left strafe.
+                # Only the A release is intercepted (bindr); everything else passes through.
+                submap = CS2_STRAFING_LEFT
                 bindr = , A, exec, ${cs2StrafeLeftStop}/bin/cs2-strafe-left-stop
-                bind  = , D, exec, ${cs2StrafeRightStart}/bin/cs2-strafe-right-start
+
+                # Entered while D is physically held for right strafe.
+                submap = CS2_STRAFING_RIGHT
                 bindr = , D, exec, ${cs2StrafeRightStop}/bin/cs2-strafe-right-stop
 
-                # Empty submap — injected keys land here where no bind consumes them,
-                # so they pass through to the game without looping.
-                submap = CS2_INJECT
+                # Empty submaps used during counter-strafe injection.
+                # Injected D/A keys arrive here where they are unbound and pass
+                # through to the game without triggering another counter-strafe.
+                submap = CS2_COUNTER_RIGHT
+
+                submap = CS2_COUNTER_LEFT
 
                 submap = reset
               '';
