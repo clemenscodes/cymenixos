@@ -153,8 +153,10 @@ let
     ];
     text = ''
       # Switch to safe submap before injecting counter D so D is unbound there.
+      ydotool key 30:0
       hyprctl dispatch submap CS2_COUNTER_RIGHT >/dev/null
-      ydotool key 30:0 32:1 32:0
+      ydotool 32:1 32:0
+      sleep 0.1
       hyprctl dispatch submap CS2 >/dev/null
     '';
   };
@@ -178,8 +180,10 @@ let
       pkgs.ydotool
     ];
     text = ''
+      ydotool key 32:0
       hyprctl dispatch submap CS2_COUNTER_LEFT >/dev/null
-      ydotool key 32:0 30:1 30:0
+      ydotool 30:1 30:0
+      sleep 0.05
       hyprctl dispatch submap CS2 >/dev/null
     '';
   };
