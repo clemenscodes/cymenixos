@@ -49,9 +49,6 @@ in {
         yamlConfig = ''
           modmap:
             - name: "Better CapsLock"
-              application:
-                not:
-                  - gamescope
               remap:
                 CapsLock:
                   held: SUPER_L
