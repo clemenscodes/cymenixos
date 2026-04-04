@@ -176,13 +176,13 @@ let
       # Hyprland IPC: submap dispatch + focus tracking
       # -------------------------------------------------------------------
 
-      def _is_cs2(cls, title=''):
+      def _is_cs2(cls, title=""):
           return cls == 'cs2' or (cls.startswith('gamescope') and 'Counter-Strike' in title)
 
 
       def watch_focus():
           global _focused
-          sig  = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE', '')
+          sig  = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE', "")
           rdir = os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')
 
           def enter():
@@ -194,8 +194,8 @@ let
           try:
               r     = subprocess.run(['${pkgs.hyprland}/bin/hyprctl', 'activewindow', '-j'],
                                      capture_output=True, text=True, check=False)
-              info  = json.loads(r.stdout or '{}')
-              state = _is_cs2(info.get('class', ''), info.get('title', ''))
+              info  = json.loads(r.stdout or "{}")
+              state = _is_cs2(info.get('class', ""), info.get('title', ""))
               with _lock: _focused = state
               (enter if state else leave)()
           except Exception:
@@ -204,7 +204,7 @@ let
           s = _sock.socket(_sock.AF_UNIX, _sock.SOCK_STREAM)
           try:
               s.connect(f'{rdir}/hypr/{sig}/.socket2.sock')
-              buf = ''
+              buf = ""
               while True:
                   data = s.recv(4096).decode('utf-8', errors='replace')
                   if not data:
@@ -216,7 +216,7 @@ let
                       if ev == 'activewindow':
                           parts = d.split(',', 1)
                           cls   = parts[0]
-                          title = parts[1] if len(parts) > 1 else ''
+                          title = parts[1] if len(parts) > 1 else ""
                           state = _is_cs2(cls, title)
                           with _lock: _focused = state
                           (enter if state else leave)()
