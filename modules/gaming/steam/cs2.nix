@@ -21,11 +21,12 @@
   # directly — works correctly whether Steam is already running or not.
   # ---------------------------------------------------------------------------
 
-  # Env vars are written as session variables (home.sessionVariables) so Steam
-  # inherits them at startup and passes them down to gamescope and CS2.
-  # They are NOT prepended to launchOptions — that only works when Steam is not
-  # already running, making it unreliable for the common case.
+  # Env vars are prepended to launchOptions AND written as session variables.
+  # Session variables handle the "Steam already running" case (Steam ignores
+  # localconfig.vdf changes while running). The launch options string ensures
+  # gamescope and CS2 explicitly receive the vars on a fresh Steam start.
   launchOptions = let
+    envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
     gamescopeStr = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
     gameArgsStr = lib.concatStringsSep " " (
       cfg.gameArgs ++ lib.optional (cfg.autoexec != []) "+exec autoexec"
@@ -33,6 +34,7 @@
   in
     lib.concatStringsSep " " (
       lib.filter (s: s != "") [
+        envStr
         "${gamescopeStr}%command%"
         gameArgsStr
       ]
