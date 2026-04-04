@@ -307,7 +307,7 @@ in {
                 "-h"
                 "2160"
                 "-nojoy"
-                "-novid"
+                "-refresh 240"
               ];
             };
 
@@ -609,7 +609,12 @@ in {
                     run install -m 644 ${convarsFile} "$cfgDir/cs2_user_convars_0_slot0.vcfg"
                     run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
                     ${lib.optionalString (cfg.autoexec != []) ''
-                    run install -m 644 ${autoexecFile} "$cfgDir/autoexec.cfg"
+                    gameCfgDir="$HOME/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg"
+                    if [ -d "$gameCfgDir" ]; then
+                      run install -m 644 ${autoexecFile} "$gameCfgDir/autoexec.cfg"
+                    else
+                      echo "cs2: game cfg dir not found, skipping autoexec.cfg (CS2 not installed?)"
+                    fi
                   ''}
                   else
                     echo "cs2: userdata cfg dir not found, skipping settings sync (CS2 not installed?)"
