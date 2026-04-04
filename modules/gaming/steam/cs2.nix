@@ -723,7 +723,10 @@ in
         # input group: needed for EVIOCGKEY ioctl to read physical key state.
         # ydotool group: needed for uinput key injection.
         users.users.${config.modules.users.user} = lib.mkIf hcfg.enable {
-          extraGroups = [ config.programs.ydotool.group "input" ];
+          extraGroups = [
+            config.programs.ydotool.group
+            "input"
+          ];
         };
 
         # Expose the daemon in PATH for manual testing.
@@ -785,30 +788,30 @@ in
                 #   - CS2 submap dispatch (enters CS2 submap when CS2 focused)
                 #   - Counter-strafe injection (polls keyboard state at 60 Hz,
                 #     injects opposite direction with 50 ms hold on A/D release)
-                cs2-daemon = {
-                  Unit = {
-                    Description = "CS2 Hyprland integration daemon";
-                    After = [ "graphical-session.target" ];
-                    PartOf = [ "graphical-session.target" ];
-                  };
-                  Service = {
-                    ExecStart = "${cs2Daemon}/bin/cs2-daemon";
-                    Restart = "on-failure";
-                    RestartSec = "2s";
-                  };
-                  Install.WantedBy = [ "graphical-session.target" ];
-                };
+                # cs2-daemon = {
+                #   Unit = {
+                #     Description = "CS2 Hyprland integration daemon";
+                #     After = [ "graphical-session.target" ];
+                #     PartOf = [ "graphical-session.target" ];
+                #   };
+                #   Service = {
+                #     ExecStart = "${cs2Daemon}/bin/cs2-daemon";
+                #     Restart = "on-failure";
+                #     RestartSec = "2s";
+                #   };
+                #   Install.WantedBy = [ "graphical-session.target" ];
+                # };
               };
 
-              wayland.windowManager.hyprland.extraConfig = lib.mkIf hcfg.enable ''
-                # CS2 submap — entered by cs2-daemon when CS2 gains focus.
-                # A/D are NOT bound here so they pass through to gamescope naturally.
-                # Counter-strafe is handled by cs2-daemon (polling, not binds).
-                submap = CS2
-                bind = ALT, W, submap, reset
-
-                submap = reset
-              '';
+              # wayland.windowManager.hyprland.extraConfig = lib.mkIf hcfg.enable ''
+              #   # CS2 submap — entered by cs2-daemon when CS2 gains focus.
+              #   # A/D are NOT bound here so they pass through to gamescope naturally.
+              #   # Counter-strafe is handled by cs2-daemon (polling, not binds).
+              #   submap = CS2
+              #   bind = ALT, W, submap, reset
+              #
+              #   submap = reset
+              # '';
             };
           };
         };
