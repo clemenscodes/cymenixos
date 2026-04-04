@@ -50,7 +50,7 @@
   );
 
   # PipeWire application audio output capture (game sound, SDL, etc.)
-  mkPipeWireAppSource = name: uuid: targetName: {
+  mkPipeWireAppSource = name: uuid: targetName: vol: {
     prev_ver = 536936448;
     inherit name uuid;
     id = "pipewire_audio_application_capture";
@@ -61,7 +61,7 @@
     mixers = 255;
     sync = 0;
     flags = 0;
-    volume = 1.0;
+    volume = vol;
     balance = 0.5;
     enabled = true;
     muted = false;
@@ -184,7 +184,7 @@
             private_settings = {};
           }
           # 2. GameSound (SDL Application via PipeWire app capture)
-          (mkPipeWireAppSource "GameSound" "b84d7fe9-1968-45f5-864d-d656d56b019b" obsCfg.audio.gameSource)
+          (mkPipeWireAppSource "GameSound" "b84d7fe9-1968-45f5-864d-d656d56b019b" obsCfg.audio.gameSource obsCfg.audio.gameSourceVolume)
           # 3. Shure SM7B (PipeWire input with broadcast filter chain)
           (
             (mkPipeWireSource "Shure SM7B" "9e0dd964-6f7e-4aca-9f09-f118d39826ab" obsCfg.audio.mic sm7bFilters)
@@ -1056,6 +1056,28 @@ in {
                   PipeWire application name to capture as game audio.
                   Shown in the OBS "Game Sound" source (application_audio_output_capture).
                   Common values: "SDL Application" (most games), or the specific process name.
+                '';
+              };
+              gameSourceVolume = lib.mkOption {
+                type = lib.types.float;
+                default = 0.178;
+                description = ''
+                  OBS linear volume multiplier (0.0–1.0) for the GameSound source.
+                  OBS stores volume as a linear amplitude value; convert from dB with 10^(dB/20).
+
+                  OBS meter ranges (for reference):
+                    Red    :   0 to  -9 dB  (clip danger)
+                    Yellow :  -9 to -20 dB
+                    Green  : -20 to -60 dB  (upper green ≈ -24 to -30 dB)
+
+                  Common dB → linear conversions:
+                      0 dB → 1.0     (default, maximum)
+                    -20 dB → 0.1
+                    -30 dB → 0.0316
+                    -35 dB → 0.0178
+                    -38 dB → 0.0126  (good starting point for game audio behind voice)
+                    -40 dB → 0.01
+                    -50 dB → 0.00316
                 '';
               };
             };
