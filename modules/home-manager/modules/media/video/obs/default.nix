@@ -448,8 +448,8 @@
                     y = 1.0;
                   };
                   bounds = {
-                    x = builtins.toFloat obsCfg.profile.baseWidth;
-                    y = builtins.toFloat obsCfg.profile.baseHeight;
+                    x = obsCfg.profile.baseWidth * 1.0;
+                    y = obsCfg.profile.baseHeight * 1.0;
                   };
                   bounds_rel = {
                     x = 0.0;
