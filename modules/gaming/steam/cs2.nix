@@ -24,7 +24,9 @@
   launchOptions = let
     envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
     gamescopeStr = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
-    gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
+    gameArgsStr = lib.concatStringsSep " " (
+      cfg.gameArgs ++ lib.optional (cfg.autoexec != []) "+exec autoexec"
+    );
   in
     lib.concatStringsSep " " (
       lib.filter (s: s != "") [
