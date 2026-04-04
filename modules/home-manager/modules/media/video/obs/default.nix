@@ -742,7 +742,7 @@
     [General]
     EnableAutoUpdates=false
     ConfirmOnExit=false
-    LastVersion=30000000
+    LastVersion=99999999
     CurrentProfile=${obsCfg.profile.name}
     CurrentSceneCollection=${obsCfg.scenes.name}
 
