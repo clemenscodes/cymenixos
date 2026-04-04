@@ -206,6 +206,14 @@
   '';
 
   # ---------------------------------------------------------------------------
+  # autoexec.cfg  — plain console commands run by CS2 on startup
+  # ---------------------------------------------------------------------------
+
+  autoexecFile = pkgs.writeText "autoexec.cfg" (
+    lib.concatStringsSep "\n" cfg.autoexec + "\n"
+  );
+
+  # ---------------------------------------------------------------------------
   # cs2_user_keys_0_slot0.vcfg
   # ---------------------------------------------------------------------------
 
@@ -549,6 +557,14 @@ in {
                 "cl_showloadout" = "true";
               };
             };
+
+            # --- autoexec (written to autoexec.cfg, executed by CS2 on startup) ---
+            autoexec = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              description = "Console commands written to autoexec.cfg and executed by CS2 on startup.";
+              example = ["gameui_preventescapetoshow" "con_enable 1"];
+            };
           };
         };
       };
@@ -590,6 +606,9 @@ in {
                   ''}
                     run install -m 644 ${convarsFile} "$cfgDir/cs2_user_convars_0_slot0.vcfg"
                     run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
+                    ${lib.optionalString (cfg.autoexec != []) ''
+                    run install -m 644 ${autoexecFile} "$cfgDir/autoexec.cfg"
+                  ''}
                   else
                     echo "cs2: userdata cfg dir not found, skipping settings sync (CS2 not installed?)"
                   fi
