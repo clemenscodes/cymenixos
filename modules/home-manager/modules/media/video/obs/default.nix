@@ -418,62 +418,62 @@
                     halfH = bh / 2.0;
                     px = keyboardOverlayCfg.pos.x;
                     py = keyboardOverlayCfg.pos.y;
-                  in
-                  {
-                  name = "Keyboard Overlay";
-                  source_uuid = "cyme0001-0001-0001-0001-000000000005";
-                  visible = true;
-                  locked = false;
-                  rot = 0.0;
-                  scale_ref = {
-                    x = bw;
-                    y = bh;
-                  };
-                  align = 5;
-                  bounds_type = 2;
-                  bounds_align = 0;
-                  bounds_crop = false;
-                  crop_left = 0;
-                  crop_top = 0;
-                  crop_right = 0;
-                  crop_bottom = 0;
-                  id = 4;
-                  group_item_backup = false;
-                  pos = {
-                    x = px;
-                    y = py;
-                  };
-                  pos_rel = {
-                    x = (px - bw / 2.0) / halfH;
-                    y = (py - bh / 2.0) / halfH;
-                  };
-                  scale = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  scale_rel = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  bounds = {
-                    x = bw;
-                    y = bh;
-                  };
-                  bounds_rel = {
-                    x = bw / halfH;
-                    y = bh / halfH;
-                  };
-                  scale_filter = "disable";
-                  blend_method = "default";
-                  blend_type = "normal";
-                  show_transition = {
-                    duration = 300;
-                  };
-                  hide_transition = {
-                    duration = 300;
-                  };
-                  private_settings = {};
-                })
+                  in {
+                    name = "Keyboard Overlay";
+                    source_uuid = "cyme0001-0001-0001-0001-000000000005";
+                    visible = true;
+                    locked = false;
+                    rot = 0.0;
+                    scale_ref = {
+                      x = bw;
+                      y = bh;
+                    };
+                    align = 5;
+                    bounds_type = 2;
+                    bounds_align = 0;
+                    bounds_crop = false;
+                    crop_left = 0;
+                    crop_top = 0;
+                    crop_right = 0;
+                    crop_bottom = 0;
+                    id = 4;
+                    group_item_backup = false;
+                    pos = {
+                      x = px;
+                      y = py;
+                    };
+                    pos_rel = {
+                      x = (px - bw / 2.0) / halfH;
+                      y = (py - bh / 2.0) / halfH;
+                    };
+                    scale = {
+                      x = 1.0;
+                      y = 1.0;
+                    };
+                    scale_rel = {
+                      x = 1.0;
+                      y = 1.0;
+                    };
+                    bounds = {
+                      x = bw;
+                      y = bh;
+                    };
+                    bounds_rel = {
+                      x = bw / halfH;
+                      y = bh / halfH;
+                    };
+                    scale_filter = "disable";
+                    blend_method = "default";
+                    blend_type = "normal";
+                    show_transition = {
+                      duration = 300;
+                    };
+                    hide_transition = {
+                      duration = 300;
+                    };
+                    private_settings = {};
+                  }
+                );
             };
             mixers = 0;
             sync = 0;
