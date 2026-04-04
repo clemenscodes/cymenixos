@@ -87,7 +87,7 @@
   # cs2-toggle: launch CS2 if not running, kill it if it is.
   # Used by the desktop entry so clicking it acts as a start/stop toggle.
   toggleCs2 = pkgs.writeShellScriptBin "cs2-toggle" ''
-    if ${pkgs.procps}/bin/pgrep -f 'cs2' > /dev/null 2>&1; then
+    if ${pkgs.procps}/bin/pgrep -x 'cs2' > /dev/null 2>&1; then
       exec ${killCs2}/bin/kill-cs2
     else
       exec steam -applaunch 730
