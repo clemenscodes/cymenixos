@@ -29,7 +29,7 @@ let
   useThunderbird = config.modules.organization.email.thunderbird.enable;
   useLf = config.modules.explorer.lf.enable;
   useGnomeKeyring = osConfig.modules.security.gnome-keyring.enable;
-  useEvglow = osConfig.services.evglow.enable or false;
+  useEvglow = osConfig.services.evglow.enable;
   useYazi = config.modules.explorer.yazi.enable;
   useNvim = config.modules.editor.nvim.enable;
   useFirefox = config.modules.browser.firefox.enable;
@@ -101,7 +101,8 @@ in
             csgo-vulkan-fix
           ];
           package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-          portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+          portalPackage =
+            inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
           settings = {
             input = {
               kb_layout = osConfig.modules.locale.defaultLocale;
