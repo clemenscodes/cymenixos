@@ -87,11 +87,18 @@
   '';
 
   # cs2-toggle: launch CS2 if not running, kill it if it is.
-  # Used by the desktop entry so clicking it acts as a start/stop toggle.
+  # Patches localconfig.vdf with the current Nix-defined launch options right before
+  # every launch so env vars (XKB layout, SDL driver, etc.) always take effect,
+  # regardless of whether Steam has overwritten the file from its in-memory cache.
   toggleCs2 = pkgs.writeShellScriptBin "cs2-toggle" ''
     if ${pkgs.procps}/bin/pgrep -x 'cs2' > /dev/null 2>&1; then
       exec ${killCs2}/bin/kill-cs2
     else
+      localcfg="$HOME/.local/share/Steam/userdata/${cfg.steamId}/config/localconfig.vdf"
+      if [ -f "$localcfg" ]; then
+        export CS2_LAUNCH_OPTS="${launchOptions}"
+        ${python}/bin/python3 ${updateLocalconfigScript} "$localcfg"
+      fi
       exec steam -applaunch 730
     fi
   '';
