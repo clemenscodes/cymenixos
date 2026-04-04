@@ -7,8 +7,6 @@
 { config, ... }:
 let
   cfg = config.modules.gaming.steam.cs2;
-  hcfg = cfg.hyprland;
-
   # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
@@ -67,214 +65,27 @@ let
   '';
 
   # ---------------------------------------------------------------------------
+  # kill-cs2: force-kill CS2 and all Steam subprocess wrappers
+  #
+  # Kills the SteamLaunch reaper (keyed by AppId 730), pressure-vessel wrapper,
+  # and the cs2 process itself so Steam clears the "game running" lock and
+  # allows a clean restart without restarting Steam.
   # ---------------------------------------------------------------------------
-  # Hyprland integration: cs2-daemon
-  # ---------------------------------------------------------------------------
-  #
-  # Single Python daemon that replaces all bind-based hacks.
-  #
-  # Responsibilities:
-  #   1. Submap management — enters CS2 submap when CS2 is focused, resets on blur.
-  #   2. Counter-strafe   — polls physical keyboard at 60 Hz via EVIOCGKEY ioctl
-  #                         (immune to EVIOCGRAB) and injects the opposite direction
-  #                         key (50 ms hold) when A or D is released.
-  #
-  # Why polling instead of Hyprland binds:
-  #   - binden+bindr in same submap: bindr (consuming) causes Hyprland to treat the
-  #     key as "owned", breaking binden's non-consuming passthrough.
-  #   - binden+bindnr: passthrough survives, but async exec has 10-50 ms latency and
-  #     no key-state awareness (cascading counter-strafes when switching directions).
-  #   - The polling daemon runs in-process at 60 Hz: ~16 ms max detection latency,
-  #     correct key-state tracking, no process-spawn overhead.
-  #
-  # A/D are NOT bound in the CS2 submap → they pass through to gamescope naturally.
 
-  cs2DaemonPython = pkgs.python3.withPackages (ps: [ ps.evdev ]);
-
-  cs2Daemon = pkgs.writeTextFile {
-    name = "cs2-daemon";
-    executable = true;
-    destination = "/bin/cs2-daemon";
-    text = ''
-      #!${cs2DaemonPython}/bin/python3
-      """
-      cs2-daemon: CS2 Hyprland submap manager + counter-strafe injector.
-
-      Key design:
-        - Polls keyboard state via EVIOCGKEY ioctl (works even when xremap holds
-          EVIOCGRAB on the device — ioctls are not blocked by exclusive grabs).
-        - Detects A/D release transitions at ~60 Hz.
-        - Injects the opposite direction with a 50 ms hold via ydotool.
-        - Only injects if the counter direction is not already physically held
-          (avoids releasing a key the user is holding).
-        - Monitors Hyprland socket2 for focus changes and dispatches CS2/reset submap.
-      """
-      import evdev, subprocess, threading, time, os, json, socket as _sock
-
-      KEY_A         = evdev.ecodes.KEY_A   # 30
-      KEY_D         = evdev.ecodes.KEY_D   # 32
-      POLL_INTERVAL = 1 / 60              # ~16 ms
-      COUNTER_HOLD  = 0.05               # 50 ms hold duration
-
-      _focused = False
-      _lock    = threading.Lock()
-
-      # Virtual / synthetic device names to skip when scanning for keyboards.
-      _SKIP = ('xremap', 'ydotool', 'virtual', 'uinput')
-
-
-      # -------------------------------------------------------------------
-      # Keyboard discovery
-      # -------------------------------------------------------------------
-
-      def find_keyboards():
-          result = []
-          for path in evdev.list_devices():
-              try:
-                  dev  = evdev.InputDevice(path)
-                  name = dev.name.lower()
-                  if any(s in name for s in _SKIP):
-                      continue
-                  caps = dev.capabilities()
-                  if evdev.ecodes.EV_KEY not in caps:
-                      continue
-                  keys = caps[evdev.ecodes.EV_KEY]
-                  if KEY_A in keys and KEY_D in keys:
-                      result.append(dev)
-              except Exception:
-                  pass
-          return result
-
-
-      def any_pressed(keyboards, key):
-          """
-          Query current key state via EVIOCGKEY ioctl.
-          Returns True if the key is down on any of the given devices.
-          This ioctl succeeds regardless of EVIOCGRAB ownership.
-          """
-          for dev in keyboards:
-              try:
-                  if key in dev.active_keys():
-                      return True
-              except Exception:
-                  pass
-          return False
-
-
-      # -------------------------------------------------------------------
-      # Counter-strafe injection
-      # -------------------------------------------------------------------
-
-      def inject_counter(keycode):
-          time.sleep(0.01)  # Let the natural release reach CS2 first.
-          subprocess.run(['${pkgs.ydotool}/bin/ydotool', 'key', f'{keycode}:1'], check=False)
-          time.sleep(COUNTER_HOLD)
-          subprocess.run(['${pkgs.ydotool}/bin/ydotool', 'key', f'{keycode}:0'], check=False)
-
-
-      # -------------------------------------------------------------------
-      # Hyprland IPC: submap dispatch + focus tracking
-      # -------------------------------------------------------------------
-
-      def _is_cs2(cls, title=""):
-          return cls == 'cs2' or (cls.startswith('gamescope') and 'Counter-Strike' in title)
-
-
-      def watch_focus():
-          global _focused
-          sig  = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE', "")
-          rdir = os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')
-
-          def enter():
-              subprocess.run(['${pkgs.hyprland}/bin/hyprctl', 'dispatch', 'submap', 'CS2'],   check=False)
-          def leave():
-              subprocess.run(['${pkgs.hyprland}/bin/hyprctl', 'dispatch', 'submap', 'reset'], check=False)
-
-          # Seed initial focus state.
-          try:
-              r     = subprocess.run(['${pkgs.hyprland}/bin/hyprctl', 'activewindow', '-j'],
-                                     capture_output=True, text=True, check=False)
-              info  = json.loads(r.stdout or "{}")
-              state = _is_cs2(info.get('class', ""), info.get('title', ""))
-              with _lock: _focused = state
-              (enter if state else leave)()
-          except Exception:
-              pass
-
-          s = _sock.socket(_sock.AF_UNIX, _sock.SOCK_STREAM)
-          try:
-              s.connect(f'{rdir}/hypr/{sig}/.socket2.sock')
-              buf = ""
-              while True:
-                  data = s.recv(4096).decode('utf-8', errors='replace')
-                  if not data:
-                      break
-                  buf += data
-                  while '\n' in buf:
-                      line, buf = buf.split('\n', 1)
-                      ev, _, d  = line.partition('>>')
-                      if ev == 'activewindow':
-                          parts = d.split(',', 1)
-                          cls   = parts[0]
-                          title = parts[1] if len(parts) > 1 else ""
-                          state = _is_cs2(cls, title)
-                          with _lock: _focused = state
-                          (enter if state else leave)()
-          except Exception:
-              pass
-          finally:
-              s.close()
-
-
-      # -------------------------------------------------------------------
-      # Main polling loop
-      # -------------------------------------------------------------------
-
-      def main():
-          threading.Thread(target=watch_focus, daemon=True).start()
-
-          keyboards = []
-          a_prev    = False
-          d_prev    = False
-
-          while True:
-              if not keyboards:
-                  keyboards = find_keyboards()
-                  if not keyboards:
-                      time.sleep(1)
-                      continue
-
-              try:
-                  a_now = any_pressed(keyboards, KEY_A)
-                  d_now = any_pressed(keyboards, KEY_D)
-
-                  with _lock: focused = _focused
-
-                  if focused:
-                      if a_prev and not a_now and not d_now:
-                          # A released, D not held → counter-strafe right
-                          threading.Thread(
-                              target=inject_counter, args=(KEY_D,), daemon=True
-                          ).start()
-                      elif d_prev and not d_now and not a_now:
-                          # D released, A not held → counter-strafe left
-                          threading.Thread(
-                              target=inject_counter, args=(KEY_A,), daemon=True
-                          ).start()
-
-                  a_prev = a_now
-                  d_prev = d_now
-
-              except Exception:
-                  keyboards = []
-
-              time.sleep(POLL_INTERVAL)
-
-
-      if __name__ == '__main__':
-          main()
-    '';
-  };
+  killCs2 = pkgs.writeShellScriptBin "kill-cs2" ''
+    echo "Killing CS2 process tree..."
+    ${pkgs.procps}/bin/pkill -9 -f 'cs2' || true
+    ${pkgs.procps}/bin/pkill -9 -f 'SteamLaunch.*AppId=730' || true
+    ${pkgs.procps}/bin/pkill -9 -f 'pressure-vessel' || true
+    ${pkgs.procps}/bin/pkill -9 -f 'steam-runtime-launcher-service' || true
+    sleep 1
+    if ${pkgs.procps}/bin/pgrep -f 'cs2' > /dev/null 2>&1; then
+      echo "WARNING: cs2 still running:"
+      ${pkgs.procps}/bin/pgrep -a -f 'cs2'
+    else
+      echo "CS2 fully dead. Steam should let you restart now."
+    fi
+  '';
 
   # ---------------------------------------------------------------------------
   # cs2_video.txt
@@ -702,12 +513,6 @@ in
               };
             };
 
-            # --- Hyprland integration ---
-            hyprland = {
-              enable = lib.mkEnableOption "CS2 Hyprland integration" // {
-                default = false;
-              };
-            };
           };
         };
       };
@@ -717,20 +522,7 @@ in
   config =
     lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable && cfg.enable)
       {
-        # ydotool: needed for counter-strafe key injection via uinput.
-        programs.ydotool.enable = lib.mkIf hcfg.enable (lib.mkDefault true);
-
-        # input group: needed for EVIOCGKEY ioctl to read physical key state.
-        # ydotool group: needed for uinput key injection.
-        users.users.${config.modules.users.user} = lib.mkIf hcfg.enable {
-          extraGroups = [
-            config.programs.ydotool.group
-            "input"
-          ];
-        };
-
-        # Expose the daemon in PATH for manual testing.
-        environment.systemPackages = lib.mkIf hcfg.enable [ cs2Daemon ];
+        environment.systemPackages = [ killCs2 ];
 
         home-manager = lib.mkIf config.modules.home-manager.enable {
           users = {
@@ -780,38 +572,6 @@ in
                 };
               };
 
-              # ---------------------------------------------------------------
-              # Hyprland integration: cs2-daemon
-              # ---------------------------------------------------------------
-              systemd.user.services = lib.mkIf hcfg.enable {
-                # Single daemon that handles:
-                #   - CS2 submap dispatch (enters CS2 submap when CS2 focused)
-                #   - Counter-strafe injection (polls keyboard state at 60 Hz,
-                #     injects opposite direction with 50 ms hold on A/D release)
-                # cs2-daemon = {
-                #   Unit = {
-                #     Description = "CS2 Hyprland integration daemon";
-                #     After = [ "graphical-session.target" ];
-                #     PartOf = [ "graphical-session.target" ];
-                #   };
-                #   Service = {
-                #     ExecStart = "${cs2Daemon}/bin/cs2-daemon";
-                #     Restart = "on-failure";
-                #     RestartSec = "2s";
-                #   };
-                #   Install.WantedBy = [ "graphical-session.target" ];
-                # };
-              };
-
-              # wayland.windowManager.hyprland.extraConfig = lib.mkIf hcfg.enable ''
-              #   # CS2 submap — entered by cs2-daemon when CS2 gains focus.
-              #   # A/D are NOT bound here so they pass through to gamescope naturally.
-              #   # Counter-strafe is handled by cs2-daemon (polling, not binds).
-              #   submap = CS2
-              #   bind = ALT, W, submap, reset
-              #
-              #   submap = reset
-              # '';
             };
           };
         };

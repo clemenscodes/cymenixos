@@ -29,6 +29,7 @@ let
   useThunderbird = config.modules.organization.email.thunderbird.enable;
   useLf = config.modules.explorer.lf.enable;
   useGnomeKeyring = osConfig.modules.security.gnome-keyring.enable;
+  useEvglow = osConfig.services.evglow.enable or false;
   useYazi = config.modules.explorer.yazi.enable;
   useNvim = config.modules.editor.nvim.enable;
   useFirefox = config.modules.browser.firefox.enable;
@@ -393,6 +394,13 @@ in
                   ''
                 else
                   "";
+              evglow =
+                if useEvglow then
+                  ''
+                    exec-once = evglow
+                  ''
+                else
+                  "";
             in
             ''
               ${lib.concatMapStrings (m: "monitor = ${m}\n") cfg.hyprland.monitors}monitor = , highrr, auto, 1
@@ -434,6 +442,7 @@ in
               ${hyprsunset}
               ${yubikey}
               ${keyring}
+              ${evglow}
             '';
         };
       };

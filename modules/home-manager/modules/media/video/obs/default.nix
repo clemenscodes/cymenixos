@@ -12,6 +12,7 @@
 let
   cfg = config.modules.media.video;
   obsCfg = cfg.obs;
+  keyboardOverlayCfg = obsCfg.scenes.keyboardOverlay;
   isDesktop = osConfig.modules.display.gui != "headless";
   useHyprland = config.modules.display.compositor.hyprland.enable;
   isPersisted = osConfig.modules.boot.enable;
@@ -195,7 +196,40 @@ let
             };
           }
         )
-        # 4. Game scene — contains VK Capture (video) + GameSound + SM7B (audio)
+      ] ++ lib.optional keyboardOverlayCfg.enable {
+        # Keyboard Overlay browser source
+        prev_ver = 536936448;
+        name = "Keyboard Overlay";
+        uuid = "cyme0001-0001-0001-0001-000000000005";
+        id = "browser_source";
+        versioned_id = "browser_source";
+        settings = {
+          url = keyboardOverlayCfg.url;
+          width = keyboardOverlayCfg.width;
+          height = keyboardOverlayCfg.height;
+          fps = keyboardOverlayCfg.fps;
+          css = keyboardOverlayCfg.extraCss;
+          shutdown = false;
+          restart_when_active = false;
+        };
+        mixers = 0;
+        sync = 0;
+        flags = 0;
+        volume = 1.0;
+        balance = 0.5;
+        enabled = true;
+        muted = false;
+        push-to-mute = false;
+        push-to-mute-delay = 0;
+        push-to-talk = false;
+        push-to-talk-delay = 0;
+        hotkeys = { };
+        deinterlace_mode = 0;
+        deinterlace_field_order = 0;
+        monitoring_type = 0;
+        private_settings = { };
+      } ++ [
+        # Game scene — contains VK Capture (video) + GameSound + SM7B (audio)
         {
           prev_ver = 536936448;
           name = "Game";
@@ -203,7 +237,7 @@ let
           id = "scene";
           versioned_id = "scene";
           settings = {
-            id_counter = 3;
+            id_counter = if keyboardOverlayCfg.enable then 4 else 3;
             custom_size = false;
             items = [
               {
@@ -371,7 +405,61 @@ let
                 };
                 private_settings = { };
               }
-            ];
+            ] ++ lib.optional keyboardOverlayCfg.enable {
+              name = "Keyboard Overlay";
+              source_uuid = "cyme0001-0001-0001-0001-000000000005";
+              visible = true;
+              locked = false;
+              rot = 0.0;
+              scale_ref = {
+                x = 3840.0;
+                y = 2160.0;
+              };
+              align = 5;
+              bounds_type = 0;
+              bounds_align = 0;
+              bounds_crop = false;
+              crop_left = 0;
+              crop_top = 0;
+              crop_right = 0;
+              crop_bottom = 0;
+              id = 4;
+              group_item_backup = false;
+              pos = {
+                x = keyboardOverlayCfg.pos.x;
+                y = keyboardOverlayCfg.pos.y;
+              };
+              pos_rel = {
+                x = 0.0;
+                y = 0.0;
+              };
+              scale = {
+                x = 1.0;
+                y = 1.0;
+              };
+              scale_rel = {
+                x = 1.0;
+                y = 1.0;
+              };
+              bounds = {
+                x = 0.0;
+                y = 0.0;
+              };
+              bounds_rel = {
+                x = 0.0;
+                y = 0.0;
+              };
+              scale_filter = "disable";
+              blend_method = "default";
+              blend_type = "normal";
+              show_transition = {
+                duration = 300;
+              };
+              hide_transition = {
+                duration = 300;
+              };
+              private_settings = { };
+            };
           };
           mixers = 0;
           sync = 0;
@@ -392,6 +480,9 @@ let
             "libobs.hide_scene_item.2" = [ ];
             "libobs.show_scene_item.3" = [ ];
             "libobs.hide_scene_item.3" = [ ];
+          } // lib.optionalAttrs keyboardOverlayCfg.enable {
+            "libobs.show_scene_item.4" = [ ];
+            "libobs.hide_scene_item.4" = [ ];
           };
           deinterlace_mode = 0;
           deinterlace_field_order = 0;
@@ -1106,6 +1197,49 @@ in
                 type = lib.types.str;
                 default = "Default";
                 description = "Scene collection name (shown in OBS menu and used as the filename).";
+              };
+              keyboardOverlay = {
+                enable = lib.mkEnableOption "keyboard overlay browser source in the Game scene" // {
+                  default = false;
+                };
+                url = lib.mkOption {
+                  type = lib.types.str;
+                  default = "http://localhost:7331";
+                  description = "URL for the keyboard overlay browser source (e.g. evglow endpoint).";
+                };
+                width = lib.mkOption {
+                  type = lib.types.int;
+                  default = 1280;
+                  description = "Width of the browser source in pixels.";
+                };
+                height = lib.mkOption {
+                  type = lib.types.int;
+                  default = 400;
+                  description = "Height of the browser source in pixels.";
+                };
+                fps = lib.mkOption {
+                  type = lib.types.int;
+                  default = 60;
+                  description = "Browser source framerate.";
+                };
+                pos = {
+                  x = lib.mkOption {
+                    type = lib.types.float;
+                    default = 0.0;
+                    description = "Horizontal position of the overlay in the scene canvas (pixels from left).";
+                  };
+                  y = lib.mkOption {
+                    type = lib.types.float;
+                    default = 1760.0;
+                    description = "Vertical position of the overlay in the scene canvas (pixels from top).";
+                  };
+                };
+                extraCss = lib.mkOption {
+                  type = lib.types.str;
+                  default = "";
+                  description = "Custom CSS injected into the browser source.";
+                  example = "body { background: transparent !important; }";
+                };
               };
             };
           };

@@ -28,6 +28,7 @@
 in {
   imports = [
     (import ./emulation {inherit inputs pkgs lib;})
+    (import ./evglow.nix {inherit inputs lib;})
     (import ./gamemode {inherit inputs pkgs lib;})
     (import ./heroic {inherit inputs pkgs lib;})
     (import ./lutris {inherit inputs pkgs lib;})

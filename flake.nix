@@ -169,6 +169,9 @@
         };
       };
     };
+    evglow = {
+      url = "github:clemenscodes/evglow";
+    };
     claude = {
       url = "github:sadjow/claude-code-nix";
     };
