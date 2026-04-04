@@ -84,6 +84,16 @@
     fi
   '';
 
+  # cs2-toggle: launch CS2 if not running, kill it if it is.
+  # Used by the desktop entry so clicking it acts as a start/stop toggle.
+  toggleCs2 = pkgs.writeShellScriptBin "cs2-toggle" ''
+    if ${pkgs.procps}/bin/pgrep -f 'cs2' > /dev/null 2>&1; then
+      exec ${killCs2}/bin/kill-cs2
+    else
+      exec steam -applaunch 730
+    fi
+  '';
+
   # ---------------------------------------------------------------------------
   # cs2_video.txt
   # ---------------------------------------------------------------------------
@@ -548,7 +558,7 @@ in {
   config =
     lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable && cfg.enable)
     {
-      environment.systemPackages = [killCs2];
+      environment.systemPackages = [killCs2 toggleCs2];
 
       home-manager = lib.mkIf config.modules.home-manager.enable {
         users = {
@@ -560,7 +570,7 @@ in {
                   comment = "CS2 via Steam";
                   # Steam uses the LaunchOptions stored in localconfig.vdf (set via activation).
                   # This correctly wraps CS2 (not Steam) in gamescope via %command%.
-                  exec = "steam -applaunch 730";
+                  exec = "${toggleCs2}/bin/cs2-toggle";
                   icon = "steam_icon_730";
                   categories = ["Game"];
                   settings = {
