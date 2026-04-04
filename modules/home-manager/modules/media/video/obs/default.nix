@@ -422,7 +422,7 @@
                     y = 2160.0;
                   };
                   align = 5;
-                  bounds_type = 0;
+                  bounds_type = 2;
                   bounds_align = 0;
                   bounds_crop = false;
                   crop_left = 0;
@@ -448,8 +448,8 @@
                     y = 1.0;
                   };
                   bounds = {
-                    x = 0.0;
-                    y = 0.0;
+                    x = builtins.toFloat obsCfg.profile.baseWidth;
+                    y = builtins.toFloat obsCfg.profile.baseHeight;
                   };
                   bounds_rel = {
                     x = 0.0;
