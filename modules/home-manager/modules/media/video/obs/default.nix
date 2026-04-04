@@ -896,13 +896,12 @@
   '';
 
   # Deletes the seeded config files so the next nixos-rebuild re-applies Nix defaults.
-  # Scenes and plugin configs are untouched.
+  # global.ini is not seeded (OBS manages it), so it is not removed here.
   obs-reset-config = pkgs.writeShellApplication {
     name = "obs-reset-config";
     text = ''
       OBS_DIR="$HOME/.config/obs-studio"
       echo "Removing OBS seeded config files..."
-      rm -f "$OBS_DIR/global.ini"
       rm -f "$OBS_DIR/plugin_config/obs-websocket/config.json"
       rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/basic.ini"
       rm -f "$OBS_DIR/basic/profiles/${obsCfg.profile.name}/recordEncoder.json"
@@ -1237,12 +1236,12 @@ in {
                   x = lib.mkOption {
                     type = lib.types.float;
                     default = 0.0;
-                    description = "Horizontal position of the overlay in the scene canvas (pixels from left).";
+                    description = "Horizontal position of the overlay top-left corner in the scene canvas (pixels from left). Uses OBS Top-Left anchor (align=5).";
                   };
                   y = lib.mkOption {
                     type = lib.types.float;
-                    default = 1760.0;
-                    description = "Vertical position of the overlay in the scene canvas (pixels from top).";
+                    default = 0.0;
+                    description = "Vertical position of the overlay top-left corner in the scene canvas (pixels from top). Uses OBS Top-Left anchor (align=5).";
                   };
                 };
                 extraCss = lib.mkOption {
@@ -1286,10 +1285,10 @@ in {
       ];
 
       # All config files use seed-if-absent so OBS can freely update them at runtime.
-      # The --profile flag in obs-launch ensures the correct profile is always loaded
-      # regardless of what global.ini says, so global.ini does not need force-writing.
-      # Forcing global.ini on every activation resets LastVersion, which triggers OBS's
-      # migration logic and causes "unable to migrate global configuration" errors.
+      # global.ini is intentionally NOT seeded: OBS creates it on first run with the
+      # correct LastVersion, avoiding "unable to migrate global configuration" errors.
+      # The --profile/--collection flags in obs-launch ensure the right profile and
+      # scene collection are always loaded regardless of global.ini state.
       # Run obs-reset-config to restore Nix defaults for all seeded files.
       activation.obsInitConfig = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
         OBS_DIR="$HOME/.config/obs-studio"
@@ -1309,7 +1308,6 @@ in {
         }
 
         seed "$WS_DIR/config.json"             ${websocketConfigFile}
-        seed "$OBS_DIR/global.ini"             ${globalIniFile}
         seed "$PROFILE_DIR/basic.ini"          ${profileIniFile}
         seed "$PROFILE_DIR/recordEncoder.json" ${recordEncoderFile}
         seed "$PROFILE_DIR/streamEncoder.json" ${streamEncoderFile}
