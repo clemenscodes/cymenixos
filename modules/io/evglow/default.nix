@@ -2,10 +2,6 @@
   inputs,
   lib,
   ...
-}:
-{
-  ...
-}:
-{
-  imports = [ inputs.evglow.nixosModules.default ];
+}: {...}: {
+  imports = [inputs.evglow.nixosModules.default];
 }

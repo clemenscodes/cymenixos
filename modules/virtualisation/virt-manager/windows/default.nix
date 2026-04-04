@@ -429,7 +429,12 @@ in {
                   # Pin QEMU emulator and I/O threads to non-isolated host CPUs so
                   # they cannot preempt guest vCPUs and cause microstutter.
                   emulatorpin = {cpuset = "8-15,24-31";};
-                  iothreadpin = [{iothread = 1; cpuset = "8-15,24-31";}];
+                  iothreadpin = [
+                    {
+                      iothread = 1;
+                      cpuset = "8-15,24-31";
+                    }
+                  ];
                 };
 
                 os = {

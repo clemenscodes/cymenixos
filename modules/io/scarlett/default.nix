@@ -101,28 +101,43 @@ in {
                   type = "builtin";
                   name = "eq_hp";
                   label = "bq_highpass";
-                  control = {"Freq" = 80.0; "Q" = 0.707;};
+                  control = {
+                    "Freq" = 80.0;
+                    "Q" = 0.707;
+                  };
                 }
                 # 2. Low shelf: add warmth/body
                 {
                   type = "builtin";
                   name = "eq_warmth";
                   label = "bq_lowshelf";
-                  control = {"Freq" = 150.0; "Q" = 0.707; "Gain" = 2.5;};
+                  control = {
+                    "Freq" = 150.0;
+                    "Q" = 0.707;
+                    "Gain" = 2.5;
+                  };
                 }
                 # 3. Box cut: remove SM7B cardboard resonance
                 {
                   type = "builtin";
                   name = "eq_box_cut";
                   label = "bq_peaking";
-                  control = {"Freq" = 400.0; "Q" = 1.4; "Gain" = -6.0;};
+                  control = {
+                    "Freq" = 400.0;
+                    "Q" = 1.4;
+                    "Gain" = -6.0;
+                  };
                 }
                 # 4. Mud cut: clean up low-mid muddiness
                 {
                   type = "builtin";
                   name = "eq_mud_cut";
                   label = "bq_peaking";
-                  control = {"Freq" = 600.0; "Q" = 1.2; "Gain" = -2.0;};
+                  control = {
+                    "Freq" = 600.0;
+                    "Q" = 1.2;
+                    "Gain" = -2.0;
+                  };
                 }
                 # 5. LSP Compressor: lookahead prevents onset cutting, evens out level
                 {
@@ -146,28 +161,44 @@ in {
                   type = "builtin";
                   name = "eq_presence";
                   label = "bq_peaking";
-                  control = {"Freq" = 3000.0; "Q" = 0.9; "Gain" = 5.0;};
+                  control = {
+                    "Freq" = 3000.0;
+                    "Q" = 0.9;
+                    "Gain" = 5.0;
+                  };
                 }
                 # 7. Definition: consonant crispness
                 {
                   type = "builtin";
                   name = "eq_definition";
                   label = "bq_peaking";
-                  control = {"Freq" = 5500.0; "Q" = 1.2; "Gain" = 2.0;};
+                  control = {
+                    "Freq" = 5500.0;
+                    "Q" = 1.2;
+                    "Gain" = 2.0;
+                  };
                 }
                 # 8. Clarity: sibilant detail without harshness
                 {
                   type = "builtin";
                   name = "eq_clarity";
                   label = "bq_peaking";
-                  control = {"Freq" = 8000.0; "Q" = 1.0; "Gain" = 1.5;};
+                  control = {
+                    "Freq" = 8000.0;
+                    "Q" = 1.0;
+                    "Gain" = 1.5;
+                  };
                 }
                 # 9. Air shelf: broadcast sparkle
                 {
                   type = "builtin";
                   name = "eq_air";
                   label = "bq_highshelf";
-                  control = {"Freq" = 10000.0; "Q" = 0.707; "Gain" = 5.0;};
+                  control = {
+                    "Freq" = 10000.0;
+                    "Q" = 0.707;
+                    "Gain" = 5.0;
+                  };
                 }
                 # 10. Harmonic generator: tube-like even harmonics for richness
                 {
@@ -224,18 +255,54 @@ in {
               ];
               inputs = ["eq_hp:In"];
               links = [
-                {output = "eq_hp:Out";        input = "eq_warmth:In";}
-                {output = "eq_warmth:Out";     input = "eq_box_cut:In";}
-                {output = "eq_box_cut:Out";    input = "eq_mud_cut:In";}
-                {output = "eq_mud_cut:Out";    input = "compressor:Input";}
-                {output = "compressor:Output"; input = "eq_presence:In";}
-                {output = "eq_presence:Out";   input = "eq_definition:In";}
-                {output = "eq_definition:Out"; input = "eq_clarity:In";}
-                {output = "eq_clarity:Out";    input = "eq_air:In";}
-                {output = "eq_air:Out";        input = "harmonics:Input";}
-                {output = "harmonics:Output";  input = "maximiser:Input";}
-                {output = "maximiser:Output";  input = "rnnoise:Input";}
-                {output = "rnnoise:Output";    input = "speex:Input";}
+                {
+                  output = "eq_hp:Out";
+                  input = "eq_warmth:In";
+                }
+                {
+                  output = "eq_warmth:Out";
+                  input = "eq_box_cut:In";
+                }
+                {
+                  output = "eq_box_cut:Out";
+                  input = "eq_mud_cut:In";
+                }
+                {
+                  output = "eq_mud_cut:Out";
+                  input = "compressor:Input";
+                }
+                {
+                  output = "compressor:Output";
+                  input = "eq_presence:In";
+                }
+                {
+                  output = "eq_presence:Out";
+                  input = "eq_definition:In";
+                }
+                {
+                  output = "eq_definition:Out";
+                  input = "eq_clarity:In";
+                }
+                {
+                  output = "eq_clarity:Out";
+                  input = "eq_air:In";
+                }
+                {
+                  output = "eq_air:Out";
+                  input = "harmonics:Input";
+                }
+                {
+                  output = "harmonics:Output";
+                  input = "maximiser:Input";
+                }
+                {
+                  output = "maximiser:Output";
+                  input = "rnnoise:Input";
+                }
+                {
+                  output = "rnnoise:Output";
+                  input = "speex:Input";
+                }
               ];
               outputs = ["speex:Output"];
             };

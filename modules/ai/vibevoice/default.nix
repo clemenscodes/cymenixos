@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   config,
   system,
   ...
-}:
-let
+}: let
   cfg = config.modules.ai;
   inherit (config.modules.boot.impermanence) persistPath;
 
@@ -23,12 +21,12 @@ let
 
   # transformers 4.51.3 — the version microsoft/VibeVoice-1.5B was built and tested with.
   # nixpkgs ships 5.x which removed VibeVoice TTS support; use 4.51.3 here.
-  transformers451 = cudaPkgs.callPackage ./transformers.nix { };
+  transformers451 = cudaPkgs.callPackage ./transformers.nix {};
 
   # vibevoice PyPI package was built for transformers 4.51.x — no patches needed.
-  vibevoicePkg = cudaPkgs.callPackage ./package.nix { inherit transformers451; };
+  vibevoicePkg = cudaPkgs.callPackage ./package.nix {inherit transformers451;};
 
-  vibevoiceEnv = cudaPkgs.python3.withPackages (_ps: [ vibevoicePkg ]);
+  vibevoiceEnv = cudaPkgs.python3.withPackages (_ps: [vibevoicePkg]);
 
   # Lightweight HTTP server: loads the model once, serves POST /generate
   # Returns raw WAV bytes.
@@ -234,8 +232,7 @@ let
       echo "Saved to $OUTPUT" >&2
     fi
   '';
-in
-{
+in {
   options = {
     modules = {
       ai = {
@@ -265,7 +262,7 @@ in
       ];
       persistence = lib.mkIf (config.modules.boot.enable && !cfg.ollama.enable) {
         "${persistPath}" = {
-          directories = [ "/var/lib/ai/vibevoice" ];
+          directories = ["/var/lib/ai/vibevoice"];
         };
       };
     };
@@ -280,7 +277,7 @@ in
         };
       };
       groups = {
-        vibevoice = { };
+        vibevoice = {};
       };
     };
 
@@ -297,8 +294,8 @@ in
       services = {
         vibevoice = {
           description = "VibeVoice TTS HTTP API";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network.target" ];
+          wantedBy = ["multi-user.target"];
+          after = ["network.target"];
           environment = {
             HF_HOME = "/var/lib/ai/vibevoice/cache";
             TRANSFORMERS_CACHE = "/var/lib/ai/vibevoice/cache";
@@ -312,9 +309,9 @@ in
             ExecStart = "${vibevoiceEnv}/bin/python ${serverScript}";
             Restart = "on-failure";
             RestartSec = 10;
-            StateDirectory = lib.mkForce [ ];
+            StateDirectory = lib.mkForce [];
             ProtectSystem = lib.mkForce "full";
-            ReadWritePaths = lib.mkForce [ "/var/lib/ai/vibevoice" ];
+            ReadWritePaths = lib.mkForce ["/var/lib/ai/vibevoice"];
           };
         };
       };
@@ -322,7 +319,7 @@ in
 
     networking = {
       firewall = lib.mkIf cfg.vibevoice.openFirewall {
-        allowedTCPPorts = [ cfg.vibevoice.port ];
+        allowedTCPPorts = [cfg.vibevoice.port];
       };
     };
   };

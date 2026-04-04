@@ -2,13 +2,11 @@
   inputs,
   lib,
   ...
-}:
-{
+}: {
   config,
   system,
   ...
-}:
-let
+}: let
   cfg = config.modules.ai;
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
@@ -17,18 +15,18 @@ let
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
-      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["claude-code"];
     };
     overlays = [
       inputs.claude.overlays.default
       inputs.codex.overlays.default
     ];
   };
-  jsonFormat = pkgs.formats.json { };
+  jsonFormat = pkgs.formats.json {};
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
     dontUnpack = true;
-    nativeBuildInputs = with pkgs; [ makeBinaryWrapper ];
+    nativeBuildInputs = with pkgs; [makeBinaryWrapper];
     installPhase = ''
       mkdir -p $out/bin
       makeBinaryWrapper ${pkgs.claude-code}/bin/claude $out/bin/claude \
@@ -36,14 +34,14 @@ let
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping \
         "--append-flags" \
         "--dangerously-skip-permissions --mcp-config ${
-          jsonFormat.generate "claude-code-mcp-config.json" { inherit mcpServers; }
-        }"
+        jsonFormat.generate "claude-code-mcp-config.json" {inherit mcpServers;}
+      }"
     '';
   };
   codex = pkgs.stdenv.mkDerivation {
     inherit (pkgs.codex) pname version;
     dontUnpack = true;
-    nativeBuildInputs = with pkgs; [ makeBinaryWrapper ];
+    nativeBuildInputs = with pkgs; [makeBinaryWrapper];
     installPhase = ''
       mkdir -p $out/bin
       makeBinaryWrapper ${pkgs.codex}/bin/codex $out/bin/codex \
@@ -54,7 +52,7 @@ let
   claude-monitor = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-monitor) pname version;
     dontUnpack = true;
-    nativeBuildInputs = with pkgs; [ makeWrapper ];
+    nativeBuildInputs = with pkgs; [makeWrapper];
     installPhase = ''
       mkdir -p $out/bin
       makeWrapper ${pkgs.claude-monitor}/bin/claude-monitor $out/bin/claude-monitor \
@@ -66,7 +64,7 @@ let
   peonsh = pkgs.stdenv.mkDerivation {
     inherit (peon) pname version;
     dontUnpack = true;
-    nativeBuildInputs = with pkgs; [ makeWrapper ];
+    nativeBuildInputs = with pkgs; [makeWrapper];
     installPhase = ''
       mkdir -p $out/bin
       makeWrapper ${peon}/bin/peon-codex-adapter $out/bin/peon-codex-adapter \
@@ -93,8 +91,7 @@ let
     rev = "746efaa6b4e8a0ea15cf9c7fe6f5b5425ed1ba8e";
     hash = "sha256-YPC8QXrq2uv6iM3z7MuZ4Zi7XMkTVTprYnq+VCywGzc=";
   };
-in
-{
+in {
   options = {
     modules = {
       ai = {
@@ -125,7 +122,7 @@ in
               settings = {
                 model = "gpt-5.3-codex";
                 model_reasoning_effort = "xhigh";
-                notify = [ "${peonsh}/bin/peon-codex-adapter" ];
+                notify = ["${peonsh}/bin/peon-codex-adapter"];
                 projects = {
                   "/home/${user}/.local/src" = {
                     trust_level = "trusted";

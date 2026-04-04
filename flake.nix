@@ -198,88 +198,86 @@
       inputs.hyprland.follows = "hyprland";
     };
   };
-  outputs =
-    {
-      self,
-      nixpkgs,
-      ...
-    }@inputs:
-    let
-      inherit (pkgs) lib;
-      system = "x86_64-linux";
-      overlays = import ./overlays {
-        inherit
-          inputs
-          pkgs
-          lib
-          system
-          ;
-      };
-      electronOverlay = final: prev: {
-        inherit
-          (
-            (import inputs.nixpkgs-electron-fix {
-              inherit system;
-              config.allowUnfree = true;
-            })
-          )
-          electron_39
-          ;
-      };
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = overlays ++ [
+  outputs = {
+    self,
+    nixpkgs,
+    ...
+  } @ inputs: let
+    inherit (pkgs) lib;
+    system = "x86_64-linux";
+    overlays = import ./overlays {
+      inherit
+        inputs
+        pkgs
+        lib
+        system
+        ;
+    };
+    electronOverlay = final: prev: {
+      inherit
+        (
+          (import inputs.nixpkgs-electron-fix {
+            inherit system;
+            config.allowUnfree = true;
+          })
+        )
+        electron_39
+        ;
+    };
+    pkgs = import nixpkgs {
+      inherit system;
+      overlays =
+        overlays
+        ++ [
           inputs.nix-cachyos-kernel.overlays.default
           electronOverlay
         ];
-        config = {
-          allowUnfreePredicate =
-            pkg:
-            builtins.elem (lib.getName pkg) [
-              "nvidia-x11"
-              "nvidia-settings"
-              "nvidia-persistenced"
-            ];
-        };
+      config = {
+        allowUnfreePredicate = pkg:
+          builtins.elem (lib.getName pkg) [
+            "nvidia-x11"
+            "nvidia-settings"
+            "nvidia-persistenced"
+          ];
       };
-    in
-    {
-      formatter = {
-        ${system} = pkgs.alejandra;
-      };
+    };
+  in {
+    formatter = {
+      ${system} = pkgs.alejandra;
+    };
 
-      packages = {
-        ${system} = {
-          inherit pkgs;
-          inherit (pkgs) tongo;
-        };
+    packages = {
+      ${system} = {
+        inherit pkgs;
+        inherit (pkgs) tongo;
       };
+    };
 
-      overlays = {
-        ${system} = {
-          default = overlays;
-        };
+    overlays = {
+      ${system} = {
+        default = overlays;
       };
+    };
 
-      devShells = {
-        ${system} = {
-          default = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [
-              cymenixos-scripts
-              nil
-              alejandra
-            ];
-          };
-        };
-      };
-
-      nixosModules = {
-        ${system} = {
-          default = import ./modules {
-            inherit inputs pkgs lib;
-            cymenixos = self;
-          };
+    devShells = {
+      ${system} = {
+        default = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [
+            cymenixos-scripts
+            nil
+            alejandra
+          ];
         };
       };
     };
+
+    nixosModules = {
+      ${system} = {
+        default = import ./modules {
+          inherit inputs pkgs lib;
+          cymenixos = self;
+        };
+      };
+    };
+  };
 }

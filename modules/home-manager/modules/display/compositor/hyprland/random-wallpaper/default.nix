@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "random-wallpaper" ''
   until ${pkgs.awww}/bin/awww query &>/dev/null; do
     sleep 0.1

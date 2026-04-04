@@ -3,13 +3,11 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   config,
   osConfig,
   ...
-}:
-let
+}: let
   displayCfg = config.modules.display;
   cfg = displayCfg.compositor;
   machine = osConfig.modules.machine.kind;
@@ -51,28 +49,29 @@ let
         ${pkgs.hyprland}/bin/hyprctl dispatch killactive ""
     fi
   '';
-  random-wallpaper = import ./wallpaper { inherit inputs pkgs lib; };
-in
-{
+  random-wallpaper = import ./wallpaper {inherit inputs pkgs lib;};
+in {
   imports = [
-    (import ./hyprshade { inherit inputs pkgs lib; })
-    (import ./hyprpicker { inherit inputs pkgs lib; })
-    (import ./hyprsunset { inherit inputs pkgs lib; })
-    (import ./xwayland { inherit inputs pkgs lib; })
+    (import ./hyprshade {inherit inputs pkgs lib;})
+    (import ./hyprpicker {inherit inputs pkgs lib;})
+    (import ./hyprsunset {inherit inputs pkgs lib;})
+    (import ./xwayland {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       display = {
         compositor = {
           hyprland = {
-            enable = lib.mkEnableOption "Enable anime titties" // {
-              default = false;
-            };
+            enable =
+              lib.mkEnableOption "Enable anime titties"
+              // {
+                default = false;
+              };
             monitors = lib.mkOption {
               type = lib.types.listOf lib.types.str;
-              default = [ ];
+              default = [];
               description = "Extra monitor rules prepended before the catch-all. Each entry is a raw Hyprland monitor line (without the 'monitor = ' prefix).";
-              example = [ "HDMI-A-2, 3840x2160@60, auto, 1, mirror, DP-3" ];
+              example = ["HDMI-A-2, 3840x2160@60, auto, 1, mirror, DP-3"];
             };
           };
         };
@@ -86,7 +85,7 @@ in
         pkgs.awww
         pkgs.wl-clipboard
         pkgs.cliphist
-        (lib.mkIf isLaptop (import ./lidhandle { inherit inputs pkgs lib; }))
+        (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
         random-wallpaper
       ];
     };
@@ -290,161 +289,150 @@ in
               "ALT, mouse:273, resizewindow"
             ];
           };
-          extraConfig =
-            let
-              waybar = if useWaybar then "exec-once = waybar" else "";
-              swaync = if useSwaync then "exec-once = swaync" else "";
-              firefox =
-                if useFirefox then
-                  ''
-                    windowrule = center 1, size (monitor_w*0.8) (monitor_h*0.8), match:class (firefox)
-                  ''
-                else
-                  "";
-              davinci =
-                if useDavinci then
-                  ''
-                    windowrule = tile on, match:title ^(DaVinci Resolve)(.*)$
-                  ''
-                else
-                  "";
-              blueman =
-                if useBlueman then
-                  ''
-                    exec-once = blueman-applet
-                    windowrule = float on, match:class ^(blueman-manager)$
-                  ''
-                else
-                  "";
-              nm =
-                if useNm then
-                  ''
-                    exec-once = nm-applet --indicator
-                    windowrule = float on, match:class ^(nm-applet)$
-                    windowrule = float on, match:class ^(nm-connection-editor)$
-                  ''
-                else
-                  "";
-              torrent =
-                if useTorrent then
-                  ''
-                    exec-once = mullvad-vpn
-                  ''
-                else
-                  "";
-              hypridle =
-                if useHyprlock then
-                  ''
-                    exec-once = hypridle &
-                  ''
-                else
-                  "";
-              hyprsunset =
-                if useHyprsunset then
-                  ''
-                    exec-once = hyprsunset &
-                  ''
-                else
-                  "";
-              kitty =
-                if useKitty then
-                  ''
-                    windowrule = opacity 0.90, match:class kitty
-                  ''
-                else
-                  "";
-              rofi =
-                if useRofi then
-                  ''
-                    windowrule = float on, match:class Rofi
-                  ''
-                else
-                  "";
-              swayidle =
-                if useSwayidle then
-                  ''
-                    exec-once = detectidle
-                  ''
-                else
-                  "";
-              swayaudioidle =
-                if useSwayAudioIdle then
-                  ''
-                    exec-once = sway-audio-idle-inhibit
-                  ''
-                else
-                  "";
-              ssh =
-                if useSsh then
-                  ''
-                    exec-once = sshagent
-                  ''
-                else
-                  "";
-              yubikey =
-                if useYubikey then
-                  ''
-                    exec-once = ${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify
-                  ''
-                else
-                  "";
-              keyring =
-                if useGnomeKeyring then
-                  ''
-                    exec-once = unlock-keyring
-                  ''
-                else
-                  "";
-              evglow =
-                if useEvglow then
-                  ''
-                    exec-once = evglow
-                  ''
-                else
-                  "";
-            in
-            ''
-              ${lib.concatMapStrings (m: "monitor = ${m}\n") cfg.hyprland.monitors}monitor = , highrr, auto, 1
+          extraConfig = let
+            waybar =
+              if useWaybar
+              then "exec-once = waybar"
+              else "";
+            swaync =
+              if useSwaync
+              then "exec-once = swaync"
+              else "";
+            firefox =
+              if useFirefox
+              then ''
+                windowrule = center 1, size (monitor_w*0.8) (monitor_h*0.8), match:class (firefox)
+              ''
+              else "";
+            davinci =
+              if useDavinci
+              then ''
+                windowrule = tile on, match:title ^(DaVinci Resolve)(.*)$
+              ''
+              else "";
+            blueman =
+              if useBlueman
+              then ''
+                exec-once = blueman-applet
+                windowrule = float on, match:class ^(blueman-manager)$
+              ''
+              else "";
+            nm =
+              if useNm
+              then ''
+                exec-once = nm-applet --indicator
+                windowrule = float on, match:class ^(nm-applet)$
+                windowrule = float on, match:class ^(nm-connection-editor)$
+              ''
+              else "";
+            torrent =
+              if useTorrent
+              then ''
+                exec-once = mullvad-vpn
+              ''
+              else "";
+            hypridle =
+              if useHyprlock
+              then ''
+                exec-once = hypridle &
+              ''
+              else "";
+            hyprsunset =
+              if useHyprsunset
+              then ''
+                exec-once = hyprsunset &
+              ''
+              else "";
+            kitty =
+              if useKitty
+              then ''
+                windowrule = opacity 0.90, match:class kitty
+              ''
+              else "";
+            rofi =
+              if useRofi
+              then ''
+                windowrule = float on, match:class Rofi
+              ''
+              else "";
+            swayidle =
+              if useSwayidle
+              then ''
+                exec-once = detectidle
+              ''
+              else "";
+            swayaudioidle =
+              if useSwayAudioIdle
+              then ''
+                exec-once = sway-audio-idle-inhibit
+              ''
+              else "";
+            ssh =
+              if useSsh
+              then ''
+                exec-once = sshagent
+              ''
+              else "";
+            yubikey =
+              if useYubikey
+              then ''
+                exec-once = ${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify
+              ''
+              else "";
+            keyring =
+              if useGnomeKeyring
+              then ''
+                exec-once = unlock-keyring
+              ''
+              else "";
+            evglow =
+              if useEvglow
+              then ''
+                exec-once = evglow
+              ''
+              else "";
+          in ''
+            ${lib.concatMapStrings (m: "monitor = ${m}\n") cfg.hyprland.monitors}monitor = , highrr, auto, 1
 
-              env = XCURSOR_SIZE,16
-              env = XDG_SESSION_TYPE,wayland
-              env = XDG_SESSION_DESKTOP,Hyprland
-              env = XDG_CURRENT_DESKTOP,Hyprland
-              env = MOZ_ENABLE_WAYLAND,1
+            env = XCURSOR_SIZE,16
+            env = XDG_SESSION_TYPE,wayland
+            env = XDG_SESSION_DESKTOP,Hyprland
+            env = XDG_CURRENT_DESKTOP,Hyprland
+            env = MOZ_ENABLE_WAYLAND,1
 
-              exec-once = ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
-              exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME
-              exec-once = wl-paste --type text --watch cliphist store
-              exec-once = wl-paste --type image --watch cliphist store
-              exec-once = polkitagent
-              exec-once = ${pkgs.awww}/bin/awww-daemon
-              exec-once = wallpaper
+            exec-once = ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
+            exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME
+            exec-once = wl-paste --type text --watch cliphist store
+            exec-once = wl-paste --type image --watch cliphist store
+            exec-once = polkitagent
+            exec-once = ${pkgs.awww}/bin/awww-daemon
+            exec-once = wallpaper
 
-              windowrule = float on, match:class ^(org.kde.polkit-kde-authentication-agent-1)$
+            windowrule = float on, match:class ^(org.kde.polkit-kde-authentication-agent-1)$
 
-              bind = $mod SHIFT, Q,submap,passthru
-              submap = passthru
-              bind = $mod SHIFT, Q,submap,reset
-              submap = reset
+            bind = $mod SHIFT, Q,submap,passthru
+            submap = passthru
+            bind = $mod SHIFT, Q,submap,reset
+            submap = reset
 
-              ${kitty}
-              ${rofi}
-              ${waybar}
-              ${swaync}
-              ${swayidle}
-              ${swayaudioidle}
-              ${ssh}
-              ${firefox}
-              ${davinci}
-              ${blueman}
-              ${nm}
-              ${torrent}
-              ${hypridle}
-              ${hyprsunset}
-              ${yubikey}
-              ${keyring}
-              ${evglow}
-            '';
+            ${kitty}
+            ${rofi}
+            ${waybar}
+            ${swaync}
+            ${swayidle}
+            ${swayaudioidle}
+            ${ssh}
+            ${firefox}
+            ${davinci}
+            ${blueman}
+            ${nm}
+            ${torrent}
+            ${hypridle}
+            ${hyprsunset}
+            ${yubikey}
+            ${keyring}
+            ${evglow}
+          '';
         };
       };
     };

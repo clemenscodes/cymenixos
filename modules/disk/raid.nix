@@ -9,24 +9,25 @@
     then "raid456"
     else "raid${builtins.toString cfg.level}";
   diskEntries = lib.listToAttrs (map (dev: {
-    name = builtins.baseNameOf dev;
-    value = {
-      type = "disk";
-      device = dev;
-      content = {
-        type = "gpt";
-        partitions = {
-          raid = {
-            size = "100%";
-            content = {
-              type = "mdraid";
-              name = cfg.name;
+      name = builtins.baseNameOf dev;
+      value = {
+        type = "disk";
+        device = dev;
+        content = {
+          type = "gpt";
+          partitions = {
+            raid = {
+              size = "100%";
+              content = {
+                type = "mdraid";
+                name = cfg.name;
+              };
             };
           };
         };
       };
-    };
-  }) cfg.devices);
+    })
+    cfg.devices);
 in {
   imports = [inputs.disko.nixosModules.default];
   options = {

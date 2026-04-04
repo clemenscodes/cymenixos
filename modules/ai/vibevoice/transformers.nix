@@ -15,7 +15,7 @@ python3Packages.buildPythonPackage rec {
     hash = "sha256-4pL8qzmQxt7+Yyjw99IAQoPKgaegey3ppG1n/YHqFAk=";
   };
 
-  build-system = with python3Packages; [ setuptools ];
+  build-system = with python3Packages; [setuptools];
 
   dependencies = with python3Packages; [
     filelock
@@ -36,7 +36,7 @@ python3Packages.buildPythonPackage rec {
     "huggingface-hub"
     "tokenizers"
   ];
-  nativeBuildInputs = with python3Packages; [ pythonRelaxDepsHook ];
+  nativeBuildInputs = with python3Packages; [pythonRelaxDepsHook];
 
   postPatch = ''
     # Remove strict upper-bound version pins that would raise ImportError at startup
@@ -48,7 +48,7 @@ python3Packages.buildPythonPackage rec {
 
   doCheck = false;
 
-  pythonImportsCheck = [ "transformers" ];
+  pythonImportsCheck = ["transformers"];
 
   meta = {
     description = "transformers 4.51.3 (VibeVoice-compatible)";

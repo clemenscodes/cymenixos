@@ -2,18 +2,17 @@
   pkgs,
   lib,
   ...
-}:
-{ config, ... }:
-let
+}: {config, ...}: let
   cfg = config.modules;
-in
-{
+in {
   options = {
     modules = {
       xdg = {
-        enable = lib.mkEnableOption "Enable XDG" // {
-          default = false;
-        };
+        enable =
+          lib.mkEnableOption "Enable XDG"
+          // {
+            default = false;
+          };
       };
     };
   };
@@ -50,7 +49,7 @@ in
         # Hyprland sets XDG_CURRENT_DESKTOP=Hyprland, so the "Hyprland" block wins.
         config = {
           common = {
-            default = [ "gtk" ];
+            default = ["gtk"];
           };
         };
       };

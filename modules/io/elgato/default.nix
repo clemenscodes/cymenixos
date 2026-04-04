@@ -2,9 +2,11 @@
   inputs,
   lib,
   ...
-}:
-{ config, system, ... }:
-let
+}: {
+  config,
+  system,
+  ...
+}: let
   cfg = config.modules.io;
   inherit (config.modules.users) user;
   pkgs = import inputs.nixpkgs {
@@ -13,29 +15,30 @@ let
       allowUnfree = true;
     };
   };
-  sc0710 = config.boot.kernelPackages.callPackage ./sc0710.nix { };
-  sc0710-cli = pkgs.callPackage ./sc0710-cli.nix { };
-  sc0710-firmware = pkgs.callPackage ./sc0710-firmware.nix { };
-in
-{
+  sc0710 = config.boot.kernelPackages.callPackage ./sc0710.nix {};
+  sc0710-cli = pkgs.callPackage ./sc0710-cli.nix {};
+  sc0710-firmware = pkgs.callPackage ./sc0710-firmware.nix {};
+in {
   options = {
     modules = {
       io = {
         elgato = {
-          enable = lib.mkEnableOption "Enable YUAN/Elgato sc0710 PCIe capture card driver (12ab:0710)" // {
-            default = false;
-          };
+          enable =
+            lib.mkEnableOption "Enable YUAN/Elgato sc0710 PCIe capture card driver (12ab:0710)"
+            // {
+              default = false;
+            };
         };
       };
     };
   };
   config = lib.mkIf (cfg.enable && cfg.elgato.enable) {
     boot = {
-      extraModulePackages = [ sc0710 ];
-      kernelModules = [ "sc0710" ];
+      extraModulePackages = [sc0710];
+      kernelModules = ["sc0710"];
     };
     hardware = {
-      firmware = [ sc0710-firmware ];
+      firmware = [sc0710-firmware];
     };
     environment = {
       systemPackages = [
@@ -47,7 +50,7 @@ in
     users = {
       users = {
         ${user} = {
-          extraGroups = [ "video" ];
+          extraGroups = ["video"];
         };
       };
     };

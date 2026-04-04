@@ -78,10 +78,10 @@ in {
     ];
     environment = {
       systemPackages = [
-        pkgs.feather      # recommended Monero wallet GUI
-        pkgs.monero-gui   # official Monero GUI wallet
-        pkgs.monero-cli   # monero-wallet-cli, monerod CLI tools
-        generateWallet    # run: generate-monero-wallet
+        pkgs.feather # recommended Monero wallet GUI
+        pkgs.monero-gui # official Monero GUI wallet
+        pkgs.monero-cli # monero-wallet-cli, monerod CLI tools
+        generateWallet # run: generate-monero-wallet
       ];
     };
     users = with cfg.monero.settings; {

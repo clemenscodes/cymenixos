@@ -3,20 +3,19 @@
   pkgs,
   lib,
   ...
-}:
-{ config, ... }:
-let
+}: {config, ...}: let
   cfg = config.modules.security;
   inherit (config.modules.users) user;
-in
-{
+in {
   options = {
     modules = {
       security = {
         gnupg = {
-          enable = lib.mkEnableOption "Enable gnupg" // {
-            default = false;
-          };
+          enable =
+            lib.mkEnableOption "Enable gnupg"
+            // {
+              default = false;
+            };
         };
       };
     };

@@ -15,7 +15,7 @@ python3Packages.buildPythonPackage rec {
     sha256 = "1fcaf03bfbea14f6a651b79b0b077b7eec75e838a16f9c891539be22d5878f24";
   };
 
-  build-system = with python3Packages; [ setuptools ];
+  build-system = with python3Packages; [setuptools];
 
   dependencies = with python3Packages; [
     torch
@@ -39,9 +39,9 @@ python3Packages.buildPythonPackage rec {
   # nixpkgs ships newer accelerate; our transformers451 satisfies the transformers pin.
   # Relax all version constraints so pythonRuntimeDepsCheckHook passes.
   pythonRelaxDeps = true;
-  nativeBuildInputs = with python3Packages; [ pythonRelaxDepsHook ];
+  nativeBuildInputs = with python3Packages; [pythonRelaxDepsHook];
 
-  pythonImportsCheck = [ "vibevoice" ];
+  pythonImportsCheck = ["vibevoice"];
 
   meta = {
     description = "VibeVoice: Microsoft's expressive long-form TTS using a 7B/1.5B LLM";
