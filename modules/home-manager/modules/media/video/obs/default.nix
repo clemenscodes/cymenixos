@@ -411,15 +411,23 @@
                     private_settings = {};
                   }
                 ]
-                ++ lib.optional keyboardOverlayCfg.enable {
+                ++ lib.optional keyboardOverlayCfg.enable (
+                  let
+                    bw = obsCfg.profile.baseWidth * 1.0;
+                    bh = obsCfg.profile.baseHeight * 1.0;
+                    halfH = bh / 2.0;
+                    px = keyboardOverlayCfg.pos.x;
+                    py = keyboardOverlayCfg.pos.y;
+                  in
+                  {
                   name = "Keyboard Overlay";
                   source_uuid = "cyme0001-0001-0001-0001-000000000005";
                   visible = true;
                   locked = false;
                   rot = 0.0;
                   scale_ref = {
-                    x = 3840.0;
-                    y = 2160.0;
+                    x = bw;
+                    y = bh;
                   };
                   align = 5;
                   bounds_type = 2;
@@ -432,12 +440,12 @@
                   id = 4;
                   group_item_backup = false;
                   pos = {
-                    x = keyboardOverlayCfg.pos.x;
-                    y = keyboardOverlayCfg.pos.y;
+                    x = px;
+                    y = py;
                   };
                   pos_rel = {
-                    x = 0.0;
-                    y = 0.0;
+                    x = (px - bw / 2.0) / halfH;
+                    y = (py - bh / 2.0) / halfH;
                   };
                   scale = {
                     x = 1.0;
@@ -448,12 +456,12 @@
                     y = 1.0;
                   };
                   bounds = {
-                    x = obsCfg.profile.baseWidth * 1.0;
-                    y = obsCfg.profile.baseHeight * 1.0;
+                    x = bw;
+                    y = bh;
                   };
                   bounds_rel = {
-                    x = 0.0;
-                    y = 0.0;
+                    x = bw / halfH;
+                    y = bh / halfH;
                   };
                   scale_filter = "disable";
                   blend_method = "default";
@@ -465,7 +473,7 @@
                     duration = 300;
                   };
                   private_settings = {};
-                };
+                })
             };
             mixers = 0;
             sync = 0;
