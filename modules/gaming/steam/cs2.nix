@@ -21,8 +21,11 @@
   # directly — works correctly whether Steam is already running or not.
   # ---------------------------------------------------------------------------
 
+  # Env vars are written as session variables (home.sessionVariables) so Steam
+  # inherits them at startup and passes them down to gamescope and CS2.
+  # They are NOT prepended to launchOptions — that only works when Steam is not
+  # already running, making it unreliable for the common case.
   launchOptions = let
-    envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
     gamescopeStr = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
     gameArgsStr = lib.concatStringsSep " " (
       cfg.gameArgs ++ lib.optional (cfg.autoexec != []) "+exec autoexec"
@@ -30,7 +33,6 @@
   in
     lib.concatStringsSep " " (
       lib.filter (s: s != "") [
-        envStr
         "${gamescopeStr}%command%"
         gameArgsStr
       ]
@@ -87,9 +89,10 @@
   '';
 
   # cs2-toggle: launch CS2 if not running, kill it if it is.
-  # Patches localconfig.vdf with the current Nix-defined launch options right before
-  # every launch so env vars (XKB layout, SDL driver, etc.) always take effect,
-  # regardless of whether Steam has overwritten the file from its in-memory cache.
+  # Env vars reach CS2 via home.sessionVariables (inherited by Steam at login).
+  # localconfig.vdf is patched here only for structural launch options (gamescope
+  # wrapper, game args) — safe to do even when Steam is running since these rarely
+  # change and take effect on the next Steam restart.
   toggleCs2 = pkgs.writeShellScriptBin "cs2-toggle" ''
     if ${pkgs.procps}/bin/pgrep -x 'cs2' > /dev/null 2>&1; then
       exec ${killCs2}/bin/kill-cs2
@@ -606,6 +609,10 @@ in {
             };
 
             home = {
+              # Env vars are set at session level so Steam (and gamescope/CS2)
+              # inherit them regardless of when Steam was started.
+              sessionVariables = cfg.env;
+
               activation = lib.mkIf (cfg.steamId != "") {
                 cs2Settings = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
                   cfgDir="$HOME/${userdataCfgPath}"
