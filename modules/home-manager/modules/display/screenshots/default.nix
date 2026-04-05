@@ -19,20 +19,10 @@ in {
       packages = [
         pkgs.grim
         pkgs.slurp
-        pkgs.swappy
+        pkgs.wl-clipboard
         (import ./screenshot {inherit pkgs;})
         (import ./fullscreenshot {inherit pkgs;})
       ];
-    };
-    xdg = {
-      configFile = {
-        "swappy/config" = {
-          text = ''
-            [Default]
-            save_dir=${config.xdg.userDirs.extraConfig.XDG_SCREENSHOT_DIR}
-          '';
-        };
-      };
     };
   };
 }
