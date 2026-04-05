@@ -2611,23 +2611,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-electron-fix": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1775368027,
-        "narHash": "sha256-0xIjVQ5cEpaowjoBCwTe0hV3t2NDaQ8uqLAl5/yiAHw=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "017c8576edde695cf297a24989781f76652b7fb1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "master",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1743296961,
@@ -3366,11 +3349,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775368065,
-        "narHash": "sha256-Q/2KDtPMCexBMOiAJ7KeabnQTeINmGM/EFqOtPekhE0=",
+        "lastModified": 1775368764,
+        "narHash": "sha256-myqHY0SSW0wUOgh/9gjJXS1jLYaZwAqLQmSMsKfgKyc=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "8886cbaaa9414cbd78c913cb0362aefca04cabca",
+        "rev": "1451e1a897076073a38c856c5d7bedc16018580d",
         "type": "github"
       },
       "original": {
@@ -3628,7 +3611,6 @@
         "nix-cachyos-kernel": "nix-cachyos-kernel",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixpkgs": "nixpkgs_20",
-        "nixpkgs-electron-fix": "nixpkgs-electron-fix",
         "nixvirt": "nixvirt",
         "nur": "nur",
         "peon-ping": "peon-ping",
