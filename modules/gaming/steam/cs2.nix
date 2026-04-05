@@ -221,8 +221,47 @@
   # autoexec.cfg  — plain console commands run by CS2 on startup
   # ---------------------------------------------------------------------------
 
+  # ---------------------------------------------------------------------------
+  # nulls.cfg  — null-movement aliases (last-pressed WASD key wins)
+  # ---------------------------------------------------------------------------
+
+  nullsFile = pkgs.writeText "nulls.cfg" ''
+    alias"+a""rightleft -1 0 0; alias +d ad"
+    alias"a1""rightleft -1 0 0; alias +d ad"
+    alias"ad""rightleft 1 0 0; alias -d add; alias -a ada"
+    alias"-a""rightleft 0 0 0; alias +d d1; alias -d d2; alias -a a2; alias +a a1"
+    alias"a2""rightleft 0 0 0; alias +d d1; alias -d d2; alias -a a2; alias +a a1"
+    alias"+d""rightleft 1 0 0; alias +a da"
+    alias"d1""rightleft 1 0 0; alias +a da"
+    alias"da""rightleft -1 0 0; alias -a ada; alias -d add"
+    alias"-d""rightleft 0 0 0; alias +a a1; alias -a a2; alias -d d2; alias +d d1"
+    alias"d2""rightleft 0 0 0; alias +a a1; alias -a a2; alias -d d2; alias +d d1"
+    alias"add""rightleft -1 0 0; alias +d ad; alias -a a2; alias -d d2"
+    alias"ada""rightleft 1 0 0; alias +a da; alias -d d2; alias -a a2"
+
+    alias"+w""forwardback 1 0 0;alias +s ws"
+    alias"w1""forwardback 1 0 0;alias +s ws"
+    alias"ws""forwardback -1 0 0;alias -s wss;alias -w wsw"
+    alias"-w""forwardback 0 0 0;alias +s s1;alias -s s2;alias -w w2;alias +w w1"
+    alias"w2""forwardback 0 0 0;alias +s s1;alias -s s2;alias -w w2;alias +w w1"
+    alias"+s""forwardback -1 0 0;alias +w sw"
+    alias"s1""forwardback -1 0 0;alias +w sw"
+    alias"sw""forwardback 1 0 0;alias -w wsw;alias -s wss"
+    alias"-s""forwardback 0 0 0;alias +w w1;alias -w w2;alias -s s2;alias +s s1"
+    alias"s2""forwardback 0 0 0;alias +w w1;alias -w w2;alias -s s2;alias +s s1"
+    alias"wss""forwardback 1 0 0;alias +s ws;alias -w w2;alias -s s2"
+    alias"wsw""forwardback -1 0 0;alias +w sw;alias -s s2;alias -w w2"
+  '';
+
+  # Null-movement bootstrap lines prepended to autoexec when nulls.enable is true.
+  # exec nulls must come first so the +w/+a/+s/+d aliases exist before being bound.
+  nullsAutoexecLines = lib.optionals cfg.nulls.enable [
+    ''exec nulls''
+    ''bind "w" "+w"; bind "a" "+a"; bind "s" "+s"; bind "d" "+d"''
+  ];
+
   autoexecFile = pkgs.writeText "autoexec.cfg" (
-    lib.concatStringsSep "\n" cfg.autoexec + "\n" + "host_writeconfig"
+    lib.concatStringsSep "\n" (nullsAutoexecLines ++ cfg.autoexec) + "\n" + "host_writeconfig"
   );
 
   # ---------------------------------------------------------------------------
@@ -577,6 +616,15 @@ in {
               };
             };
 
+            # --- nulls movement ---
+            nulls = {
+              enable =
+                lib.mkEnableOption "Null-movement (last-pressed WASD key wins via rightleft/forwardback)"
+                // {
+                  default = false;
+                };
+            };
+
             # --- autoexec (written to autoexec.cfg, executed by CS2 on startup) ---
             autoexec = lib.mkOption {
               type = lib.types.listOf lib.types.str;
@@ -635,12 +683,17 @@ in {
                   ''}
                     run install -m 644 ${convarsFile} "$cfgDir/cs2_user_convars_0_slot0.vcfg"
                     run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
-                    ${lib.optionalString (cfg.autoexec != []) ''
+                    ${lib.optionalString (cfg.autoexec != [] || cfg.nulls.enable) ''
                     gameCfgDir="$HOME/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg"
                     if [ -d "$gameCfgDir" ]; then
+                      ${lib.optionalString (cfg.autoexec != [] || cfg.nulls.enable) ''
                       run install -m 644 ${autoexecFile} "$gameCfgDir/autoexec.cfg"
+                    ''}
+                      ${lib.optionalString cfg.nulls.enable ''
+                      run install -m 644 ${nullsFile} "$gameCfgDir/nulls.cfg"
+                    ''}
                     else
-                      echo "cs2: game cfg dir not found, skipping autoexec.cfg (CS2 not installed?)"
+                      echo "cs2: game cfg dir not found, skipping cfg files (CS2 not installed?)"
                     fi
                   ''}
                   else
