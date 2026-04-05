@@ -2,19 +2,18 @@
   pkgs,
   lib,
   ...
-}:
-{ config, ... }:
-let
+}: {config, ...}: let
   cfg = config.modules.io;
-in
-{
+in {
   options = {
     modules = {
       io = {
         razer = {
-          enable = lib.mkEnableOption "Enable Razer peripheral support" // {
-            default = false;
-          };
+          enable =
+            lib.mkEnableOption "Enable Razer peripheral support"
+            // {
+              default = false;
+            };
         };
       };
     };
@@ -23,7 +22,7 @@ in
     hardware = {
       openrazer = {
         enable = true;
-        users = [ config.modules.users.name ];
+        users = [config.modules.users.name];
       };
     };
     environment = {

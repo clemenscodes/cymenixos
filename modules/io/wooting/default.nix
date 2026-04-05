@@ -69,7 +69,20 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.wooting.enable) {
-    environment.systemPackages = [wootility];
+    environment = {
+      systemPackages = [
+        wootility
+      ];
+      persistence = {
+        ${config.modules.boot.impermanence.persistPath} = {
+          users = {
+            ${config.modules.users.user} = {
+              directories = [".config/wootility"];
+            };
+          };
+        };
+      };
+    };
     services.udev.packages = [pkgs.wooting-udev-rules];
   };
 }
