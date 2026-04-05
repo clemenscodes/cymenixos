@@ -3,7 +3,9 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}:
+{ config, ... }:
+let
   cfg = config.modules.gaming.steam.cs2;
   # ---------------------------------------------------------------------------
   # Helpers
@@ -25,24 +27,23 @@
   # Session variables handle the "Steam already running" case (Steam ignores
   # localconfig.vdf changes while running). The launch options string ensures
   # gamescope and CS2 explicitly receive the vars on a fresh Steam start.
-  launchOptions = let
-    envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
-    gamescopeStr = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- ";
-    gameArgsStr = lib.concatStringsSep " " (
-      cfg.gameArgs ++ lib.optional (cfg.autoexec != []) "+exec autoexec"
-    );
-  in
+  launchOptions =
+    let
+      envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
+      gamescopeStr = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args}";
+      gameArgsStr = lib.concatStringsSep " " (cfg.gameArgs ++ lib.optional (cfg.autoexec != [ ]));
+    in
     lib.concatStringsSep " " (
       lib.filter (s: s != "") [
         envStr
-        "${gamescopeStr}%command%"
+        "${gamescopeStr} -- %command%"
         gameArgsStr
       ]
     );
 
   # Python script that patches localconfig.vdf with the CS2 launch options.
   # Reads the launch options string from $CS2_LAUNCH_OPTS to avoid shell quoting issues.
-  python = pkgs.python3.withPackages (ps: [ps.vdf]);
+  python = pkgs.python3.withPackages (ps: [ ps.vdf ]);
   updateLocalconfigScript = pkgs.writeText "update-cs2-localconfig.py" ''
     import os, sys, vdf
 
@@ -92,8 +93,8 @@
 
   # cs2-toggle: launch CS2 if not running, kill it if it is.
   # Env vars reach CS2 via home.sessionVariables (inherited by Steam at login).
-  # localconfig.vdf is patched here only for structural launch options (gamescope
   # wrapper, game args) — safe to do even when Steam is running since these rarely
+  # localconfig.vdf is patched here only for structural launch options (gamescope
   # change and take effect on the next Steam restart.
   toggleCs2 = pkgs.writeShellScriptBin "cs2-toggle" ''
     if ${pkgs.procps}/bin/pgrep -x 'cs2' > /dev/null 2>&1; then
@@ -125,19 +126,10 @@
     "setting.defaultresheight" = toString v.resolution.height;
     "setting.refreshrate_numerator" = "0";
     "setting.refreshrate_denominator" = "0";
-    "setting.fullscreen" =
-      if v.displayMode == "fullscreen"
-      then "1"
-      else "0";
+    "setting.fullscreen" = if v.displayMode == "fullscreen" then "1" else "0";
     "setting.coop_fullscreen" = "1";
-    "setting.nowindowborder" =
-      if v.displayMode == "borderless"
-      then "1"
-      else "0";
-    "setting.mat_vsync" =
-      if v.vsync
-      then "1"
-      else "0";
+    "setting.nowindowborder" = if v.displayMode == "borderless" then "1" else "0";
+    "setting.mat_vsync" = if v.vsync then "1" else "0";
     "setting.fullscreen_min_on_focus_loss" = "0";
     "setting.high_dpi" = "0";
     "Autoconfig" = "2";
@@ -178,23 +170,11 @@
     "cl_crosshairsize" = toString ch.size;
     "cl_crosshairthickness" = toString ch.thickness;
     "cl_crosshairgap" = toString ch.gap;
-    "cl_crosshairdot" =
-      if ch.dot
-      then "true"
-      else "false";
-    "cl_crosshair_t" =
-      if ch.tStyle
-      then "true"
-      else "false";
-    "cl_crosshair_drawoutline" =
-      if ch.outline
-      then "true"
-      else "false";
+    "cl_crosshairdot" = if ch.dot then "true" else "false";
+    "cl_crosshair_t" = if ch.tStyle then "true" else "false";
+    "cl_crosshair_drawoutline" = if ch.outline then "true" else "false";
     "cl_crosshair_outlinethickness" = toString ch.outlineThickness;
-    "cl_crosshair_recoil" =
-      if ch.followRecoil
-      then "true"
-      else "false";
+    "cl_crosshair_recoil" = if ch.followRecoil then "true" else "false";
     "cl_crosshairgap_useweaponvalue" = "false";
     "cl_crosshairusealpha" = "true";
     "crosshair" = "true";
@@ -203,10 +183,7 @@
     "sensitivity" = toString cfg.mouse.sensitivity;
     "zoom_sensitivity_ratio" = toString cfg.mouse.zoomSensitivity;
     "sensitivity_y_scale" = "1.000000";
-    "mouse_inverty" =
-      if cfg.mouse.invertY
-      then "true"
-      else "false";
+    "mouse_inverty" = if cfg.mouse.invertY then "true" else "false";
   };
   allConvars = crosshairConvars // mouseConvars // cfg.extraConvars;
   convarsFile = pkgs.writeText "cs2_user_convars_0_slot0.vcfg" ''
@@ -224,7 +201,7 @@
   # ---------------------------------------------------------------------------
 
   autoexecFile = pkgs.writeText "autoexec.cfg" (
-    lib.concatStringsSep "\n" cfg.autoexec + "\n"
+    lib.concatStringsSep "\n" cfg.autoexec + "\n" + "host_writeconfig"
   );
 
   # ---------------------------------------------------------------------------
@@ -235,8 +212,7 @@
     map (b: {
       name = b.key;
       value = b.command;
-    })
-    cfg.binds
+    }) cfg.binds
   );
   keysFile = pkgs.writeText "cs2_user_keys_0_slot0.vcfg" ''
     "config"
@@ -253,17 +229,16 @@
   # ---------------------------------------------------------------------------
 
   userdataCfgPath = ".local/share/Steam/userdata/${cfg.steamId}/730/local/cfg";
-in {
+in
+{
   options = {
     modules = {
       gaming = {
         steam = {
           cs2 = {
-            enable =
-              lib.mkEnableOption "CS2 Steam desktop entry and settings"
-              // {
-                default = false;
-              };
+            enable = lib.mkEnableOption "CS2 Steam desktop entry and settings" // {
+              default = false;
+            };
 
             steamId = lib.mkOption {
               type = lib.types.str;
@@ -278,7 +253,7 @@ in {
             # --- launch ---
             env = lib.mkOption {
               type = lib.types.attrsOf lib.types.str;
-              default = {};
+              default = { };
               description = "Environment variables set before launching CS2.";
               example = {
                 SDL_VIDEO_DRIVER = "wayland";
@@ -286,17 +261,17 @@ in {
                 MANGOHUD = "1";
                 MANGOHUD_CONFIG = "fps_only=1";
                 OBS_VKCAPTURE = "1";
+                XKB_DEFAULT_MODEL = "pc105";
+                XKB_DEFAULT_LAYOUT = "de";
               };
             };
             gamescope = {
-              enable =
-                lib.mkEnableOption "Wrap CS2 launch in gamescope"
-                // {
-                  default = false;
-                };
+              enable = lib.mkEnableOption "Wrap CS2 launch in gamescope" // {
+                default = false;
+              };
               args = lib.mkOption {
                 type = lib.types.listOf lib.types.str;
-                default = [];
+                default = [ ];
                 description = "Arguments passed to gamescope before --.";
                 example = [
                   "-f"
@@ -310,7 +285,7 @@ in {
             };
             gameArgs = lib.mkOption {
               type = lib.types.listOf lib.types.str;
-              default = [];
+              default = [ ];
               description = "Arguments passed to CS2 via steam -applaunch 730.";
               example = [
                 "-vulkan"
@@ -319,17 +294,20 @@ in {
                 "-h"
                 "2160"
                 "-nojoy"
+                "-sdlaudiodriver"
+                "pipewire"
+                "+fps_max"
+                "0"
+                "-forcenovsync"
                 "-refresh 240"
               ];
             };
 
             # --- video (cs2_video.txt) ---
             video = {
-              enable =
-                lib.mkEnableOption "Manage cs2_video.txt"
-                // {
-                  default = false;
-                };
+              enable = lib.mkEnableOption "Manage cs2_video.txt" // {
+                default = false;
+              };
               vendorId = lib.mkOption {
                 type = lib.types.int;
                 default = 4318;
@@ -538,12 +516,12 @@ in {
               type = lib.types.listOf (
                 lib.types.submodule {
                   options = {
-                    key = lib.mkOption {type = lib.types.str;};
-                    command = lib.mkOption {type = lib.types.str;};
+                    key = lib.mkOption { type = lib.types.str; };
+                    command = lib.mkOption { type = lib.types.str; };
                   };
                 }
               );
-              default = [];
+              default = [ ];
               description = "Keybinds written to cs2_user_keys_0_slot0.vcfg.";
               example = [
                 {
@@ -564,7 +542,7 @@ in {
             # --- extra convars (merged into cs2_user_convars) ---
             extraConvars = lib.mkOption {
               type = lib.types.attrsOf lib.types.str;
-              default = {};
+              default = { };
               description = "Any additional convars merged into cs2_user_convars_0_slot0.vcfg.";
               example = {
                 "con_enable" = "true";
@@ -575,9 +553,12 @@ in {
             # --- autoexec (written to autoexec.cfg, executed by CS2 on startup) ---
             autoexec = lib.mkOption {
               type = lib.types.listOf lib.types.str;
-              default = [];
+              default = [ ];
               description = "Console commands written to autoexec.cfg and executed by CS2 on startup.";
-              example = ["gameui_preventescapetoshow" "con_enable 1"];
+              example = [
+                "gameui_preventescapetoshow"
+                "con_enable 1"
+              ];
             };
           };
         };
@@ -587,70 +568,73 @@ in {
 
   config =
     lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable && cfg.enable)
-    {
-      environment.systemPackages = [killCs2 toggleCs2];
+      {
+        environment.systemPackages = [
+          killCs2
+          toggleCs2
+        ];
 
-      home-manager = lib.mkIf config.modules.home-manager.enable {
-        users = {
-          ${config.modules.users.user} = {
-            xdg = {
-              desktopEntries = {
-                cs2 = {
-                  name = "Counter-Strike 2";
-                  comment = "CS2 via Steam";
-                  # Steam uses the LaunchOptions stored in localconfig.vdf (set via activation).
-                  # This correctly wraps CS2 (not Steam) in gamescope via %command%.
-                  exec = "${toggleCs2}/bin/cs2-toggle";
-                  icon = "steam_icon_730";
-                  categories = ["Game"];
-                  settings = {
-                    StartupWMClass = "cs2";
+        home-manager = lib.mkIf config.modules.home-manager.enable {
+          users = {
+            ${config.modules.users.user} = {
+              xdg = {
+                desktopEntries = {
+                  cs2 = {
+                    name = "Counter-Strike 2";
+                    comment = "CS2 via Steam";
+                    # Steam uses the LaunchOptions stored in localconfig.vdf (set via activation).
+                    # This correctly wraps CS2 (not Steam) in gamescope via %command%.
+                    exec = "${toggleCs2}/bin/cs2-toggle";
+                    icon = "steam_icon_730";
+                    categories = [ "Game" ];
+                    settings = {
+                      StartupWMClass = "cs2";
+                    };
                   };
                 };
               };
-            };
 
-            home = {
-              # Env vars are set at session level so Steam (and gamescope/CS2)
-              # inherit them regardless of when Steam was started.
-              sessionVariables = cfg.env;
+              home = {
+                # Env vars are set at session level so Steam (and gamescope/CS2)
+                # inherit them regardless of when Steam was started.
+                sessionVariables = cfg.env;
 
-              activation = lib.mkIf (cfg.steamId != "") {
-                cs2Settings = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
-                  cfgDir="$HOME/${userdataCfgPath}"
-                  if [ -d "$cfgDir" ]; then
-                    ${lib.optionalString cfg.video.enable ''
-                    run install -m 644 ${videoFile} "$cfgDir/cs2_video.txt"
-                  ''}
-                    run install -m 644 ${convarsFile} "$cfgDir/cs2_user_convars_0_slot0.vcfg"
-                    run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
-                    ${lib.optionalString (cfg.autoexec != []) ''
-                    gameCfgDir="$HOME/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg"
-                    if [ -d "$gameCfgDir" ]; then
-                      run install -m 644 ${autoexecFile} "$gameCfgDir/autoexec.cfg"
+                activation = lib.mkIf (cfg.steamId != "") {
+                  cs2Settings = inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+                    cfgDir="$HOME/${userdataCfgPath}"
+                    if [ -d "$cfgDir" ]; then
+                      ${lib.optionalString cfg.video.enable ''
+                        run install -m 644 ${videoFile} "$cfgDir/cs2_video.txt"
+                      ''}
+                      run install -m 644 ${convarsFile} "$cfgDir/cs2_user_convars_0_slot0.vcfg"
+                      run install -m 644 ${keysFile} "$cfgDir/cs2_user_keys_0_slot0.vcfg"
+                      ${lib.optionalString (cfg.autoexec != [ ]) ''
+                        gameCfgDir="$HOME/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg"
+                        if [ -d "$gameCfgDir" ]; then
+                          run install -m 644 ${autoexecFile} "$gameCfgDir/autoexec.cfg"
+                        else
+                          echo "cs2: game cfg dir not found, skipping autoexec.cfg (CS2 not installed?)"
+                        fi
+                      ''}
                     else
-                      echo "cs2: game cfg dir not found, skipping autoexec.cfg (CS2 not installed?)"
+                      echo "cs2: userdata cfg dir not found, skipping settings sync (CS2 not installed?)"
                     fi
-                  ''}
-                  else
-                    echo "cs2: userdata cfg dir not found, skipping settings sync (CS2 not installed?)"
-                  fi
 
-                  # Update localconfig.vdf so Steam uses gamescope (%command%) as launch options.
-                  # This wraps the CS2 executable — not Steam — regardless of whether Steam is
-                  # already running when the desktop entry is clicked.
-                  localcfg="$HOME/.local/share/Steam/userdata/${cfg.steamId}/config/localconfig.vdf"
-                  if [ -f "$localcfg" ]; then
-                    export CS2_LAUNCH_OPTS="${launchOptions}"
-                    $DRY_RUN_CMD ${python}/bin/python3 ${updateLocalconfigScript} "$localcfg"
-                  else
-                    echo "cs2: localconfig.vdf not found, skipping launch options update (Steam not set up?)"
-                  fi
-                '';
+                    # Update localconfig.vdf so Steam uses gamescope (%command%) as launch options.
+                    # This wraps the CS2 executable — not Steam — regardless of whether Steam is
+                    # already running when the desktop entry is clicked.
+                    localcfg="$HOME/.local/share/Steam/userdata/${cfg.steamId}/config/localconfig.vdf"
+                    if [ -f "$localcfg" ]; then
+                      export CS2_LAUNCH_OPTS="${launchOptions}"
+                      $DRY_RUN_CMD ${python}/bin/python3 ${updateLocalconfigScript} "$localcfg"
+                    else
+                      echo "cs2: localconfig.vdf not found, skipping launch options update (Steam not set up?)"
+                    fi
+                  '';
+                };
               };
             };
           };
         };
       };
-    };
 }
