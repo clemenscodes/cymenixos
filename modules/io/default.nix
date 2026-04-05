@@ -13,6 +13,7 @@
     (import ./scarlett {inherit inputs pkgs lib;})
     (import ./sound {inherit inputs pkgs lib;})
     (import ./udisks {inherit inputs pkgs lib;})
+    (import ./wooting {inherit inputs pkgs lib;})
     (import ./xremap {inherit inputs pkgs lib;})
     (import ./ydotool {inherit inputs pkgs lib;})
   ];
