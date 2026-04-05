@@ -31,6 +31,7 @@
     nativeBuildInputs = [pkgs.makeWrapper];
     extraInstallCommands = ''
       wrapProgram $out/bin/wootility \
+        --add-flags "--disable-gpu-sandbox" \
         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}"
 
       install -Dm444 ${wootilityContents}/wootility.desktop -t $out/share/applications
