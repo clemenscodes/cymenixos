@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   lib,
   ...
@@ -7,11 +8,18 @@
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
 in {
+  imports = [
+    (import ./cs2.nix {inherit inputs pkgs lib;})
+  ];
   options = {
     modules = {
       gaming = {
         steam = {
-          enable = lib.mkEnableOption "Enable steam" // {default = false;};
+          enable =
+            lib.mkEnableOption "Enable steam"
+            // {
+              default = false;
+            };
           gamescope = {
             fpsLimit = lib.mkOption {
               type = lib.types.int;

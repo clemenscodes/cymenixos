@@ -34,7 +34,6 @@ in {
     (import ./mangohud {inherit inputs pkgs lib;})
     (import ./nexusmods {inherit inputs pkgs lib;})
     (import ./steam {inherit inputs pkgs lib;})
-    (import ./steam/cs2.nix {inherit inputs pkgs lib;})
     (import ./umu {inherit inputs pkgs lib;})
     (import ./w3champions {inherit inputs pkgs lib;})
   ];
