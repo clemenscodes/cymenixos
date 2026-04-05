@@ -410,7 +410,7 @@ in {
 
             windowrule = float on, match:class ^(org.kde.polkit-kde-authentication-agent-1)$
             windowrule = fullscreen on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
-            windowrule = stayfocused, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
+            windowrule = stay_focused on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
             windowrule = immediate on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
 
             bind = $mod SHIFT, Q,submap,passthru
