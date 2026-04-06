@@ -30,28 +30,28 @@
         '';
       };
       on_open = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
         default = [];
-        example = ["obs-cli start-recording"];
-        description = "Shell commands to run when a matching window is created.";
+        example = [["obs-cli" "start-recording"]];
+        description = "Commands to run when a matching window is created. Each command is an argv list.";
       };
       on_close = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
         default = [];
-        example = ["obs-cli stop-recording"];
-        description = "Shell commands to run when a matching window is destroyed.";
+        example = [["obs-cli" "stop-recording"]];
+        description = "Commands to run when a matching window is destroyed. Each command is an argv list.";
       };
       on_focus = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
         default = [];
-        example = ["wootswitch switch CS2"];
-        description = "Shell commands to run when a matching window gains focus.";
+        example = [["hyprctl" "dispatch" "submap" "gaming"]];
+        description = "Commands to run when a matching window gains focus. Each command is an argv list.";
       };
       on_unfocus = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
         default = [];
-        example = ["wootswitch switch Default"];
-        description = "Shell commands to run when a matching window loses focus.";
+        example = [["hyprctl" "dispatch" "submap" "reset"]];
+        description = "Commands to run when a matching window loses focus. Each command is an argv list.";
       };
     };
   };
@@ -67,15 +67,16 @@ in {
             default = [];
             description = ''
               Window hook rules. Each entry matches windows by class and/or title
-              (both are regexes, AND-ed) and runs shell commands on lifecycle events.
+              (both are regexes, AND-ed) and runs commands on lifecycle events.
+              Each command is an argv list: ["executable" "arg1" "arg2" ...].
             '';
             example = lib.literalExpression ''
               [
                 {
                   class      = "^gamescope$";
                   title      = "Counter-Strike 2";
-                  on_focus   = [ "wootswitch switch CS2" ];
-                  on_unfocus = [ "wootswitch switch Default" ];
+                  on_focus   = [ ["/run/current-system/sw/bin/hyprctl" "dispatch" "submap" "gaming"] ];
+                  on_unfocus = [ ["/run/current-system/sw/bin/hyprctl" "dispatch" "submap" "reset"] ];
                 }
               ]
             '';
