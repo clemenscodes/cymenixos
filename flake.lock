@@ -4244,11 +4244,11 @@
         "rust-overlay": "rust-overlay_5"
       },
       "locked": {
-        "lastModified": 1775485193,
-        "narHash": "sha256-+0FYJx7CTTswN0rZgnLA9MKWPUb2b4brtFzWtAaqfeo=",
+        "lastModified": 1775486637,
+        "narHash": "sha256-KXTbQKSgurBKLuuX4OgYI4IivQg6YVgMC0ZLXWcQxGg=",
         "owner": "clemenscodes",
         "repo": "wootswitch",
-        "rev": "dee8e3f65f7326052a744024034ea9fbb907b833",
+        "rev": "70ae34c57059be1f455dfaacdce016c0129584df",
         "type": "github"
       },
       "original": {
