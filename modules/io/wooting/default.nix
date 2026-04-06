@@ -36,7 +36,8 @@
 
       install -Dm444 ${wootilityContents}/wootility.desktop -t $out/share/applications
       substituteInPlace $out/share/applications/wootility.desktop \
-        --replace-fail 'Exec=AppRun --no-sandbox' "Exec=$out/bin/wootility"
+        --replace-fail 'Exec=AppRun --no-sandbox' "Exec=wootility" \
+        --replace-quiet 'TryExec=AppRun' "TryExec=wootility"
 
       for size in 16x16 32x32 48x48 64x64 128x128 256x256 512x512 1024x1024; do
         if [ -f ${wootilityContents}/usr/share/icons/hicolor/$size/apps/wootility.png ]; then
