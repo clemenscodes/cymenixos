@@ -9,7 +9,7 @@
 }: let
   cfg = config.modules.io;
   hyprhookModuleAvailable = inputs ? hyprhook;
-  windowRule = lib.types.submodule {
+  ruleType = lib.types.submodule {
     options = {
       class = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
@@ -62,8 +62,8 @@ in {
       io = {
         hyprhook = {
           enable = lib.mkEnableOption "Enable hyprhook — Hyprland window event hook runner";
-          windows = lib.mkOption {
-            type = lib.types.listOf windowRule;
+          rules = lib.mkOption {
+            type = lib.types.listOf ruleType;
             default = [];
             description = ''
               Window hook rules. Each entry matches windows by class and/or title
@@ -88,7 +88,7 @@ in {
   config = lib.mkIf (cfg.enable && cfg.hyprhook.enable && hyprhookModuleAvailable) {
     services.hyprhook = {
       enable = true;
-      windows = cfg.hyprhook.windows;
+      rules = cfg.hyprhook.rules;
     };
   };
 }
