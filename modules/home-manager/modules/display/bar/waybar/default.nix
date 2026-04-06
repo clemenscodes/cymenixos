@@ -246,7 +246,8 @@ in {
             "custom/wootswitch" = lib.mkIf (useWootswitch && wootswitchPkg != null) {
               exec = "${wootswitchPkg}/bin/wootswitch list --waybar";
               return-type = "json";
-              interval = 5;
+              interval = 1;
+              tooltip = true;
               format = "{}";
               on-click = "${wootswitchPkg}/bin/wootswitch switch --next";
               on-click-right = "${wootswitchPkg}/bin/wootswitch switch --previous";
