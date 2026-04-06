@@ -72,6 +72,7 @@ in {
           set -g allow-passthrough on
           set -ga update-environment TERM
           set -ga update-environment TERM_PROGRAM
+          set -ga update-environment HYPRLAND_INSTANCE_SIGNATURE
 
           # Forward Ctrl+L to the pane so shell clear always works
           bind -n C-l send-keys C-l
