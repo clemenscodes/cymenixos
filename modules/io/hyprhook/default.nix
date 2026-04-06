@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   lib,
   ...
 }: {
@@ -88,5 +89,7 @@ in {
       enable = true;
       windows = cfg.hyprhook.windows;
     };
+    systemd.user.services.hyprhook.path =
+      lib.optional (inputs ? wootswitch) inputs.wootswitch.packages.${pkgs.system}.default;
   };
 }
