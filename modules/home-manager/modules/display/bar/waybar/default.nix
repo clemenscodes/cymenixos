@@ -19,10 +19,7 @@
   useClaude = osConfig.modules.ai.claude.enable;
   useNvidia = osConfig.modules.gpu.nvidia.enable;
   useWootswitch = osConfig.modules.io.wooting.wootswitch.enable;
-  wootswitchPkg =
-    if inputs ? wootswitch
-    then inputs.wootswitch.packages.${system}.default
-    else null;
+  wootswitchPkg =inputs.wootswitch.packages.${system}.default;
   cpuVendor = osConfig.modules.cpu.vendor;
   cpuHwmonPath =
     if cpuVendor == "amd"
@@ -250,7 +247,7 @@ in {
               exec = "${wootswitchPkg}/bin/wootswitch list --waybar";
               return-type = "json";
               interval = 5;
-              format = " {}";
+              format = "{}";
               on-click = "${wootswitchPkg}/bin/wootswitch switch --next";
               on-click-right = "${wootswitchPkg}/bin/wootswitch switch --previous";
             };
