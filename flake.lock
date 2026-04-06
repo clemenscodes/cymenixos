@@ -1822,11 +1822,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1775486921,
-        "narHash": "sha256-5chmDkhXI0cqPgqQJ3Dqcm8VYyPPyE8GS9usrkdRID0=",
+        "lastModified": 1775490479,
+        "narHash": "sha256-lV4FOEAbM7dulJD8hqb6vNL1EcF9g5TXQfHVWQvcKPE=",
         "owner": "clemenscodes",
         "repo": "hyprhook",
-        "rev": "18fc42b972976c27b758c1663bc9bbd26c4036d2",
+        "rev": "573c79fa8f8c997d8edc06a759f63c673503e681",
         "type": "github"
       },
       "original": {
@@ -3468,11 +3468,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775482222,
-        "narHash": "sha256-5iq1FijGze1uB3jwCF4S+VVqo7S/HbI0I9k5tkiTteI=",
+        "lastModified": 1775490179,
+        "narHash": "sha256-vACdUFV+JMHUHInQMs+wNYtelXtynqnpGuZXJMtl4vo=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "2484b52840e30d6ea75bb49a0bddc7dd72af0f7f",
+        "rev": "c250ee505add658d216c80f7ff51742bd375e156",
         "type": "github"
       },
       "original": {
