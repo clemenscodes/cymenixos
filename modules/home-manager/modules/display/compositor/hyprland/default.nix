@@ -293,10 +293,7 @@ in {
           extraConfig = let
             waybar =
               if useWaybar
-              then ''
-                exec-once = waybar
-                layerrule = noanim, ^(waybar)$
-              ''
+              then "exec-once = waybar"
               else "";
             swaync =
               if useSwaync
