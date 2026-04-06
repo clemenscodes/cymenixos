@@ -28,6 +28,7 @@
   useLf = config.modules.explorer.lf.enable;
   useGnomeKeyring = osConfig.modules.security.gnome-keyring.enable;
   useEvglow = osConfig.services.evglow.enable;
+  useHyprhook = osConfig.modules.io.enable && osConfig.modules.io.hyprhook.enable && (inputs ? hyprhook);
   useYazi = config.modules.explorer.yazi.enable;
   useNvim = config.modules.editor.nvim.enable;
   useFirefox = config.modules.browser.firefox.enable;
@@ -391,6 +392,12 @@ in {
                 exec-once = evglow
               ''
               else "";
+            hyprhook =
+              if useHyprhook
+              then ''
+                exec-once = ${osConfig.services.hyprhook.finalPackage}/bin/hyprhook
+              ''
+              else "";
           in ''
             ${lib.concatMapStrings (m: "monitor = ${m}\n") cfg.hyprland.monitors}monitor = , highrr, auto, 1
 
@@ -435,6 +442,7 @@ in {
             ${yubikey}
             ${keyring}
             ${evglow}
+            ${hyprhook}
           '';
         };
       };
