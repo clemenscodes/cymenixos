@@ -9,6 +9,8 @@
 }: let
   cfg = config.modules.io;
   hyprhookModuleAvailable = inputs ? hyprhook;
+  commandType = lib.types.listOf lib.types.str;
+
   ruleType = lib.types.submodule {
     options = {
       class = lib.mkOption {
@@ -30,28 +32,28 @@
         '';
       };
       on_open = lib.mkOption {
-        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
-        default = [];
-        example = [["obs-cli" "start-recording"]];
-        description = "Commands to run when a matching window is created. Each command is an argv list.";
+        type = lib.types.nullOr commandType;
+        default = null;
+        example = ["obs-cli" "start-recording"];
+        description = "Command to run when a matching window is created. First element is the binary, the rest are args.";
       };
       on_close = lib.mkOption {
-        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
-        default = [];
-        example = [["obs-cli" "stop-recording"]];
-        description = "Commands to run when a matching window is destroyed. Each command is an argv list.";
+        type = lib.types.nullOr commandType;
+        default = null;
+        example = ["obs-cli" "stop-recording"];
+        description = "Command to run when a matching window is destroyed. First element is the binary, the rest are args.";
       };
       on_focus = lib.mkOption {
-        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
-        default = [];
-        example = [["hyprctl" "dispatch" "submap" "gaming"]];
-        description = "Commands to run when a matching window gains focus. Each command is an argv list.";
+        type = lib.types.nullOr commandType;
+        default = null;
+        example = ["hyprctl" "dispatch" "submap" "gaming"];
+        description = "Command to run when a matching window gains focus. First element is the binary, the rest are args.";
       };
       on_unfocus = lib.mkOption {
-        type = lib.types.listOf (lib.types.nonEmptyListOf lib.types.str);
-        default = [];
-        example = [["hyprctl" "dispatch" "submap" "reset"]];
-        description = "Commands to run when a matching window loses focus. Each command is an argv list.";
+        type = lib.types.nullOr commandType;
+        default = null;
+        example = ["hyprctl" "dispatch" "submap" "reset"];
+        description = "Command to run when a matching window loses focus. First element is the binary, the rest are args.";
       };
     };
   };
@@ -67,19 +69,17 @@ in {
             default = [];
             description = ''
               Window hook rules. Each entry matches windows by class and/or title
-              (both are regexes, AND-ed) and runs commands on lifecycle events.
-              Each command is an argv list: ["executable" "arg1" "arg2" ...].
+              (both are regexes, AND-ed) and runs a command on lifecycle events.
+              Each command is a list where the first element is the binary and the rest are args.
             '';
-            example = lib.literalExpression ''
-              [
-                {
-                  class      = "^gamescope$";
-                  title      = "Counter-Strike 2";
-                  on_focus   = [ ["/run/current-system/sw/bin/hyprctl" "dispatch" "submap" "gaming"] ];
-                  on_unfocus = [ ["/run/current-system/sw/bin/hyprctl" "dispatch" "submap" "reset"] ];
-                }
-              ]
-            '';
+            example = [
+              {
+                class      = "^gamescope$";
+                title      = "Counter-Strike 2";
+                on_focus   = ["hyprctl" "dispatch" "submap" "gaming"];
+                on_unfocus = ["hyprctl" "dispatch" "submap" "reset"];
+              }
+            ];
           };
         };
       };
