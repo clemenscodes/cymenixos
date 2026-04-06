@@ -1822,11 +1822,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1775490479,
-        "narHash": "sha256-lV4FOEAbM7dulJD8hqb6vNL1EcF9g5TXQfHVWQvcKPE=",
+        "lastModified": 1775490726,
+        "narHash": "sha256-kFtmomHuL80GpqzSclmfhuKu+rFdPB1QVT2CghTbTAg=",
         "owner": "clemenscodes",
         "repo": "hyprhook",
-        "rev": "573c79fa8f8c997d8edc06a759f63c673503e681",
+        "rev": "23619510e78574d580e7c03b6f298ffd75e7dd00",
         "type": "github"
       },
       "original": {

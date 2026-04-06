@@ -88,16 +88,5 @@ in {
       enable = true;
       windows = cfg.hyprhook.windows;
     };
-    systemd.user.services.hyprhook = {
-      description = "hyprhook Hyprland window event hook runner";
-      wantedBy = ["graphical-session.target"];
-      after = ["graphical-session.target"];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = "${config.services.hyprhook.finalPackage}/bin/hyprhook";
-        Restart = "on-failure";
-        RestartSec = "1s";
-      };
-    };
   };
 }
