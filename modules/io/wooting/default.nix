@@ -8,6 +8,10 @@
   ...
 }: let
   cfg = config.modules.io;
+  wootswitchModule =
+    if inputs ? wootswitch
+    then inputs.wootswitch.nixosModules.default
+    else null;
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
@@ -61,29 +65,39 @@ in {
       io = {
         wooting = {
           enable =
-            lib.mkEnableOption "Enable support for wooting"
+            lib.mkEnableOption "Enable support for Wooting keyboards"
             // {
               default = false;
             };
-        };
-      };
-    };
-  };
-  config = lib.mkIf (cfg.enable && cfg.wooting.enable) {
-    environment = {
-      systemPackages = [
-        wootility
-      ];
-      persistence = {
-        ${config.modules.boot.impermanence.persistPath} = {
-          users = {
-            ${config.modules.users.user} = {
-              directories = [".config/wootility"];
-            };
+          wootswitch = {
+            enable =
+              lib.mkEnableOption "Enable wootswitch — HID-based profile switcher (no Wootility)";
           };
         };
       };
     };
-    services.udev.packages = [pkgs.wooting-udev-rules];
   };
+  config = lib.mkIf (cfg.enable && cfg.wooting.enable) (
+    lib.mkMerge [
+      {
+        environment = {
+          systemPackages = [wootility];
+          persistence = {
+            ${config.modules.boot.impermanence.persistPath} = {
+              users = {
+                ${config.modules.users.user} = {
+                  directories = [".config/wootility"];
+                };
+              };
+            };
+          };
+        };
+        services.udev.packages = [pkgs.wooting-udev-rules];
+      }
+      (lib.mkIf (cfg.wooting.wootswitch.enable && wootswitchModule != null) {
+        imports = [wootswitchModule];
+        programs.wootswitch.enable = true;
+      })
+    ]
+  );
 }

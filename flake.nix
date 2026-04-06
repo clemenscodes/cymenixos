@@ -17,6 +17,14 @@
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
+    wootswitch = {
+      url = "github:clemenscodes/wootswitch";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     impermanence = {
       url = "github:nix-community/impermanence";
     };

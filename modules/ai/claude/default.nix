@@ -223,6 +223,44 @@ in {
                   ```
 
                   **No underscore separators in integer literals** — `5_000_000` is invalid Nix; use `5000000`.
+
+                  ## Rust Standards
+
+                  These are the minimum standards for publishable or mergeable Rust code.
+
+                  ### Naming
+
+                  - All constants must be named. No bare literals with unexplained meaning (`0`, `4`, `0xDA`, `1000`). Every magic value gets a `const` whose name states what it represents.
+                  - Struct fields must be named for their semantic meaning, never for their position. `param0`, `param3`, `magic_lo` are forbidden — they are C-style positional names that destroy readability.
+                  - Variable names must be full words describing what the value is, not abbreviations (`kb`, `n`, `resp`, `p`).
+                  - Follow standard Rust conventions: `PascalCase` for types and enum variants, `snake_case` for functions and variables, `SCREAMING_SNAKE_CASE` for constants.
+
+                  ### Types and structs
+
+                  - Model everything with structs. If you are returning or passing multiple related values, define a named struct — never a tuple.
+                  - Never use tuple structs. They provide no semantic benefit over a struct with named fields and force callers to use positional access.
+                  - No `pub` fields. Expose data via `pub` getter methods returning shared references (`&T`) or copies (`T: Copy`).
+                  - Use traits to model behaviour: `Display`, `From`, `TryFrom`, `Serialize`, etc. Do not write free functions that duplicate what a trait impl would express.
+                  - Enums must be either complete (full variant surface, with `#[allow(dead_code)]` accepted on the whole enum) or minimal (only variants the code uses, no `#[allow(dead_code)]`). Never have a partial enum with `#[allow(dead_code)]`.
+
+                  ### No type casts or type indicators
+
+                  - `as T` casts at call sites are forbidden. If a cast is needed, the type design is wrong — fix the types so the cast disappears.
+                  - Type indicators on literals (`0u8`, `1usize`) are forbidden for the same reason. If the compiler cannot infer the type, the API is wrong.
+                  - Lossless conversions use `From`/`Into`. The one accepted use of `as u8` is inside a `From<EnumType> for u8` impl for `#[repr(u8)]` enums — isolated in one place.
+                  - Avoid `Some(&value)` pattern matches against primitives. Use `.copied()` to turn `Option<&T>` into `Option<T>` first.
+
+                  ### Struct instantiation and function calls
+
+                  - Never instantiate a struct inline as an argument or inside `Ok(...)`. Always bind to a named variable first, then pass the variable.
+                  - Function calls stay on one line. Multi-line argument lists are a sign the call is too complex or needs refactoring.
+                  - Always `use` types before using them. Never qualify types at call sites (`keyboard::ProfileNumber`) when an import would make it `ProfileNumber`.
+
+                  ### Code organisation
+
+                  - No section-divider comments (`// === Foo ===`, `// --- helpers ---`). If a file needs sections, split it into modules.
+                  - Scope functions to their natural owner. A function that operates on or belongs to a type is an associated function or method on that type, not a free function.
+                  - No backwards-compatibility shims, unused `_variables`, or removed-but-kept code. Delete dead code entirely.
                 '';
               };
               ".config/claude/settings.json" = {
