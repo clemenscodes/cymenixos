@@ -60,6 +60,7 @@
     meta = pkgs.wootility.meta;
   };
 in {
+  imports = lib.optional (inputs ? wootswitch) inputs.wootswitch.nixosModules.default;
   options = {
     modules = {
       io = {
@@ -95,7 +96,6 @@ in {
         services.udev.packages = [pkgs.wooting-udev-rules];
       }
       (lib.mkIf (cfg.wooting.wootswitch.enable && wootswitchModule != null) {
-        imports = [wootswitchModule];
         programs.wootswitch.enable = true;
       })
     ]
