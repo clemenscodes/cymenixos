@@ -35,6 +35,7 @@ in {
     # Vendor 1235 = Focusrite. Matching on SUBSYSTEM=="sound" ensures ALSA is already initialised.
     services.udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="sound", ATTRS{idVendor}=="1235", TAG+="systemd", ENV{SYSTEMD_WANTS}+="scarlett-init.service"
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1235", ATTR{idProduct}=="8219", ATTR{power/autosuspend}="-1"
     '';
 
     # Systemd service: set Scarlett hardware controls (Air on, 48V configurable)
