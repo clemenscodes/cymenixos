@@ -158,6 +158,8 @@ in {
         # Don't force-import root — avoids pulling in a degraded pool on rollback
         forceImportRoot = false;
         extraPools = [cfg.name];
+        # disko labels partitions by partlabel; by-id won't find them
+        devNodes = "/dev/disk/by-partlabel";
       };
     };
 
