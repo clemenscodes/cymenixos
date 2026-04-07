@@ -255,12 +255,19 @@ in {
                   - Never instantiate a struct inline as an argument or inside `Ok(...)`. Always bind to a named variable first, then pass the variable.
                   - Function calls stay on one line. Multi-line argument lists are a sign the call is too complex or needs refactoring.
                   - Always `use` types before using them. Never qualify types at call sites (`keyboard::ProfileNumber`) when an import would make it `ProfileNumber`.
+                  - Inside an `impl` block, always use `Self` instead of the struct name when constructing or returning the type (e.g. `Self { field }` not `MyStruct { field }`).
+                  - Every struct that is constructed outside its own `impl` must expose a `new()` constructor. Inline `StructName { .. }` literals at call sites are forbidden outside the struct's own impl.
 
                   ### Code organisation
 
                   - No section-divider comments (`// === Foo ===`, `// --- helpers ---`). If a file needs sections, split it into modules.
                   - Scope functions to their natural owner. A function that operates on or belongs to a type is an associated function or method on that type, not a free function.
                   - No backwards-compatibility shims, unused `_variables`, or removed-but-kept code. Delete dead code entirely.
+
+                  ### Formatting and linting
+
+                  - All Rust code must pass `rustfmt` and `cargo clippy --all-targets -- -D warnings` before it is considered done.
+                  - Run both after every edit. A task is not complete until both pass cleanly.
                 '';
               };
               ".config/claude/settings.json" = {
