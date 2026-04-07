@@ -130,6 +130,8 @@ in {
       };
     };
 
+    environment.systemPackages = [cfg.zfsPackage];
+
     networking = {
       inherit (cfg) hostId;
     };
