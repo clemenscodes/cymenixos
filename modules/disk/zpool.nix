@@ -150,9 +150,7 @@ in {
       # We bypass it entirely: explicitly add the ZFS kernel module package built
       # for the active kernel, and load it via kernelModules.
       kernelModules = ["zfs"];
-      extraModulePackages = [
-        (cfg.zfsPackage.override {inherit (config.boot.kernelPackages) kernel;})
-      ];
+      extraModulePackages = [config.boot.kernelPackages.zfs_unstable];
       zfs = {
         package = cfg.zfsPackage;
         # Don't force-import root — avoids pulling in a degraded pool on rollback
