@@ -80,10 +80,10 @@ in {
           };
           zfsPackage = lib.mkOption {
             type = lib.types.package;
-            default = pkgs.zfsUnstable;
-            defaultText = lib.literalExpression "pkgs.zfsUnstable";
+            default = pkgs.zfs_unstable;
+            defaultText = lib.literalExpression "pkgs.zfs_unstable";
             description = ''
-              ZFS package to use. Defaults to pkgs.zfsUnstable because nixos-unstable
+              ZFS package to use. Defaults to pkgs.zfs_unstable because nixos-unstable
               regularly ships kernels that stable ZFS does not yet support. Override
               with pkgs.zfs once stable catches up to your kernel.
             '';
