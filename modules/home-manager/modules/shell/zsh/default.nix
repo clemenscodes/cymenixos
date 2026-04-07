@@ -90,7 +90,7 @@ in {
           hex = "printf '%x\n'";
           dec = "printf '%d\n'";
           sudo = "sudo ";
-          ssh = "kitten ssh";
+          kssh = "kitten ssh";
           g = "lazygit";
           vsc = "codium .";
           ls = "${pkgs.eza}/bin/eza";
