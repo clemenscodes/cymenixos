@@ -138,9 +138,15 @@ in {
       "d ${cfg.mountpoint} ${cfg.permissions} ${cfg.user} ${cfg.group}"
     ];
 
+    # nofail: a missing pool (e.g. before disko has run, or after a drive failure)
+    # must never block boot and drop the system into emergency mode.
+    fileSystems.${cfg.mountpoint} = {
+      options = ["nofail" "x-systemd.device-timeout=10s"];
+    };
+
     boot = {
       # Loads the ZFS kernel module and wires up zfs-import/zfs-mount services.
-      # zfsUnstable is the default because nixos-unstable kernels frequently outpace
+      # zfs_unstable is the default because nixos-unstable kernels frequently outpace
       # the stable ZFS release cycle; override via modules.disk.zpool.zfsPackage.
       supportedFilesystems = ["zfs"];
       zfs = {
