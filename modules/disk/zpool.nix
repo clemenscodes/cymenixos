@@ -145,11 +145,14 @@ in {
     };
 
     boot = {
-      # Loads the ZFS kernel module and wires up zfs-import/zfs-mount services.
-      # zfs_unstable is the default because nixos-unstable kernels frequently outpace
-      # the stable ZFS release cycle; override via modules.disk.zpool.zfsPackage.
-      supportedFilesystems = {zfs = true;};
+      # boot.supportedFilesystems is a coercedTo type whose merging behaviour
+      # is unreliable when mixing list and attrset definitions across modules.
+      # We bypass it entirely: explicitly add the ZFS kernel module package built
+      # for the active kernel, and load it via kernelModules.
       kernelModules = ["zfs"];
+      extraModulePackages = [
+        (cfg.zfsPackage.override {inherit (config.boot.kernelPackages) kernel;})
+      ];
       zfs = {
         package = cfg.zfsPackage;
         # Don't force-import root — avoids pulling in a degraded pool on rollback
