@@ -148,7 +148,8 @@ in {
       # Loads the ZFS kernel module and wires up zfs-import/zfs-mount services.
       # zfs_unstable is the default because nixos-unstable kernels frequently outpace
       # the stable ZFS release cycle; override via modules.disk.zpool.zfsPackage.
-      supportedFilesystems = ["zfs"];
+      supportedFilesystems = {zfs = true;};
+      kernelModules = ["zfs"];
       zfs = {
         package = cfg.zfsPackage;
         # Don't force-import root — avoids pulling in a degraded pool on rollback
