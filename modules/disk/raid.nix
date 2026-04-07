@@ -29,7 +29,6 @@
     })
     cfg.devices);
 in {
-  imports = [inputs.disko.nixosModules.default];
   options = {
     modules = {
       disk = {

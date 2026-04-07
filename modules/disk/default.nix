@@ -13,6 +13,7 @@ in {
   imports = [
     inputs.disko.nixosModules.default
     (import ./raid.nix {inherit inputs lib;})
+    (import ./zpool.nix {inherit lib;})
   ];
   options = {
     modules = {
