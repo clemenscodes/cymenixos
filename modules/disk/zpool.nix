@@ -25,6 +25,40 @@
       };
     }) cfg.devices
   );
+  # Modelled on nixos/modules/tasks/filesystems/zfs.nix createImportService.
+  # We cannot use boot.zfs.enabled (it requires boot.supportedFilesystems.zfs,
+  # whose coercedTo merge silently drops attrset definitions from NixOS modules)
+  # so we replicate the essential import logic ourselves.
+  importScript = ''
+    poolImported() {
+      ${cfg.zfsPackage}/sbin/zpool list "$1" >/dev/null 2>&1
+    }
+
+    poolReady() {
+      local state
+      state="$(${cfg.zfsPackage}/sbin/zpool import \
+        -d /dev/disk/by-partlabel 2>/dev/null \
+        | ${pkgs.gawk}/bin/awk \
+          '/pool: ${cfg.name}/ { found=1 }
+           /state:/ { if (found==1) { print $2; exit } }
+           END { if (!found) print "MISSING" }')"
+      [ "$state" = "ONLINE" ]
+    }
+
+    if poolImported "${cfg.name}"; then
+      echo "Pool ${cfg.name} already imported"
+      exit 0
+    fi
+
+    echo "Waiting for ZFS pool ${cfg.name}..."
+    for i in $(seq 1 60); do
+      poolReady "${cfg.name}" && break
+      sleep 1
+    done
+
+    ${cfg.zfsPackage}/sbin/zpool import \
+      -d /dev/disk/by-partlabel -N "${cfg.name}"
+  '';
 in {
   options = {
     modules = {
@@ -136,41 +170,54 @@ in {
       inherit (cfg) hostId;
     };
 
-    systemd.tmpfiles.rules = [
-      # d: create mountpoint before ZFS mounts (nofail scenario)
-      "d ${cfg.mountpoint} ${cfg.permissions} ${cfg.user} ${cfg.group}"
-      # z: fix dataset root permissions after ZFS mounts (runs after local-fs.target)
-      "z ${cfg.mountpoint} ${cfg.permissions} ${cfg.user} ${cfg.group}"
-    ];
+    systemd = {
+      tmpfiles.rules = [
+        # d: create mountpoint before ZFS mounts (nofail scenario)
+        "d ${cfg.mountpoint} ${cfg.permissions} ${cfg.user} ${cfg.group}"
+        # z: fix dataset root permissions after ZFS mounts (runs after local-fs.target)
+        "z ${cfg.mountpoint} ${cfg.permissions} ${cfg.user} ${cfg.group}"
+      ];
+      services."zfs-import-${cfg.name}" = {
+        description = "Import ZFS pool \"${cfg.name}\"";
+        wants = ["systemd-udev-settle.service"];
+        after = ["systemd-udev-settle.service" "systemd-modules-load.service"];
+        before = ["local-fs.target" "shutdown.target"];
+        wantedBy = ["local-fs.target"];
+        conflicts = ["shutdown.target"];
+        unitConfig.DefaultDependencies = "no";
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = "yes";
+        };
+        script = importScript;
+      };
+    };
 
-    # nofail: a missing pool (e.g. before disko has run, or after a drive failure)
-    # must never block boot and drop the system into emergency mode.
+    # nofail: a missing pool must never block boot and drop into emergency mode.
+    # x-systemd.wants ensures the mount is attempted only after import succeeds.
     fileSystems.${cfg.mountpoint} = {
-      options = ["nofail" "x-systemd.device-timeout=10s"];
+      options = [
+        "nofail"
+        "x-systemd.device-timeout=10s"
+        "x-systemd.wants=zfs-import-${cfg.name}.service"
+        "x-systemd.after=zfs-import-${cfg.name}.service"
+      ];
     };
 
     boot = {
-      # boot.supportedFilesystems is a coercedTo type whose merging behaviour
-      # is unreliable when mixing list and attrset definitions across modules.
-      # We bypass it entirely: explicitly add the ZFS kernel module package built
-      # for the active kernel, and load it via kernelModules.
       kernelModules = ["zfs"];
       extraModulePackages = [config.boot.kernelPackages.zfs_unstable];
       zfs = {
         package = cfg.zfsPackage;
-        # Don't force-import root — avoids pulling in a degraded pool on rollback
         forceImportRoot = false;
+        # extraPools kept so zpool.cache is managed if boot.zfs.enabled ever becomes true
         extraPools = [cfg.name];
-        # disko labels partitions by partlabel; by-id won't find them
-        devNodes = "/dev/disk/by-partlabel";
       };
     };
 
-    services.zfs = {
-      autoScrub = {
-        inherit (cfg.autoScrub) enable interval;
-        pools = [cfg.name];
-      };
+    services.zfs.autoScrub = {
+      inherit (cfg.autoScrub) enable interval;
+      pools = [cfg.name];
     };
   };
 }
