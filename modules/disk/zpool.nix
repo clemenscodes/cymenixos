@@ -137,7 +137,10 @@ in {
     };
 
     systemd.tmpfiles.rules = [
+      # d: create mountpoint before ZFS mounts (nofail scenario)
       "d ${cfg.mountpoint} ${cfg.permissions} ${cfg.user} ${cfg.group}"
+      # z: fix dataset root permissions after ZFS mounts (runs after local-fs.target)
+      "z ${cfg.mountpoint} ${cfg.permissions} ${cfg.user} ${cfg.group}"
     ];
 
     # nofail: a missing pool (e.g. before disko has run, or after a drive failure)
