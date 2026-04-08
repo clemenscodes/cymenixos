@@ -24,13 +24,16 @@
   # Env vars are prepended to launchOptions so only CS2/gamescope inherit them.
   launchOptions = let
     envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
-    gamescopeStr = lib.optionalString cfg.gamescope.enable "gamescope ${lib.concatStringsSep " " cfg.gamescope.args}";
+    commandStr =
+      if cfg.gamescope.enable
+      then "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- %command%"
+      else "%command%";
     gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
   in
     lib.concatStringsSep " " (
       lib.filter (s: s != "") [
         envStr
-        "${gamescopeStr} -- %command%"
+        commandStr
         gameArgsStr
       ]
     );
@@ -52,11 +55,12 @@
         if "730" not in apps:
             apps["730"] = {}
         apps["730"]["LaunchOptions"] = opts
+        apps["730"]["OverlayAppEnable"] = "0"
 
         with open(path, "w", encoding="utf-8") as f:
             vdf.dump(data, f, pretty=True)
 
-        print("cs2: updated LaunchOptions in localconfig.vdf")
+        print("cs2: updated LaunchOptions and disabled overlay in localconfig.vdf")
     except Exception as e:
         print("cs2: failed to update localconfig.vdf: " + str(e), file=sys.stderr)
         sys.exit(1)
