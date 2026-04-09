@@ -24,10 +24,14 @@
   # Env vars are prepended to launchOptions so only CS2/gamescope inherit them.
   launchOptions = let
     envStr = lib.concatStringsSep " " (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.env);
-    commandStr =
+    baseCmd =
       if cfg.gamescope.enable
       then "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- %command%"
       else "%command%";
+    commandStr =
+      if cfg.commandWrapper != ""
+      then "${cfg.commandWrapper} ${baseCmd}"
+      else baseCmd;
     gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
   in
     lib.concatStringsSep " " (
@@ -347,6 +351,12 @@ in {
                   "--force-grab-cursor"
                 ];
               };
+            };
+            commandWrapper = lib.mkOption {
+              type = lib.types.str;
+              default = "";
+              description = "Command prepended before %command% in Steam launch options (e.g. 'taskset -c 0-7,16-23').";
+              example = "taskset -c 0-7,16-23";
             };
             gameArgs = lib.mkOption {
               type = lib.types.listOf lib.types.str;
