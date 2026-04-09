@@ -38,10 +38,15 @@
         --add-flags "--disable-gpu-sandbox" \
         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}"
 
-      install -Dm444 ${wootilityContents}/wootility.desktop -t $out/share/applications
-      substituteInPlace $out/share/applications/wootility.desktop \
-        --replace-fail 'Exec=AppRun --no-sandbox' "Exec=wootility" \
-        --replace-quiet 'TryExec=AppRun' "TryExec=wootility"
+      mkdir -p $out/share/applications
+      cat > $out/share/applications/wootility.desktop <<EOF
+[Desktop Entry]
+Name=Wootility
+Exec=$out/bin/wootility
+Icon=wootility
+Type=Application
+Categories=Utility;
+EOF
 
       for size in 16x16 32x32 48x48 64x64 128x128 256x256 512x512 1024x1024; do
         if [ -f ${wootilityContents}/usr/share/icons/hicolor/$size/apps/wootility.png ]; then
