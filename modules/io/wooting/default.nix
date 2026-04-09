@@ -38,16 +38,6 @@
         --add-flags "--disable-gpu-sandbox" \
         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}"
 
-      mkdir -p $out/share/applications
-      cat > $out/share/applications/wootility.desktop <<EOF
-[Desktop Entry]
-Name=Wootility
-Exec=$out/bin/wootility
-Icon=wootility
-Type=Application
-Categories=Utility;
-EOF
-
       for size in 16x16 32x32 48x48 64x64 128x128 256x256 512x512 1024x1024; do
         if [ -f ${wootilityContents}/usr/share/icons/hicolor/$size/apps/wootility.png ]; then
           install -Dm444 ${wootilityContents}/usr/share/icons/hicolor/$size/apps/wootility.png \
@@ -63,6 +53,13 @@ EOF
         libxkbfile
       ];
     meta = pkgs.wootility.meta;
+  };
+  wootilityDesktop = pkgs.makeDesktopItem {
+    name = "wootility";
+    desktopName = "Wootility";
+    exec = "${wootility}/bin/wootility";
+    icon = "wootility";
+    categories = ["Utility"];
   };
 in {
   imports = lib.optional (inputs ? wootswitch) inputs.wootswitch.nixosModules.default;
@@ -87,7 +84,7 @@ in {
     lib.mkMerge [
       {
         environment = {
-          systemPackages = [wootility];
+          systemPackages = [wootility wootilityDesktop];
           persistence = {
             ${config.modules.boot.impermanence.persistPath} = {
               users = {
