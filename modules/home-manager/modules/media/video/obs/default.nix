@@ -872,12 +872,18 @@
       '';
     };
 
-  # Launcher: passes --profile (and optionally --collection / --startreplaybuffer)
-  # directly so OBS always opens the right profile regardless of user.ini state.
+  # Launcher: passes --profile (and optionally --collection) directly so OBS
+  # always opens the right profile regardless of user.ini state.
   obsArgs =
     [
       "--profile"
       obsCfg.profile.name
+      "--multi"
+      "--minimize-to-tray"
+      "--disable-missing-files-check"
+      "--disable-updater"
+      "--startreplaybuffer"
+      "--startrecording"
     ]
     ++ lib.optionals obsCfg.scenes.enable [
       "--collection"
