@@ -100,16 +100,14 @@
   # change and take effect on the next Steam restart.
   toggleCs2 = pkgs.writeShellScriptBin "cs2-toggle" ''
     if ${pkgs.procps}/bin/pgrep -x 'cs2' > /dev/null 2>&1; then
-      ${killCs2}/bin/kill-cs2
-      ${pkgs.hyprland}/bin/hyprctl dispatch submap reset
+      exec ${killCs2}/bin/kill-cs2
     else
       localcfg="$HOME/.local/share/Steam/userdata/${cfg.steamId}/config/localconfig.vdf"
       if [ -f "$localcfg" ]; then
         export CS2_LAUNCH_OPTS="${launchOptions}"
         ${python}/bin/python3 ${updateLocalconfigScript} "$localcfg"
       fi
-      nohup steam -applaunch 730 >/dev/null 2>&1 &
-      ${pkgs.hyprland}/bin/hyprctl dispatch submap cs2
+      exec steam -applaunch 730
     fi
   '';
 
