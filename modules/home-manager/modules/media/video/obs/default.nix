@@ -878,7 +878,6 @@
     [
       "--profile"
       obsCfg.profile.name
-      "--disable-shutdown-check"
     ]
     ++ lib.optionals obsCfg.scenes.enable [
       "--collection"
