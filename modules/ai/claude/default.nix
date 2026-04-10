@@ -121,7 +121,7 @@ in {
               package = codex;
               settings = {
                 model = "gpt-5.3-codex";
-                model_reasoning_effort = "xhigh";
+                model_reasoning_effort = "low";
                 notify = ["${peonsh}/bin/peon-codex-adapter"];
                 projects = {
                   "/home/${user}/.local/src" = {
