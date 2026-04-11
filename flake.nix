@@ -165,6 +165,10 @@
       url = "github:drduh/YubiKey-Guide";
       flake = false;
     };
+    obs-vkcapture = {
+      url = "github:clemenscodes/obs-vkcapture";
+      flake = false;
+    };
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux";
       inputs = {

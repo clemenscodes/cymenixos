@@ -7,6 +7,7 @@
 }: [
   (import ./cymenixos-scripts.nix)
   (import ./grub2.nix)
+  (import ./obs-vkcapture.nix {inherit inputs;})
   (import ./tongo.nix)
   (import ./xmrig.nix)
   inputs.lutris-overlay.overlays.lutris
