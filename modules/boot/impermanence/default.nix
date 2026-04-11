@@ -65,6 +65,7 @@ in {
             "/etc/nixos"
             "/var/lib/nixos"
             "/var/lib/systemd/coredump"
+            "/root/.cache"
           ];
           files = [
             "/etc/machine-id"

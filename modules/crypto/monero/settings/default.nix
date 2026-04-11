@@ -1,0 +1,127 @@
+{lib, ...}: {...}: {
+  options = {
+    modules = {
+      crypto = {
+        monero = {
+          settings = {
+            wallet = lib.mkOption {
+              type = lib.types.str;
+              default = "YOUR_WALLET_ADDRESS_HERE";
+              description = "Monero wallet address for mining rewards";
+            };
+            walletName = lib.mkOption {
+              type = lib.types.str;
+              default = "miner";
+              description = "Wallet file/folder name under ~/Monero/wallets/";
+            };
+            guiRestoreHeight = lib.mkOption {
+              type = lib.types.int;
+              default = 0;
+              description = "Block height monero-gui uses if the wallet cache is missing. Set to your wallet's creation height to avoid scanning from genesis.";
+            };
+            host = lib.mkOption {
+              type = lib.types.str;
+              default = "127.0.0.1";
+              description = "Localhost bind address";
+            };
+            monero = lib.mkOption {
+              type = lib.types.str;
+              default = "monero";
+              description = "Service/user name for monerod";
+            };
+            xmrig = lib.mkOption {
+              type = lib.types.str;
+              default = "xmrig";
+              description = "Service/user name for xmrig";
+            };
+            p2pool = lib.mkOption {
+              type = lib.types.str;
+              default = "p2pool";
+              description = "Service/user name for p2pool";
+            };
+            p2pPort = lib.mkOption {
+              type = lib.types.int;
+              default = 18080;
+              description = "Monero P2P port";
+            };
+            p2poolPort = lib.mkOption {
+              type = lib.types.int;
+              default = 37889;
+              description = "P2Pool main chain port";
+            };
+            p2poolMiniPort = lib.mkOption {
+              type = lib.types.int;
+              default = 37888;
+              description = "P2Pool mini sidechain port";
+            };
+            p2poolStratumPort = lib.mkOption {
+              type = lib.types.int;
+              default = 3333;
+              description = "P2Pool stratum port for xmrig";
+            };
+            p2poolStratumApiPort = lib.mkOption {
+              type = lib.types.int;
+              default = 3334;
+              description = "P2Pool stratum API port";
+            };
+            zmqPort = lib.mkOption {
+              type = lib.types.int;
+              default = 18083;
+              description = "Monero ZMQ port for p2pool";
+            };
+            rpcPort = lib.mkOption {
+              type = lib.types.int;
+              default = 18089;
+              description = "Monero restricted RPC port for p2pool";
+            };
+            rateLimit = lib.mkOption {
+              type = lib.types.int;
+              default = 128000;
+              description = "Monero bandwidth rate limit (kB/s)";
+            };
+            loglevel = lib.mkOption {
+              type = lib.types.int;
+              default = 3;
+              description = "P2Pool log level (0-6)";
+            };
+            threads = lib.mkOption {
+              type = lib.types.nullOr lib.types.int;
+              default = null;
+              description = "XMRig CPU thread count (null = auto-detect). Ignored when rxAffinity is set — thread count is then derived from the list length.";
+            };
+            rxAffinity = lib.mkOption {
+              type = lib.types.nullOr (lib.types.listOf lib.types.int);
+              default = null;
+              description = ''
+                Per-thread CPU affinity list for RandomX. Each entry is a logical CPU index
+                and implicitly defines one miner thread. Order matters — pair HT siblings
+                consecutively so they share the same L3 cache slice.
+
+                Example for a 16-core/32-thread CPU (HT siblings at N and N+16):
+                  builtins.concatMap (c: [c (c+16)]) (builtins.genList (x: x) 16)
+                  → [0 16 1 17 2 18 … 15 31]
+
+                null = xmrig auto-detect (uses --threads if set).
+              '';
+            };
+            useMini = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Use P2Pool mini sidechain (recommended for miners ~1 KH/s–1 MH/s)";
+            };
+            useNano = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Use P2Pool nano sidechain (recommended for single-CPU miners below ~1 KH/s–100 KH/s, ~6x more shares than mini)";
+            };
+            p2poolNanoPort = lib.mkOption {
+              type = lib.types.int;
+              default = 37890;
+              description = "P2Pool nano sidechain P2P port";
+            };
+          };
+        };
+      };
+    };
+  };
+}

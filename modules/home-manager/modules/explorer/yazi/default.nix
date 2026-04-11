@@ -166,7 +166,37 @@ in {
             max_height = 1000;
             image_delay = 0;
           };
+          opener = {
+            # Single-entry opener lists prevent Yazi from showing a chooser menu.
+            # Openers are referenced by name in open.prepend_rules below.
+            mpv = [
+              {
+                run = ''mpv "$@"'';
+                orphan = true;
+                desc = "Play with MPV";
+              }
+            ];
+            swayimg = [
+              {
+                run = ''swayimg "$@"'';
+                orphan = true;
+                desc = "View with Swayimg";
+              }
+            ];
+          };
           open = {
+            prepend_rules = [
+              # Explicit single-opener rules take priority over yazi's built-in defaults,
+              # which match multiple apps and trigger the chooser prompt.
+              {
+                mime = "video/*";
+                use = "mpv";
+              }
+              {
+                mime = "image/*";
+                use = "swayimg";
+              }
+            ];
             append_rules = [
               {
                 name = "*";

@@ -3,19 +3,35 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://attic.xuyh0120.win/lantian"
+      "https://cache.nixos-cuda.org"
+      "https://hyprland.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
+      "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
     ];
   };
   inputs = {
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
-    nixpkgs-electron-fix = {
-      url = "github:NixOS/nixpkgs/master";
-      flake = false;
+    wootswitch = {
+      url = "github:clemenscodes/wootswitch";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
+    hyprhook = {
+      url = "github:clemenscodes/hyprhook";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
     impermanence = {
       url = "github:nix-community/impermanence";
@@ -149,6 +165,10 @@
       url = "github:drduh/YubiKey-Guide";
       flake = false;
     };
+    obs-vkcapture = {
+      url = "github:clemenscodes/obs-vkcapture";
+      flake = false;
+    };
     w3c = {
       url = "github:clemenscodes/W3ChampionsOnLinux";
       inputs = {
@@ -164,6 +184,9 @@
           follows = "nixpkgs";
         };
       };
+    };
+    evglow = {
+      url = "github:clemenscodes/evglow";
     };
     claude = {
       url = "github:sadjow/claude-code-nix";
@@ -185,6 +208,11 @@
         };
       };
     };
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
+    };
   };
   outputs = {
     self,
@@ -193,19 +221,21 @@
   } @ inputs: let
     inherit (pkgs) lib;
     system = "x86_64-linux";
-    overlays = import ./overlays {inherit inputs pkgs lib system;};
-    electronOverlay = final: prev: {
+    overlays = import ./overlays {
       inherit
-        ((import inputs.nixpkgs-electron-fix {
-          inherit system;
-          config.allowUnfree = true;
-        }))
-        electron_39
+        inputs
+        pkgs
+        lib
+        system
         ;
     };
     pkgs = import nixpkgs {
       inherit system;
-      overlays = overlays ++ [inputs.nix-cachyos-kernel.overlays.default electronOverlay];
+      overlays =
+        overlays
+        ++ [
+          inputs.nix-cachyos-kernel.overlays.default
+        ];
       config = {
         allowUnfreePredicate = pkg:
           builtins.elem (lib.getName pkg) [

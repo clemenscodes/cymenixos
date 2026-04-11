@@ -7,17 +7,26 @@
   imports = [
     (import ./android {inherit inputs pkgs lib;})
     (import ./elgato {inherit inputs pkgs lib;})
+    (import ./evglow {inherit inputs pkgs lib;})
+    (import ./hyprhook {inherit inputs pkgs lib;})
     (import ./input-remapper {inherit inputs pkgs lib;})
     (import ./printing {inherit inputs pkgs lib;})
+    (import ./razer {inherit pkgs lib;})
+    (import ./scarlett {inherit inputs pkgs lib;})
     (import ./sound {inherit inputs pkgs lib;})
     (import ./udisks {inherit inputs pkgs lib;})
+    (import ./wooting {inherit inputs pkgs lib;})
     (import ./xremap {inherit inputs pkgs lib;})
     (import ./ydotool {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
       io = {
-        enable = lib.mkEnableOption "Enable IO" // {default = false;};
+        enable =
+          lib.mkEnableOption "Enable IO"
+          // {
+            default = false;
+          };
       };
     };
   };

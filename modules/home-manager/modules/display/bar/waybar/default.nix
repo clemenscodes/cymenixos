@@ -18,6 +18,8 @@
   useVoxtype = osConfig.modules.ai.voxtype.enable;
   useClaude = osConfig.modules.ai.claude.enable;
   useNvidia = osConfig.modules.gpu.nvidia.enable;
+  useWootswitch = osConfig.modules.io.wooting.wootswitch.enable;
+  wootswitchPkg = inputs.wootswitch.packages.${system}.default;
   cpuVendor = osConfig.modules.cpu.vendor;
   cpuHwmonPath =
     if cpuVendor == "amd"
@@ -212,6 +214,7 @@ in {
             modules-right = [
               (lib.mkIf useClaude "custom/claude-monitor")
               (lib.mkIf useVoxtype "custom/voxtype")
+              (lib.mkIf useWootswitch "custom/wootswitch")
               "hyprland/submap"
               "privacy"
               (lib.mkIf useSwaync "custom/notification")
@@ -239,6 +242,15 @@ in {
                 stopped = "⚪";
               };
               on-click = "${pkgs.systemd}/bin/systemctl --user restart voxtype";
+            };
+            "custom/wootswitch" = lib.mkIf (useWootswitch && wootswitchPkg != null) {
+              exec = "${wootswitchPkg}/bin/wootswitch list --waybar";
+              return-type = "json";
+              interval = 1;
+              tooltip = true;
+              format = "{}";
+              on-click = "${wootswitchPkg}/bin/wootswitch switch --next";
+              on-click-right = "${wootswitchPkg}/bin/wootswitch switch --previous";
             };
             systemd-failed-units = {
               hide-on-ok = false;
@@ -512,6 +524,7 @@ in {
           #custom-voxtype,
           #custom-nvidia,
           #custom-claude-monitor,
+          #custom-wootswitch,
           #mpd {
             ${padding}
             ${defaultColor}
@@ -544,6 +557,7 @@ in {
           #pulseaudio.mic,
           #custom-voxtype,
           #custom-claude-monitor,
+          #custom-wootswitch,
           #custom-clock {
             margin: 0px 4px ${defaultMargin} 4px;
           }

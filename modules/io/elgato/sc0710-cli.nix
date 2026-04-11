@@ -20,7 +20,7 @@ stdenv.mkDerivation {
     hash = "sha256-8dFfGaMkJfRdHU98P+qXcwb4lYh9fTtk6rFz5X7xjOg=";
   };
 
-  nativeBuildInputs = [ makeWrapper ];
+  nativeBuildInputs = [makeWrapper];
 
   dontBuild = true;
 
@@ -29,14 +29,14 @@ stdenv.mkDerivation {
     install -D -m755 scripts/sc0710-cli.sh $out/bin/sc0710-cli
     wrapProgram $out/bin/sc0710-cli \
       --prefix PATH : ${
-        lib.makeBinPath [
-          kmod
-          util-linux
-          pciutils
-          psmisc
-          curl
-        ]
-      }
+      lib.makeBinPath [
+        kmod
+        util-linux
+        pciutils
+        psmisc
+        curl
+      ]
+    }
     runHook postInstall
   '';
 

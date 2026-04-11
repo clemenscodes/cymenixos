@@ -27,6 +27,8 @@
   useThunderbird = config.modules.organization.email.thunderbird.enable;
   useLf = config.modules.explorer.lf.enable;
   useGnomeKeyring = osConfig.modules.security.gnome-keyring.enable;
+  useEvglow = osConfig.services.evglow.enable;
+  useHyprhook = osConfig.modules.io.enable && osConfig.modules.io.hyprhook.enable && (inputs ? hyprhook);
   useYazi = config.modules.explorer.yazi.enable;
   useNvim = config.modules.editor.nvim.enable;
   useFirefox = config.modules.browser.firefox.enable;
@@ -37,7 +39,6 @@
   useSwayAudioIdle = displayCfg.lockscreen.sway-audio-idle-inhibit.enable;
   useSsh = config.modules.security.ssh.enable;
   useTorrent = osConfig.modules.networking.torrent.enable;
-  useUdiskie = osConfig.modules.io.udisks.enable;
   useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   useNewsboat = config.modules.media.rss.newsboat.enable;
@@ -62,7 +63,11 @@ in {
       display = {
         compositor = {
           hyprland = {
-            enable = lib.mkEnableOption "Enable anime titties" // {default = false;};
+            enable =
+              lib.mkEnableOption "Enable anime titties"
+              // {
+                default = false;
+              };
             monitors = lib.mkOption {
               type = lib.types.listOf lib.types.str;
               default = [];
@@ -78,7 +83,7 @@ in {
     home = {
       packages = [
         pkgs.brightnessctl
-        pkgs.swww
+        pkgs.awww
         pkgs.wl-clipboard
         pkgs.cliphist
         (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
@@ -92,6 +97,12 @@ in {
           systemd = {
             enable = true;
           };
+          # plugins = with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}; [
+          #   csgo-vulkan-fix
+          # ];
+          package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+          portalPackage =
+            inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
           settings = {
             input = {
               kb_layout = osConfig.modules.locale.defaultLocale;
@@ -206,7 +217,9 @@ in {
               (lib.mkIf (useKitty && useLf) "$mod, R, exec, kitty -1 --title=kitty lf")
               (lib.mkIf (useKitty && useYazi) "$mod, R, exec, kitty -1 --title=kitty yazi")
               (lib.mkIf (useKitty && useEmail) "$mod, E, exec, kitty -1 --title=kitty neomutt")
-              (lib.mkIf (useKitty && useEmail && useThunderbird) "$mod SHIFT, E, exec, ${pkgs.thunderbird}/bin/thunderbird")
+              (lib.mkIf (
+                useKitty && useEmail && useThunderbird
+              ) "$mod SHIFT, E, exec, ${pkgs.thunderbird}/bin/thunderbird")
               (lib.mkIf (useKitty && useBtop) "$mod SHIFT, R, exec, kitty -1 --title=kitty btop")
               (lib.mkIf (useKitty && useNcmpcpp) "$mod, M, exec, kitty -1 --title=kitty ncmpcpp")
               (lib.mkIf (useKitty && useCalcurse) "$mod SHIFT, K, exec, kitty -1 --title=kitty calcurse")
@@ -361,12 +374,6 @@ in {
                 exec-once = sshagent
               ''
               else "";
-            udiskie =
-              if useUdiskie
-              then ''
-                exec-once = udiskie &
-              ''
-              else "";
             yubikey =
               if useYubikey
               then ''
@@ -377,6 +384,18 @@ in {
               if useGnomeKeyring
               then ''
                 exec-once = unlock-keyring
+              ''
+              else "";
+            evglow =
+              if useEvglow
+              then ''
+                exec-once = evglow
+              ''
+              else "";
+            hyprhook =
+              if useHyprhook
+              then ''
+                exec-once = ${osConfig.services.hyprhook.finalPackage}/bin/hyprhook
               ''
               else "";
           in ''
@@ -393,10 +412,13 @@ in {
             exec-once = wl-paste --type text --watch cliphist store
             exec-once = wl-paste --type image --watch cliphist store
             exec-once = polkitagent
-            exec-once = ${pkgs.swww}/bin/swww-daemon
+            exec-once = ${pkgs.awww}/bin/awww-daemon
             exec-once = wallpaper
 
             windowrule = float on, match:class ^(org.kde.polkit-kde-authentication-agent-1)$
+            windowrule = fullscreen on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
+            windowrule = stay_focused on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
+            windowrule = immediate on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
 
             bind = $mod SHIFT, Q,submap,passthru
             submap = passthru
@@ -409,7 +431,6 @@ in {
             ${swaync}
             ${swayidle}
             ${swayaudioidle}
-            ${udiskie}
             ${ssh}
             ${firefox}
             ${davinci}
@@ -420,6 +441,8 @@ in {
             ${hyprsunset}
             ${yubikey}
             ${keyring}
+            ${evglow}
+            ${hyprhook}
           '';
         };
       };

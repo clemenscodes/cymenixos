@@ -230,16 +230,6 @@ in {
             };
           };
         };
-        tmpfiles = {
-          rules = let
-            firmware = pkgs.runCommandLocal "qemu-firmware" {} ''
-              mkdir $out
-              cp ${pkgs.qemu}/share/qemu/firmware/*.json $out
-            '';
-          in [
-            "L+ /var/lib/qemu/firmware - - - - ${firmware}"
-          ];
-        };
       };
 
       users = {

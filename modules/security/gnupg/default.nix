@@ -11,7 +11,11 @@ in {
     modules = {
       security = {
         gnupg = {
-          enable = lib.mkEnableOption "Enable gnupg" // {default = false;};
+          enable =
+            lib.mkEnableOption "Enable gnupg"
+            // {
+              default = false;
+            };
         };
       };
     };
@@ -50,25 +54,6 @@ in {
             gnupg = {
               inherit (cfg.gnupg) enable;
             };
-          };
-        };
-      };
-    };
-    systemd = {
-      user = {
-        sockets = {
-          gpg-agent = {
-            listenStreams = let
-              socketDir =
-                pkgs.runCommand "gnupg-socketdir" {
-                  nativeBuildInputs = [pkgs.python3];
-                } ''
-                  ${pkgs.python3}/bin/python3 ${import ./gnupgdir.nix {inherit inputs pkgs lib;}} '/home/${config.modules.users.user}/.local/share/gnupg' > $out
-                '';
-            in [
-              "" # unset
-              "%t/gnupg/${builtins.readFile socketDir}/S.gpg-agent"
-            ];
           };
         };
       };

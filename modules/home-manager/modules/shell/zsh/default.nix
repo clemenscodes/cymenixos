@@ -90,14 +90,13 @@ in {
           hex = "printf '%x\n'";
           dec = "printf '%d\n'";
           sudo = "sudo ";
-          ssh = "kitten ssh";
+          kssh = "kitten ssh";
           g = "lazygit";
           vsc = "codium .";
           ls = "${pkgs.eza}/bin/eza";
           ne = "${explorer} $FLAKE";
           nix-repl-flake = ''nix repl --expr "builtins.getFlake \"$PWD\""'';
           notes = "${explorer} $XDG_NOTE_DIR";
-          V = "${explorer} $XDG_VIDEOS_DIR";
           D = "${explorer} $XDG_DOWNLOAD_DIR";
           M = "${explorer} $XDG_MUSIC_DIR";
           I = "${explorer} $XDG_PICTURES_DIR";
@@ -167,6 +166,14 @@ in {
               if config.modules.development.direnv.enable
               then ''eval "$(direnv hook zsh)"''
               else ""
+            }
+            # V: open Videos directory — prefers /mnt/raid/Videos when the ZFS pool is mounted
+            function V() {
+              if ${pkgs.util-linux}/bin/mountpoint -q /mnt/raid 2>/dev/null; then
+                ${explorer} /mnt/raid/Videos
+              else
+                ${explorer} "$XDG_VIDEOS_DIR"
+              fi
             }
           '';
         profileExtra =

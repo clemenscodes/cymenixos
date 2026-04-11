@@ -8,7 +8,11 @@ in {
   options = {
     modules = {
       xdg = {
-        enable = lib.mkEnableOption "Enable XDG" // {default = false;};
+        enable =
+          lib.mkEnableOption "Enable XDG"
+          // {
+            default = false;
+          };
       };
     };
   };
@@ -37,7 +41,6 @@ in {
         xdgOpenUsePortal = true;
         extraPortals = [
           pkgs.xdg-desktop-portal
-          pkgs.xdg-desktop-portal-hyprland
           pkgs.xdg-desktop-portal-gtk
         ];
         # Explicit routing is required when multiple portal backends are installed.

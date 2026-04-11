@@ -35,36 +35,51 @@ in {
             "image/webp"
             "image/bmp"
             "image/tiff"
+            "image/avif"
+            "image/heif"
+            "image/heic"
+            "image/svg+xml"
+            "image/x-portable-pixmap"
+            "image/x-portable-bitmap"
+            "image/x-tga"
           ];
         };
       };
-      mimeApps = {
+      mimeApps = let
+        imageTypes = [
+          "image/jpeg"
+          "image/png"
+          "image/gif"
+          "image/webp"
+          "image/bmp"
+          "image/tiff"
+          "image/avif"
+          "image/heif"
+          "image/heic"
+          "image/svg+xml"
+          "image/x-portable-pixmap"
+          "image/x-portable-bitmap"
+          "image/x-tga"
+        ];
+        unwanted = ["swappy.desktop" "brave-browser.desktop" "gimp.desktop" "org.gimp.GIMP.desktop"];
+      in {
         associations = {
-          added = {
-            "image/jpeg" = ["swayimg.desktop"];
-            "image/png" = ["swayimg.desktop"];
-            "image/gif" = ["swayimg.desktop"];
-            "image/webp" = ["swayimg.desktop"];
-            "image/bmp" = ["swayimg.desktop"];
-            "image/tiff" = ["swayimg.desktop"];
-          };
-          removed = {
-            "image/jpeg" = ["swappy.desktop" "brave-browser.desktop"];
-            "image/png" = ["swappy.desktop" "brave-browser.desktop"];
-            "image/gif" = ["swappy.desktop" "brave-browser.desktop"];
-            "image/webp" = ["swappy.desktop" "brave-browser.desktop"];
-            "image/bmp" = ["swappy.desktop" "brave-browser.desktop"];
-            "image/tiff" = ["swappy.desktop" "brave-browser.desktop"];
-          };
+          added = builtins.listToAttrs (map (mime: {
+              name = mime;
+              value = ["swayimg.desktop"];
+            })
+            imageTypes);
+          removed = builtins.listToAttrs (map (mime: {
+              name = mime;
+              value = unwanted;
+            })
+            imageTypes);
         };
-        defaultApplications = {
-          "image/jpeg" = ["swayimg.desktop"];
-          "image/png" = ["swayimg.desktop"];
-          "image/gif" = ["swayimg.desktop"];
-          "image/webp" = ["swayimg.desktop"];
-          "image/bmp" = ["swayimg.desktop"];
-          "image/tiff" = ["swayimg.desktop"];
-        };
+        defaultApplications = builtins.listToAttrs (map (mime: {
+            name = mime;
+            value = ["swayimg.desktop"];
+          })
+          imageTypes);
       };
     };
   };
