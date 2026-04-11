@@ -9,6 +9,6 @@ pkgs.writeShellScriptBin "lidhandle" ''
       ${pkgs.hyprland}/bin/hyprctl keyword monitor "eDP-1, disable"
     fi
   else
-    ${pkgs.hyprland}/bin/hyprctl keyword monitor "eDP-1,1920x1080,0x0,1"
+    ${pkgs.hyprland}/bin/hyprctl keyword monitor "eDP-1,1920x1200@60.01,0x0,1"
   fi
 ''
