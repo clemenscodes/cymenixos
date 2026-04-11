@@ -907,6 +907,43 @@
     echo "rec=$rec stream=$stream replay=$replay vcam=$vcam"
   '';
 
+  # obs-toggle: launch OBS if not running; gracefully stop it if it is.
+  # Shutdown order mirrors cs2-close in the system config:
+  #   1. stop replay buffer (flushes buffered frames)
+  #   2. stop recording (sends stop signal — OBS muxes the file)
+  #   3. poll recording status for up to 30 s so the container is fully closed
+  #   4. pkill obs (safe to kill only after the file is sealed)
+  obs-toggle = pkgs.writeShellApplication {
+    name = "obs-toggle";
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
+    text = ''
+      if pgrep -x obs > /dev/null 2>&1; then
+        CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
+        if [[ -f "$CONFIG_PATH" ]]; then
+          OBS_WEBSOCKET_PORT="$(jq -r '.server_port // empty' "$CONFIG_PATH")"
+          OBS_WEBSOCKET_PASSWORD="$(jq -r '.server_password // empty' "$CONFIG_PATH")"
+          if [[ -n "$OBS_WEBSOCKET_PORT" && -n "$OBS_WEBSOCKET_PASSWORD" ]]; then
+            export OBS_WEBSOCKET_URL="obsws://localhost:$OBS_WEBSOCKET_PORT/$OBS_WEBSOCKET_PASSWORD"
+            obs-cmd replay-buffer stop 2>/dev/null || true
+            obs-cmd recording stop 2>/dev/null || true
+            remaining=30
+            while [ "$remaining" -gt 0 ]; do
+              active=$(obs-cmd recording status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
+              if [ "$active" = "false" ]; then
+                break
+              fi
+              sleep 1
+              remaining=$((remaining - 1))
+            done
+          fi
+        fi
+        pkill obs 2>/dev/null || true
+      else
+        exec ${obs-launch}/bin/obs-launch
+      fi
+    '';
+  };
+
   # Deletes the seeded config files so the next nixos-rebuild re-applies Nix defaults.
   # global.ini is not seeded (OBS manages it), so it is not removed here.
   obs-reset-config = pkgs.writeShellApplication {
@@ -1308,6 +1345,7 @@ in {
         pkgs.gst_all_1.gst-libav
         pkgs.gst_all_1.gst-vaapi
         pkgs.nv-codec-headers-12
+        obs-toggle
         obs-cmd-wrapped
         obs-record-toggle
         obs-stream-toggle
@@ -1355,7 +1393,7 @@ in {
     wayland.windowManager.hyprland = lib.mkIf (useHyprland && obsCfg.keybinds.enable) {
       settings = {
         bind = [
-          "$mod, O, exec, ${obs-launch}/bin/obs-launch"
+          "$mod, O, exec, ${obs-toggle}/bin/obs-toggle"
           "$mod CTRL, O, exec, obs-record-toggle"
           "$mod CTRL, T, exec, obs-stream-toggle"
           "$mod CTRL, B, exec, obs-replay-toggle"
@@ -1433,12 +1471,12 @@ in {
     };
 
     # Override the OBS desktop entry so app launchers (anyrun, rofi, etc.)
-    # all go through obs-launch, which patches the profile before OBS reads it.
+    # all go through obs-toggle: opens OBS if closed, gracefully stops it if running.
     xdg.desktopEntries."com.obsproject.Studio" = {
       name = "OBS Studio";
       genericName = "Streaming/Recording Software";
       comment = "Free and Open Source Streaming/Recording Software";
-      exec = "${obs-launch}/bin/obs-launch %F";
+      exec = "${obs-toggle}/bin/obs-toggle";
       icon = "com.obsproject.Studio";
       terminal = false;
       type = "Application";

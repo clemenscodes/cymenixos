@@ -663,6 +663,10 @@ in {
       home-manager = lib.mkIf config.modules.home-manager.enable {
         users = {
           ${config.modules.users.user} = {
+            wayland.windowManager.hyprland.settings = {
+              windowrulev2 = ["workspace 2, class:^(cs2)$"];
+            };
+
             xdg = {
               desktopEntries = {
                 cs2 = {
