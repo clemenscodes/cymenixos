@@ -274,6 +274,7 @@ in {
                 source = jsonFormat.generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
                   skipDangerousModePermissionPrompt = true;
+                  effortLevel = "low";
                   permissions = {
                     defaultMode = "bypassPermissions";
                   };
