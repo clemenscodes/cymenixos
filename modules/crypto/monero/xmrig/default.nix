@@ -11,13 +11,59 @@
   affinityConfigFlag =
     if cfg.monero.settings.rxAffinity != null
     then let
-      cpuConfig = pkgs.writeText "xmrig-cpu-config.json" (builtins.toJSON {
-        cpu.rx = map (a: {affinity = a;}) cfg.monero.settings.rxAffinity;
-      });
+      cpuConfig = pkgs.writeText "xmrig-cpu-config.json" (
+        builtins.toJSON {
+          cpu.rx = map (a: {affinity = a;}) cfg.monero.settings.rxAffinity;
+        }
+      );
     in " -c ${cpuConfig}"
     else "";
+  serviceName = cfg.monero.settings.xmrig;
+  xmrig-ensure-running = pkgs.writeShellApplication {
+    name = "xmrig-ensure-running";
+    runtimeInputs = [pkgs.systemd];
+    text = ''
+      if systemctl is-active --quiet ${serviceName}.service; then
+        exit 0
+      fi
+      sudo systemctl start ${serviceName}.service
+    '';
+  };
+  xmrig-ensure-stopped = pkgs.writeShellApplication {
+    name = "xmrig-ensure-stopped";
+    runtimeInputs = [pkgs.systemd];
+    text = ''
+      if ! systemctl is-active --quiet ${serviceName}.service; then
+        exit 0
+      fi
+      sudo systemctl stop ${serviceName}.service
+    '';
+  };
 in {
+  options = {
+    modules = {
+      crypto = {
+        monero = {
+          scripts = {
+            xmrig-ensure-running = lib.mkOption {
+              type = lib.types.package;
+              readOnly = true;
+              description = "xmrig-ensure-running script derivation.";
+            };
+            xmrig-ensure-stopped = lib.mkOption {
+              type = lib.types.package;
+              readOnly = true;
+              description = "xmrig-ensure-stopped script derivation.";
+            };
+          };
+        };
+      };
+    };
+  };
   config = lib.mkIf (cfg.enable && cfg.monero.enable) {
+    modules.crypto.monero.scripts = {
+      inherit xmrig-ensure-running xmrig-ensure-stopped;
+    };
     environment = {
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
@@ -27,6 +73,10 @@ in {
           ];
         };
       };
+      systemPackages = [
+        xmrig-ensure-running
+        xmrig-ensure-stopped
+      ];
     };
     systemd = with cfg.monero.settings; {
       tmpfiles = {
@@ -37,7 +87,12 @@ in {
       };
       services = {
         "${xmrig}" = let
-          dependencies = ["network-online.target" "systemd-modules-load.service" "${p2pool}.service" "${monero}.service"];
+          dependencies = [
+            "network-online.target"
+            "systemd-modules-load.service"
+            "${p2pool}.service"
+            "${monero}.service"
+          ];
         in {
           description = "${xmrig} miner";
           after = dependencies;
@@ -46,8 +101,16 @@ in {
           serviceConfig = {
             # xmrig needs cap_ipc_lock for hugepages, cap_sys_nice for priority,
             # and cap_sys_rawio to write AMD MSR registers for RandomX optimization
-            AmbientCapabilities = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
-            CapabilityBoundingSet = ["CAP_IPC_LOCK" "CAP_SYS_NICE" "CAP_SYS_RAWIO"];
+            AmbientCapabilities = [
+              "CAP_IPC_LOCK"
+              "CAP_SYS_NICE"
+              "CAP_SYS_RAWIO"
+            ];
+            CapabilityBoundingSet = [
+              "CAP_IPC_LOCK"
+              "CAP_SYS_NICE"
+              "CAP_SYS_RAWIO"
+            ];
             LogsDirectory = "${xmrig}";
             LogsDirectoryMode = "0750";
             Restart = "always";

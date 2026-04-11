@@ -23,7 +23,8 @@
           };
         };
       };
-    }) cfg.devices
+    })
+    cfg.devices
   );
   # Modelled on nixos/modules/tasks/filesystems/zfs.nix createImportService.
   # We cannot use boot.zfs.enabled (it requires boot.supportedFilesystems.zfs,

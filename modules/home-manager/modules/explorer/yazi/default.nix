@@ -169,8 +169,20 @@ in {
           opener = {
             # Single-entry opener lists prevent Yazi from showing a chooser menu.
             # Openers are referenced by name in open.prepend_rules below.
-            mpv = [{run = ''mpv "$@"''; orphan = true; desc = "Play with MPV";}];
-            swayimg = [{run = ''swayimg "$@"''; orphan = true; desc = "View with Swayimg";}];
+            mpv = [
+              {
+                run = ''mpv "$@"'';
+                orphan = true;
+                desc = "Play with MPV";
+              }
+            ];
+            swayimg = [
+              {
+                run = ''swayimg "$@"'';
+                orphan = true;
+                desc = "View with Swayimg";
+              }
+            ];
           };
           open = {
             prepend_rules = [

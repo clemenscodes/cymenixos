@@ -19,7 +19,7 @@
   useClaude = osConfig.modules.ai.claude.enable;
   useNvidia = osConfig.modules.gpu.nvidia.enable;
   useWootswitch = osConfig.modules.io.wooting.wootswitch.enable;
-  wootswitchPkg =inputs.wootswitch.packages.${system}.default;
+  wootswitchPkg = inputs.wootswitch.packages.${system}.default;
   cpuVendor = osConfig.modules.cpu.vendor;
   cpuHwmonPath =
     if cpuVendor == "amd"

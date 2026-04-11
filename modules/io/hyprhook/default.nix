@@ -3,10 +3,7 @@
   pkgs,
   lib,
   ...
-}: {
-  config,
-  ...
-}: let
+}: {config, ...}: let
   cfg = config.modules.io;
   hyprhookModuleAvailable = inputs ? hyprhook;
   commandType = lib.types.listOf lib.types.str;
@@ -74,9 +71,9 @@ in {
             '';
             example = [
               {
-                class      = "^gamescope$";
-                title      = "Counter-Strike 2";
-                on_focus   = ["hyprctl" "dispatch" "submap" "gaming"];
+                class = "^gamescope$";
+                title = "Counter-Strike 2";
+                on_focus = ["hyprctl" "dispatch" "submap" "gaming"];
                 on_unfocus = ["hyprctl" "dispatch" "submap" "reset"];
               }
             ];

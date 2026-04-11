@@ -14,11 +14,19 @@
   #
   # The keybind uses the bare toggle. Hyprhook scripts use explicit on/off
   # so the state is always deterministic regardless of prior manual toggles.
-  hyprGamemode = pkgs.writeShellApplication {
+  hypr-gamemode = pkgs.writeShellApplication {
     name = "hypr-gamemode";
-    runtimeInputs = [pkgs.hyprland pkgs.gawk];
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.gawk
+    ];
     text = ''
+      is_on() {
+        [ "$(hyprctl getoption animations:enabled | awk 'NR==1{print $2}')" = "0" ]
+      }
+
       gamemode_on() {
+        if is_on; then return 0; fi
         hyprctl --batch "
           keyword animations:enabled 0;
           keyword decoration:shadow:enabled 0;
@@ -30,16 +38,14 @@
       }
 
       gamemode_off() {
+        if ! is_on; then return 0; fi
         hyprctl reload
       }
 
       case "''${1:-toggle}" in
         on)     gamemode_on ;;
         off)    gamemode_off ;;
-        toggle)
-          current=$(hyprctl getoption animations:enabled | awk 'NR==1{print $2}')
-          if [ "$current" = "1" ]; then gamemode_on; else gamemode_off; fi
-          ;;
+        toggle) if is_on; then gamemode_off; else gamemode_on; fi ;;
         *)
           echo "usage: hypr-gamemode [on|off|toggle]" >&2
           exit 1
@@ -52,12 +58,23 @@ in {
     modules = {
       gaming = {
         hyprland = {
-          enable = lib.mkEnableOption "Enable Hyprland gaming window rules and gamemode toggle" // {default = false;};
+          enable =
+            lib.mkEnableOption "Enable Hyprland gaming window rules and gamemode toggle"
+            // {
+              default = false;
+            };
           gamemode = {
             keybind = lib.mkOption {
               type = lib.types.str;
               default = "F1";
               description = "Key (after \$mod) used to toggle Hyprland gamemode (disables animations, blur, shadows, gaps).";
+            };
+          };
+          scripts = {
+            hypr-gamemode = lib.mkOption {
+              type = lib.types.package;
+              readOnly = true;
+              description = "The hypr-gamemode script derivation.";
             };
           };
         };
@@ -66,9 +83,11 @@ in {
   };
 
   config = lib.mkIf (cfg.enable && hyprCfg.enable) {
+    modules.gaming.hyprland.scripts = {inherit hypr-gamemode;};
+
     home-manager = lib.mkIf config.modules.home-manager.enable {
       users.${config.modules.users.user} = {
-        home.packages = [hyprGamemode];
+        home.packages = [hypr-gamemode];
 
         wayland.windowManager.hyprland.settings = {
           windowrule = [
@@ -110,7 +129,7 @@ in {
           ];
 
           bind = [
-            "$mod, ${hyprCfg.gamemode.keybind}, exec, ${hyprGamemode}/bin/hypr-gamemode"
+            "$mod, ${hyprCfg.gamemode.keybind}, exec, ${hypr-gamemode}/bin/hypr-gamemode"
           ];
         };
       };

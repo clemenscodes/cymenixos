@@ -912,18 +912,14 @@
   # pgrep target: on NixOS the `obs` binary in PATH is a shell wrapper — the actual
   # running process is `.obs-wrapped`. pgrep -x obs never matches it; pgrep -x '.obs-wrapped' does.
   #
-  # xmrig: OBS encoder competes with the miner for GPU/CPU; stop it on open, restart on close.
-  # This mirrors cs2-open (stop xmrig, launch OBS) / cs2-close (stop OBS, start xmrig).
-  #
   # Shutdown order:
   #   1. stop replay buffer (flush buffered frames)
   #   2. stop recording (OBS muxes and seals the container)
   #   3. poll recording status up to 30 s until outputActive = false
   #   4. pkill obs (safe only after the file is sealed)
-  #   5. restart xmrig
   obs-toggle = pkgs.writeShellApplication {
     name = "obs-toggle";
-    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps pkgs.systemd];
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
     text = ''
       if pgrep -x '.obs-wrapped' > /dev/null 2>&1; then
         CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
@@ -946,10 +942,81 @@
           fi
         fi
         pkill obs 2>/dev/null || true
-        sudo systemctl start xmrig.service
       else
-        sudo systemctl stop xmrig.service
         exec ${obs-launch}/bin/obs-launch
+      fi
+    '';
+  };
+
+  # obs-ensure-open: Idempotently bring OBS to the running+recording state.
+  #
+  # Owns OBS state only — callers are responsible for any other side effects.
+  #
+  # State machine:
+  #   OBS not running        → exec obs-launch (args include --startrecording --startreplaybuffer)
+  #   OBS running, not rec   → start recording; ensure replay buffer also running
+  #   OBS running, recording → ensure replay buffer running; otherwise no-op
+  obs-ensure-open = pkgs.writeShellApplication {
+    name = "obs-ensure-open";
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
+    text = ''
+      CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
+
+      if pgrep -x '.obs-wrapped' > /dev/null 2>&1; then
+        if [[ -f "$CONFIG_PATH" ]]; then
+          OBS_WEBSOCKET_PORT="$(jq -r '.server_port // empty' "$CONFIG_PATH")"
+          OBS_WEBSOCKET_PASSWORD="$(jq -r '.server_password // empty' "$CONFIG_PATH")"
+          if [[ -n "$OBS_WEBSOCKET_PORT" && -n "$OBS_WEBSOCKET_PASSWORD" ]]; then
+            export OBS_WEBSOCKET_URL="obsws://localhost:$OBS_WEBSOCKET_PORT/$OBS_WEBSOCKET_PASSWORD"
+            recording=$(obs-cmd recording status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
+            if [ "$recording" = "false" ]; then
+              obs-cmd recording start 2>/dev/null || true
+            fi
+            replay=$(obs-cmd replay-buffer status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
+            if [ "$replay" = "false" ]; then
+              obs-cmd replay-buffer start 2>/dev/null || true
+            fi
+          fi
+        fi
+      else
+        exec ${obs-launch}/bin/obs-launch
+      fi
+    '';
+  };
+
+  # obs-ensure-closed: Idempotently bring OBS to the stopped state.
+  #
+  # Owns OBS state only — callers are responsible for any other side effects.
+  #
+  # State machine:
+  #   OBS running     → graceful shutdown (stop replay → stop recording → wait → pkill)
+  #   OBS not running → no-op
+  obs-ensure-closed = pkgs.writeShellApplication {
+    name = "obs-ensure-closed";
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
+    text = ''
+      CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
+
+      if pgrep -x '.obs-wrapped' > /dev/null 2>&1; then
+        if [[ -f "$CONFIG_PATH" ]]; then
+          OBS_WEBSOCKET_PORT="$(jq -r '.server_port // empty' "$CONFIG_PATH")"
+          OBS_WEBSOCKET_PASSWORD="$(jq -r '.server_password // empty' "$CONFIG_PATH")"
+          if [[ -n "$OBS_WEBSOCKET_PORT" && -n "$OBS_WEBSOCKET_PASSWORD" ]]; then
+            export OBS_WEBSOCKET_URL="obsws://localhost:$OBS_WEBSOCKET_PORT/$OBS_WEBSOCKET_PASSWORD"
+            obs-cmd replay-buffer stop 2>/dev/null || true
+            obs-cmd recording stop 2>/dev/null || true
+            remaining=30
+            while [ "$remaining" -gt 0 ]; do
+              active=$(obs-cmd recording status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
+              if [ "$active" = "false" ]; then
+                break
+              fi
+              sleep 1
+              remaining=$((remaining - 1))
+            done
+          fi
+        fi
+        pkill obs 2>/dev/null || true
       fi
     '';
   };
@@ -1267,6 +1334,18 @@ in {
                 description = "Register Hyprland keybinds for OBS control";
               };
             };
+            scripts = {
+              obs-ensure-open = lib.mkOption {
+                type = lib.types.package;
+                readOnly = true;
+                description = "obs-ensure-open script derivation.";
+              };
+              obs-ensure-closed = lib.mkOption {
+                type = lib.types.package;
+                readOnly = true;
+                description = "obs-ensure-closed script derivation.";
+              };
+            };
             filenameFormatting = lib.mkOption {
               type = lib.types.str;
               default = "%CCYY-%MM-%DD_%hh-%mm-%ss";
@@ -1339,6 +1418,8 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && obsCfg.enable && isDesktop) {
+    modules.media.video.obs.scripts = {inherit obs-ensure-open obs-ensure-closed;};
+
     home = {
       persistence = lib.mkIf isPersisted {
         "${persistPath}" = {
@@ -1356,6 +1437,8 @@ in {
         pkgs.gst_all_1.gst-vaapi
         pkgs.nv-codec-headers-12
         obs-toggle
+        obs-ensure-open
+        obs-ensure-closed
         obs-cmd-wrapped
         obs-record-toggle
         obs-stream-toggle
