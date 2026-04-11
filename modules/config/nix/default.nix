@@ -70,11 +70,8 @@ in {
       optimise = {
         automatic = true;
       };
-      extraOptions = ''
-        accept-flake-config = true
-      '';
-      daemonCPUSchedPolicy = "batch";
-      daemonIOSchedClass = "idle";
+      daemonCPUSchedPolicy = "other";
+      daemonIOSchedClass = "best-effort";
     };
     system = {
       autoUpgrade = {
