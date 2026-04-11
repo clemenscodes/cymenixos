@@ -3502,6 +3502,22 @@
         "type": "github"
       }
     },
+    "obs-vkcapture": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775924806,
+        "narHash": "sha256-va9JCU5j7CVlScu25tBZMCv0XuKqE109b2avTCGcK7E=",
+        "owner": "clemenscodes",
+        "repo": "obs-vkcapture",
+        "rev": "ce43eb881f811d877e3ce05dc1679c12f59330a2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "clemenscodes",
+        "repo": "obs-vkcapture",
+        "type": "github"
+      }
+    },
     "peon-ping": {
       "inputs": {
         "flake-utils": "flake-utils_4",
@@ -3733,6 +3749,7 @@
         "nixpkgs": "nixpkgs_20",
         "nixvirt": "nixvirt",
         "nur": "nur",
+        "obs-vkcapture": "obs-vkcapture",
         "peon-ping": "peon-ping",
         "plasma-manager": "plasma-manager",
         "pwndbg": "pwndbg",
