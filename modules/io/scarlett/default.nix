@@ -75,14 +75,14 @@ in {
       };
     };
 
-    # PipeWire filter-chain: SM7B processing chain
+    # PipeWire filter-chain: SM7B processing chain (single source of truth for all apps)
     # HP(80Hz) → EQ → compressor → EQ → harmonics → maximiser → RNNoise → Speex
     #
-    # Noise suppression applied last, matching OBS filter order exactly:
-    #   OBS: RNNoise (neural VAD) → Speex -15dB (spectral subtraction)
-    # Speex is a custom LADSPA derivation (speex-ladspa.nix) wrapping libspeexdsp —
-    # the same library OBS uses. No off-the-shelf LADSPA Speex plugin exists.
-    # To revert: remove nodes 12-13, restore outputs=["maximiser:Output"].
+    # All processing lives here. OBS captures SM7B_Processed and applies only a safety
+    # limiter — duplicating suppression or compression in OBS causes artifacts.
+    # Speex is a custom LADSPA derivation (speex-ladspa.nix) wrapping libspeexdsp.
+    # No off-the-shelf LADSPA Speex plugin exists.
+    # To revert noise suppression: remove nodes 12-13, restore outputs=["maximiser:Output"].
     #
     # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert
     #       DSP mode, exceeding the filter-chain's single-output SPA node → ENOSPC → all audio
@@ -141,6 +141,8 @@ in {
                   };
                 }
                 # 5. LSP Compressor: lookahead prevents onset cutting, evens out level
+                # Attack raised from 6ms to 12ms — lets consonant transients through
+                # before gain reduction kicks in, preserving natural punch and clarity.
                 {
                   type = "ladspa";
                   name = "compressor";
@@ -150,7 +152,7 @@ in {
                     "Sidechain lookahead (ms)" = 5.0;
                     "Sidechain reactivity (ms)" = 5.0;
                     "Attack threshold (G)" = 0.12589; # -18 dB
-                    "Attack time (ms)" = 6.0;
+                    "Attack time (ms)" = 12.0;
                     "Release time (ms)" = 60.0;
                     "Ratio" = 4.0;
                     "Knee (G)" = 0.5;
@@ -191,6 +193,9 @@ in {
                   };
                 }
                 # 9. Air shelf: broadcast sparkle
+                # Reduced from +5dB to +2dB — the Scarlett hardware Air/Presence mode
+                # already adds ~4dB presence in this range; stacking both causes
+                # harshness and sibilance around 8–12kHz.
                 {
                   type = "builtin";
                   name = "eq_air";
@@ -198,7 +203,7 @@ in {
                   control = {
                     "Freq" = 10000.0;
                     "Q" = 0.707;
-                    "Gain" = 5.0;
+                    "Gain" = 2.0;
                   };
                 }
                 # 10. Harmonic generator: tube-like even harmonics for richness
@@ -221,13 +226,16 @@ in {
                   };
                 }
                 # 11. Satan Maximiser: loudness/punch limiter
+                # Decay raised from 8 to 40 samples (~0.8ms at 48kHz) — the 8-sample
+                # setting causes intermodulation distortion on sharp transients.
+                # 40 samples still limits aggressively while sounding clean.
                 {
                   type = "ladspa";
                   name = "maximiser";
                   plugin = "${pkgs.ladspaPlugins}/lib/ladspa/satan_maximiser_1408.so";
                   label = "satanMaximiser";
                   control = {
-                    "Decay time (samples)" = 8.0;
+                    "Decay time (samples)" = 40.0;
                     "Knee point (dB)" = -6.0;
                   };
                 }
@@ -316,7 +324,7 @@ in {
             };
             "playback.props" = {
               "node.name" = "SM7B_Processed";
-              "node.description" = "SM7B Processed (Shure SM7B + Scarlett 2i2)";
+              "node.description" = "SM7B Processed (Shure SM7B + Scarlett 2i2 4th Gen)";
               "media.class" = "Audio/Source";
               "audio.channels" = 1;
               "audio.position" = ["FL"];

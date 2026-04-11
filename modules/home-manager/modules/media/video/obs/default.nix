@@ -141,13 +141,11 @@
     private_settings = {};
   };
 
+  # OBS receives SM7B_Processed — already fully processed by the PipeWire filter-chain
+  # (HP → EQ → compressor → EQ → harmonics → maximiser → RNNoise → Speex).
+  # Only a safety limiter is needed here; duplicating noise suppression or compression
+  # causes metallic artifacts and over-squashed dynamics.
   sm7bFilters = [
-    (mkFilter "RNNoise" "37f2a665-504b-45a8-a991-4661e445fc59" "noise_suppress_filter_v2" {})
-    (mkFilter "Speex" "0dc549b9-2c50-44e0-afec-6b84b763ca35" "noise_suppress_filter_v2" {
-      suppress_level = -15;
-      method = "speex";
-    })
-    (mkFilter "Kompressor" "d6b36017-e914-44cc-b947-03b1f87219c5" "compressor_filter" {ratio = 4.0;})
     (mkFilter "Limiter" "f98982cf-dd71-4a24-ac47-f1d5a3b13760" "limiter_filter" {threshold = -2.0;})
   ];
 
