@@ -908,16 +908,24 @@
   '';
 
   # obs-toggle: launch OBS if not running; gracefully stop it if it is.
-  # Shutdown order mirrors cs2-close in the system config:
-  #   1. stop replay buffer (flushes buffered frames)
-  #   2. stop recording (sends stop signal — OBS muxes the file)
-  #   3. poll recording status for up to 30 s so the container is fully closed
-  #   4. pkill obs (safe to kill only after the file is sealed)
+  #
+  # pgrep target: on NixOS the `obs` binary in PATH is a shell wrapper — the actual
+  # running process is `.obs-wrapped`. pgrep -x obs never matches it; pgrep -x '.obs-wrapped' does.
+  #
+  # xmrig: OBS encoder competes with the miner for GPU/CPU; stop it on open, restart on close.
+  # This mirrors cs2-open (stop xmrig, launch OBS) / cs2-close (stop OBS, start xmrig).
+  #
+  # Shutdown order:
+  #   1. stop replay buffer (flush buffered frames)
+  #   2. stop recording (OBS muxes and seals the container)
+  #   3. poll recording status up to 30 s until outputActive = false
+  #   4. pkill obs (safe only after the file is sealed)
+  #   5. restart xmrig
   obs-toggle = pkgs.writeShellApplication {
     name = "obs-toggle";
-    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps pkgs.systemd];
     text = ''
-      if pgrep -x obs > /dev/null 2>&1; then
+      if pgrep -x '.obs-wrapped' > /dev/null 2>&1; then
         CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
         if [[ -f "$CONFIG_PATH" ]]; then
           OBS_WEBSOCKET_PORT="$(jq -r '.server_port // empty' "$CONFIG_PATH")"
@@ -938,7 +946,9 @@
           fi
         fi
         pkill obs 2>/dev/null || true
+        sudo systemctl start xmrig.service
       else
+        sudo systemctl stop xmrig.service
         exec ${obs-launch}/bin/obs-launch
       fi
     '';

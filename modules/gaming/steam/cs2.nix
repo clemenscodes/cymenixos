@@ -664,7 +664,7 @@ in {
         users = {
           ${config.modules.users.user} = {
             wayland.windowManager.hyprland.settings = {
-              windowrulev2 = ["workspace 2, class:^(cs2)$"];
+              windowrule = ["workspace 2, match:class ^(cs2)$"];
             };
 
             xdg = {
