@@ -97,9 +97,9 @@ in {
           systemd = {
             enable = true;
           };
-          plugins = with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}; [
-            csgo-vulkan-fix
-          ];
+          # plugins = with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}; [
+          #   csgo-vulkan-fix
+          # ];
           package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
           portalPackage =
             inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
