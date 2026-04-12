@@ -206,26 +206,7 @@ in {
                     "Gain" = 2.0;
                   };
                 }
-                # 10. Harmonic generator: tube-like even harmonics for richness
-                {
-                  type = "ladspa";
-                  name = "harmonics";
-                  plugin = "${pkgs.ladspaPlugins}/lib/ladspa/harmonic_gen_1220.so";
-                  label = "harmonicGen";
-                  control = {
-                    "Fundamental magnitude" = 1.0;
-                    "2nd harmonic magnitude" = 0.15;
-                    "3rd harmonic magnitude" = 0.05;
-                    "4th harmonic magnitude" = 0.02;
-                    "5th harmonic magnitude" = 0.0;
-                    "6th harmonic magnitude" = 0.0;
-                    "7th harmonic magnitude" = 0.0;
-                    "8th harmonic magnitude" = 0.0;
-                    "9th harmonic magnitude" = 0.0;
-                    "10th harmonic magnitude" = 0.0;
-                  };
-                }
-                # 11. Satan Maximiser: loudness/punch limiter
+                # 10. Satan Maximiser: loudness/punch limiter
                 # Decay raised from 8 to 40 samples (~0.8ms at 48kHz) — the 8-sample
                 # setting causes intermodulation distortion on sharp transients.
                 # 40 samples still limits aggressively while sounding clean.
@@ -239,7 +220,7 @@ in {
                     "Knee point (dB)" = -6.0;
                   };
                 }
-                # 12. RNNoise: neural noise suppressor — VAD-based, catches voice-frequency hum
+                # 11. RNNoise: neural noise suppressor — VAD-based, catches voice-frequency hum
                 {
                   type = "ladspa";
                   name = "rnnoise";
@@ -249,7 +230,7 @@ in {
                     "VAD Threshold (%)" = 30.0;
                   };
                 }
-                # 13. Speex: spectral subtraction suppressor — stationary noise floor estimation
+                # 12. Speex: spectral subtraction suppressor — stationary noise floor estimation
                 # Custom LADSPA derivation wrapping libspeexdsp (same lib OBS uses).
                 # -15dB matches the OBS Speex filter setting exactly.
                 {
@@ -259,6 +240,28 @@ in {
                   label = "speex_noise_suppressor_mono";
                   control = {
                     "Suppress Level (dB)" = -15.0;
+                  };
+                }
+                # 13. Harmonic generator: tube-like even harmonics for richness.
+                # Placed after noise suppression so the synthesized harmonics are not
+                # treated as noise and suppressed — that interaction caused a hollow,
+                # phasey "hallway" artifact. Magnitudes reduced slightly for the same reason.
+                {
+                  type = "ladspa";
+                  name = "harmonics";
+                  plugin = "${pkgs.ladspaPlugins}/lib/ladspa/harmonic_gen_1220.so";
+                  label = "harmonicGen";
+                  control = {
+                    "Fundamental magnitude" = 1.0;
+                    "2nd harmonic magnitude" = 0.10;
+                    "3rd harmonic magnitude" = 0.03;
+                    "4th harmonic magnitude" = 0.01;
+                    "5th harmonic magnitude" = 0.0;
+                    "6th harmonic magnitude" = 0.0;
+                    "7th harmonic magnitude" = 0.0;
+                    "8th harmonic magnitude" = 0.0;
+                    "9th harmonic magnitude" = 0.0;
+                    "10th harmonic magnitude" = 0.0;
                   };
                 }
               ];
@@ -298,10 +301,6 @@ in {
                 }
                 {
                   output = "eq_air:Out";
-                  input = "harmonics:Input";
-                }
-                {
-                  output = "harmonics:Output";
                   input = "maximiser:Input";
                 }
                 {
@@ -312,8 +311,12 @@ in {
                   output = "rnnoise:Output";
                   input = "speex:Input";
                 }
+                {
+                  output = "speex:Output";
+                  input = "harmonics:Input";
+                }
               ];
-              outputs = ["speex:Output"];
+              outputs = ["harmonics:Output"];
             };
             "capture.props" = {
               "node.name" = "capture.sm7b";
