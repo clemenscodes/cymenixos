@@ -389,7 +389,7 @@ in {
             evglow =
               if useEvglow
               then ''
-                exec-once = evglow${osConfig.services.evglow.extraArgs}
+                exec-once = evglow
               ''
               else "";
             hyprhook =
