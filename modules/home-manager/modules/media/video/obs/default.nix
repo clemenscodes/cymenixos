@@ -265,20 +265,21 @@
           private_settings = {};
         }
         ++ [
-          # 6. Screen — wlrobs-scpy (zwlr_screencopy_manager_v1, CPU copy path)
-          # Uses wlrobs instead of the portal-based pipewire-desktop-capture-source because
-          # NVIDIA's EGL cannot import DMA-bufs from the compositor, causing a black screen
-          # through the portal path. wlrobs-scpy bypasses the portal entirely and specifies
-          # the output by name — no picker, no restore token, no DMA-buf negotiation.
+          # 6. Screen — PipeWire desktop portal capture (hardware DMA-buf path, zero-copy)
+          # Uses pipewire-desktop-capture-source (xdg-desktop-portal → PipeWire → DMA-buf EGL import).
+          # Requires NVIDIA's EGL to be used (not Mesa's) — obs-launch sets
+          # __EGL_VENDOR_LIBRARY_FILENAMES to force 10_nvidia.json when modules.gpu.nvidia.enable.
+          # On first launch OBS shows the portal picker; the RestoreToken is saved back to the
+          # seeded scene JSON and persisted via impermanence so no re-selection is needed after reboot.
           {
             prev_ver = 536936448;
             name = "Screen";
             uuid = "cyme0001-0001-0001-0001-000000000006";
-            id = "wlrobs-scpy";
-            versioned_id = "wlrobs-scpy";
+            id = "pipewire-desktop-capture-source";
+            versioned_id = "pipewire-desktop-capture-source";
             settings = {
-              output = obsCfg.scenes.screenCapture.output;
-              show_cursor = true;
+              ShowCursor = true;
+              RestoreToken = "";
             };
             mixers = 0;
             sync = 0;
@@ -1171,7 +1172,16 @@
 
   obs-launch = pkgs.writeShellApplication {
     name = "obs-launch";
-    text = "exec obs ${lib.escapeShellArgs obsArgs} \"$@\"";
+    text =
+      lib.optionalString osConfig.modules.gpu.nvidia.enable ''
+        # Force NVIDIA's EGL vendor so the portal/PipeWire DMA-buf path works.
+        # Without this GLVND picks Mesa (sort_priority 50 > NVIDIA's 10), and Mesa
+        # cannot import NVIDIA-allocated DMA-bufs → black screen in pipewire-desktop-capture-source.
+        export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
+        export LIBVA_DRIVER_NAME=nvidia
+        export NVD_BACKEND=direct
+      ''
+      + "exec obs ${lib.escapeShellArgs obsArgs} \"$@\"";
   };
 
   obs-cmd-wrapped = mkObsScript "obs-cmd" ''exec obs-cmd "$@"'';
@@ -1668,9 +1678,12 @@ in {
                   Seed a declarative scene collection on first run.
                   Contains two scenes:
                     "Game" — VK Capture (cursor off) + GameSound + Shure SM7B
-                    "Work" — Screen (wlrobs-scpy) + DesktopAudio + Shure SM7B
-                  Screen uses wlrobs-scpy (zwlr_screencopy_manager_v1) to bypass the portal and
-                  avoid NVIDIA DMA-buf black screen issues. Output is set by scenes.screenCapture.output.
+                    "Work" — Screen (pipewire-desktop-capture-source) + DesktopAudio + Shure SM7B
+                  Screen uses the PipeWire/portal path (hardware DMA-buf, zero-copy). On NVIDIA,
+                  obs-launch forces __EGL_VENDOR_LIBRARY_FILENAMES=10_nvidia.json so the DMA-buf
+                  import succeeds (Mesa EGL cannot import NVIDIA DMA-bufs, causing a black screen).
+                  On first launch OBS shows the portal picker; the RestoreToken is written back and
+                  persisted via impermanence so no re-selection is needed after reboot.
                   Seeded once — OBS can freely modify it afterward. Use obs-reset-config to re-seed.
                 '';
               };
@@ -1684,10 +1697,9 @@ in {
                   type = lib.types.str;
                   default = "";
                   description = ''
-                    Wayland output name for the Work scene Screen source (e.g. "DP-3", "HDMI-A-1").
-                    Used by wlrobs-scpy which captures via zwlr_screencopy_manager_v1 — no portal
-                    picker, no DMA-buf negotiation, works reliably on NVIDIA.
-                    Run `hyprctl monitors` or `wlr-randr` to find your output name.
+                    Unused. Kept for backwards compatibility; the Screen source now uses
+                    pipewire-desktop-capture-source (xdg-desktop-portal) which selects the
+                    capture target via the portal picker, not an output name.
                   '';
                 };
               };
