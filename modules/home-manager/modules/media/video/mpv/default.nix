@@ -28,33 +28,28 @@ in {
           k = "seek 60";
           S = "cycle sub";
         };
-        scripts = [
-          (pkgs.writeTextFile {
-            name = "merge-audio-tracks.lua";
-            destination = "/share/mpv/scripts/merge-audio-tracks.lua";
-            text = ''
-              -- Dynamically merge all audio tracks via amix so multi-track files
-              -- (e.g. OBS recordings with isolated stems) play as a single mix.
-              -- Single-track files are left untouched.
-              local function merge_audio()
-                local tracks = mp.get_property_native("track-list")
-                local n = 0
-                for _, t in ipairs(tracks) do
-                  if t.type == "audio" then n = n + 1 end
-                end
-                if n <= 1 then return end
-                local inputs = ""
-                for i = 1, n do
-                  inputs = inputs .. "[aid" .. i .. "]"
-                end
-                mp.set_property("lavfi-complex", inputs .. "amix=inputs=" .. n .. "[ao]")
-              end
-              mp.register_event("file-loaded", merge_audio)
-            '';
-          })
-        ];
       };
     };
+    xdg.configFile."mpv/scripts/merge-audio-tracks.lua".text = ''
+      -- Dynamically merge all audio tracks via amix so multi-track files
+      -- (e.g. OBS recordings with isolated stems) play as a single mix.
+      -- Single-track files are left untouched.
+      local function merge_audio()
+        local tracks = mp.get_property_native("track-list")
+        local n = 0
+        for _, t in ipairs(tracks) do
+          if t.type == "audio" then n = n + 1 end
+        end
+        if n <= 1 then return end
+        local inputs = ""
+        for i = 1, n do
+          inputs = inputs .. "[aid" .. i .. "]"
+        end
+        mp.set_property("lavfi-complex", inputs .. "amix=inputs=" .. n .. "[ao]")
+      end
+      mp.register_event("file-loaded", merge_audio)
+    '';
+
     xdg.mimeApps = {
       defaultApplications = let
         videoTypes = [
