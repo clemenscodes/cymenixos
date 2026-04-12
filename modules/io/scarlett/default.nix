@@ -107,7 +107,7 @@ in {
                     "Q" = 0.707;
                   };
                 }
-                # 2. Low shelf: add warmth/body
+                # 2. Low shelf: gentle warmth — SM7B is already dark so keep this subtle
                 {
                   type = "builtin";
                   name = "eq_warmth";
@@ -115,29 +115,29 @@ in {
                   control = {
                     "Freq" = 150.0;
                     "Q" = 0.707;
-                    "Gain" = 2.5;
+                    "Gain" = 0.0;
                   };
                 }
-                # 3. Box cut: remove SM7B cardboard resonance
+                # 3. Boom cut: SM7B proximity/body resonance around 300Hz
                 {
                   type = "builtin";
                   name = "eq_box_cut";
                   label = "bq_peaking";
                   control = {
-                    "Freq" = 400.0;
-                    "Q" = 1.4;
-                    "Gain" = -6.0;
+                    "Freq" = 300.0;
+                    "Q" = 1.0;
+                    "Gain" = -4.0;
                   };
                 }
-                # 4. Mud cut: clean up low-mid muddiness
+                # 4. Box/mud cut: cardboard resonance and low-mid muddiness
                 {
                   type = "builtin";
                   name = "eq_mud_cut";
                   label = "bq_peaking";
                   control = {
-                    "Freq" = 600.0;
+                    "Freq" = 500.0;
                     "Q" = 1.2;
-                    "Gain" = -2.0;
+                    "Gain" = -3.0;
                   };
                 }
                 # 5. LSP Compressor: lookahead prevents onset cutting, evens out level
@@ -156,7 +156,7 @@ in {
                     "Release time (ms)" = 60.0;
                     "Ratio" = 4.0;
                     "Knee (G)" = 0.5;
-                    "Makeup gain (G)" = 1.4125; # +3 dB
+                    "Makeup gain (G)" = 1.0; # 0 dB — let the presence EQ do the lifting
                   };
                 }
                 # 6. Presence: voice forward, intelligible
