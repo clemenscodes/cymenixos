@@ -447,5 +447,14 @@ in {
         };
       };
     };
+    # Ensure the user-level portals.conf routes ScreenCast to xdph, not gtk.
+    # The user-level file (~/.config/xdg-desktop-portal/portals.conf) takes priority
+    # over the system-level one (/etc/xdg/…). Without this, the yazi termfilechooser
+    # config (which only sets the FileChooser override) produces a file with only
+    # default=gtk, and xdp never forwards ScreenCast requests to xdg-desktop-portal-hyprland.
+    xdg.portal.config.hyprland = {
+      default = ["hyprland" "gtk"];
+      "org.freedesktop.portal.FileChooser" = ["gtk"];
+    };
   };
 }
