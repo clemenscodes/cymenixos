@@ -413,11 +413,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1776006040,
-        "narHash": "sha256-nIVdTXsQp7rMSt2zIOyK/NQY7rtDE4bOedw9Z/nPono=",
+        "lastModified": 1776006727,
+        "narHash": "sha256-lmjjNYVt2nL/DWwGrxlO4TAAk1MuHpeUg3g6B/YLHio=",
         "owner": "clemenscodes",
         "repo": "evglow",
-        "rev": "07534d6c29a33ff961561d0ce2d12a7d2915f469",
+        "rev": "a50b7970bfabf102df825a7c7a93391f0a6a8316",
         "type": "github"
       },
       "original": {
