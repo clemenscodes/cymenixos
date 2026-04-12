@@ -54,10 +54,33 @@
       ];
     meta = pkgs.wootility.meta;
   };
+  # Electron on Wayland creates its window but doesn't call show() until the
+  # single-instance "activate" event fires. The window never appears on first
+  # launch; a second invocation signals the running process, which then shows it.
+  # This wrapper polls hyprctl for up to 3 s after launch and re-runs the binary
+  # if no window appears, replicating that second click automatically.
+  wootilityLauncher = pkgs.writeShellApplication {
+    name = "wootility-launcher";
+    runtimeInputs = [pkgs.hyprland];
+    text = ''
+      ${wootility}/bin/wootility "$@" &
+
+      for _ in 1 2 3 4 5 6; do
+        sleep 0.5
+        if hyprctl clients -j 2>/dev/null | grep -qi wootility; then
+          wait
+          exit 0
+        fi
+      done
+
+      # No window appeared — trigger the single-instance activate event.
+      exec ${wootility}/bin/wootility "$@"
+    '';
+  };
   wootilityDesktop = pkgs.makeDesktopItem {
     name = "wootility";
     desktopName = "Wootility";
-    exec = "${wootility}/bin/wootility";
+    exec = "${wootilityLauncher}/bin/wootility-launcher";
     icon = "wootility";
     categories = ["Utility"];
   };
@@ -84,7 +107,7 @@ in {
     lib.mkMerge [
       {
         environment = {
-          systemPackages = [wootility wootilityDesktop];
+          systemPackages = [wootility wootilityLauncher wootilityDesktop];
           persistence = {
             ${config.modules.boot.impermanence.persistPath} = {
               users = {

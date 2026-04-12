@@ -132,17 +132,31 @@ in {
       portal = lib.mkIf (osConfig.modules.display.gui != "headless") {
         inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
-        extraPortals = [
-          pkgs.xdg-desktop-portal
-          pkgs.xdg-desktop-portal-gtk
-          pkgs.xdg-desktop-portal-wlr
-        ];
-        config = {
-          common = {
-            default = "hyprland;gtk";
-            "org.freedesktop.portal.OpenURI" = "gtk";
+        extraPortals =
+          [
+            pkgs.xdg-desktop-portal
+            pkgs.xdg-desktop-portal-gtk
+          ]
+          ++ lib.optionals config.modules.display.compositor.hyprland.enable [
+            pkgs.xdg-desktop-portal-hyprland
+          ];
+        config =
+          if config.modules.display.compositor.hyprland.enable
+          then {
+            common = {
+              default = ["gtk"];
+            };
+            hyprland = {
+              default = ["hyprland" "gtk"];
+              "org.freedesktop.portal.FileChooser" = ["gtk"];
+              "org.freedesktop.portal.OpenURI" = ["gtk"];
+            };
+          }
+          else {
+            common = {
+              default = ["gtk"];
+            };
           };
-        };
       };
       dataFile = {
         "chars" = {

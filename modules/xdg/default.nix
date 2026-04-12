@@ -39,19 +39,35 @@ in {
       portal = lib.mkIf (cfg.display.gui != "headless") {
         enable = true;
         xdgOpenUsePortal = true;
-        extraPortals = [
-          pkgs.xdg-desktop-portal
-          pkgs.xdg-desktop-portal-gtk
-        ];
+        extraPortals =
+          [
+            pkgs.xdg-desktop-portal
+            pkgs.xdg-desktop-portal-gtk
+          ]
+          ++ lib.optionals cfg.display.hyprland.enable [
+            pkgs.xdg-desktop-portal-hyprland
+          ];
         # Explicit routing is required when multiple portal backends are installed.
         # Without this, xdg-desktop-portal picks backends alphabetically and may
         # choose gtk over hyprland, breaking screen capture in OBS and other apps.
         # Hyprland sets XDG_CURRENT_DESKTOP=Hyprland, so the "Hyprland" block wins.
-        config = {
-          common = {
-            default = ["gtk"];
+        config =
+          if cfg.display.hyprland.enable
+          then {
+            common = {
+              default = ["gtk"];
+            };
+            hyprland = {
+              default = ["hyprland" "gtk"];
+              "org.freedesktop.portal.FileChooser" = ["gtk"];
+              "org.freedesktop.portal.OpenURI" = ["gtk"];
+            };
+          }
+          else {
+            common = {
+              default = ["gtk"];
+            };
           };
-        };
       };
     };
   };
