@@ -45,7 +45,7 @@ in {
         for i = 1, n do
           inputs = inputs .. "[aid" .. i .. "]"
         end
-        mp.set_property("lavfi-complex", inputs .. "amix=inputs=" .. n .. "[ao]")
+        mp.set_property("lavfi-complex", inputs .. "amix=inputs=" .. n .. ":normalize=0[ao]")
       end
       mp.register_event("file-loaded", merge_audio)
     '';
