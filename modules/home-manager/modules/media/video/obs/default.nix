@@ -19,6 +19,9 @@
   # Bitmask: enable first N audio tracks (1=0b1, 2=0b11, 3=0b111 … 6=0b111111)
   trackMask = builtins.foldl' (acc: _: acc * 2 + 1) 0 (lib.range 1 obsCfg.audio.tracks);
 
+  # Bitmask: isolate a single track (track 1 → 1, track 2 → 2, track 3 → 4, …)
+  singleTrackMixer = track: builtins.foldl' (acc: _: acc * 2) 1 (lib.range 1 (track - 1));
+
   # Files precomputed in the Nix store — copied to ~/.config/obs-studio on first run
   # (or on demand via obs-reset-config)
   websocketConfigFile = pkgs.writeText "obs-websocket-config.json" (
@@ -149,6 +152,36 @@
     (mkFilter "Limiter" "f98982cf-dd71-4a24-ac47-f1d5a3b13760" "limiter_filter" {threshold = -2.0;})
   ];
 
+  # PipeWire desktop audio output capture (all system audio, no app filter)
+  mkPipeWireOutputSource = name: uuid: {
+    prev_ver = 536936448;
+    inherit name uuid;
+    id = "pipewire_audio_output_capture";
+    versioned_id = "pipewire_audio_output_capture";
+    settings = {};
+    mixers = 255;
+    sync = 0;
+    flags = 0;
+    volume = 1.0;
+    balance = 0.5;
+    enabled = true;
+    muted = false;
+    push-to-mute = false;
+    push-to-mute-delay = 0;
+    push-to-talk = false;
+    push-to-talk-delay = 0;
+    hotkeys = {
+      "libobs.mute" = [];
+      "libobs.unmute" = [];
+      "libobs.push-to-mute" = [];
+      "libobs.push-to-talk" = [];
+    };
+    deinterlace_mode = 0;
+    deinterlace_field_order = 0;
+    monitoring_type = 0;
+    private_settings = {};
+  };
+
   sceneCollectionFile = pkgs.writeText "obs-scene-collection.json" (
     builtins.toJSON {
       name = obsCfg.scenes.name;
@@ -181,12 +214,16 @@
             monitoring_type = 0;
             private_settings = {};
           }
-          # 2. GameSound (SDL Application via PipeWire app capture)
-          (mkPipeWireAppSource "GameSound" "b84d7fe9-1968-45f5-864d-d656d56b019b" obsCfg.audio.gameSource obsCfg.audio.gameSourceVolume)
+          # 2. GameSound (SDL Application via PipeWire app capture) — isolated to its track
+          (
+            (mkPipeWireAppSource "GameSound" "b84d7fe9-1968-45f5-864d-d656d56b019b" obsCfg.audio.gameSource obsCfg.audio.gameSourceVolume)
+            // {mixers = singleTrackMixer obsCfg.audio.gameSourceTrack;}
+          )
           # 3. Shure SM7B (PipeWire input with broadcast filter chain)
           (
             (mkPipeWireSource "Shure SM7B" "9e0dd964-6f7e-4aca-9f09-f118d39826ab" obsCfg.audio.mic sm7bFilters)
             // {
+              mixers = singleTrackMixer obsCfg.audio.micTrack;
               settings = {
                 TargetId = 43;
                 TargetName = obsCfg.audio.mic;
@@ -228,6 +265,39 @@
           private_settings = {};
         }
         ++ [
+          # 6. Screen (full-screen PipeWire capture via xdg-desktop-portal)
+          # RestoreToken is seeded declaratively via gdbus in home activation so OBS
+          # restores without prompting. The flatpak permission store maps the token UUID
+          # to the target output name (screenCapture.output).
+          {
+            prev_ver = 536936448;
+            name = "Screen";
+            uuid = "cyme0001-0001-0001-0001-000000000006";
+            id = "pipewire-desktop-capture-source";
+            versioned_id = "pipewire-desktop-capture-source";
+            settings = {
+              ShowCursor = true;
+              RestoreToken = obsCfg.scenes.screenCapture.restoreToken;
+            };
+            mixers = 0;
+            sync = 0;
+            flags = 0;
+            volume = 1.0;
+            balance = 0.5;
+            enabled = true;
+            muted = false;
+            push-to-mute = false;
+            push-to-mute-delay = 0;
+            push-to-talk = false;
+            push-to-talk-delay = 0;
+            hotkeys = {};
+            deinterlace_mode = 0;
+            deinterlace_field_order = 0;
+            monitoring_type = 0;
+            private_settings = {};
+          }
+          # 7. DesktopAudio (all PipeWire output — used by the Work scene)
+          (mkPipeWireOutputSource "DesktopAudio" "cyme0001-0001-0001-0001-000000000008")
           # Game scene — contains VK Capture (video) + GameSound + SM7B (audio)
           {
             prev_ver = 536936448;
@@ -504,10 +574,217 @@
             canvas_uuid = "6c69626f-6273-4c00-9d88-c5136d61696e";
             private_settings = {};
           }
+          # Work scene — Screen capture (video) + desktop sound + SM7B (audio)
+          {
+            prev_ver = 536936448;
+            name = "Work";
+            uuid = "cyme0001-0001-0001-0001-000000000007";
+            id = "scene";
+            versioned_id = "scene";
+            settings = {
+              id_counter = 3;
+              custom_size = false;
+              items = [
+                {
+                  name = "Screen";
+                  source_uuid = "cyme0001-0001-0001-0001-000000000006";
+                  visible = true;
+                  locked = false;
+                  rot = 0.0;
+                  scale_ref = {
+                    x = 3840.0;
+                    y = 2160.0;
+                  };
+                  align = 5;
+                  bounds_type = 2;
+                  bounds_align = 0;
+                  bounds_crop = false;
+                  crop_left = 0;
+                  crop_top = 0;
+                  crop_right = 0;
+                  crop_bottom = 0;
+                  id = 1;
+                  group_item_backup = false;
+                  pos = {
+                    x = 0.0;
+                    y = 0.0;
+                  };
+                  pos_rel = {
+                    x = -1.7777777910232544;
+                    y = -1.0;
+                  };
+                  scale = {
+                    x = 1.0;
+                    y = 1.0;
+                  };
+                  scale_rel = {
+                    x = 1.0;
+                    y = 1.0;
+                  };
+                  bounds = {
+                    x = 3840.0;
+                    y = 2160.0;
+                  };
+                  bounds_rel = {
+                    x = 3.555555582046509;
+                    y = 2.0;
+                  };
+                  scale_filter = "disable";
+                  blend_method = "default";
+                  blend_type = "normal";
+                  show_transition = {
+                    duration = 0;
+                  };
+                  hide_transition = {
+                    duration = 0;
+                  };
+                  private_settings = {};
+                }
+                {
+                  name = "DesktopAudio";
+                  source_uuid = "cyme0001-0001-0001-0001-000000000008";
+                  visible = true;
+                  locked = false;
+                  rot = 0.0;
+                  scale_ref = {
+                    x = 3840.0;
+                    y = 2160.0;
+                  };
+                  align = 5;
+                  bounds_type = 0;
+                  bounds_align = 0;
+                  bounds_crop = false;
+                  crop_left = 0;
+                  crop_top = 0;
+                  crop_right = 0;
+                  crop_bottom = 0;
+                  id = 2;
+                  group_item_backup = false;
+                  pos = {
+                    x = 0.0;
+                    y = 0.0;
+                  };
+                  pos_rel = {
+                    x = -1.7777777910232544;
+                    y = -1.0;
+                  };
+                  scale = {
+                    x = 1.0;
+                    y = 1.0;
+                  };
+                  scale_rel = {
+                    x = 1.0;
+                    y = 1.0;
+                  };
+                  bounds = {
+                    x = 0.0;
+                    y = 0.0;
+                  };
+                  bounds_rel = {
+                    x = 0.0;
+                    y = 0.0;
+                  };
+                  scale_filter = "disable";
+                  blend_method = "default";
+                  blend_type = "normal";
+                  show_transition = {
+                    duration = 300;
+                  };
+                  hide_transition = {
+                    duration = 300;
+                  };
+                  private_settings = {};
+                }
+                {
+                  name = "Shure SM7B";
+                  source_uuid = "9e0dd964-6f7e-4aca-9f09-f118d39826ab";
+                  visible = true;
+                  locked = false;
+                  rot = 0.0;
+                  scale_ref = {
+                    x = 3840.0;
+                    y = 2160.0;
+                  };
+                  align = 5;
+                  bounds_type = 0;
+                  bounds_align = 0;
+                  bounds_crop = false;
+                  crop_left = 0;
+                  crop_top = 0;
+                  crop_right = 0;
+                  crop_bottom = 0;
+                  id = 3;
+                  group_item_backup = false;
+                  pos = {
+                    x = 0.0;
+                    y = 0.0;
+                  };
+                  pos_rel = {
+                    x = -1.7777777910232544;
+                    y = -1.0;
+                  };
+                  scale = {
+                    x = 1.0;
+                    y = 1.0;
+                  };
+                  scale_rel = {
+                    x = 1.0;
+                    y = 1.0;
+                  };
+                  bounds = {
+                    x = 0.0;
+                    y = 0.0;
+                  };
+                  bounds_rel = {
+                    x = 0.0;
+                    y = 0.0;
+                  };
+                  scale_filter = "disable";
+                  blend_method = "default";
+                  blend_type = "normal";
+                  show_transition = {
+                    duration = 300;
+                  };
+                  hide_transition = {
+                    duration = 300;
+                  };
+                  private_settings = {};
+                }
+              ];
+            };
+            mixers = 0;
+            sync = 0;
+            flags = 0;
+            volume = 1.0;
+            balance = 0.5;
+            enabled = true;
+            muted = false;
+            push-to-mute = false;
+            push-to-mute-delay = 0;
+            push-to-talk = false;
+            push-to-talk-delay = 0;
+            hotkeys = {
+              "OBSBasic.SelectScene" = [];
+              "libobs.show_scene_item.1" = [];
+              "libobs.hide_scene_item.1" = [];
+              "libobs.show_scene_item.2" = [];
+              "libobs.hide_scene_item.2" = [];
+              "libobs.show_scene_item.3" = [];
+              "libobs.hide_scene_item.3" = [];
+            };
+            deinterlace_mode = 0;
+            deinterlace_field_order = 0;
+            monitoring_type = 0;
+            canvas_uuid = "6c69626f-6273-4c00-9d88-c5136d61696e";
+            private_settings = {};
+          }
         ];
 
       groups = [];
-      scene_order = [{name = "Game";}];
+      scene_order = [
+        {name = "Game";}
+        {name = "Work";}
+      ];
       current_scene = "Game";
       current_program_scene = "Game";
       canvases = [];
@@ -1198,6 +1475,24 @@ in {
                     -50 dB → 0.00316
                 '';
               };
+              gameSourceTrack = lib.mkOption {
+                type = lib.types.ints.between 1 6;
+                default = 1;
+                description = ''
+                  OBS recording track for the GameSound source (1–6).
+                  The source is isolated to this single track (all other tracks disabled).
+                  Track assignments must be unique across sources for clean per-source stems.
+                '';
+              };
+              micTrack = lib.mkOption {
+                type = lib.types.ints.between 1 6;
+                default = 2;
+                description = ''
+                  OBS recording track for the microphone (Shure SM7B) source (1–6).
+                  The source is isolated to this single track (all other tracks disabled).
+                  Track assignments must be unique across sources for clean per-source stems.
+                '';
+              };
             };
             stream = {
               encoder = lib.mkOption {
@@ -1357,7 +1652,11 @@ in {
                 default = false;
                 description = ''
                   Seed a declarative scene collection on first run.
-                  Contains a single "Game" scene with a VK Capture source (cursor disabled).
+                  Contains two scenes:
+                    "Game" — VK Capture (cursor off) + GameSound + Shure SM7B
+                    "Work" — Screen (pipewire-desktop-capture-source) + DesktopAudio + Shure SM7B
+                  The Screen source restore token is seeded declaratively via gdbus in home
+                  activation when scenes.screenCapture.restoreToken and .output are set.
                   Seeded once — OBS can freely modify it afterward. Use obs-reset-config to re-seed.
                 '';
               };
@@ -1365,6 +1664,28 @@ in {
                 type = lib.types.str;
                 default = "Default";
                 description = "Scene collection name (shown in OBS menu and used as the filename).";
+              };
+              screenCapture = {
+                output = lib.mkOption {
+                  type = lib.types.str;
+                  default = "";
+                  description = ''
+                    Wayland output name to capture in the Work scene (e.g. "DP-3", "HDMI-A-1").
+                    Together with restoreToken, this is seeded into the xdg-desktop-portal permission
+                    store on every home-manager activation via gdbus so OBS never prompts for a picker.
+                    Run `hyprctl monitors` to find your output name.
+                  '';
+                };
+                restoreToken = lib.mkOption {
+                  type = lib.types.str;
+                  default = "";
+                  description = ''
+                    UUID token that xdg-desktop-portal uses to look up the stored screen capture
+                    selection. Generate once with `uuidgen` and pin it here. Home activation will
+                    (re-)seed this token → output mapping in the permission store on every boot,
+                    so the token survives impermanence wipes without manual re-selection.
+                  '';
+                };
               };
               keyboardOverlay = {
                 enable =
@@ -1423,7 +1744,13 @@ in {
     home = {
       persistence = lib.mkIf isPersisted {
         "${persistPath}" = {
-          directories = [".config/obs-studio"];
+          directories = [
+            ".config/obs-studio"
+            # The xdg-desktop-portal permission store lives here. Persisting it
+            # means the screencast restore token (seeded by obsInitConfig) survives
+            # reboots even before the next home-manager activation has run.
+            ".local/share/flatpak/db"
+          ];
         };
       };
       packages = [
@@ -1480,6 +1807,29 @@ in {
           seed "$OBS_DIR/basic/scenes/${obsCfg.scenes.name}.json" ${sceneCollectionFile}
         ''}
         run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
+        ${lib.optionalString (
+          obsCfg.scenes.screenCapture.restoreToken != ""
+          && obsCfg.scenes.screenCapture.output != ""
+        ) ''
+          # Seed the xdg-desktop-portal permission store so OBS restores the screen
+          # capture source without showing a picker. Idempotent: Set overwrites if
+          # the token already exists with the same data.
+          #
+          # Data format: (issuer, version, a{sv}) — hyprland portal v3 schema.
+          # The portal validates output name against the running Wayland session; if
+          # the output doesn't exist at OBS start time, it falls back to the picker.
+          ${pkgs.glib}/bin/gdbus call \
+            --session \
+            --dest org.freedesktop.impl.portal.PermissionStore \
+            --object-path /org/freedesktop/impl/portal/PermissionStore \
+            --method org.freedesktop.impl.portal.PermissionStore.Set \
+            "screencast" \
+            true \
+            "${obsCfg.scenes.screenCapture.restoreToken}" \
+            "{}" \
+            "<('hyprland', uint32 3, <{'output': <'${obsCfg.scenes.screenCapture.output}'>, 'withCursor': <uint32 1>, 'timeIssued': <uint64 0>, 'token': <'todo'>}>)>" \
+            > /dev/null 2>&1 || true
+        ''}
       '';
     };
 
