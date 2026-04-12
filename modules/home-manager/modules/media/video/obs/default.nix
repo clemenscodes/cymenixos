@@ -265,19 +265,20 @@
           private_settings = {};
         }
         ++ [
-          # 6. Screen (full-screen PipeWire capture via xdg-desktop-portal)
-          # RestoreToken is seeded declaratively via gdbus in home activation so OBS
-          # restores without prompting. The flatpak permission store maps the token UUID
-          # to the target output name (screenCapture.output).
+          # 6. Screen — wlrobs-scpy (zwlr_screencopy_manager_v1, CPU copy path)
+          # Uses wlrobs instead of the portal-based pipewire-desktop-capture-source because
+          # NVIDIA's EGL cannot import DMA-bufs from the compositor, causing a black screen
+          # through the portal path. wlrobs-scpy bypasses the portal entirely and specifies
+          # the output by name — no picker, no restore token, no DMA-buf negotiation.
           {
             prev_ver = 536936448;
             name = "Screen";
             uuid = "cyme0001-0001-0001-0001-000000000006";
-            id = "pipewire-desktop-capture-source";
-            versioned_id = "pipewire-desktop-capture-source";
+            id = "wlrobs-scpy";
+            versioned_id = "wlrobs-scpy";
             settings = {
-              ShowCursor = true;
-              RestoreToken = obsCfg.scenes.screenCapture.restoreToken;
+              output = obsCfg.scenes.screenCapture.output;
+              show_cursor = true;
             };
             mixers = 0;
             sync = 0;
@@ -297,7 +298,10 @@
             private_settings = {};
           }
           # 7. DesktopAudio (all PipeWire output — used by the Work scene)
-          (mkPipeWireOutputSource "DesktopAudio" "cyme0001-0001-0001-0001-000000000008")
+          (
+            (mkPipeWireOutputSource "DesktopAudio" "cyme0001-0001-0001-0001-000000000008")
+            // {mixers = singleTrackMixer obsCfg.audio.desktopAudioTrack;}
+          )
           # Game scene — contains VK Capture (video) + GameSound + SM7B (audio)
           {
             prev_ver = 536936448;
@@ -1493,6 +1497,16 @@ in {
                   Track assignments must be unique across sources for clean per-source stems.
                 '';
               };
+              desktopAudioTrack = lib.mkOption {
+                type = lib.types.ints.between 1 6;
+                default = 3;
+                description = ''
+                  OBS recording track for the DesktopAudio source (pipewire_audio_output_capture, 1–6).
+                  The source is isolated to this single track (all other tracks disabled).
+                  Keeping it on a separate track from gameSourceTrack avoids track collisions when
+                  switching between the Game and Work scenes mid-recording.
+                '';
+              };
             };
             stream = {
               encoder = lib.mkOption {
@@ -1654,9 +1668,9 @@ in {
                   Seed a declarative scene collection on first run.
                   Contains two scenes:
                     "Game" — VK Capture (cursor off) + GameSound + Shure SM7B
-                    "Work" — Screen (pipewire-desktop-capture-source) + DesktopAudio + Shure SM7B
-                  The Screen source restore token is seeded declaratively via gdbus in home
-                  activation when scenes.screenCapture.restoreToken and .output are set.
+                    "Work" — Screen (wlrobs-scpy) + DesktopAudio + Shure SM7B
+                  Screen uses wlrobs-scpy (zwlr_screencopy_manager_v1) to bypass the portal and
+                  avoid NVIDIA DMA-buf black screen issues. Output is set by scenes.screenCapture.output.
                   Seeded once — OBS can freely modify it afterward. Use obs-reset-config to re-seed.
                 '';
               };
@@ -1670,20 +1684,10 @@ in {
                   type = lib.types.str;
                   default = "";
                   description = ''
-                    Wayland output name to capture in the Work scene (e.g. "DP-3", "HDMI-A-1").
-                    Together with restoreToken, this is seeded into the xdg-desktop-portal permission
-                    store on every home-manager activation via gdbus so OBS never prompts for a picker.
-                    Run `hyprctl monitors` to find your output name.
-                  '';
-                };
-                restoreToken = lib.mkOption {
-                  type = lib.types.str;
-                  default = "";
-                  description = ''
-                    UUID token that xdg-desktop-portal uses to look up the stored screen capture
-                    selection. Generate once with `uuidgen` and pin it here. Home activation will
-                    (re-)seed this token → output mapping in the permission store on every boot,
-                    so the token survives impermanence wipes without manual re-selection.
+                    Wayland output name for the Work scene Screen source (e.g. "DP-3", "HDMI-A-1").
+                    Used by wlrobs-scpy which captures via zwlr_screencopy_manager_v1 — no portal
+                    picker, no DMA-buf negotiation, works reliably on NVIDIA.
+                    Run `hyprctl monitors` or `wlr-randr` to find your output name.
                   '';
                 };
               };
@@ -1807,29 +1811,6 @@ in {
           seed "$OBS_DIR/basic/scenes/${obsCfg.scenes.name}.json" ${sceneCollectionFile}
         ''}
         run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
-        ${lib.optionalString (
-          obsCfg.scenes.screenCapture.restoreToken != ""
-          && obsCfg.scenes.screenCapture.output != ""
-        ) ''
-          # Seed the xdg-desktop-portal permission store so OBS restores the screen
-          # capture source without showing a picker. Idempotent: Set overwrites if
-          # the token already exists with the same data.
-          #
-          # Data format: (issuer, version, a{sv}) — hyprland portal v3 schema.
-          # The portal validates output name against the running Wayland session; if
-          # the output doesn't exist at OBS start time, it falls back to the picker.
-          ${pkgs.glib}/bin/gdbus call \
-            --session \
-            --dest org.freedesktop.impl.portal.PermissionStore \
-            --object-path /org/freedesktop/impl/portal/PermissionStore \
-            --method org.freedesktop.impl.portal.PermissionStore.Set \
-            "screencast" \
-            true \
-            "${obsCfg.scenes.screenCapture.restoreToken}" \
-            "{}" \
-            "<('hyprland', uint32 3, <{'output': <'${obsCfg.scenes.screenCapture.output}'>, 'withCursor': <uint32 1>, 'timeIssued': <uint64 0>, 'token': <'todo'>}>)>" \
-            > /dev/null 2>&1 || true
-        ''}
       '';
     };
 
