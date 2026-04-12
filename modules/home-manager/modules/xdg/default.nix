@@ -132,14 +132,10 @@ in {
       portal = lib.mkIf (osConfig.modules.display.gui != "headless") {
         inherit (cfg.xdg) enable;
         xdgOpenUsePortal = true;
-        extraPortals =
-          [
-            pkgs.xdg-desktop-portal
-            pkgs.xdg-desktop-portal-gtk
-          ]
-          ++ lib.optionals config.modules.display.compositor.hyprland.enable [
-            pkgs.xdg-desktop-portal-hyprland
-          ];
+        extraPortals = [
+          pkgs.xdg-desktop-portal
+          pkgs.xdg-desktop-portal-gtk
+        ];
         config =
           if config.modules.display.compositor.hyprland.enable
           then {
