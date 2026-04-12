@@ -57,8 +57,9 @@ in {
             exit 0
           fi
           echo "scarlett-init: using card $card"
-          # Air mode: 'Presence' enables the high-frequency boost for dynamic mics like SM7B
-          amixer -c "$card" cset name='Line In 1 Air Capture Enum' 'Presence'
+          # Air mode: 'Air' gives a subtle high-freq boost. 'Presence' was too aggressive,
+          # stacking with the software presence/air EQ caused an overly airy/harsh sound.
+          amixer -c "$card" cset name='Line In 1 Air Capture Enum' 'Air'
           # 48V phantom power: controlled by useCloudLifter option.
           # CloudLifter/Fethead need phantom power to run their active circuit
           # but do not pass voltage through to the SM7B (safe for dynamic mics).
@@ -107,15 +108,16 @@ in {
                     "Q" = 0.707;
                   };
                 }
-                # 2. Low shelf: gentle warmth — SM7B is already dark so keep this subtle
+                # 2. Low shelf: cut SM7B proximity bass — the mic is naturally dark and
+                # close-mic'd proximity effect adds bass buildup that needs taming
                 {
                   type = "builtin";
                   name = "eq_warmth";
                   label = "bq_lowshelf";
                   control = {
-                    "Freq" = 150.0;
+                    "Freq" = 200.0;
                     "Q" = 0.707;
-                    "Gain" = 0.0;
+                    "Gain" = -3.0;
                   };
                 }
                 # 3. Boom cut: SM7B proximity/body resonance around 300Hz
@@ -192,10 +194,7 @@ in {
                     "Gain" = 1.5;
                   };
                 }
-                # 9. Air shelf: broadcast sparkle
-                # Reduced from +5dB to +2dB — the Scarlett hardware Air/Presence mode
-                # already adds ~4dB presence in this range; stacking both causes
-                # harshness and sibilance around 8–12kHz.
+                # 9. Air shelf: gentle sparkle — hardware Air mode already boosts this range
                 {
                   type = "builtin";
                   name = "eq_air";
@@ -203,7 +202,7 @@ in {
                   control = {
                     "Freq" = 10000.0;
                     "Q" = 0.707;
-                    "Gain" = 2.0;
+                    "Gain" = 0.0;
                   };
                 }
                 # 10. Satan Maximiser: loudness/punch limiter
