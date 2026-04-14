@@ -6,7 +6,9 @@
 }: {config, ...}: let
   cfg = config.modules.gaming.emulation.mgba;
   emulationCfg = config.modules.gaming.emulation;
-  home = "/home/${config.modules.users.user}";
+  inherit (config.modules.boot.impermanence) persistPath;
+  inherit (config.modules.users) user;
+  home = "/home/${user}";
 in {
   options = {
     modules = {
@@ -25,9 +27,20 @@ in {
     };
   };
   config = lib.mkIf (emulationCfg.enable && cfg.enable) {
+    environment = {
+      persistence = lib.mkIf (config.modules.boot.enable) {
+        ${persistPath} = {
+          users = {
+            ${user} = {
+              directories = [".config/mgba"];
+            };
+          };
+        };
+      };
+    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
-        ${config.modules.users.user} = {
+        ${user} = {
           home = {
             packages = [pkgs.mgba];
             activation.mgbaSetup = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
