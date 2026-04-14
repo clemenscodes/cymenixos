@@ -5,7 +5,7 @@
   ...
 }: {...}: {
   imports = [
-    (import ./mgba {inherit pkgs lib;})
+    (import ./mgba {inherit inputs pkgs lib;})
     (import ./pcsx2 {inherit inputs pkgs lib;})
     (import ./rpcs3 {inherit inputs pkgs lib;})
   ];
