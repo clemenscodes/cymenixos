@@ -13,7 +13,6 @@
 in {
   imports = [
     (import ./impermanence {inherit inputs pkgs lib;})
-    (import ./secureboot {inherit inputs pkgs lib;})
     "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
     "${inputs.nixpkgs}/nixos/modules/profiles/all-hardware.nix"
   ];
@@ -124,7 +123,7 @@ in {
           "kernel.yama.ptrace_scope" = 0;
         };
       };
-      loader = lib.mkIf (!cfg.boot.secureboot.enable) {
+      loader = {
         efi = {
           efiSysMountPoint =
             if (efiSupport && !cfg.disk.luks.yubikey)
