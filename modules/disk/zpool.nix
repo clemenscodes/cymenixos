@@ -121,15 +121,6 @@ in {
               ZFS userspace package (CLI tools, pool import). Defaults to pkgs.zfs_unstable.
             '';
           };
-          zfsKernelPackage = lib.mkOption {
-            type = lib.types.package;
-            default = config.boot.kernelPackages.${cfg.zfsPackage.kernelModuleAttribute};
-            defaultText = lib.literalExpression "config.boot.kernelPackages.\${cfg.zfsPackage.kernelModuleAttribute}";
-            description = ''
-              ZFS kernel module package. Defaults to the kernel module matching zfsPackage.
-              Override to e.g. config.boot.kernelPackages.zfs_cachyos when using CachyOS kernels.
-            '';
-          };
           hostId = lib.mkOption {
             type = lib.types.str;
             description = ''
@@ -214,7 +205,7 @@ in {
 
     boot = {
       kernelModules = ["zfs"];
-      extraModulePackages = [cfg.zfsKernelPackage];
+      extraModulePackages = [config.boot.kernelPackages.${cfg.zfsPackage.kernelModuleAttribute}];
       zfs = {
         package = cfg.zfsPackage;
         forceImportRoot = false;
