@@ -1434,7 +1434,2513 @@ in {
                   - `rustfmt.toml` at the workspace root configures formatting. The configuration is committed and shared. The most common settings: `edition = "2021"`, `imports_granularity = "Crate"`, `group_imports = "StdExternalCrate"`.
                   - `clippy.toml` or `.clippy.toml` for workspace-level clippy configuration. Enable `clippy::pedantic` group as a warning (not an error) and disable individual pedantic lints that are incorrect for the codebase, with comments explaining each disable.
                   - Never silence a lint with `#[allow]` without understanding why the lint fired. The lint is almost always correct.
+                  - `cargo deny` for license and dependency auditing. Run in CI. `deny.toml` at workspace root.
+                  - `cargo audit` for security vulnerability scanning. Run in CI on every PR.
+                  - `cargo doc --no-deps --all-features` must produce zero warnings. Documentation warnings are build failures.
 
+                  ---
+
+                  ### Naming Deep Reference
+
+                  **File names:**
+                  - Module files: `snake_case/mod.rs`. Never `snake_case.rs`. Never mixed case in directory names.
+                  - Integration test files: `tests/snake_case_scenario.rs`. Full descriptive name of the scenario covered.
+                  - Benchmark files: `benches/snake_case_what_is_benchmarked.rs`.
+                  - Example files: `examples/kebab-case-use-case.rs`. Hyphenated like binary crate names.
+                  - Build script: always `build.rs`. Never `build_script.rs` or `compile.rs`.
+
+                  **Struct field names:**
+                  - Fields named for semantic content, not the type: `created_at: Instant` not `instant: Instant`.
+                  - When a struct has IDs for multiple entity types: qualify the field name. `author_id: UserId`, `post_id: PostId` — not both named `id`.
+                  - Timestamp fields: `created_at`, `updated_at`, `deleted_at`, `expires_at`, `started_at`, `ended_at`. The `_at` suffix signals a point in time.
+                  - Duration fields: `timeout`, `retry_interval`, `session_duration`. When units are ambiguous: `timeout_seconds` or use a newtype `Seconds { value: u64 }`.
+                  - Count fields: `retry_count`, `connection_count`, `failure_count`. The `_count` suffix signals a cardinal number. Never `retries` (ambiguous: a count or a collection?).
+                  - Size fields: `buffer_size`, `chunk_size`, `page_size`, `pool_size`. Include units in the name when the unit is not bytes.
+                  - Boolean fields: predicate form only. `is_enabled`, `has_errors`, `was_migrated`, `can_reconnect`. Never bare adjectives `enabled`, `migrated`, `active`.
+
+                  **Enum variant naming:**
+                  - State variants: present-tense noun or adjective. `Connected`, `Disconnected`, `Pending`, `Active`, `Expired`, `Cancelled`, `Failed`, `Succeeded`.
+                  - Error variants: noun phrase describing the condition. `InvalidInput`, `ConnectionTimeout`, `PermissionDenied`, `NotFound`, `AlreadyExists`.
+                  - Event variants: past-tense verb phrase. `UserCreated`, `OrderPlaced`, `PaymentProcessed`, `SessionExpired`.
+                  - Command variants: imperative verb phrase. `CreateUser`, `PlaceOrder`, `ProcessPayment`, `ExpireSession`.
+                  - Variants never start with the enum name: `Status::Active` not `Status::StatusActive`. `Color::Red` not `Color::ColorRed`.
+                  - Never use `Other`, `Unknown`, `Misc`, or `Custom` as a catch-all variant unless the domain genuinely has an open-ended category.
+
+                  **Trait names:**
+                  - Capability traits: gerund or agent noun. `Serialize`, `Deserialize`, `Read`, `Write`, `Display`, `Debug`, `Clone`, `Iterator`, `Hasher`, `Executor`.
+                  - Property traits: adjective. `Send`, `Sync`, `Sized`, `Unpin`, `Copy`.
+                  - Domain interface traits: noun phrase. `UserRepository`, `EmailSender`, `PaymentProcessor`, `MessageQueue`.
+                  - Never prefix with `I`: `IRepository` is Java. `Repository` is Rust.
+                  - Never suffix with `Trait`: `SerializableTrait` is forbidden. `Serializable` is correct.
+                  - Never suffix with `able` unless the word is standard English: `Serializable` is fine. `Processable` and `Handleable` are not words — use `Process` and `Handle`.
+
+                  **Function parameter names:**
+                  - Name the role, not the type: `recipient: &User` when the user receives something. `requester: &User` when the user makes a request. Not just `user: &User` when the role matters.
+                  - Never single-letter parameters except `self`.
+                  - Never type-echoing names: `string: &str`, `vec: &[T]`. Name what it represents: `email: &str`, `items: &[Item]`.
+                  - Callback parameters: descriptive. `on_success`, `on_error`, `handle_event`, `transform`, `predicate`. Never `f`, `cb`, `func`.
+
+                  **Const and static names:**
+                  - Named for domain meaning with units: `MAX_RETRY_COUNT`, `DEFAULT_TIMEOUT_SECONDS`, `MAX_PAYLOAD_BYTES`, `MIN_PASSWORD_LENGTH`, `BCRYPT_COST_FACTOR`.
+                  - Never named for value: `ZERO`, `ONE`, `HUNDRED`, `EMPTY`. These communicate nothing.
+                  - Bit masks: named for what they mask. `READ_PERMISSION_BIT`, `WRITE_PERMISSION_BIT`. Never `BIT_0`, `FLAG_1`.
+                  - `const` preferred over `static` for compile-time values. Use `static` only when the address identity matters or the type is not `const`-initializable.
+
+                  ---
+
+                  ### Struct Design Deep Reference
+
+                  **Invariants and field visibility:**
+                  - A struct whose constructor stores parameters without validation has no invariants. Its fields may be `pub`. Document: `// invariants: none; plain data struct`.
+                  - A struct whose constructor validates parameters has invariants. Its fields are private without exception.
+                  - Document invariants in a `# Invariants` section in the struct doc comment. Every property guaranteed for all instances constructed via the public API.
+                  - Accessor methods for private fields: one method per field, named exactly the field name. `fn id(&self) -> UserId` not `fn get_id(&self) -> UserId`. Return `FieldType` for `Copy` types, `&FieldType` for non-`Copy` types.
+                  - Mutable accessor (setter): `fn set_field(&mut self, value: FieldType)`. When a setter validates its input, return `Result<(), Error>`.
+                  - Structs with no meaningful default state do not implement `Default`. Forcing a "default" value when no natural zero exists is a code smell.
+                  - Structs representing handles or contexts (`DatabaseConnection`, `FileHandle`, `NetworkSocket`) implement `Drop` to release the resource.
+                  - Structs that implement `Drop` do not also implement `Clone` unless the clone increments a reference count (wrapping `Arc`).
+                  - Generic structs with `PhantomData<T>`: the `PhantomData` field is listed last, after all real data fields.
+
+                  **Struct size:**
+                  - A struct with more than 8 fields is a smell. Consider whether some fields form a coherent sub-concept.
+                  - A struct where more than half the fields are `Option` is always wrong. Those `Option`s form an implicit enum — make it explicit.
+                  - A struct that changes identity at runtime (user becomes admin) is not a single struct. Use an enum or type-state.
+                  - Request/response structs for HTTP or RPC are separate from domain structs. Never reuse a domain struct as a wire type. Parse the wire format into domain types immediately at the boundary.
+
+                  **Constructor patterns:**
+                  - `fn new(params) -> Self` — infallible. All parameters valid by type.
+                  - `fn try_new(params) -> Result<Self, Error>` — fallible. Parameters require validation.
+                  - `fn default() -> Self` via `#[derive(Default)]` when all fields have meaningful defaults. Never implement `Default` manually when derive produces the same result.
+                  - Never `new()` that can panic. If construction can fail, return `Result`.
+                  - Named constructors beyond `new()` only for established domain vocabulary: `open`, `connect`, `bind`, `spawn`, `parse`, `decode`, `from_file`, `from_env`.
+
+                  ---
+
+                  ### Enum Design Deep Reference
+
+                  **Variant data decision tree:**
+                  - No data: unit variant without parentheses. `Pending`, `Active`, `Expired`.
+                  - One unambiguous wrapped type: single-element tuple variant. `Failed(IoError)`. This is the only acceptable tuple variant.
+                  - Two or more values: named-field variant. `Move { x: i32, y: i32 }`. Never positional tuple variant with two or more fields.
+                  - Wrapped errors: one source type per variant. Never `Other(Box<dyn Error>)`.
+
+                  **Enum completeness:**
+                  - Public enums that may gain variants: `#[non_exhaustive]`.
+                  - Internal enums with unused variants: `#[allow(dead_code)]` on the enum type, not individual variants.
+                  - Every variant exercised in tests or removed.
+
+                  **Enum methods:**
+                  - Predicate per state: `fn is_active(&self) -> bool`, `fn is_expired(&self) -> bool`.
+                  - Accessor for variant data: `fn as_error(&self) -> Option<&Error>`. Returns `Option` because the variant may not be present.
+                  - Callers use methods. Callers do not `match` on enum internals when a method exists.
+                  - `match` arms over 3 lines: extract a function. Nested `match`: extract a method on the inner type.
+
+                  ---
+
+                  ### Error Handling Deep Reference
+
+                  **Error type design:**
+                  - Every library crate has exactly one top-level error enum. All errors are variants of this enum, directly or nested.
+                  - No error variants carry `String` as the primary field. Error variants carry typed data. The `String` may be input that caused the error, never the error description.
+                  - `thiserror` is the only error derivation library. Never `quick-error` or manual `impl Error`.
+                  - Every `#[error("...")]` string is correct English, lowercase, no trailing period, describes the condition from the user's perspective.
+                  - Never `"error: ..."` in an `#[error]` string — the calling context adds that.
+                  - `Display` on an error type describes the error for logging. Never restates the error type name.
+                  - No `Other(String)` catch-all variant. Every error condition is a named variant.
+                  - Error types implement `Send + Sync + 'static` so they work with `anyhow` and across threads.
+
+                  **Error propagation:**
+                  - `?` always. Never explicit `match` to re-wrap errors.
+                  - Type mismatch: implement `From<SourceError> for TargetError`. `?` uses it automatically.
+                  - Discarding errors: `let _ = op();` is forbidden. Use `if let Err(error) = op() { tracing::warn!(...); }` for non-fatal errors.
+                  - Never log before propagating. Log at the handling site.
+
+                  **Error recovery patterns:**
+                  - Retry logic: max retries and delay are configurable constants. The retry loop is a named function. Retried errors logged at `debug`. Final failure logged at `error` and propagated.
+                  - Partial failure in batch operations: `Vec<Result<T, E>>` or a `BatchResult<T, E>` struct. Never abort the entire batch on the first error unless atomicity is required.
+                  - Circuit breaker: a named struct with an enum state field (`Closed`, `Open`, `HalfOpen`). Thresholds are configurable constants.
+
+                  ---
+
+                  ### Trait Design Deep Reference
+
+                  **Trait method design:**
+                  - Methods that cannot have a reasonable default implementation: no default body.
+                  - Methods with a reasonable default: provide a default body. The default is always correct, never `todo!()` or `unimplemented!()`.
+                  - Traits with one required method and many defaults: this is the correct Rust pattern. `Iterator` is canonical — only `next()` required.
+                  - A trait with ten or more required methods: either combining multiple concerns (split it) or should be a concrete type.
+                  - Associated types vs. generic parameters: use an associated type when there is exactly one natural output type per implementing type. Use a generic parameter when a type might implement the trait for multiple type arguments.
+
+                  **Trait coherence:**
+                  - Implement a trait for a type only if you own the trait OR you own the type.
+                  - Blanket implementations only in the crate that defines the trait.
+                  - Before writing a blanket impl, verify it does not conflict with standard library blanket impls.
+
+                  **Object safety:**
+                  - A trait intended for `dyn` usage must be object-safe: no methods returning `Self`, no generic methods.
+                  - Methods that cannot be object-safe: `where Self: Sized` to exclude from the vtable.
+                  - Document: `/// This trait is object-safe and can be used as a trait object.`
+
+                  **Implementing external traits:**
+                  - Implement all applicable standard library traits: `Debug`, `Display`, `Clone`, `PartialEq`, `Eq`, `Hash`, `PartialOrd`, `Ord`, `Default`, `From`, `TryFrom`, `AsRef`, `Borrow`, `FromStr`, `Iterator`, `IntoIterator`.
+                  - `From<T>` for every lossless input representation.
+                  - `AsRef<str>` on string newtypes so they work with `impl AsRef<str>` parameters.
+                  - `Borrow<str>` on string newtypes so they work as `HashMap` keys queried by `&str`.
+                  - `Deref<Target = str>` on string newtypes only when all `str` operations are semantically valid on the newtype. Never for semantic types where string operations must be controlled.
+
+                  ---
+
+                  ### Iterator Deep Reference
+
+                  **Implementing `Iterator`:**
+                  - `fn size_hint(&self) -> (usize, Option<usize>)` whenever size is known or bounded. Enables pre-allocation in `collect`.
+                  - `fn count(self) -> usize` overridden when counting without consuming all elements is possible.
+                  - `fn nth(&mut self, n: usize) -> Option<Self::Item>` overridden for random-access iterators.
+                  - `DoubleEndedIterator` when both forward and reverse traversal is meaningful.
+                  - `ExactSizeIterator` when the exact length is always known. Requires correct `size_hint()`.
+                  - `FusedIterator` (empty marker impl) when the iterator reliably returns `None` forever after the first `None`.
+
+                  **Providing iteration:**
+                  - `iter(&self) -> Iter<'_>` — yields `&Element`.
+                  - `iter_mut(&mut self) -> IterMut<'_>` — yields `&mut Element`.
+                  - `impl IntoIterator for Type` — consumes, yields `Element`.
+                  - `impl IntoIterator for &Type` — delegates to `iter()`.
+                  - `impl IntoIterator for &mut Type` — delegates to `iter_mut()`.
+
+                  **Adapter reference:**
+                  - `.map(f)` — transform every element.
+                  - `.filter(p)` — keep matching elements.
+                  - `.filter_map(f)` — transform and filter; `f` returns `Option`. Never `.filter().map()` when this achieves the same.
+                  - `.flat_map(f)` — transform each element to an iterator and chain.
+                  - `.flatten()` — unwrap one level of nesting.
+                  - `.take(n)` / `.skip(n)` — limit or skip.
+                  - `.take_while(p)` / `.skip_while(p)` — conditional limit/skip.
+                  - `.enumerate()` — pair with 0-based index.
+                  - `.zip(other)` — pair elements from two iterators; stops at shorter.
+                  - `.unzip()` — split pairs into two collections.
+                  - `.chain(other)` — concatenate two iterators.
+                  - `.peekable()` — look-ahead without consuming.
+                  - `.rev()` — reverse; requires `DoubleEndedIterator`.
+                  - `.copied()` — `&T` to `T` for `Copy` types. Never `.cloned()` on `Copy` types.
+                  - `.cloned()` — `&T` to `T` for `Clone` types. Only when cloning is semantically correct.
+                  - `.scan(state, f)` — stateful transformation threading state through calls.
+                  - `.fold(init, f)` — reduce to a single value. Use `.sum()` or `.product()` for numeric aggregation.
+                  - `.reduce(f)` — fold without initial value; returns `Option`.
+                  - `.min_by_key(f)` / `.max_by_key(f)` — find extreme by key function.
+                  - `.position(p)` / `.find(p)` — find index or value.
+                  - `.any(p)` / `.all(p)` — short-circuit boolean tests. Never `.filter(p).count() > 0` instead of `.any(p)`.
+                  - `.count()` — consume and count. Never `.collect::<Vec<_>>().len()`.
+                  - `.partition(p)` — split into two `Vec`s.
+                  - `.for_each(f)` — side-effecting consumption. Use `for` loop for multi-line bodies.
+                  - `.collect::<Type>()` — materialize. Type annotation always present when not inferred.
+                  - `.inspect(f)` — debug peek without transforming. Remove before committing.
+
+                  ---
+
+                  ### Collections Deep Reference
+
+                  **Slice patterns:**
+                  - Empty: `slice.is_empty()`. Never `slice.len() == 0`.
+                  - Single element: `if let [element] = slice { ... }`.
+                  - First: `slice.first()` → `Option<&T>`. Never `slice.get(0)`.
+                  - Last: `slice.last()` → `Option<&T>`.
+                  - Safe index: `slice.get(i)` → `Option<&T>`. `slice[i]` panics; only when index provably in bounds.
+                  - Binary search: `slice.binary_search(&value)` on sorted slice. Returns `Result<usize, usize>`.
+                  - Sort stable: `slice.sort()`. Sort unstable (faster): `slice.sort_unstable()`. By key: `sort_by_key(|x| x.field)`.
+                  - Dedup: `slice.dedup()` on sorted slice. By key: `slice.dedup_by_key(|x| x.field)`.
+
+                  **HashMap patterns:**
+                  - `.entry(key).or_insert(value)` — insert if absent, return mutable ref. Never get-check-insert.
+                  - `.entry(key).or_insert_with(|| expensive())` — lazy insert.
+                  - `.entry(key).or_default()` — insert `Default::default()` if absent.
+                  - `.entry(key).and_modify(|v| *v += 1).or_insert(0)` — modify if present, insert if absent.
+                  - `.get(&key)` → `Option<&V>`. `.get_mut(&key)` → `Option<&mut V>`.
+                  - `.remove(&key)` → `Option<V>`. `.remove_entry(&key)` → `Option<(K, V)>`.
+                  - Iteration: `.iter()` → `(&K, &V)`. `.iter_mut()` → `(&K, &mut V)`. `.into_iter()` → `(K, V)`.
+                  - Capacity: `HashMap::with_capacity(n)` upfront. `.reserve(n)` to grow. `.shrink_to_fit()` after bulk removal.
+
+                  ---
+
+                  ### Lifetime Deep Reference
+
+                  **Lifetime elision rules:**
+                  - Rule 1: each `&T` parameter gets its own lifetime.
+                  - Rule 2: one input lifetime → all output lifetimes get it.
+                  - Rule 3: `&self`/`&mut self` method → `self` lifetime given to all outputs.
+                  - None of these apply: explicit lifetimes required.
+
+                  **Common lifetime signatures:**
+                  - `fn foo<'a>(x: &'a T) -> &'a U` — output tied to input.
+                  - `fn foo<'a, 'b>(x: &'a T, y: &'b U) -> &'a V` — output tied to first input only.
+                  - `struct Foo<'a> { reference: &'a T }` — `Foo` cannot outlive `T`.
+                  - `'a: 'b` — `'a` outlives `'b`.
+                  - `for<'a> F: Fn(&'a T) -> &'a U` — higher-ranked: works for any lifetime.
+
+                  **Anti-patterns:**
+                  - Unnecessary `'static` bound: only add when the value is stored in a spawned task or `Arc` genuinely requiring `'static`.
+                  - Annotating lifetimes the compiler would infer: adds noise.
+                  - Struct lifetime parameters with no corresponding `&'a` fields: either add the field or remove the parameter.
+                  - Shadowing lifetime names across nested scopes.
+
+                  ---
+
+                  ### Async Deep Reference
+
+                  **Function structure:**
+                  - `async fn` with no `.await` point: remove `async`. Immediate `Ready` future with unnecessary overhead.
+                  - CPU-bound work in `async fn`: move to `tokio::task::spawn_blocking`. CPU work starves the executor.
+                  - Recursive `async fn`: requires `Box::pin(async { ... })` to break infinite type size.
+                  - Single `async fn` wrapping one other `async fn` with no logic: remove the wrapper.
+
+                  **Tokio runtime:**
+                  - One `#[tokio::main]` per binary, at the entry point. Never nested runtimes.
+                  - `#[tokio::main(flavor = "multi_thread")]` — default. `worker_threads` left to tokio's default (CPU count) unless profiling shows a different count is better.
+                  - `#[tokio::main(flavor = "current_thread")]` only for single-threaded applications. Document why.
+                  - `#[tokio::test]` for async test functions.
+
+                  **Synchronization primitive selection:**
+                  - `tokio::sync::Mutex<T>` — guards held across `.await`. Async code accessing `T`.
+                  - `std::sync::Mutex<T>` — guards NOT held across `.await`. Brief synchronous access only.
+                  - `tokio::sync::RwLock<T>` — many readers, rare writers.
+                  - `tokio::sync::Semaphore` — limit concurrent access to N. Rate limiting, connection pooling.
+                  - `tokio::sync::Notify` — wake-up signal between tasks.
+                  - `tokio::sync::watch` — single producer, multi consumer, last value wins. Config updates.
+                  - `tokio::sync::broadcast` — single producer, multi consumer, all receive all messages.
+                  - `tokio::sync::mpsc` — multi producer, single consumer. Default task channel.
+                  - `tokio::sync::oneshot` — single use, request/response between tasks.
+
+                  **Cancellation safety:**
+                  - `.await` points are cancellation points. Dropped futures are dropped at the last `.await`.
+                  - Resources acquired before `.await` must be released in `Drop` (RAII).
+                  - Cancellation-unsafe futures must never be used as unprotected branches in `tokio::select!`.
+                  - Document cancellation safety: `/// # Cancellation Safety\n/// This function is cancellation-safe.` or explicitly not, with the reason.
+
+                  **Backpressure:**
+                  - All channels are bounded. `tokio::sync::mpsc::channel(CAPACITY)`. Document the capacity and its rationale.
+                  - Never `unbounded_channel()` in production code. Unbounded channels are memory leaks under load.
+                  - `buffer_unordered(N)` for concurrent stream processing with a concurrency limit.
+
+                  ---
+
+                  ### Concurrency Deep Reference
+
+                  **Thread design:**
+                  - Always name threads: `std::thread::Builder::new().name("worker".to_owned()).spawn(...)`. Thread names appear in panic messages.
+                  - Always join thread handles. Never detach silently.
+                  - `std::thread::scope` for threads that borrow from the enclosing scope. Avoids `Arc` when data is only needed during the thread's lifetime.
+
+                  **Arc patterns:**
+                  - `Arc::clone(&arc)` — explicit clone signals reference count increment, not data clone.
+                  - `Arc<T>` for shared immutable data across threads.
+                  - `Arc<Mutex<T>>` for shared mutable data across threads.
+                  - `Arc<RwLock<T>>` for shared data: many readers, rare writers.
+                  - `Weak<T>` to break `Arc` reference cycles. Parent holds `Arc`, children hold `Weak`.
+
+                  **Lock protocol:**
+                  - Lock ordering: documented and consistently enforced. `// Lock ordering: A then B. Never acquire B without holding A.`
+                  - Locks held for minimum duration. Compute what you need, then lock and mutate, then release immediately.
+                  - Never hold a lock while calling external code (callbacks, trait method implementations from outside the crate).
+                  - `try_lock()` when lock unavailability is a recoverable condition.
+                  - Write locks on `RwLock`: minimize hold time. Never blocking IO under a write lock.
+
+                  **Atomics:**
+                  - `Relaxed` for counters with no data synchronization requirement.
+                  - `Acquire` on load + `Release` on store for producer/consumer synchronization.
+                  - `AcqRel` on read-modify-write in synchronization primitives.
+                  - `SeqCst` only when global sequential consistency across multiple atomics is required. Document why.
+                  - `fetch_add`, `fetch_sub` for atomic increment/decrement. `load` + compute + `store` is NOT atomic.
+                  - `compare_exchange` for optimistic concurrency control.
+
+                  ---
+
+                  ### Testing Deep Reference
+
+                  **Test organization:**
+                  - Unit tests: bottom of the file they test. `#[cfg(test)] mod tests { use super::*; }`.
+                  - Integration tests: `tests/` directory. One file per feature or scenario. Note: use `tests/common/mod.rs`, never `tests/common.rs`.
+                  - Benchmark tests: `benches/` directory.
+                  - Shared test utilities: `tests/common/mod.rs`. Declared in each integration test file with `mod common;`.
+
+                  **Test structure:**
+                  - Arrange-Act-Assert pattern. Three phases separated by blank lines.
+                  - Arrange: set up data and dependencies.
+                  - Act: call the function under test. One call per test.
+                  - Assert: verify results.
+                  - One logical behavior tested per function. Multiple related asserts on the same result: acceptable. Testing unrelated behaviors in one test: not.
+
+                  **What to test:**
+                  - The public API. Not private implementation details.
+                  - Every distinct code path that produces a different observable result.
+                  - Every error condition documented in `# Errors`.
+                  - Every boundary: empty collection, single element, maximum value, minimum value, zero.
+                  - Integration tests: real dependencies (database, network).
+
+                  **Test doubles:**
+                  - No mocking frameworks. Define a test-specific struct implementing the same trait.
+                  - Test doubles in `#[cfg(test)]` modules or `tests/common/`.
+                  - Never add `#[cfg(test)]` code to production structs. Design for testability via trait injection.
+                  - Prefer fakes (working implementations with inspectable state) over mocks (assertion-based).
+                  - In-memory implementations: `InMemoryUserRepository`. Used in unit tests, not integration tests.
+
+                  **Proptest:**
+                  - Property: a statement true for all valid inputs. Examples: round-trip serialization, sort produces sorted output, valid input constructs successfully.
+                  - Every newtype defines a proptest `Strategy` in its test module.
+                  - `prop_assert!` and `prop_assert_eq!` inside `proptest!` — they return `TestCaseError` instead of panicking.
+                  - Never suppress shrinking.
+
+                  ---
+
+                  ### Performance Deep Reference
+
+                  **Profile before optimizing:**
+                  - `cargo flamegraph` for CPU profiling. `heaptrack` for heap allocation. `cargo bench` for microbenchmarks.
+                  - Profile in release mode. Debug builds have different characteristics.
+                  - A comment that says "this is fast" without a benchmark number is not evidence.
+
+                  **Allocation discipline:**
+                  - `String::with_capacity(n)` before building strings in loops.
+                  - `Vec::with_capacity(n)` before filling vectors when count is known.
+                  - `Box<[T]>` instead of `Vec<T>` for collections created once and never resized. Saves 8 bytes.
+                  - `Cow<'a, T>` when most values are borrowed but occasionally owned. Avoids allocation in the common case.
+                  - Arena allocation (`bumpalo`) for many short-lived allocations in a bounded scope.
+                  - `collect::<Vec<_>>()` materializes the entire iterator. Avoid when one pass suffices.
+
+                  **Cache efficiency:**
+                  - Struct-of-Arrays for bulk-processed homogeneous data: three `Vec<f64>` instead of `Vec<Particle>` with three `f64` fields. SIMD and prefetching work better.
+                  - Array-of-Structs when operations on a single entity need all its fields.
+                  - `Vec<T>` stores data contiguously. `Vec<Box<T>>` stores scattered pointers. Prefer `Vec<T>`.
+                  - `SmallVec<[T; N]>` for collections usually small but occasionally large.
+
+                  **Vectorization:**
+                  - Iterator chains on slices auto-vectorize. Write clean scalar code first.
+                  - Verify with `cargo asm` that the hot loop uses SIMD instructions in release builds.
+                  - Keep branches out of inner loops. Compute branch conditions outside the loop.
+
+                  ---
+
+                  ### Dependency Management Deep Reference
+
+                  **Choosing dependencies:**
+                  - Before adding: could this be implemented correctly in under 100 lines? If yes, implement it.
+                  - Permitted without apology: `serde`, `tokio`, `thiserror`, `anyhow`, `tracing`, `clap`, `uuid`, `chrono`, `reqwest`, `sqlx`, `axum`, `tower`, `bytes`, `http`, `criterion`, `proptest`.
+                  - Evaluate: active maintenance, security track record, compile time impact, binary size impact.
+                  - `cargo-audit` in CI. A published vulnerability is remediated within one release cycle.
+
+                  **Version management:**
+                  - Versions declared once in `[workspace.dependencies]`.
+                  - `^` semver requirement (default) for libraries. Exact pinning (`=1.2.3`) only for known regressions or security-critical dependencies.
+                  - `cargo update` regularly. Commit lock file changes as `chore: update dependencies`.
+                  - `cargo build --timings` to identify slow-to-compile dependencies.
+
+                  ---
+
+                  ### Serde Deep Reference
+
+                  **Derive vs. manual:**
+                  - `#[derive(Serialize, Deserialize)]` always. Never manual `impl Serialize` or `impl Deserialize` when derive produces correct code.
+                  - For validated deserialization: `#[serde(try_from = "RawType")]` pattern. Define `struct RawFoo` with derived `Deserialize`, implement `TryFrom<RawFoo> for Foo` with validation. `Foo` gets `#[serde(try_from = "RawFoo")]`.
+
+                  **Field attributes reference:**
+                  - `#[serde(rename = "jsonFieldName")]` — rename individual field.
+                  - `#[serde(rename_all = "camelCase")]` — rename all fields systematically.
+                  - `#[serde(default)]` — missing field uses `Default::default()`.
+                  - `#[serde(default = "path::to::fn")]` — missing field uses the provided function.
+                  - `#[serde(skip)]` — exclude field entirely. Must implement `Default`.
+                  - `#[serde(skip_serializing_if = "Option::is_none")]` — omit `None` from output.
+                  - `#[serde(skip_serializing_if = "Vec::is_empty")]` — omit empty collections.
+                  - `#[serde(flatten)]` — inline struct fields into parent. Use sparingly.
+                  - `#[serde(deny_unknown_fields)]` — reject unknown fields on input. Use on all input types.
+                  - `#[serde(with = "module")]` — custom serialize/deserialize via module.
+                  - `#[serde(alias = "old_name")]` — accept both old and new name during transition.
+
+                  **Versioning serialized data:**
+                  - New optional fields: `#[serde(default)]`. Old data deserializes with default.
+                  - Renamed fields: `#[serde(alias = "old_name")]` accepts both names.
+                  - Removed fields: `#[serde(skip_deserializing)]` before full removal.
+                  - Structural changes: version field + `#[serde(tag = "version")] enum DataVersioned { V1(DataV1), V2(DataV2) }`.
+
+                  ---
+
+                  ### Documentation Deep Reference
+
+                  **Writing quality doc comments:**
+                  - Documentation is for the caller, not the implementer. Describe what from the caller's perspective.
+                  - Never restate the type signature in prose: `fn get_user(id: UserId) -> Option<User>` does not need "Gets a user by UserId, returning Option<User>." Write what the caller needs: "Returns the user with the given ID, or `None` if no user exists with that ID."
+                  - `# Examples` code must compile and pass as doc tests. Run `cargo test --doc`. Failing doc test examples are misinformation.
+                  - Performance-sensitive functions: `# Complexity` section with time and space complexity.
+                  - Non-obvious algorithmic choices: `# Algorithm` section.
+                  - `# Invariants` on types: every property guaranteed for all instances constructed via the public API.
+
+                  **Module documentation (`//!` in `mod.rs`):**
+                  - First paragraph: what types and functionality this module provides.
+                  - Second paragraph: why this module exists as a separate semantic boundary.
+                  - Third paragraph (optional): usage example or link to the primary type.
+                  - Do not list every type. Explain purpose and concept, not inventory.
+
+                  **Crate-level documentation (`//!` in `lib.rs`):**
+                  - First paragraph: one sentence describing what the crate does.
+                  - Second paragraph: who uses it and for what.
+                  - Third paragraph: minimal end-to-end example of the primary use case.
+                  - `# Features` section listing all Cargo features.
+                  - `# Compatibility` section: MSRV and platform requirements.
+
+                  ---
+
+                  ### Free-Standing Functions Are Forbidden
+
+                  This is one of the most important structural rules. A free-standing function that operates on a type belongs inside an `impl` block. A free-standing function that produces output belongs behind a trait. There is almost no legitimate reason for a free-standing function to exist in production Rust code.
+
+                  **The rule:**
+                  - Every function that takes a value of type `T` as its primary argument is a method on `T`. Move it into `impl T`.
+                  - Every function that formats, displays, or renders a value implements `Display` or `Debug` on that value. It is not a free function.
+                  - Every function that converts from type `A` to type `B` is `impl From<A> for B` or `impl TryFrom<A> for B`. It is not `fn convert_a_to_b(a: A) -> B`.
+                  - Every function that checks a condition on a value is a method: `fn is_valid(&self) -> bool`, not `fn is_valid_user(user: &User) -> bool`.
+                  - Every function that constructs a value is `T::new()` or `T::try_new()`. Not `fn create_user(name: Name, email: Email) -> User`.
+                  - Every function that serializes, hashes, or summarizes a value implements the appropriate trait: `Serialize`, `Hash`, `Display`. Not `fn serialize_user(user: &User) -> String`.
+
+                  **The red flag examples — every one of these is wrong:**
+                  - `fn render_user(user: &User) -> String` — implement `Display for User`.
+                  - `fn format_error(error: &Error) -> String` — implement `Display for Error`.
+                  - `fn validate_email(email: &str) -> bool` — implement `fn is_valid(&self) -> bool` on `EmailAddress`.
+                  - `fn user_to_json(user: &User) -> String` — derive `Serialize`, call `serde_json::to_string`.
+                  - `fn make_connection(config: &Config) -> Connection` — implement `Connection::new(config: &Config)` or `impl TryFrom<&Config> for Connection`.
+                  - `fn compare_users(a: &User, b: &User) -> bool` — implement `PartialEq for User`.
+                  - `fn hash_user(user: &User) -> u64` — implement `Hash for User`.
+                  - `fn default_config() -> Config` — implement `Default for Config`.
+                  - `fn parse_user_id(s: &str) -> Result<UserId, ParseError>` — implement `FromStr for UserId`.
+                  - `fn clone_session(session: &Session) -> Session` — implement `Clone for Session`.
+                  - `fn empty_queue() -> Queue` — implement `Default for Queue`.
+                  - `fn sort_users(users: &mut Vec<User>)` — implement `Ord for User`, call `users.sort()`.
+
+                  **Legitimate free-standing functions — exhaustive list:**
+                  - `main()` — the binary entry point.
+                  - Functions in `mod tests` that are test helpers with no natural type owner.
+                  - Top-level algorithm functions that operate equally on multiple unrelated types and cannot be expressed as a trait method without introducing an artificial trait.
+                  - Functions exposed as `pub` in a crate API specifically because the caller cannot call a method (e.g., a callback registered with a C library that requires a function pointer).
+
+                  **If you are about to write a free-standing function, ask these questions in order:**
+                  1. Does this function take a value of a type I own as its primary argument? → Make it a method.
+                  2. Does this function produce a string representation? → Implement `Display` or `Debug`.
+                  3. Does this function convert between two types? → Implement `From` or `TryFrom`.
+                  4. Does this function construct a value? → Make it `new()` or `try_new()`.
+                  5. Does this function check a property? → Make it a predicate method (`is_*`, `has_*`, `can_*`).
+                  6. Does this function compare two values? → Implement `PartialEq`, `Eq`, `PartialOrd`, `Ord`.
+                  7. Does this function aggregate or summarize? → Implement `Iterator`, `FromIterator`, or `Display`.
+                  If none of the above apply, the function may be free-standing. Otherwise it must not be.
+
+                  ---
+
+                  ### Trait Implementation Is Not Optional
+
+                  LLMs consistently fail to implement applicable standard library traits, leaving callers to write boilerplate conversion code, explicit comparisons, and manual string formatting. This is laziness encoded into the API. Every applicable trait must be implemented. There is no excuse for omitting them.
+
+                  **The complete mandatory trait checklist — evaluate every type against every trait:**
+
+                  `Debug` — every type, every time. No exceptions. A type without `Debug` cannot be logged, cannot be inspected in a test failure, cannot be used in `assert_eq!`. There is no situation where `Debug` should not be derived. If you cannot derive it (raw pointers, FFI types), implement it manually.
+
+                  `Display` — every type that has a meaningful string representation for a human reader. This includes: error types, domain value types (email addresses, user IDs, amounts, URLs), status enums, result types shown in a UI or log. If the type ever appears in a formatted string, in a log message, in a user-facing error, or in a CLI output, it implements `Display`. Forgetting `Display` and calling `format!("{:?}", value)` is always wrong.
+
+                  `Clone` — every type that can logically be duplicated. If a function needs two copies of a value, the type implements `Clone`. If you find yourself writing `let copy = MyType { field_a: original.field_a, field_b: original.field_b }` instead of `original.clone()`, the type is missing `Clone`.
+
+                  `Copy` — every type that is small (fits in a few registers), contains no heap resources, and has value semantics. `UserId { value: u64 }` is `Copy`. `Milliseconds { value: u64 }` is `Copy`. `Point { x: f64, y: f64 }` is `Copy`. `StatusCode { value: u16 }` is `Copy`. If the type can be `Copy`, it must be `Copy`. Forcing callers to `.clone()` a `Copy`-eligible type is an API defect.
+
+                  `PartialEq` — every type where equality comparison has meaning. Almost every type. If two instances of the type can be meaningfully compared, derive `PartialEq`. If you find yourself writing `a.id() == b.id()` instead of `a == b`, the type is missing `PartialEq`.
+
+                  `Eq` — always derived alongside `PartialEq` when the equality is total (reflexive, symmetric, transitive). Almost all types satisfy this. The exceptions are floating-point types (`f32`, `f64`) and types containing them, where `NaN != NaN`. For all other types: if you derive `PartialEq`, derive `Eq`.
+
+                  `PartialOrd` and `Ord` — every type with a meaningful ordering. `Timestamp`, `Version`, `Priority`, `Amount`, `Rank`, `Score`, `Index`, `Count` — all of these have natural orderings. If callers would ever want to sort a collection of this type, or compare two instances with `<`, `>`, `<=`, `>=`, or pass them to `min()`/`max()`, the type implements `Ord`. If you find yourself writing `a.value() < b.value()` to compare two newtypes, the type is missing `Ord`.
+
+                  `Hash` — every type used as a `HashMap` key or `HashSet` element. Every type that implements `Eq` should also implement `Hash` so it can be used in hash-based collections. The invariant: `a == b` implies `hash(a) == hash(b)`. Derive both together.
+
+                  `Default` — every type with a meaningful zero, empty, or initial state. `Config::default()` should produce a valid configuration with sensible defaults. `Queue::default()` should produce an empty queue. `Counters::default()` should produce all-zero counters. If there is a natural "starting state," implement `Default`. If there is not, do not implement it — a misleading `Default` is worse than none.
+
+                  `From<T>` — for every lossless, infallible conversion from another type to this type. If a `UserId` wraps a `u64`, implement `From<u64> for UserId`. If a `Name` wraps a `String`, implement `From<String> for Name` and `From<&str> for Name`. If a domain type can be created from a primitive, implement `From`. Never write a free-standing conversion function when `From` would express it.
+
+                  `TryFrom<T>` — for every fallible conversion from another type to this type. `EmailAddress` cannot be created from an arbitrary `&str` without validation — implement `TryFrom<&str> for EmailAddress`. `Port` cannot hold values above 65535 — implement `TryFrom<u32> for Port`. If creation can fail for any reason, the entry point is `TryFrom`, not a free-standing `validate_and_create` function.
+
+                  `FromStr` — every type that can be parsed from a string. `UserId`, `EmailAddress`, `IpAddress`, `Url`, `Version`, `Duration`, `Color` — all implement `FromStr`. Users call `.parse::<Type>()`. This is the Rust convention. A free-standing `parse_foo(s: &str) -> Result<Foo, Error>` is wrong when `FromStr` is the correct expression.
+
+                  `AsRef<T>` — when a type transparently borrows as another type. String newtypes implement `AsRef<str>`. Path newtypes implement `AsRef<Path>`. Byte buffer newtypes implement `AsRef<[u8]>`. This allows passing the newtype to any function accepting `impl AsRef<str>` or `impl AsRef<Path>`.
+
+                  `Borrow<T>` — alongside `AsRef<T>` for types used as `HashMap` keys, so that lookups can use the borrowed form. `HashMap<EmailAddress, User>` should be queryable with `&str`. Implement `Borrow<str> for EmailAddress`.
+
+                  `IntoIterator` — every collection type. `impl IntoIterator for &MyCollection`, `impl IntoIterator for &mut MyCollection`, `impl IntoIterator for MyCollection`. This allows the collection to be used in `for` loops and iterator chains directly.
+
+                  `Iterator` — every type that produces a sequence. If you have a type that yields elements one at a time, implement `Iterator`. Do not wrap it in a closure or return a `Vec`.
+
+                  `Extend<T>` — every collection type. `impl Extend<T> for MyCollection` allows bulk insertion from an iterator. Enables `.extend(iter)` at call sites.
+
+                  `FromIterator<T>` — every collection type. `impl FromIterator<T> for MyCollection` allows `.collect::<MyCollection>()`. If your type is a collection, it must be collectable.
+
+                  `Error` — every error type, via `thiserror`. Error types that do not implement `std::error::Error` cannot be used with `?`, cannot be boxed as `Box<dyn Error>`, and are first-class citizens of no error handling framework.
+
+                  `Serialize` and `Deserialize` — every type that crosses a serialization boundary. This includes: request/response types, database row types, config types, event types, message types. If the type leaves or enters the Rust process boundary, it derives both.
+
+                  `Send` and `Sync` — automatically derived when all fields are `Send`/`Sync`. Verify with `static_assertions::assert_impl_all!(MyType: Send, Sync)` in the test module of types that must be thread-safe.
+
+                  **Trait implementation is the API.** A type without `Display` forces callers to write formatting code. A type without `From` forces callers to write conversion code. A type without `Ord` forces callers to write comparison code. Every missing trait is work pushed onto every caller, repeated across the entire codebase. Implement the trait once. Never force callers to reimplement it.
+
+                  ---
+
+                  ### Comment Policy — Almost No Comments
+
+                  Comments are a last resort. The code is the documentation. A well-named variable, a well-named function, a well-chosen type, and a well-structured `impl` block communicate more than any comment ever could. A comment that explains what the code does is a confession that the code's names are wrong.
+
+                  **The rule: no inline comments. No block comments. No explanatory comments.**
+
+                  The only accepted comments:
+
+                  1. Module-level `//!` documentation at the top of `mod.rs` files. This is the single place where prose explanation is required. One paragraph maximum. No bullet lists.
+
+                  2. `// SAFETY:` before every `unsafe` block. This is mandatory and non-negotiable. It is not an explanation of what the code does — it is a proof that the unsafe contract is upheld.
+
+                  3. `// UNREACHABLE:` before `unreachable!()` calls, explaining why the branch cannot be reached given the type system invariants.
+
+                  4. `// TODO: #<issue-number>` when a known limitation must be acknowledged in the code itself. No other `TODO` form is accepted. No `TODO` without an issue number.
+
+                  **Everything else is forbidden:**
+
+                  - `// Get the user from the database` before a database call — the function name and return type already say this.
+                  - `// Check if the email is valid` before `email.is_valid()` — the method name says this.
+                  - `// Convert the raw bytes to a string` before a `from_utf8` call — the function name says this.
+                  - `// Return early if there is an error` before an `?` — everyone knows what `?` does.
+                  - `// Create a new vector` before `Vec::new()` — it is literally `Vec::new()`.
+                  - `// Loop over all users` before `for user in users` — this is insulting to the reader.
+                  - Section dividers: `// ===== Helpers =====`, `// --- Private ---`, `// Constructors` — these are symptoms of a file that needs to be split into modules, not annotated.
+                  - `// This is safe because...` without using the `// SAFETY:` convention — use the convention.
+                  - `// Note:` comments explaining surprising behavior — fix the surprising behavior or rename the construct so it is not surprising.
+                  - `// We use X instead of Y because...` — if X is correct, its name communicates why. If a comment is needed to justify the choice, the choice is probably wrong.
+                  - Doc comments (`///`) on private items. Private items are implementation details. They do not have doc comments.
+                  - `///` doc comments that restate the function signature in prose. `/// Returns the user ID.` on `fn user_id(&self) -> UserId` adds nothing. Delete it.
+
+                  **When you feel the urge to write a comment, do this instead:**
+
+                  - Extract the commented block into a named function whose name is the comment.
+                  - Rename the variable or function so the comment is unnecessary.
+                  - Introduce a type that makes the constraint self-evident.
+                  - Use a let binding with a descriptive name instead of a comment explaining an expression.
+
+                  `let is_within_rate_limit = request_count < MAX_REQUESTS_PER_WINDOW;` needs no comment.
+                  `let requires_admin_approval = amount > APPROVAL_THRESHOLD && !requester.has_admin_role();` needs no comment.
+                  `let effective_timeout = requested_timeout.min(MAX_ALLOWED_TIMEOUT);` needs no comment.
+
+                  If the code cannot be made self-evident through naming and structure, that is a design problem. Fix the design.
+
+                  ---
+
+                  ### Assignment-Heavy Style
+
+                  Complex expressions are always decomposed into named intermediate variables. A chain of three nested function calls is three lines with three named bindings. The name of each binding describes what the value represents. The reader can understand each step in isolation.
+
+                  **The rule: one operation per line, every intermediate value is named.**
+
+                  Wrong:
+                  ```
+                  send_notification(build_message(fetch_template(config.template_id())?, user.display_name()), channel)?;
+                  ```
+
+                  Right:
+                  ```
+                  let template_id = config.template_id();
+                  let template = fetch_template(template_id)?;
+                  let recipient_name = user.display_name();
+                  let message = build_message(template, recipient_name);
+                  send_notification(message, channel)?;
+                  ```
+
+                  The named version is longer. It is also unambiguous, debuggable, and readable. Every binding can be inspected in a debugger. Every step can be tested individually. Every name communicates intent.
+
+                  **Rules for intermediate bindings:**
+
+                  - Any expression that involves more than one operation has a name.
+                  - The name describes what the value is, not how it was computed. `let validated_email = email.validate()?` not `let result = email.validate()?`.
+                  - Boolean conditions that involve more than one comparison are extracted: `let has_expired = expiry < Instant::now();` not `if session.expiry() < Instant::now() && !session.is_revoked()`.
+                  - Long method chains (more than two chained calls) are broken into steps with named bindings.
+                  - Closures passed as arguments: if the closure is more than one line, extract it to a named variable first. `let transform = |item: &Item| { ... }; items.iter().map(transform)`.
+                  - Conditional expressions: avoid `let x = if condition { a } else { b }` when `a` and `b` are themselves complex expressions. Extract each branch.
+                  - `match` expressions as arguments to a function: extract the `match` to a named binding first.
+                  - Struct construction: every argument to a struct constructor is a named binding. Never `User::new(request.name().to_owned(), Email::try_from(request.email())?, UserId::from(db.next_id()))`. Each argument is its own line and its own name.
+
+                  **Nesting depth:**
+                  - Maximum nesting depth in a function body: 3 levels. More than 3 levels signals a missing extraction.
+                  - Each level of nesting is: a function body (level 1), a block or control flow (level 2), an inner block (level 3). A fourth level means extract a function.
+                  - Early return pattern (`guard clauses`) flattens nesting: check preconditions at the top of the function body, return early if they fail. The happy path is at the lowest nesting level.
+
+                  **Guard clauses:**
+                  Wrong:
+                  ```
+                  fn process(input: &Input) -> Result<Output, Error> {
+                      if input.is_valid() {
+                          if let Some(data) = input.data() {
+                              // 30 lines of logic
+                          } else {
+                              Err(Error::MissingData)
+                          }
+                      } else {
+                          Err(Error::InvalidInput)
+                      }
+                  }
+                  ```
+
+                  Right:
+                  ```
+                  fn process(input: &Input) -> Result<Output, Error> {
+                      let valid_input = input.validate()?;
+                      let data = valid_input.data().ok_or(Error::MissingData)?;
+                      // logic at flat level
+                  }
+                  ```
+
+                  ---
+
+                  ### Struct Parameters — No Naked Multi-Argument Functions
+
+                  A function that takes more than one argument where those arguments represent configuration, options, or a logical group belongs to a struct. The rule is simple and has no exceptions.
+
+                  **The rule:**
+                  - Functions with exactly one primary subject argument (`&self`, `&mut self`, or `T`) and zero additional arguments: acceptable.
+                  - Functions with one subject and one additional argument where the additional argument is atomic and has no relationship to other arguments: acceptable. `fn find_by_id(&self, id: UserId) -> Option<&User>` is fine.
+                  - Functions with two or more non-`self` arguments: the arguments are collected into a named struct. The struct is the parameter.
+
+                  **Wrong:**
+                  ```
+                  fn create_user(name: Name, email: EmailAddress, role: Role, department: Department) -> Result<User, Error>
+                  fn send_email(to: EmailAddress, subject: Subject, body: Body, reply_to: Option<EmailAddress>) -> Result<(), Error>
+                  fn search(query: &str, limit: usize, offset: usize, sort: SortOrder, filters: Vec<Filter>) -> Results
+                  fn connect(host: &str, port: Port, timeout: Duration, tls: TlsConfig) -> Result<Connection, Error>
+                  ```
+
+                  **Right:**
+                  ```
+                  fn create(params: CreateUserParams) -> Result<User, Error>
+                  fn send(email: Email) -> Result<(), Error>
+                  fn search(query: SearchQuery) -> SearchResults
+                  fn connect(options: ConnectionOptions) -> Result<Connection, Error>
+                  ```
+
+                  **The struct that carries the parameters:**
+                  - Named after what it represents, not after the function: `CreateUserParams`, `ConnectionOptions`, `SearchQuery`, `EmailMessage`. Never `CreateUserArgs`, `ConnectArgs`, `SearchArgs`.
+                  - Implements `Default` when any fields have sensible defaults.
+                  - Implements `Debug`, `Clone`.
+                  - Implements a builder (`CreateUserParamsBuilder`) when fields are optional or require validation.
+                  - Lives in the same module as the function it parameterizes.
+                  - All fields are `pub` only when the struct has no invariants. If the struct has required fields or validation, fields are private and construction is via `new()` or a builder.
+
+                  **Constructors are not exempt:**
+                  - `fn new(name: Name, email: EmailAddress, role: Role) -> Self` with three parameters: introduce `NewUserParams { name, email, role }` and call `fn new(params: NewUserParams) -> Self`.
+                  - `fn try_new(host: String, port: u16, timeout_seconds: u64) -> Result<Self, Error>`: introduce `ConnectionConfig { host, port, timeout_seconds }` and call `fn try_new(config: ConnectionConfig) -> Result<Self, Error>`.
+
+                  **The benefits are not optional:**
+                  - The call site is self-documenting: `User::new(CreateUserParams { name, email, role })` not `User::new(name, email, role)` where argument order is invisible.
+                  - Adding a new parameter to a function is a breaking change. Adding a new field with a default to the params struct is not.
+                  - The params struct can be constructed partially and passed around before the function is called.
+                  - The params struct implements `Default`, so callers can use struct update syntax to override only what they need.
+
+                  ---
+
+                  ### Structures Everywhere — Design Principle
+
+                  Types communicate intent. Raw primitives and generic containers communicate nothing. Every concept in the domain, every configuration value, every intermediate computation result that has a name and a meaning is a type.
+
+                  **Use a struct when:**
+                  - Two or more values always travel together and have a collective identity.
+                  - A value has a name and a unit that cannot be inferred from the primitive type alone.
+                  - A computation produces an intermediate result that will be passed to another function.
+                  - A function returns multiple related values.
+                  - A type alias would be used — use a newtype struct instead.
+
+                  **Use an enum when:**
+                  - A value can be exactly one of N known alternatives.
+                  - A function can succeed in multiple distinct ways (not just `Ok(T)` but `Ok(Created)`, `Ok(Updated)`, `Ok(NoChange)`).
+                  - A state machine has distinct states with different associated data.
+                  - A configuration option has a fixed set of choices.
+                  - A `bool` parameter would be passed — it is always an enum.
+                  - An `Option<bool>` would be used — it is always a three-variant enum.
+                  - An integer is used as a discriminant — it is always an enum.
+
+                  **Specific structural replacements:**
+                  - `(f64, f64)` → `struct Point { x: f64, y: f64 }` or `struct LatLng { latitude: f64, longitude: f64 }`.
+                  - `(String, u16)` for a host/port pair → `struct SocketAddress { host: String, port: Port }`.
+                  - `(Vec<User>, usize)` for paginated results → `struct Page<T> { items: Vec<T>, total_count: usize }`.
+                  - `Option<String>` for an optional message → `enum Outcome { Success, SuccessWithNote { note: String }, Failure { reason: String } }` or a dedicated type.
+                  - `bool` return value from a mutation function → `enum MutationResult { Applied, Skipped }`.
+                  - `Vec<(String, String)>` for headers → `struct Headers { entries: Vec<Header> }` where `struct Header { name: HeaderName, value: HeaderValue }`.
+                  - `HashMap<String, String>` for metadata → `struct Metadata { fields: HashMap<MetadataKey, MetadataValue> }`.
+                  - `String` for a status → `enum Status { Active, Inactive, Suspended, Pending }`.
+                  - `u32` for an error code → `enum ErrorCode { NotFound, Unauthorized, RateLimited, InternalError }`.
+                  - `Vec<Box<dyn Any>>` for heterogeneous data → a proper enum with variants.
+
+                  **Return type design:**
+                  - Functions never return `(T, U)`. They return a named struct.
+                  - Functions never return `bool` when the two cases have different semantic meanings that the caller will branch on. Return an enum.
+                  - Functions that can succeed in multiple distinguishable ways return an enum: `enum InsertResult { Inserted(Record), AlreadyExisted(Record) }` not `bool`.
+                  - Functions that return a count and a collection return a struct: `struct QueryResult { rows: Vec<Row>, total: usize }` not `(Vec<Row>, usize)`.
+                  - Functions in a builder chain return `Self`. Functions that produce a different type return that type. Never return `()` when the produced value might be useful.
+
+                  ---
+
+                  ### Clippy Configuration — Maximum Strictness
+
+                  The clippy configuration in `clippy.toml` (or `.clippy.toml`) at the workspace root enables the maximum set of correct lints. This is the required configuration. Every lint listed here is enabled. Lints disabled per-file require a comment explaining the specific reason.
+
+                  **`clippy.toml` required settings:**
+                  ```
+                  msrv = "1.70.0"
+                  cognitive-complexity-threshold = 5
+                  too-many-arguments-threshold = 2
+                  too-many-lines-threshold = 40
+                  trivial-copy-size-limit = 128
+                  type-complexity-threshold = 250
+                  ```
+
+                  **Required lints in `Cargo.toml` or via `RUSTFLAGS`:**
+                  ```
+                  [lints.clippy]
+                  # Pedantic group — enabled as errors
+                  pedantic = "warn"
+                  # Restriction group — selectively enabled
+                  alloc_instead_of_core = "warn"
+                  allow_attributes = "warn"
+                  allow_attributes_without_reason = "warn"
+                  arithmetic_side_effects = "warn"
+                  as_conversions = "warn"
+                  as_underscore = "warn"
+                  assertions_on_result_states = "warn"
+                  clone_on_ref_ptr = "warn"
+                  create_dir = "warn"
+                  dbg_macro = "warn"
+                  decimal_literal_representation = "warn"
+                  default_numeric_fallback = "warn"
+                  deref_by_slicing = "warn"
+                  disallowed_script_idents = "warn"
+                  else_if_without_else = "warn"
+                  empty_drop = "warn"
+                  empty_structs_with_brackets = "warn"
+                  error_impl_error = "warn"
+                  exhaustive_enums = "warn"
+                  exhaustive_structs = "warn"
+                  exit = "warn"
+                  expect_used = "warn"
+                  filetype_is_file = "warn"
+                  float_arithmetic = "warn"
+                  float_cmp_const = "warn"
+                  fn_to_numeric_cast_any = "warn"
+                  format_push_string = "warn"
+                  get_unwrap = "warn"
+                  if_then_some_else_none = "warn"
+                  impl_trait_in_params = "warn"
+                  indexing_slicing = "warn"
+                  inline_asm_x86_att_syntax = "warn"
+                  integer_division = "warn"
+                  large_include_file = "warn"
+                  let_underscore_must_use = "warn"
+                  let_underscore_untyped = "warn"
+                  lossy_float_literal = "warn"
+                  map_err_ignore = "warn"
+                  mem_forget = "warn"
+                  missing_assert_message = "warn"
+                  missing_asserts_for_indexing = "warn"
+                  missing_docs_in_private_items = "deny"
+                  missing_inline_in_public_items = "warn"
+                  mixed_read_write_in_expression = "warn"
+                  mod_module_files = "warn"
+                  multiple_inherent_impl = "warn"
+                  multiple_unsafe_ops_per_block = "warn"
+                  mutex_atomic = "warn"
+                  needless_raw_strings = "warn"
+                  non_ascii_literal = "warn"
+                  panic = "warn"
+                  panic_in_result_fn = "warn"
+                  partial_pub_fields = "warn"
+                  print_stderr = "warn"
+                  print_stdout = "warn"
+                  pub_without_shorthand = "warn"
+                  rc_buffer = "warn"
+                  rc_mutex = "warn"
+                  redundant_type_annotations = "warn"
+                  ref_patterns = "warn"
+                  rest_pat_in_fully_bound_structs = "warn"
+                  same_name_method = "warn"
+                  self_named_module_files = "deny"
+                  semicolon_inside_block = "warn"
+                  semicolon_outside_block = "warn"
+                  shadow_reuse = "warn"
+                  shadow_same = "warn"
+                  shadow_unrelated = "warn"
+                  std_instead_of_alloc = "warn"
+                  str_to_string = "warn"
+                  string_add = "warn"
+                  string_lit_chars_any = "warn"
+                  string_slice = "warn"
+                  string_to_string = "warn"
+                  suspicious_xor_used_as_pow = "warn"
+                  tests_outside_test_module = "warn"
+                  todo = "warn"
+                  try_err = "warn"
+                  undocumented_unsafe_blocks = "deny"
+                  unimplemented = "warn"
+                  unnecessary_self_imports = "warn"
+                  unneeded_field_pattern = "warn"
+                  unreachable = "warn"
+                  unseparated_literal_suffix = "warn"
+                  unwrap_in_result = "warn"
+                  unwrap_used = "warn"
+                  use_debug = "warn"
+                  verbose_file_reads = "warn"
+                  wildcard_enum_match_arm = "warn"
+                  ```
+
+                  **Required `rustc` lints via `[lints.rust]` in `Cargo.toml`:**
+                  ```
+                  [lints.rust]
+                  absolute_paths_not_starting_with_crate = "warn"
+                  dead_code = "warn"
+                  deprecated_in_future = "warn"
+                  elided_lifetimes_in_paths = "warn"
+                  explicit_outlives_requirements = "warn"
+                  ffi_unwind_calls = "warn"
+                  keyword_idents = "warn"
+                  let_underscore_drop = "warn"
+                  macro_use_extern_crate = "warn"
+                  meta_variable_misuse = "warn"
+                  missing_abi = "warn"
+                  missing_copy_implementations = "warn"
+                  missing_debug_implementations = "warn"
+                  non_exhaustive_omitted_patterns = "warn"
+                  rust_2018_idioms = "warn"
+                  rust_2021_incompatible_closure_captures = "warn"
+                  trivial_casts = "warn"
+                  trivial_numeric_casts = "warn"
+                  unit_bindings = "warn"
+                  unnameable_types = "warn"
+                  unreachable_pub = "warn"
+                  unsafe_op_in_unsafe_fn = "deny"
+                  unused_crate_dependencies = "warn"
+                  unused_extern_crates = "warn"
+                  unused_import_braces = "warn"
+                  unused_lifetimes = "warn"
+                  unused_macro_rules = "warn"
+                  unused_qualifications = "warn"
+                  unused_results = "warn"
+                  variant_size_differences = "warn"
+                  ```
+
+                  **What these lints enforce — key ones explained:**
+                  - `arithmetic_side_effects` — forbids `+`, `-`, `*` operators that can overflow. Forces `checked_*`, `saturating_*`, or `wrapping_*`.
+                  - `as_conversions` — forbids all `as` casts. Use `From`/`Into`/`TryFrom`/`TryInto`.
+                  - `expect_used` — forbids `.expect()` in non-test code. Forces proper error handling.
+                  - `unwrap_used` — forbids `.unwrap()` in non-test code. Forces proper error handling.
+                  - `indexing_slicing` — forbids `collection[index]` without bounds proof. Forces `.get(index)`.
+                  - `integer_division` — forbids `/` on integers when truncation might be unintentional.
+                  - `panic` — forbids `panic!()` calls in library code.
+                  - `print_stdout` / `print_stderr` — forbids `println!` and `eprintln!`. Forces `tracing::`.
+                  - `self_named_module_files = "deny"` — enforces `mod.rs` form. Forbids `module_name.rs` flat form.
+                  - `mod_module_files = "warn"` — used together with `self_named_module_files` to ensure the `mod.rs` convention.
+                  - `exhaustive_enums` — forces `#[non_exhaustive]` on public enums or explicit documentation that the enum is intentionally exhaustive and closed.
+                  - `missing_docs_in_private_items = "deny"` — every item has a doc comment. (May be relaxed to `warn` in projects where private docs are aspirational rather than mandatory.)
+                  - `undocumented_unsafe_blocks = "deny"` — every `unsafe` block requires a `// SAFETY:` comment. This is non-negotiable.
+                  - `shadow_reuse`, `shadow_same`, `shadow_unrelated` — all three shadowing lints enabled. Variable shadowing is forbidden in all forms.
+                  - `wildcard_enum_match_arm` — forbids `_ =>` in `match` on enums. Every variant must be named explicitly.
+                  - `multiple_inherent_impl` — one `impl` block per type per file. Multiple `impl` blocks for the same type in the same file are forbidden.
+                  - `partial_pub_fields` — all fields of a struct are either all `pub` or all private. Never a mix.
+                  - `tests_outside_test_module` — test functions must be inside `#[cfg(test)] mod tests`.
+                  - `dbg_macro` — `dbg!()` is forbidden in committed code.
+                  - `todo` — `todo!()` is forbidden in committed code.
+                  - `unimplemented` — `unimplemented!()` is forbidden in committed code.
+                  - `unreachable` — `unreachable!()` requires justification (addressed by the `// UNREACHABLE:` comment rule).
+                  - `str_to_string`, `string_to_string` — explicit about string allocations.
+                  - `clone_on_ref_ptr` — `.clone()` on `Arc`/`Rc` must use `Arc::clone(&arc)` not `arc.clone()`.
+                  - `use_debug` — forbids `{:?}` in non-test `format!`/`println!` calls. Use `Display` instead.
+                  - `missing_copy_implementations` — if a type could be `Copy`, it must be `Copy`.
+                  - `missing_debug_implementations` — if a type doesn't derive `Debug`, it's a build warning.
+                  - `variant_size_differences` — warns when enum variants differ greatly in size; suggests `Box`ing the large variant.
+
+                  **Per-lint disable policy:**
+                  - Every `#[allow(clippy::some_lint)]` requires `#[allow(clippy::some_lint, reason = "specific reason this lint is incorrect here")]`.
+                  - The `reason` field is mandatory (enforced by `allow_attributes_without_reason = "warn"`).
+                  - `#[allow]` on a module or file is forbidden. Only on specific items.
+                  - A codebase with more than 5 `#[allow]` attributes signals that the code needs to be fixed, not the lints.
+
+                  ---
+
+                  ### Impl Block Organization — One Structure, One Place
+
+                  Every `impl` block for a type lives in the same file as the type definition. The type and all of its behavior are colocated. A reader who opens `src/user/mod.rs` sees the `User` struct, every method, every trait implementation, every associated function.
+
+                  **`impl` block ordering within a file:**
+                  1. The type definition (`struct`, `enum`).
+                  2. The primary `impl TypeName` block: constructors first (`new`, `try_new`, named constructors), then predicate methods (`is_*`, `has_*`, `can_*`), then reader methods (take `&self`, return data), then mutation methods (take `&mut self`), then consuming methods (take `self`), then associated functions (no `self`).
+                  3. `impl Default for TypeName` — if separate from the primary `impl`.
+                  4. `impl Display for TypeName`.
+                  5. `impl Debug for TypeName` — only if manual implementation is required; prefer `#[derive(Debug)]`.
+                  6. `impl From<OtherType> for TypeName` — one `impl` per source type.
+                  7. `impl TryFrom<OtherType> for TypeName` — one `impl` per source type.
+                  8. `impl FromStr for TypeName`.
+                  9. `impl PartialEq for TypeName` — only if manual; prefer `#[derive]`.
+                  10. `impl Eq for TypeName` — only if manual.
+                  11. `impl PartialOrd for TypeName` — only if manual.
+                  12. `impl Ord for TypeName` — only if manual.
+                  13. `impl Hash for TypeName` — only if manual.
+                  14. `impl AsRef<T> for TypeName`.
+                  15. `impl Borrow<T> for TypeName`.
+                  16. `impl Deref for TypeName` — only for smart pointer types.
+                  17. `impl Iterator for TypeName`.
+                  18. `impl IntoIterator for TypeName` / `impl IntoIterator for &TypeName` / `impl IntoIterator for &mut TypeName`.
+                  19. `impl Serialize for TypeName` — only if manual; prefer `#[derive]`.
+                  20. `impl Deserialize for TypeName` — only if manual.
+                  21. Custom trait implementations, alphabetical by trait name.
+                  22. `#[cfg(test)] mod tests { ... }` — always last.
+
+                  **Multiple `impl` blocks for the same type in the same file are forbidden** (enforced by `clippy::multiple_inherent_impl`). One `impl TypeName` block, one place. Trait impls are separate blocks but they are all in the same file.
+
+                  **`impl` blocks in different files for the same type are forbidden.** A type's entire implementation lives in one file. If the impl is growing too large, the type is doing too much — split the type, not the impl.
+
+                  ---
+
+                  ### Architecture Patterns — Mandatory Structures
+
+                  **Repository pattern:**
+                  - Every domain entity that is persisted has a repository trait: `trait UserRepository`, `trait OrderRepository`.
+                  - The trait lives in the same module as the entity: `src/user/mod.rs` contains `trait UserRepository`.
+                  - The trait methods are in terms of domain types only. No SQL, no JSON, no HTTP in the trait signature.
+                  - The concrete implementation lives in `src/user/repository.rs` under `src/user/` (i.e., `src/user/repository/mod.rs`).
+                  - The concrete implementation is never referenced in business logic. Only the trait is referenced.
+                  - `impl UserRepository for PostgresUserRepository` in the infrastructure layer.
+                  - Tests use `InMemoryUserRepository` implementing the same trait.
+
+                  **Service pattern:**
+                  - Business logic that coordinates multiple domain types belongs in a service struct: `struct UserService<Repo: UserRepository>`.
+                  - Services are generic over their dependencies via trait bounds.
+                  - Services have a `new(repository: Repo) -> Self` constructor.
+                  - Services do not contain state beyond their dependencies. All state lives in the domain types or the repository.
+                  - Services implement the domain operations as methods: `fn register_user(&self, params: RegisterUserParams) -> Result<User, RegistrationError>`.
+                  - Services are tested with in-memory implementations of their repository traits.
+
+                  **Command and query separation:**
+                  - Functions that change state (commands) return `Result<(), Error>` or `Result<DomainEvent, Error>`.
+                  - Functions that read state (queries) return `Result<T, Error>` where `T` is the data.
+                  - Commands and queries are never mixed in a single function.
+                  - Command parameters are named structs: `struct RegisterUserCommand { name: Name, email: EmailAddress }`.
+                  - Query parameters are named structs: `struct FindUserQuery { email: EmailAddress }`.
+
+                  **Event-driven design:**
+                  - Domain events are enums: `enum UserEvent { Registered(UserRegistered), EmailVerified(EmailVerified), Suspended(UserSuspended) }`.
+                  - Each event variant's data is a named struct: `struct UserRegistered { user_id: UserId, email: EmailAddress, registered_at: Timestamp }`.
+                  - Events are past-tense: `UserRegistered`, `OrderPlaced`, `PaymentFailed`.
+                  - Event handlers are structs implementing a handler trait: `trait EventHandler<Event> { fn handle(&self, event: &Event) -> Result<(), HandlerError>; }`.
+
+                  **Error hierarchy:**
+                  - Application-level errors are enums with domain-specific variants.
+                  - Infrastructure-level errors (database, network, serialization) are wrapped by domain errors.
+                  - The domain layer never leaks infrastructure error types. `UserError::NotFound` not `sqlx::Error::RowNotFound`.
+                  - Error conversion: `impl From<sqlx::Error> for UserError` in the infrastructure layer only.
+
+                  **Configuration hierarchy:**
+                  - One root config struct: `struct AppConfig`. All subsystem configs are fields: `database: DatabaseConfig`, `server: ServerConfig`, `auth: AuthConfig`.
+                  - Each subsystem config struct implements `Default` with sensible defaults.
+                  - Config is loaded once at startup: `AppConfig::from_env() -> Result<Self, ConfigError>`.
+                  - Config is passed by reference through the application. It is never accessed via a global or a thread-local.
+                  - Config fields are validated at load time. The application does not start with invalid config.
+
+                  **Layered architecture — dependency direction:**
+                  - Domain layer: pure business logic. No I/O. No framework dependencies. Depends on nothing.
+                  - Application layer: orchestrates domain logic. Depends on domain. No I/O primitives.
+                  - Infrastructure layer: implements traits defined in the domain. Depends on domain and application. Performs I/O.
+                  - Presentation layer: HTTP handlers, CLI commands. Depends on application. Never directly on domain internals.
+                  - Dependencies point inward. The domain never imports from infrastructure. Infrastructure imports from domain.
+
+                  ---
+
+                  ### Struct Arguments — Functions Take At Most One Non-Self Parameter
+
+                  Every function taking more than one non-`self` parameter is wrong by default. The extra parameters belong together in a struct. This is not a style preference. It is an architectural rule. Multiple bare parameters signal that the caller must know the correct order, the correct meaning of each position, and the correct types — all without names. A struct gives every parameter a name at the call site.
+
+                  **The hard limit:**
+                  - Zero parameters: always fine.
+                  - One parameter: always fine.
+                  - Two parameters: acceptable when the two values are genuinely independent and have no thematic relationship. `fn zip<A, B>(first: A, second: B)` — independent by definition.
+                  - Three or more parameters: define a struct. No exceptions. `&self` or `&mut self` does not count.
+
+                  **Defining the parameter struct:**
+                  - Name it after the operation and what it configures: `CreateUserRequest`, `SendEmailParams`, `QueryOptions`, `RenderConfig`, `ConnectionSettings`.
+                  - It implements `Debug` always.
+                  - It implements `Default` when any parameters are optional with sensible defaults.
+                  - It implements `Clone` when it might be reused.
+                  - Optional parameters are `Option<T>` fields with `#[serde(default)]` if serialized, resolved to defaults in the function body.
+                  - The struct is defined in the same module as the function.
+                  - Wrong: `fn create_user(name: String, email: String, role: Role, notify: bool, created_by: UserId) -> Result<UserId, CreateUserError>`.
+                  - Right:
+                    ```
+                    struct CreateUserRequest {
+                        name: Name,
+                        email: EmailAddress,
+                        role: Role,
+                        send_welcome_email: bool,
+                        created_by: UserId,
+                    }
+                    fn create_user(request: CreateUserRequest) -> Result<UserId, CreateUserError>
+                    ```
+
+                  **Two-parameter functions that are NOT acceptable:**
+                  - Two `String` parameters: always a struct. `fn rename(old: String, new: String)` → `struct RenameRequest { old_name: Name, new_name: Name }`.
+                  - Two `bool` parameters: always a struct or an enum. Booleans have no names at call sites.
+                  - A domain type plus a primitive: often a struct. `fn schedule(task: Task, delay: Duration)` — if there are ever more scheduling options, this grows. Start with a struct.
+                  - A key plus a value: the one genuine exception. `fn insert(key: K, value: V)` is established convention.
+
+                  **Builder vs. parameter struct:**
+                  - Parameter structs are for simple cases where all or most parameters are required.
+                  - Builders are for cases where there are many optional parameters, where parameters have dependencies on each other, or where invalid combinations must be rejected at compile time.
+                  - A parameter struct with more than five fields should probably be a builder.
+
+                  ---
+
+                  ### Type Algebra — Using the Type System as a Proof System
+
+                  The Rust type system is a theorem prover. Every type is a proposition. Every value of that type is a proof that the proposition holds. Design types to encode the proofs your domain requires.
+
+                  **Phantom types for unit safety:**
+                  - Every numeric value with a unit is a generic struct over a unit marker type.
+                  - `struct Quantity<Unit> { value: f64, _unit: PhantomData<Unit> }`.
+                  - `struct Meters;` `struct Feet;` `struct Seconds;` `struct Kilograms;`.
+                  - `Quantity<Meters>` and `Quantity<Feet>` cannot be added. Compile error. The Mars Climate Orbiter crashed because of a unit mismatch that a type system could have caught. This type system can catch it.
+                  - Conversion: `impl From<Quantity<Feet>> for Quantity<Meters> { fn from(q: Quantity<Feet>) -> Self { Quantity { value: q.value * 0.3048, _unit: PhantomData } } }`. One place. One constant. One `From` impl.
+                  - `impl<Unit> Add for Quantity<Unit> { type Output = Self; fn add(self, rhs: Self) -> Self { Quantity { value: self.value + rhs.value, _unit: PhantomData } } }`. Adding same-unit quantities is addition. Adding different-unit quantities is a compile error.
+
+                  **Refinement types — values with proven invariants:**
+                  - `struct NonEmptyVec<T> { first: T, rest: Vec<T> }`. Always has at least one element. The type makes it impossible to construct an empty instance. Every function requiring a non-empty list accepts `NonEmptyVec<T>`, not `Vec<T>`. `first()` and `last()` return `T`, not `Option<T>`.
+                  - `struct BoundedU32<const MIN: u32, const MAX: u32> { value: u32 }`. A number proven to be within `[MIN, MAX]`. Constructor returns `Result<Self, OutOfRangeError>`.
+                  - `struct Positive(f64)`. A float proven positive. `sqrt()` is infallible on `Positive`. No need for `f64::sqrt` which returns `NaN` for negative inputs.
+                  - `struct SortedVec<T: Ord> { inner: Vec<T> }`. A vec proven sorted. Binary search is always valid. The type guarantees the precondition.
+                  - `struct Normalized(f64)`. A float proven in `[0.0, 1.0]`. Percentage operations are safe.
+
+                  **Witness types:**
+                  - A witness type is a zero-cost proof that an operation was performed.
+                  - `struct Validated<T> { inner: T }`. Constructible only by calling `validate(value) -> Result<Validated<T>, ValidationError>`. Functions requiring validated input accept `Validated<T>`, not `T`. Unvalidated values cannot reach these functions.
+                  - `struct Authenticated<T> { inner: T }`. Constructible only via `authenticate(...)`. Functions requiring authentication accept `Authenticated<Request>`.
+                  - `struct Authorized<Permission, T> { inner: T, _permission: PhantomData<Permission> }`. Constructible only via `authorize::<CreateUser>(actor)`. Functions requiring a specific permission accept `Authorized<CreateUser, Actor>`.
+                  - Witnesses are zero-sized when the wrapped type is stateless. The entire authorization model compiles to nothing at runtime.
+
+                  **Branded types for taint tracking:**
+                  - A branded type marks the provenance of a value. `struct Untrusted<T>(T)`. Raw user input is always `Untrusted<String>`. Functions that sanitize input accept `Untrusted<String>` and return `Sanitized<String>`. Functions that are SQL-injection-safe accept only `Sanitized<String>`. An unsanitized string cannot reach a SQL query — the type prevents it.
+                  - `struct FromDatabase<T>(T)`. Values read from the database are `FromDatabase<T>`. Functions that expect database-sourced data accept `FromDatabase<T>`. A value constructed from user input that was not persisted and re-read cannot be passed as a `FromDatabase<T>`.
+                  - The compiler enforces the data flow. No runtime checks needed.
+
+                  **Session types for protocol safety:**
+                  - A session type encodes a communication protocol in the type system. Each step of the protocol is a type transition. Skipping a step is a compile error.
+                  - `struct Handshaking;` `struct Authenticated;` `struct RequestSent;` `struct ResponseReceived;`.
+                  - `struct TlsConnection<State> { stream: TcpStream, _state: PhantomData<State> }`.
+                  - `impl TlsConnection<Handshaking> { fn complete_handshake(self) -> Result<TlsConnection<Authenticated>, TlsError> }`.
+                  - `impl TlsConnection<Authenticated> { fn send_request(self, request: Request) -> Result<TlsConnection<RequestSent>, NetworkError> }`.
+                  - `impl TlsConnection<RequestSent> { fn receive_response(self) -> Result<(TlsConnection<ResponseReceived>, Response), NetworkError> }`.
+                  - Sending a request before the handshake completes: compile error. Receiving a response before sending a request: compile error. The entire protocol is enforced statically.
+
+                  ---
+
+                  ### State Machine Design Deep Reference
+
+                  **Enum state machines — when and how:**
+                  - Use an enum state machine when: the state must be persisted or serialized, multiple threads may observe the state, the state must be readable at runtime, or the number of transitions is large.
+                  - Each enum variant holds exactly the data valid in that state — no more, no less. If the `Shipped` state does not yet know the `delivered_at` timestamp, it has no `delivered_at` field. This is the entire point.
+                  - Transition methods consume `self`: `fn confirm(self, ...) -> Result<Self, TransitionError>`. They return `Result` because runtime validation may fail.
+                  - The `match` on the current state inside a transition method is exhaustive and handles every valid transition.
+
+                  **Type-state machines — when and how:**
+                  - Use type-state when: the state is transient (not persisted), the transitions are statically known and few, and compile-time enforcement is more valuable than runtime flexibility.
+                  - Zero-sized state marker types: `struct Uninitialized;` `struct Ready;` `struct Running;` `struct Stopped;`. These have no runtime cost.
+                  - `PhantomData<State>` in the generic struct: zero runtime cost, carries the type.
+                  - Each state's `impl` block contains only the methods valid in that state. Calling an invalid method is a compile error — not a runtime error, not a logged warning, a compile error.
+                  - State transitions consume the struct: `fn start(self) -> Machine<Running>`. The old state is gone. You cannot use the stopped machine after starting it.
+
+                  **Combining both:**
+                  - An outer type-state for coarse lifecycle phases (constructed, running, shut down).
+                  - An inner enum for fine-grained runtime states within a phase.
+                  - Example: `struct Server<Phase>`. `Phase` is `Configuring`, `Running`, `ShuttingDown`. Within `Running`, an inner enum tracks `Idle`, `ProcessingRequest(RequestId)`, `WritingResponse(RequestId)`.
+
+                  **The state machine as a design tool:**
+                  - Before writing any type with mutable state, draw the state machine. What are the states? What are the valid transitions? What data is valid in each state?
+                  - If the state machine has more than 7 states, it is too complex. Split it.
+                  - If the state machine has a transition that can reach any state from any state, it is not a state machine — it is unstructured state mutation. Redesign.
+                  - Every `Option` field in a struct is a hidden two-state machine. Make it explicit.
+                  - Every `bool` field in a struct is a hidden two-state machine. Make it explicit.
+                  - A struct with three `bool` fields is a hidden eight-state machine. Make it explicit. Most of those eight states are probably invalid — express the valid ones as enum variants.
+
+                  ---
+
+                  ### Function Design Deep Reference
+
+                  **What a function is:**
+                  - A function is a named unit of computation. Its name is a proposition: "given these inputs, this function produces this output." The body is the proof.
+                  - A function exists because the computation it performs has a name. Not because the code was long. Not because it is called twice. Because the computation is a named concept in the domain.
+                  - If you extract a function and cannot name it without using "and" ("validate_and_transform", "fetch_and_process") — you extracted two functions. Split further.
+
+                  **Hard limits:**
+                  - 40 lines maximum. Hard. No exceptions.
+                  - Cyclomatic complexity 5 maximum. More than 5 branches: extract named helpers.
+                  - 2 non-self parameters maximum. More: define a struct.
+                  - 0 nested closures. A closure inside a closure is always a named function.
+                  - 0 functions with "and" or "or" in their name. One function, one thing.
+
+                  **Recursion:**
+                  - Only for genuinely recursive structures (trees, graphs, grammars) where the depth is bounded or the problem is explicitly recursive.
+                  - Unbounded user-controlled recursion is a stack overflow attack surface. Convert to iteration with an explicit `Vec` stack.
+                  - Tail recursion is not guaranteed to optimize. Use iteration.
+
+                  **Associated functions vs. methods:**
+                  - Methods take `&self`, `&mut self`, or `self`. They operate on an existing instance.
+                  - Associated functions do not take `self`. They are constructors, converters, or utilities tied to the type by ownership.
+                  - Free functions outside any `impl` block: almost never correct. The one exception in non-`main` code: a pure mathematical function with no type affinity (`fn gcd(a: u64, b: u64) -> u64`).
+                  - When in doubt: if the function takes any value of a specific type as a primary input, it is a method or associated function on that type.
+
+                  **`impl` block organization within a file:**
+                  All `impl TypeName` blocks follow this order:
+                  1. Constructors: `new`, `try_new`, `with_capacity`, `from_*`, `default` (if manual).
+                  2. Property accessors (read-only): `&self` methods returning field values or derived values.
+                  3. Predicates: `&self` methods returning `bool`.
+                  4. Mutators: `&mut self` methods modifying state.
+                  5. Consumers: `self` methods consuming the value.
+                  6. Associated functions: no `self` parameter, not constructors.
+                  7. Trait implementations: one `impl TraitName for TypeName` block per trait, grouped after all inherent impls.
+                  Conversion traits: `From`, `TryFrom`, `FromStr`, `AsRef`, `Borrow`.
+                  Formatting traits: `Display` (if not derived), `Debug` (if not derived).
+                  Operator traits: `Add`, `Sub`, `Mul`, `Neg`, `Index`, etc.
+                  Iterator traits: `Iterator`, `IntoIterator`, `FromIterator`, `Extend`.
+                  Other standard traits in alphabetical order.
+                  8. `#[cfg(test)] mod tests { ... }` at the very bottom.
+
+                  ---
+
+                  ### Ownership Patterns Deep Reference
+
+                  **The ownership decision tree:**
+                  - Does the function need to read the value? → `&T`.
+                  - Does the function need to modify the value and the caller wants to keep it? → `&mut T`.
+                  - Does the function need to store the value or will it outlive the function? → `T` (transfer ownership).
+                  - Does the function need to share the value across threads? → `Arc<T>`.
+                  - Is the decision between `&T` and `T` being driven by the borrow checker rather than semantics? → the ownership design is wrong. Fix the structure.
+
+                  **RAII everywhere:**
+                  - Every resource acquisition is tied to a constructor. Every resource release is in `Drop`.
+                  - File opened in `new()`, closed in `drop()`.
+                  - Lock acquired in constructor, released in `drop()`.
+                  - Database connection checked out in constructor, returned to pool in `drop()`.
+                  - Network connection established in `connect()`, torn down in `drop()`.
+                  - There is no "remember to call `close()`" in Rust. If `close()` must be called, the type forces it via `Drop`.
+                  - `impl Drop for MyResource { fn drop(&mut self) { /* release resource */ } }`. This is not optional for types that hold resources.
+                  - When teardown can fail, provide `fn close(self) -> Result<(), Error>`. If the caller does not call `close()`, `Drop` runs and silently handles or logs the error.
+
+                  **Borrow splitting:**
+                  - The borrow checker prevents multiple mutable borrows to the same struct simultaneously.
+                  - When you need to mutate two different fields of a struct simultaneously, the struct splits them into sub-structs or uses interior mutability.
+                  - `struct Config { display: DisplayConfig, network: NetworkConfig }`. You can borrow `config.display` mutably while borrowing `config.network` immutably. The borrow checker understands field borrows.
+                  - A struct that cannot be borrowed in parts is a design smell. Reorganize the fields into coherent sub-structs.
+
+                  **`Pin` and self-referential types:**
+                  - `Pin<P>` prevents the value pointed to by `P` from being moved in memory.
+                  - Self-referential structs (structs containing a reference to themselves) require `Pin`.
+                  - Async futures are self-referential and require `Pin`. This is handled automatically by `async`/`.await`.
+                  - Manual self-referential structs use the `pin-project` crate for safe field projection.
+                  - `Box::pin(value)` to create a pinned heap allocation.
+                  - `std::pin::pin!(value)` to create a pinned stack value (nightly or via `tokio::pin!`).
+
+                  ---
+
+                  ### API Stability and Evolution
+
+                  **Semver discipline:**
+                  - Patch version (1.0.x): bug fixes only. No new public API. No behavioral changes observable by correct code.
+                  - Minor version (1.x.0): new public API, all backward-compatible. New `pub` items, new trait implementations, new enum variants on `#[non_exhaustive]` enums.
+                  - Major version (x.0.0): breaking changes. Removed items, changed signatures, non-`#[non_exhaustive]` enum variants added, sealed trait unsealed.
+                  - Adding a `pub` function: minor version.
+                  - Changing a `pub` function signature: major version.
+                  - Adding a field to a `#[non_exhaustive]` struct: minor version.
+                  - Adding a field to a non-`#[non_exhaustive]` struct: major version.
+                  - Adding a variant to a `#[non_exhaustive]` enum: minor version.
+                  - Adding a variant to a non-`#[non_exhaustive]` enum: major version.
+                  - Implementing a new standard library trait for an existing type: minor version (can break downstream code that provides its own impl — use `#[non_exhaustive]` carefully).
+
+                  **Deprecation before removal:**
+                  - `#[deprecated(since = "1.2.0", note = "use new_method() instead")]` marks old items.
+                  - Deprecated items are removed in the next major version.
+                  - The deprecation note always specifies what to use instead.
+                  - Never remove without deprecation first, except in major version zero (`0.x.y`).
+
+                  **`#[non_exhaustive]` everywhere:**
+                  - Every `pub enum` in a library crate is `#[non_exhaustive]`. Without exception.
+                  - Every `pub struct` that may gain fields is `#[non_exhaustive]`. When in doubt, add it.
+                  - `#[non_exhaustive]` prevents downstream code from exhaustively matching your enum or constructing your struct. This is correct — downstream code should be resilient to additions.
+
+                  ---
+
+                  ### Conciseness Without Brevity
+
+                  Rust code should be dense with meaning, not sparse with words. Every token earns its place by communicating something that could not be communicated more directly.
+
+                  **Variable names are full and precise, but not verbose:**
+                  - Not `the_user_that_sent_the_message` (verbose). Not `u` (meaningless). `message_sender` (precise).
+                  - Not `the_result_of_the_database_query` (verbose). Not `res` (meaningless). `found_user` or `matching_orders` (precise).
+                  - The name answers the question: what is this, in terms of the domain? Not: what type is this, in terms of Rust?
+
+                  **One statement, one fact:**
+                  - Each `let` binding establishes one fact about the current computation.
+                  - Each method call in a chain performs one transformation.
+                  - Each `match` arm handles one case.
+                  - Combining multiple facts into one expression reduces readability even if it reduces line count.
+
+                  **Prefer `?` chains to nested `match`:**
+                  - Three nested `match` blocks checking for errors: rewrite as three `?` operators.
+                  - But: each `?` is named. The value produced by each `?` has a name. The reader sees each step.
+
+                  **No redundant type annotations:**
+                  - When the type is obvious from the right-hand side, omit the annotation: `let user = User::new(...)` not `let user: User = User::new(...)`.
+                  - When the type is not obvious, add the annotation: `let count = items.len()` is obvious. `let result = compute()` — if `compute()` returns an `i64` and that matters, write `let result: i64 = compute()`.
+                  - Closure parameter types: add when the closure is stored or returned. Omit when the compiler infers them from context.
+
+                  **Turbofish only when necessary:**
+                  - `value.parse::<u64>()` — necessary when the type cannot be inferred.
+                  - `items.collect::<Vec<_>>()` — necessary when the collection type is ambiguous.
+                  - `items.collect::<HashSet<_>>()` — necessary.
+                  - Never add a turbofish that the compiler would infer correctly without it.
+
+                  ---
+
+                  ## Parse Don't Validate — The Fundamental Boundary Rule
+
+                  **The rule:** Never pass unvalidated data through your system. Parse inputs into precise types at the system boundary. After that boundary, the type is the proof. No re-checking, no `is_valid()` methods, no defensive guards in the middle of business logic.
+
+                  **What this means concretely:**
+                  - A function that receives a `String` email cannot trust it is a valid email. A function that receives an `EmailAddress` struct can. The struct's constructor is the only place validation happens.
+                  - `Option<T>` means absent. `Result<T, E>` means failure. A non-empty `Vec<T>` where you need at least one element is wrong — define `NonEmptyVec<T>`.
+                  - Validated types must be constructed only through constructors that can fail. The failing constructor is `TryFrom` or a named constructor like `new()` that returns `Result<Self, E>`. After construction, the value is always valid.
+
+                  **The wrong way:**
+                  ```rust
+                  fn create_user(email: String, age: u32) -> Result<User, Error> {
+                      if !email.contains('@') {
+                          return Err(Error::InvalidEmail);
+                      }
+                      if age < 18 {
+                          return Err(Error::TooYoung);
+                      }
+                      // ... more validation scattered here
+                  }
+                  ```
+
+                  **The right way:**
+                  ```rust
+                  struct EmailAddress(String);
+
+                  impl TryFrom<String> for EmailAddress {
+                      type Error = InvalidEmailError;
+                      fn try_from(raw: String) -> Result<Self, Self::Error> {
+                          if !raw.contains('@') {
+                              return Err(InvalidEmailError::MissingAtSign);
+                          }
+                          Ok(Self(raw))
+                      }
+                  }
+
+                  struct Age(u32);
+
+                  impl TryFrom<u32> for Age {
+                      type Error = InvalidAgeError;
+                      fn try_from(value: u32) -> Result<Self, Self::Error> {
+                          if value < 18 {
+                              return Err(InvalidAgeError::BelowMinimum { actual: value, minimum: 18 });
+                          }
+                          Ok(Self(value))
+                      }
+                  }
+
+                  fn create_user(email: EmailAddress, age: Age) -> User {
+                      // No validation here. Types guarantee correctness.
+                      User::new(email, age)
+                  }
+                  ```
+
+                  **Rules for boundary types:**
+                  - Every type that wraps a primitive and adds invariants must have `TryFrom` as its primary constructor.
+                  - The inner value must not be `pub`. Expose it via a getter that returns `&str`, `u32`, etc.
+                  - Implement `Display` to show the inner value. Implement `Debug` via derive.
+                  - Do not implement `From<String>` for a validated type — `From` is infallible, and validation is fallible.
+                  - Do not expose `as_inner()` or `into_inner()` unless the consuming code genuinely needs the raw value. When you do expose it, name the method after the semantic concept: `.as_str()` not `.as_inner()`.
+
+                  **Carry invariants in the type system:**
+                  - `NonEmpty<T>` for collections that must have at least one element.
+                  - `Positive<f64>` for positive floats.
+                  - `Normalized<Vec3>` for unit vectors.
+                  - `Sorted<Vec<T>>` for pre-sorted collections.
+                  - `Validated<T>` for types that passed external validation. Use this wrapper pattern when validation cost is significant and you want to avoid repeating it.
+
+                  **Deserialization is a boundary:**
+                  - Serde deserialization is a system boundary. Types deserialized from JSON, TOML, env vars, databases must either be parsed into validated types during deserialization (via `#[serde(try_from = "String")]`) or go through explicit construction after deserialization.
+                  - Never deserialize into `String` and then validate later in application code. Deserialize directly into `EmailAddress`, `Url`, `Duration`, etc.
+
+                  ```rust
+                  #[derive(Deserialize)]
+                  struct UserRequest {
+                      #[serde(try_from = "String")]
+                      email: EmailAddress,
+                      #[serde(try_from = "u32")]
+                      age: Age,
+                  }
+                  ```
+
+                  ---
+
+                  ## Witness Types and Proof-Carrying Code
+
+                  A witness type proves a fact to the compiler without carrying data. Zero-sized types are the most powerful tool for encoding invariants that span function boundaries.
+
+                  **The core pattern:**
+                  ```rust
+                  use std::marker::PhantomData;
+
+                  struct Verified;
+                  struct Unverified;
+
+                  struct Token<State> {
+                      value: String,
+                      _state: PhantomData<State>,
+                  }
+
+                  impl Token<Unverified> {
+                      fn new(value: String) -> Self {
+                          Self { value, _state: PhantomData }
+                      }
+
+                      fn verify(self, secret: &str) -> Result<Token<Verified>, VerificationError> {
+                          if hmac_verify(&self.value, secret) {
+                              Ok(Token { value: self.value, _state: PhantomData })
+                          } else {
+                              Err(VerificationError::InvalidSignature)
+                          }
+                      }
+                  }
+
+                  impl Token<Verified> {
+                      fn claims(&self) -> &str {
+                          &self.value
+                      }
+                  }
+
+                  // This function can ONLY be called with a verified token — enforced at compile time.
+                  fn protected_endpoint(token: Token<Verified>) -> Response {
+                      // ...
+                  }
+                  ```
+
+                  **When to use witness types:**
+                  - Authentication and authorization: `Authenticated<Request>` vs `Unauthenticated<Request>`.
+                  - Database transactions: `Transactional<Conn>` vs `NonTransactional<Conn>`.
+                  - Sorted collections: `Sorted<Vec<T>>` — the wrapper proves the invariant.
+                  - Initialized resources: `Initialized<Service>` vs `Uninitialized<Service>`.
+                  - Ownership transfer in protocols: state machine transitions where the old state must not be usable after transition.
+
+                  **Rules:**
+                  - The phantom type parameter must be `PhantomData<State>`, not stored as a field value.
+                  - State marker types are usually ZSTs: `struct Verified;`.
+                  - Use sealed traits if you want to restrict which states are externally constructible.
+                  - The transition function consumes `self` (takes ownership) and returns the new state. This makes it impossible to use the old state after transition.
+                  - If a proof type carries a lifetime, use `PhantomData<&'a State>` to tie the proof to the lifetime of the underlying resource.
+
+                  **Proof-carrying code:**
+                  ```rust
+                  struct NonEmpty;
+                  struct MaybeEmpty;
+
+                  struct Collection<Contents, Populated> {
+                      items: Vec<Contents>,
+                      _populated: PhantomData<Populated>,
+                  }
+
+                  impl<T> Collection<T, MaybeEmpty> {
+                      fn new() -> Self {
+                          Self { items: Vec::new(), _populated: PhantomData }
+                      }
+
+                      fn push(mut self, item: T) -> Collection<T, NonEmpty> {
+                          self.items.push(item);
+                          Collection { items: self.items, _populated: PhantomData }
+                      }
+                  }
+
+                  impl<T> Collection<T, NonEmpty> {
+                      fn first(&self) -> &T {
+                          &self.items[0] // Safe: NonEmpty witness guarantees at least one element.
+                      }
+                  }
+                  ```
+
+                  ---
+
+                  ## Extension Traits — The FooExt Pattern
+
+                  When you want to add methods to a type you do not own, or to a trait you do not own, use an extension trait. Extension traits follow the `FooExt` naming convention.
+
+                  **The pattern:**
+                  ```rust
+                  pub trait StrExt {
+                      fn to_title_case(&self) -> String;
+                      fn word_count(&self) -> usize;
+                  }
+
+                  impl StrExt for str {
+                      fn to_title_case(&self) -> String {
+                          // implementation
+                      }
+
+                      fn word_count(&self) -> usize {
+                          self.split_whitespace().count()
+                      }
+                  }
+                  ```
+
+                  **Sealed extension traits — prevent external implementation:**
+                  When an extension trait is an implementation detail and must not be implemented by downstream code, seal it.
+
+                  ```rust
+                  mod private {
+                      pub trait Sealed {}
+                  }
+
+                  pub trait ResultExt: private::Sealed {
+                      fn log_error(self) -> Self;
+                  }
+
+                  impl<T, E: std::fmt::Display> private::Sealed for Result<T, E> {}
+
+                  impl<T, E: std::fmt::Display> ResultExt for Result<T, E> {
+                      fn log_error(self) -> Self {
+                          if let Err(ref error) = self {
+                              tracing::error!("{error}");
+                          }
+                          self
+                      }
+                  }
+                  ```
+
+                  **Rules for extension traits:**
+                  - Name: `{TypeBeingExtended}Ext`. `StrExt`, `SliceExt`, `ResultExt`, `FutureExt`, `StreamExt`.
+                  - Live in their own module, typically `ext.rs` or a submodule of the crate root.
+                  - Extension traits that are implementation details must be sealed with the private module pattern.
+                  - Extension traits that are part of the public API must be documented with `//!` at module level.
+                  - Do not implement extension traits for types that already have the method via another path — extension methods shadow inherent methods and cause confusing resolution.
+                  - A sealed extension trait's `Sealed` supertrait lives in a private module. The name `private::Sealed` is conventional and must not change.
+                  - Blanket implementations (`impl<T: SomeTrait> FooExt for T`) are acceptable for extension traits. They must be written after the trait definition, in the same module.
+
+                  ---
+
+                  ## Typed Index Pattern — Never Use Raw usize
+
+                  Raw `usize` indices are anonymous. They mix with every other `usize`. They can be confused with lengths, offsets, capacities. Define typed wrappers for every index type.
+
+                  **The wrong way:**
+                  ```rust
+                  fn get_node(nodes: &[Node], index: usize) -> &Node {
+                      &nodes[index]
+                  }
+                  ```
+
+                  **The right way:**
+                  ```rust
+                  struct NodeIndex {
+                      index: usize,
+                  }
+
+                  impl NodeIndex {
+                      fn new(index: usize) -> Self {
+                          Self { index }
+                      }
+
+                      fn as_usize(&self) -> usize {
+                          self.index
+                      }
+                  }
+
+                  fn get_node<'graph>(nodes: &'graph [Node], index: NodeIndex) -> &'graph Node {
+                      &nodes[index.as_usize()]
+                  }
+                  ```
+
+                  **Rules for typed indices:**
+                  - Every arena, pool, slotmap, or indexed collection has its own distinct index type.
+                  - `NodeIndex` and `EdgeIndex` are different types even if both wrap `usize`. You cannot accidentally pass an `EdgeIndex` where a `NodeIndex` is expected.
+                  - The index type is constructed only by the collection that owns the data. The collection returns `NodeIndex` from insertion methods. External code cannot construct arbitrary `NodeIndex` values.
+                  - To prevent external construction, make the inner field private and expose no public constructor. The collection owns the constructor.
+                  - Implement `Copy` for index types — they are small and cheap to copy.
+                  - Implement `Debug`, `Eq`, `Hash`, `Ord`, `PartialEq`, `PartialOrd` via derive.
+                  - Do not implement arithmetic on index types. `index + 1` should not compile. Use named methods like `.next()` if increment is needed.
+
+                  **SlotMap pattern:**
+                  When using `slotmap` crate, define typed keys:
+                  ```rust
+                  use slotmap::new_key_type;
+
+                  new_key_type! {
+                      struct NodeKey;
+                      struct EdgeKey;
+                  }
+                  ```
+                  `NodeKey` and `EdgeKey` are incompatible. Passing the wrong key type is a compile error.
+
+                  **Generational indices:**
+                  For arenas that support removal and reuse of slots, generational indices prevent use-after-free:
+                  - Store a generation counter alongside the index.
+                  - When a slot is freed and reused, its generation increments.
+                  - An old index with an outdated generation returns `None` instead of the new occupant.
+                  - This logic is encapsulated in the arena type. The caller never sees generations — they see `Option<&T>`.
+
+                  ---
+
+                  ## Zero-Copy Design
+
+                  Allocations are never free. Every `String`, every `Vec<T>`, every `Box<T>` is a heap allocation. Prefer borrowed types when ownership is not required.
+
+                  **Function signatures prefer borrows:**
+                  - Accept `&str` not `String`. Accept `&[T]` not `Vec<T>`. Accept `&Path` not `PathBuf`.
+                  - Return owned types when the caller needs to keep the value. Return borrows when the return value is derived from an input.
+                  - `String` is an owned buffer. `&str` is a view into one. A function that searches for a substring returns `&str`, not `String`.
+
+                  **Cow for conditionally owned data:**
+                  ```rust
+                  use std::borrow::Cow;
+
+                  fn normalize_path(input: &str) -> Cow<str> {
+                      if input.starts_with('/') {
+                          Cow::Borrowed(input)
+                      } else {
+                          Cow::Owned(format!("/{input}"))
+                      }
+                  }
+                  ```
+                  `Cow` avoids an allocation when the data does not need transformation. Use it in:
+                  - Functions that sometimes need to modify the input and sometimes can return it as-is.
+                  - Error messages that are sometimes static strings and sometimes formatted.
+                  - Deserialization where many values are unchanged from the input buffer.
+
+                  **Zero-copy deserialization:**
+                  When deserializing from a buffer that lives at least as long as the deserialized value, borrow from the buffer instead of copying:
+                  ```rust
+                  #[derive(Deserialize)]
+                  struct Message<'de> {
+                      #[serde(borrow)]
+                      content: &'de str,
+                      #[serde(borrow)]
+                      author: &'de str,
+                  }
+                  ```
+                  The `'de` lifetime ties the deserialized struct to the input buffer. Content is not copied — the `&str` fields point directly into the buffer.
+
+                  **Rules:**
+                  - Never clone a value just to pass it to a function. Borrow it instead. If you write `.clone()` to satisfy a borrow checker error, the function signature is wrong — change it to accept a borrow.
+                  - `Arc<str>` instead of `String` when the same string is shared across threads without mutation.
+                  - `Arc<[T]>` instead of `Vec<T>` for shared immutable slices.
+                  - Avoid `to_string()` inside hot loops. Compute the string once, outside the loop.
+                  - `Bytes` from the `bytes` crate for cheap cloning of byte buffers — `Bytes` is `Arc`-backed and cloning it only increments a reference count.
+
+                  ---
+
+                  ## Interior Mutability — Decision Tree
+
+                  Interior mutability is the escape hatch from the borrow checker's single-writer rule. Use it only when the borrow checker's model is genuinely insufficient. Every use of interior mutability is a trade: compile-time safety for runtime checking.
+
+                  **The decision tree:**
+
+                  1. Do you need mutation at all? If not, use `&T`.
+                  2. Is mutation exclusive and always safe to model with `&mut T`? Use `&mut T`.
+                  3. Is the value `Copy` and shared between threads? Use `AtomicBool`, `AtomicU64`, etc.
+                  4. Is the value `Copy` and single-threaded? Use `Cell<T>`.
+                  5. Is the value non-Copy and single-threaded, mutation is infrequent, and you accept runtime panics on aliased mutation? Use `RefCell<T>`.
+                  6. Is the value shared between threads with infrequent writes and many readers? Use `RwLock<T>`.
+                  7. Is the value shared between threads with balanced reads and writes? Use `Mutex<T>`.
+                  8. Does the value need to be initialized exactly once after program start? Use `OnceLock<T>` (thread-safe) or `OnceCell<T>` (single-threaded).
+                  9. Does the value need lazy initialization from a closure? Use `LazyLock<T>` (thread-safe) or `LazyCell<T>` (single-threaded).
+
+                  **Cell<T>:**
+                  - Only for `Copy` types.
+                  - Single-threaded only (`!Sync`).
+                  - No borrow overhead — moves values in and out.
+                  - Use for: counters, flags, small values mutated frequently in single-threaded contexts.
+                  - Do not wrap `String` or `Vec` in `Cell` — they are not `Copy`. Use `RefCell` instead.
+
+                  **RefCell<T>:**
+                  - Runtime borrow checking. Panics if borrows conflict.
+                  - Single-threaded only (`!Sync`).
+                  - Use for: tree nodes with parent pointers, observers, graph structures where shared mutable access is required.
+                  - Always keep borrows short-lived. Never store a `Ref<T>` or `RefMut<T>` across a function boundary.
+                  - If your code is reaching for `RefCell` frequently, reconsider the ownership model.
+
+                  **Mutex<T>:**
+                  - Runtime exclusion. Blocks threads waiting for the lock.
+                  - Use for: shared mutable state between threads where writes are as frequent as reads.
+                  - Always lock with `let guard = mutex.lock().unwrap()`. Never hold a guard longer than necessary.
+                  - Never call async code while holding a `std::sync::Mutex` guard. Use `tokio::sync::Mutex` in async contexts.
+                  - Poison on panic: if a thread panics while holding a `Mutex`, subsequent calls to `lock()` return `Err`. Handle this explicitly or call `.unwrap()` with awareness of the implication.
+
+                  **RwLock<T>:**
+                  - Multiple concurrent readers or one exclusive writer.
+                  - Use when reads vastly outnumber writes.
+                  - Writer starvation is possible on some implementations. Know your platform.
+                  - In async contexts, use `tokio::sync::RwLock`.
+
+                  **OnceLock<T> and OnceCell<T>:**
+                  - Initialized at most once. After initialization, it is effectively immutable.
+                  - `OnceLock<T>`: thread-safe, use for global configuration, registry, plugin tables.
+                  - `OnceCell<T>`: single-threaded, use for lazy struct fields.
+                  - Prefer `OnceLock` over `static mut` for static initialization. `static mut` is almost always wrong.
+
+                  **Rules:**
+                  - Never wrap `Mutex<Option<T>>` to represent optional state. Use a proper state enum.
+                  - Never nest locks: `Mutex<HashMap<K, Mutex<V>>>` is a deadlock waiting to happen. Restructure data.
+                  - Atomic types for single values only. `AtomicU64` for a counter. Not `AtomicPtr` for a complex structure — use a `Mutex` or `RwLock` there.
+                  - Document every use of interior mutability with a comment stating why `&mut T` was insufficient.
+
+                  ---
+
+                  ## Static Assertions — Compile-Time API Contracts
+
+                  Use the `static_assertions` crate to encode invariants that must hold forever. Static assertions fail at compile time — they cannot be forgotten, they cannot pass on one platform and fail on another.
+
+                  **Required in every crate that exports public types:**
+                  ```rust
+                  #[cfg(test)]
+                  mod assertions {
+                      use static_assertions::{assert_impl_all, assert_not_impl_any, const_assert};
+
+                      assert_impl_all!(MyType: Send, Sync);
+                      assert_impl_all!(MyError: std::error::Error, Send, Sync, 'static);
+                      assert_not_impl_any!(MyHandle: Clone);
+                      const_assert!(std::mem::size_of::<MyType>() <= 64);
+                  }
+                  ```
+
+                  **assert_impl_all! — require trait implementations:**
+                  Every public type that crosses thread boundaries must assert `Send + Sync`. Every error type that is returned across async boundaries must assert `Send + Sync + 'static`. These assertions catch accidental removal of `Send`/`Sync` impls.
+
+                  **assert_not_impl_any! — prohibit trait implementations:**
+                  Types that must not be cloned (handles, file descriptors, unique tokens) must assert `!Clone`. Types that must remain single-threaded must assert `!Send` or `!Sync`. This prevents accidental `derive(Clone)` from breaking invariants.
+
+                  **const_assert! — numeric invariants:**
+                  Size limits, alignment requirements, enum discriminant values — these are things that must not change silently:
+                  ```rust
+                  const_assert!(std::mem::size_of::<PacketHeader>() == 20);
+                  const_assert!(std::mem::align_of::<DmaBuffer>() >= 64);
+                  const_assert!(MAX_CONNECTIONS <= 65535);
+                  ```
+
+                  **assert_eq_size! — layout compatibility:**
+                  When two types must have the same size for FFI, transmute, or protocol correctness:
+                  ```rust
+                  assert_eq_size!(WireHeader, [u8; 16]);
+                  ```
+
+                  **Placement:**
+                  - Static assertions for public API contracts live in `src/lib.rs` or `src/assertions.rs` in a `#[cfg(test)]` module named `static_assertions`.
+                  - Static assertions for a specific module's invariants live in that module, also in `#[cfg(test)]`.
+                  - Every public struct, enum, and trait that has size or trait requirements has at minimum one `assert_impl_all!`.
+
+                  ---
+
+                  ## Advanced Builder Typestate — Required Fields at Compile Time
+
+                  Standard builders using `Option` fields allow constructing invalid objects at runtime: the caller forgets a required field and gets a runtime error. Typestate builders push this error to compile time.
+
+                  **The problem with runtime builders:**
+                  ```rust
+                  // BAD: Missing required field is a runtime error.
+                  let server = ServerBuilder::new()
+                      .port(8080)
+                      .build() // Panics: host not set
+                      .unwrap();
+                  ```
+
+                  **The typestate builder:**
+                  ```rust
+                  struct NoHost;
+                  struct WithHost(String);
+                  struct NoPort;
+                  struct WithPort(u16);
+
+                  struct ServerBuilder<H, P> {
+                      host: H,
+                      port: P,
+                      timeout_seconds: u64,
+                  }
+
+                  impl ServerBuilder<NoHost, NoPort> {
+                      fn new() -> Self {
+                          Self {
+                              host: NoHost,
+                              port: NoPort,
+                              timeout_seconds: 30,
+                          }
+                      }
+                  }
+
+                  impl<P> ServerBuilder<NoHost, P> {
+                      fn host(self, host: String) -> ServerBuilder<WithHost, P> {
+                          ServerBuilder {
+                              host: WithHost(host),
+                              port: self.port,
+                              timeout_seconds: self.timeout_seconds,
+                          }
+                      }
+                  }
+
+                  impl<H> ServerBuilder<H, NoPort> {
+                      fn port(self, port: u16) -> ServerBuilder<H, WithPort> {
+                          ServerBuilder {
+                              host: self.host,
+                              port: WithPort(port),
+                              timeout_seconds: self.timeout_seconds,
+                          }
+                      }
+                  }
+
+                  impl<H, P> ServerBuilder<H, P> {
+                      fn timeout(mut self, seconds: u64) -> Self {
+                          self.timeout_seconds = seconds;
+                          self
+                      }
+                  }
+
+                  impl ServerBuilder<WithHost, WithPort> {
+                      fn build(self) -> Server {
+                          Server::new(self.host.0, self.port.0, self.timeout_seconds)
+                      }
+                  }
+                  ```
+
+                  Now `build()` only exists when both `host` and `port` have been set. Forgetting either is a compile error, not a runtime panic.
+
+                  **Rules for typestate builders:**
+                  - Required fields use the `No{Field}` / `With{Field}` marker pattern.
+                  - Optional fields with defaults use plain struct fields (not typestate).
+                  - The `build()` method only exists on the fully-populated typestate variant.
+                  - The marker types (`NoHost`, `WithHost`) are private to the module. They are not part of the public API.
+                  - Phantom marker types must use `PhantomData` only when the marker carries no data. When the marker wraps the value (`WithHost(String)`), use a named-field newtype struct, not a phantom.
+                  - Each setter consumes `self` and returns `Self` with the new typestate. This enforces that setting a field is a one-way transition.
+
+                  ---
+
+                  ## Tokio Structured Concurrency Deep Reference
+
+                  Tokio tasks are cheap but not free. Unstructured spawning creates tasks with no owner, no cancellation, and no error propagation path. Structured concurrency means every spawned task has an owner that waits for it.
+
+                  **JoinSet — owning a group of tasks:**
+                  ```rust
+                  use tokio::task::JoinSet;
+
+                  async fn process_all(items: Vec<WorkItem>) -> Vec<Result<Output, WorkError>> {
+                      let mut join_set = JoinSet::new();
+
+                      for item in items {
+                          join_set.spawn(async move { process_one(item).await });
+                      }
+
+                      let mut results = Vec::with_capacity(join_set.len());
+                      while let Some(result) = join_set.join_next().await {
+                          let output = result.expect("task must not panic");
+                          results.push(output);
+                      }
+                      results
+                  }
+                  ```
+
+                  **CancellationToken — cooperative cancellation:**
+                  ```rust
+                  use tokio_util::sync::CancellationToken;
+
+                  struct WorkerPool {
+                      cancellation_token: CancellationToken,
+                      join_set: JoinSet<()>,
+                  }
+
+                  impl WorkerPool {
+                      fn new() -> Self {
+                          Self {
+                              cancellation_token: CancellationToken::new(),
+                              join_set: JoinSet::new(),
+                          }
+                      }
+
+                      fn spawn_worker(&mut self, task: impl Future<Output = ()> + Send + 'static) {
+                          let token = self.cancellation_token.clone();
+                          self.join_set.spawn(async move {
+                              tokio::select! {
+                                  _ = token.cancelled() => {},
+                                  _ = task => {},
+                              }
+                          });
+                      }
+
+                      async fn shutdown(mut self) {
+                          self.cancellation_token.cancel();
+                          while self.join_set.join_next().await.is_some() {}
+                      }
+                  }
+                  ```
+
+                  **Task naming:**
+                  Name every spawned task with `task::Builder`:
+                  ```rust
+                  tokio::task::Builder::new()
+                      .name("ingest-worker")
+                      .spawn(ingest_loop(receiver))
+                      .expect("task spawn must succeed");
+                  ```
+                  Named tasks appear in panic messages, tokio-console output, and traces.
+
+                  **Rules:**
+                  - Never call `tokio::spawn` at a point where the task cannot be awaited. Use `JoinSet::spawn` instead.
+                  - `tokio::spawn` is acceptable only at the top level of a program (main function or its direct callees) where the task represents a long-running service that lives for the program's lifetime.
+                  - Every `JoinSet` must be awaited to completion. Dropping a `JoinSet` cancels all tasks — do this intentionally, not by accident.
+                  - Never hold a `std::sync::Mutex` across an `.await` point. Use `tokio::sync::Mutex` or restructure to drop the guard before `.await`.
+                  - Use `tokio::select!` with a cancellation token branch, not a timeout that causes silent drops.
+                  - `tokio::time::timeout` wraps a future. Never use `sleep` followed by a check — use `timeout`.
+                  - Task-local storage with `tokio::task_local!` is acceptable for request-scoped data like trace IDs.
+                  - Never use `std::thread::sleep` inside async code. Use `tokio::time::sleep`.
+                  - Spawning blocking operations uses `tokio::task::spawn_blocking`. Never call blocking operations directly from async functions — it stalls the runtime.
+
+                  **Channels:**
+                  - `tokio::sync::mpsc` — many producers, one consumer. The standard channel for work distribution.
+                  - `tokio::sync::broadcast` — one producer, many consumers. Use for event fanout.
+                  - `tokio::sync::watch` — one writer, many readers of the latest value. Use for configuration updates.
+                  - `tokio::sync::oneshot` — single value, single receiver. Use for request-response pairing.
+                  - `std::sync::mpsc` is wrong in async code. Always use tokio channels in async contexts.
+                  - Always set a bounded buffer size on `mpsc` channels. Unbounded channels hide backpressure problems.
+
+                  ---
+
+                  ## Web Service Patterns — axum and sqlx
+
+                  **axum: State injection, extractors, error types**
+
+                  Application state in axum is an `Arc`-wrapped struct. Never use global state (`static` variables). Inject everything through the state extractor.
+
+                  ```rust
+                  #[derive(Clone)]
+                  struct AppState {
+                      database: Arc<Database>,
+                      config: Arc<AppConfig>,
+                  }
+
+                  async fn get_user(
+                      State(state): State<AppState>,
+                      Path(user_id): Path<UserId>,
+                  ) -> Result<Json<UserResponse>, AppError> {
+                      let user = state.database.find_user(user_id).await?;
+                      let response = UserResponse::from(user);
+                      Ok(Json(response))
+                  }
+                  ```
+
+                  **Error handling in axum:**
+                  Implement `IntoResponse` for your error type. Never return strings or status codes directly from handlers:
+                  ```rust
+                  struct AppError(anyhow::Error);
+
+                  impl IntoResponse for AppError {
+                      fn into_response(self) -> Response {
+                          let status = StatusCode::INTERNAL_SERVER_ERROR;
+                          let body = Json(ErrorBody::new(self.0.to_string()));
+                          (status, body).into_response()
+                      }
+                  }
+
+                  impl<E: Into<anyhow::Error>> From<E> for AppError {
+                      fn from(error: E) -> Self {
+                          Self(error.into())
+                      }
+                  }
+                  ```
+
+                  **Validation in axum:**
+                  Use `axum-valid` or manual extraction. Never validate in handler bodies. Validation belongs in the extractor or in the domain type constructor.
+
+                  **sqlx: Query patterns**
+
+                  Always use the compile-time verified macros:
+                  ```rust
+                  async fn find_user(pool: &PgPool, user_id: UserId) -> Result<User, sqlx::Error> {
+                      let row = sqlx::query_as!(
+                          UserRow,
+                          "SELECT id, email, created_at FROM users WHERE id = $1",
+                          user_id.as_uuid()
+                      )
+                      .fetch_one(pool)
+                      .await?;
+                      Ok(User::from(row))
+                  }
+                  ```
+
+                  **sqlx rules:**
+                  - Always use `sqlx::query_as!` with a named row type. Never use `sqlx::query!` returning anonymous records in production code.
+                  - Row types are separate from domain types. `UserRow` holds raw database values. `User` is the domain type. `From<UserRow> for User` performs the conversion.
+                  - Database IDs are UUIDs. Never use serial integers as public-facing IDs.
+                  - Transactions wrap multi-statement operations:
+                  ```rust
+                  let mut transaction = pool.begin().await?;
+                  sqlx::query!("INSERT INTO ...").execute(&mut *transaction).await?;
+                  sqlx::query!("UPDATE ...").execute(&mut *transaction).await?;
+                  transaction.commit().await?;
+                  ```
+                  - Migrations live in `migrations/` directory. Never run `ALTER TABLE` manually. Every schema change is a numbered migration file.
+                  - Pool configuration: always set `max_connections`, `min_connections`, `acquire_timeout`, `idle_timeout`.
+                  - Never store `PgPool` in a global. Inject it through the application state.
+
+                  ---
+
+                  ## Property Testing with proptest
+
+                  Unit tests verify specific examples. Property tests verify invariants across thousands of generated inputs. Both are required for correctness.
+
+                  **Basic property test:**
+                  ```rust
+                  use proptest::prelude::*;
+
+                  proptest! {
+                      #[test]
+                      fn parse_then_display_is_identity(raw in "[a-z]+@[a-z]+\\.[a-z]+") {
+                          let email = EmailAddress::try_from(raw.clone()).unwrap();
+                          prop_assert_eq!(email.to_string(), raw);
+                      }
+                  }
+                  ```
+
+                  **Custom strategies with prop_compose:**
+                  When the generated type has domain-specific invariants, write a strategy:
+                  ```rust
+                  prop_compose! {
+                      fn valid_age()(value in 18u32..=120) -> Age {
+                          Age::try_from(value).unwrap()
+                      }
+                  }
+
+                  prop_compose! {
+                      fn valid_user()(
+                          email in "[a-z]{3,10}@[a-z]{3,10}\\.[a-z]{2,4}",
+                          age in valid_age(),
+                      ) -> User {
+                          let email_addr = EmailAddress::try_from(email).unwrap();
+                          User::new(email_addr, age)
+                      }
+                  }
+                  ```
+
+                  **Arbitrary derive:**
+                  For types where all values are valid, derive `Arbitrary`:
+                  ```rust
+                  #[derive(Debug, Arbitrary)]
+                  struct Offset {
+                      row: u32,
+                      column: u32,
+                  }
+                  ```
+
+                  **What to property test:**
+                  - Roundtrip: parse then serialize equals original input.
+                  - Idempotency: applying an operation twice equals applying it once.
+                  - Commutativity: order of operations does not matter when it should not.
+                  - Monotonicity: adding more data never decreases a count.
+                  - Boundary conditions: the invariants of your validated types hold under all generated inputs.
+
+                  **proptest rules:**
+                  - Property tests live alongside unit tests, in the same `#[cfg(test)]` module.
+                  - Use `prop_assert!` and `prop_assert_eq!`, not plain `assert!` — they generate shrinking-friendly failures.
+                  - Set `proptest!` configuration with `ProptestConfig::with_cases(1000)` for thorough testing.
+                  - Proptest seeds are deterministic by default. If a failure is found, the seed is printed — use it to reproduce.
+                  - For state machines, use the `proptest-state-machine` extension.
+
+                  ---
+
+                  ## Benchmark Discipline with criterion
+
+                  Benchmarks measure performance. Without them, optimizations are guesses. With them, regressions are caught before shipping.
+
+                  **Basic benchmark:**
+                  ```rust
+                  use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+                  fn bench_parse_email(criterion: &mut Criterion) {
+                      let raw = "user@example.com";
+                      criterion.bench_function("parse_email", |bencher| {
+                          bencher.iter(|| EmailAddress::try_from(black_box(raw.to_string())))
+                      });
+                  }
+
+                  criterion_group!(benches, bench_parse_email);
+                  criterion_main!(benches);
+                  ```
+
+                  **Throughput measurement:**
+                  ```rust
+                  fn bench_serialize(criterion: &mut Criterion) {
+                      let data = generate_test_data(1024);
+                      let mut group = criterion.benchmark_group("serialize");
+                      group.throughput(Throughput::Bytes(data.len() as u64));
+                      group.bench_function("json", |bencher| {
+                          bencher.iter(|| serde_json::to_vec(black_box(&data)))
+                      });
+                      group.bench_function("msgpack", |bencher| {
+                          bencher.iter(|| rmp_serde::to_vec(black_box(&data)))
+                      });
+                      group.finish();
+                  }
+                  ```
+
+                  **Rules:**
+                  - Every public function in a performance-critical path has a benchmark.
+                  - Always wrap inputs to the benchmarked function in `black_box()`. This prevents the compiler from optimizing away the computation.
+                  - Use benchmark groups to compare alternatives: `BenchmarkGroup::bench_function` with the same input and different implementations.
+                  - Set warm-up time and measurement time in `BenchmarkConfig` for stable results.
+                  - Benchmark results are saved to `target/criterion/`. Commit the baseline. Regression detection compares against the saved baseline.
+                  - Never benchmark in debug builds. Always benchmark with `--release`.
+                  - Allocations inside the benchmarked closure skew results. Measure allocation counts separately with `dhat` or `heaptrack`.
+
+                  ---
+
+                  ## Cargo Workspace Rules
+
+                  **Workspace layout (flat, matklad style):**
+                  ```
+                  workspace-root/
+                  ├── Cargo.toml          # workspace manifest
+                  ├── ARCHITECTURE.md     # mandatory, explains crate graph
+                  ├── crates/
+                  │   ├── domain/         # no external dependencies except std
+                  │   ├── application/    # depends on domain
+                  │   ├── infrastructure/ # depends on domain, application
+                  │   ├── api-types/      # shared data transfer types
+                  │   └── cli/            # binary crate, depends on all
+                  └── tests/
+                      └── integration/    # integration tests, depends on infrastructure
+                  ```
+
+                  **Workspace Cargo.toml mandatory sections:**
+                  ```toml
+                  [workspace]
+                  members = ["crates/*"]
+                  resolver = "2"
+
+                  [workspace.dependencies]
+                  # All third-party dependencies are declared here with pinned versions.
+                  # Member crates inherit: serde = { workspace = true }
+                  tokio = { version = "1", features = ["full"] }
+                  serde = { version = "1", features = ["derive"] }
+                  thiserror = "2"
+                  anyhow = "1"
+                  tracing = "0.1"
+
+                  [workspace.package]
+                  edition = "2021"
+                  rust-version = "1.82"
+                  license = "MIT OR Apache-2.0"
+                  authors = ["Author Name <email@example.com>"]
+                  ```
+
+                  **Rules:**
+                  - All version numbers live in `[workspace.dependencies]`. Member crates inherit with `{ workspace = true }`. Never specify a version in a member crate's `Cargo.toml`.
+                  - The `domain` crate depends only on `std` and possibly `serde` (for serialization of domain types). No I/O crates, no HTTP clients, no database drivers.
+                  - Feature flags must be documented. Every non-default feature has a comment explaining what it enables and when to use it.
+                  - `dev-dependencies` for test utilities are workspace-inherited when shared across crates.
+                  - `[profile.release]` settings: `lto = "thin"`, `codegen-units = 1`, `panic = "abort"`.
+                  - `[profile.bench]` inherits from release.
+                  - Never use `path` dependencies pointing outside the workspace root. They indicate the workspace is improperly bounded.
+                  - `Cargo.lock` is committed for binary crates and applications. It is not committed for pure library crates.
+
+                  ---
+
+                  ## Dependency Management Rules
+
+                  Every dependency is a liability. Every dependency is someone else's code you must audit, update, and trust. Minimize the dependency graph.
+
+                  **Before adding a dependency, ask:**
+                  1. Does `std` already provide this? `HashMap`, `BTreeMap`, sorting, parsing integers, `Display`, string formatting — all in `std`.
+                  2. Is there a single-file implementation that fits in the codebase? A 50-line helper function costs less than a crate.
+                  3. Does the crate have an active maintainer? Check the last commit date and open issues.
+                  4. What does it transitively pull in? Run `cargo tree` before adding a dependency.
+
+                  **Approved dependency tiers:**
+                  - Tier 1 (always acceptable): `serde`, `tokio`, `tracing`, `thiserror`, `anyhow`, `chrono`, `uuid`, `rand`, `regex`, `itertools`, `bytes`.
+                  - Tier 2 (acceptable with justification): `reqwest`, `sqlx`, `axum`, `tonic`, `clap`, `rayon`, `crossbeam`, `flume`, `parking_lot`.
+                  - Tier 3 (requires explicit review): anything with `unsafe` in its own code, anything pulling in C FFI, anything with >50 transitive dependencies.
+
+                  **Version pinning:**
+                  - Use tilde requirements for minor versions: `~1.5` pins to `1.5.x`.
+                  - Use caret requirements for compatible versions: `^1` allows `1.x.y`.
+                  - Never use `*` as a version. Never use `>=` without an upper bound.
+                  - After `cargo update`, run the full test suite before committing the updated `Cargo.lock`.
+
+                  **Feature hygiene:**
+                  - Enable only the features you use. `tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }` — not `features = ["full"]` in library crates.
+                  - `default-features = false` when you need only a subset of a crate's functionality.
+
+                  ---
+
+                  ## Naming Deep Rules — Every Name Is a Contract
+
+                  Names are the most durable part of an API. A bad name outlives the code that uses it. Apply these rules with the understanding that the name is a commitment.
+
+                  **Getters:**
+                  - A getter that returns a reference: `fn name(&self) -> &str` — named after the field, no `get_` prefix.
+                  - A getter that copies a value: `fn count(&self) -> usize` — same, no `get_`.
+                  - `get_` prefix is reserved for methods that can fail and return `Option<&T>` or `Option<T>`. `HashMap::get` is the canonical example.
+                  - Infallible owned value: `fn into_name(self) -> String`.
+                  - `get_` for `Option` returns, never for infallible returns. This is the standard library convention.
+
+                  **Conversion method names:**
+                  - `as_foo()`: cheap reference-to-reference conversion. `as_str()`, `as_bytes()`. Returns a borrowed type.
+                  - `to_foo()`: expensive conversion that allocates. `to_string()`, `to_owned()`, `to_vec()`. Returns an owned type.
+                  - `into_foo()`: consumes self. `into_bytes()`, `into_inner()`. Returns an owned type.
+                  - These conventions are followed by the entire standard library and must be followed in all crates.
+
+                  **Boolean naming:**
+                  - Boolean getters use `is_` or `has_` or `can_` prefix: `is_empty()`, `has_children()`, `can_send()`.
+                  - Never name a boolean `flag`, `check`, `ok`, `status`, `result`. These names reveal nothing.
+                  - A boolean struct field: `is_enabled`, `has_error`, `can_retry`.
+
+                  **Iterator methods:**
+                  - `iter()`: returns an iterator over `&T`.
+                  - `iter_mut()`: returns an iterator over `&mut T`.
+                  - `into_iter()`: consumes self, returns an iterator over `T`.
+                  - All three are implemented via `IntoIterator` for the collection type and its references.
+
+                  **Error variant naming:**
+                  - Error variants are named for the condition, not the action: `NotFound`, `InvalidInput`, `Unauthorized`. Not `GetFailed`, `ParseError`, `CheckFailed`.
+                  - When the error carries context, the context fields are named for the thing being described: `InvalidInput { field: String, reason: String }`. Not `message`, not `description`, not `data`.
+
+                  **Lifetime names:**
+                  - `'a`, `'b` are acceptable only when the lifetime is anonymous and has no semantic meaning.
+                  - Named lifetimes for function signatures: `'input`, `'buffer`, `'arena`, `'request`. Names that say what the lifetime is tied to.
+                  - `'static` is the entire program lifetime. When you write `'static`, you mean this value will never be dropped. Be certain.
+                  - `'de` is the conventional name for the deserializer lifetime in serde implementations.
+
+                  ---
+
+                  ## Trait Implementation Is Not Optional
+
+                  Every type must implement the full set of traits its nature demands. LLMs skip trait implementations. This is forbidden.
+
+                  **Types that hold a value of a printable type implement `Display`:**
+                  If the type wraps a `String`, `u64`, or any primitive, it implements `Display`. No exceptions. `Display` is how users see the value. Without it, the type is incomplete.
+
+                  **Types that are compared implement all comparison traits:**
+                  If a type implements `PartialEq`, it must implement `Eq` when equality is total. If it implements `Eq` and `PartialOrd`, it must implement `Ord`. The four traits come as a group.
+
+                  **Types used in hash maps implement both `Hash` and `Eq`:**
+                  If you derive `Hash`, you must also derive `Eq`. They are a pair. The invariant: values that are `Eq` must have the same `Hash`.
+
+                  **Domain types implement `From` for their raw inputs:**
+                  ```rust
+                  // If User has an id, and the id is a UUID in the database:
+                  impl From<uuid::Uuid> for UserId {
+                      fn from(uuid: uuid::Uuid) -> Self {
+                          Self { uuid }
+                      }
+                  }
+                  ```
+
+                  **Types that may fail to construct implement `TryFrom`:**
+                  Not a custom `parse()` method. Not `from_str_unchecked()`. `TryFrom<String>` or `TryFrom<&str>`. The standard library uses `TryFrom`. User code must too.
+
+                  **Types that have a meaningful default implement `Default`:**
+                  Configuration structs, builders, empty collections — they all implement `Default`. The default is the safe, zero-initialized, ready-to-configure state.
+
+                  **Types that can be serialized for storage or transport implement `Serialize` and `Deserialize`:**
+                  These come in a pair. A type that is `Serialize` but not `Deserialize` is usually wrong. The exception is types whose deserialization requires validation — those use `#[serde(try_from = "RawType")]`.
+
+                  **Standard library trait checklist for every new type:**
+                  - `Debug`: always, via derive.
+                  - `Clone`: when the type has no unique ownership semantics.
+                  - `Copy`: when `Clone` is trivial (no heap allocation in the type or any field).
+                  - `PartialEq`, `Eq`: when equality comparisons are meaningful.
+                  - `PartialOrd`, `Ord`: when ordering is meaningful and total.
+                  - `Hash`: when the type will be used in hash maps or sets.
+                  - `Display`: when the type has a human-readable representation.
+                  - `FromStr`: when the type can be constructed from a string (for CLI, config parsing).
+                  - `Default`: when there is a sensible zero-value.
+                  - `From<T>` / `Into<T>`: for all natural, infallible conversions.
+                  - `TryFrom<T>` / `TryInto<T>`: for all fallible conversions.
+                  - `Serialize` / `Deserialize`: for all types crossing serialization boundaries.
+                  - `Error`: for all error types.
+                  - `IntoIterator`: for all collection types.
+                  - `Index` / `IndexMut`: for collections that support indexed access.
+
+                  When you skip any of these, you have a reason. State it in a comment. If you cannot state a reason, implement the trait.
+
+                  ---
+
+                  ## Impl Block Organization — Every impl Has a Structure
+
+                  Every `impl` block follows the same internal ordering. This is not a preference. It is a rule.
+
+                  **Order within a single `impl SelfType` block:**
+                  1. `pub fn new(...)` — constructor(s).
+                  2. `pub fn from_*(...)` — named constructors (alternatives to `new`).
+                  3. `pub fn is_*(&self) -> bool` — predicate methods.
+                  4. `pub fn *(&self) -> &T` — immutable getter methods.
+                  5. `pub fn *_mut(&mut self) -> &mut T` — mutable getter methods.
+                  6. `pub fn with_*(mut self, ...) -> Self` — builder-style setters.
+                  7. `pub fn set_*(...)` — mutation methods.
+                  8. `pub fn into_*(self) -> T` — consuming conversion methods.
+                  9. `pub fn *(...)` — other public methods.
+                  10. `fn *(...)` — private methods.
+
+                  **Separate impl blocks for trait implementations:**
+                  Each trait implementation is its own `impl` block, never merged into the main `impl` block. Order of trait impl blocks:
+                  1. `impl Default`
+                  2. `impl Display`
+                  3. `impl Debug` (if custom, not derived)
+                  4. `impl From<T>` / `impl TryFrom<T>` — one block per source type
+                  5. `impl Error`
+                  6. `impl Iterator` / `impl IntoIterator`
+                  7. `impl Index` / `impl IndexMut`
+                  8. All other trait implementations, alphabetical by trait name
+
+                  **Derive placement:**
+                  Derive macros appear directly above `struct` or `enum` declarations, in this order:
+                  1. Standard library derives: `Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd`
+                  2. External derives: `Deserialize, Serialize` (serde), `Error` (thiserror), `Arbitrary` (proptest), etc.
+
+                  Always alphabetical within each group. Consistent ordering prevents diff noise.
+
+                  ---
+
+                  ## Serde Deep Reference
+
+                  Serialization and deserialization are system boundaries. Apply the same rigor as parse-don't-validate.
+
+                  **Never serialize domain types directly:**
+                  Domain types may change freely. Wire types must remain stable. Define separate wire types:
+                  ```rust
+                  // Domain type — internal representation, free to evolve.
+                  struct User {
+                      identifier: UserId,
+                      email_address: EmailAddress,
+                      account_created: DateTime<Utc>,
+                  }
+
+                  // Wire type — stable, versioned, annotated for serde.
+                  #[derive(Serialize, Deserialize)]
+                  struct UserDto {
+                      id: String,
+                      email: String,
+                      created_at: String,
+                  }
+
+                  impl From<User> for UserDto {
+                      fn from(user: User) -> Self {
+                          Self {
+                              id: user.identifier.to_string(),
+                              email: user.email_address.to_string(),
+                              created_at: user.account_created.to_rfc3339(),
+                          }
+                      }
+                  }
+                  ```
+
+                  **Field renaming:**
+                  - Use `#[serde(rename_all = "camelCase")]` at the container level to match JSON conventions.
+                  - Use `#[serde(rename = "specific_name")]` at the field level for exceptions.
+                  - Never rely on Rust field names matching the wire format by accident — always explicit.
+
+                  **Versioning:**
+                  When a wire type changes, use `#[serde(default)]` for new optional fields and `#[serde(deny_unknown_fields)]` during a transition period. Never remove a field from a `Deserialize` type without a versioning strategy.
+
+                  **Validation during deserialization:**
+                  Use `#[serde(try_from = "RawType")]` to run validation during deserialization:
+                  ```rust
+                  #[derive(Deserialize)]
+                  #[serde(try_from = "String")]
+                  struct EmailAddress(String);
+
+                  impl TryFrom<String> for EmailAddress {
+                      type Error = InvalidEmailError;
+                      fn try_from(raw: String) -> Result<Self, Self::Error> {
+                          validate_email(&raw)?;
+                          Ok(Self(raw))
+                      }
+                  }
+                  ```
+
+                  **Rules:**
+                  - `#[serde(deny_unknown_fields)]` on all inbound types (from external systems). Unknown fields from a trusted source indicate version mismatch — fail loudly.
+                  - `#[serde(skip_serializing_if = "Option::is_none")]` for optional fields in outbound types.
+                  - Never use `serde_json::Value` in domain code. Parse JSON into typed structs immediately.
+                  - `serde_json::to_string_pretty` is for debugging and human-readable output only. Production serialization uses `serde_json::to_string` or a binary format.
+
+                  ---
+
+                  ## Error Handling Deep Rules
+
+                  **The fundamental split:**
+                  - Library crates: use `thiserror`. Define precise, enumerated error types. Every error variant carries exactly the context needed to diagnose it — nothing more.
+                  - Application crates: use `anyhow`. Wrap library errors into application context with `.context("while loading user config")`.
+                  - Never use `anyhow` in a library. Library consumers cannot pattern-match on `anyhow::Error` to handle specific cases.
+                  - Never use `thiserror` as a catch-all in an application where `anyhow` would be cleaner.
+
+                  **thiserror error design:**
+                  ```rust
+                  #[derive(Debug, thiserror::Error)]
+                  enum DatabaseError {
+                      #[error("connection failed: {reason}")]
+                      ConnectionFailed { reason: String },
+
+                      #[error("record not found: {entity} with id {id}")]
+                      NotFound { entity: String, id: String },
+
+                      #[error("query failed")]
+                      QueryFailed(#[from] sqlx::Error),
+                  }
+                  ```
+
+                  **Error variant rules:**
+                  - Every variant carries enough context to produce a helpful error message without looking at the source code.
+                  - `#[from]` wraps the underlying error. This is the only acceptable use of wrapping — do not hand-write `impl From<sqlx::Error> for DatabaseError` when `#[from]` does it.
+                  - `#[source]` (without `#[from]`) exposes the underlying error for programmatic inspection without converting from it automatically.
+                  - Error types implement `Send + Sync + 'static` — use `static_assertions::assert_impl_all!` to verify this.
+
+                  **The `?` operator:**
+                  - Use `?` on every fallible call. Never `unwrap()` or `expect()` in production code paths.
+                  - `expect()` is acceptable in tests and in main program initialization where panicking is the correct behavior.
+                  - When `?` converts between error types, the conversion must be explicit or via `#[from]`. Never `.map_err(|_| SomeError)` that discards information.
+                  - `.map_err(|e| Error::Foo { reason: e.to_string() })` — acceptable when wrapping context.
+
+                  **Error propagation across async:**
+                  - Errors returned from `tokio::spawn` arrive as `JoinError`. Inspect and unwrap the inner error explicitly.
+                  - Never box errors as `Box<dyn Error>` in async function signatures. Use `anyhow::Error` or a concrete type.
+
+                  ---
+
+                  ## Testing Deep Rules
+
+                  **Test structure — every test follows AAA:**
+                  Every test has three clearly delineated phases: Arrange, Act, Assert. Name helper functions with the phase they belong to.
+
+                  ```rust
+                  #[test]
+                  fn user_rejects_underage_applicant() {
+                      // Arrange
+                      let age = Age::try_from(17).expect("17 is a valid u32 for Age construction attempt");
+
+                      // Act
+                      let result = age;
+
+                      // Assert
+                      assert!(result.is_err());
+                      assert!(matches!(result, Err(InvalidAgeError::BelowMinimum { .. })));
+                  }
+                  ```
+
+                  **Test naming:**
+                  - Test function names are full sentences describing the behavior being tested.
+                  - Format: `{subject}_{condition}_{expected_outcome}`. `user_with_invalid_email_rejects_construction`. `empty_cart_total_is_zero`. `concurrent_writes_to_different_keys_do_not_conflict`.
+                  - No `test_` prefix. The `#[test]` attribute is sufficient.
+
+                  **Test isolation:**
+                  - Tests must not share state. No global mutable state, no shared files, no shared network ports.
+                  - Database tests use transactions that are rolled back at test end. Never commit test data.
+                  - Tests that need time should control time via dependency injection or `tokio::time::pause`.
+
+                  **What to test:**
+                  - The public API of every public type.
+                  - Every error path: what error is returned when each invariant is violated.
+                  - Boundary conditions: minimum and maximum values, empty inputs, single-element inputs.
+                  - Concurrency: tests that spawn multiple tasks and verify the result under concurrent access.
+                  - Integration tests for database access, HTTP clients, file I/O — these live in `tests/`.
+
+                  **Test helpers:**
+                  - Builder pattern for test fixtures: `UserBuilder::new().with_email("test@test.com").build()`.
+                  - Shared test builders live in `tests/common/mod.rs` or a `test_support` crate.
+                  - Never inline complex setup in a test body. Extract to a named function.
+
+                  ---
+
+                  ## Documentation Deep Rules
+
+                  **Module-level documentation is mandatory:**
+                  Every module has a `//!` doc comment at the top of `mod.rs`. It states:
+                  - What the module does.
+                  - What the main types are.
+                  - A one-line usage example if non-obvious.
+                  Length: 3-10 lines. Never longer unless the module is complex.
+
+                  **Public item documentation:**
+                  - Every `pub` struct, `pub` enum, `pub` trait, and `pub fn` has a doc comment.
+                  - The first sentence is the summary — one line, no period at the end.
+                  - Subsequent paragraphs provide detail, examples, panics, errors, safety.
+                  - `# Errors` section: every function returning `Result` documents the error conditions.
+                  - `# Panics` section: every function that can panic documents when and why.
+                  - `# Safety` section: every `unsafe fn` documents the preconditions.
+
+                  **Doc tests:**
+                  Code examples in documentation are compiled and run with `cargo test --doc`. Write them. Broken examples are worse than no examples.
+
+                  **Intra-doc links:**
+                  Link to related types and methods using `[TypeName]` and `[method_name]`. Avoid spelling out full paths when a relative link works.
+
+                  **What must NOT be in documentation:**
+                  - The date, author, or version the item was introduced — that belongs in the changelog.
+                  - Explanations of why a past version was different — the code is the current state.
+                  - Internal implementation details for public items — describe behavior, not implementation.
+
+                  ---
+
+                  ## Performance Patterns — Write for the CPU
+
+                  Performance is a feature. Write code that the CPU can execute efficiently. Measure first, optimize second — but write obviously efficient code on the first pass.
+
+                  **Allocation budget:**
+                  - Profile allocations in hot paths with `cargo-flamegraph` or `dhat`.
+                  - A function called once is not a hot path. A function called per request or per message or per frame is.
+                  - Pre-allocate with `Vec::with_capacity` when the size is known or estimable.
+                  - Prefer stack allocation over heap allocation for small, fixed-size data.
+
+                  **Cache locality:**
+                  - Data accessed together should live together. Use structs of arrays (SoA) instead of arrays of structs (AoS) for data processed in bulk.
+                  - Avoid pointer-chasing in hot loops: `Vec<Box<T>>` is worse than `Vec<T>`. Prefer arena allocation when ownership allows.
+
+                  **SIMD-friendly code:**
+                  - Process data in batches rather than element-by-element in tight loops.
+                  - Use `chunks_exact` for guaranteed chunk sizes the compiler can vectorize.
+                  - Annotate performance-critical functions with `#[inline]` when cross-crate inlining matters.
+
+                  **String formatting is expensive:**
+                  - Never call `format!` to build a string that is immediately written to an output. Use `write!` to write directly.
+                  - Never use `String::new()` followed by `+` for concatenation. Use `format!` or a `String::with_capacity` and `push_str` loop.
+                  - `to_string()` allocates. In hot paths, write to a pre-allocated buffer instead.
+
+                  **Cloning is expensive:**
+                  - Profile before cloning in hot paths. An `.Arc<T>` clone is cheap. A `Vec<T>` clone is not.
+                  - `Rc::clone` and `Arc::clone` must be written as `Rc::clone(&value)`, not `value.clone()`, to make the cheap reference-count bump visible and distinguish it from deep clones.
+
+                  ---
+
+                  ## The Complexity Budget
+
+                  Every codebase has a complexity budget. Spend it on the problem, not the infrastructure. Measure every abstraction against its cost.
+
+                  **Abstraction cost:**
+                  - An abstraction is only worth its weight when it is used in at least three places with genuinely different implementations.
+                  - A trait with one implementation is probably not a trait — it is a struct.
+                  - A module with one function is probably not a module — it is a function in the parent module.
+                  - A wrapper type with no behavior added over the wrapped type is unnecessary — remove it.
+
+                  **Generic cost:**
+                  - Generics monomorphize. Every instantiation is compiled separately. Use `dyn Trait` when the runtime cost is acceptable and the binary size matters more than the virtual dispatch overhead.
+                  - `impl Trait` in function position is syntactic sugar for a generic. It monomorphizes. Use `Box<dyn Trait>` for heterogeneous collections.
+                  - Type parameters that appear only in `PhantomData` are free at runtime.
+
+                  **Lifetime cost:**
+                  - Lifetimes are zero-cost at runtime. They are compile-time annotations. Add them when they express a real relationship. Remove them when they add noise without expressing anything.
+                  - Lifetime elision rules: when a function has one reference input, the output lifetimes can be elided. Write them explicitly when elision makes the relationship unclear.
+
+                  ---
+
+                  ## Never add a turbofish that the compiler would infer correctly without it.
+
+                  ---
 
                   ## Coding Principles
 
