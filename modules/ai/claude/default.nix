@@ -121,7 +121,7 @@ in {
               package = codex;
               settings = {
                 model = "gpt-5.3-codex";
-                model_reasoning_effort = "low";
+                model_reasoning_effort = "xhigh";
                 notify = ["${peonsh}/bin/peon-codex-adapter"];
                 projects = {
                   "/home/${user}/.local/src" = {
@@ -397,7 +397,7 @@ in {
                 source = jsonFormat.generate "claude-code-settings.json" {
                   "$schema" = "https://json.schemastore.org/claude-code-settings.json";
                   skipDangerousModePermissionPrompt = true;
-                  effortLevel = "low";
+                  effortLevel = "high";
                   permissions = {
                     defaultMode = "bypassPermissions";
                   };
