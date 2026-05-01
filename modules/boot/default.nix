@@ -164,11 +164,6 @@ in {
         };
       };
     };
-    nix = lib.mkIf cfg.boot.cachyos.enable {
-      settings = {
-        substituters = ["https://attic.xuyh0120.win/lantian"];
-        trusted-public-keys = ["lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="];
-      };
-    };
+    nix = {};
   };
 }
