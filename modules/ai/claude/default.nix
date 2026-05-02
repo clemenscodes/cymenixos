@@ -127,6 +127,7 @@ in
                 model = "gpt-5.5-codex";
                 model_reasoning_effort = "xhigh";
                 approval_policy = "never";
+                sandbox_mode = "danger-full-access";
                 notify = [ "${peonsh}/bin/peon-codex-adapter" ];
                 projects = {
                   "/home/${user}/.local/src" = {
