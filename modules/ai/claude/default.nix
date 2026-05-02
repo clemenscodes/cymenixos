@@ -126,6 +126,7 @@ in
               settings = {
                 model = "gpt-5.5-codex";
                 model_reasoning_effort = "xhigh";
+                approval_policy = "never";
                 notify = [ "${peonsh}/bin/peon-codex-adapter" ];
                 projects = {
                   "/home/${user}/.local/src" = {
