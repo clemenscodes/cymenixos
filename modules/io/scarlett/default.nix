@@ -90,12 +90,12 @@ in {
     # PipeWire 1.6+ no longer resolves absolute LADSPA plugin paths directly;
     # it searches LADSPA_PATH by filename. Set it to include every plugin used
     # by the filter-chain so the compressor and other nodes can be found.
-    systemd.user.services.pipewire.environment.LADSPA_PATH = lib.makeSearchPath "lib/ladspa" [
+    systemd.user.services.pipewire.environment.LADSPA_PATH = lib.mkForce (lib.makeSearchPath "lib/ladspa" [
       pkgs.lsp-plugins
       pkgs.ladspaPlugins
       pkgs.rnnoise-plugin
       speexLadspa
-    ];
+    ]);
 
     # Declare SM7B_Processed as the default audio input device.
     # WirePlumber reads this at startup and sets it before any app connects.
