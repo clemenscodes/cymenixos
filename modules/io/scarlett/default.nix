@@ -35,7 +35,7 @@ in {
     # Vendor 1235 = Focusrite. Matching on SUBSYSTEM=="sound" ensures ALSA is already initialised.
     services.udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="sound", ATTRS{idVendor}=="1235", TAG+="systemd", ENV{SYSTEMD_WANTS}+="scarlett-init.service"
-      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1235", ATTR{idProduct}=="8219", ATTR{power/autosuspend}="-1"
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1235", ATTR{idProduct}=="8219", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
     '';
 
     # Systemd service: set Scarlett hardware controls (Air on, 48V configurable)
@@ -44,22 +44,41 @@ in {
       description = "Initialize Focusrite Scarlett 2i2 ALSA controls";
       wantedBy = ["multi-user.target"];
       after = ["systemd-udev-settle.service"];
-      path = [pkgs.alsa-utils pkgs.gawk];
+      path = [pkgs.alsa-utils pkgs.gawk pkgs.coreutils];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = false;
-        # Brief delay after udev settle to ensure ALSA mixer controls are registered.
-        ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
         ExecStart = "${pkgs.writeShellScript "scarlett-init" ''
+          # The scarlett-gen2 driver triggers a USB mode-switch reboot (standalone→driver
+          # mode) ~15 s after connecting, which re-fires this udev trigger. Setting
+          # phantom power on a freshly mode-switched device causes a second unrecoverable
+          # disconnect. Guard: stamp is created after the first successful run (pre-
+          # mode-switch) and is on tmpfs so it is cleared each boot. The device stores
+          # phantom-power state in its own flash, so the post-mode-switch device already
+          # has the correct value.
+          if [ -f /run/scarlett-init.done ]; then
+            echo "scarlett-init: already ran this boot cycle, skipping"
+            exit 0
+          fi
+
+          # Wait for ALSA mixer controls to be registered after udev settle.
+          sleep 2
+
           card=$(aplay -l 2>/dev/null | grep -i scarlett | head -1 | awk '{gsub(":", "", $2); print $2}')
           if [ -z "$card" ]; then
             echo "scarlett-init: Scarlett card not found, skipping"
             exit 0
           fi
+
+          # Stamp only after confirming the card is present, so the wantedBy
+          # multi-user.target dry-run (card absent at boot) does not block udev.
+          touch /run/scarlett-init.done
+
           echo "scarlett-init: using card $card"
-          # Air mode: 'Air' gives a subtle high-freq boost. 'Presence' was too aggressive,
-          # stacking with the software presence/air EQ caused an overly airy/harsh sound.
-          amixer -c "$card" cset name='Line In 1 Air Capture Enum' 'Air'
+          # Firmware 2408+ removed the 'Air' enum value; available values are now
+          # 'Off', 'Presence', 'Presence + Drive'. Leave at 'Off' — the software
+          # filter-chain handles all presence/air EQ and 'Presence' stacks badly.
+          amixer -c "$card" cset name='Line In 1 Air Capture Enum' 'Off'
           # 48V phantom power: controlled by useCloudLifter option.
           # CloudLifter/Fethead need phantom power to run their active circuit
           # but do not pass voltage through to the SM7B (safe for dynamic mics).
