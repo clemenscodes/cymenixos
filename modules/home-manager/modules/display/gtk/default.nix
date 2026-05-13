@@ -33,7 +33,6 @@ in {
         GTK_THEME = theme.name;
       };
       packages = [
-        pkgs.libsForQt5.breeze-icons
         pkgs.hicolor-icon-theme
       ];
       file = {

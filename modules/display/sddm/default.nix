@@ -38,7 +38,6 @@ in {
             enable = cfg.gui == "wayland";
           };
           extraPackages = [
-            pkgs.kdePackages.breeze-icons
             pkgs.kdePackages.kirigami
             pkgs.kdePackages.plasma5support
             pkgs.kdePackages.qtsvg
