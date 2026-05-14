@@ -94,6 +94,7 @@ in {
       windowManager = {
         hyprland = {
           inherit (cfg.hyprland) enable;
+          configType = "hyprlang";
           systemd = {
             enable = true;
           };
