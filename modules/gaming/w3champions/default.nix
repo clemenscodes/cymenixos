@@ -29,11 +29,10 @@ in {
       users.${config.modules.users.user} = {
         wayland.windowManager.hyprland.settings = {
           windowrule = [
-            "content game, tile on, match:class ^(battle.net.exe)$, match:title ^(Battle.net)$"
+            "tile on, match:class ^(battle.net.exe)$, match:title ^(Battle.net)$"
             "content game, workspace 2, center 1, float on, size (monitor_w*0.8) (monitor_h*0.8), match:class ^(w3champions.exe)$, match:title ^(W3Champions)$"
             "workspace 3, match:class ^(warcraft iii.exe)$"
             "fullscreen on, match:class ^(warcraft iii.exe)$"
-            "immediate on, match:class ^(warcraft iii.exe)$"
           ];
         };
       };

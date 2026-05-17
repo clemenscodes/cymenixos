@@ -20,23 +20,6 @@ in {
             // {
               default = false;
             };
-          gamescope = {
-            fpsLimit = lib.mkOption {
-              type = lib.types.int;
-              default = 120;
-              description = ''
-                Gamescope composite output framerate cap (-r).
-                Match this to your OBS recording FPS for frame-perfect capture.
-                With DLSS FG the engine renders at half this rate; gamescope sees
-                the post-FG output so the cap applies to the final presented frames.
-              '';
-            };
-            vrr = lib.mkOption {
-              type = lib.types.bool;
-              default = true;
-              description = "Enable adaptive sync / VRR in the gamescope session (--adaptive-sync).";
-            };
-          };
         };
       };
     };
@@ -74,23 +57,7 @@ in {
           inherit (cfg.steam) enable;
         };
         gamescopeSession = {
-          inherit (cfg.steam) enable;
-          env = {
-            DXVK_HDR = "1";
-            ENABLE_GAMESCOPE_WSI = "1";
-          };
-          args =
-            [
-              "--hdr-enabled"
-              "--hdr-itm-enable"
-              # Cap composite output to match OBS recording FPS.
-              # Ensures every captured frame is a real rendered/FG frame —
-              # no duplicates from game running faster than capture rate.
-              "-r ${toString cfg.steam.gamescope.fpsLimit}"
-            ]
-            ++ lib.optionals cfg.steam.gamescope.vrr [
-              "--adaptive-sync"
-            ];
+          enable = false;
         };
         remotePlay = {
           openFirewall = cfg.steam.enable;
@@ -116,8 +83,6 @@ in {
           pkgs.libkrb5
           pkgs.keyutils
           pkgs.mangohud
-          pkgs.gamescope
-          pkgs.gamescope-wsi
         ];
         extraCompatPackages = [pkgs.proton-ge-bin];
       };
