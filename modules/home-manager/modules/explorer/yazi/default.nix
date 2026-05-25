@@ -199,7 +199,7 @@ in {
             ];
             append_rules = [
               {
-                name = "*";
+                url = "**";
                 use = "edit";
               }
             ];
@@ -218,26 +218,26 @@ in {
             prepend_fetchers = [
               {
                 id = "git";
-                name = "*";
+                url = "**";
                 run = "git";
               }
               {
                 id = "git";
-                name = "*/";
+                url = "*/";
                 run = "git";
               }
             ];
             prepend_previewers = [
               {
-                name = "*.tar*";
+                url = "*.tar*";
                 run = ''piper --format=url -- tar tf "$1"'';
               }
               {
-                name = "*.csv";
+                url = "*.csv";
                 run = ''piper -- bat -p --color=always "$1"'';
               }
               {
-                name = "*.md";
+                url = "*.md";
                 run = ''piper -- CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"'';
               }
               {
@@ -251,7 +251,7 @@ in {
             ];
             append_previewers = [
               {
-                name = "*";
+                url = "**";
                 run = ''piper -- hexyl --border=none --terminal-width=$w "$1"'';
               }
             ];
