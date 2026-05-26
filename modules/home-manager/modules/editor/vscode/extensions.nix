@@ -28,9 +28,7 @@ in {
               dbaeumer.vscode-eslint
               tamasfe.even-better-toml
               exiasr.hadolint
-              tim-koehler.helm-intellisense
               firsttris.vscode-jest-runner
-              ms-kubernetes-tools.vscode-kubernetes-tools
               bierner.markdown-mermaid
               moonrepo.moon-console
               arrterian.nix-env-selector
