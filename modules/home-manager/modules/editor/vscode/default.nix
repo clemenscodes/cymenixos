@@ -25,7 +25,7 @@
     overlays = [inputs.nix-vscode-extensions.overlays.default];
   };
   codevim = pkgs.writeShellScriptBin "codevim" ''
-    exec nvim "$@"
+    exec ${pkgs.neovim}/bin/nvim "$@"
   '';
   cfg = config.modules.editor;
   vscodeCfg = config.programs.vscode;
