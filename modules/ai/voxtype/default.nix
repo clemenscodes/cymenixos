@@ -51,10 +51,10 @@ in {
               hyprland = {
                 extraConfig = ''
                   hl.bind("SUPER + T",       hl.dsp.exec_cmd("${voxtypePkg}/bin/voxtype record toggle --clipboard"))
-                  hl.bind("SUPER CTRL + T",  hl.dsp.exec_cmd("${voxtypePkg}/bin/voxtype record cancel"))
+                  hl.bind("SUPER + CTRL + T",  hl.dsp.exec_cmd("${voxtypePkg}/bin/voxtype record cancel"))
                   hl.bind("SUPER + I",       hl.dsp.exec_cmd("${meeting-toggle}/bin/voxtype-meeting-toggle"))
-                  hl.bind("SUPER SHIFT + I", hl.dsp.exec_cmd("${meeting-pause-toggle}/bin/voxtype-meeting-pause-toggle"))
-                  hl.bind("SUPER ALT + I",   hl.dsp.exec_cmd("${meeting-export}/bin/voxtype-meeting-export"))
+                  hl.bind("SUPER + SHIFT + I", hl.dsp.exec_cmd("${meeting-pause-toggle}/bin/voxtype-meeting-pause-toggle"))
+                  hl.bind("SUPER + ALT + I",   hl.dsp.exec_cmd("${meeting-export}/bin/voxtype-meeting-export"))
                 '';
               };
             };

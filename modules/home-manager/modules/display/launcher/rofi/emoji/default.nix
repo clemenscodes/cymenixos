@@ -15,7 +15,7 @@ in {
     windowManager = {
       hyprland = {
         extraConfig = ''
-          hl.bind("SUPER SHIFT + D", hl.dsp.exec_cmd("${emoji}/bin/emoji"))
+          hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${emoji}/bin/emoji"))
         '';
       };
     };

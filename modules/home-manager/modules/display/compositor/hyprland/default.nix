@@ -205,7 +205,7 @@ in {
 
         -- Passthru submap: forwards $mod to the focused window (e.g. for VMs, remote desktops)
         hl.define_submap("passthru", "reset", function()
-          hl.bind(mod .. " SHIFT + Q", hl.dsp.submap("reset"))
+          hl.bind(mod .. " + SHIFT + Q", hl.dsp.submap("reset"))
         end)
 
         -- Core binds
@@ -213,21 +213,21 @@ in {
         hl.bind(mod .. " + Q",       hl.dsp.exec_cmd("${lib.getExe close-window}"))
         hl.bind(mod .. " + C",       hl.dsp.exec_cmd("hyprctl reload"))
         hl.bind(mod .. " + W",       hl.dsp.exec_cmd("${config.modules.browser.defaultBrowser}"))
-        hl.bind(mod .. " SHIFT + C", hl.dsp.exit())
-        hl.bind(mod .. " SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
-        hl.bind(mod .. " SHIFT + W", hl.dsp.exec_cmd("${lib.getExe random-wallpaper}"))
-        hl.bind(mod .. " SHIFT + Q", hl.dsp.submap("passthru"))
+        hl.bind(mod .. " + SHIFT + C", hl.dsp.exit())
+        hl.bind(mod .. " + SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
+        hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd("${lib.getExe random-wallpaper}"))
+        hl.bind(mod .. " + SHIFT + Q", hl.dsp.submap("passthru"))
         hl.bind(mod .. " + SPACE",   hl.dsp.layout("swapwithmaster"))
 
         -- Workspace navigation (loop for 1–9, manual for 10)
         for i = 1, 9 do
           hl.bind(mod .. " + " .. i,       hl.dsp.focus({ workspace = i }))
-          hl.bind(mod .. " SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
+          hl.bind(mod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
         end
         hl.bind(mod .. " + 0",           hl.dsp.focus({ workspace = 10 }))
-        hl.bind(mod .. " SHIFT + 0",     hl.dsp.window.move({ workspace = 10 }))
-        hl.bind(mod .. " SHIFT + LEFT",  hl.dsp.window.move({ workspace = "e-1" }))
-        hl.bind(mod .. " SHIFT + RIGHT", hl.dsp.window.move({ workspace = "e+1" }))
+        hl.bind(mod .. " + SHIFT + 0",     hl.dsp.window.move({ workspace = 10 }))
+        hl.bind(mod .. " + SHIFT + LEFT",  hl.dsp.window.move({ workspace = "e-1" }))
+        hl.bind(mod .. " + SHIFT + RIGHT", hl.dsp.window.move({ workspace = "e+1" }))
         hl.bind(mod .. " + LEFT",  hl.dsp.focus({ workspace = "e-1" }), { repeating = true })
         hl.bind(mod .. " + RIGHT", hl.dsp.focus({ workspace = "e+1" }), { repeating = true })
         hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
@@ -240,16 +240,16 @@ in {
         hl.bind(mod .. " + J", hl.dsp.focus({ direction = "down" }),  { repeating = true })
 
         -- Move windows in tiling (repeating)
-        hl.bind(mod .. " ALT + H", hl.dsp.window.move({ direction = "left" }),  { repeating = true })
-        hl.bind(mod .. " ALT + L", hl.dsp.window.move({ direction = "right" }), { repeating = true })
-        hl.bind(mod .. " ALT + K", hl.dsp.window.move({ direction = "up" }),    { repeating = true })
-        hl.bind(mod .. " ALT + J", hl.dsp.window.move({ direction = "down" }),  { repeating = true })
+        hl.bind(mod .. " + ALT + H", hl.dsp.window.move({ direction = "left" }),  { repeating = true })
+        hl.bind(mod .. " + ALT + L", hl.dsp.window.move({ direction = "right" }), { repeating = true })
+        hl.bind(mod .. " + ALT + K", hl.dsp.window.move({ direction = "up" }),    { repeating = true })
+        hl.bind(mod .. " + ALT + J", hl.dsp.window.move({ direction = "down" }),  { repeating = true })
 
         -- Resize active window (repeating)
-        hl.bind(mod .. " SHIFT + L", hl.dsp.window.resize({ x = 10,  y = 0,   relative = true }), { repeating = true })
-        hl.bind(mod .. " SHIFT + H", hl.dsp.window.resize({ x = -10, y = 0,   relative = true }), { repeating = true })
-        hl.bind(mod .. " SHIFT + K", hl.dsp.window.resize({ x = 0,   y = -10, relative = true }), { repeating = true })
-        hl.bind(mod .. " SHIFT + J", hl.dsp.window.resize({ x = 0,   y = 10,  relative = true }), { repeating = true })
+        hl.bind(mod .. " + SHIFT + L", hl.dsp.window.resize({ x = 10,  y = 0,   relative = true }), { repeating = true })
+        hl.bind(mod .. " + SHIFT + H", hl.dsp.window.resize({ x = -10, y = 0,   relative = true }), { repeating = true })
+        hl.bind(mod .. " + SHIFT + K", hl.dsp.window.resize({ x = 0,   y = -10, relative = true }), { repeating = true })
+        hl.bind(mod .. " + SHIFT + J", hl.dsp.window.resize({ x = 0,   y = 10,  relative = true }), { repeating = true })
 
         -- Mouse: drag/resize with Alt+click
         hl.bind("ALT + mouse:272", hl.dsp.window.drag(),   { mouse = true })
@@ -266,10 +266,10 @@ in {
 
         -- Lid switch + brightness keys (laptop only)
         ${lib.optionalString isLaptop ''
-        hl.bind(", switch:on:Lid Switch",  hl.dsp.exec_cmd("lidhandle on"),  { locked = true })
-        hl.bind(", switch:off:Lid Switch", hl.dsp.exec_cmd("lidhandle off"), { locked = true })
-        hl.bind(", XF86MonBrightnessDown",       hl.dsp.exec_cmd("brightnessctl set 1%-"))
-        hl.bind(", XF86MonBrightnessUp",         hl.dsp.exec_cmd("brightnessctl set 1%+"))
+        hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("lidhandle on"),  { locked = true })
+        hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("lidhandle off"), { locked = true })
+        hl.bind("XF86MonBrightnessDown",       hl.dsp.exec_cmd("brightnessctl set 1%-"))
+        hl.bind("XF86MonBrightnessUp",         hl.dsp.exec_cmd("brightnessctl set 1%+"))
         hl.bind("SHIFT + XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"))
         hl.bind("SHIFT + XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 5%+"))
         ''}
@@ -281,43 +281,43 @@ in {
         ${lib.optionalString (useKitty && useYazi)                       ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty yazi"))''}
         ${lib.optionalString (useKitty && !useYazi && useLf)             ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty lf"))''}
         ${lib.optionalString (useKitty && useEmail)                      ''hl.bind(mod .. " + E",        hl.dsp.exec_cmd("kitty -1 --title=kitty neomutt"))''}
-        ${lib.optionalString (useKitty && useEmail && useThunderbird)    ''hl.bind(mod .. " SHIFT + E",  hl.dsp.exec_cmd("${pkgs.thunderbird}/bin/thunderbird"))''}
-        ${lib.optionalString (useKitty && useBtop)                       ''hl.bind(mod .. " SHIFT + R",  hl.dsp.exec_cmd("kitty -1 --title=kitty btop"))''}
+        ${lib.optionalString (useKitty && useEmail && useThunderbird)    ''hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("${pkgs.thunderbird}/bin/thunderbird"))''}
+        ${lib.optionalString (useKitty && useBtop)                       ''hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd("kitty -1 --title=kitty btop"))''}
         ${lib.optionalString (useKitty && useNcmpcpp)                    ''hl.bind(mod .. " + M",        hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
-        ${lib.optionalString (useKitty && useCalcurse)                   ''hl.bind(mod .. " ALT + K",    hl.dsp.exec_cmd("kitty -1 --title=kitty calcurse"))''}
-        ${lib.optionalString useNewsboat                                  ''hl.bind(mod .. " SHIFT + N",  hl.dsp.exec_cmd("kitty -1 --title=kitty newsboat"))''}
+        ${lib.optionalString (useKitty && useCalcurse)                   ''hl.bind(mod .. " + ALT + K",    hl.dsp.exec_cmd("kitty -1 --title=kitty calcurse"))''}
+        ${lib.optionalString useNewsboat                                  ''hl.bind(mod .. " + SHIFT + N",  hl.dsp.exec_cmd("kitty -1 --title=kitty newsboat"))''}
         ${lib.optionalString useWaybar ''
         hl.bind(mod .. " + B",       hl.dsp.exec_cmd("waybar-toggle"))
-        hl.bind(mod .. " SHIFT + B", hl.dsp.exec_cmd("waybar-reload"))
+        hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("waybar-reload"))
         ''}
         ${lib.optionalString useSwaync ''hl.bind(mod .. " + N",        hl.dsp.exec_cmd("swaync-client -t -sw"))''}
-        ${lib.optionalString useRofi   ''hl.bind(mod .. " SHIFT + V",  hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy"))''}
+        ${lib.optionalString useRofi   ''hl.bind(mod .. " + SHIFT + V",  hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy"))''}
         ${lib.optionalString useAnyrun ''hl.bind(mod .. " + D",        hl.dsp.exec_cmd("anyrun"))''}
         ${lib.optionalString useRofi   ''hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("logoutlaunch"))''}
         ${lib.optionalString useScreenshots ''
         hl.bind(mod .. " + S",       hl.dsp.exec_cmd("screenshot"))
-        hl.bind(mod .. " SHIFT + D", hl.dsp.exec_cmd("fullscreenshot"))
+        hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("fullscreenshot"))
         ''}
 
         -- Music / audio binds
         ${lib.optionalString useMusic ''
         hl.bind(mod .. " + P",            hl.dsp.exec_cmd("mpc toggle"))
         hl.bind(mod .. " + COMMA",        hl.dsp.exec_cmd("mpc prev"))
-        hl.bind(mod .. " SHIFT + COMMA",  hl.dsp.exec_cmd("mpc seek 0%"))
+        hl.bind(mod .. " + SHIFT + COMMA",  hl.dsp.exec_cmd("mpc seek 0%"))
         hl.bind(mod .. " + PERIOD",       hl.dsp.exec_cmd("mpc next"))
-        hl.bind(mod .. " SHIFT + PERIOD", hl.dsp.exec_cmd("mpc repeat"))
-        hl.bind(", XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-        hl.bind(", XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
-        hl.bind(", XF86AudioPrev",        hl.dsp.exec_cmd("mpc prev"))
-        hl.bind(", XF86AudioNext",        hl.dsp.exec_cmd("mpc next"))
-        hl.bind(", XF86AudioPause",       hl.dsp.exec_cmd("mpc pause"))
-        hl.bind(", XF86AudioPlay",        hl.dsp.exec_cmd("mpc play"))
-        hl.bind(", XF86AudioStop",        hl.dsp.exec_cmd("mpc stop"))
-        hl.bind(", XF86AudioRewind",      hl.dsp.exec_cmd("mpc seek -10"))
-        hl.bind(", XF86AudioForward",     hl.dsp.exec_cmd("mpc seek +10"))
-        hl.bind(", XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
-        hl.bind(", XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        { repeating = true })
-        ${lib.optionalString (useKitty && useNcmpcpp) ''hl.bind(", XF86AudioMedia", hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
+        hl.bind(mod .. " + SHIFT + PERIOD", hl.dsp.exec_cmd("mpc repeat"))
+        hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+        hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
+        hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("mpc prev"))
+        hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("mpc next"))
+        hl.bind("XF86AudioPause",       hl.dsp.exec_cmd("mpc pause"))
+        hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("mpc play"))
+        hl.bind("XF86AudioStop",        hl.dsp.exec_cmd("mpc stop"))
+        hl.bind("XF86AudioRewind",      hl.dsp.exec_cmd("mpc seek -10"))
+        hl.bind("XF86AudioForward",     hl.dsp.exec_cmd("mpc seek +10"))
+        hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
+        hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        { repeating = true })
+        ${lib.optionalString (useKitty && useNcmpcpp) ''hl.bind("XF86AudioMedia", hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
         ''}
       '';
     };
