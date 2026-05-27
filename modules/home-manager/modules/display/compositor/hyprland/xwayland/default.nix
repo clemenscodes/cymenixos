@@ -30,13 +30,13 @@ in {
           };
           extraConfig =
             /*
-            hyprlang
+            lua
             */
             ''
-              windowrulev2 = opacity 0.0 override 0.0 override,class:^(xwaylandvideobridge)$
-              windowrulev2 = no_anim on,class:^(xwaylandvideobridge)$
-              windowrulev2 = nofocus,class:^(xwaylandvideobridge)$
-              windowrulev2 = noinitialfocus,class:^(xwaylandvideobridge)$
+              hl.window_rule({ match = { class = "^(xwaylandvideobridge)$" }, opacity = "0.0 override 0.0 override" })
+              hl.window_rule({ match = { class = "^(xwaylandvideobridge)$" }, no_anim = true })
+              hl.window_rule({ match = { class = "^(xwaylandvideobridge)$" }, no_focus = true })
+              hl.window_rule({ match = { class = "^(xwaylandvideobridge)$" }, no_initial_focus = true })
             '';
         };
       };
