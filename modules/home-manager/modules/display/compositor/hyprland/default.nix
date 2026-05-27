@@ -44,14 +44,16 @@
   useNewsboat = config.modules.media.rss.newsboat.enable;
   isLaptop = machine == "laptop";
   random-wallpaper = import ./wallpaper {inherit inputs pkgs lib;};
-  # Convert "OUTPUT, MODE, POSITION, SCALE" string to a hl.monitor({}) Lua call
+  # Convert "OUTPUT, MODE, POSITION, SCALE[, mirror, TARGET]" string to a hl.monitor({}) Lua call
   monitorToLua = m: let
     parts = lib.splitString ", " m;
     output = lib.elemAt parts 0;
     mode = lib.elemAt parts 1;
     position = lib.elemAt parts 2;
     scale = lib.elemAt parts 3;
-  in ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale} })'';
+    hasMirror = lib.length parts >= 6 && lib.elemAt parts 4 == "mirror";
+    mirrorAttr = lib.optionalString hasMirror '', mirror = "${lib.elemAt parts 5}"'';
+  in ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale}${mirrorAttr} })'';
 in {
   imports = [
     (import ./hyprshade {inherit inputs pkgs lib;})
@@ -72,10 +74,10 @@ in {
               default = [];
               description = ''
                 Extra monitor rules prepended before the catch-all.
-                Each entry: "OUTPUT, MODE, POSITION, SCALE"
-                e.g. "HDMI-A-2, 3840x2160@60, 0x0, 1"
+                Each entry: "OUTPUT, MODE, POSITION, SCALE[, mirror, TARGET]"
+                e.g. "HDMI-A-2, 3840x2160@60, 0x0, 1" or "HDMI-A-2, 3840x2160@60, auto, 1, mirror, DP-3"
               '';
-              example = ["HDMI-A-2, 3840x2160@60, 0x0, 1"];
+              example = ["HDMI-A-2, 3840x2160@60, 0x0, 1" "HDMI-A-2, 3840x2160@60, auto, 1, mirror, DP-3"];
             };
           };
         };
