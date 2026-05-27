@@ -1,4 +1,9 @@
-{lib, ...}: {config, ...}: let
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}: {config, ...}: let
   cfg = config.modules.display;
 in {
   options = {
@@ -14,6 +19,8 @@ in {
     programs = {
       hyprland = {
         inherit (cfg.hyprland) enable;
+        package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+        portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
         xwayland = {
           inherit (cfg.hyprland) enable;
         };
