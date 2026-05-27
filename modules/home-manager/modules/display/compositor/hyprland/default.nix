@@ -51,6 +51,14 @@
     fi
   '';
   random-wallpaper = import ./wallpaper {inherit inputs pkgs lib;};
+  # Convert "OUTPUT, MODE, POSITION, SCALE" string to a hl.monitor({}) Lua call
+  monitorToLua = m: let
+    parts = lib.splitString ", " m;
+    output = lib.elemAt parts 0;
+    mode = lib.elemAt parts 1;
+    position = lib.elemAt parts 2;
+    scale = lib.elemAt parts 3;
+  in ''hl.monitor({ output = "${output}", mode = "${mode}", position = "${position}", scale = ${scale} })'';
 in {
   imports = [
     (import ./hyprshade {inherit inputs pkgs lib;})
@@ -65,14 +73,16 @@ in {
           hyprland = {
             enable =
               lib.mkEnableOption "Enable anime titties"
-              // {
-                default = false;
-              };
+              // {default = false;};
             monitors = lib.mkOption {
               type = lib.types.listOf lib.types.str;
               default = [];
-              description = "Extra monitor rules prepended before the catch-all. Each entry is a raw Hyprland monitor line (without the 'monitor = ' prefix).";
-              example = ["HDMI-A-2, 3840x2160@60, auto, 1, mirror, DP-3"];
+              description = ''
+                Extra monitor rules prepended before the catch-all.
+                Each entry: "OUTPUT, MODE, POSITION, SCALE"
+                e.g. "HDMI-A-2, 3840x2160@60, 0x0, 1"
+              '';
+              example = ["HDMI-A-2, 3840x2160@60, 0x0, 1"];
             };
           };
         };
@@ -80,379 +90,236 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.hyprland.enable) {
-    home = {
-      packages = [
-        pkgs.brightnessctl
-        pkgs.awww
-        pkgs.wl-clipboard
-        pkgs.cliphist
-        (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
-        random-wallpaper
-      ];
-    };
-    wayland = {
-      windowManager = {
-        hyprland = {
-          inherit (cfg.hyprland) enable;
-          configType = "hyprlang";
-          systemd = {
-            enable = true;
-          };
-          # plugins = with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}; [
-          #   csgo-vulkan-fix
-          # ];
-          package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-          portalPackage =
-            inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
-          settings = {
-            input = {
-              kb_layout = osConfig.modules.locale.defaultLocale;
-              kb_options = "ctrl:nocaps";
-              follow_mouse = 0;
-              repeat_rate = 50;
-              repeat_delay = 300;
-              touchpad = {
-                natural_scroll = "no";
-              };
-              sensitivity = 0;
-              accel_profile = "flat";
-            };
+    home.packages = [
+      pkgs.brightnessctl
+      pkgs.awww
+      pkgs.wl-clipboard
+      pkgs.cliphist
+      (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
+      random-wallpaper
+    ];
+    wayland.windowManager.hyprland = {
+      inherit (cfg.hyprland) enable;
+      configType = "lua";
+      systemd.enable = true;
+      package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+      portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
 
-            general = {
-              gaps_in = 6;
-              gaps_out = 12;
-              border_size = 2;
-              "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
-              "col.inactive_border" = "rgba(595959aa)";
-              layout = "master";
-            };
-
-            decoration = {
-              rounding = 4;
-              blur = {
-                enabled = true;
-                size = 4;
-                noise = 0.02;
-                brightness = 0.9;
-                contrast = 0.9;
-                vibrancy = 0.2;
-                vibrancy_darkness = 0.1;
-                passes = 2;
-                special = false;
-              };
-            };
-
-            misc = {
-              enable_swallow = true;
-              disable_hyprland_logo = true;
-              disable_splash_rendering = true;
-              vrr = 1;
-            };
-
-            binds = {
-              allow_workspace_cycles = true;
-            };
-
-            ecosystem = {
-              no_update_news = true;
-            };
-
-            "$mod" = "SUPER";
-
-            bind = [
-              "$mod, F, fullscreen"
-              "$mod, Q, exec, ${lib.getExe close-window}"
-              "$mod, C, exec, hyprctl reload"
-              "$mod, W, exec, ${config.modules.browser.defaultBrowser}"
-              "$mod SHIFT, C, exit"
-              "$mod SHIFT, F, togglefloating,"
-              "$mod SHIFT, K, exec, hyprctl kill"
-              "$mod SHIFT, W, exec, ${lib.getExe random-wallpaper}"
-              "$mod, SPACE, layoutmsg, swapwithmaster"
-
-              "$mod, 1, workspace, 1"
-              "$mod, 2, workspace, 2"
-              "$mod, 3, workspace, 3"
-              "$mod, 4, workspace, 4"
-              "$mod, 5, workspace, 5"
-              "$mod, 6, workspace, 6"
-              "$mod, 7, workspace, 7"
-              "$mod, 8, workspace, 8"
-              "$mod, 9, workspace, 9"
-              "$mod, 0, workspace, 10"
-
-              "$mod SHIFT, 1, movetoworkspace, 1"
-              "$mod SHIFT, 2, movetoworkspace, 2"
-              "$mod SHIFT, 3, movetoworkspace, 3"
-              "$mod SHIFT, 4, movetoworkspace, 4"
-              "$mod SHIFT, 5, movetoworkspace, 5"
-              "$mod SHIFT, 6, movetoworkspace, 6"
-              "$mod SHIFT, 7, movetoworkspace, 7"
-              "$mod SHIFT, 8, movetoworkspace, 8"
-              "$mod SHIFT, 9, movetoworkspace, 9"
-              "$mod SHIFT, 0, movetoworkspace, 10"
-              "$mod SHIFT, LEFT, movetoworkspace, -1"
-              "$mod SHIFT, RIGHT, movetoworkspace, +1"
-              "$mod SHIFT_R, 1, movetoworkspace, 1"
-              "$mod SHIFT_R, 2, movetoworkspace, 2"
-              "$mod SHIFT_R, 3, movetoworkspace, 3"
-              "$mod SHIFT_R, 4, movetoworkspace, 4"
-              "$mod SHIFT_R, 5, movetoworkspace, 5"
-              "$mod SHIFT_R, 6, movetoworkspace, 6"
-              "$mod SHIFT_R, 7, movetoworkspace, 7"
-              "$mod SHIFT_R, 8, movetoworkspace, 8"
-              "$mod SHIFT_R, 9, movetoworkspace, 9"
-              "$mod SHIFT_R, 0, movetoworkspace, 10"
-              "$mod SHIFT_R, LEFT, movetoworkspace, -1"
-              "$mod SHIFT_R, RIGHT, movetoworkspace, +1"
-
-              # Switch workspaces with mod + [0-9]
-              # Move active window to a workspace with mod + SHIFT + [0-9]
-              # Scroll through existing workspaces with mod + scroll
-              "$mod, mouse_down, workspace, e+1"
-              "$mod, mouse_up, workspace, e-1"
-
-              (lib.mkIf useHyprpicker "$mod, U, exec, hyprpicker")
-              (lib.mkIf useKitty "$mod, RETURN, exec, kitty -1 --title=kitty ")
-              (lib.mkIf (useKitty && useNvim) "$mod, V, exec, kitty -1 --title=kitty nvim")
-              (lib.mkIf (useKitty && useLf) "$mod, R, exec, kitty -1 --title=kitty lf")
-              (lib.mkIf (useKitty && useYazi) "$mod, R, exec, kitty -1 --title=kitty yazi")
-              (lib.mkIf (useKitty && useEmail) "$mod, E, exec, kitty -1 --title=kitty neomutt")
-              (lib.mkIf (
-                useKitty && useEmail && useThunderbird
-              ) "$mod SHIFT, E, exec, ${pkgs.thunderbird}/bin/thunderbird")
-              (lib.mkIf (useKitty && useBtop) "$mod SHIFT, R, exec, kitty -1 --title=kitty btop")
-              (lib.mkIf (useKitty && useNcmpcpp) "$mod, M, exec, kitty -1 --title=kitty ncmpcpp")
-              (lib.mkIf (useKitty && useCalcurse) "$mod SHIFT, K, exec, kitty -1 --title=kitty calcurse")
-              (lib.mkIf useNewsboat "$mod SHIFT, N, exec, kitty -1 --title=kitty newsboat")
-              (lib.mkIf useWaybar "$mod, B, exec, waybar-toggle")
-              (lib.mkIf useWaybar "$mod SHIFT, B, exec, waybar-reload")
-              (lib.mkIf useSwaync "$mod, N, exec, swaync-client -t -sw")
-              (lib.mkIf useRofi "$mod SHIFT, V, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy")
-              (lib.mkIf useAnyrun "$mod, D, exec, anyrun")
-              (lib.mkIf useRofi "$mod, BACKSPACE, exec, logoutlaunch")
-              (lib.mkIf useScreenshots "$mod, S, exec, screenshot")
-              (lib.mkIf useScreenshots "$mod SHIFT, D, exec, fullscreenshot")
-              (lib.mkIf useMusic "$mod, P, exec, mpc toggle")
-              (lib.mkIf useMusic "$mod, COMMA, exec, mpc prev")
-              (lib.mkIf useMusic ''$mod SHIFT, COMMA, exec, mpc seek "0%"'')
-              (lib.mkIf useMusic "$mod, PERIOD, exec, mpc next")
-              (lib.mkIf useMusic "$mod SHIFT, PERIOD, exec, mpc repeat")
-              # OBS keybinds are declared in the OBS module itself
-              (lib.mkIf useMusic ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
-              (lib.mkIf useMusic ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle")
-              (lib.mkIf useMusic ", XF86AudioAudioPrev, exec, mpc prev")
-              (lib.mkIf useMusic ", XF86AudioAudioNext, exec, mpc next")
-              (lib.mkIf useMusic ", XF86AudioAudioPause, exec, mpc pause")
-              (lib.mkIf useMusic ", XF86AudioAudioPlay, exec, mpc play")
-              (lib.mkIf useMusic ", XF86AudioAudioStop, exec, mpc stop")
-              (lib.mkIf useMusic ", XF86AudioAudioRewind, exec, mpc seek -10")
-              (lib.mkIf useMusic ", XF86AudioAudioForward, exec, mpc seek +10")
-              (lib.mkIf isLaptop ", XF86MonBrightnessDown, exec, brightnessctl set 1%-")
-              (lib.mkIf isLaptop ", XF86MonBrightnessUp, exec, brightnessctl set 1%+")
-              (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessDown, exec, brightnessctl set 5%-")
-              (lib.mkIf isLaptop "SHIFT, XF86MonBrightnessUp, exec, brightnessctl set 5%+")
-              (lib.mkIf (useMusic && useKitty) ", XF86AudioAudioMedia, exec, kitty -1 --title=kitty ncmpcpp")
-              "$mod, P, togglespecialworkspace, magic"
-              "$mod, P, movetoworkspace, +0"
-              "$mod, P, togglespecialworkspace, magic"
-              "$mod, P, movetoworkspace, special:magic"
-              "$mod, P, togglespecialworkspace, magic"
-            ];
-
-            bindl = lib.mkIf isLaptop [
-              ", switch:on:Lid Switch, exec, lidhandle on"
-              ", switch:off:Lid Switch, exec, lidhandle off"
-            ];
-
-            binde = [
-              # Move focus with vim keys
-              "$mod, H, movefocus, l"
-              "$mod, L, movefocus, r"
-              "$mod, K, movefocus, u"
-              "$mod, J, movefocus, d"
-              "$mod ALT, H, movewindow, l"
-              "$mod ALT, L, movewindow, r"
-              "$mod ALT, K, movewindow, u"
-              "$mod ALT, J, movewindow, d"
-              "$mod SHIFT, L, resizeactive, 10 0"
-              "$mod SHIFT, H, resizeactive, -10 0"
-              "$mod SHIFT, K, resizeactive, 0 -10"
-              "$mod SHIFT, J, resizeactive, 0 10"
-              "$mod, LEFT, workspace, -1"
-              "$mod, RIGHT, workspace, +1"
-
-              (lib.mkIf useMusic ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+")
-              (lib.mkIf useMusic ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-")
-            ];
-
-            bindm = [
-              "ALT, mouse:272, movewindow"
-              "ALT, mouse:273, resizewindow"
-            ];
-          };
-          extraConfig = let
-            waybar =
-              if useWaybar
-              then "exec-once = waybar"
-              else "";
-            swaync =
-              if useSwaync
-              then "exec-once = swaync"
-              else "";
-            firefox =
-              if useFirefox
-              then ''
-                windowrule = center 1, size (monitor_w*0.8) (monitor_h*0.8), match:class (firefox)
-              ''
-              else "";
-            davinci =
-              if useDavinci
-              then ''
-                windowrule = tile on, match:title ^(DaVinci Resolve)(.*)$
-              ''
-              else "";
-            blueman =
-              if useBlueman
-              then ''
-                exec-once = blueman-applet
-                windowrule = float on, match:class ^(blueman-manager)$
-              ''
-              else "";
-            nm =
-              if useNm
-              then ''
-                exec-once = nm-applet --indicator
-                windowrule = float on, match:class ^(nm-applet)$
-                windowrule = float on, match:class ^(nm-connection-editor)$
-              ''
-              else "";
-            torrent =
-              if useTorrent
-              then ''
-                exec-once = mullvad-vpn
-              ''
-              else "";
-            hypridle =
-              if useHyprlock
-              then ''
-                exec-once = hypridle &
-              ''
-              else "";
-            hyprsunset =
-              if useHyprsunset
-              then ''
-                exec-once = hyprsunset &
-              ''
-              else "";
-            kitty =
-              if useKitty
-              then ''
-                windowrule = opacity 0.90, match:class kitty
-              ''
-              else "";
-            rofi =
-              if useRofi
-              then ''
-                windowrule = float on, match:class Rofi
-              ''
-              else "";
-            swayidle =
-              if useSwayidle
-              then ''
-                exec-once = detectidle
-              ''
-              else "";
-            swayaudioidle =
-              if useSwayAudioIdle
-              then ''
-                exec-once = sway-audio-idle-inhibit
-              ''
-              else "";
-            ssh =
-              if useSsh
-              then ''
-                exec-once = sshagent
-              ''
-              else "";
-            yubikey =
-              if useYubikey
-              then ''
-                exec-once = ${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify
-              ''
-              else "";
-            keyring =
-              if useGnomeKeyring
-              then ''
-                exec-once = unlock-keyring
-              ''
-              else "";
-            evglow =
-              if useEvglow
-              then ''
-                exec-once = evglow
-              ''
-              else "";
-            hyprhook =
-              if useHyprhook
-              then ''
-                exec-once = ${osConfig.services.hyprhook.finalPackage}/bin/hyprhook
-              ''
-              else "";
-          in ''
-            ${lib.concatMapStrings (m: "monitor = ${m}\n") cfg.hyprland.monitors}monitor = , highrr, auto, 1
-
-            env = XCURSOR_SIZE,16
-            env = XDG_SESSION_TYPE,wayland
-            env = XDG_SESSION_DESKTOP,Hyprland
-            env = XDG_CURRENT_DESKTOP,Hyprland
-            env = MOZ_ENABLE_WAYLAND,1
-
-            exec-once = ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
-            exec-once = ${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME
-            exec-once = wl-paste --type text --watch cliphist store
-            exec-once = wl-paste --type image --watch cliphist store
-            exec-once = polkitagent
-            exec-once = ${pkgs.awww}/bin/awww-daemon
-            exec-once = wallpaper
-
-            windowrule = float on, match:class ^(org.kde.polkit-kde-authentication-agent-1)$
-            windowrule = fullscreen on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
-            windowrule = stay_focused on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
-            windowrule = immediate on, match:class ^(gamescope)$, match:title ^(Counter-Strike 2)$
-
-            bind = $mod SHIFT, Q,submap,passthru
-            submap = passthru
-            bind = $mod SHIFT, Q,submap,reset
-            submap = reset
-
-            ${kitty}
-            ${rofi}
-            ${waybar}
-            ${swaync}
-            ${swayidle}
-            ${swayaudioidle}
-            ${ssh}
-            ${firefox}
-            ${davinci}
-            ${blueman}
-            ${nm}
-            ${torrent}
-            ${hypridle}
-            ${hyprsunset}
-            ${yubikey}
-            ${keyring}
-            ${evglow}
-            ${hyprhook}
-          '';
+      # Rendered as hl.config({...}) in the generated hyprland.lua
+      settings.config = {
+        input = {
+          kb_layout = osConfig.modules.locale.defaultLocale;
+          kb_options = "ctrl:nocaps";
+          follow_mouse = 0;
+          repeat_rate = 50;
+          repeat_delay = 300;
+          touchpad.natural_scroll = false;
+          sensitivity = 0;
+          accel_profile = "flat";
         };
+        general = {
+          gaps_in = 6;
+          gaps_out = 12;
+          border_size = 2;
+          "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
+          "col.inactive_border" = "rgba(595959aa)";
+          layout = "master";
+        };
+        decoration = {
+          rounding = 4;
+          blur = {
+            enabled = true;
+            size = 4;
+            noise = 0.02;
+            brightness = 0.9;
+            contrast = 0.9;
+            vibrancy = 0.2;
+            vibrancy_darkness = 0.1;
+            passes = 2;
+            special = false;
+          };
+        };
+        misc = {
+          enable_swallow = true;
+          disable_hyprland_logo = true;
+          disable_splash_rendering = true;
+          vrr = 1;
+        };
+        binds.allow_workspace_cycles = true;
+        ecosystem.no_update_news = true;
       };
+
+      extraConfig = ''
+        local mod = "SUPER"
+
+        -- Environment
+        hl.env("XCURSOR_SIZE", "16")
+        hl.env("XDG_SESSION_TYPE", "wayland")
+        hl.env("XDG_SESSION_DESKTOP", "Hyprland")
+        hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
+        hl.env("MOZ_ENABLE_WAYLAND", "1")
+
+        -- Monitors (custom rules first, catch-all last: highrr, auto-position, 1x scale)
+        ${lib.concatMapStrings (m: "${monitorToLua m}\n") cfg.hyprland.monitors}hl.monitor({ output = "", mode = "highrr", position = "auto", scale = 1 })
+
+        -- Startup
+        hl.on("hyprland.start", function()
+          hl.exec_cmd("${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all")
+          hl.exec_cmd("${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME")
+          hl.exec_cmd("wl-paste --type text --watch cliphist store")
+          hl.exec_cmd("wl-paste --type image --watch cliphist store")
+          hl.exec_cmd("polkitagent")
+          hl.exec_cmd("${pkgs.awww}/bin/awww-daemon")
+          hl.exec_cmd("wallpaper")
+          ${lib.optionalString useWaybar        ''hl.exec_cmd("waybar")''}
+          ${lib.optionalString useSwaync        ''hl.exec_cmd("swaync")''}
+          ${lib.optionalString useSwayidle      ''hl.exec_cmd("detectidle")''}
+          ${lib.optionalString useSwayAudioIdle ''hl.exec_cmd("sway-audio-idle-inhibit")''}
+          ${lib.optionalString useSsh           ''hl.exec_cmd("sshagent")''}
+          ${lib.optionalString useBlueman       ''hl.exec_cmd("blueman-applet")''}
+          ${lib.optionalString useNm            ''hl.exec_cmd("nm-applet --indicator")''}
+          ${lib.optionalString useTorrent       ''hl.exec_cmd("mullvad-vpn")''}
+          ${lib.optionalString useHyprlock      ''hl.exec_cmd("hypridle")''}
+          ${lib.optionalString useHyprsunset    ''hl.exec_cmd("hyprsunset")''}
+          ${lib.optionalString useYubikey       ''hl.exec_cmd("${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify")''}
+          ${lib.optionalString useGnomeKeyring  ''hl.exec_cmd("unlock-keyring")''}
+          ${lib.optionalString useEvglow        ''hl.exec_cmd("evglow")''}
+          ${lib.optionalString useHyprhook      ''hl.exec_cmd("${osConfig.services.hyprhook.finalPackage}/bin/hyprhook")''}
+        end)
+
+        -- Window rules
+        hl.window_rule({ match = { class = "^(org.kde.polkit-kde-authentication-agent-1)$" }, float = true })
+        hl.window_rule({ match = { class = "^(gamescope)$", title = "^(Counter-Strike 2)$" },
+          fullscreen = true, stay_focused = true, immediate = true })
+        ${lib.optionalString useKitty   ''hl.window_rule({ match = { class = "kitty" }, opacity = 0.90 })''}
+        ${lib.optionalString useRofi    ''hl.window_rule({ match = { class = "Rofi" }, float = true })''}
+        ${lib.optionalString useBlueman ''hl.window_rule({ match = { class = "^(blueman-manager)$" }, float = true })''}
+        ${lib.optionalString useNm ''
+        hl.window_rule({ match = { class = "^(nm-applet)$" }, float = true })
+        hl.window_rule({ match = { class = "^(nm-connection-editor)$" }, float = true })
+        ''}
+        ${lib.optionalString useFirefox ''hl.window_rule({ match = { class = "firefox" }, center = true })''}
+        ${lib.optionalString useDavinci ''hl.window_rule({ match = { title = "^(DaVinci Resolve)(.*)$" }, tile = true })''}
+
+        -- Passthru submap: forwards $mod to the focused window (e.g. for VMs, remote desktops)
+        hl.define_submap("passthru", "reset", function()
+          hl.bind(mod .. " SHIFT + Q", hl.dsp.submap("reset"))
+        end)
+
+        -- Core binds
+        hl.bind(mod .. " + F",       hl.dsp.window.fullscreen())
+        hl.bind(mod .. " + Q",       hl.dsp.exec_cmd("${lib.getExe close-window}"))
+        hl.bind(mod .. " + C",       hl.dsp.exec_cmd("hyprctl reload"))
+        hl.bind(mod .. " + W",       hl.dsp.exec_cmd("${config.modules.browser.defaultBrowser}"))
+        hl.bind(mod .. " SHIFT + C", hl.dsp.exit())
+        hl.bind(mod .. " SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
+        hl.bind(mod .. " SHIFT + W", hl.dsp.exec_cmd("${lib.getExe random-wallpaper}"))
+        hl.bind(mod .. " SHIFT + Q", hl.dsp.submap("passthru"))
+        hl.bind(mod .. " + SPACE",   hl.dsp.layout("swapwithmaster"))
+
+        -- Workspace navigation (loop for 1–9, manual for 10)
+        for i = 1, 9 do
+          hl.bind(mod .. " + " .. i,       hl.dsp.focus({ workspace = i }))
+          hl.bind(mod .. " SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
+        end
+        hl.bind(mod .. " + 0",           hl.dsp.focus({ workspace = 10 }))
+        hl.bind(mod .. " SHIFT + 0",     hl.dsp.window.move({ workspace = 10 }))
+        hl.bind(mod .. " SHIFT + LEFT",  hl.dsp.window.move({ workspace = "e-1" }))
+        hl.bind(mod .. " SHIFT + RIGHT", hl.dsp.window.move({ workspace = "e+1" }))
+        hl.bind(mod .. " + LEFT",  hl.dsp.focus({ workspace = "e-1" }), { repeating = true })
+        hl.bind(mod .. " + RIGHT", hl.dsp.focus({ workspace = "e+1" }), { repeating = true })
+        hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+        hl.bind(mod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+
+        -- Focus movement (vim keys, repeating)
+        hl.bind(mod .. " + H", hl.dsp.focus({ direction = "left" }),  { repeating = true })
+        hl.bind(mod .. " + L", hl.dsp.focus({ direction = "right" }), { repeating = true })
+        hl.bind(mod .. " + K", hl.dsp.focus({ direction = "up" }),    { repeating = true })
+        hl.bind(mod .. " + J", hl.dsp.focus({ direction = "down" }),  { repeating = true })
+
+        -- Move windows in tiling (repeating)
+        hl.bind(mod .. " ALT + H", hl.dsp.window.move({ direction = "left" }),  { repeating = true })
+        hl.bind(mod .. " ALT + L", hl.dsp.window.move({ direction = "right" }), { repeating = true })
+        hl.bind(mod .. " ALT + K", hl.dsp.window.move({ direction = "up" }),    { repeating = true })
+        hl.bind(mod .. " ALT + J", hl.dsp.window.move({ direction = "down" }),  { repeating = true })
+
+        -- Resize active window (repeating)
+        hl.bind(mod .. " SHIFT + L", hl.dsp.window.resize({ x = 10,  y = 0,   relative = true }), { repeating = true })
+        hl.bind(mod .. " SHIFT + H", hl.dsp.window.resize({ x = -10, y = 0,   relative = true }), { repeating = true })
+        hl.bind(mod .. " SHIFT + K", hl.dsp.window.resize({ x = 0,   y = -10, relative = true }), { repeating = true })
+        hl.bind(mod .. " SHIFT + J", hl.dsp.window.resize({ x = 0,   y = 10,  relative = true }), { repeating = true })
+
+        -- Mouse: drag/resize with Alt+click
+        hl.bind("ALT + mouse:272", hl.dsp.window.drag(),   { mouse = true })
+        hl.bind("ALT + mouse:273", hl.dsp.window.resize(), { mouse = true })
+
+        -- Magic special workspace on ` (backtick); $mod+P is now free for music
+        hl.bind(mod .. " + grave", function()
+          hl.dispatch(hl.dsp.workspace.toggle_special("magic"))
+          hl.dispatch(hl.dsp.window.move({ workspace = "+0" }))
+          hl.dispatch(hl.dsp.workspace.toggle_special("magic"))
+          hl.dispatch(hl.dsp.window.move({ workspace = "special:magic" }))
+          hl.dispatch(hl.dsp.workspace.toggle_special("magic"))
+        end)
+
+        -- Lid switch + brightness keys (laptop only)
+        ${lib.optionalString isLaptop ''
+        hl.bind(", switch:on:Lid Switch",  hl.dsp.exec_cmd("lidhandle on"),  { locked = true })
+        hl.bind(", switch:off:Lid Switch", hl.dsp.exec_cmd("lidhandle off"), { locked = true })
+        hl.bind(", XF86MonBrightnessDown",       hl.dsp.exec_cmd("brightnessctl set 1%-"))
+        hl.bind(", XF86MonBrightnessUp",         hl.dsp.exec_cmd("brightnessctl set 1%+"))
+        hl.bind("SHIFT + XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"))
+        hl.bind("SHIFT + XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 5%+"))
+        ''}
+
+        -- Application binds
+        ${lib.optionalString useHyprpicker                               ''hl.bind(mod .. " + U",        hl.dsp.exec_cmd("hyprpicker"))''}
+        ${lib.optionalString useKitty                                    ''hl.bind(mod .. " + RETURN",   hl.dsp.exec_cmd("kitty -1 --title=kitty"))''}
+        ${lib.optionalString (useKitty && useNvim)                       ''hl.bind(mod .. " + V",        hl.dsp.exec_cmd("kitty -1 --title=kitty nvim"))''}
+        ${lib.optionalString (useKitty && useYazi)                       ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty yazi"))''}
+        ${lib.optionalString (useKitty && !useYazi && useLf)             ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty lf"))''}
+        ${lib.optionalString (useKitty && useEmail)                      ''hl.bind(mod .. " + E",        hl.dsp.exec_cmd("kitty -1 --title=kitty neomutt"))''}
+        ${lib.optionalString (useKitty && useEmail && useThunderbird)    ''hl.bind(mod .. " SHIFT + E",  hl.dsp.exec_cmd("${pkgs.thunderbird}/bin/thunderbird"))''}
+        ${lib.optionalString (useKitty && useBtop)                       ''hl.bind(mod .. " SHIFT + R",  hl.dsp.exec_cmd("kitty -1 --title=kitty btop"))''}
+        ${lib.optionalString (useKitty && useNcmpcpp)                    ''hl.bind(mod .. " + M",        hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
+        ${lib.optionalString (useKitty && useCalcurse)                   ''hl.bind(mod .. " ALT + K",    hl.dsp.exec_cmd("kitty -1 --title=kitty calcurse"))''}
+        ${lib.optionalString useNewsboat                                  ''hl.bind(mod .. " SHIFT + N",  hl.dsp.exec_cmd("kitty -1 --title=kitty newsboat"))''}
+        ${lib.optionalString useWaybar ''
+        hl.bind(mod .. " + B",       hl.dsp.exec_cmd("waybar-toggle"))
+        hl.bind(mod .. " SHIFT + B", hl.dsp.exec_cmd("waybar-reload"))
+        ''}
+        ${lib.optionalString useSwaync ''hl.bind(mod .. " + N",        hl.dsp.exec_cmd("swaync-client -t -sw"))''}
+        ${lib.optionalString useRofi   ''hl.bind(mod .. " SHIFT + V",  hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy"))''}
+        ${lib.optionalString useAnyrun ''hl.bind(mod .. " + D",        hl.dsp.exec_cmd("anyrun"))''}
+        ${lib.optionalString useRofi   ''hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("logoutlaunch"))''}
+        ${lib.optionalString useScreenshots ''
+        hl.bind(mod .. " + S",       hl.dsp.exec_cmd("screenshot"))
+        hl.bind(mod .. " SHIFT + D", hl.dsp.exec_cmd("fullscreenshot"))
+        ''}
+
+        -- Music / audio binds
+        ${lib.optionalString useMusic ''
+        hl.bind(mod .. " + P",            hl.dsp.exec_cmd("mpc toggle"))
+        hl.bind(mod .. " + COMMA",        hl.dsp.exec_cmd("mpc prev"))
+        hl.bind(mod .. " SHIFT + COMMA",  hl.dsp.exec_cmd("mpc seek 0%"))
+        hl.bind(mod .. " + PERIOD",       hl.dsp.exec_cmd("mpc next"))
+        hl.bind(mod .. " SHIFT + PERIOD", hl.dsp.exec_cmd("mpc repeat"))
+        hl.bind(", XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+        hl.bind(", XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
+        hl.bind(", XF86AudioPrev",        hl.dsp.exec_cmd("mpc prev"))
+        hl.bind(", XF86AudioNext",        hl.dsp.exec_cmd("mpc next"))
+        hl.bind(", XF86AudioPause",       hl.dsp.exec_cmd("mpc pause"))
+        hl.bind(", XF86AudioPlay",        hl.dsp.exec_cmd("mpc play"))
+        hl.bind(", XF86AudioStop",        hl.dsp.exec_cmd("mpc stop"))
+        hl.bind(", XF86AudioRewind",      hl.dsp.exec_cmd("mpc seek -10"))
+        hl.bind(", XF86AudioForward",     hl.dsp.exec_cmd("mpc seek +10"))
+        hl.bind(", XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
+        hl.bind(", XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        { repeating = true })
+        ${lib.optionalString (useKitty && useNcmpcpp) ''hl.bind(", XF86AudioMedia", hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
+        ''}
+      '';
     };
-    # Ensure the user-level portals.conf routes ScreenCast to xdph, not gtk.
-    # The user-level file (~/.config/xdg-desktop-portal/portals.conf) takes priority
-    # over the system-level one (/etc/xdg/…). Without this, the yazi termfilechooser
-    # config (which only sets the FileChooser override) produces a file with only
-    # default=gtk, and xdp never forwards ScreenCast requests to xdg-desktop-portal-hyprland.
+    # Route ScreenCast to xdg-desktop-portal-hyprland, FileChooser to gtk
     xdg.portal.config.hyprland = {
       default = ["hyprland" "gtk"];
       "org.freedesktop.portal.FileChooser" = ["gtk"];

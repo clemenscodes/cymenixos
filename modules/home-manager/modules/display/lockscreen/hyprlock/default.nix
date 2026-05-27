@@ -11,6 +11,9 @@
   cfg = config.modules.display.lockscreen;
   suspendScript = pkgs.writeShellScript "suspend-script" ''
     ${lib.getExe pkgs.playerctl} -a status | ${lib.getExe pkgs.ripgrep} Playing -q
+    if [ $? -eq 1 ]; then
+      ${pkgs.systemd}/bin/systemctl suspend
+    fi
   '';
   brightness = lib.getExe pkgs.brightnessctl;
   timeout = 3000;

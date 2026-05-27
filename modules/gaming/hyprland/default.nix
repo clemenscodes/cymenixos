@@ -89,49 +89,26 @@ in {
       users.${config.modules.users.user} = {
         home.packages = [hypr-gamemode];
 
-        wayland.windowManager.hyprland.settings = {
-          windowrule = [
-            # ── Steam Big Picture ──────────────────────────────────────────────
-            # Send Big Picture mode to the games workspace and make it fullscreen
-            # so it feels like a console UI rather than a floating Steam window.
-            "workspace special:games, match:class ^(?i)steam$, match:title ^(?i).*Big Picture.*$"
-            "fullscreen on, match:class ^(?i)steam$, match:title ^(?i).*Big Picture.*$"
+        wayland.windowManager.hyprland.extraConfig = ''
+          -- Steam Big Picture: send to games workspace and fullscreen
+          hl.window_rule({ match = { class = "^(?i)steam$", title = "^(?i).*Big Picture.*$" }, workspace = "special:games" })
+          hl.window_rule({ match = { class = "^(?i)steam$", title = "^(?i).*Big Picture.*$" }, fullscreen = true })
 
-            # ── Game clients ───────────────────────────────────────────────────
-            # steam_app_* — windows spawned by Steam for individual game launches.
-            # gamescope   — games that run inside a gamescope wrapper (e.g. RE Engine titles).
-            #               CS2 is unaffected: it runs natively (no gamescope window) and has
-            #               an explicit workspace 2 rule in cs2.nix that takes precedence.
-            # sunshine    — game streaming server window.
-            # proton/wine — Windows compatibility layer windows.
-            "workspace special:games, match:class ^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$"
-            "workspace special:games, match:initial_class ^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$"
-            "fullscreen on, match:class ^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$"
+          -- Game clients (steam_app_*, gamescope, sunshine, proton, wine)
+          -- CS2 runs natively and has an explicit workspace 2 rule in cs2.nix that takes precedence.
+          hl.window_rule({ match = { class = "^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$" }, workspace = "special:games" })
+          hl.window_rule({ match = { initial_class = "^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$" }, workspace = "special:games" })
+          hl.window_rule({ match = { class = "^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$" }, fullscreen = true })
 
-            # ── Per-workspace compositor optimizations ─────────────────────────
-            # Disabling these effects for the games workspace removes GPU memory-
-            # bandwidth pressure during gameplay without touching any other workspace.
-            "no_anim on, match:workspace special:games"
-            "no_blur on, match:workspace special:games"
-            "no_shadow on, match:workspace special:games"
-            "decorate off, match:workspace special:games"
-            "border_size 0, match:workspace special:games"
-            "rounding 0, match:workspace special:games"
-            "fullscreen on, match:workspace special:games"
+          -- Per-workspace compositor optimizations and input behaviour for special:games
+          hl.window_rule({ match = { workspace = "special:games" },
+            no_anim = true, no_blur = true, no_shadow = true,
+            decorate = false, border_size = 0, rounding = 0, fullscreen = true,
+            idle_inhibit = "always", stay_focused = true, suppress_event = "activatefocus" })
 
-            # ── Focus / input behaviour ────────────────────────────────────────
-            # idle_inhibit: prevent screen lock while a game is active.
-            # stay_focused: ignore focus-steal requests from background apps.
-            # suppress activatefocus: drop _NET_ACTIVE_WINDOW requests from game processes.
-            "idle_inhibit always, match:workspace special:games"
-            "stay_focused on, match:workspace special:games"
-            "suppress_event activatefocus, match:workspace special:games"
-          ];
-
-          bind = [
-            "$mod, ${hyprCfg.gamemode.keybind}, exec, ${hypr-gamemode}/bin/hypr-gamemode"
-          ];
-        };
+          -- Gamemode toggle
+          hl.bind("SUPER + ${hyprCfg.gamemode.keybind}", hl.dsp.exec_cmd("${hypr-gamemode}/bin/hypr-gamemode"))
+        '';
       };
     };
   };

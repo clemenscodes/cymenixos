@@ -59,7 +59,7 @@
       };
     };
     catppuccin = {
-      url = "github:catppuccin/nix";
+      url = "github:catppuccin/nix/86996e2c4ee6a091fddb10de56dd21a1a5972bcb";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";
@@ -198,7 +198,7 @@
         };
       };
     };
-    hyprland.url = "github:hyprwm/Hyprland/v0.54.0";
+    hyprland.url = "github:hyprwm/Hyprland/v0.55.2";
     hyprland-plugins = {
       url = "github:hyprwm/hyprland-plugins";
       inputs.hyprland.follows = "hyprland";
