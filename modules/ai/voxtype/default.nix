@@ -50,13 +50,11 @@ in {
             windowManager = {
               hyprland = {
                 extraConfig = ''
-                  # Recording
-                  bind = $mod, T, exec, ${voxtypePkg}/bin/voxtype record toggle --clipboard
-                  bind = $mod CTRL, T, exec, ${voxtypePkg}/bin/voxtype record cancel
-                  # Meetings
-                  bind = $mod, I, exec, ${meeting-toggle}/bin/voxtype-meeting-toggle
-                  bind = $mod SHIFT, I, exec, ${meeting-pause-toggle}/bin/voxtype-meeting-pause-toggle
-                  bind = $mod ALT, I, exec, ${meeting-export}/bin/voxtype-meeting-export
+                  hl.bind("SUPER + T",       hl.dsp.exec_cmd("${voxtypePkg}/bin/voxtype record toggle --clipboard"))
+                  hl.bind("SUPER CTRL + T",  hl.dsp.exec_cmd("${voxtypePkg}/bin/voxtype record cancel"))
+                  hl.bind("SUPER + I",       hl.dsp.exec_cmd("${meeting-toggle}/bin/voxtype-meeting-toggle"))
+                  hl.bind("SUPER SHIFT + I", hl.dsp.exec_cmd("${meeting-pause-toggle}/bin/voxtype-meeting-pause-toggle"))
+                  hl.bind("SUPER ALT + I",   hl.dsp.exec_cmd("${meeting-export}/bin/voxtype-meeting-export"))
                 '';
               };
             };

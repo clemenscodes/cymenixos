@@ -14,11 +14,9 @@ in {
   wayland = {
     windowManager = {
       hyprland = {
-        settings = {
-          bind = [
-            "$mod SHIFT, D, exec, ${emoji}/bin/emoji"
-          ];
-        };
+        extraConfig = ''
+          hl.bind("SUPER SHIFT + D", hl.dsp.exec_cmd("${emoji}/bin/emoji"))
+        '';
       };
     };
   };

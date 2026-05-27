@@ -1827,16 +1827,14 @@ in {
     };
 
     wayland.windowManager.hyprland = lib.mkIf (useHyprland && obsCfg.keybinds.enable) {
-      settings = {
-        bind = [
-          "$mod, O, exec, ${obs-toggle}/bin/obs-toggle"
-          "$mod CTRL, O, exec, obs-record-toggle"
-          "$mod CTRL, T, exec, obs-stream-toggle"
-          "$mod CTRL, B, exec, obs-replay-toggle"
-          "$mod CTRL, S, exec, obs-replay-save"
-          "$mod CTRL, V, exec, obs-vcam-toggle"
-        ];
-      };
+      extraConfig = ''
+        hl.bind("SUPER + O",      hl.dsp.exec_cmd("${obs-toggle}/bin/obs-toggle"))
+        hl.bind("SUPER CTRL + O", hl.dsp.exec_cmd("obs-record-toggle"))
+        hl.bind("SUPER CTRL + T", hl.dsp.exec_cmd("obs-stream-toggle"))
+        hl.bind("SUPER CTRL + B", hl.dsp.exec_cmd("obs-replay-toggle"))
+        hl.bind("SUPER CTRL + S", hl.dsp.exec_cmd("obs-replay-save"))
+        hl.bind("SUPER CTRL + V", hl.dsp.exec_cmd("obs-vcam-toggle"))
+      '';
     };
 
     programs = {

@@ -453,7 +453,7 @@ in {
               windowManager = {
                 hyprland = {
                   extraConfig = ''
-                    windowrule = fullscreen on, match:class (looking-glass-client)
+                    hl.window_rule({ match = { class = "looking-glass-client" }, fullscreen = true })
                   '';
                 };
               };

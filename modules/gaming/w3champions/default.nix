@@ -27,14 +27,12 @@ in {
 
     home-manager = lib.mkIf config.modules.home-manager.enable {
       users.${config.modules.users.user} = {
-        wayland.windowManager.hyprland.settings = {
-          windowrule = [
-            "tile on, match:class ^(battle.net.exe)$, match:title ^(Battle.net)$"
-            "content game, workspace 2, center 1, float on, size (monitor_w*0.8) (monitor_h*0.8), match:class ^(w3champions.exe)$, match:title ^(W3Champions)$"
-            "workspace 3, match:class ^(warcraft iii.exe)$"
-            "fullscreen on, match:class ^(warcraft iii.exe)$"
-          ];
-        };
+        wayland.windowManager.hyprland.extraConfig = ''
+          hl.window_rule({ match = { class = "^(battle.net.exe)$", title = "^(Battle.net)$" }, tile = true })
+          hl.window_rule({ match = { class = "^(w3champions.exe)$", title = "^(W3Champions)$" }, workspace = "2", center = true, float = true })
+          hl.window_rule({ match = { class = "^(warcraft iii.exe)$" }, workspace = "3" })
+          hl.window_rule({ match = { class = "^(warcraft iii.exe)$" }, fullscreen = true })
+        '';
       };
     };
   };
