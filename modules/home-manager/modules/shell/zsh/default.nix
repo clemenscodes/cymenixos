@@ -163,10 +163,25 @@ in {
               else ""
             }
             ${
-              if config.modules.development.direnv.enable
-              then ''eval "$(direnv hook zsh)"''
-              else ""
-            }
+            if config.modules.development.direnv.enable
+            then ''
+              eval "$(direnv hook zsh)"
+
+              # Re-run compinit when direnv changes ZSH_COMPDUMP (e.g. nix develop
+              # shellHook with `installShellFiles`-provided completions). Without this,
+              # zsh's compinit has already run before direnv injects the new fpath.
+              autoload -Uz add-zsh-hook
+              _direnv_refresh_completions() {
+                [[ -z "$ZSH_COMPDUMP" || "$ZSH_COMPDUMP" == "$_LAST_ZSH_COMPDUMP" ]] && return
+                export _LAST_ZSH_COMPDUMP="$ZSH_COMPDUMP"
+                command rm -f "$ZSH_COMPDUMP" "$ZSH_COMPDUMP.zwc"
+                autoload -Uz compinit
+                compinit -i -d "$ZSH_COMPDUMP"
+              }
+              add-zsh-hook precmd _direnv_refresh_completions
+            ''
+            else ""
+          }
             # V: open Videos directory — prefers /mnt/raid/Videos when the ZFS pool is mounted
             function V() {
               if ${pkgs.util-linux}/bin/mountpoint -q /mnt/raid 2>/dev/null; then
