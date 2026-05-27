@@ -43,13 +43,6 @@
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   useNewsboat = config.modules.media.rss.newsboat.enable;
   isLaptop = machine == "laptop";
-  close-window = pkgs.writeShellScriptBin "close-window" ''
-    if [ "$(${pkgs.hyprland}/bin/hyprctl activewindow -j | ${lib.getExe pkgs.jq} -r ".class")" = "Steam" ]; then
-        ${lib.getExe pkgs.xdotool} getactivewindow windowunmap
-    else
-        ${pkgs.hyprland}/bin/hyprctl dispatch killactive ""
-    fi
-  '';
   random-wallpaper = import ./wallpaper {inherit inputs pkgs lib;};
   # Convert "OUTPUT, MODE, POSITION, SCALE" string to a hl.monitor({}) Lua call
   monitorToLua = m: let
@@ -210,7 +203,7 @@ in {
 
         -- Core binds
         hl.bind(mod .. " + F",       hl.dsp.window.fullscreen())
-        hl.bind(mod .. " + Q",       hl.dsp.exec_cmd("${lib.getExe close-window}"))
+        hl.bind(mod .. " + Q",       hl.dsp.window.close())
         hl.bind(mod .. " + C",       hl.dsp.exec_cmd("hyprctl reload"))
         hl.bind(mod .. " + W",       hl.dsp.exec_cmd("${config.modules.browser.defaultBrowser}"))
         hl.bind(mod .. " + SHIFT + C", hl.dsp.exit())
