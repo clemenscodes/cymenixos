@@ -43,11 +43,30 @@
       lockfile="$lockdir/lock"
       exec 9>"$lockfile"
       if ! flock -n 9; then
-        echo "waydroid-ui: already running; focusing existing cage window"
-        if command -v hyprctl >/dev/null 2>&1; then
-          hyprctl dispatch 'hl.dsp.focus({ regex = "class:wlroots" })' >/dev/null 2>&1 || true
+        # Already running. Two sub-cases:
+        #   a) cage window still mapped somewhere (likely a non-active
+        #      workspace) — bring focus there.
+        #   b) cage is alive but its window is gone for some reason —
+        #      the user can't bring it back, so kill cage to break the
+        #      lock and start fresh.
+        if hyprctl clients -j 2>/dev/null | grep -q '"class": "wlroots"'; then
+          echo "waydroid-ui: already running; focusing existing cage window"
+          hyprctl dispatch 'hl.dsp.focus({ window = "class:wlroots" })' >/dev/null 2>&1 || true
+          exit 0
         fi
-        exit 0
+        echo "waydroid-ui: existing cage has no window; killing and restarting"
+        pkill -TERM -f "cage -- waydroid show-full-ui" 2>/dev/null || true
+        # Wait for the old wrapper to release the lock.
+        for _ in 1 2 3 4 5 6 7 8; do
+          if flock -n 9; then
+            break
+          fi
+          sleep 1
+        done
+        if ! flock -n 9; then
+          echo "waydroid-ui: could not acquire lock after kill; aborting"
+          exit 1
+        fi
       fi
 
       # Find the amdgpu render node — Android renders via mesa minigbm
