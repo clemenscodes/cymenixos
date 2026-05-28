@@ -100,12 +100,7 @@ PanelWindow {
                         IconImage {
                             anchors.centerIn: parent
                             implicitSize: 22
-                            source: {
-                                var appId = tlButton.modelData.appId || ""
-                                var p = Quickshell.iconPath(appId.toLowerCase(), true)
-                                if (p) return p
-                                return Quickshell.iconPath("application-x-executable")
-                            }
+                            source: Quickshell.iconPath((tlButton.modelData.appId || "").toLowerCase(), "image-missing")
                         }
 
                         MouseArea {
