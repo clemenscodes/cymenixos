@@ -209,6 +209,7 @@ PanelWindow {
         }
 
         JsonPill {
+            id: notifPill
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
@@ -225,6 +226,19 @@ PanelWindow {
                 "dnd-inhibited-notification": "🔕",
                 "default": "🔔"
             })
+            tooltipText: {
+                const count = parseInt(notifPill.text) || 0
+                const dnd = notifPill.iconName.startsWith("dnd-")
+                let s
+                if (count === 0) {
+                    s = dnd ? "Do Not Disturb active" : "No new notifications"
+                } else {
+                    s = count + " unread notification" + (count === 1 ? "" : "s")
+                    if (dnd) s += "  ·  DND active"
+                }
+                s += "\n\nLeft-click: toggle notification panel\nRight-click: toggle Do Not Disturb"
+                return s
+            }
             onLeftClick: () => Quickshell.execDetached(["swaync-client", "-t", "-sw"])
             onRightClick: () => Quickshell.execDetached(["swaync-client", "-d", "-sw"])
         }

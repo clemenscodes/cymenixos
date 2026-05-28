@@ -19,6 +19,9 @@ Pill {
     property string text: fallbackText
     property string altClass: ""
     property string iconName: ""
+    property string parsedTooltipText: ""
+
+    tooltipText: parsedTooltipText
 
     interactive: onLeftClick !== null || onRightClick !== null || onMiddleClick !== null
 
@@ -48,13 +51,13 @@ Pill {
                 root.text = obj.text || ""
                 root.altClass = obj.class || ""
                 root.iconName = obj.alt || ""
-                root.tooltipText = obj.tooltip || ""
+                root.parsedTooltipText = obj.tooltip || ""
                 return
             } catch (e) {}
         }
         const lines = line.split("\n")
         root.text = (lines[0] || "").trim()
-        root.tooltipText = (lines[1] || "").trim()
+        root.parsedTooltipText = (lines[1] || "").trim()
         root.altClass = (lines[2] || "").trim()
         root.iconName = ""
     }

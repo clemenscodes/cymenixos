@@ -34,10 +34,10 @@ PanelWindow {
 
         Pill {
             Layout.alignment: Qt.AlignVCenter
-            contentPadding: 8
+            contentPadding: 6
 
             Row {
-                spacing: Theme.pillSpacing
+                spacing: 2
 
                 Repeater {
                     model: Hyprland.workspaces
@@ -46,12 +46,12 @@ PanelWindow {
                         id: wsButton
                         required property HyprlandWorkspace modelData
 
-                        implicitWidth: wsLabel.implicitWidth + 20
-                        implicitHeight: 32
+                        implicitWidth: wsLabel.implicitWidth + 18
+                        implicitHeight: Theme.pillHeight - 12
                         radius: Theme.innerRadius
                         color: modelData.focused
                             ? Theme.activeBg
-                            : (hoverArea.containsMouse ? Qt.rgba(0.85, 0.76, 0.77, 0.3) : "transparent")
+                            : (hoverArea.containsMouse ? Qt.rgba(0.85, 0.76, 0.77, 0.25) : "transparent")
 
                         Behavior on color {
                             ColorAnimation { duration: Theme.fadeMs }
@@ -92,11 +92,24 @@ PanelWindow {
         // -------- RIGHT: stats + custom modules + powermenu --------
 
         JsonPill {
+            id: mailPill
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
             command: ["waybar-mail"]
             intervalMs: 5000
+            tooltipText: {
+                const m = mailPill.text.match(/(\d+)/)
+                const count = m ? parseInt(m[1]) : 0
+                let s
+                if (count === 0) {
+                    s = "Inbox is clean — no unread mail"
+                } else {
+                    s = count + " unread message" + (count === 1 ? "" : "s") + " in INBOX"
+                }
+                s += "\n\nLeft-click: open Thunderbird"
+                return s
+            }
             onLeftClick: () => Quickshell.execDetached(["thunderbird"])
         }
 
@@ -170,6 +183,9 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             baseColor: Theme.powerBg
             interactive: true
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+            tooltipText: "Power menu\nLeft-click: open shutdown / reboot / lock / logout menu"
             onLeftClicked: Quickshell.execDetached(["sh", "-c", "sleep 0.1 && logoutlaunch"])
 
             Text {
