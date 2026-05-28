@@ -17,16 +17,25 @@ PopupWindow {
     color: "transparent"
     visible: false
 
-    Text {
-        id: naturalMeasure
-        text: tooltip.text
+    TextMetrics {
+        id: lineMetrics
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSize - 2
-        wrapMode: Text.NoWrap
-        visible: false
     }
 
-    readonly property real measuredNaturalWidth: naturalMeasure.contentWidth
+    function measureWidestLine(s) {
+        if (!s || s.length === 0) return 0
+        const lines = s.split("\n")
+        let maxW = 0
+        for (let i = 0; i < lines.length; i++) {
+            lineMetrics.text = lines[i]
+            const w = lineMetrics.boundingRect.width
+            if (w > maxW) maxW = w
+        }
+        return maxW
+    }
+
+    readonly property real measuredNaturalWidth: measureWidestLine(tooltip.text)
     readonly property real fitWidth: Math.min(measuredNaturalWidth + innerPadding * 2, maxWidth)
 
     implicitWidth: fitWidth

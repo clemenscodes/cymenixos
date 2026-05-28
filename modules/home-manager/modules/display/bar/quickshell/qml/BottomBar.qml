@@ -372,27 +372,32 @@ PanelWindow {
         }
 
         Pill {
+            id: clockPill
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+            tooltipText: Qt.formatDateTime(clock.now, "dddd, dd MMMM yyyy") + "\n"
+                + Qt.formatDateTime(clock.now, "HH:mm:ss")
+
+            QtObject {
+                id: clock
+                property date now: new Date()
+            }
+
+            Timer {
+                interval: 5000
+                running: true
+                repeat: true
+                triggeredOnStart: true
+                onTriggered: clock.now = new Date()
+            }
 
             Text {
+                text: Qt.formatDateTime(clock.now, "HH:mm") + " 🕐"
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 font.bold: true
-                text: Qt.formatDateTime(clock.now, "ddd dd.MM.yyyy HH:mm") + " 🕐"
-
-                QtObject {
-                    id: clock
-                    property date now: new Date()
-                }
-
-                Timer {
-                    interval: 5000
-                    running: true
-                    repeat: true
-                    triggeredOnStart: true
-                    onTriggered: clock.now = new Date()
-                }
             }
         }
     }
