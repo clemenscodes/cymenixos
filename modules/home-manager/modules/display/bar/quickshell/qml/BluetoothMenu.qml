@@ -12,6 +12,12 @@ PanelWindow {
     readonly property var adapter: Bluetooth.defaultAdapter
     readonly property var allDevices: Bluetooth.devices ? Bluetooth.devices.values : []
 
+    // Nerd Font Awesome glyphs via fromCodePoint to avoid editor encoding loss.
+    readonly property string btOnIcon: String.fromCodePoint(0xf293)
+    readonly property string btOffIcon: String.fromCodePoint(0xf294)
+    readonly property string linkIcon: String.fromCodePoint(0xf0c1)
+    readonly property string unlinkIcon: String.fromCodePoint(0xf127)
+
     readonly property var sortedDevices: {
         const arr = menu.allDevices.slice()
         arr.sort((a, b) => {
@@ -125,7 +131,7 @@ PanelWindow {
                     id: headerIcon
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: menu.adapter && menu.adapter.enabled ? "" : ""
+                    text: menu.adapter && menu.adapter.enabled ? menu.btOnIcon : menu.btOffIcon
                     color: menu.adapter && menu.adapter.enabled ? Theme.activeBg : Theme.mutedColor
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize + 10
@@ -293,7 +299,7 @@ PanelWindow {
                             anchors.right: parent.right
                             anchors.rightMargin: 14
                             anchors.verticalCenter: parent.verticalCenter
-                            text: row.modelData.connected ? "" : ""
+                            text: row.modelData.connected ? menu.linkIcon : menu.unlinkIcon
                             color: row.modelData.connected ? Theme.activeBg : Theme.mutedColor
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize

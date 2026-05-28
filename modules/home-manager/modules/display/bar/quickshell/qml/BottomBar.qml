@@ -285,6 +285,11 @@ PanelWindow {
                 : 0
             readonly property bool poweredOn: adapter !== null && adapter.enabled
 
+            // Nerd Font Awesome glyphs — written via fromCodePoint so the
+            // file is pure ASCII and editor/git can't mangle the bytes.
+            readonly property string btOnIcon: String.fromCodePoint(0xf293)
+            readonly property string btOffIcon: String.fromCodePoint(0xf294)
+
             onLeftClicked: bar.bluetoothMenu.toggle(bar)
             onRightClicked: { if (adapter) adapter.enabled = !adapter.enabled }
 
@@ -302,8 +307,10 @@ PanelWindow {
 
             Text {
                 text: btPill.poweredOn
-                    ? (btPill.connectedCount > 0 ? "  " + btPill.connectedCount : "")
-                    : ""
+                    ? (btPill.connectedCount > 0
+                        ? btPill.btOnIcon + " " + btPill.connectedCount
+                        : btPill.btOnIcon)
+                    : btPill.btOffIcon
                 color: btPill.poweredOn
                     ? (btPill.connectedCount > 0 ? Theme.activeBg : Theme.textColor)
                     : Theme.mutedColor
