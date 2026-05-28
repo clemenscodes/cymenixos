@@ -12,6 +12,10 @@ ShellRoot {
         id: shellPowerMenu
     }
 
+    BluetoothMenu {
+        id: shellBluetoothMenu
+    }
+
     Variants {
         model: Quickshell.screens
 
@@ -29,6 +33,7 @@ ShellRoot {
             required property var modelData
             screen: modelData
             appLauncher: shellAppLauncher
+            bluetoothMenu: shellBluetoothMenu
         }
     }
 }

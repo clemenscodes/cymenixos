@@ -6,5 +6,6 @@ StyledTooltip 1.0 StyledTooltip.qml
 TrayMenu 1.0 TrayMenu.qml
 PowerMenu 1.0 PowerMenu.qml
 AppLauncher 1.0 AppLauncher.qml
+BluetoothMenu 1.0 BluetoothMenu.qml
 TopBar 1.0 TopBar.qml
 BottomBar 1.0 BottomBar.qml

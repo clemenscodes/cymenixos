@@ -7,12 +7,14 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
 import Quickshell.Services.Pipewire
+import Quickshell.Bluetooth
 
 PanelWindow {
     id: bar
 
     required property var screen
     required property var appLauncher
+    required property var bluetoothMenu
 
     anchors {
         bottom: true
@@ -263,6 +265,50 @@ PanelWindow {
             Text {
                 text: idleInhibit.enabled ? "☀️" : "🌙"
                 color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize + 2
+                font.bold: true
+            }
+        }
+
+        Pill {
+            id: btPill
+            Layout.alignment: Qt.AlignVCenter
+            interactive: true
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+            visible: Bluetooth.defaultAdapter !== null
+
+            readonly property var adapter: Bluetooth.defaultAdapter
+            readonly property int connectedCount: Bluetooth.devices
+                ? Bluetooth.devices.values.filter(d => d.connected).length
+                : 0
+            readonly property bool poweredOn: adapter !== null && adapter.enabled
+
+            onLeftClicked: bar.bluetoothMenu.toggle(bar)
+            onRightClicked: { if (adapter) adapter.enabled = !adapter.enabled }
+
+            tooltipText: {
+                if (!btPill.adapter) return "No Bluetooth adapter"
+                if (!btPill.poweredOn) return "Bluetooth is off\nLeft-click: open menu\nRight-click: power on"
+                if (btPill.connectedCount === 0) return "Bluetooth on, nothing connected\nLeft-click: open menu\nRight-click: power off"
+                const names = Bluetooth.devices.values
+                    .filter(d => d.connected)
+                    .map(d => "• " + (d.deviceName || d.name || d.address))
+                    .join("\n")
+                return "Bluetooth on, " + btPill.connectedCount + " connected:\n" + names
+                    + "\n\nLeft-click: open menu  ·  Right-click: power off"
+            }
+
+            Text {
+                text: {
+                    if (!btPill.poweredOn) return ""
+                    if (btPill.connectedCount === 0) return ""
+                    return "  " + btPill.connectedCount
+                }
+                color: btPill.poweredOn
+                    ? (btPill.connectedCount > 0 ? Theme.activeBg : Theme.textColor)
+                    : Theme.mutedColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize + 2
                 font.bold: true
