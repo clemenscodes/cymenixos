@@ -113,7 +113,7 @@ in {
             ];
             "hyprland/workspaces" = lib.mkIf useHyprland {
               format = "-> {id}";
-              on-click = "activate";
+              on-click = "hyprctl dispatch 'hl.dsp.focus({ workspace = {id} })'";
               on-scroll-up = "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'";
               on-scroll-down = "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e-1\" })'";
             };
