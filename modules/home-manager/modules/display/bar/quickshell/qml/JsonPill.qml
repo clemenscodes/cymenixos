@@ -23,15 +23,23 @@ Pill {
     visible: text.length > 0
 
     function parseLine(line) {
-        try {
-            const obj = JSON.parse(line)
-            root.text = obj.text || ""
-            root.altClass = obj.class || ""
-            root.tooltipText = obj.tooltip || ""
-            root.iconName = obj.alt || ""
-        } catch (e) {
-            root.text = line.trim()
+        const trimmed = line.trim()
+        if (trimmed.startsWith("{")) {
+            try {
+                const obj = JSON.parse(trimmed)
+                root.text = obj.text || ""
+                root.altClass = obj.class || ""
+                root.tooltipText = obj.tooltip || ""
+                root.iconName = obj.alt || ""
+                return
+            } catch (e) {}
         }
+        // Legacy waybar 3-line format: text \n tooltip \n class
+        const lines = line.split("\n")
+        root.text = (lines[0] || "").trim()
+        root.tooltipText = (lines[1] || "").trim()
+        root.altClass = (lines[2] || "").trim()
+        root.iconName = ""
     }
 
     Process {

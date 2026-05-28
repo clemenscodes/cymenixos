@@ -25,12 +25,11 @@ PanelWindow {
         anchors.bottomMargin: 0
         spacing: 4
 
+        // -------- LEFT: workspaces --------
+
         Pill {
             Layout.alignment: Qt.AlignVCenter
-            topMargin: 4
-            bottomMargin: 4
-            leftMargin: 8
-            rightMargin: 8
+            contentPadding: 6
 
             Row {
                 spacing: Theme.pillSpacing
@@ -42,8 +41,8 @@ PanelWindow {
                         id: wsButton
                         required property HyprlandWorkspace modelData
 
-                        implicitWidth: wsLabel.implicitWidth + 24
-                        implicitHeight: wsLabel.implicitHeight + 12
+                        implicitWidth: wsLabel.implicitWidth + 16
+                        implicitHeight: 26
                         radius: Theme.innerRadius
                         color: modelData.focused
                             ? Theme.activeBg
@@ -84,5 +83,85 @@ PanelWindow {
         }
 
         Item { Layout.fillWidth: true }
+
+        // -------- RIGHT: stats + custom modules + powermenu --------
+
+        JsonPill {
+            Layout.alignment: Qt.AlignVCenter
+            command: ["waybar-mail"]
+            intervalMs: 5000
+            onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty neomutt"])
+        }
+
+        Pill {
+            Layout.alignment: Qt.AlignVCenter
+            Text {
+                text: `${SysStats.diskUsage || "—"} 💾`
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        Pill {
+            Layout.alignment: Qt.AlignVCenter
+            Text {
+                text: `${SysStats.memPercent}% 🧠`
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        Pill {
+            Layout.alignment: Qt.AlignVCenter
+            visible: SysStats.tempC > 0
+            Text {
+                text: `${SysStats.tempC}°C 🌡️`
+                color: SysStats.tempC >= 80 ? Theme.criticalColor : Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        Pill {
+            Layout.alignment: Qt.AlignVCenter
+            Text {
+                text: `${SysStats.cpuPercent}% ⚙️`
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        JsonPill {
+            Layout.alignment: Qt.AlignVCenter
+            command: ["waybar-nvidia"]
+            intervalMs: 5000
+            onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty nvtop"])
+        }
+
+        Pill {
+            Layout.alignment: Qt.AlignVCenter
+            color: Theme.powerBg
+
+            Text {
+                text: "⏻"
+                color: "white"
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize + 4
+                font.bold: true
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Quickshell.execDetached(["sh", "-c", "sleep 0.1 && logoutlaunch"])
+            }
+        }
     }
 }

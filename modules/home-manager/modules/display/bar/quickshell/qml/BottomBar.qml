@@ -40,6 +40,12 @@ PanelWindow {
         ]
     }
 
+    IdleInhibitor {
+        id: idleInhibit
+        window: bar
+        enabled: false
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -48,18 +54,20 @@ PanelWindow {
         anchors.bottomMargin: Theme.barMargin
         spacing: 4
 
-        // ---------- LEFT ----------
+        // -------- LEFT: logo + taskbar --------
 
         Rectangle {
             Layout.alignment: Qt.AlignVCenter
-            implicitWidth: Theme.barHeight - 12
-            implicitHeight: Theme.barHeight - 12
+            implicitWidth: Theme.pillHeight
+            implicitHeight: Theme.pillHeight
             color: "transparent"
 
             IconImage {
                 anchors.fill: parent
                 source: Quickshell.iconPath("nix-snowflake")
                 implicitSize: parent.height
+                smooth: true
+                mipmap: true
             }
 
             MouseArea {
@@ -72,10 +80,7 @@ PanelWindow {
         Pill {
             Layout.alignment: Qt.AlignVCenter
             visible: ToplevelManager.toplevels.values.length > 0
-            topMargin: 4
-            bottomMargin: 4
-            leftMargin: 8
-            rightMargin: 8
+            contentPadding: 6
 
             Row {
                 spacing: 4
@@ -114,6 +119,10 @@ PanelWindow {
                             mipmap: true
                         }
 
+                        ToolTip.visible: tlHover.containsMouse
+                        ToolTip.delay: 400
+                        ToolTip.text: tlButton.modelData.title || tlButton.modelData.appId || ""
+
                         MouseArea {
                             id: tlHover
                             anchors.fill: parent
@@ -136,7 +145,29 @@ PanelWindow {
 
         Item { Layout.fillWidth: true }
 
-        // ---------- RIGHT ----------
+        // -------- RIGHT: custom JSON + submap + tray + audio + clock --------
+
+        JsonPill {
+            Layout.alignment: Qt.AlignVCenter
+            command: ["waybar-claude-monitor"]
+            intervalMs: 60000
+            onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty claude-monitor"])
+        }
+
+        JsonPill {
+            Layout.alignment: Qt.AlignVCenter
+            command: ["voxtype", "status", "--follow", "--format", "json"]
+            streaming: true
+            onLeftClick: () => Quickshell.execDetached(["systemctl", "--user", "restart", "voxtype"])
+        }
+
+        JsonPill {
+            Layout.alignment: Qt.AlignVCenter
+            command: ["wootswitch", "list", "--waybar"]
+            intervalMs: 1000
+            onLeftClick: () => Quickshell.execDetached(["wootswitch", "switch", "--next"])
+            onRightClick: () => Quickshell.execDetached(["wootswitch", "switch", "--previous"])
+        }
 
         Pill {
             Layout.alignment: Qt.AlignVCenter
@@ -151,15 +182,39 @@ PanelWindow {
             }
         }
 
-        // System tray
+        JsonPill {
+            Layout.alignment: Qt.AlignVCenter
+            command: ["swaync-client", "-swb"]
+            streaming: true
+            fallbackText: "🔔"
+            onLeftClick: () => Quickshell.execDetached(["swaync-client", "-t", "-sw"])
+            onRightClick: () => Quickshell.execDetached(["swaync-client", "-d", "-sw"])
+        }
+
+        Pill {
+            id: idlePill
+            Layout.alignment: Qt.AlignVCenter
+
+            Text {
+                text: idleInhibit.enabled ? "☕" : "💤"
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: idleInhibit.enabled = !idleInhibit.enabled
+            }
+        }
+
         Pill {
             id: trayPill
             Layout.alignment: Qt.AlignVCenter
             visible: SystemTray.items.values.length > 0
-            topMargin: 4
-            bottomMargin: 4
-            leftMargin: 8
-            rightMargin: 8
+            contentPadding: 8
 
             Row {
                 spacing: 8
@@ -199,7 +254,6 @@ PanelWindow {
                             onClicked: function(mouse) {
                                 if (mouse.button === Qt.LeftButton) {
                                     if (trayDelegate.modelData.onlyMenu) {
-                                        trayMenu.item = trayDelegate.modelData
                                         trayMenu.anchorItem = trayDelegate
                                         trayMenu.menu = trayDelegate.modelData.menu
                                         trayMenu.open()
@@ -210,7 +264,6 @@ PanelWindow {
                                     trayDelegate.modelData.secondaryActivate()
                                 } else if (mouse.button === Qt.RightButton) {
                                     if (trayDelegate.modelData.hasMenu) {
-                                        trayMenu.item = trayDelegate.modelData
                                         trayMenu.anchorItem = trayDelegate
                                         trayMenu.menu = trayDelegate.modelData.menu
                                         trayMenu.open()
@@ -229,7 +282,6 @@ PanelWindow {
 
         QsMenuAnchor {
             id: trayMenu
-            property var item: null
             property Item anchorItem: null
             anchor {
                 window: bar
@@ -244,103 +296,86 @@ PanelWindow {
             }
         }
 
-        // Volume (default sink)
         Pill {
             id: volPill
             Layout.alignment: Qt.AlignVCenter
 
             readonly property var audio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
 
-            Item {
-                implicitWidth: volText.implicitWidth
-                implicitHeight: volText.implicitHeight
-
-                Text {
-                    id: volText
-                    text: {
-                        if (!volPill.audio) return "—"
-                        if (volPill.audio.muted) return "🔇"
-                        var v = Math.round(volPill.audio.volume * 100)
-                        return `${v}% 🔊`
-                    }
-                    color: Theme.textColor
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize
-                    font.bold: true
+            Text {
+                id: volText
+                text: {
+                    if (!volPill.audio) return "—"
+                    if (volPill.audio.muted) return "🔇"
+                    const v = Math.round(volPill.audio.volume * 100)
+                    return `${v}% 🔊`
                 }
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    onClicked: function(mouse) {
-                        if (mouse.button === Qt.LeftButton) {
-                            if (volPill.audio) {
-                                volPill.audio.muted = !volPill.audio.muted
-                            }
-                        } else if (mouse.button === Qt.RightButton) {
-                            Quickshell.execDetached(["pavucontrol"])
-                        }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: function(mouse) {
+                    if (mouse.button === Qt.LeftButton) {
+                        if (volPill.audio) volPill.audio.muted = !volPill.audio.muted
+                    } else if (mouse.button === Qt.RightButton) {
+                        Quickshell.execDetached(["pavucontrol"])
                     }
-                    onWheel: function(wheel) {
-                        if (!volPill.audio) return
-                        var step = 0.05
-                        var newV = volPill.audio.volume + (wheel.angleDelta.y > 0 ? step : -step)
-                        volPill.audio.volume = Math.max(0, Math.min(1.5, newV))
-                        wheel.accepted = true
-                    }
+                }
+                onWheel: function(wheel) {
+                    if (!volPill.audio) return
+                    const step = 0.05
+                    const newV = volPill.audio.volume + (wheel.angleDelta.y > 0 ? step : -step)
+                    volPill.audio.volume = Math.max(0, Math.min(1.5, newV))
+                    wheel.accepted = true
                 }
             }
         }
 
-        // Mic (default source)
         Pill {
             id: micPill
             Layout.alignment: Qt.AlignVCenter
 
             readonly property var audio: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
 
-            Item {
-                implicitWidth: micText.implicitWidth
-                implicitHeight: micText.implicitHeight
-
-                Text {
-                    id: micText
-                    text: {
-                        if (!micPill.audio) return "—"
-                        if (micPill.audio.muted) return "🚫 🎤"
-                        var v = Math.round(micPill.audio.volume * 100)
-                        return `${v}% 🎤`
-                    }
-                    color: Theme.textColor
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize
-                    font.bold: true
+            Text {
+                id: micText
+                text: {
+                    if (!micPill.audio) return "—"
+                    if (micPill.audio.muted) return "🚫 🎤"
+                    const v = Math.round(micPill.audio.volume * 100)
+                    return `${v}% 🎤`
                 }
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    onClicked: function(mouse) {
-                        if (mouse.button === Qt.LeftButton) {
-                            if (micPill.audio) {
-                                micPill.audio.muted = !micPill.audio.muted
-                            }
-                        } else if (mouse.button === Qt.RightButton) {
-                            Quickshell.execDetached(["pavucontrol"])
-                        }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: function(mouse) {
+                    if (mouse.button === Qt.LeftButton) {
+                        if (micPill.audio) micPill.audio.muted = !micPill.audio.muted
+                    } else if (mouse.button === Qt.RightButton) {
+                        Quickshell.execDetached(["pavucontrol"])
                     }
-                    onWheel: function(wheel) {
-                        if (!micPill.audio) return
-                        var step = 0.01
-                        var newV = micPill.audio.volume + (wheel.angleDelta.y > 0 ? step : -step)
-                        micPill.audio.volume = Math.max(0, Math.min(1.5, newV))
-                        wheel.accepted = true
-                    }
+                }
+                onWheel: function(wheel) {
+                    if (!micPill.audio) return
+                    const step = 0.01
+                    const newV = micPill.audio.volume + (wheel.angleDelta.y > 0 ? step : -step)
+                    micPill.audio.volume = Math.max(0, Math.min(1.5, newV))
+                    wheel.accepted = true
                 }
             }
         }
 
-        // Clock
         Pill {
             Layout.alignment: Qt.AlignVCenter
 
@@ -364,6 +399,12 @@ PanelWindow {
                     triggeredOnStart: true
                     onTriggered: clock.now = new Date()
                 }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty calcurse"])
             }
         }
     }
