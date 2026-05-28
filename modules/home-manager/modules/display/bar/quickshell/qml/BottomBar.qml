@@ -305,18 +305,29 @@ PanelWindow {
                     + "\n\nLeft-click: open menu  ·  Right-click: power off"
             }
 
-            Text {
-                text: btPill.poweredOn
-                    ? (btPill.connectedCount > 0
-                        ? btPill.btOnIcon + " " + btPill.connectedCount
-                        : btPill.btOnIcon)
-                    : btPill.btOffIcon
-                color: btPill.poweredOn
-                    ? (btPill.connectedCount > 0 ? Theme.activeBg : Theme.textColor)
-                    : Theme.mutedColor
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize + 2
-                font.bold: true
+            Row {
+                spacing: 6
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: btPill.poweredOn ? btPill.btOnIcon : btPill.btOffIcon
+                    color: btPill.poweredOn
+                        ? (btPill.connectedCount > 0 ? Theme.activeBg : Theme.textColor)
+                        : Theme.mutedColor
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 8
+                    font.bold: true
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: btPill.poweredOn && btPill.connectedCount > 0
+                    text: btPill.connectedCount
+                    color: Theme.activeBg
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
             }
         }
 
