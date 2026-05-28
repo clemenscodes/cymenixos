@@ -38,39 +38,19 @@
       # spin forever on 'Failed to get service waydroidplatform', stick
       # the session, and the only fix is killing both cages plus the
       # container — so refuse the second launch up front.
+      # Single-instance guard. A second cage attaching to a session
+      # that's already owned by another cage spins on 'Failed to get
+      # service waydroidplatform'. If the cage window still exists
+      # (e.g. on a non-active workspace) just focus it instead of
+      # refusing.
       lockdir="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/waydroid-ui"
       mkdir -p "$lockdir"
       lockfile="$lockdir/lock"
       exec 9>"$lockfile"
       if ! flock -n 9; then
-        # Already running. Two sub-cases:
-        #   a) cage window still mapped somewhere (likely a non-active
-        #      workspace) — bring focus there.
-        #   b) cage is alive but its window is gone for some reason —
-        #      the user can't bring it back, so kill cage to break the
-        #      lock and start fresh.
-        if hyprctl clients -j 2>/dev/null | grep -q '"class": "wlroots"'; then
-          echo "waydroid-ui: already running; focusing existing cage window"
-          hyprctl dispatch 'hl.dsp.focus({ window = "class:wlroots" })' >/dev/null 2>&1 || true
-          exit 0
-        fi
-        echo "waydroid-ui: existing cage has no window; stopping session and restarting"
-        # SIGTERM-ing cage directly doesn't work — cage 0.3.0 sleeps
-        # in do_wait on its child and ignores TERM. Stopping the
-        # waydroid session is the supported way to tear the stack
-        # down: show-full-ui exits, cage's child returns, cage exits,
-        # the old wrapper exits, fd 9 closes, the lock releases.
-        waydroid session stop >/dev/null 2>&1 || true
-        for _ in 1 2 3 4 5 6 7 8 9 10; do
-          if flock -n 9; then
-            break
-          fi
-          sleep 1
-        done
-        if ! flock -n 9; then
-          echo "waydroid-ui: could not acquire lock after stop; aborting"
-          exit 1
-        fi
+        echo "waydroid-ui: already running; focusing existing cage window"
+        hyprctl dispatch 'hl.dsp.focus({ window = "class:wlroots" })' >/dev/null 2>&1 || true
+        exit 0
       fi
 
       # Find the amdgpu render node — Android renders via mesa minigbm
@@ -201,6 +181,17 @@ in {
         inherit (cfg.waydroid) enable;
       };
     };
+
+    # When the cage wlroots window closes (e.g. Mod+Q in Hyprland),
+    # tear the waydroid session down so the next launch starts clean.
+    # Without this the session lingers in RUNNING state, the next
+    # cage attaches to nothing, and the user sees no window.
+    modules.io.hyprhook.rules = lib.mkIf config.modules.io.hyprhook.enable [
+      {
+        class = "^wlroots$";
+        on_close = ["${pkgs.waydroid}/bin/waydroid" "session" "stop"];
+      }
+    ];
 
     home-manager.users.${user} = {
       wayland.windowManager.hyprland.extraConfig = ''
