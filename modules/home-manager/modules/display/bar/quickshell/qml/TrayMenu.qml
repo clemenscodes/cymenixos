@@ -1,31 +1,29 @@
 // One level of a system tray context menu. Used recursively via
-// Loader { sourceComponent: ... Qt.createComponent("TrayMenu.qml") }
-// so submenus, sub-submenus etc. all use the same delegate code.
+// Qt.createComponent(Qt.resolvedUrl("TrayMenu.qml")) so submenus,
+// sub-submenus etc. all use the same delegate code.
 //
-// Positioning: every level (top + all submenus) anchors to the same
-// root bar window. We compute absolute screen positions via
-// mapToGlobal and convert back into the bar window's local space.
-// That way chained PopupAnchors don't have to play coordinate-space
-// gymnastics between nested popup windows.
+// Anchoring:
+// - The top level anchors to the BottomBar PanelWindow above the
+//   tray pill (placement = "above").
+// - Every submenu anchors to its IMMEDIATE PARENT popup window with
+//   anchor coords in that popup's local scene (placement = "right").
+//   This is what xdg_popup is designed for and avoids any
+//   cross-window coordinate gymnastics.
 import QtQuick
 import Quickshell
 
 PopupWindow {
     id: popup
 
-    // The QsMenuHandle for THIS level. Set at show()/createObject.
     property var menuHandle: null
-
-    // The bar PanelWindow that anchors the entire chain.
-    property var rootWindow: null
-
-    // Where this popup wants its top-left in *bar* coordinates.
-    property real screenX: 0
-    property real screenY: 0
+    property var anchorWindow: null
+    property Item anchorItem: null
+    property string placement: "above"   // "above" or "right"
+    property var parentLevel: null
 
     color: "transparent"
     visible: false
-    grabFocus: !popup.parentLevel  // only the top-level grabs focus
+    grabFocus: !popup.parentLevel        // only the root level grabs focus
 
     implicitWidth: 260
     implicitHeight: menuFrame.implicitHeight
@@ -35,59 +33,58 @@ PopupWindow {
         menu: popup.menuHandle
     }
 
-    // Parent in the chain (null for top-level). Used to bubble Hide.
-    property var parentLevel: null
-
-    // Which child submenu is currently spawned (one at a time per level).
     property var subInstance: null
     property var subForEntry: null
 
     anchor {
-        window: popup.rootWindow
-        rect.x: popup.screenX
-        rect.y: popup.screenY
+        window: popup.anchorWindow
+        rect.x: {
+            if (!popup.anchorItem) return 0
+            const p = popup.anchorItem.mapToItem(null, 0, 0)
+            if (popup.placement === "right") {
+                return p.x + popup.anchorItem.width + 2
+            }
+            return p.x + popup.anchorItem.width / 2 - popup.implicitWidth / 2
+        }
+        rect.y: {
+            if (!popup.anchorItem) return 0
+            const p = popup.anchorItem.mapToItem(null, 0, 0)
+            if (popup.placement === "right") {
+                return p.y
+            }
+            return p.y - popup.implicitHeight - 4
+        }
         rect.width: 1
         rect.height: 1
         edges: Edges.Top | Edges.Left
         gravity: Edges.Bottom | Edges.Right
     }
 
-    function show(item, anchorItem, window) {
+    function show(item, anchor, window) {
         popup.menuHandle = item ? item.menu : null
-        popup.rootWindow = window
-        // Position top-level above the tray pill, horizontally centered.
-        if (anchorItem && window) {
-            const g = anchorItem.mapToItem(null, 0, 0)
-            popup.screenX = g.x + anchorItem.width / 2 - popup.implicitWidth / 2
-            popup.screenY = g.y - popup.implicitHeight - 4
-        }
+        popup.anchorItem = anchor
+        popup.anchorWindow = window
+        popup.placement = "above"
+        popup.parentLevel = null
         popup.visible = true
     }
 
-    // Called by an entry row when the user wants its submenu open.
     function openSubFor(entry, handle) {
-        if (popup.subForEntry === entry && popup.subInstance) {
-            return  // already open, no-op
-        }
-        // Close any existing one
+        if (popup.subForEntry === entry && popup.subInstance) return
         closeSub()
-
-        const g = entry.mapToItem(null, 0, 0)
-        const subX = g.x + entry.width + 2
-        const subY = g.y - 6   // align roughly with row top inside its frame
 
         const c = Qt.createComponent(Qt.resolvedUrl("TrayMenu.qml"))
         if (c.status !== Component.Ready) {
-            console.warn("TrayMenu submenu component not ready:", c.errorString())
+            console.warn("TrayMenu sub component error:", c.errorString())
             return
         }
         const sub = c.createObject(null, {
-            rootWindow: popup.rootWindow,
-            parentLevel: popup,
-            screenX: subX,
-            screenY: subY
+            menuHandle: handle,
+            anchorWindow: popup,        // <- anchor to this popup window
+            anchorItem: entry,
+            placement: "right",
+            parentLevel: popup
         })
-        sub.menuHandle = handle
         sub.visible = true
         popup.subInstance = sub
         popup.subForEntry = entry
@@ -95,8 +92,7 @@ PopupWindow {
 
     function closeSub() {
         if (popup.subInstance) {
-            popup.subInstance.closeSub()
-            popup.subInstance.visible = false
+            popup.subInstance.bubbleHide()
             popup.subInstance.destroy()
             popup.subInstance = null
             popup.subForEntry = null
@@ -105,10 +101,20 @@ PopupWindow {
 
     function bubbleHide() {
         closeSub()
-        visible = false
-        if (parentLevel) parentLevel.bubbleHide()
-        menuHandle = null
+        popup.visible = false
+        if (popup.parentLevel && popup.parentLevel.visible) {
+            popup.parentLevel.bubbleHide()
+        }
+        popup.menuHandle = null
     }
+
+    // Cascade: when this popup becomes hidden (e.g. root grabFocus
+    // dismiss, or programmatic), drop our child too.
+    onVisibleChanged: {
+        if (!visible) closeSub()
+    }
+
+    Component.onDestruction: closeSub()
 
     Rectangle {
         id: menuFrame
@@ -118,6 +124,9 @@ PopupWindow {
         border.color: Theme.activeBg
         border.width: 1
         implicitHeight: menuColumn.implicitHeight + 12
+
+        focus: true
+        Keys.onEscapePressed: popup.bubbleHide()
 
         Column {
             id: menuColumn
@@ -177,7 +186,7 @@ PopupWindow {
                         Text {
                             id: rowLabel
                             anchors.left: rowIcon.visible ? rowIcon.right : parent.left
-                            anchors.leftMargin: rowIcon.visible ? 8 : 8
+                            anchors.leftMargin: 8
                             anchors.right: subArrow.visible ? subArrow.left : parent.right
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
@@ -213,11 +222,10 @@ PopupWindow {
                                 && !entry.modelData.isSeparator
 
                             onEntered: {
-                                // Only switch / open a submenu when hovering a
-                                // hasChildren row. Hovering leaf rows must NOT
-                                // close an already-open submenu — otherwise the
-                                // mouse sweeping from the parent row toward the
-                                // submenu kills it.
+                                // Hovering a hasChildren row opens / switches
+                                // the submenu. Hovering anything else leaves
+                                // the open submenu alone so the mouse can
+                                // sweep into it without it disappearing.
                                 if (entry.modelData.hasChildren) {
                                     popup.openSubFor(entry, entry.modelData)
                                 }
