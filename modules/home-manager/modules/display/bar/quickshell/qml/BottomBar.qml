@@ -86,8 +86,16 @@ PanelWindow {
                         id: tlButton
                         required property Toplevel modelData
 
-                        implicitWidth: 36
-                        implicitHeight: 28
+                        readonly property string resolvedIcon: {
+                            const appId = (tlButton.modelData.appId || "").toLowerCase()
+                            if (!appId) return ""
+                            const entry = DesktopEntries.heuristicLookup(appId)
+                            if (entry && entry.icon) return entry.icon
+                            return appId
+                        }
+
+                        implicitWidth: 40
+                        implicitHeight: 32
                         radius: Theme.innerRadius
                         color: modelData.activated
                             ? Theme.activeBg
@@ -99,8 +107,8 @@ PanelWindow {
 
                         IconImage {
                             anchors.centerIn: parent
-                            implicitSize: 22
-                            source: Quickshell.iconPath((tlButton.modelData.appId || "").toLowerCase(), "image-missing")
+                            implicitSize: 26
+                            source: Quickshell.iconPath(tlButton.resolvedIcon, "application-x-executable")
                         }
 
                         MouseArea {
@@ -160,13 +168,15 @@ PanelWindow {
                         id: trayDelegate
                         required property SystemTrayItem modelData
 
-                        implicitWidth: 28
-                        implicitHeight: 28
+                        implicitWidth: 32
+                        implicitHeight: 32
 
                         IconImage {
                             anchors.centerIn: parent
-                            implicitSize: 22
+                            implicitSize: 26
                             source: trayDelegate.modelData.icon
+                            smooth: true
+                            mipmap: true
                         }
 
                         MouseArea {
