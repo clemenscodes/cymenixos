@@ -172,12 +172,14 @@ PanelWindow {
                                 launcher.launch()
                                 event.accepted = true
                             } else if (event.key === Qt.Key_Down
+                                    || event.key === Qt.Key_Tab
                                     || (ctrl && event.key === Qt.Key_J)
                                     || (ctrl && event.key === Qt.Key_N)) {
                                 launcher.selectedIndex = Math.min(last, launcher.selectedIndex + 1)
                                 resultList.positionViewAtIndex(launcher.selectedIndex, ListView.Contain)
                                 event.accepted = true
                             } else if (event.key === Qt.Key_Up
+                                    || event.key === Qt.Key_Backtab
                                     || (ctrl && event.key === Qt.Key_K)
                                     || (ctrl && event.key === Qt.Key_P)) {
                                 launcher.selectedIndex = Math.max(0, launcher.selectedIndex - 1)
