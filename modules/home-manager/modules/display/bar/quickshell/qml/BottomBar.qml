@@ -12,6 +12,7 @@ PanelWindow {
     id: bar
 
     required property var screen
+    required property var appLauncher
 
     anchors {
         bottom: true
@@ -50,10 +51,6 @@ PanelWindow {
         id: barTooltip
     }
 
-    AppLauncher {
-        id: appLauncher
-    }
-
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -81,7 +78,7 @@ PanelWindow {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: appLauncher.toggle(bar)
+                onClicked: bar.appLauncher.toggle(bar)
             }
         }
 

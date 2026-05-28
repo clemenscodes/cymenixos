@@ -1,44 +1,45 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 
-PopupWindow {
+PanelWindow {
     id: menu
 
-    property Item anchorItem: null
-    property var anchorWindow: null
+    readonly property int cardWidth: 360
+    readonly property int cardHeight: 360
 
     readonly property var actions: [
-        { icon: "🔒", label: "Lock",      tip: "Lock the session",            cmd: ["loginctl", "lock-session"] },
-        { icon: "🚪", label: "Log out",   tip: "End the user session",        cmd: ["sh", "-c", "loginctl kill-user $USER"] },
-        { icon: "💤", label: "Suspend",   tip: "Suspend to RAM",              cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl suspend"] },
-        { icon: "❄",  label: "Hibernate", tip: "Suspend to disk",             cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl hibernate"] },
-        { icon: "🔄", label: "Reboot",    tip: "Restart the machine",         cmd: ["systemctl", "reboot"] },
-        { icon: "⏻",  label: "Shut down", tip: "Power off the machine",       cmd: ["systemctl", "poweroff"] }
+        { icon: "🔒", label: "Lock",      cmd: ["loginctl", "lock-session"] },
+        { icon: "🚪", label: "Log out",   cmd: ["sh", "-c", "loginctl kill-user $USER"] },
+        { icon: "💤", label: "Suspend",   cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl suspend"] },
+        { icon: "❄",  label: "Hibernate", cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl hibernate"] },
+        { icon: "🔄", label: "Reboot",    cmd: ["systemctl", "reboot"] },
+        { icon: "⏻",  label: "Shut down", cmd: ["systemctl", "poweroff"] }
     ]
 
-    color: "transparent"
     visible: false
-    grabFocus: true
+    color: "transparent"
 
-    implicitWidth: frame.implicitWidth
-    implicitHeight: frame.implicitHeight
+    anchors {
+        top: true
+        left: true
+        right: true
+        bottom: true
+    }
+    exclusiveZone: 0
+    aboveWindows: true
+    focusable: true
 
-    anchor {
-        window: menu.anchorWindow
-        rect.x: menu.anchorItem
-            ? menu.anchorItem.mapToItem(null, 0, 0).x + menu.anchorItem.width / 2 - menu.implicitWidth / 2
-            : 0
-        rect.y: menu.anchorWindow ? menu.anchorWindow.height + 6 : 6
-        rect.width: 1
-        rect.height: 1
-        edges: Edges.Bottom
-        gravity: Edges.Bottom
+    function toggle(window) {
+        if (menu.visible) menu.hide()
+        else menu.show(window)
     }
 
-    function show(item, window) {
-        menu.anchorItem = item
-        menu.anchorWindow = window
+    function show(window) {
+        if (window && window.screen) menu.screen = window.screen
         menu.visible = true
+        Qt.callLater(() => menu.forceActiveFocus())
     }
 
     function hide() {
@@ -50,40 +51,47 @@ PopupWindow {
         menu.hide()
     }
 
-    Rectangle {
-        id: frame
+    Keys.onPressed: function(event) {
+        if (event.key === Qt.Key_Escape) {
+            menu.hide()
+            event.accepted = true
+        }
+    }
+
+    MouseArea {
         anchors.fill: parent
+        onClicked: menu.hide()
+    }
+
+    Rectangle {
+        id: card
+        anchors.centerIn: parent
+        width: menu.cardWidth
+        height: menu.cardHeight
         color: Theme.defaultBg
         radius: Theme.pillRadius
         border.color: Theme.activeBg
         border.width: 1
 
-        implicitWidth: 260
-        implicitHeight: header.implicitHeight + actionsColumn.implicitHeight + 24
-
-        Text {
-            id: header
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: 10
-            text: "Power menu"
-            color: Theme.activeBg
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize - 2
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
+        MouseArea {
+            anchors.fill: parent
+            onClicked: { /* swallow */ }
         }
 
-        Column {
-            id: actionsColumn
-            anchors.top: header.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.margins: 8
-            anchors.topMargin: 6
-            spacing: 4
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 8
+
+            Text {
+                Layout.fillWidth: true
+                text: "Power"
+                color: Theme.activeBg
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize - 2
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+            }
 
             Repeater {
                 model: menu.actions
@@ -91,8 +99,9 @@ PopupWindow {
                 delegate: Rectangle {
                     id: btn
                     required property var modelData
-                    width: actionsColumn.width
-                    height: 40
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 44
                     radius: Theme.innerRadius
                     color: btnMouse.containsMouse
                         ? Qt.lighter(Theme.defaultBg, 1.4)
@@ -105,15 +114,15 @@ PopupWindow {
                     Row {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 14
-                        spacing: 14
+                        anchors.leftMargin: 16
+                        spacing: 16
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: btn.modelData.icon
                             color: Theme.textColor
                             font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize + 4
+                            font.pixelSize: Theme.fontSize + 6
                         }
 
                         Text {
@@ -135,6 +144,22 @@ PopupWindow {
                     }
                 }
             }
+        }
+    }
+
+    IpcHandler {
+        target: "powermenu"
+
+        function toggle() {
+            menu.toggle(null)
+        }
+
+        function open() {
+            menu.show(null)
+        }
+
+        function close() {
+            menu.hide()
         }
     }
 }

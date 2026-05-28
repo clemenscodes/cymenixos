@@ -7,6 +7,7 @@ PanelWindow {
     id: bar
 
     required property var screen
+    required property var powerMenu
 
     anchors {
         top: true
@@ -201,11 +202,8 @@ PanelWindow {
             interactive: true
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            tooltipText: "Power menu\nLeft-click: open lock / suspend / reboot / shutdown / logout menu"
-            onLeftClicked: {
-                if (powerMenu.visible) powerMenu.hide()
-                else powerMenu.show(powerPill, bar)
-            }
+            tooltipText: "Power menu (SUPER+Backspace)\nLeft-click: open lock / suspend / reboot / shutdown / logout"
+            onLeftClicked: bar.powerMenu.toggle(bar)
 
             Text {
                 text: "⏻"
@@ -214,10 +212,6 @@ PanelWindow {
                 font.pixelSize: Theme.fontSize + 4
                 font.bold: true
             }
-        }
-
-        PowerMenu {
-            id: powerMenu
         }
     }
 }
