@@ -127,7 +127,7 @@ in {
 
     home-manager.users.${user} = {
       wayland.windowManager.hyprland.extraConfig = ''
-        hl.window_rule({ match = { class = "^(wlroots)$", title = "^(Waydroid)$" }, fullscreen = true })
+        hl.window_rule({ match = { class = "^(wlroots)$" }, fullscreen = true, immediate = true })
       '';
     };
   };
