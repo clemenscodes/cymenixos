@@ -7,7 +7,7 @@ PanelWindow {
     id: menu
 
     readonly property int cardWidth: 360
-    readonly property int cardHeight: 360
+    readonly property int cardHeight: 380
 
     readonly property var actions: [
         { icon: "🔒", label: "Lock",      cmd: ["loginctl", "lock-session"] },
@@ -17,6 +17,8 @@ PanelWindow {
         { icon: "🔄", label: "Reboot",    cmd: ["systemctl", "reboot"] },
         { icon: "⏻",  label: "Shut down", cmd: ["systemctl", "poweroff"] }
     ]
+
+    property int selectedIndex: 0
 
     visible: false
     color: "transparent"
@@ -38,6 +40,7 @@ PanelWindow {
 
     function show(window) {
         if (window && window.screen) menu.screen = window.screen
+        menu.selectedIndex = 0
         menu.visible = true
         Qt.callLater(() => keyHandler.forceActiveFocus())
     }
@@ -55,10 +58,32 @@ PanelWindow {
         id: keyHandler
         anchors.fill: parent
         focus: true
+
         Keys.onPressed: function(event) {
             if (event.key === Qt.Key_Escape) {
                 menu.hide()
                 event.accepted = true
+            } else if (event.key === Qt.Key_Down || event.key === Qt.Key_J) {
+                menu.selectedIndex = (menu.selectedIndex + 1) % menu.actions.length
+                event.accepted = true
+            } else if (event.key === Qt.Key_Up || event.key === Qt.Key_K) {
+                menu.selectedIndex = (menu.selectedIndex - 1 + menu.actions.length) % menu.actions.length
+                event.accepted = true
+            } else if (event.key === Qt.Key_Home) {
+                menu.selectedIndex = 0
+                event.accepted = true
+            } else if (event.key === Qt.Key_End) {
+                menu.selectedIndex = menu.actions.length - 1
+                event.accepted = true
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                menu.runAction(menu.actions[menu.selectedIndex].cmd)
+                event.accepted = true
+            } else if (event.text >= "1" && event.text <= "9") {
+                const i = parseInt(event.text) - 1
+                if (i < menu.actions.length) {
+                    menu.runAction(menu.actions[i].cmd)
+                    event.accepted = true
+                }
             }
         }
 
@@ -88,14 +113,24 @@ PanelWindow {
             anchors.margins: 14
             spacing: 8
 
-            Text {
+            RowLayout {
                 Layout.fillWidth: true
-                text: "Power"
-                color: Theme.activeBg
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize - 2
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
+
+                Text {
+                    Layout.fillWidth: true
+                    text: "Power"
+                    color: Theme.activeBg
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize - 2
+                    font.bold: true
+                }
+
+                Text {
+                    text: "↑/↓ Enter · Esc"
+                    color: Qt.darker(Theme.textColor, 1.6)
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize - 4
+                }
             }
 
             Repeater {
@@ -104,11 +139,12 @@ PanelWindow {
                 delegate: Rectangle {
                     id: btn
                     required property var modelData
+                    required property int index
 
                     Layout.fillWidth: true
                     Layout.preferredHeight: 44
                     radius: Theme.innerRadius
-                    color: btnMouse.containsMouse
+                    color: (btn.index === menu.selectedIndex || btnMouse.containsMouse)
                         ? Qt.lighter(Theme.defaultBg, 1.4)
                         : Theme.defaultBg
 
@@ -136,8 +172,18 @@ PanelWindow {
                             color: Theme.textColor
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize
-                            font.bold: btnMouse.containsMouse
+                            font.bold: btn.index === menu.selectedIndex
                         }
+                    }
+
+                    Text {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.rightMargin: 14
+                        text: (btn.index + 1).toString()
+                        color: Qt.darker(Theme.textColor, 1.8)
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize - 4
                     }
 
                     MouseArea {
@@ -145,6 +191,7 @@ PanelWindow {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
+                        onEntered: menu.selectedIndex = btn.index
                         onClicked: menu.runAction(btn.modelData.cmd)
                     }
                 }
