@@ -28,6 +28,14 @@
   '';
 
   hasProps = w.density != null || w.width != null || w.height != null;
+
+  waydroid-ui = pkgs.writeShellApplication {
+    name = "waydroid-ui";
+    runtimeInputs = [pkgs.cage pkgs.waydroid];
+    text = ''
+      exec cage -- waydroid show-full-ui "$@"
+    '';
+  };
 in {
   options = {
     modules = {
@@ -83,6 +91,7 @@ in {
       };
       systemPackages = [
         pkgs.waydroid-helper
+        waydroid-ui
         (pkgs.writeShellApplication {
           name = "waydroid-aid";
           runtimeInputs = [
@@ -114,6 +123,12 @@ in {
       waydroid = {
         inherit (cfg.waydroid) enable;
       };
+    };
+
+    home-manager.users.${user} = {
+      wayland.windowManager.hyprland.extraConfig = ''
+        hl.window_rule({ match = { class = "^(wlroots)$", title = "^(Waydroid)$" }, fullscreen = true })
+      '';
     };
   };
 }
