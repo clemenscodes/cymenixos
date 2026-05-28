@@ -140,18 +140,6 @@ in {
           settings = {
             StartupWMClass = "wlroots";
           };
-          actions = {
-            stop = {
-              name = "Stop Waydroid";
-              exec = "${pkgs.waydroid}/bin/waydroid session stop";
-              icon = "waydroid";
-            };
-            initialize = {
-              name = "Initialize Waydroid";
-              exec = "${pkgs.waydroid}/bin/waydroid init --client";
-              icon = "waydroid";
-            };
-          };
         };
         Waydroid-Stop = {
           name = "Stop Waydroid";
