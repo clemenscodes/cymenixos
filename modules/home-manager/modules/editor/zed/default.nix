@@ -33,7 +33,7 @@ in {
     programs = {
       zed-editor = {
         inherit (cfg.zed) enable;
-        package = inputs.zed.packages.${pkgs.system}.default;
+        package = inputs.zed.packages.${pkgs.stdenv.hostPlatform.system}.default;
         extensions = [
           "nix"
           "basher"
