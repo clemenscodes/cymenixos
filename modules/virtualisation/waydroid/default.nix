@@ -31,9 +31,36 @@
 
   waydroid-ui = pkgs.writeShellApplication {
     name = "waydroid-ui";
-    runtimeInputs = [pkgs.cage pkgs.waydroid];
+    runtimeInputs = [pkgs.cage pkgs.waydroid pkgs.coreutils pkgs.gnugrep];
     text = ''
-      exec cage -- waydroid show-full-ui "$@"
+      # Find the amdgpu render node — Android renders via mesa minigbm
+      # on the AMD iGPU. Its DPM 'auto' governor doesn't ramp the iGPU
+      # up under sustained 4K Android workloads even at 100% busy, so
+      # pin it to 'high' while a session is alive and restore on exit.
+      amd_card=""
+      for c in /sys/class/drm/card[0-9]*; do
+        [ -d "$c/device" ] || continue
+        if grep -q amdgpu "$c/device/uevent" 2>/dev/null; then
+          amd_card="$c"
+          break
+        fi
+      done
+
+      perf_file=""
+      prev_perf=""
+      if [ -n "$amd_card" ] && [ -f "$amd_card/device/power_dpm_force_performance_level" ]; then
+        perf_file="$amd_card/device/power_dpm_force_performance_level"
+        prev_perf="$(cat "$perf_file")"
+        if sudo -n sh -c "echo high > $perf_file" 2>/dev/null; then
+          echo "waydroid-ui: pinned $amd_card to high perf (was $prev_perf)"
+          # shellcheck disable=SC2064
+          trap "sudo -n sh -c 'echo $prev_perf > $perf_file' 2>/dev/null || true" EXIT
+        else
+          echo "waydroid-ui: could not bump iGPU clock (sudo prompt or denied); continuing anyway"
+        fi
+      fi
+
+      cage -- waydroid show-full-ui "$@"
     '';
   };
 in {
