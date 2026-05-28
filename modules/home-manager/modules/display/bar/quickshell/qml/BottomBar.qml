@@ -50,6 +50,10 @@ PanelWindow {
         id: barTooltip
     }
 
+    AppLauncher {
+        id: appLauncher
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -77,7 +81,7 @@ PanelWindow {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Quickshell.execDetached(["sh", "-c", "sleep 0.3; rofi -show drun"])
+                onClicked: appLauncher.toggle(bar)
             }
         }
 
