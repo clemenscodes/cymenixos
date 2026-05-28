@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import Quickshell.Io
 
 Pill {
@@ -19,8 +18,9 @@ Pill {
 
     property string text: fallbackText
     property string altClass: ""
-    property string tooltipText: ""
     property string iconName: ""
+
+    interactive: onLeftClick !== null || onRightClick !== null || onMiddleClick !== null
 
     readonly property string displayText: {
         const keys = Object.keys(root.formatIcons)
@@ -32,6 +32,12 @@ Pill {
 
     visible: displayText.length > 0
 
+    onLeftClicked: { if (root.onLeftClick) root.onLeftClick() }
+    onRightClicked: { if (root.onRightClick) root.onRightClick() }
+    onMiddleClicked: { if (root.onMiddleClick) root.onMiddleClick() }
+    onScrolledUp: { if (root.onScrollUp) root.onScrollUp() }
+    onScrolledDown: { if (root.onScrollDown) root.onScrollDown() }
+
     function parseLine(line) {
         if (!line) return
         const trimmed = line.trim()
@@ -41,14 +47,12 @@ Pill {
                 const obj = JSON.parse(trimmed)
                 root.text = obj.text || ""
                 root.altClass = obj.class || ""
-                root.tooltipText = obj.tooltip || ""
                 root.iconName = obj.alt || ""
                 return
             } catch (e) {}
         }
         const lines = line.split("\n")
         root.text = (lines[0] || "").trim()
-        root.tooltipText = (lines[1] || "").trim()
         root.altClass = (lines[2] || "").trim()
         root.iconName = ""
     }
@@ -88,44 +92,17 @@ Pill {
         }
     }
 
-    Item {
-        implicitWidth: label.implicitWidth
-        implicitHeight: label.implicitHeight
-
-        Text {
-            id: label
-            text: root.displayText
-            color: {
-                if (root.altClass === "critical" || root.altClass === "notification") return Theme.criticalColor
-                if (root.altClass === "warning") return Theme.warningColor
-                if (root.altClass === "inactive") return Theme.mutedColor
-                return root.textColor
-            }
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize
-            font.bold: true
+    Text {
+        id: label
+        text: root.displayText
+        color: {
+            if (root.altClass === "critical" || root.altClass === "notification") return Theme.criticalColor
+            if (root.altClass === "warning") return Theme.warningColor
+            if (root.altClass === "inactive") return Theme.mutedColor
+            return root.textColor
         }
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            hoverEnabled: root.tooltipText.length > 0
-            cursorShape: (root.onLeftClick || root.onRightClick || root.onMiddleClick) ? Qt.PointingHandCursor : Qt.ArrowCursor
-
-            ToolTip.visible: containsMouse && root.tooltipText.length > 0
-            ToolTip.delay: 500
-            ToolTip.text: root.tooltipText
-
-            onClicked: function(mouse) {
-                if (mouse.button === Qt.LeftButton && root.onLeftClick) root.onLeftClick()
-                else if (mouse.button === Qt.RightButton && root.onRightClick) root.onRightClick()
-                else if (mouse.button === Qt.MiddleButton && root.onMiddleClick) root.onMiddleClick()
-            }
-            onWheel: function(wheel) {
-                if (wheel.angleDelta.y > 0 && root.onScrollUp) root.onScrollUp()
-                else if (wheel.angleDelta.y < 0 && root.onScrollDown) root.onScrollDown()
-                wheel.accepted = true
-            }
-        }
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize
+        font.bold: true
     }
 }

@@ -148,6 +148,8 @@ PanelWindow {
         Pill {
             Layout.alignment: Qt.AlignVCenter
             color: Theme.powerBg
+            interactive: true
+            onLeftClicked: Quickshell.execDetached(["sh", "-c", "sleep 0.1 && logoutlaunch"])
 
             Text {
                 text: "⏻"
@@ -155,12 +157,6 @@ PanelWindow {
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize + 4
                 font.bold: true
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: Quickshell.execDetached(["sh", "-c", "sleep 0.1 && logoutlaunch"])
             }
         }
     }

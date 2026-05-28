@@ -14,11 +14,11 @@ QtObject {
 
     readonly property int barHeight: 60
     readonly property int barMargin: 12
-    readonly property int pillHeight: 36
+    readonly property int pillHeight: 44
     readonly property int pillRadius: 12
     readonly property int innerRadius: 8
     readonly property int pillSpacing: 4
-    readonly property int padding: 12
+    readonly property int padding: 14
 
     readonly property string fontFamily: "Iosevka Nerd Font Mono"
     readonly property int fontSize: 16
