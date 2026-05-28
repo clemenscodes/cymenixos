@@ -14,29 +14,26 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: 60
+    implicitHeight: Theme.barHeight
     color: "transparent"
 
-    Rectangle {
+    RowLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        color: "transparent"
+        anchors.leftMargin: Theme.barMargin
+        anchors.rightMargin: Theme.barMargin
+        anchors.topMargin: Theme.barMargin
+        anchors.bottomMargin: 0
+        spacing: 4
 
-        RowLayout {
-            anchors.fill: parent
-            spacing: 12
+        Pill {
+            Layout.alignment: Qt.AlignVCenter
+            verticalPadding: 4
+            horizontalPadding: 8
 
-            Rectangle {
-                Layout.alignment: Qt.AlignVCenter
-                color: "#4A3C63"
-                radius: 12
-                implicitHeight: 36
-                implicitWidth: workspacesRow.implicitWidth + 16
-
+            content: [
                 Row {
-                    id: workspacesRow
-                    anchors.centerIn: parent
-                    spacing: 4
+                    spacing: Theme.pillSpacing
+                    anchors.verticalCenter: parent.verticalCenter
 
                     Repeater {
                         model: Hyprland.workspaces
@@ -45,27 +42,32 @@ PanelWindow {
                             id: wsButton
                             required property HyprlandWorkspace modelData
 
-                            width: 56
-                            height: 28
-                            radius: 8
-                            color: modelData.focused ? "#D8C1C4" : "transparent"
+                            implicitWidth: wsLabel.implicitWidth + 24
+                            implicitHeight: wsLabel.implicitHeight + 12
+                            radius: Theme.innerRadius
+                            color: modelData.focused
+                                ? Theme.activeBg
+                                : (hoverArea.containsMouse ? Qt.rgba(0.85, 0.76, 0.77, 0.3) : "transparent")
 
                             Behavior on color {
-                                ColorAnimation { duration: 200 }
+                                ColorAnimation { duration: Theme.fadeMs }
                             }
 
                             Text {
+                                id: wsLabel
                                 anchors.centerIn: parent
                                 text: `-> ${wsButton.modelData.id}`
-                                color: wsButton.modelData.focused ? "#58505E" : "#ffffff"
-                                font.family: "Iosevka Nerd Font Mono"
-                                font.pixelSize: 16
+                                color: wsButton.modelData.focused ? Theme.activeTextColor : Theme.textColor
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize
                                 font.bold: true
                             }
 
                             MouseArea {
+                                id: hoverArea
                                 anchors.fill: parent
                                 acceptedButtons: Qt.LeftButton
+                                hoverEnabled: true
                                 onClicked: wsButton.modelData.activate()
                                 onWheel: function(wheel) {
                                     if (wheel.angleDelta.y > 0) {
@@ -79,40 +81,9 @@ PanelWindow {
                         }
                     }
                 }
-            }
-
-            Item { Layout.fillWidth: true }
-
-            Rectangle {
-                Layout.alignment: Qt.AlignVCenter
-                color: "#4A3C63"
-                radius: 12
-                implicitHeight: 36
-                implicitWidth: clockText.implicitWidth + 24
-
-                Text {
-                    id: clockText
-                    anchors.centerIn: parent
-                    color: "#ffffff"
-                    font.family: "Iosevka Nerd Font Mono"
-                    font.pixelSize: 16
-                    font.bold: true
-                    text: Qt.formatDateTime(clock.now, "ddd dd.MM.yyyy HH:mm:ss")
-
-                    QtObject {
-                        id: clock
-                        property date now: new Date()
-                    }
-
-                    Timer {
-                        interval: 1000
-                        running: true
-                        repeat: true
-                        triggeredOnStart: true
-                        onTriggered: clock.now = new Date()
-                    }
-                }
-            }
+            ]
         }
+
+        Item { Layout.fillWidth: true }
     }
 }

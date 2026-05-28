@@ -9,4 +9,13 @@ ShellRoot {
             screen: modelData
         }
     }
+
+    Variants {
+        model: Quickshell.screens
+
+        BottomBar {
+            required property var modelData
+            screen: modelData
+        }
+    }
 }
