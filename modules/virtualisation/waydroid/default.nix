@@ -80,26 +80,14 @@
         trap "waydroid session stop >/dev/null 2>&1 || true" EXIT
       fi
 
-      cage -- waydroid show-full-ui "$@" &
-      cage_pid=$!
-
-      # Cage's wrapped child (waydroid show-full-ui) keeps the python
-      # session manager alive indefinitely, so cage never returns when
-      # the host compositor closes its surface. Watch Hyprland for the
-      # window disappearing and signal cage to quit so the EXIT trap
-      # can restore iGPU + stop the session.
-      (
-        sleep 8  # give the wlroots window time to appear
-        while kill -0 "$cage_pid" 2>/dev/null; do
-          if ! hyprctl clients -j 2>/dev/null | grep -q '"class": "wlroots"'; then
-            kill -TERM "$cage_pid" 2>/dev/null || true
-            break
-          fi
-          sleep 2
-        done
-      ) &
-
-      wait "$cage_pid" || true
+      # NB: closing the cage window in Hyprland (Mod+Q etc.) only
+      # sends xdg_toplevel.close, which cage 0.3.0 ignores because its
+      # wrapped command ('waydroid show-full-ui') is still alive. The
+      # clean exit path is the 'Stop Waydroid' desktop entry, which
+      # calls 'waydroid session stop' — that exits show-full-ui, which
+      # exits cage, which lets this script's EXIT trap restore the
+      # iGPU governor.
+      cage -- waydroid show-full-ui "$@"
     '';
   };
 in {
