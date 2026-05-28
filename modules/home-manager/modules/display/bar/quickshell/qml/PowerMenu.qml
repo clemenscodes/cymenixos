@@ -9,13 +9,18 @@ PanelWindow {
     readonly property int cardWidth: 360
     readonly property int cardHeight: 380
 
+    // Icons are Nerd Font Awesome glyphs from Iosevka Nerd Font Mono.
+    // Picked over emoji so every row renders in the same monochrome
+    // style — the unicode snowflake and power-symbol have no color
+    // emoji variant on this font setup and looked broken next to the
+    // colored padlock / door / ZZZ.
     readonly property var actions: [
-        { icon: "🔒", label: "Lock",      cmd: ["loginctl", "lock-session"] },
-        { icon: "🚪", label: "Log out",   cmd: ["sh", "-c", "loginctl kill-user $USER"] },
-        { icon: "💤", label: "Suspend",   cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl suspend"] },
-        { icon: "❄",  label: "Hibernate", cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl hibernate"] },
-        { icon: "🔄", label: "Reboot",    cmd: ["systemctl", "reboot"] },
-        { icon: "⏻",  label: "Shut down", cmd: ["systemctl", "poweroff"] }
+        { icon: "", label: "Lock",      cmd: ["loginctl", "lock-session"] },
+        { icon: "", label: "Log out",   cmd: ["sh", "-c", "loginctl kill-user $USER"] },
+        { icon: "", label: "Suspend",   cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl suspend"] },
+        { icon: "", label: "Hibernate", cmd: ["sh", "-c", "loginctl lock-session && sleep 1 && systemctl hibernate"] },
+        { icon: "", label: "Reboot",    cmd: ["systemctl", "reboot"] },
+        { icon: "", label: "Shut down", cmd: ["systemctl", "poweroff"] }
     ]
 
     property int selectedIndex: 0
