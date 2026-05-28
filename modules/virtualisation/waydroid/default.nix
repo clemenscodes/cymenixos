@@ -188,10 +188,12 @@ in {
     # cage attaches to nothing, and the user sees no window.
     modules.io.hyprhook.rules = lib.mkIf config.modules.io.hyprhook.enable [
       {
-        # cage propagates the inner client's xdg_toplevel.title — for
-        # 'cage -- waydroid show-full-ui' that's literally "Waydroid".
-        # Match on title only; the cage class is just "wlroots" and
-        # would collide with any other wlroots-based nested compositor.
+        # cage 0.3.0 hardcodes xdg_toplevel.app_id="wlroots" and
+        # propagates the inner client's title — for
+        # 'cage -- waydroid show-full-ui' that title is literally
+        # "Waydroid". AND both so the rule only fires for the cage
+        # instance running Waydroid, not other wlroots nested setups.
+        class = "^wlroots$";
         title = "^Waydroid$";
         on_close = ["${pkgs.waydroid}/bin/waydroid" "session" "stop"];
       }
