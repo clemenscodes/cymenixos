@@ -163,33 +163,45 @@ PanelWindow {
                         focus: true
 
                         Keys.onPressed: function(event) {
+                            const ctrl = (event.modifiers & Qt.ControlModifier) !== 0
+                            const last = launcher.filtered.length - 1
                             if (event.key === Qt.Key_Escape) {
                                 launcher.hide()
-                                event.accepted = true
-                            } else if (event.key === Qt.Key_Down) {
-                                launcher.selectedIndex = Math.min(
-                                    launcher.filtered.length - 1,
-                                    launcher.selectedIndex + 1
-                                )
-                                resultList.positionViewAtIndex(launcher.selectedIndex, ListView.Contain)
-                                event.accepted = true
-                            } else if (event.key === Qt.Key_Up) {
-                                launcher.selectedIndex = Math.max(0, launcher.selectedIndex - 1)
-                                resultList.positionViewAtIndex(launcher.selectedIndex, ListView.Contain)
                                 event.accepted = true
                             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                                 launcher.launch()
                                 event.accepted = true
-                            } else if (event.key === Qt.Key_PageDown) {
-                                launcher.selectedIndex = Math.min(
-                                    launcher.filtered.length - 1,
-                                    launcher.selectedIndex + 8
-                                )
+                            } else if (event.key === Qt.Key_Down
+                                    || (ctrl && event.key === Qt.Key_J)
+                                    || (ctrl && event.key === Qt.Key_N)) {
+                                launcher.selectedIndex = Math.min(last, launcher.selectedIndex + 1)
                                 resultList.positionViewAtIndex(launcher.selectedIndex, ListView.Contain)
                                 event.accepted = true
-                            } else if (event.key === Qt.Key_PageUp) {
+                            } else if (event.key === Qt.Key_Up
+                                    || (ctrl && event.key === Qt.Key_K)
+                                    || (ctrl && event.key === Qt.Key_P)) {
+                                launcher.selectedIndex = Math.max(0, launcher.selectedIndex - 1)
+                                resultList.positionViewAtIndex(launcher.selectedIndex, ListView.Contain)
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_PageDown
+                                    || (ctrl && event.key === Qt.Key_D)) {
+                                launcher.selectedIndex = Math.min(last, launcher.selectedIndex + 8)
+                                resultList.positionViewAtIndex(launcher.selectedIndex, ListView.Contain)
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_PageUp
+                                    || (ctrl && event.key === Qt.Key_U)) {
                                 launcher.selectedIndex = Math.max(0, launcher.selectedIndex - 8)
                                 resultList.positionViewAtIndex(launcher.selectedIndex, ListView.Contain)
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Home
+                                    || (ctrl && event.key === Qt.Key_Home)) {
+                                launcher.selectedIndex = 0
+                                resultList.positionViewAtIndex(0, ListView.Beginning)
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_End
+                                    || (ctrl && event.key === Qt.Key_End)) {
+                                launcher.selectedIndex = last
+                                resultList.positionViewAtIndex(last, ListView.End)
                                 event.accepted = true
                             }
                         }
