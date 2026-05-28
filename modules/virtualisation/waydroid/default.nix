@@ -8,12 +8,26 @@
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
 
-  densityScript = pkgs.writeShellScript "waydroid-set-density" ''
+  w = cfg.waydroid;
+
+  propScript = pkgs.writeShellScript "waydroid-base-props" ''
     prop=/var/lib/waydroid/waydroid_base.prop
     [ -f "$prop" ] || exit 0
-    ${pkgs.gnused}/bin/sed -i '/^ro\.sf\.lcd_density=/d' "$prop"
-    echo 'ro.sf.lcd_density=${toString cfg.waydroid.density}' >> "$prop"
+    ${lib.optionalString (w.density != null) ''
+      ${pkgs.gnused}/bin/sed -i '/^ro\.sf\.lcd_density=/d' "$prop"
+      echo 'ro.sf.lcd_density=${toString w.density}' >> "$prop"
+    ''}
+    ${lib.optionalString (w.width != null) ''
+      ${pkgs.gnused}/bin/sed -i '/^persist\.waydroid\.width=/d' "$prop"
+      echo 'persist.waydroid.width=${toString w.width}' >> "$prop"
+    ''}
+    ${lib.optionalString (w.height != null) ''
+      ${pkgs.gnused}/bin/sed -i '/^persist\.waydroid\.height=/d' "$prop"
+      echo 'persist.waydroid.height=${toString w.height}' >> "$prop"
+    ''}
   '';
+
+  hasProps = w.density != null || w.width != null || w.height != null;
 in {
   options = {
     modules = {
@@ -29,6 +43,26 @@ in {
               in waydroid_base.prop before each container start.
               Recommended: 160 (1080p), 240 (1440p), 320 (4K).
               null leaves the value from waydroid init unchanged.
+            '';
+          };
+          width = lib.mkOption {
+            type = lib.types.nullOr lib.types.int;
+            default = null;
+            example = 3840;
+            description = ''
+              Android display width in pixels (persist.waydroid.width).
+              Written to waydroid_base.prop as the initial default; Android
+              picks it up on first boot and stores it in persistent_properties.
+              Match your fullscreen window width. null = auto-detect.
+            '';
+          };
+          height = lib.mkOption {
+            type = lib.types.nullOr lib.types.int;
+            default = null;
+            example = 2160;
+            description = ''
+              Android display height in pixels (persist.waydroid.height).
+              See width. null = auto-detect.
             '';
           };
         };
@@ -71,8 +105,9 @@ in {
         })
       ];
     };
-    systemd.services.waydroid-container = lib.mkIf (cfg.waydroid.density != null) {
-      serviceConfig.ExecStartPre = "${densityScript}";
+
+    systemd.services.waydroid-container = lib.mkIf hasProps {
+      serviceConfig.ExecStartPre = "${propScript}";
     };
 
     virtualisation = {
