@@ -16,8 +16,18 @@ PanelWindow {
     property Item anchorItem: null
     property var anchorWindow: null
 
-    property real menuX: 0
-    property real menuY: 0
+    // Anchor geometry in SCREEN coordinates. Captured in show(); the
+    // card's x/y/height are bindings derived from these so the card
+    // re-positions when its own height changes (e.g. when the
+    // QsMenuOpener finishes populating).
+    property real anchorScreenX: 0
+    property real anchorScreenY: 0
+    property real anchorWidth: 0
+    property real anchorHeight: 0
+    readonly property real screenWidth: anchorWindow && anchorWindow.screen
+        ? anchorWindow.screen.width : 1920
+    readonly property real screenHeight: anchorWindow && anchorWindow.screen
+        ? anchorWindow.screen.height : 1080
 
     visible: false
     color: "transparent"
@@ -41,29 +51,15 @@ PanelWindow {
         if (anchor && window && window.screen) {
             // mapToGlobal on items inside a Wayland layer-shell window
             // returns the item's position in the BAR window's scene,
-            // not real screen coordinates. To get the screen position
-            // we add the bar's own screen offset. The bar fills width
-            // (screen-X 0) and is anchored to the bottom of the screen,
-            // so its screen-Y = screenHeight - barHeight.
+            // not real screen coordinates. The bar is bottom-anchored
+            // and fills width, so its screen-Y = screenHeight - barHeight,
+            // screen-X = 0.
             const local = anchor.mapToItem(null, 0, 0)
-            const screenW = window.screen.width
-            const screenH = window.screen.height
-            const barH = window.height
-            const barScreenY = screenH - barH
-
-            const ax = local.x        // bar spans width, screen-X 0
-            const ay = local.y + barScreenY
-
-            const cardWidth = 280
-            const cardHeight = 320
-            trayMenu.menuX = Math.max(8, Math.min(
-                ax + anchor.width / 2 - cardWidth / 2,
-                screenW - cardWidth - 8
-            ))
-            // Above the anchor if there is room, else flip below.
-            const above = ay - cardHeight - 4
-            const below = ay + anchor.height + 4
-            trayMenu.menuY = above >= 8 ? above : below
+            const barScreenY = window.screen.height - window.height
+            trayMenu.anchorScreenX = local.x
+            trayMenu.anchorScreenY = local.y + barScreenY
+            trayMenu.anchorWidth = anchor.width
+            trayMenu.anchorHeight = anchor.height
         }
 
         // Reset the stack to the root menu of this tray item.
@@ -95,12 +91,6 @@ PanelWindow {
         }
     }
 
-    // Cap at screen-height minus the bar minus a small breathing margin
-    // so the card never spills past the screen edge, but otherwise grow
-    // as tall as the content needs.
-    readonly property int cardMaxHeight: anchorWindow && anchorWindow.screen
-        ? anchorWindow.screen.height - anchorWindow.height - 24
-        : 1200
     readonly property int cardMinHeight: 80
 
     // Track the current SubMenu's content column height so the card
@@ -110,13 +100,25 @@ PanelWindow {
             ? stack.currentItem.contentColumnHeight
             : 0
 
+    // Vertical space above and below the anchor, with an 8 px breathing
+    // margin to the screen edges and 4 px gap to the anchor itself.
+    readonly property real spaceAbove: anchorScreenY - 12
+    readonly property real spaceBelow: screenHeight - (anchorScreenY + anchorHeight) - 12
+    readonly property bool placeAbove: spaceAbove >= spaceBelow
+    readonly property real availableHeight: Math.max(spaceAbove, spaceBelow)
+
     Rectangle {
         id: card
-        x: trayMenu.menuX
-        y: trayMenu.menuY
-        width: 280
+        readonly property int cardWidth: 280
+        width: cardWidth
+        x: Math.max(8, Math.min(
+            trayMenu.anchorScreenX + trayMenu.anchorWidth / 2 - cardWidth / 2,
+            trayMenu.screenWidth - cardWidth - 8))
+        y: trayMenu.placeAbove
+            ? trayMenu.anchorScreenY - height - 4
+            : trayMenu.anchorScreenY + trayMenu.anchorHeight + 4
         height: Math.max(trayMenu.cardMinHeight,
-                         Math.min(trayMenu.cardMaxHeight,
+                         Math.min(trayMenu.availableHeight,
                                   trayMenu.currentContentHeight + 12))
         color: Theme.defaultBg
         radius: Theme.pillRadius
