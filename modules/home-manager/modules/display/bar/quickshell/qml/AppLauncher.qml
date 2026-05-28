@@ -19,18 +19,31 @@ PopupWindow {
     implicitWidth: 620
     implicitHeight: 540
 
+    readonly property var anchorScreen: launcher.anchorWindow ? launcher.anchorWindow.screen : null
+
     anchor {
         window: launcher.anchorWindow
-        rect.x: launcher.anchorWindow
-            ? (launcher.anchorWindow.width - launcher.implicitWidth) / 2
+        rect.x: launcher.anchorScreen
+            ? (launcher.anchorScreen.width - launcher.implicitWidth) / 2
             : 0
-        rect.y: launcher.anchorWindow
-            ? launcher.anchorWindow.height + 80
-            : 80
+        // BottomBar's coordinate system has y=0 at the top of the bar window. The
+        // bar sits at screen_y = screenHeight - barHeight. We want the popup's
+        // *top* to land at screen_y = (screenHeight - popupHeight) / 2, i.e. the
+        // popup centered on the screen. In bar coords:
+        //   popup_top_in_bar = popup_top_screen - bar_top_screen
+        //                    = (screenH - popupH)/2 - (screenH - barH)
+        //                    = barH - (screenH + popupH)/2
+        // With edges = Top + gravity = Top, the popup's bottom sits at rect.y and
+        // it grows upward, so rect.y = popup_top_in_bar + popupH.
+        rect.y: launcher.anchorScreen && launcher.anchorWindow
+            ? launcher.anchorWindow.height
+              - (launcher.anchorScreen.height - launcher.implicitHeight) / 2
+              + launcher.implicitHeight
+            : 0
         rect.width: 1
         rect.height: 1
-        edges: Edges.Bottom
-        gravity: Edges.Bottom
+        edges: Edges.Top
+        gravity: Edges.Top
     }
 
     function toggle(window) {
