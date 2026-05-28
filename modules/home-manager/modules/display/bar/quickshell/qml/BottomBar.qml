@@ -190,7 +190,7 @@ PanelWindow {
             tooltipHost: barTooltip
             tooltipHostWindow: bar
             command: ["wootswitch", "list", "--waybar"]
-            intervalMs: 5000
+            intervalMs: 1000
             onLeftClick: () => Quickshell.execDetached(["wootswitch", "switch", "--next"])
             onRightClick: () => Quickshell.execDetached(["wootswitch", "switch", "--previous"])
         }
