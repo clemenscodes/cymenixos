@@ -1,26 +1,31 @@
 // One level of a system tray context menu. Used recursively via
-// Loader{ source: Qt.resolvedUrl("TrayMenu.qml") } so submenus, sub-
-// submenus etc. all use the same delegate code.
+// Loader { sourceComponent: ... Qt.createComponent("TrayMenu.qml") }
+// so submenus, sub-submenus etc. all use the same delegate code.
+//
+// Positioning: every level (top + all submenus) anchors to the same
+// root bar window. We compute absolute screen positions via
+// mapToGlobal and convert back into the bar window's local space.
+// That way chained PopupAnchors don't have to play coordinate-space
+// gymnastics between nested popup windows.
 import QtQuick
 import Quickshell
 
 PopupWindow {
     id: popup
 
-    // The QsMenuHandle for THIS level. Set at show().
+    // The QsMenuHandle for THIS level. Set at show()/createObject.
     property var menuHandle: null
 
-    // What this popup is anchored to.
-    property var anchorWindow: null
-    property Item anchorItem: null
+    // The bar PanelWindow that anchors the entire chain.
+    property var rootWindow: null
 
-    // "below" → drop under the anchor (top-level menu under the tray pill)
-    // "right" → flyout to the right of the anchor (submenu off a parent row)
-    property string placement: "below"
+    // Where this popup wants its top-left in *bar* coordinates.
+    property real screenX: 0
+    property real screenY: 0
 
     color: "transparent"
     visible: false
-    grabFocus: placement === "below"
+    grabFocus: !popup.parentLevel  // only the top-level grabs focus
 
     implicitWidth: 260
     implicitHeight: menuFrame.implicitHeight
@@ -30,108 +35,79 @@ PopupWindow {
         menu: popup.menuHandle
     }
 
-    // Submenu state — only one submenu open at a time per level.
-    property var subHandle: null
-    property Item subAnchor: null
+    // Parent in the chain (null for top-level). Used to bubble Hide.
+    property var parentLevel: null
+
+    // Which child submenu is currently spawned (one at a time per level).
+    property var subInstance: null
+    property var subForEntry: null
 
     anchor {
-        window: popup.anchorWindow
-        rect.x: {
-            if (!popup.anchorItem) return 0
-            const p = popup.anchorItem.mapToItem(null, 0, 0)
-            if (popup.placement === "right") {
-                return p.x + popup.anchorItem.width + 2
-            }
-            return p.x + popup.anchorItem.width / 2 - popup.implicitWidth / 2
-        }
-        rect.y: {
-            if (!popup.anchorItem) return 0
-            const p = popup.anchorItem.mapToItem(null, 0, 0)
-            if (popup.placement === "right") {
-                return p.y
-            }
-            // Top-level: drop the popup above the anchor (bottom-bar tray)
-            return 0
-        }
+        window: popup.rootWindow
+        rect.x: popup.screenX
+        rect.y: popup.screenY
         rect.width: 1
         rect.height: 1
-        edges: popup.placement === "right" ? Edges.Right : Edges.Top
-        gravity: popup.placement === "right" ? Edges.Right : Edges.Top
+        edges: Edges.Top | Edges.Left
+        gravity: Edges.Bottom | Edges.Right
     }
 
-    function show(item, anchor, window) {
+    function show(item, anchorItem, window) {
         popup.menuHandle = item ? item.menu : null
-        popup.anchorItem = anchor
-        popup.anchorWindow = window
-        popup.placement = "below"
+        popup.rootWindow = window
+        // Position top-level above the tray pill, horizontally centered.
+        if (anchorItem && window) {
+            const g = anchorItem.mapToItem(null, 0, 0)
+            popup.screenX = g.x + anchorItem.width / 2 - popup.implicitWidth / 2
+            popup.screenY = g.y - popup.implicitHeight - 4
+        }
         popup.visible = true
     }
 
-    function showSub(handle, anchor) {
-        popup.subHandle = handle
-        popup.subAnchor = anchor
-    }
-
-    function clearSub() {
-        popup.subHandle = null
-        popup.subAnchor = null
-    }
-
-    function hideAll() {
-        popup.clearSub()
-        popup.visible = false
-        popup.menuHandle = null
-    }
-
-    // Lazy-load the submenu — it's literally this same TrayMenu.qml.
-    Loader {
-        id: subLoader
-        active: popup.subHandle !== null
-        sourceComponent: Component {
-            id: subComp
-            // Use a placeholder Item so the Loader can instantiate the
-            // nested popup without referencing TrayMenu by name (which
-            // would be a forward reference inside its own file).
-            Item {
-                Component.onCompleted: {
-                    const c = Qt.createComponent(Qt.resolvedUrl("TrayMenu.qml"))
-                    if (c.status === Component.Ready) {
-                        const sub = c.createObject(null, {
-                            anchorWindow: popup,
-                            anchorItem: popup.subAnchor,
-                            placement: "right"
-                        })
-                        sub.menuHandle = popup.subHandle
-                        sub.visible = true
-                        // expose so parent can chase it on hide
-                        subLoader.subInstance = sub
-                    }
-                }
-                Component.onDestruction: {
-                    if (subLoader.subInstance) {
-                        subLoader.subInstance.hideAll()
-                        subLoader.subInstance.destroy()
-                        subLoader.subInstance = null
-                    }
-                }
-            }
+    // Called by an entry row when the user wants its submenu open.
+    function openSubFor(entry, handle) {
+        if (popup.subForEntry === entry && popup.subInstance) {
+            return  // already open, no-op
         }
-        property var subInstance: null
-        onActiveChanged: {
-            if (!active && subInstance) {
-                subInstance.hideAll()
-                subInstance.destroy()
-                subInstance = null
-            }
+        // Close any existing one
+        closeSub()
+
+        const g = entry.mapToItem(null, 0, 0)
+        const subX = g.x + entry.width + 2
+        const subY = g.y - 6   // align roughly with row top inside its frame
+
+        const c = Qt.createComponent(Qt.resolvedUrl("TrayMenu.qml"))
+        if (c.status !== Component.Ready) {
+            console.warn("TrayMenu submenu component not ready:", c.errorString())
+            return
+        }
+        const sub = c.createObject(null, {
+            rootWindow: popup.rootWindow,
+            parentLevel: popup,
+            screenX: subX,
+            screenY: subY
+        })
+        sub.menuHandle = handle
+        sub.visible = true
+        popup.subInstance = sub
+        popup.subForEntry = entry
+    }
+
+    function closeSub() {
+        if (popup.subInstance) {
+            popup.subInstance.closeSub()
+            popup.subInstance.visible = false
+            popup.subInstance.destroy()
+            popup.subInstance = null
+            popup.subForEntry = null
         }
     }
 
-    // Walk up the parent chain hiding popups when an action fires.
     function bubbleHide() {
-        if (anchorWindow && typeof anchorWindow.bubbleHide === "function") {
-            anchorWindow.bubbleHide()
-        }
-        hideAll()
+        closeSub()
+        visible = false
+        if (parentLevel) parentLevel.bubbleHide()
+        menuHandle = null
     }
 
     Rectangle {
@@ -160,7 +136,6 @@ PopupWindow {
                     width: menuColumn.width
                     implicitHeight: modelData && modelData.isSeparator ? 9 : 30
 
-                    // Separator
                     Rectangle {
                         visible: entry.modelData && entry.modelData.isSeparator
                         anchors.centerIn: parent
@@ -169,14 +144,13 @@ PopupWindow {
                         color: "#555"
                     }
 
-                    // Regular entry
                     Rectangle {
                         visible: entry.modelData && !entry.modelData.isSeparator
                         anchors.fill: parent
                         color: itemHover.containsMouse
                             ? Theme.activeBg
                             : (entry.modelData && entry.modelData.hasChildren
-                                && popup.subHandle === entry.modelData
+                                && popup.subForEntry === entry
                                     ? Qt.lighter(Theme.defaultBg, 1.3)
                                     : "transparent")
                         radius: Theme.innerRadius
@@ -217,7 +191,6 @@ PopupWindow {
                             elide: Text.ElideRight
                         }
 
-                        // Submenu indicator arrow
                         Text {
                             id: subArrow
                             visible: entry.modelData && entry.modelData.hasChildren
@@ -240,15 +213,18 @@ PopupWindow {
                                 && !entry.modelData.isSeparator
 
                             onEntered: {
+                                // Only switch / open a submenu when hovering a
+                                // hasChildren row. Hovering leaf rows must NOT
+                                // close an already-open submenu — otherwise the
+                                // mouse sweeping from the parent row toward the
+                                // submenu kills it.
                                 if (entry.modelData.hasChildren) {
-                                    popup.showSub(entry.modelData, entry)
-                                } else {
-                                    popup.clearSub()
+                                    popup.openSubFor(entry, entry.modelData)
                                 }
                             }
                             onClicked: {
                                 if (entry.modelData.hasChildren) {
-                                    popup.showSub(entry.modelData, entry)
+                                    popup.openSubFor(entry, entry.modelData)
                                 } else {
                                     entry.modelData.triggered()
                                     popup.bubbleHide()
