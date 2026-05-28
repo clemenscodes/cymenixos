@@ -114,8 +114,8 @@ in {
             "hyprland/workspaces" = lib.mkIf useHyprland {
               format = "-> {id}";
               on-click = "activate";
-              on-scroll-up = "hyprctl dispatch workspace e+1";
-              on-scroll-down = "hyprctl dispatch workspace e-1";
+              on-scroll-up = "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'";
+              on-scroll-down = "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e-1\" })'";
             };
             mpd = lib.mkIf useMusic {
               format = "⸨{songPosition}|{queueLength}⸩ {filename} ({elapsedTime:%H:%M:%S}/{totalTime:%H:%M:%S}) 🎵";
