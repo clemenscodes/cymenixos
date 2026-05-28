@@ -31,8 +31,25 @@
 
   waydroid-ui = pkgs.writeShellApplication {
     name = "waydroid-ui";
-    runtimeInputs = [pkgs.cage pkgs.waydroid pkgs.coreutils pkgs.gnugrep];
+    runtimeInputs = [pkgs.cage pkgs.waydroid pkgs.coreutils pkgs.gnugrep pkgs.procps pkgs.util-linux];
     text = ''
+      # Single-instance guard. A second cage trying to attach to a
+      # waydroid session that's already attached to another cage will
+      # spin forever on 'Failed to get service waydroidplatform', stick
+      # the session, and the only fix is killing both cages plus the
+      # container — so refuse the second launch up front.
+      lockdir="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/waydroid-ui"
+      mkdir -p "$lockdir"
+      lockfile="$lockdir/lock"
+      exec 9>"$lockfile"
+      if ! flock -n 9; then
+        echo "waydroid-ui: already running; focusing existing cage window"
+        if command -v hyprctl >/dev/null 2>&1; then
+          hyprctl dispatch 'hl.dsp.focus({ regex = "class:wlroots" })' >/dev/null 2>&1 || true
+        fi
+        exit 0
+      fi
+
       # Find the amdgpu render node — Android renders via mesa minigbm
       # on the AMD iGPU. Its DPM 'auto' governor doesn't ramp the iGPU
       # up under sustained 4K Android workloads even at 100% busy, so
@@ -54,10 +71,13 @@
         if sudo -n sh -c "echo high > $perf_file" 2>/dev/null; then
           echo "waydroid-ui: pinned $amd_card to high perf (was $prev_perf)"
           # shellcheck disable=SC2064
-          trap "sudo -n sh -c 'echo $prev_perf > $perf_file' 2>/dev/null || true" EXIT
+          trap "sudo -n sh -c 'echo $prev_perf > $perf_file' 2>/dev/null || true; waydroid session stop >/dev/null 2>&1 || true" EXIT
         else
           echo "waydroid-ui: could not bump iGPU clock (sudo prompt or denied); continuing anyway"
+          trap "waydroid session stop >/dev/null 2>&1 || true" EXIT
         fi
+      else
+        trap "waydroid session stop >/dev/null 2>&1 || true" EXIT
       fi
 
       cage -- waydroid show-full-ui "$@"
