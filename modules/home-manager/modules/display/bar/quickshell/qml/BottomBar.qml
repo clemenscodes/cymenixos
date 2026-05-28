@@ -46,6 +46,10 @@ PanelWindow {
         enabled: false
     }
 
+    StyledTooltip {
+        id: barTooltip
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -145,6 +149,8 @@ PanelWindow {
 
         JsonPill {
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
             command: ["waybar-claude-monitor"]
             intervalMs: 60000
             onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty claude-monitor"])
@@ -152,6 +158,8 @@ PanelWindow {
 
         JsonPill {
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
             command: ["voxtype", "status", "--follow", "--format", "json"]
             streaming: true
             formatIcons: ({
@@ -165,6 +173,8 @@ PanelWindow {
 
         JsonPill {
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
             command: ["wootswitch", "list", "--waybar"]
             intervalMs: 5000
             onLeftClick: () => Quickshell.execDetached(["wootswitch", "switch", "--next"])
@@ -172,12 +182,12 @@ PanelWindow {
         }
 
         Pill {
+            id: submapPill
             Layout.alignment: Qt.AlignVCenter
-            visible: bar.currentSubmap !== "NORMAL"
 
             Text {
                 text: bar.currentSubmap
-                color: Theme.textColor
+                color: bar.currentSubmap !== "NORMAL" ? Theme.warningColor : Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 font.bold: true
@@ -186,6 +196,8 @@ PanelWindow {
 
         JsonPill {
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
             command: ["swaync-client", "-swb"]
             streaming: true
             formatIcons: ({
@@ -207,13 +219,18 @@ PanelWindow {
             id: idlePill
             Layout.alignment: Qt.AlignVCenter
             interactive: true
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+            tooltipText: idleInhibit.enabled
+                ? "Idle inhibited — screen stays on. Click to allow sleep."
+                : "Sleep allowed. Click to keep screen awake."
             onLeftClicked: idleInhibit.enabled = !idleInhibit.enabled
 
             Text {
-                text: idleInhibit.enabled ? "AWAKE" : "ZZZ"
-                color: idleInhibit.enabled ? Theme.warningColor : Theme.textColor
+                text: idleInhibit.enabled ? "☀️" : "🌙"
+                color: Theme.textColor
                 font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
+                font.pixelSize: Theme.fontSize + 2
                 font.bold: true
             }
         }
@@ -234,6 +251,15 @@ PanelWindow {
                         id: trayDelegate
                         required property SystemTrayItem modelData
 
+                        readonly property string tooltipText: {
+                            const tt = trayDelegate.modelData.tooltipTitle
+                                || trayDelegate.modelData.tooltipDescription
+                                || ""
+                            const title = trayDelegate.modelData.title || ""
+                            const id = trayDelegate.modelData.id || ""
+                            return tt || title || id
+                        }
+
                         implicitWidth: 26
                         implicitHeight: 26
 
@@ -250,6 +276,8 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+                            onEntered: barTooltip.showFor(trayDelegate, trayDelegate.tooltipText, bar)
+                            onExited: barTooltip.hide()
                             onClicked: function(mouse) {
                                 if (mouse.button === Qt.LeftButton) {
                                     if (trayDelegate.modelData.onlyMenu) {

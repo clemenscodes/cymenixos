@@ -17,6 +17,11 @@ PanelWindow {
     implicitHeight: Theme.barHeight
     color: "transparent"
 
+    StyledTooltip {
+        id: barTooltip
+        placement: "below"
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -88,6 +93,8 @@ PanelWindow {
 
         JsonPill {
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
             command: ["waybar-mail"]
             intervalMs: 5000
             onLeftClick: () => Quickshell.execDetached(["thunderbird"])
@@ -140,6 +147,8 @@ PanelWindow {
 
         JsonPill {
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
             command: ["waybar-nvidia"]
             intervalMs: 5000
             onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty nvtop"])
