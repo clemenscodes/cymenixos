@@ -165,7 +165,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            command: ["waybar-claude-monitor"]
+            command: ["qs-claude-monitor"]
             intervalMs: 60000
             onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty claude-monitor"])
         }

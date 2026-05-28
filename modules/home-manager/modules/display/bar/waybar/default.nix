@@ -66,17 +66,17 @@ in {
         pkgs.libappindicator-gtk3
         pkgs.libdbusmenu-gtk3
         (import ./waybar-clock {inherit inputs pkgs lib;})
-        (import ./waybar-mail {inherit inputs pkgs lib;})
+        (import ../quickshell/helpers/qs-mail {inherit inputs pkgs lib;})
         (import ./waybar-powermenu {inherit inputs pkgs lib;})
         (import ./waybar-reload {inherit inputs pkgs lib;})
         (import ./waybar-swaync {inherit inputs pkgs lib;})
         (import ./waybar-toggle {inherit inputs pkgs lib;})
         (import ./waybar-watch {inherit inputs pkgs lib;})
-        (import ./waybar-claude-monitor {
+        (import ../quickshell/helpers/qs-claude-monitor {
           inherit pkgs;
           quota = claudeQuota;
         })
-        (import ./waybar-nvidia {inherit pkgs;})
+        (import ../quickshell/helpers/qs-nvidia {inherit pkgs;})
       ];
     };
     programs = {
@@ -133,7 +133,7 @@ in {
             "custom/mail" = lib.mkIf useEmail {
               format = "{}";
               interval = 5;
-              exec = "waybar-mail";
+              exec = "qs-mail";
               on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty ${pkgs.neomutt}/bin/neomutt";
             };
             disk = {
@@ -191,7 +191,7 @@ in {
             "custom/nvidia" = lib.mkIf useNvidia {
               return-type = "json";
               interval = 5;
-              exec = "waybar-nvidia";
+              exec = "qs-nvidia";
               on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty nvtop";
             };
             "custom/powermenu" = {
@@ -228,7 +228,7 @@ in {
             "custom/claude-monitor" = lib.mkIf useClaude {
               return-type = "json";
               interval = 60;
-              exec = "waybar-claude-monitor";
+              exec = "qs-claude-monitor";
               on-click = "${pkgs.kitty}/bin/kitty -1 --title=kitty claude-monitor";
             };
             "custom/voxtype" = lib.mkIf useVoxtype {

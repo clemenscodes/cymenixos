@@ -5,7 +5,7 @@
   quotaStr = toString quota;
 in
   pkgs.writeShellApplication {
-    name = "waybar-claude-monitor";
+    name = "qs-claude-monitor";
     runtimeInputs = [pkgs.coreutils pkgs.findutils pkgs.jq pkgs.gawk];
     text = ''
       projects_dir="$HOME/.config/claude/projects"

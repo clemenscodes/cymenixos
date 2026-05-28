@@ -1,5 +1,5 @@
 {pkgs}:
-pkgs.writeShellScriptBin "waybar-nvidia" ''
+pkgs.writeShellScriptBin "qs-nvidia" ''
   set -euo pipefail
 
   # Query GPU 0: name, driver_version, utilization.gpu, memory.used, memory.total,

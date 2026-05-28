@@ -1,5 +1,5 @@
 {pkgs, ...}:
-pkgs.writeShellScriptBin "waybar-mail" ''
+pkgs.writeShellScriptBin "qs-mail" ''
 
   mail=$(echo)
   tooltip=$(echo)

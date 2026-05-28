@@ -111,7 +111,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            command: ["waybar-mail"]
+            command: ["qs-mail"]
             intervalMs: 5000
             tooltipText: {
                 const m = mailPill.text.match(/(\d+)/)
@@ -189,7 +189,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            command: ["waybar-nvidia"]
+            command: ["qs-nvidia"]
             intervalMs: 5000
             onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty nvtop"])
         }

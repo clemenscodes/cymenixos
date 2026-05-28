@@ -37,13 +37,12 @@ in {
       packages = [
         pkgs.libappindicator-gtk3
         pkgs.libdbusmenu-gtk3
-        (import ../waybar/waybar-mail {inherit inputs pkgs lib;})
-        (import ../waybar/waybar-swaync {inherit inputs pkgs lib;})
-        (import ../waybar/waybar-claude-monitor {
+        (import ./helpers/qs-mail {inherit inputs pkgs lib;})
+        (import ./helpers/qs-claude-monitor {
           inherit pkgs;
           quota = claudeQuota;
         })
-        (import ../waybar/waybar-nvidia {inherit pkgs;})
+        (import ./helpers/qs-nvidia {inherit pkgs;})
       ];
     };
     programs = {
