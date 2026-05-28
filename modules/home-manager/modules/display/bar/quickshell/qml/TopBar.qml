@@ -195,13 +195,17 @@ PanelWindow {
         }
 
         Pill {
+            id: powerPill
             Layout.alignment: Qt.AlignVCenter
             baseColor: Theme.powerBg
             interactive: true
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            tooltipText: "Power menu\nLeft-click: open shutdown / reboot / lock / logout menu"
-            onLeftClicked: Quickshell.execDetached(["sh", "-c", "sleep 0.1 && logoutlaunch"])
+            tooltipText: "Power menu\nLeft-click: open lock / suspend / reboot / shutdown / logout menu"
+            onLeftClicked: {
+                if (powerMenu.visible) powerMenu.hide()
+                else powerMenu.show(powerPill, bar)
+            }
 
             Text {
                 text: "⏻"
@@ -210,6 +214,10 @@ PanelWindow {
                 font.pixelSize: Theme.fontSize + 4
                 font.bold: true
             }
+        }
+
+        PowerMenu {
+            id: powerMenu
         }
     }
 }

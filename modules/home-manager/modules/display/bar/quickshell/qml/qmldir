@@ -4,5 +4,6 @@ Pill 1.0 Pill.qml
 JsonPill 1.0 JsonPill.qml
 StyledTooltip 1.0 StyledTooltip.qml
 TrayMenu 1.0 TrayMenu.qml
+PowerMenu 1.0 PowerMenu.qml
 TopBar 1.0 TopBar.qml
 BottomBar 1.0 BottomBar.qml
