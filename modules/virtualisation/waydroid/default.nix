@@ -7,12 +7,30 @@
   cfg = config.modules.virtualisation;
   inherit (config.modules.boot.impermanence) persistPath;
   inherit (config.modules.users) user;
+
+  densityScript = pkgs.writeShellScript "waydroid-set-density" ''
+    prop=/var/lib/waydroid/waydroid_base.prop
+    [ -f "$prop" ] || exit 0
+    ${pkgs.gnused}/bin/sed -i '/^ro\.sf\.lcd_density=/d' "$prop"
+    echo 'ro.sf.lcd_density=${toString cfg.waydroid.density}' >> "$prop"
+  '';
 in {
   options = {
     modules = {
       virtualisation = {
         waydroid = {
           enable = lib.mkEnableOption "Enable waydroid" // {default = false;};
+          density = lib.mkOption {
+            type = lib.types.nullOr lib.types.int;
+            default = null;
+            example = 320;
+            description = ''
+              Android display density (DPI) written to ro.sf.lcd_density
+              in waydroid_base.prop before each container start.
+              Recommended: 160 (1080p), 240 (1440p), 320 (4K).
+              null leaves the value from waydroid init unchanged.
+            '';
+          };
         };
       };
     };
@@ -53,6 +71,10 @@ in {
         })
       ];
     };
+    systemd.services.waydroid-container = lib.mkIf (cfg.waydroid.density != null) {
+      serviceConfig.ExecStartPre = "${densityScript}";
+    };
+
     virtualisation = {
       waydroid = {
         inherit (cfg.waydroid) enable;
