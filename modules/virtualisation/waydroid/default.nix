@@ -129,6 +129,39 @@ in {
       wayland.windowManager.hyprland.extraConfig = ''
         hl.window_rule({ match = { class = "^(wlroots)$" }, fullscreen = true, immediate = true })
       '';
+      xdg.desktopEntries = {
+        Waydroid = {
+          name = "Waydroid";
+          type = "Application";
+          exec = "${waydroid-ui}/bin/waydroid-ui";
+          icon = "waydroid";
+          categories = ["Utility"];
+          startupNotify = true;
+          settings = {
+            StartupWMClass = "wlroots";
+          };
+          actions = {
+            stop = {
+              name = "Stop Waydroid";
+              exec = "${pkgs.waydroid}/bin/waydroid session stop";
+              icon = "waydroid";
+            };
+            initialize = {
+              name = "Initialize Waydroid";
+              exec = "${pkgs.waydroid}/bin/waydroid init --client";
+              icon = "waydroid";
+            };
+          };
+        };
+        Waydroid-Stop = {
+          name = "Stop Waydroid";
+          comment = "Stop the Waydroid Android session";
+          type = "Application";
+          exec = "${pkgs.waydroid}/bin/waydroid session stop";
+          icon = "waydroid";
+          categories = ["Utility"];
+        };
+      };
     };
   };
 }
