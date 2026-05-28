@@ -34,10 +34,9 @@ PanelWindow {
 
     function show(window) {
         if (window && window.screen) launcher.screen = window.screen
-        launcher.query = ""
         launcher.selectedIndex = 0
         launcher.visible = true
-        Qt.callLater(() => input.forceActiveFocus())
+        Qt.callLater(() => { input.text = ""; input.forceActiveFocus() })
     }
 
     function hide() {
