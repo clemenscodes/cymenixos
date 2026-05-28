@@ -94,7 +94,10 @@ PanelWindow {
         id: card
         anchors.centerIn: parent
         width: menu.cardWidth
-        height: Math.min(menu.cardMaxHeight, cardColumn.implicitHeight + 28)
+        // Floor at 240px so the empty-state stays visible even before the
+        // async BlueZ discovery finishes and lets the implicit content
+        // height settle.
+        height: Math.min(menu.cardMaxHeight, Math.max(240, cardColumn.implicitHeight + 28))
         color: Theme.defaultBg
         radius: Theme.pillRadius
         border.color: Theme.activeBg
