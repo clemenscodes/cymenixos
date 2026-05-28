@@ -1,59 +1,50 @@
-// One level of a system tray context menu. Used recursively via
-// Qt.createComponent(Qt.resolvedUrl("TrayMenu.qml")) so submenus,
-// sub-submenus etc. all use the same delegate code.
-//
-// Anchoring:
-// - The top level anchors to the BottomBar PanelWindow above the
-//   tray pill (placement = "above").
-// - Every submenu anchors to its IMMEDIATE PARENT popup window with
-//   anchor coords in that popup's local scene (placement = "right").
-//   This is what xdg_popup is designed for and avoids any
-//   cross-window coordinate gymnastics.
+// Tray context menu. Hierarchical menus are rendered using a
+// drill-down (replace) pattern in a single popup window: clicking a
+// row with hasChildren swaps the popup's content for that row's
+// children and adds a "← Back" entry on top. Clicking that back-
+// entry pops the navigation stack. This avoids every cross-popup
+// xdg_popup coordinate-space problem we had with flyout submenus,
+// and works reliably under Hyprland.
 import QtQuick
 import Quickshell
 
 PopupWindow {
     id: popup
 
-    property var menuHandle: null
-    property var anchorWindow: null
+    property var trayItem: null
     property Item anchorItem: null
-    property string placement: "above"   // "above" or "right"
-    property var parentLevel: null
+    property var anchorWindow: null
+
+    // Navigation stack: array of QsMenuHandle, deepest first.
+    // The top-level menu is the trayItem.menu; we always derive the
+    // currently-shown handle from this stack.
+    property var stack: []
+
+    readonly property var currentHandle: stack.length > 0
+        ? stack[stack.length - 1]
+        : (trayItem ? trayItem.menu : null)
 
     color: "transparent"
+    grabFocus: true
     visible: false
-    grabFocus: !popup.parentLevel        // only the root level grabs focus
 
-    implicitWidth: 260
+    implicitWidth: 280
     implicitHeight: menuFrame.implicitHeight
 
     QsMenuOpener {
         id: opener
-        menu: popup.menuHandle
+        menu: popup.currentHandle
     }
-
-    property var subInstance: null
-    property var subForEntry: null
 
     anchor {
         window: popup.anchorWindow
-        rect.x: {
-            if (!popup.anchorItem) return 0
-            const p = popup.anchorItem.mapToItem(null, 0, 0)
-            if (popup.placement === "right") {
-                return p.x + popup.anchorItem.width + 2
-            }
-            return p.x + popup.anchorItem.width / 2 - popup.implicitWidth / 2
-        }
-        rect.y: {
-            if (!popup.anchorItem) return 0
-            const p = popup.anchorItem.mapToItem(null, 0, 0)
-            if (popup.placement === "right") {
-                return p.y
-            }
-            return p.y - popup.implicitHeight - 4
-        }
+        rect.x: popup.anchorItem
+            ? popup.anchorItem.mapToItem(null, 0, 0).x
+                + popup.anchorItem.width / 2 - popup.implicitWidth / 2
+            : 0
+        rect.y: popup.anchorItem
+            ? popup.anchorItem.mapToItem(null, 0, 0).y - popup.implicitHeight - 4
+            : 0
         rect.width: 1
         rect.height: 1
         edges: Edges.Top | Edges.Left
@@ -61,60 +52,31 @@ PopupWindow {
     }
 
     function show(item, anchor, window) {
-        popup.menuHandle = item ? item.menu : null
+        popup.trayItem = item
         popup.anchorItem = anchor
         popup.anchorWindow = window
-        popup.placement = "above"
-        popup.parentLevel = null
+        popup.stack = []
         popup.visible = true
     }
 
-    function openSubFor(entry, handle) {
-        if (popup.subForEntry === entry && popup.subInstance) return
-        closeSub()
-
-        const c = Qt.createComponent(Qt.resolvedUrl("TrayMenu.qml"))
-        if (c.status !== Component.Ready) {
-            console.warn("TrayMenu sub component error:", c.errorString())
-            return
-        }
-        const sub = c.createObject(null, {
-            menuHandle: handle,
-            anchorWindow: popup,        // <- anchor to this popup window
-            anchorItem: entry,
-            placement: "right",
-            parentLevel: popup
-        })
-        sub.visible = true
-        popup.subInstance = sub
-        popup.subForEntry = entry
-    }
-
-    function closeSub() {
-        if (popup.subInstance) {
-            popup.subInstance.bubbleHide()
-            popup.subInstance.destroy()
-            popup.subInstance = null
-            popup.subForEntry = null
-        }
-    }
-
-    function bubbleHide() {
-        closeSub()
+    function hide() {
         popup.visible = false
-        if (popup.parentLevel && popup.parentLevel.visible) {
-            popup.parentLevel.bubbleHide()
-        }
-        popup.menuHandle = null
+        popup.stack = []
+        popup.trayItem = null
     }
 
-    // Cascade: when this popup becomes hidden (e.g. root grabFocus
-    // dismiss, or programmatic), drop our child too.
-    onVisibleChanged: {
-        if (!visible) closeSub()
+    function pushHandle(handle) {
+        const s = popup.stack.slice()
+        s.push(handle)
+        popup.stack = s
     }
 
-    Component.onDestruction: closeSub()
+    function popHandle() {
+        if (popup.stack.length === 0) return
+        const s = popup.stack.slice()
+        s.pop()
+        popup.stack = s
+    }
 
     Rectangle {
         id: menuFrame
@@ -126,7 +88,7 @@ PopupWindow {
         implicitHeight: menuColumn.implicitHeight + 12
 
         focus: true
-        Keys.onEscapePressed: popup.bubbleHide()
+        Keys.onEscapePressed: popup.hide()
 
         Column {
             id: menuColumn
@@ -136,6 +98,53 @@ PopupWindow {
             anchors.margins: 6
             spacing: 2
 
+            // ----- Back row, shown only when we've drilled down -----
+            Item {
+                visible: popup.stack.length > 0
+                width: menuColumn.width
+                height: visible ? 30 : 0
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: backHover.containsMouse
+                        ? Qt.lighter(Theme.defaultBg, 1.4)
+                        : "transparent"
+                    radius: Theme.innerRadius
+
+                    Behavior on color {
+                        ColorAnimation { duration: Theme.fadeMs / 2 }
+                    }
+
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "← Back"
+                        color: backHover.containsMouse ? Theme.activeTextColor : Theme.textColor
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 13
+                        font.bold: backHover.containsMouse
+                    }
+
+                    MouseArea {
+                        id: backHover
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: popup.popHandle()
+                    }
+                }
+            }
+
+            // ----- Separator after Back -----
+            Rectangle {
+                visible: popup.stack.length > 0
+                width: menuColumn.width
+                height: visible ? 1 : 0
+                color: "#555"
+            }
+
+            // ----- Menu items -----
             Repeater {
                 model: opener.children
 
@@ -158,10 +167,7 @@ PopupWindow {
                         anchors.fill: parent
                         color: itemHover.containsMouse
                             ? Theme.activeBg
-                            : (entry.modelData && entry.modelData.hasChildren
-                                && popup.subForEntry === entry
-                                    ? Qt.lighter(Theme.defaultBg, 1.3)
-                                    : "transparent")
+                            : "transparent"
                         radius: Theme.innerRadius
 
                         Behavior on color {
@@ -220,22 +226,12 @@ PopupWindow {
                             enabled: entry.modelData
                                 && entry.modelData.enabled
                                 && !entry.modelData.isSeparator
-
-                            onEntered: {
-                                // Hovering a hasChildren row opens / switches
-                                // the submenu. Hovering anything else leaves
-                                // the open submenu alone so the mouse can
-                                // sweep into it without it disappearing.
-                                if (entry.modelData.hasChildren) {
-                                    popup.openSubFor(entry, entry.modelData)
-                                }
-                            }
                             onClicked: {
                                 if (entry.modelData.hasChildren) {
-                                    popup.openSubFor(entry, entry.modelData)
+                                    popup.pushHandle(entry.modelData)
                                 } else {
                                     entry.modelData.triggered()
-                                    popup.bubbleHide()
+                                    popup.hide()
                                 }
                             }
                         }
