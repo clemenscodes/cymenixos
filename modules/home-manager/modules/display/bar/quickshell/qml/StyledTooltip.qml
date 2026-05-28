@@ -7,15 +7,28 @@ PopupWindow {
     property string text: ""
     property Item targetItem: null
     property var targetWindow: null
-    property int maxWidth: 480
+    property int maxWidth: 720
     property int verticalGap: 8
     property string placement: "above"
+
+    readonly property int innerPadding: 12
+    readonly property int outerPadding: 8
 
     color: "transparent"
     visible: false
 
-    implicitWidth: contentBg.implicitWidth
-    implicitHeight: contentBg.implicitHeight
+    TextMetrics {
+        id: metrics
+        text: tooltip.text
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize - 2
+    }
+
+    readonly property real measuredNaturalWidth: metrics.boundingRect.width
+    readonly property real fitWidth: Math.min(measuredNaturalWidth + innerPadding * 2, maxWidth)
+
+    implicitWidth: fitWidth
+    implicitHeight: tooltipText.contentHeight + outerPadding * 2
 
     anchor {
         window: tooltip.targetWindow
@@ -47,23 +60,19 @@ PopupWindow {
     }
 
     Rectangle {
-        id: contentBg
         anchors.fill: parent
         color: Theme.defaultBg
         radius: 8
         border.color: Theme.activeBg
         border.width: 1
 
-        implicitWidth: Math.min(tooltipText.implicitWidth + 24, tooltip.maxWidth)
-        implicitHeight: tooltipText.implicitHeight + 16
-
         Text {
             id: tooltipText
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 12
-            anchors.rightMargin: 12
+            anchors.leftMargin: tooltip.innerPadding
+            anchors.rightMargin: tooltip.innerPadding
             text: tooltip.text
             color: Theme.textColor
             font.family: Theme.fontFamily
