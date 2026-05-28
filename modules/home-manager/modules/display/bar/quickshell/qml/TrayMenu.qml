@@ -96,13 +96,23 @@ PanelWindow {
     }
 
     readonly property int cardMaxHeight: 520
+    readonly property int cardMinHeight: 80
+
+    // Track the current SubMenu's content column height so the card
+    // resizes when levelOpener.children populates asynchronously.
+    readonly property int currentContentHeight: stack.currentItem
+        && stack.currentItem.contentColumnHeight !== undefined
+            ? stack.currentItem.contentColumnHeight
+            : 0
 
     Rectangle {
         id: card
         x: trayMenu.menuX
         y: trayMenu.menuY
         width: 280
-        height: Math.min(trayMenu.cardMaxHeight, (stack.currentItem ? stack.currentItem.implicitHeight : 0) + 12)
+        height: Math.max(trayMenu.cardMinHeight,
+                         Math.min(trayMenu.cardMaxHeight,
+                                  trayMenu.currentContentHeight + 12))
         color: Theme.defaultBg
         radius: Theme.pillRadius
         border.color: Theme.activeBg
@@ -146,8 +156,11 @@ PanelWindow {
             required property var handle
             required property bool isSubMenu
 
+            // Expose contentColumn height so the parent card can size
+            // itself once the QsMenuOpener has populated children.
+            readonly property int contentColumnHeight: contentColumn.implicitHeight
+
             implicitWidth: 268
-            implicitHeight: Math.min(trayMenu.cardMaxHeight - 12, contentColumn.implicitHeight)
             contentWidth: width
             contentHeight: contentColumn.implicitHeight
             clip: true
