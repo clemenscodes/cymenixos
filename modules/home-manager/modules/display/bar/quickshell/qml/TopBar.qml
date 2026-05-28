@@ -104,7 +104,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            tooltipText: `Root filesystem usage (/)\n${SysStats.diskUsage || "?"} used`
+            tooltipText: SysStats.diskTooltip
             Text {
                 text: `${SysStats.diskUsage || "—"} 💾`
                 color: Theme.textColor
@@ -118,7 +118,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            tooltipText: `RAM usage\n${SysStats.memPercent}% of system memory in use`
+            tooltipText: SysStats.memTooltip
             Text {
                 text: `${SysStats.memPercent}% 🧠`
                 color: Theme.textColor
@@ -133,7 +133,7 @@ PanelWindow {
             visible: SysStats.tempC > 0
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            tooltipText: `CPU temperature\n${SysStats.tempC}°C`
+            tooltipText: SysStats.tempTooltip
             Text {
                 text: `${SysStats.tempC}°C 🌡️`
                 color: SysStats.tempC >= 80 ? Theme.criticalColor : Theme.textColor
@@ -147,7 +147,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            tooltipText: `CPU usage\n${SysStats.cpuPercent}% across all cores`
+            tooltipText: SysStats.cpuTooltip
             Text {
                 text: `${SysStats.cpuPercent}% ⚙️`
                 color: Theme.textColor

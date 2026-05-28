@@ -184,6 +184,11 @@ PanelWindow {
         Pill {
             id: submapPill
             Layout.alignment: Qt.AlignVCenter
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+            tooltipText: bar.currentSubmap === "NORMAL"
+                ? "Current Hyprland submap: NORMAL (no submap active)"
+                : `Current Hyprland submap: ${bar.currentSubmap}\nPress Mod+Shift+Escape to exit`
 
             Text {
                 text: bar.currentSubmap
