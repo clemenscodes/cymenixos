@@ -18,7 +18,7 @@ Rectangle {
     signal scrolledDown()
 
     property color baseColor: Theme.defaultBg
-    property color hoverColor: Qt.lighter(baseColor, 1.18)
+    property color hoverColor: Qt.lighter(baseColor, 1.4)
 
     color: (pillMouse.containsMouse && (pill.interactive || pill.tooltipText.length > 0))
         ? hoverColor

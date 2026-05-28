@@ -92,7 +92,7 @@ PanelWindow {
                 Repeater {
                     model: ToplevelManager.toplevels
 
-                    delegate: Item {
+                    delegate: Rectangle {
                         id: tlButton
                         required property Toplevel modelData
 
@@ -104,8 +104,16 @@ PanelWindow {
                             return appId
                         }
 
-                        implicitWidth: 36
-                        implicitHeight: 32
+                        implicitWidth: 44
+                        implicitHeight: Theme.pillHeight - 12
+                        radius: Theme.innerRadius
+                        color: tlHover.containsMouse
+                            ? Qt.lighter(Theme.defaultBg, 1.4)
+                            : "transparent"
+
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.fadeMs / 2 }
+                        }
 
                         IconImage {
                             anchors.centerIn: parent
@@ -113,19 +121,13 @@ PanelWindow {
                             source: Quickshell.iconPath(tlButton.resolvedIcon, "application-x-executable")
                             smooth: true
                             mipmap: true
-                            opacity: tlButton.modelData.activated
-                                ? 1.0
-                                : (tlHover.containsMouse ? 0.9 : 0.65)
-
-                            Behavior on opacity {
-                                NumberAnimation { duration: Theme.fadeMs }
-                            }
                         }
 
                         Rectangle {
                             anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 4
                             anchors.horizontalCenter: parent.horizontalCenter
-                            width: tlButton.modelData.activated ? 18 : 0
+                            width: tlButton.modelData.activated ? 22 : 0
                             height: 2
                             radius: 1
                             color: Theme.activeBg
