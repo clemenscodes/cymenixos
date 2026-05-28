@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
@@ -171,6 +172,15 @@ PanelWindow {
                         implicitWidth: 32
                         implicitHeight: 32
 
+                        ToolTip.visible: trayHover.containsMouse
+                        ToolTip.delay: 400
+                        ToolTip.text: {
+                            const id = trayDelegate.modelData.id || ""
+                            const title = trayDelegate.modelData.title || ""
+                            const tt = trayDelegate.modelData.tooltipTitle || trayDelegate.modelData.tooltipDescription || ""
+                            return tt || title || id
+                        }
+
                         IconImage {
                             anchors.centerIn: parent
                             implicitSize: 26
@@ -180,12 +190,15 @@ PanelWindow {
                         }
 
                         MouseArea {
+                            id: trayHover
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
                             onClicked: function(mouse) {
                                 if (mouse.button === Qt.LeftButton) {
                                     if (trayDelegate.modelData.onlyMenu) {
+                                        trayMenu.item = trayDelegate.modelData
+                                        trayMenu.anchorItem = trayDelegate
                                         trayMenu.menu = trayDelegate.modelData.menu
                                         trayMenu.open()
                                     } else {
@@ -195,6 +208,8 @@ PanelWindow {
                                     trayDelegate.modelData.secondaryActivate()
                                 } else if (mouse.button === Qt.RightButton) {
                                     if (trayDelegate.modelData.hasMenu) {
+                                        trayMenu.item = trayDelegate.modelData
+                                        trayMenu.anchorItem = trayDelegate
                                         trayMenu.menu = trayDelegate.modelData.menu
                                         trayMenu.open()
                                     }
@@ -212,9 +227,13 @@ PanelWindow {
 
         QsMenuAnchor {
             id: trayMenu
+            property var item: null
+            property Item anchorItem: null
             anchor {
                 window: bar
-                rect.x: trayPill.x + trayPill.width / 2
+                rect.x: trayMenu.anchorItem
+                    ? trayMenu.anchorItem.mapToItem(null, 0, 0).x + trayMenu.anchorItem.width / 2
+                    : 0
                 rect.y: 0
                 rect.height: 1
                 rect.width: 1
