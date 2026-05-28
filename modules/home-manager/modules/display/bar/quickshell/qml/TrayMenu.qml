@@ -38,13 +38,23 @@ PanelWindow {
         trayMenu.anchorWindow = window
         if (window && window.screen) trayMenu.screen = window.screen
 
-        if (anchor && window) {
-            const g = anchor.mapToItem(null, 0, 0)
-            // Centre the menu horizontally on the tray icon, sit it just
-            // above the bar with a small gap.
-            const w = 280
-            trayMenu.menuX = Math.max(8, g.x + anchor.width / 2 - w / 2)
-            trayMenu.menuY = Math.max(8, g.y - 4 - 320)
+        if (anchor) {
+            // mapToGlobal gives true screen coordinates. Our overlay
+            // PanelWindow fills the whole screen so its (0,0) is the
+            // screen's (0,0) — global coords are usable directly as
+            // local positions inside the card layout.
+            const g = anchor.mapToGlobal(0, 0)
+            const cardWidth = 280
+            const cardHeight = 320
+            trayMenu.menuX = Math.max(8, Math.min(
+                g.x + anchor.width / 2 - cardWidth / 2,
+                (trayMenu.screen ? trayMenu.screen.width : 1920) - cardWidth - 8
+            ))
+            // Place the card just ABOVE the anchor with a 4px gap. If
+            // that runs off the top, flip below the anchor.
+            const above = g.y - cardHeight - 4
+            const below = g.y + anchor.height + 4
+            trayMenu.menuY = above >= 8 ? above : below
         }
 
         // Reset the stack to the root menu of this tray item.
