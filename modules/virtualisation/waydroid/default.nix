@@ -31,7 +31,7 @@
 
   waydroid-ui = pkgs.writeShellApplication {
     name = "waydroid-ui";
-    runtimeInputs = [pkgs.cage pkgs.waydroid pkgs.coreutils pkgs.gnugrep pkgs.procps pkgs.util-linux];
+    runtimeInputs = [pkgs.cage pkgs.waydroid pkgs.coreutils pkgs.gnugrep pkgs.procps pkgs.util-linux pkgs.hyprland];
     text = ''
       # Single-instance guard. A second cage trying to attach to a
       # waydroid session that's already attached to another cage will
@@ -80,7 +80,26 @@
         trap "waydroid session stop >/dev/null 2>&1 || true" EXIT
       fi
 
-      cage -- waydroid show-full-ui "$@"
+      cage -- waydroid show-full-ui "$@" &
+      cage_pid=$!
+
+      # Cage's wrapped child (waydroid show-full-ui) keeps the python
+      # session manager alive indefinitely, so cage never returns when
+      # the host compositor closes its surface. Watch Hyprland for the
+      # window disappearing and signal cage to quit so the EXIT trap
+      # can restore iGPU + stop the session.
+      (
+        sleep 8  # give the wlroots window time to appear
+        while kill -0 "$cage_pid" 2>/dev/null; do
+          if ! hyprctl clients -j 2>/dev/null | grep -q '"class": "wlroots"'; then
+            kill -TERM "$cage_pid" 2>/dev/null || true
+            break
+          fi
+          sleep 2
+        done
+      ) &
+
+      wait "$cage_pid" || true
     '';
   };
 in {
