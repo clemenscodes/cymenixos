@@ -51,7 +51,7 @@ PanelWindow {
                         radius: Theme.innerRadius
                         color: hoverArea.containsMouse
                             ? Qt.lighter(Theme.defaultBg, 1.4)
-                            : "transparent"
+                            : Theme.defaultBg
 
                         Behavior on color {
                             ColorAnimation { duration: Theme.fadeMs / 2 }

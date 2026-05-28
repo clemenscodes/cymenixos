@@ -109,7 +109,7 @@ PanelWindow {
                         radius: Theme.innerRadius
                         color: tlHover.containsMouse
                             ? Qt.lighter(Theme.defaultBg, 1.4)
-                            : "transparent"
+                            : Theme.defaultBg
 
                         Behavior on color {
                             ColorAnimation { duration: Theme.fadeMs / 2 }
