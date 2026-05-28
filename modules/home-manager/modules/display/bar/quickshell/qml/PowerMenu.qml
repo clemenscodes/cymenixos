@@ -39,7 +39,7 @@ PanelWindow {
     function show(window) {
         if (window && window.screen) menu.screen = window.screen
         menu.visible = true
-        Qt.callLater(() => menu.forceActiveFocus())
+        Qt.callLater(() => keyHandler.forceActiveFocus())
     }
 
     function hide() {
@@ -51,16 +51,21 @@ PanelWindow {
         menu.hide()
     }
 
-    Keys.onPressed: function(event) {
-        if (event.key === Qt.Key_Escape) {
-            menu.hide()
-            event.accepted = true
-        }
-    }
-
-    MouseArea {
+    Item {
+        id: keyHandler
         anchors.fill: parent
-        onClicked: menu.hide()
+        focus: true
+        Keys.onPressed: function(event) {
+            if (event.key === Qt.Key_Escape) {
+                menu.hide()
+                event.accepted = true
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: menu.hide()
+        }
     }
 
     Rectangle {
