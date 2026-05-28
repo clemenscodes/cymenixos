@@ -34,7 +34,7 @@ PanelWindow {
 
         Pill {
             Layout.alignment: Qt.AlignVCenter
-            contentPadding: 6
+            contentPadding: 8
 
             Row {
                 spacing: Theme.pillSpacing
@@ -46,8 +46,8 @@ PanelWindow {
                         id: wsButton
                         required property HyprlandWorkspace modelData
 
-                        implicitWidth: wsLabel.implicitWidth + 16
-                        implicitHeight: 26
+                        implicitWidth: wsLabel.implicitWidth + 20
+                        implicitHeight: 32
                         radius: Theme.innerRadius
                         color: modelData.focused
                             ? Theme.activeBg

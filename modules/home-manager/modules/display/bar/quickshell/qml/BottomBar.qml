@@ -84,7 +84,7 @@ PanelWindow {
         Pill {
             Layout.alignment: Qt.AlignVCenter
             visible: ToplevelManager.toplevels.values.length > 0
-            contentPadding: 6
+            contentPadding: 8
 
             Row {
                 spacing: 4
@@ -104,7 +104,7 @@ PanelWindow {
                             return appId
                         }
 
-                        implicitWidth: 36
+                        implicitWidth: 40
                         implicitHeight: 32
                         radius: Theme.innerRadius
                         color: modelData.activated
@@ -128,6 +128,15 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+                            onEntered: {
+                                const title = tlButton.modelData.title || ""
+                                const appId = tlButton.modelData.appId || ""
+                                let s = appId ? appId : "Window"
+                                if (title && title !== appId) s += "\n" + title
+                                s += "\n\nLeft-click: focus  ·  Middle: fullscreen  ·  Right: close"
+                                barTooltip.showFor(tlButton, s, bar)
+                            }
+                            onExited: barTooltip.hide()
                             onClicked: function(mouse) {
                                 if (mouse.button === Qt.LeftButton) {
                                     tlButton.modelData.activate()
@@ -316,8 +325,24 @@ PanelWindow {
             id: volPill
             Layout.alignment: Qt.AlignVCenter
             interactive: true
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
 
-            readonly property var audio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
+            readonly property var sink: Pipewire.defaultAudioSink
+            readonly property var audio: sink ? sink.audio : null
+            readonly property string sinkName: sink
+                ? (sink.nickname || sink.description || sink.name || "Audio output")
+                : "Audio output"
+
+            tooltipText: {
+                let s = "Output: " + volPill.sinkName
+                if (volPill.audio) {
+                    s += "\nVolume: " + Math.round(volPill.audio.volume * 100) + "%"
+                        + (volPill.audio.muted ? "  (muted)" : "")
+                }
+                s += "\n\nScroll: adjust  ·  Click: mute  ·  Right-click: pavucontrol"
+                return s
+            }
 
             onLeftClicked: { if (volPill.audio) volPill.audio.muted = !volPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
@@ -348,8 +373,24 @@ PanelWindow {
             id: micPill
             Layout.alignment: Qt.AlignVCenter
             interactive: true
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
 
-            readonly property var audio: Pipewire.defaultAudioSource ? Pipewire.defaultAudioSource.audio : null
+            readonly property var src: Pipewire.defaultAudioSource
+            readonly property var audio: src ? src.audio : null
+            readonly property string srcName: src
+                ? (src.nickname || src.description || src.name || "Audio input")
+                : "Audio input"
+
+            tooltipText: {
+                let s = "Input: " + micPill.srcName
+                if (micPill.audio) {
+                    s += "\nVolume: " + Math.round(micPill.audio.volume * 100) + "%"
+                        + (micPill.audio.muted ? "  (muted)" : "")
+                }
+                s += "\n\nScroll: adjust  ·  Click: mute  ·  Right-click: pavucontrol"
+                return s
+            }
 
             onLeftClicked: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
@@ -381,8 +422,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            tooltipText: Qt.formatDateTime(clock.now, "dddd, dd MMMM yyyy") + "\n"
-                + Qt.formatDateTime(clock.now, "HH:mm:ss")
+            tooltipText: Qt.formatDateTime(clock.now, "dddd, dd MMMM yyyy")
 
             QtObject {
                 id: clock
