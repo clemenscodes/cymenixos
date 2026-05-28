@@ -301,11 +301,9 @@ PanelWindow {
             }
 
             Text {
-                text: {
-                    if (!btPill.poweredOn) return ""
-                    if (btPill.connectedCount === 0) return ""
-                    return "  " + btPill.connectedCount
-                }
+                text: btPill.poweredOn
+                    ? (btPill.connectedCount > 0 ? "  " + btPill.connectedCount : "")
+                    : ""
                 color: btPill.poweredOn
                     ? (btPill.connectedCount > 0 ? Theme.activeBg : Theme.textColor)
                     : Theme.mutedColor

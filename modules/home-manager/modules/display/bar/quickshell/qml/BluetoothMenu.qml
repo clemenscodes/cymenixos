@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Bluetooth
@@ -7,7 +6,7 @@ import Quickshell.Bluetooth
 PanelWindow {
     id: menu
 
-    readonly property int cardWidth: 420
+    readonly property int cardWidth: 440
     readonly property int cardMaxHeight: 560
 
     readonly property var adapter: Bluetooth.defaultAdapter
@@ -79,6 +78,9 @@ PanelWindow {
             } else if (event.key === Qt.Key_Space) {
                 if (menu.adapter) menu.adapter.enabled = !menu.adapter.enabled
                 event.accepted = true
+            } else if (event.key === Qt.Key_R) {
+                if (menu.adapter && menu.adapter.enabled) menu.adapter.discovering = !menu.adapter.discovering
+                event.accepted = true
             }
         }
 
@@ -89,9 +91,10 @@ PanelWindow {
     }
 
     Rectangle {
+        id: card
         anchors.centerIn: parent
         width: menu.cardWidth
-        implicitHeight: Math.min(menu.cardMaxHeight, layout.implicitHeight + 28)
+        height: Math.min(menu.cardMaxHeight, cardColumn.implicitHeight + 28)
         color: Theme.defaultBg
         radius: Theme.pillRadius
         border.color: Theme.activeBg
@@ -102,55 +105,67 @@ PanelWindow {
             onClicked: { /* swallow */ }
         }
 
-        ColumnLayout {
-            id: layout
-            anchors.fill: parent
+        Column {
+            id: cardColumn
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             anchors.margins: 14
             spacing: 10
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 12
+            // ----- Header row -----
+            Item {
+                width: parent.width
+                height: 48
 
                 Text {
+                    id: headerIcon
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
                     text: menu.adapter && menu.adapter.enabled ? "" : ""
                     color: menu.adapter && menu.adapter.enabled ? Theme.activeBg : Theme.mutedColor
                     font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize + 6
-                    Layout.alignment: Qt.AlignVCenter
+                    font.pixelSize: Theme.fontSize + 10
                 }
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
+                Text {
+                    id: headerTitle
+                    anchors.left: headerIcon.right
+                    anchors.leftMargin: 14
+                    anchors.top: parent.top
+                    anchors.topMargin: 6
+                    text: "Bluetooth"
+                    color: Theme.textColor
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
 
-                    Text {
-                        text: "Bluetooth"
-                        color: Theme.textColor
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize
-                        font.bold: true
+                Text {
+                    anchors.left: headerIcon.right
+                    anchors.leftMargin: 14
+                    anchors.top: headerTitle.bottom
+                    anchors.topMargin: 2
+                    text: {
+                        if (!menu.adapter) return "No adapter detected"
+                        if (!menu.adapter.enabled) return "Adapter off  ·  Space to toggle"
+                        const n = menu.allDevices.filter(d => d.connected).length
+                        const total = menu.allDevices.length
+                        if (menu.adapter.discovering) return "Scanning…  ·  " + total + " visible"
+                        if (n === 0) return total + " known device" + (total === 1 ? "" : "s")
+                        return n + " connected  ·  " + total + " known"
                     }
-
-                    Text {
-                        text: {
-                            if (!menu.adapter) return "No adapter"
-                            const n = menu.allDevices.filter(d => d.connected).length
-                            const total = menu.allDevices.length
-                            if (!menu.adapter.enabled) return "Adapter off"
-                            if (menu.adapter.discovering) return "Scanning…  ·  " + total + " visible"
-                            if (n === 0) return total + " known device" + (total === 1 ? "" : "s")
-                            return n + " connected  ·  " + total + " known"
-                        }
-                        color: Qt.darker(Theme.textColor, 1.5)
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize - 4
-                    }
+                    color: Qt.darker(Theme.textColor, 1.5)
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize - 4
                 }
 
                 Rectangle {
-                    Layout.preferredWidth: 96
-                    Layout.preferredHeight: 32
+                    id: powerBtn
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 96
+                    height: 32
                     radius: Theme.innerRadius
                     color: powerHover.containsMouse
                         ? Qt.lighter(menu.adapter && menu.adapter.enabled ? Theme.activeBg : Theme.defaultBg, 1.3)
@@ -180,136 +195,152 @@ PanelWindow {
                 }
             }
 
+            // ----- Separator -----
             Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
+                width: parent.width
+                height: 1
                 color: Qt.darker(Theme.textColor, 4)
             }
 
+            // ----- Empty state -----
             Text {
                 visible: menu.sortedDevices.length === 0
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.bottomMargin: 16
-                text: menu.adapter && menu.adapter.enabled
-                    ? "No known devices.\nPair via bluetoothctl or a settings app."
-                    : "Adapter is off."
+                width: parent.width
+                height: visible ? 60 : 0
+                text: !menu.adapter
+                    ? "No Bluetooth adapter found"
+                    : (menu.adapter.enabled
+                        ? "No known devices yet.\nPress R to scan, or pair via bluetoothctl."
+                        : "Adapter is off. Press Space to turn it on.")
                 color: Qt.darker(Theme.textColor, 1.5)
                 font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize - 2
+                font.pixelSize: Theme.fontSize - 1
                 horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.Wrap
             }
 
-            ListView {
-                id: deviceList
-                Layout.fillWidth: true
-                Layout.preferredHeight: Math.min(360, count * 48)
+            // ----- Device list -----
+            Column {
                 visible: menu.sortedDevices.length > 0
-                clip: true
+                width: parent.width
                 spacing: 2
-                model: menu.sortedDevices
-                currentIndex: menu.selectedIndex
 
-                delegate: Rectangle {
-                    id: row
-                    required property var modelData
-                    required property int index
+                Repeater {
+                    model: menu.sortedDevices
 
-                    width: ListView.view.width
-                    height: 44
-                    radius: Theme.innerRadius
-                    color: (row.index === menu.selectedIndex || rowHover.containsMouse)
-                        ? Qt.lighter(Theme.defaultBg, 1.4)
-                        : Theme.defaultBg
+                    delegate: Rectangle {
+                        id: row
+                        required property var modelData
+                        required property int index
 
-                    Behavior on color {
-                        ColorAnimation { duration: Theme.fadeMs / 2 }
-                    }
+                        width: parent.width
+                        height: 52
+                        radius: Theme.innerRadius
+                        color: (row.index === menu.selectedIndex || rowHover.containsMouse)
+                            ? Qt.lighter(Theme.defaultBg, 1.4)
+                            : Theme.defaultBg
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 12
-                        spacing: 12
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.fadeMs / 2 }
+                        }
 
                         IconImage {
-                            Layout.preferredWidth: 22
-                            Layout.preferredHeight: 22
-                            implicitSize: 22
+                            id: rowIcon
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            implicitSize: 24
                             source: Quickshell.iconPath(row.modelData.icon, "bluetooth")
                             smooth: true
                             mipmap: true
                         }
 
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 0
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: row.modelData.deviceName || row.modelData.name || row.modelData.address
-                                color: Theme.textColor
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 1
-                                font.bold: row.index === menu.selectedIndex
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: row.modelData.address + "  ·  "
-                                    + (row.modelData.connected ? "connected"
-                                        : (row.modelData.paired ? "paired" : "known"))
-                                color: row.modelData.connected ? Theme.activeBg : Qt.darker(Theme.textColor, 1.6)
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 5
-                                elide: Text.ElideRight
-                            }
+                        Text {
+                            id: rowName
+                            anchors.left: rowIcon.right
+                            anchors.leftMargin: 12
+                            anchors.right: rowStatus.left
+                            anchors.rightMargin: 12
+                            anchors.top: parent.top
+                            anchors.topMargin: 8
+                            text: row.modelData.deviceName || row.modelData.name || row.modelData.address
+                            color: Theme.textColor
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize
+                            font.bold: row.index === menu.selectedIndex
+                            elide: Text.ElideRight
                         }
 
                         Text {
-                            text: row.modelData.connected ? "" : ""
-                            color: row.modelData.connected ? Theme.activeBg : Qt.darker(Theme.textColor, 1.5)
+                            anchors.left: rowIcon.right
+                            anchors.leftMargin: 12
+                            anchors.top: rowName.bottom
+                            anchors.topMargin: 2
+                            text: row.modelData.address + "  ·  "
+                                + (row.modelData.connected ? "connected"
+                                    : (row.modelData.paired ? "paired" : "known"))
+                            color: row.modelData.connected ? Theme.activeBg : Qt.darker(Theme.textColor, 1.6)
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 5
+                        }
+
+                        Text {
+                            id: rowStatus
+                            anchors.right: parent.right
+                            anchors.rightMargin: 14
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: row.modelData.connected ? "" : ""
+                            color: row.modelData.connected ? Theme.activeBg : Theme.mutedColor
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize
-                            Layout.alignment: Qt.AlignVCenter
                         }
-                    }
 
-                    MouseArea {
-                        id: rowHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onEntered: menu.selectedIndex = row.index
-                        onClicked: row.modelData.connected = !row.modelData.connected
+                        MouseArea {
+                            id: rowHover
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: menu.selectedIndex = row.index
+                            onClicked: row.modelData.connected = !row.modelData.connected
+                        }
                     }
                 }
             }
 
-            Text {
-                Layout.fillWidth: true
-                visible: menu.adapter !== null
-                text: menu.adapter && menu.adapter.discovering
-                    ? "Scanning · click to stop"
-                    : (menu.adapter && menu.adapter.enabled ? "Click to scan for new devices" : "")
-                color: Qt.darker(Theme.textColor, 1.6)
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize - 4
-                horizontalAlignment: Text.AlignHCenter
+            // ----- Scan toggle -----
+            Item {
+                width: parent.width
+                height: scanText.implicitHeight + 8
+                visible: menu.adapter !== null && menu.adapter.enabled
+
+                Text {
+                    id: scanText
+                    anchors.centerIn: parent
+                    text: menu.adapter && menu.adapter.discovering
+                        ? "Scanning… click to stop"
+                        : "Click to scan for new devices"
+                    color: scanArea.containsMouse
+                        ? Theme.activeBg
+                        : Qt.darker(Theme.textColor, 1.5)
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize - 3
+                    font.underline: scanArea.containsMouse
+                }
 
                 MouseArea {
+                    id: scanArea
                     anchors.fill: parent
-                    cursorShape: parent.text.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    enabled: menu.adapter !== null && menu.adapter.enabled
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
                     onClicked: { if (menu.adapter) menu.adapter.discovering = !menu.adapter.discovering }
                 }
             }
 
+            // ----- Footer hint -----
             Text {
-                Layout.fillWidth: true
-                text: "Enter toggle · Space adapter · Esc"
+                width: parent.width
+                text: "Enter toggle  ·  Space adapter  ·  R scan  ·  Esc"
                 color: Qt.darker(Theme.textColor, 1.8)
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize - 5
