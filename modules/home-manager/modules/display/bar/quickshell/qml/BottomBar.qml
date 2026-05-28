@@ -95,8 +95,8 @@ PanelWindow {
                             return appId
                         }
 
-                        implicitWidth: 40
-                        implicitHeight: 32
+                        implicitWidth: 32
+                        implicitHeight: 26
                         radius: Theme.innerRadius
                         color: modelData.activated
                             ? Theme.activeBg
@@ -108,8 +108,10 @@ PanelWindow {
 
                         IconImage {
                             anchors.centerIn: parent
-                            implicitSize: 26
+                            implicitSize: 22
                             source: Quickshell.iconPath(tlButton.resolvedIcon, "application-x-executable")
+                            smooth: true
+                            mipmap: true
                         }
 
                         MouseArea {
@@ -169,8 +171,8 @@ PanelWindow {
                         id: trayDelegate
                         required property SystemTrayItem modelData
 
-                        implicitWidth: 32
-                        implicitHeight: 32
+                        implicitWidth: 24
+                        implicitHeight: 24
 
                         ToolTip.visible: trayHover.containsMouse
                         ToolTip.delay: 400
@@ -183,7 +185,7 @@ PanelWindow {
 
                         IconImage {
                             anchors.centerIn: parent
-                            implicitSize: 26
+                            implicitSize: 18
                             source: trayDelegate.modelData.icon
                             smooth: true
                             mipmap: true
