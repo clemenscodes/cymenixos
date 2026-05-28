@@ -156,7 +156,7 @@ PanelWindow {
 
         Pill {
             Layout.alignment: Qt.AlignVCenter
-            color: Theme.powerBg
+            baseColor: Theme.powerBg
             interactive: true
             onLeftClicked: Quickshell.execDetached(["sh", "-c", "sleep 0.1 && logoutlaunch"])
 

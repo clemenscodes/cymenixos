@@ -17,7 +17,17 @@ Rectangle {
     signal scrolledUp()
     signal scrolledDown()
 
-    color: Theme.defaultBg
+    property color baseColor: Theme.defaultBg
+    property color hoverColor: Qt.lighter(baseColor, 1.18)
+
+    color: (pillMouse.containsMouse && (pill.interactive || pill.tooltipText.length > 0))
+        ? hoverColor
+        : baseColor
+
+    Behavior on color {
+        ColorAnimation { duration: Theme.fadeMs / 2 }
+    }
+
     radius: Theme.pillRadius
     implicitHeight: Theme.pillHeight
     implicitWidth: contentContainer.implicitWidth + contentPadding * 2

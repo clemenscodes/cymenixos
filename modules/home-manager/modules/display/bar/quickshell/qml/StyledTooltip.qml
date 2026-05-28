@@ -17,14 +17,16 @@ PopupWindow {
     color: "transparent"
     visible: false
 
-    TextMetrics {
-        id: metrics
+    Text {
+        id: naturalMeasure
         text: tooltip.text
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSize - 2
+        wrapMode: Text.NoWrap
+        visible: false
     }
 
-    readonly property real measuredNaturalWidth: metrics.boundingRect.width
+    readonly property real measuredNaturalWidth: naturalMeasure.contentWidth
     readonly property real fitWidth: Math.min(measuredNaturalWidth + innerPadding * 2, maxWidth)
 
     implicitWidth: fitWidth

@@ -379,7 +379,7 @@ PanelWindow {
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 font.bold: true
-                text: Qt.formatDateTime(clock.now, "ddd dd.MM.yyyy HH:mm:ss")
+                text: Qt.formatDateTime(clock.now, "ddd dd.MM.yyyy HH:mm") + " 🕐"
 
                 QtObject {
                     id: clock
@@ -387,7 +387,7 @@ PanelWindow {
                 }
 
                 Timer {
-                    interval: 1000
+                    interval: 5000
                     running: true
                     repeat: true
                     triggeredOnStart: true
