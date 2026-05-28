@@ -5,46 +5,27 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Io
 
-PopupWindow {
+PanelWindow {
     id: launcher
 
-    property var anchorWindow: null
     property string query: ""
     property int selectedIndex: 0
 
-    color: "transparent"
+    readonly property int cardWidth: 620
+    readonly property int cardHeight: 560
+
     visible: false
-    grabFocus: true
+    color: "transparent"
 
-    implicitWidth: 620
-    implicitHeight: 540
-
-    readonly property var anchorScreen: launcher.anchorWindow ? launcher.anchorWindow.screen : null
-
-    anchor {
-        window: launcher.anchorWindow
-        rect.x: launcher.anchorScreen
-            ? (launcher.anchorScreen.width - launcher.implicitWidth) / 2
-            : 0
-        // BottomBar's coordinate system has y=0 at the top of the bar window. The
-        // bar sits at screen_y = screenHeight - barHeight. We want the popup's
-        // *top* to land at screen_y = (screenHeight - popupHeight) / 2, i.e. the
-        // popup centered on the screen. In bar coords:
-        //   popup_top_in_bar = popup_top_screen - bar_top_screen
-        //                    = (screenH - popupH)/2 - (screenH - barH)
-        //                    = barH - (screenH + popupH)/2
-        // With edges = Top + gravity = Top, the popup's bottom sits at rect.y and
-        // it grows upward, so rect.y = popup_top_in_bar + popupH.
-        rect.y: launcher.anchorScreen && launcher.anchorWindow
-            ? launcher.anchorWindow.height
-              - (launcher.anchorScreen.height - launcher.implicitHeight) / 2
-              + launcher.implicitHeight
-            : 0
-        rect.width: 1
-        rect.height: 1
-        edges: Edges.Top
-        gravity: Edges.Top
+    anchors {
+        top: true
+        left: true
+        right: true
+        bottom: true
     }
+    exclusiveZone: 0
+    aboveWindows: true
+    focusable: true
 
     function toggle(window) {
         if (launcher.visible) launcher.hide()
@@ -52,7 +33,7 @@ PopupWindow {
     }
 
     function show(window) {
-        launcher.anchorWindow = window
+        if (window && window.screen) launcher.screen = window.screen
         launcher.query = ""
         launcher.selectedIndex = 0
         launcher.visible = true
@@ -112,12 +93,29 @@ PopupWindow {
         launcher.hide()
     }
 
-    Rectangle {
+    // Backdrop: click outside the card dismisses.
+    MouseArea {
         anchors.fill: parent
+        onClicked: launcher.hide()
+    }
+
+    // Card.
+    Rectangle {
+        id: card
+        anchors.centerIn: parent
+        width: launcher.cardWidth
+        height: launcher.cardHeight
         color: Theme.defaultBg
         radius: Theme.pillRadius
         border.color: Theme.activeBg
         border.width: 1
+
+        // Swallow clicks on the card itself so backdrop doesn't dismiss
+        // when the user clicks empty padding between fields.
+        MouseArea {
+            anchors.fill: parent
+            onClicked: { /* eat */ }
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -297,11 +295,11 @@ PopupWindow {
         target: "launcher"
 
         function toggle() {
-            launcher.toggle(launcher.anchorWindow)
+            launcher.toggle(null)
         }
 
         function open() {
-            launcher.show(launcher.anchorWindow)
+            launcher.show(null)
         }
 
         function close() {
