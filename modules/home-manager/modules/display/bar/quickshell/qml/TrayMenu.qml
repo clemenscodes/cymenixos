@@ -95,7 +95,12 @@ PanelWindow {
         }
     }
 
-    readonly property int cardMaxHeight: 520
+    // Cap at screen-height minus the bar minus a small breathing margin
+    // so the card never spills past the screen edge, but otherwise grow
+    // as tall as the content needs.
+    readonly property int cardMaxHeight: anchorWindow && anchorWindow.screen
+        ? anchorWindow.screen.height - anchorWindow.height - 24
+        : 1200
     readonly property int cardMinHeight: 80
 
     // Track the current SubMenu's content column height so the card
