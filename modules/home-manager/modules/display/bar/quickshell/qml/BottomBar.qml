@@ -92,7 +92,7 @@ PanelWindow {
                 Repeater {
                     model: ToplevelManager.toplevels
 
-                    delegate: Rectangle {
+                    delegate: Item {
                         id: tlButton
                         required property Toplevel modelData
 
@@ -104,16 +104,8 @@ PanelWindow {
                             return appId
                         }
 
-                        implicitWidth: 40
+                        implicitWidth: 36
                         implicitHeight: 32
-                        radius: Theme.innerRadius
-                        color: modelData.activated
-                            ? Theme.activeBg
-                            : (tlHover.containsMouse ? Qt.rgba(0.85, 0.76, 0.77, 0.3) : "transparent")
-
-                        Behavior on color {
-                            ColorAnimation { duration: Theme.fadeMs }
-                        }
 
                         IconImage {
                             anchors.centerIn: parent
@@ -121,6 +113,26 @@ PanelWindow {
                             source: Quickshell.iconPath(tlButton.resolvedIcon, "application-x-executable")
                             smooth: true
                             mipmap: true
+                            opacity: tlButton.modelData.activated
+                                ? 1.0
+                                : (tlHover.containsMouse ? 0.9 : 0.65)
+
+                            Behavior on opacity {
+                                NumberAnimation { duration: Theme.fadeMs }
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: tlButton.modelData.activated ? 18 : 0
+                            height: 2
+                            radius: 1
+                            color: Theme.activeBg
+
+                            Behavior on width {
+                                NumberAnimation { duration: Theme.fadeMs }
+                            }
                         }
 
                         MouseArea {
@@ -128,15 +140,6 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-                            onEntered: {
-                                const title = tlButton.modelData.title || ""
-                                const appId = tlButton.modelData.appId || ""
-                                let s = appId ? appId : "Window"
-                                if (title && title !== appId) s += "\n" + title
-                                s += "\n\nLeft-click: focus  ·  Middle: fullscreen  ·  Right: close"
-                                barTooltip.showFor(tlButton, s, bar)
-                            }
-                            onExited: barTooltip.hide()
                             onClicked: function(mouse) {
                                 if (mouse.button === Qt.LeftButton) {
                                     tlButton.modelData.activate()

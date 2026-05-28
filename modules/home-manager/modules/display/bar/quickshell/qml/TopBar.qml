@@ -34,44 +34,58 @@ PanelWindow {
 
         Pill {
             Layout.alignment: Qt.AlignVCenter
-            contentPadding: 6
+            contentPadding: 10
 
             Row {
-                spacing: 2
+                spacing: 14
 
                 Repeater {
                     model: Hyprland.workspaces
 
-                    delegate: Rectangle {
+                    delegate: Item {
                         id: wsButton
                         required property HyprlandWorkspace modelData
 
-                        implicitWidth: wsLabel.implicitWidth + 18
-                        implicitHeight: Theme.pillHeight - 12
-                        radius: Theme.innerRadius
-                        color: modelData.focused
-                            ? Theme.activeBg
-                            : (hoverArea.containsMouse ? Qt.rgba(0.85, 0.76, 0.77, 0.25) : "transparent")
-
-                        Behavior on color {
-                            ColorAnimation { duration: Theme.fadeMs }
-                        }
+                        implicitWidth: wsLabel.implicitWidth
+                        implicitHeight: Theme.pillHeight - 14
 
                         Text {
                             id: wsLabel
                             anchors.centerIn: parent
-                            text: `-> ${wsButton.modelData.id}`
-                            color: wsButton.modelData.focused ? Theme.activeTextColor : Theme.textColor
+                            text: `${wsButton.modelData.id}`
+                            color: wsButton.modelData.focused
+                                ? Theme.warningColor
+                                : (hoverArea.containsMouse ? Theme.activeBg : Theme.textColor)
+                            opacity: wsButton.modelData.focused ? 1.0 : 0.7
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize
-                            font.bold: true
+                            font.bold: wsButton.modelData.focused
+
+                            Behavior on color {
+                                ColorAnimation { duration: Theme.fadeMs / 2 }
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: wsButton.modelData.focused ? wsLabel.implicitWidth : 0
+                            height: 2
+                            radius: 1
+                            color: Theme.warningColor
+
+                            Behavior on width {
+                                NumberAnimation { duration: Theme.fadeMs }
+                            }
                         }
 
                         MouseArea {
                             id: hoverArea
                             anchors.fill: parent
+                            anchors.margins: -4
                             acceptedButtons: Qt.LeftButton
                             hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: wsButton.modelData.activate()
                             onWheel: function(wheel) {
                                 if (wheel.angleDelta.y > 0) {
