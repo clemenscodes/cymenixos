@@ -50,9 +50,9 @@ in {
         enable = true;
         package = pkgs.quickshell;
         configs = {
-          amaru = ./qml;
+          cymenix = ./qml;
         };
-        activeConfig = "amaru";
+        activeConfig = "cymenix";
         systemd = {
           enable = true;
           target = "hyprland-session.target";

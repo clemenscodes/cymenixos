@@ -5,11 +5,11 @@ import Quickshell
 
 ShellRoot {
     AppLauncher {
-        id: appLauncher
+        id: shellAppLauncher
     }
 
     PowerMenu {
-        id: powerMenu
+        id: shellPowerMenu
     }
 
     Variants {
@@ -18,7 +18,7 @@ ShellRoot {
         TopBar {
             required property var modelData
             screen: modelData
-            powerMenu: powerMenu
+            powerMenu: shellPowerMenu
         }
     }
 
@@ -28,7 +28,7 @@ ShellRoot {
         BottomBar {
             required property var modelData
             screen: modelData
-            appLauncher: appLauncher
+            appLauncher: shellAppLauncher
         }
     }
 }

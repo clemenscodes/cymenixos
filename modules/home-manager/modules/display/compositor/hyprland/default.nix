@@ -21,6 +21,7 @@
   useAnyrun = displayCfg.launcher.anyrun.enable;
   useSwaync = displayCfg.notifications.swaync.enable;
   useWaybar = displayCfg.bar.waybar.enable;
+  useQuickshell = displayCfg.bar.quickshell.enable;
   useBtop = config.modules.monitoring.btop.enable;
   useCalcurse = config.modules.organization.calcurse.enable;
   useEmail = config.modules.organization.email.enable;
@@ -287,8 +288,12 @@ in {
         ''}
         ${lib.optionalString useSwaync ''hl.bind(mod .. " + N",        hl.dsp.exec_cmd("swaync-client -t -sw"))''}
         ${lib.optionalString useRofi   ''hl.bind(mod .. " + SHIFT + V",  hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy"))''}
-        ${lib.optionalString useAnyrun ''hl.bind(mod .. " + D",        hl.dsp.exec_cmd("anyrun"))''}
-        ${lib.optionalString useRofi   ''hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("logoutlaunch"))''}
+        ${lib.optionalString useQuickshell ''
+        hl.bind(mod .. " + D",         hl.dsp.exec_cmd("qs -c cymenix ipc call launcher toggle"))
+        hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("qs -c cymenix ipc call powermenu toggle"))
+        ''}
+        ${lib.optionalString (useAnyrun && !useQuickshell) ''hl.bind(mod .. " + D",        hl.dsp.exec_cmd("anyrun"))''}
+        ${lib.optionalString (useRofi && !useQuickshell)   ''hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("logoutlaunch"))''}
         ${lib.optionalString useScreenshots ''
         hl.bind(mod .. " + S",       hl.dsp.exec_cmd("screenshot"))
         hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("fullscreenshot"))
