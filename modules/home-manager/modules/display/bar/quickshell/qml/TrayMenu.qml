@@ -130,7 +130,7 @@ PanelWindow {
             required property bool isSubMenu
 
             spacing: 2
-            implicitWidth: 268
+            width: 268
 
             QsMenuOpener {
                 id: levelOpener
