@@ -7,7 +7,6 @@ PopupWindow {
     property string text: ""
     property Item targetItem: null
     property var targetWindow: null
-    property int maxWidth: 720
     property int verticalGap: 8
     property string placement: "above"
 
@@ -17,29 +16,8 @@ PopupWindow {
     color: "transparent"
     visible: false
 
-    TextMetrics {
-        id: lineMetrics
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize - 2
-    }
-
-    function measureWidestLine(s) {
-        if (!s || s.length === 0) return 0
-        const lines = s.split("\n")
-        let maxW = 0
-        for (let i = 0; i < lines.length; i++) {
-            lineMetrics.text = lines[i]
-            const w = lineMetrics.boundingRect.width
-            if (w > maxW) maxW = w
-        }
-        return maxW
-    }
-
-    readonly property real measuredNaturalWidth: measureWidestLine(tooltip.text)
-    readonly property real fitWidth: Math.min(measuredNaturalWidth + innerPadding * 2, maxWidth)
-
-    implicitWidth: fitWidth
-    implicitHeight: tooltipText.contentHeight + outerPadding * 2
+    implicitWidth: contentBg.implicitWidth
+    implicitHeight: contentBg.implicitHeight
 
     anchor {
         window: tooltip.targetWindow
@@ -71,24 +49,24 @@ PopupWindow {
     }
 
     Rectangle {
+        id: contentBg
         anchors.fill: parent
         color: Theme.defaultBg
         radius: 8
         border.color: Theme.activeBg
         border.width: 1
 
+        implicitWidth: tooltipText.implicitWidth + tooltip.innerPadding * 2
+        implicitHeight: tooltipText.implicitHeight + tooltip.outerPadding * 2
+
         Text {
             id: tooltipText
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: tooltip.innerPadding
-            anchors.rightMargin: tooltip.innerPadding
+            anchors.centerIn: parent
             text: tooltip.text
             color: Theme.textColor
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize - 2
-            wrapMode: Text.Wrap
+            wrapMode: Text.NoWrap
         }
     }
 }
