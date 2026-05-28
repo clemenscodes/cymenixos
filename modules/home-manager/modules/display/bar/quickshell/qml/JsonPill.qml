@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import Quickshell.Io
 
 Pill {
@@ -9,6 +10,7 @@ Pill {
     property bool streaming: false
     property string fallbackText: ""
     property color textColor: Theme.textColor
+    property var formatIcons: ({})
     property var onLeftClick: null
     property var onRightClick: null
     property var onMiddleClick: null
@@ -20,10 +22,20 @@ Pill {
     property string tooltipText: ""
     property string iconName: ""
 
-    visible: text.length > 0
+    readonly property string displayText: {
+        const keys = Object.keys(root.formatIcons)
+        if (keys.length === 0) return root.text
+        if (root.iconName && root.formatIcons[root.iconName] !== undefined) return root.formatIcons[root.iconName]
+        if (root.formatIcons.default !== undefined) return root.formatIcons.default
+        return root.text
+    }
+
+    visible: displayText.length > 0
 
     function parseLine(line) {
+        if (!line) return
         const trimmed = line.trim()
+        if (trimmed.length === 0) return
         if (trimmed.startsWith("{")) {
             try {
                 const obj = JSON.parse(trimmed)
@@ -34,7 +46,6 @@ Pill {
                 return
             } catch (e) {}
         }
-        // Legacy waybar 3-line format: text \n tooltip \n class
         const lines = line.split("\n")
         root.text = (lines[0] || "").trim()
         root.tooltipText = (lines[1] || "").trim()
@@ -54,9 +65,12 @@ Pill {
 
     Process {
         id: pollProc
-        command: root.command
         stdout: StdioCollector {
-            onStreamFinished: root.parseLine(this.text)
+            onStreamFinished: {
+                if (this.text && this.text.trim().length > 0) {
+                    root.parseLine(this.text)
+                }
+            }
         }
     }
 
@@ -65,12 +79,12 @@ Pill {
         interval: root.intervalMs
         repeat: true
         triggeredOnStart: true
-        onTriggered: pollProc.running = true
+        onTriggered: pollProc.exec(root.command)
     }
 
     Component.onCompleted: {
         if (!root.streaming && root.intervalMs === 0 && root.command.length > 0) {
-            pollProc.running = true
+            pollProc.exec(root.command)
         }
     }
 
@@ -80,9 +94,9 @@ Pill {
 
         Text {
             id: label
-            text: root.text
+            text: root.displayText
             color: {
-                if (root.altClass === "critical") return Theme.criticalColor
+                if (root.altClass === "critical" || root.altClass === "notification") return Theme.criticalColor
                 if (root.altClass === "warning") return Theme.warningColor
                 if (root.altClass === "inactive") return Theme.mutedColor
                 return root.textColor
@@ -95,7 +109,13 @@ Pill {
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            hoverEnabled: root.tooltipText.length > 0
             cursorShape: (root.onLeftClick || root.onRightClick || root.onMiddleClick) ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+            ToolTip.visible: containsMouse && root.tooltipText.length > 0
+            ToolTip.delay: 500
+            ToolTip.text: root.tooltipText
+
             onClicked: function(mouse) {
                 if (mouse.button === Qt.LeftButton && root.onLeftClick) root.onLeftClick()
                 else if (mouse.button === Qt.RightButton && root.onRightClick) root.onRightClick()

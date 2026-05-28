@@ -158,6 +158,12 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             command: ["voxtype", "status", "--follow", "--format", "json"]
             streaming: true
+            formatIcons: ({
+                "idle": "🟢",
+                "recording": "🔴",
+                "transcribing": "🟡",
+                "stopped": "⚪"
+            })
             onLeftClick: () => Quickshell.execDetached(["systemctl", "--user", "restart", "voxtype"])
         }
 
@@ -186,7 +192,17 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             command: ["swaync-client", "-swb"]
             streaming: true
-            fallbackText: "🔔"
+            formatIcons: ({
+                "none": "🔔",
+                "notification": "🔔",
+                "dnd-none": "🔕",
+                "dnd-notification": "🔕",
+                "inhibited-none": "🔔",
+                "inhibited-notification": "🔔",
+                "dnd-inhibited-none": "🔕",
+                "dnd-inhibited-notification": "🔕",
+                "default": "🔔"
+            })
             onLeftClick: () => Quickshell.execDetached(["swaync-client", "-t", "-sw"])
             onRightClick: () => Quickshell.execDetached(["swaync-client", "-d", "-sw"])
         }
@@ -196,8 +212,8 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
 
             Text {
-                text: idleInhibit.enabled ? "☕" : "💤"
-                color: Theme.textColor
+                text: idleInhibit.enabled ? "☀️ STAY AWAKE" : "🌙"
+                color: idleInhibit.enabled ? Theme.warningColor : Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 font.bold: true
@@ -205,8 +221,15 @@ PanelWindow {
 
             MouseArea {
                 anchors.fill: parent
+                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: idleInhibit.enabled = !idleInhibit.enabled
+
+                ToolTip.visible: containsMouse
+                ToolTip.delay: 500
+                ToolTip.text: idleInhibit.enabled
+                    ? "Idle inhibited — screen stays on. Click to allow sleep."
+                    : "Sleep allowed (normal). Click to keep screen awake."
             }
         }
 
@@ -254,9 +277,7 @@ PanelWindow {
                             onClicked: function(mouse) {
                                 if (mouse.button === Qt.LeftButton) {
                                     if (trayDelegate.modelData.onlyMenu) {
-                                        trayMenu.anchorItem = trayDelegate
-                                        trayMenu.menu = trayDelegate.modelData.menu
-                                        trayMenu.open()
+                                        trayMenu.show(trayDelegate.modelData, trayDelegate, bar)
                                     } else {
                                         trayDelegate.modelData.activate()
                                     }
@@ -264,9 +285,7 @@ PanelWindow {
                                     trayDelegate.modelData.secondaryActivate()
                                 } else if (mouse.button === Qt.RightButton) {
                                     if (trayDelegate.modelData.hasMenu) {
-                                        trayMenu.anchorItem = trayDelegate
-                                        trayMenu.menu = trayDelegate.modelData.menu
-                                        trayMenu.open()
+                                        trayMenu.show(trayDelegate.modelData, trayDelegate, bar)
                                     }
                                 }
                             }
@@ -280,20 +299,8 @@ PanelWindow {
             }
         }
 
-        QsMenuAnchor {
+        TrayMenu {
             id: trayMenu
-            property Item anchorItem: null
-            anchor {
-                window: bar
-                rect.x: trayMenu.anchorItem
-                    ? trayMenu.anchorItem.mapToItem(null, 0, 0).x + trayMenu.anchorItem.width / 2
-                    : 0
-                rect.y: 0
-                rect.height: 1
-                rect.width: 1
-                edges: Edges.Top
-                gravity: Edges.Top
-            }
         }
 
         Pill {
@@ -401,11 +408,6 @@ PanelWindow {
                 }
             }
 
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty calcurse"])
-            }
         }
     }
 }

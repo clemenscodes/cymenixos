@@ -90,7 +90,7 @@ PanelWindow {
             Layout.alignment: Qt.AlignVCenter
             command: ["waybar-mail"]
             intervalMs: 5000
-            onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty neomutt"])
+            onLeftClick: () => Quickshell.execDetached(["thunderbird"])
         }
 
         Pill {

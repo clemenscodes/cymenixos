@@ -2,5 +2,6 @@ singleton Theme 1.0 Theme.qml
 singleton SysStats 1.0 SysStats.qml
 Pill 1.0 Pill.qml
 JsonPill 1.0 JsonPill.qml
+TrayMenu 1.0 TrayMenu.qml
 TopBar 1.0 TopBar.qml
 BottomBar 1.0 BottomBar.qml
