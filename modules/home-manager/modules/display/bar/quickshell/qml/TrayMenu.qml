@@ -129,18 +129,22 @@ PanelWindow {
         x: Math.max(8, Math.min(
             trayMenu.anchorScreenX + trayMenu.anchorWidth / 2 - cardWidth / 2,
             trayMenu.screenWidth - cardWidth - 8))
-        // For explicit "above" placement we don't trust anchorScreenY
-        // (mapToItem(null, ...) inside a layer-shell window has bitten us
-        // before): anchor the card to the bottom edge of the screen
-        // above the bar's exclusive zone. Same for "below" from a top
-        // bar. "auto" still uses the anchor-relative path.
-        y: trayMenu.placement === "above"
-            ? trayMenu.screenHeight - (trayMenu.anchorWindow ? trayMenu.anchorWindow.height : 60) - height - 4
-            : trayMenu.placement === "below"
-                ? (trayMenu.anchorWindow ? trayMenu.anchorWindow.height : 60) + 4
-                : trayMenu.placeAbove
-                    ? trayMenu.anchorScreenY - height - 4
-                    : trayMenu.anchorScreenY + trayMenu.anchorHeight + 4
+        // For explicit "above"/"below" we use Qt anchors against the
+        // TrayMenu PanelWindow's own edges so the card stays inside
+        // the panel regardless of how the compositor sized that panel
+        // (full screen vs. clipped by other layers' exclusive zones —
+        // the maths-based y kept underestimating that on this host).
+        anchors.bottom: trayMenu.placement === "above" ? parent.bottom : undefined
+        anchors.top: trayMenu.placement === "below" ? parent.top : undefined
+        anchors.bottomMargin: 4
+        anchors.topMargin: 4
+
+        Binding on y {
+            when: trayMenu.placement === "auto"
+            value: trayMenu.placeAbove
+                ? trayMenu.anchorScreenY - card.height - 4
+                : trayMenu.anchorScreenY + trayMenu.anchorHeight + 4
+        }
         height: Math.max(trayMenu.cardMinHeight,
                          Math.min(trayMenu.availableHeight,
                                   trayMenu.currentContentHeight + 12))
