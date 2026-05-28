@@ -20,9 +20,10 @@ Rectangle {
     property color baseColor: Theme.defaultBg
     property color hoverColor: Qt.lighter(baseColor, 1.4)
 
-    color: (pillMouse.containsMouse && (pill.interactive || pill.tooltipText.length > 0))
-        ? hoverColor
-        : baseColor
+    readonly property bool _shouldHandleMouse: pill.interactive || pill.tooltipText.length > 0
+    property bool _hovered: false
+
+    color: (_hovered && _shouldHandleMouse) ? hoverColor : baseColor
 
     Behavior on color {
         ColorAnimation { duration: Theme.fadeMs / 2 }
@@ -39,34 +40,38 @@ Rectangle {
         implicitHeight: childrenRect.height
     }
 
-    MouseArea {
-        id: pillMouse
+    Loader {
         anchors.fill: parent
         z: 10
-        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-        hoverEnabled: pill.interactive || pill.tooltipText.length > 0
-        cursorShape: pill.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: pill.interactive || pill.tooltipText.length > 0
+        active: pill._shouldHandleMouse
 
-        onClicked: function(mouse) {
-            if (!pill.interactive) return
-            if (mouse.button === Qt.LeftButton) pill.leftClicked()
-            else if (mouse.button === Qt.RightButton) pill.rightClicked()
-            else if (mouse.button === Qt.MiddleButton) pill.middleClicked()
-        }
-        onWheel: function(wheel) {
-            if (!pill.interactive) { wheel.accepted = false; return }
-            if (wheel.angleDelta.y > 0) pill.scrolledUp()
-            else if (wheel.angleDelta.y < 0) pill.scrolledDown()
-            wheel.accepted = true
-        }
-        onEntered: {
-            if (pill.tooltipText.length > 0 && pill.tooltipHost) {
-                pill.tooltipHost.showFor(pill, pill.tooltipText, pill.tooltipHostWindow)
+        sourceComponent: MouseArea {
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            hoverEnabled: true
+            cursorShape: pill.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+            onClicked: function(mouse) {
+                if (!pill.interactive) return
+                if (mouse.button === Qt.LeftButton) pill.leftClicked()
+                else if (mouse.button === Qt.RightButton) pill.rightClicked()
+                else if (mouse.button === Qt.MiddleButton) pill.middleClicked()
             }
-        }
-        onExited: {
-            if (pill.tooltipHost) pill.tooltipHost.hide()
+            onWheel: function(wheel) {
+                if (!pill.interactive) { wheel.accepted = false; return }
+                if (wheel.angleDelta.y > 0) pill.scrolledUp()
+                else if (wheel.angleDelta.y < 0) pill.scrolledDown()
+                wheel.accepted = true
+            }
+            onEntered: {
+                pill._hovered = true
+                if (pill.tooltipText.length > 0 && pill.tooltipHost) {
+                    pill.tooltipHost.showFor(pill, pill.tooltipText, pill.tooltipHostWindow)
+                }
+            }
+            onExited: {
+                pill._hovered = false
+                if (pill.tooltipHost) pill.tooltipHost.hide()
+            }
         }
     }
 }

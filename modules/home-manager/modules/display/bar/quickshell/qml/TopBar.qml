@@ -61,7 +61,7 @@ PanelWindow {
                             id: wsLabel
                             anchors.centerIn: parent
                             text: `${wsButton.modelData.id}`
-                            color: wsButton.modelData.focused ? Theme.warningColor : Theme.textColor
+                            color: wsButton.modelData.focused ? Theme.activeBg : Theme.textColor
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize
                             font.bold: wsButton.modelData.focused
@@ -74,7 +74,7 @@ PanelWindow {
                             width: wsButton.modelData.focused ? 22 : 0
                             height: 2
                             radius: 1
-                            color: Theme.warningColor
+                            color: Theme.activeBg
 
                             Behavior on width {
                                 NumberAnimation { duration: Theme.fadeMs }
