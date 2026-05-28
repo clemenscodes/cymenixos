@@ -15,6 +15,11 @@ PanelWindow {
     property var trayItem: null
     property Item anchorItem: null
     property var anchorWindow: null
+    // "above" | "below" | "auto" — "auto" runs the spaceAbove/spaceBelow
+    // heuristic. Bars know their own placement (bottom bar always wants
+    // "above", top bar always "below"), so they pass it explicitly to
+    // sidestep the mapToItem-on-layer-shell coordinate fragility.
+    property string placement: "auto"
 
     // Anchor geometry in SCREEN coordinates. Captured in show(); the
     // card's x/y/height are bindings derived from these so the card
@@ -42,10 +47,11 @@ PanelWindow {
     aboveWindows: true
     focusable: true
 
-    function show(item, anchor, window) {
+    function show(item, anchor, window, placement) {
         trayMenu.trayItem = item
         trayMenu.anchorItem = anchor
         trayMenu.anchorWindow = window
+        trayMenu.placement = placement || "auto"
         if (window && window.screen) trayMenu.screen = window.screen
 
         if (anchor && window && window.screen) {
@@ -104,8 +110,17 @@ PanelWindow {
     // margin to the screen edges and 4 px gap to the anchor itself.
     readonly property real spaceAbove: anchorScreenY - 12
     readonly property real spaceBelow: screenHeight - (anchorScreenY + anchorHeight) - 12
-    readonly property bool placeAbove: spaceAbove >= spaceBelow
-    readonly property real availableHeight: Math.max(spaceAbove, spaceBelow)
+    readonly property bool placeAbove: placement === "above"
+        ? true
+        : placement === "below"
+            ? false
+            : spaceAbove >= spaceBelow
+    readonly property real barHeight: anchorWindow ? anchorWindow.height : 60
+    readonly property real availableHeight: placement === "above"
+        ? screenHeight - barHeight - 12
+        : placement === "below"
+            ? screenHeight - barHeight - 12
+            : (placeAbove ? spaceAbove : spaceBelow)
 
     Rectangle {
         id: card
@@ -114,9 +129,18 @@ PanelWindow {
         x: Math.max(8, Math.min(
             trayMenu.anchorScreenX + trayMenu.anchorWidth / 2 - cardWidth / 2,
             trayMenu.screenWidth - cardWidth - 8))
-        y: trayMenu.placeAbove
-            ? trayMenu.anchorScreenY - height - 4
-            : trayMenu.anchorScreenY + trayMenu.anchorHeight + 4
+        // For explicit "above" placement we don't trust anchorScreenY
+        // (mapToItem(null, ...) inside a layer-shell window has bitten us
+        // before): anchor the card to the bottom edge of the screen
+        // above the bar's exclusive zone. Same for "below" from a top
+        // bar. "auto" still uses the anchor-relative path.
+        y: trayMenu.placement === "above"
+            ? trayMenu.screenHeight - (trayMenu.anchorWindow ? trayMenu.anchorWindow.height : 60) - height - 4
+            : trayMenu.placement === "below"
+                ? (trayMenu.anchorWindow ? trayMenu.anchorWindow.height : 60) + 4
+                : trayMenu.placeAbove
+                    ? trayMenu.anchorScreenY - height - 4
+                    : trayMenu.anchorScreenY + trayMenu.anchorHeight + 4
         height: Math.max(trayMenu.cardMinHeight,
                          Math.min(trayMenu.availableHeight,
                                   trayMenu.currentContentHeight + 12))

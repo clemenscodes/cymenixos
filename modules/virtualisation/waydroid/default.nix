@@ -54,17 +54,21 @@
           hyprctl dispatch 'hl.dsp.focus({ window = "class:wlroots" })' >/dev/null 2>&1 || true
           exit 0
         fi
-        echo "waydroid-ui: existing cage has no window; killing and restarting"
-        pkill -TERM -f "cage -- waydroid show-full-ui" 2>/dev/null || true
-        # Wait for the old wrapper to release the lock.
-        for _ in 1 2 3 4 5 6 7 8; do
+        echo "waydroid-ui: existing cage has no window; stopping session and restarting"
+        # SIGTERM-ing cage directly doesn't work — cage 0.3.0 sleeps
+        # in do_wait on its child and ignores TERM. Stopping the
+        # waydroid session is the supported way to tear the stack
+        # down: show-full-ui exits, cage's child returns, cage exits,
+        # the old wrapper exits, fd 9 closes, the lock releases.
+        waydroid session stop >/dev/null 2>&1 || true
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
           if flock -n 9; then
             break
           fi
           sleep 1
         done
         if ! flock -n 9; then
-          echo "waydroid-ui: could not acquire lock after kill; aborting"
+          echo "waydroid-ui: could not acquire lock after stop; aborting"
           exit 1
         fi
       fi

@@ -377,7 +377,7 @@ PanelWindow {
                             onClicked: function(mouse) {
                                 if (mouse.button === Qt.LeftButton) {
                                     if (trayDelegate.modelData.onlyMenu) {
-                                        trayMenu.show(trayDelegate.modelData, trayDelegate, bar)
+                                        trayMenu.show(trayDelegate.modelData, trayDelegate, bar, "above")
                                     } else {
                                         trayDelegate.modelData.activate()
                                     }
@@ -385,7 +385,7 @@ PanelWindow {
                                     trayDelegate.modelData.secondaryActivate()
                                 } else if (mouse.button === Qt.RightButton) {
                                     if (trayDelegate.modelData.hasMenu) {
-                                        trayMenu.show(trayDelegate.modelData, trayDelegate, bar)
+                                        trayMenu.show(trayDelegate.modelData, trayDelegate, bar, "above")
                                     }
                                 }
                             }
