@@ -359,6 +359,18 @@ PanelWindow {
                         implicitWidth: 26
                         implicitHeight: 26
 
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: Theme.innerRadius
+                            color: trayHover.containsMouse
+                                ? Qt.lighter(Theme.defaultBg, 1.4)
+                                : "transparent"
+
+                            Behavior on color {
+                                ColorAnimation { duration: Theme.fadeMs / 2 }
+                            }
+                        }
+
                         IconImage {
                             anchors.centerIn: parent
                             implicitSize: 20
@@ -371,6 +383,7 @@ PanelWindow {
                             id: trayHover
                             anchors.fill: parent
                             hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
                             acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
                             onEntered: barTooltip.showFor(trayDelegate, trayDelegate.tooltipText, bar)
                             onExited: barTooltip.hide()
