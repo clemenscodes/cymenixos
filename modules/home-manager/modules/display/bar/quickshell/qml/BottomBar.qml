@@ -15,6 +15,7 @@ PanelWindow {
     required property var screen
     required property var appLauncher
     required property var bluetoothMenu
+    required property var notifCenter
 
     anchors {
         bottom: true
@@ -216,39 +217,50 @@ PanelWindow {
             }
         }
 
-        JsonPill {
+        Pill {
             id: notifPill
             Layout.alignment: Qt.AlignVCenter
+            interactive: true
             tooltipHost: barTooltip
             tooltipHostWindow: bar
-            command: ["swaync-client", "-swb"]
-            streaming: true
-            formatIcons: ({
-                "none": "🔔",
-                "notification": "🔔",
-                "dnd-none": "🔕",
-                "dnd-notification": "🔕",
-                "inhibited-none": "🔔",
-                "inhibited-notification": "🔔",
-                "dnd-inhibited-none": "🔕",
-                "dnd-inhibited-notification": "🔕",
-                "default": "🔔"
-            })
+
             tooltipText: {
-                const count = parseInt(notifPill.text) || 0
-                const dnd = notifPill.iconName.startsWith("dnd-")
+                const count = Notifs.count
                 let s
                 if (count === 0) {
-                    s = dnd ? "Do Not Disturb active" : "No new notifications"
+                    s = Notifs.dnd ? "Do Not Disturb active" : "No new notifications"
                 } else {
-                    s = count + " unread notification" + (count === 1 ? "" : "s")
-                    if (dnd) s += "  ·  DND active"
+                    s = count + " notification" + (count === 1 ? "" : "s")
+                    if (Notifs.dnd) s += "  ·  DND active"
                 }
-                s += "\n\nLeft-click: toggle notification panel\nRight-click: toggle Do Not Disturb"
+                s += "\n\nLeft-click: notification center\nRight-click: toggle Do Not Disturb"
                 return s
             }
-            onLeftClick: () => Quickshell.execDetached(["swaync-client", "-t", "-sw"])
-            onRightClick: () => Quickshell.execDetached(["swaync-client", "-d", "-sw"])
+
+            onLeftClicked: bar.notifCenter.toggle(bar)
+            onRightClicked: Notifs.toggleDnd()
+
+            Row {
+                spacing: 6
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Notifs.dnd ? "🔕" : "🔔"
+                    color: Theme.textColor
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Notifs.count > 0
+                    text: Notifs.count
+                    color: Theme.activeBg
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    font.bold: true
+                }
+            }
         }
 
         Pill {
@@ -364,7 +376,7 @@ PanelWindow {
                             radius: Theme.innerRadius
                             color: trayHover.containsMouse
                                 ? Qt.lighter(Theme.defaultBg, 1.4)
-                                : "transparent"
+                                : Theme.defaultBg
 
                             Behavior on color {
                                 ColorAnimation { duration: Theme.fadeMs / 2 }

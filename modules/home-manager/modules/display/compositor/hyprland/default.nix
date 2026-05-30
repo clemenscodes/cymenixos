@@ -90,7 +90,6 @@ in {
       pkgs.brightnessctl
       pkgs.awww
       pkgs.wl-clipboard
-      pkgs.cliphist
       (lib.mkIf isLaptop (import ./lidhandle {inherit inputs pkgs lib;}))
       random-wallpaper
     ];
@@ -137,6 +136,7 @@ in {
             special = false;
           };
         };
+        animations.enabled = true;
         misc = {
           enable_swallow = true;
           disable_hyprland_logo = true;
@@ -164,37 +164,60 @@ in {
         hl.on("hyprland.start", function()
           hl.exec_cmd("${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all")
           hl.exec_cmd("${pkgs.systemd}/bin/systemctl --user import-environment QT_QPA_PLATFORMTHEME")
-          hl.exec_cmd("wl-paste --type text --watch cliphist store")
-          hl.exec_cmd("wl-paste --type image --watch cliphist store")
           hl.exec_cmd("polkitagent")
           hl.exec_cmd("${pkgs.awww}/bin/awww-daemon")
           hl.exec_cmd("wallpaper")
-          ${lib.optionalString useWaybar        ''hl.exec_cmd("waybar")''}
-          ${lib.optionalString useSwaync        ''hl.exec_cmd("swaync")''}
-          ${lib.optionalString useSwayidle      ''hl.exec_cmd("detectidle")''}
+          ${lib.optionalString useWaybar ''hl.exec_cmd("waybar")''}
+          ${lib.optionalString (useSwaync && !useQuickshell) ''hl.exec_cmd("swaync")''}
+          ${lib.optionalString useSwayidle ''hl.exec_cmd("detectidle")''}
           ${lib.optionalString useSwayAudioIdle ''hl.exec_cmd("sway-audio-idle-inhibit")''}
-          ${lib.optionalString useSsh           ''hl.exec_cmd("sshagent")''}
-          ${lib.optionalString useBlueman       ''hl.exec_cmd("blueman-applet")''}
-          ${lib.optionalString useNm            ''hl.exec_cmd("nm-applet --indicator")''}
-          ${lib.optionalString useTorrent       ''hl.exec_cmd("mullvad-vpn")''}
-          ${lib.optionalString useHyprlock      ''hl.exec_cmd("hypridle")''}
-          ${lib.optionalString useHyprsunset    ''hl.exec_cmd("hyprsunset")''}
-          ${lib.optionalString useYubikey       ''hl.exec_cmd("${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify")''}
-          ${lib.optionalString useGnomeKeyring  ''hl.exec_cmd("unlock-keyring")''}
-          ${lib.optionalString useEvglow        ''hl.exec_cmd("evglow")''}
-          ${lib.optionalString useHyprhook      ''hl.exec_cmd("${osConfig.services.hyprhook.finalPackage}/bin/hyprhook")''}
+          ${lib.optionalString useSsh ''hl.exec_cmd("sshagent")''}
+          ${lib.optionalString useBlueman ''hl.exec_cmd("blueman-applet")''}
+          ${lib.optionalString useNm ''hl.exec_cmd("nm-applet --indicator")''}
+          ${lib.optionalString useTorrent ''hl.exec_cmd("mullvad-vpn")''}
+          ${lib.optionalString useHyprlock ''hl.exec_cmd("hypridle")''}
+          ${lib.optionalString useHyprsunset ''hl.exec_cmd("hyprsunset")''}
+          ${lib.optionalString useYubikey ''hl.exec_cmd("${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify")''}
+          ${lib.optionalString useGnomeKeyring ''hl.exec_cmd("unlock-keyring")''}
+          ${lib.optionalString useEvglow ''hl.exec_cmd("evglow")''}
+          ${lib.optionalString useHyprhook ''hl.exec_cmd("${osConfig.services.hyprhook.finalPackage}/bin/hyprhook")''}
         end)
+
+        -- Animation curves and animations
+        hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
+        hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } })
+        hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
+        hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
+        hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
+        hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
+
+        hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
+        hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
+        hl.animation({ leaf = "windows",       enabled = true,  speed = 4.79, spring = "easy" })
+        hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 4.1,  spring = "easy",         style = "popin 87%" })
+        hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 1.49, bezier = "linear",       style = "popin 87%" })
+        hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.73, bezier = "almostLinear" })
+        hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.46, bezier = "almostLinear" })
+        hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "quick" })
+        hl.animation({ leaf = "layers",        enabled = true,  speed = 3.81, bezier = "easeOutQuint" })
+        hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    bezier = "easeOutQuint", style = "fade" })
+        hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1.5,  bezier = "linear",       style = "fade" })
+        hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.79, bezier = "almostLinear" })
+        hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.39, bezier = "almostLinear" })
+        hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
+        hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
+        hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
 
         -- Window rules
         hl.window_rule({ match = { class = "^(org.kde.polkit-kde-authentication-agent-1)$" }, float = true })
         hl.window_rule({ match = { class = "^(gamescope)$", title = "^(Counter-Strike 2)$" },
           fullscreen = true, stay_focused = true, immediate = true })
-        ${lib.optionalString useKitty   ''hl.window_rule({ match = { class = "kitty" }, opacity = 0.90 })''}
-        ${lib.optionalString useRofi    ''hl.window_rule({ match = { class = "Rofi" }, float = true })''}
+        ${lib.optionalString useKitty ''hl.window_rule({ match = { class = "kitty" }, opacity = 0.90 })''}
+        ${lib.optionalString useRofi ''hl.window_rule({ match = { class = "Rofi" }, float = true })''}
         ${lib.optionalString useBlueman ''hl.window_rule({ match = { class = "^(blueman-manager)$" }, float = true })''}
         ${lib.optionalString useNm ''
-        hl.window_rule({ match = { class = "^(nm-applet)$" }, float = true })
-        hl.window_rule({ match = { class = "^(nm-connection-editor)$" }, float = true })
+          hl.window_rule({ match = { class = "^(nm-applet)$" }, float = true })
+          hl.window_rule({ match = { class = "^(nm-connection-editor)$" }, float = true })
         ''}
         ${lib.optionalString useFirefox ''hl.window_rule({ match = { class = "firefox" }, center = true })''}
         ${lib.optionalString useDavinci ''hl.window_rule({ match = { title = "^(DaVinci Resolve)(.*)$" }, tile = true })''}
@@ -262,62 +285,63 @@ in {
 
         -- Lid switch + brightness keys (laptop only)
         ${lib.optionalString isLaptop ''
-        hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("lidhandle on"),  { locked = true })
-        hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("lidhandle off"), { locked = true })
-        hl.bind("XF86MonBrightnessDown",       hl.dsp.exec_cmd("brightnessctl set 1%-"))
-        hl.bind("XF86MonBrightnessUp",         hl.dsp.exec_cmd("brightnessctl set 1%+"))
-        hl.bind("SHIFT + XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"))
-        hl.bind("SHIFT + XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 5%+"))
+          hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("lidhandle on"),  { locked = true })
+          hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("lidhandle off"), { locked = true })
+          hl.bind("XF86MonBrightnessDown",       hl.dsp.exec_cmd("brightnessctl set 1%-"))
+          hl.bind("XF86MonBrightnessUp",         hl.dsp.exec_cmd("brightnessctl set 1%+"))
+          hl.bind("SHIFT + XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"))
+          hl.bind("SHIFT + XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 5%+"))
         ''}
 
         -- Application binds
-        ${lib.optionalString useHyprpicker                               ''hl.bind(mod .. " + U",        hl.dsp.exec_cmd("hyprpicker"))''}
-        ${lib.optionalString useKitty                                    ''hl.bind(mod .. " + RETURN",   hl.dsp.exec_cmd("kitty -1 --title=kitty"))''}
-        ${lib.optionalString (useKitty && useNvim)                       ''hl.bind(mod .. " + V",        hl.dsp.exec_cmd("kitty -1 --title=kitty nvim"))''}
-        ${lib.optionalString (useKitty && useYazi)                       ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty yazi"))''}
-        ${lib.optionalString (useKitty && !useYazi && useLf)             ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty lf"))''}
-        ${lib.optionalString (useKitty && useEmail)                      ''hl.bind(mod .. " + E",        hl.dsp.exec_cmd("kitty -1 --title=kitty neomutt"))''}
-        ${lib.optionalString (useKitty && useEmail && useThunderbird)    ''hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("${pkgs.thunderbird}/bin/thunderbird"))''}
-        ${lib.optionalString (useKitty && useBtop)                       ''hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd("kitty -1 --title=kitty btop"))''}
-        ${lib.optionalString (useKitty && useNcmpcpp)                    ''hl.bind(mod .. " + M",        hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
-        ${lib.optionalString (useKitty && useCalcurse)                   ''hl.bind(mod .. " + ALT + K",    hl.dsp.exec_cmd("kitty -1 --title=kitty calcurse"))''}
-        ${lib.optionalString useNewsboat                                  ''hl.bind(mod .. " + SHIFT + N",  hl.dsp.exec_cmd("kitty -1 --title=kitty newsboat"))''}
+        ${lib.optionalString useHyprpicker ''hl.bind(mod .. " + U",        hl.dsp.exec_cmd("hyprpicker"))''}
+        ${lib.optionalString useKitty ''hl.bind(mod .. " + RETURN",   hl.dsp.exec_cmd("kitty -1 --title=kitty"))''}
+        ${lib.optionalString (useKitty && useNvim) ''hl.bind(mod .. " + V",        hl.dsp.exec_cmd("kitty -1 --title=kitty nvim"))''}
+        ${lib.optionalString (useKitty && useYazi) ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty yazi"))''}
+        ${lib.optionalString (useKitty && !useYazi && useLf) ''hl.bind(mod .. " + R",        hl.dsp.exec_cmd("kitty -1 --title=kitty lf"))''}
+        ${lib.optionalString (useKitty && useEmail) ''hl.bind(mod .. " + E",        hl.dsp.exec_cmd("kitty -1 --title=kitty neomutt"))''}
+        ${lib.optionalString (useKitty && useEmail && useThunderbird) ''hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("${pkgs.thunderbird}/bin/thunderbird"))''}
+        ${lib.optionalString (useKitty && useBtop) ''hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd("kitty -1 --title=kitty btop"))''}
+        ${lib.optionalString (useKitty && useNcmpcpp) ''hl.bind(mod .. " + M",        hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
+        ${lib.optionalString (useKitty && useCalcurse) ''hl.bind(mod .. " + ALT + K",    hl.dsp.exec_cmd("kitty -1 --title=kitty calcurse"))''}
+        ${lib.optionalString useNewsboat ''hl.bind(mod .. " + SHIFT + N",  hl.dsp.exec_cmd("kitty -1 --title=kitty newsboat"))''}
         ${lib.optionalString useWaybar ''
-        hl.bind(mod .. " + B",       hl.dsp.exec_cmd("waybar-toggle"))
-        hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("waybar-reload"))
+          hl.bind(mod .. " + B",       hl.dsp.exec_cmd("waybar-toggle"))
+          hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("waybar-reload"))
         ''}
-        ${lib.optionalString useSwaync ''hl.bind(mod .. " + N",        hl.dsp.exec_cmd("swaync-client -t -sw"))''}
-        ${lib.optionalString useRofi   ''hl.bind(mod .. " + SHIFT + V",  hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy"))''}
+        ${lib.optionalString (useSwaync && !useQuickshell) ''hl.bind(mod .. " + N",        hl.dsp.exec_cmd("swaync-client -t -sw"))''}
         ${lib.optionalString useQuickshell ''
-        hl.bind(mod .. " + D",         hl.dsp.exec_cmd("qs -c cymenix ipc call launcher toggle"))
-        hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("qs -c cymenix ipc call powermenu toggle"))
+          hl.bind(mod .. " + D",         hl.dsp.exec_cmd("qs -c cymenix ipc call launcher toggle"))
+          hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("qs -c cymenix ipc call powermenu toggle"))
+          hl.bind(mod .. " + N",         hl.dsp.exec_cmd("qs -c cymenix ipc call notifs toggle"))
+          hl.bind(mod .. " + SEMICOLON", hl.dsp.exec_cmd("qs -c cymenix ipc call emoji toggle"))
         ''}
         ${lib.optionalString (useAnyrun && !useQuickshell) ''hl.bind(mod .. " + D",        hl.dsp.exec_cmd("anyrun"))''}
-        ${lib.optionalString (useRofi && !useQuickshell)   ''hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("logoutlaunch"))''}
+        ${lib.optionalString (useRofi && !useQuickshell) ''hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("logoutlaunch"))''}
         ${lib.optionalString useScreenshots ''
-        hl.bind(mod .. " + S",       hl.dsp.exec_cmd("screenshot"))
-        hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("fullscreenshot"))
+          hl.bind(mod .. " + S",       hl.dsp.exec_cmd("screenshot"))
+          hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("fullscreenshot"))
         ''}
 
         -- Music / audio binds
         ${lib.optionalString useMusic ''
-        hl.bind(mod .. " + P",            hl.dsp.exec_cmd("mpc toggle"))
-        hl.bind(mod .. " + COMMA",        hl.dsp.exec_cmd("mpc prev"))
-        hl.bind(mod .. " + SHIFT + COMMA",  hl.dsp.exec_cmd("mpc seek 0%"))
-        hl.bind(mod .. " + PERIOD",       hl.dsp.exec_cmd("mpc next"))
-        hl.bind(mod .. " + SHIFT + PERIOD", hl.dsp.exec_cmd("mpc repeat"))
-        hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-        hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
-        hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("mpc prev"))
-        hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("mpc next"))
-        hl.bind("XF86AudioPause",       hl.dsp.exec_cmd("mpc pause"))
-        hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("mpc play"))
-        hl.bind("XF86AudioStop",        hl.dsp.exec_cmd("mpc stop"))
-        hl.bind("XF86AudioRewind",      hl.dsp.exec_cmd("mpc seek -10"))
-        hl.bind("XF86AudioForward",     hl.dsp.exec_cmd("mpc seek +10"))
-        hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
-        hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        { repeating = true })
-        ${lib.optionalString (useKitty && useNcmpcpp) ''hl.bind("XF86AudioMedia", hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
+          hl.bind(mod .. " + P",            hl.dsp.exec_cmd("mpc toggle"))
+          hl.bind(mod .. " + COMMA",        hl.dsp.exec_cmd("mpc prev"))
+          hl.bind(mod .. " + SHIFT + COMMA",  hl.dsp.exec_cmd("mpc seek 0%"))
+          hl.bind(mod .. " + PERIOD",       hl.dsp.exec_cmd("mpc next"))
+          hl.bind(mod .. " + SHIFT + PERIOD", hl.dsp.exec_cmd("mpc repeat"))
+          hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+          hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
+          hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("mpc prev"))
+          hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("mpc next"))
+          hl.bind("XF86AudioPause",       hl.dsp.exec_cmd("mpc pause"))
+          hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("mpc play"))
+          hl.bind("XF86AudioStop",        hl.dsp.exec_cmd("mpc stop"))
+          hl.bind("XF86AudioRewind",      hl.dsp.exec_cmd("mpc seek -10"))
+          hl.bind("XF86AudioForward",     hl.dsp.exec_cmd("mpc seek +10"))
+          hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
+          hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        { repeating = true })
+          ${lib.optionalString (useKitty && useNcmpcpp) ''hl.bind("XF86AudioMedia", hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
         ''}
       '';
     };

@@ -16,6 +16,17 @@ ShellRoot {
         id: shellBluetoothMenu
     }
 
+    NotificationCenter {
+        id: shellNotifCenter
+    }
+
+    // Owns org.freedesktop.Notifications and renders incoming toasts.
+    NotificationPopups {}
+
+    EmojiPicker {
+        id: shellEmojiPicker
+    }
+
     Variants {
         model: Quickshell.screens
 
@@ -34,6 +45,7 @@ ShellRoot {
             screen: modelData
             appLauncher: shellAppLauncher
             bluetoothMenu: shellBluetoothMenu
+            notifCenter: shellNotifCenter
         }
     }
 }
