@@ -102,7 +102,7 @@ in {
             unitConfig = {
               Description = "Easyeffects daemon";
               Requires = ["dbus.service"];
-              After = ["graphical-session-pre.target"];
+              After = ["graphical-session-pre.target" "pipewire.service"];
               PartOf = ["graphical-session.target" "pipewire.service"];
             };
             serviceConfig = {
