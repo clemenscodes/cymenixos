@@ -136,7 +136,6 @@ in {
             special = false;
           };
         };
-        animations.enabled = true;
         misc = {
           enable_swallow = true;
           disable_hyprland_logo = true;
@@ -182,29 +181,6 @@ in {
           ${lib.optionalString useEvglow ''hl.exec_cmd("evglow")''}
           ${lib.optionalString useHyprhook ''hl.exec_cmd("${osConfig.services.hyprhook.finalPackage}/bin/hyprhook")''}
         end)
-
-        -- Animation curves and animations (snappy; speed is in deciseconds,
-        -- lower = faster)
-        hl.curve("easeOutQuint", { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
-        hl.curve("linear",       { type = "bezier", points = { {0, 0},       {1, 1}       } })
-        hl.curve("almostLinear", { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
-
-        hl.animation({ leaf = "global",        enabled = true, speed = 3,   bezier = "easeOutQuint" })
-        hl.animation({ leaf = "border",        enabled = true, speed = 4,   bezier = "easeOutQuint" })
-        hl.animation({ leaf = "windows",       enabled = true, speed = 3,   bezier = "easeOutQuint" })
-        hl.animation({ leaf = "windowsIn",     enabled = true, speed = 2.8, bezier = "easeOutQuint", style = "popin 90%" })
-        hl.animation({ leaf = "windowsOut",    enabled = true, speed = 2.5, bezier = "easeOutQuint", style = "popin 90%" })
-        hl.animation({ leaf = "fadeIn",        enabled = true, speed = 2,   bezier = "almostLinear" })
-        hl.animation({ leaf = "fadeOut",       enabled = true, speed = 2,   bezier = "almostLinear" })
-        hl.animation({ leaf = "fade",          enabled = true, speed = 2,   bezier = "almostLinear" })
-        hl.animation({ leaf = "layers",        enabled = true, speed = 3,   bezier = "easeOutQuint" })
-        hl.animation({ leaf = "layersIn",      enabled = true, speed = 3,   bezier = "easeOutQuint", style = "fade" })
-        hl.animation({ leaf = "layersOut",     enabled = true, speed = 2.5, bezier = "almostLinear", style = "fade" })
-        hl.animation({ leaf = "fadeLayersIn",  enabled = true, speed = 2,   bezier = "almostLinear" })
-        hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 2,   bezier = "almostLinear" })
-        hl.animation({ leaf = "workspaces",    enabled = true, speed = 2.5, bezier = "easeOutQuint", style = "slide" })
-        hl.animation({ leaf = "workspacesIn",  enabled = true, speed = 2.5, bezier = "easeOutQuint", style = "slide" })
-        hl.animation({ leaf = "workspacesOut", enabled = true, speed = 2.5, bezier = "easeOutQuint", style = "slide" })
 
         -- Window rules
         hl.window_rule({ match = { class = "^(org.kde.polkit-kde-authentication-agent-1)$" }, float = true })
