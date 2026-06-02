@@ -37,6 +37,7 @@ in {
       packages = [
         pkgs.libappindicator-gtk3
         pkgs.libdbusmenu-gtk3
+        pkgs.brightnessctl
         pkgs.wtype
         pkgs.wl-clipboard
         (import ./helpers/qs-mail {inherit inputs pkgs lib;})

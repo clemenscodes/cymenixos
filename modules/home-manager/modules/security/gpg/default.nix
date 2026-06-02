@@ -11,6 +11,26 @@ in {
         gpg = {
           enable = lib.mkEnableOption "Enable GPG support" // {default = false;};
           enableDebianKeyring = lib.mkEnableOption "Enable debian keyring" // {default = false;};
+          enableSshSupport =
+            lib.mkEnableOption "Route SSH authentication through gpg-agent (uses the OpenPGP [A] subkey). Takes over SSH_AUTH_SOCK from ssh-agent/gnome-keyring."
+            // {default = false;};
+          publicKeys = lib.mkOption {
+            type = lib.types.listOf (lib.types.submodule {
+              options = {
+                source = lib.mkOption {
+                  type = lib.types.path;
+                  description = "Path to an (armored) public key file imported into the keyring on activation.";
+                };
+                trust = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  description = "Owner trust to assign (e.g. \"ultimate\"). Null leaves trust unmanaged.";
+                };
+              };
+            });
+            default = [];
+            description = "Public keys imported into the keyring on every activation. Lets a wiped/ephemeral keyring self-heal (the canonical key lives on the YubiKey + a keyserver/GitHub).";
+          };
         };
       };
     };
@@ -19,7 +39,7 @@ in {
     services = {
       gpg-agent = {
         inherit (cfg.gpg) enable;
-        enableSshSupport = cfg.ssh.enable;
+        enableSshSupport = cfg.gpg.enableSshSupport;
         enableZshIntegration = config.modules.shell.zsh.enable;
         pinentry = {
           package = pkgs.pinentry-gnome3;
@@ -86,7 +106,8 @@ in {
             trust = "ultimate";
           };
         in
-          lib.mkIf cfg.gpg.enableDebianKeyring [debianDevelopers];
+          cfg.gpg.publicKeys
+          ++ lib.optional cfg.gpg.enableDebianKeyring debianDevelopers;
       };
     };
   };

@@ -429,6 +429,35 @@ PanelWindow {
         }
 
         Pill {
+            id: brightnessPill
+            Layout.alignment: Qt.AlignVCenter
+            interactive: true
+            visible: Brightness.available
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+
+            tooltipText: {
+                let s = "Display brightness: " + Brightness.percent + "%"
+                if (Brightness.device) s += "\nDevice: " + Brightness.device
+                s += "\n\nScroll: adjust  ·  Click: full  ·  Right-click: dim"
+                return s
+            }
+
+            onScrolledUp: Brightness.increase(5)
+            onScrolledDown: Brightness.decrease(5)
+            onLeftClicked: Brightness.setPercent(100)
+            onRightClicked: Brightness.setPercent(10)
+
+            Text {
+                text: Brightness.percent + "% 🔆"
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        Pill {
             id: volPill
             Layout.alignment: Qt.AlignVCenter
             interactive: true
