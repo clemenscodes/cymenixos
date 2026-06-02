@@ -350,7 +350,7 @@
   gstViewPkgs = with pkgs.gst_all_1; [gstreamer gst-plugins-base gst-plugins-good];
   distrolab-view = pkgs.writeShellApplication {
     name = "distrolab-view";
-    runtimeInputs = [pkgs.v4l-utils] ++ gstViewPkgs;
+    runtimeInputs = [pkgs.v4l-utils pkgs.libnotify] ++ gstViewPkgs;
     text = ''
       export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
       dev=""
@@ -361,13 +361,29 @@
         fi
       done
       if [ -z "$dev" ]; then
-        echo "no sc0710 (Elgato 4K Pro) capture node found — is the card present?" >&2
+        msg="No Elgato (sc0710) capture device found — is the card present and a GPU VM running?"
+        echo "$msg" >&2
+        # launched from the app launcher there's no terminal, so surface it visibly
+        notify-send "distroLab View" "$msg" 2>/dev/null || true
         exit 1
       fi
       echo "viewing GPU-VM output via $dev (ctrl-ctrl toggles kb/mouse into the VM; Super+F to fullscreen)"
       exec gst-launch-1.0 \
         v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
     '';
+  };
+
+  # Desktop entry so the viewer shows up in the app launcher (quickshell reads
+  # .desktop files from the system profile's share/applications).
+  distrolab-view-desktop = pkgs.makeDesktopItem {
+    name = "distrolab-view";
+    desktopName = "distroLab View";
+    comment = "Low-latency view of the GPU passthrough VM via the Elgato capture card";
+    exec = lib.getExe distrolab-view;
+    icon = "video-display";
+    terminal = false;
+    categories = ["System" "Utility"];
+    keywords = ["vm" "vfio" "gpu" "elgato" "capture" "distrolab"];
   };
 
   mkdisks = lib.mapAttrsToList (name: _: mkDisk name) tcfg.distros;
@@ -448,7 +464,7 @@ in {
       }
     ];
 
-    environment.systemPackages = [distrolab-release distrolab-view];
+    environment.systemPackages = [distrolab-release distrolab-view distrolab-view-desktop];
 
     # xremap re-emits your keystrokes through a virtual input device; give it a
     # stable symlink so the GPU VM grabs the node that actually carries keys
