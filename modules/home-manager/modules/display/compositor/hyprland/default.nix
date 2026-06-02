@@ -40,7 +40,6 @@
   useSwayAudioIdle = displayCfg.lockscreen.sway-audio-idle-inhibit.enable;
   useSsh = config.modules.security.ssh.enable;
   useTorrent = osConfig.modules.networking.torrent.enable;
-  useYubikey = osConfig.modules.security.yubikey.enable;
   useHyprlock = displayCfg.lockscreen.hyprlock.enable;
   useNewsboat = config.modules.media.rss.newsboat.enable;
   isLaptop = machine == "laptop";
@@ -176,7 +175,6 @@ in {
           ${lib.optionalString useTorrent ''hl.exec_cmd("mullvad-vpn")''}
           ${lib.optionalString useHyprlock ''hl.exec_cmd("hypridle")''}
           ${lib.optionalString useHyprsunset ''hl.exec_cmd("hyprsunset")''}
-          ${lib.optionalString useYubikey ''hl.exec_cmd("${pkgs.yubikey-touch-detector}/bin/yubikey-touch-detector -libnotify")''}
           ${lib.optionalString useGnomeKeyring ''hl.exec_cmd("unlock-keyring")''}
           ${lib.optionalString useEvglow ''hl.exec_cmd("evglow")''}
           ${lib.optionalString useHyprhook ''hl.exec_cmd("${osConfig.services.hyprhook.finalPackage}/bin/hyprhook")''}

@@ -221,20 +221,6 @@ in {
         inherit (cfg.yubikey) enable;
       };
     };
-    systemd = lib.mkIf config.modules.home-manager.enable {
-      user = {
-        services = {
-          # The detector locates the gpg-agent socket via GNUPGHOME; point it at
-          # the user's actual GnuPG home (we relocate it to ~/.config/gnupg) so
-          # it watches the right socket and fires on GPG signing touches.
-          yubikey-touch-detector = {
-            environment = {
-              GNUPGHOME = config.home-manager.users.${config.modules.users.name}.programs.gpg.homedir;
-            };
-          };
-        };
-      };
-    };
     environment = {
       systemPackages = [
         pkgs.yubikey-manager
