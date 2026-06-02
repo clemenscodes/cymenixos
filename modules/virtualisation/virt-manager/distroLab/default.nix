@@ -42,17 +42,20 @@
       '';
     };
 
-  # gpu=false -> "<name>-install": virtio video + SPICE/VNC, NO passthrough.
-  #              Install the distro AND its Nvidia driver here first.
-  # gpu=true  -> "<name>": RTX 3080 passthrough, video=none (drives the physical
-  #              monitor), host keyboard+mouse shared via evdev.
-  # Both variants share the same qcow2 and the same UEFI nvram so the bootloader
-  # entry written during install is seen by the GPU variant.
-  mkDomain = name: iso: gpu: let
+  # Three phases per distro, all sharing one qcow2 + one UEFI nvram:
+  #   "install" -> "<name>-install": SPICE, boots the ISO. Install the OS.
+  #   "setup"   -> "<name>-setup":   SPICE, boots the installed disk (no GPU).
+  #                Install the Nvidia driver + do post-install config here.
+  #   "gpu"     -> "<name>":         RTX 3080 passthrough, video=none (physical
+  #                monitor), host keyboard+mouse via evdev. Run the AppImage.
+  mkDomain = name: iso: variant: let
+    isGpu = variant == "gpu";
+    # Only the install phase boots the ISO first; setup/gpu boot the disk.
+    bootIso = variant == "install";
     vmName =
-      if gpu
+      if isGpu
       then name
-      else "${name}-install";
+      else "${name}-${variant}";
 
     base = {
       type = "kvm";
@@ -141,12 +144,11 @@
               dev = "vda";
               bus = "virtio";
             };
-            # GPU variant boots the installed disk first; install variant boots
-            # the ISO first.
+            # install boots the ISO first; setup/gpu boot the installed disk.
             boot.order =
-              if gpu
-              then 1
-              else 2;
+              if bootIso
+              then 2
+              else 1;
           }
           {
             type = "file";
@@ -165,9 +167,9 @@
             };
             readonly = true;
             boot.order =
-              if gpu
-              then 2
-              else 1;
+              if bootIso
+              then 1
+              else 2;
           }
         ];
 
@@ -193,18 +195,9 @@
       };
     };
 
-    # GPU variant: passthrough + evdev input + no emulated display.
+    # GPU variant: 3080 passthrough, no emulated display, host keyboard+mouse
+    # shared over libvirt-native evdev (configurable grab toggle).
     gpuExtra = {
-      "xmlns:qemu" = "http://libvirt.org/schemas/domain/qemu/1.0";
-      # Share the host keyboard + mouse (toggle host<->guest with both Ctrl).
-      "qemu:commandline" = {
-        "qemu:arg" = [
-          {value = "-object";}
-          {value = "input-linux,id=kbd0,evdev=${tcfg.keyboard},grab_all=on,repeat=on";}
-          {value = "-object";}
-          {value = "input-linux,id=mouse0,evdev=${tcfg.mouse}";}
-        ];
-      };
       devices =
         base.devices
         // {
@@ -227,11 +220,30 @@
           ];
           # The passed-through 3080 drives the physical monitor.
           video.model.type = "none";
+          # Share the host keyboard + mouse over evdev. grab='all' ties them
+          # together; grabToggle flips host<->guest (default both Shift keys —
+          # works on 60% boards that have no Right Ctrl, unlike QEMU's fixed
+          # both-Ctrl).
+          input = [
+            {
+              type = "evdev";
+              source = {
+                dev = tcfg.keyboard;
+                grab = "all";
+                grabToggle = tcfg.grabToggle;
+                repeat = true;
+              };
+            }
+            {
+              type = "evdev";
+              source.dev = tcfg.mouse;
+            }
+          ];
         };
     };
 
-    # Install variant: ordinary viewable desktop (virt-viewer / virt-manager).
-    installExtra = {
+    # install + setup phases: ordinary viewable SPICE/VNC desktop (no GPU).
+    spiceExtra = {
       devices =
         base.devices
         // {
@@ -281,19 +293,20 @@
     definition = inputs.nixvirt.lib.domain.writeXML (
       base
       // (
-        if gpu
+        if isGpu
         then gpuExtra
-        else installExtra
+        else spiceExtra
       )
     );
   };
 
-  # Two domains per distro: "<name>-install" and "<name>".
+  # Three domains per distro: "<name>-install", "<name>-setup", "<name>".
   domains =
     lib.concatLists (
       lib.mapAttrsToList (name: iso: [
-        (mkDomain name iso false)
-        (mkDomain name iso true)
+        (mkDomain name iso "install")
+        (mkDomain name iso "setup")
+        (mkDomain name iso "gpu")
       ])
       tcfg.distros
     );
@@ -316,6 +329,11 @@ in {
             type = lib.types.str;
             default = "/dev/input/by-id/usb-Razer_Razer_Viper_V3_Pro-event-mouse";
             description = "evdev mouse passed to the GPU variants.";
+          };
+          grabToggle = lib.mkOption {
+            type = lib.types.enum ["ctrl-ctrl" "alt-alt" "shift-shift" "meta-meta" "scrolllock" "ctrl-scrolllock"];
+            default = "shift-shift";
+            description = "Key combo that toggles the evdev keyboard+mouse grab between host and guest. shift-shift (both Shift keys) works on 60% boards that lack Right Ctrl.";
           };
           shareDir = lib.mkOption {
             type = lib.types.str;
