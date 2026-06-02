@@ -47,14 +47,15 @@ PanelWindow {
                         id: wsButton
                         required property HyprlandWorkspace modelData
 
-                        // "Lit up" when the workspace holds at least one window
-                        // (e.g. a browser). Derived from live toplevels so it
-                        // updates the moment a window opens, closes or moves.
-                        property bool occupied: {
+                        // Lights up when a window on this (unfocused) workspace
+                        // raises the attention/urgent hint — e.g. a browser
+                        // download finishing or a chat ping. Cleared on focus.
+                        property bool urgent: {
+                            if (wsButton.modelData.focused) return false
                             const tls = Hyprland.toplevels ? Hyprland.toplevels.values : []
                             for (let i = 0; i < tls.length; ++i) {
                                 const ws = tls[i].workspace
-                                if (ws && ws.id === wsButton.modelData.id)
+                                if (ws && ws.id === wsButton.modelData.id && tls[i].urgent)
                                     return true
                             }
                             return false
@@ -63,9 +64,11 @@ PanelWindow {
                         implicitWidth: 44
                         implicitHeight: Theme.pillHeight - 12
                         radius: Theme.innerRadius
-                        color: hoverArea.containsMouse
-                            ? Qt.lighter(Theme.defaultBg, 1.4)
-                            : Theme.defaultBg
+                        color: wsButton.urgent
+                            ? Theme.urgentBg
+                            : (hoverArea.containsMouse
+                                ? Qt.lighter(Theme.defaultBg, 1.4)
+                                : Theme.defaultBg)
 
                         Behavior on color {
                             ColorAnimation { duration: Theme.fadeMs / 2 }
@@ -75,29 +78,10 @@ PanelWindow {
                             id: wsLabel
                             anchors.centerIn: parent
                             text: `${wsButton.modelData.id}`
-                            color: wsButton.modelData.focused
-                                ? Theme.activeBg
-                                : (wsButton.occupied ? Theme.textColor : Theme.mutedColor)
+                            color: wsButton.modelData.focused ? Theme.activeBg : Theme.textColor
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize
                             font.bold: wsButton.modelData.focused
-                        }
-
-                        // occupied indicator — fades in when the workspace
-                        // gains a window, fades out when it empties
-                        Rectangle {
-                            anchors.top: parent.top
-                            anchors.topMargin: 5
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: 6
-                            height: 6
-                            radius: 3
-                            color: Theme.activeBg
-                            opacity: (wsButton.occupied && !wsButton.modelData.focused) ? 1 : 0
-
-                            Behavior on opacity {
-                                NumberAnimation { duration: Theme.fadeMs }
-                            }
                         }
 
                         Rectangle {
