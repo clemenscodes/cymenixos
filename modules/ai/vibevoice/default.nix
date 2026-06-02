@@ -17,6 +17,22 @@
       cudaSupport = true;
       allowUnfree = true;
     };
+    overlays = [
+      # gradio 6.9.0's test suite imports matplotlib, which isn't among its
+      # check inputs (nixpkgs regression), so the checkPhase fails in the
+      # sandbox. The package itself is fine — skip its tests.
+      (_final: prev: {
+        pythonPackagesExtensions =
+          prev.pythonPackagesExtensions
+          ++ [
+            (_pyfinal: pyprev: {
+              gradio = pyprev.gradio.overridePythonAttrs (_old: {
+                doCheck = false;
+              });
+            })
+          ];
+      })
+    ];
   };
 
   # transformers 4.51.3 — the version microsoft/VibeVoice-1.5B was built and tested with.
