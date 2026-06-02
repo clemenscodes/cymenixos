@@ -368,7 +368,14 @@
         exit 1
       fi
       echo "viewing GPU-VM output via $dev (ctrl-ctrl toggles kb/mouse into the VM; Super+F to fullscreen)"
-      exec gst-launch-1.0 \
+      # Best-effort HDMI audio: the sc0710 exposes the captured HDMI audio as an
+      # ALSA card named "sc0710"; play it to the host's default sink. Backgrounded
+      # + trap-killed so an audio hiccup never takes down the video viewer, and so
+      # it stops when the viewer window closes.
+      gst-launch-1.0 alsasrc device=hw:CARD=sc0710,DEV=0 '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 &
+      audio_pid=$!
+      trap 'kill "$audio_pid" 2>/dev/null || true' EXIT
+      gst-launch-1.0 \
         v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
     '';
   };
