@@ -326,6 +326,38 @@
     '';
   };
 
+  # Low-latency viewer for the GPU variant's output. The 3080 renders into the
+  # Elgato 4K Pro (sc0710) capture card; this displays /dev/video<n> with mpv
+  # tuned for live capture (--untimed renders each frame on arrival instead of
+  # pacing to a clock; --cache=no avoids queueing) so the picture tracks your
+  # input with ~1 frame of lag — OBS's preview pipeline is far too laggy to
+  # drive a VM through. Press `f` for fullscreen; the window needs no focus
+  # since input reaches the guest over evdev, not the window.
+  distrolab-view = pkgs.writeShellApplication {
+    name = "distrolab-view";
+    runtimeInputs = [pkgs.mpv pkgs.v4l-utils];
+    text = ''
+      dev=""
+      for d in /dev/video*; do
+        if v4l2-ctl -d "$d" -D 2>/dev/null | grep -qi "sc0710"; then
+          dev="$d"
+          break
+        fi
+      done
+      if [ -z "$dev" ]; then
+        echo "no sc0710 (Elgato 4K Pro) capture node found — is the card present?" >&2
+        exit 1
+      fi
+      echo "viewing GPU-VM output via $dev (ctrl-ctrl toggles your kb/mouse into the VM)"
+      exec mpv "av://v4l2:$dev" \
+        --demuxer-lavf-o=input_format=yuyv422 \
+        --profile=low-latency --untimed --cache=no \
+        --no-osc --force-window=immediate \
+        --title="distroLab — Elgato (GPU VM)" \
+        "$@"
+    '';
+  };
+
   mkdisks = lib.mapAttrsToList (name: _: mkDisk name) tcfg.distros;
 in {
   options = {
@@ -404,7 +436,7 @@ in {
       }
     ];
 
-    environment.systemPackages = [distrolab-release];
+    environment.systemPackages = [distrolab-release distrolab-view];
 
     # xremap re-emits your keystrokes through a virtual input device; give it a
     # stable symlink so the GPU VM grabs the node that actually carries keys
