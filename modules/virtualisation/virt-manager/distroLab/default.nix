@@ -237,6 +237,15 @@
               type = "evdev";
               source.dev = tcfg.mouse;
             }
+            # The evdev passthrough above injects RELATIVE motion, but the guest
+            # only auto-gets a PS/2 mouse whose aux port many guests never enable
+            # (the PS/2 keyboard works, the PS/2 mouse silently doesn't) — so the
+            # cursor wouldn't move at all. A USB mouse is enumerated by the guest's
+            # usbhid driver automatically, giving the motion somewhere to land.
+            {
+              type = "mouse";
+              bus = "usb";
+            }
           ];
         };
     };
@@ -327,16 +336,23 @@
   };
 
   # Low-latency viewer for the GPU variant's output. The 3080 renders into the
-  # Elgato 4K Pro (sc0710) capture card; this displays /dev/video<n> with mpv
-  # tuned for live capture (--untimed renders each frame on arrival instead of
-  # pacing to a clock; --cache=no avoids queueing) so the picture tracks your
-  # input with ~1 frame of lag — OBS's preview pipeline is far too laggy to
-  # drive a VM through. Press `f` for fullscreen; the window needs no focus
-  # since input reaches the guest over evdev, not the window.
+  # Elgato 4K Pro (sc0710); this displays it with GStreamer. mpv/ffmpeg's
+  # libavdevice v4l2 path is BROKEN on this card (VIDIOC_QBUF: Bad file
+  # descriptor -> <1fps); GStreamer's v4l2src mmap path captures a clean 60fps.
+  # DMABUF zero-copy is unsupported by the sc0710 (buffer pool activation fails),
+  # so io-mode=mmap; glupload/glcolorconvert do the YUYV->RGB on the GPU;
+  # sync=false renders each frame on arrival for the lowest latency. Fullscreen
+  # the window (Hyprland Super+F) for direct-scanout to shave another frame; it
+  # needs no focus since input reaches the guest over evdev, not the window.
+  # NOTE: capture-card display floors at ~2-3 frames of latency (the card must
+  # receive a whole frame before handing it over) — fine for install/click
+  # testing, laggy for fast pointer work; that floor is structural, not tunable.
+  gstViewPkgs = with pkgs.gst_all_1; [gstreamer gst-plugins-base gst-plugins-good];
   distrolab-view = pkgs.writeShellApplication {
     name = "distrolab-view";
-    runtimeInputs = [pkgs.mpv pkgs.v4l-utils];
+    runtimeInputs = [pkgs.v4l-utils] ++ gstViewPkgs;
     text = ''
+      export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
       dev=""
       for d in /dev/video*; do
         if v4l2-ctl -d "$d" -D 2>/dev/null | grep -qi "sc0710"; then
@@ -348,13 +364,9 @@
         echo "no sc0710 (Elgato 4K Pro) capture node found — is the card present?" >&2
         exit 1
       fi
-      echo "viewing GPU-VM output via $dev (ctrl-ctrl toggles your kb/mouse into the VM)"
-      exec mpv "av://v4l2:$dev" \
-        --demuxer-lavf-o=input_format=yuyv422 \
-        --profile=low-latency --untimed --cache=no \
-        --no-osc --force-window=immediate \
-        --title="distroLab — Elgato (GPU VM)" \
-        "$@"
+      echo "viewing GPU-VM output via $dev (ctrl-ctrl toggles kb/mouse into the VM; Super+F to fullscreen)"
+      exec gst-launch-1.0 \
+        v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
     '';
   };
 
