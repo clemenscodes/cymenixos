@@ -194,6 +194,7 @@ in {
     inputs.nixvirt.nixosModules.default
     # (import ./nixos {inherit inputs pkgs lib cymenixos;})
     (import ./windows {inherit inputs pkgs lib;})
+    (import ./distroLab {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
@@ -433,7 +434,9 @@ in {
                 "/dev/random", "/dev/urandom",
                 "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
                 "/dev/rtc","/dev/hpet", "/dev/vfio/vfio",
-                "/dev/kvmfr0"
+                "/dev/kvmfr0"${lib.optionalString cfg.distroLab.enable ''
+                ,
+                "${cfg.distroLab.keyboard}", "${cfg.distroLab.mouse}"''}
               ]
             '';
           };
