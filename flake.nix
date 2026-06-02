@@ -236,6 +236,9 @@
         permittedInsecurePackages = [
           "nodejs-20.20.2"
           "nodejs-slim-20.20.2"
+          # bitwarden-desktop still depends on electron_39 (EOL). Drop once
+          # nixpkgs bumps bitwarden-desktop to a supported electron.
+          "electron-39.8.10"
         ];
       };
     };
