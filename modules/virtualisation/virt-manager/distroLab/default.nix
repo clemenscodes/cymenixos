@@ -195,8 +195,12 @@
       };
     };
 
-    # GPU variant: 3080 passthrough, no emulated display, host keyboard+mouse
-    # shared over libvirt-native evdev (configurable grab toggle).
+    # GPU variant: 3080 passed through as the PRIMARY display (→ Elgato,
+    # video=none) and the host keyboard+mouse passed through via evdev — real,
+    # no compromises. ESCAPE HATCHES if the grab toggle ever misbehaves (so you
+    # NEVER pull power again): Alt+SysRq+E (kernel-level, works even mid-grab) or
+    # `ssh <host> distrolab-release` from your phone (surgical — frees input,
+    # keeps your session).
     gpuExtra = {
       devices =
         base.devices
@@ -218,12 +222,7 @@
               source.address = source_address 3 0 1;
             }
           ];
-          # The passed-through 3080 drives the physical monitor.
           video.model.type = "none";
-          # Share the host keyboard + mouse over evdev. grab='all' ties them
-          # together; grabToggle flips host<->guest (default both Shift keys —
-          # works on 60% boards that have no Right Ctrl, unlike QEMU's fixed
-          # both-Ctrl).
           input = [
             {
               type = "evdev";
@@ -311,6 +310,22 @@
       tcfg.distros
     );
 
+  # Emergency get-my-devices-back: stops any running GPU VM, which releases the
+  # evdev grab and returns the keyboard/mouse to the host. Run it out-of-band:
+  # `ssh <host> distrolab-release` from your phone, or after Alt+SysRq+E.
+  distrolab-release = pkgs.writeShellApplication {
+    name = "distrolab-release";
+    runtimeInputs = [pkgs.libvirt];
+    text = ''
+      for vm in ${lib.concatStringsSep " " (lib.attrNames tcfg.distros)}; do
+        if virsh --connect qemu:///system domstate "$vm" 2>/dev/null | grep -q running; then
+          echo "stopping $vm to release your keyboard/mouse..."
+          virsh --connect qemu:///system destroy "$vm"
+        fi
+      done
+    '';
+  };
+
   mkdisks = lib.mapAttrsToList (name: _: mkDisk name) tcfg.distros;
 in {
   options = {
@@ -322,8 +337,13 @@ in {
             // {default = false;};
           keyboard = lib.mkOption {
             type = lib.types.str;
-            default = "/dev/input/by-id/usb-Wooting_Wooting_60HE+_A02B2501W05T02100S02H15106-if01-event-kbd";
-            description = "evdev keyboard passed to the GPU variants (shared via both-Ctrl toggle).";
+            # xremap grabs the physical Wooting and re-emits a VIRTUAL keyboard;
+            # that virtual device is what actually carries keystrokes, so it's
+            # what the VM must grab. Grabbing the raw Wooting fights xremap and
+            # the release toggle never sees your keys. The udev rule below pins
+            # the xremap virtual device to this stable symlink.
+            default = "/dev/input/xremap-kbd";
+            description = "evdev keyboard passed to the GPU variants — the xremap virtual keyboard (the real source of keystrokes on this host).";
           };
           mouse = lib.mkOption {
             type = lib.types.str;
@@ -383,6 +403,16 @@ in {
         message = "modules.virtualisation.distroLab requires modules.virtualisation.virt-manager.vfio.enable (the RTX 3080 must be vfio-bound for GPU passthrough).";
       }
     ];
+
+    environment.systemPackages = [distrolab-release];
+
+    # xremap re-emits your keystrokes through a virtual input device; give it a
+    # stable symlink so the GPU VM grabs the node that actually carries keys
+    # (and so the ctrl-ctrl release toggle works — it was failing because we
+    # were grabbing the raw, xremap-owned Wooting instead).
+    services.udev.extraRules = ''
+      SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="xremap", ENV{ID_INPUT_KEYBOARD}=="1", SYMLINK+="input/xremap-kbd"
+    '';
 
     systemd.tmpfiles.rules = [
       "d ${tcfg.shareDir} 0755 ${user} ${user} -"
