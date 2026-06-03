@@ -415,8 +415,8 @@
       # Video supervisor. A lost HDMI signal makes v4l2src error out; we re-find
       # the device and relaunch until the signal returns — a fresh pipeline also
       # renegotiates caps, so a different resolution on resume just works. Closing
-      # the viewer window makes glimagesink report "window was closed"; that is the
-      # one case we quit for real instead of relaunching.
+      # the viewer window sends EOS through the pipeline, so gst-launch prints
+      # "Got EOS" — that is the one case we quit for real instead of relaunching.
       while true; do
         dev="$(find_dev || true)"
         if [ -z "$dev" ]; then
@@ -424,7 +424,7 @@
           continue
         fi
         out="$(gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false 2>&1 || true)"
-        if printf '%s' "$out" | grep -qi "window was closed"; then
+        if printf '%s' "$out" | grep -qiE "Got EOS|window was closed"; then
           break
         fi
         sleep 1
