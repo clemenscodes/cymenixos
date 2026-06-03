@@ -50,11 +50,13 @@ PanelWindow {
         id: keyHandler
         anchors.fill: parent
         focus: true
-        Keys.onEscapePressed: center.hide()
 
-        // While the center is open, C (or Delete) clears all notifications.
-        Keys.onPressed: (event) => {
-            if (event.key === Qt.Key_C || event.key === Qt.Key_Delete) {
+        // Escape closes; C or Delete clears all notifications.
+        Keys.onPressed: function(event) {
+            if (event.key === Qt.Key_Escape) {
+                center.hide()
+                event.accepted = true
+            } else if (event.key === Qt.Key_C || event.key === Qt.Key_Delete) {
                 Notifs.clearAll()
                 event.accepted = true
             }

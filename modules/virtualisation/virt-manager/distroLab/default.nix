@@ -128,29 +128,39 @@
       devices = {
         emulator = "/run/libvirt/nix-emulators/qemu-system-x86_64";
 
-        disk = [
-          {
-            type = "file";
-            device = "disk";
-            driver = {
-              name = "qemu";
-              type = "qcow2";
-              cache = "none";
-              discard = "unmap";
-              iothread = 1;
-            };
-            source.file = "/var/lib/libvirt/images/${name}.qcow2";
-            target = {
-              dev = "vda";
-              bus = "virtio";
-            };
-            # install boots the ISO first; setup/gpu boot the installed disk.
-            boot.order =
-              if bootIso
-              then 2
-              else 1;
-          }
-          {
+        disk =
+          [
+            {
+              type = "file";
+              device = "disk";
+              driver = {
+                name = "qemu";
+                type = "qcow2";
+                cache = "none";
+                discard = "unmap";
+                iothread = 1;
+              };
+              source.file = "/var/lib/libvirt/images/${name}.qcow2";
+              target = {
+                dev = "vda";
+                bus = "virtio";
+              };
+              # install boots the ISO first; setup/gpu boot the installed disk.
+              boot.order =
+                if bootIso
+                then 2
+                else 1;
+            }
+          ]
+          # The installer ISO is attached ONLY to the install variant. The three
+          # variants share one per-distro UEFI nvram, and the installer leaves its
+          # persisted BootOrder pointing at the CD. OVMF honors that persisted
+          # BootOrder over the per-device bootindex, so while a CD entry exists the
+          # setup/gpu variants boot the installer again instead of the installed
+          # disk. Omitting the cdrom from setup/gpu drops that entry entirely, so
+          # OVMF falls through to the installed disk — which is the whole point of
+          # the setup variant (install drivers on the bare OS, no GPU yet).
+          ++ lib.optional bootIso {
             type = "file";
             device = "cdrom";
             driver = {
@@ -166,12 +176,8 @@
               bus = "sata";
             };
             readonly = true;
-            boot.order =
-              if bootIso
-              then 1
-              else 2;
-          }
-        ];
+            boot.order = 1;
+          };
 
         # virtiofs share: drop the AppImage in tcfg.shareDir on the host, then
         # `sudo mount -t virtiofs share /mnt` inside any guest.
