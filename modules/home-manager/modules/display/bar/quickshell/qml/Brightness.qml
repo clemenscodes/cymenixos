@@ -22,15 +22,17 @@ QtObject {
 
     function setPercent(p) {
         const clamped = Math.max(1, Math.min(100, Math.round(p)))
-        setProc.command = ["brightnessctl", "-m", "set", clamped + "%"]
+        setProc.command = ["brightnessctl", "-c", "backlight", "-m", "set", clamped + "%"]
         setProc.running = true
     }
 
     function increase(delta) { root.setPercent(root.percent + delta) }
     function decrease(delta) { root.setPercent(root.percent - delta) }
 
-    // brightnessctl -m output: device,class,current,percent,max
-    // e.g. "intel_backlight,backlight,12000,80%,15000"
+    // brightnessctl -c backlight -m output: device,class,current,percent,max
+    // e.g. "intel_backlight,backlight,12000,80%,15000". We force -c backlight
+    // because brightnessctl's default device is NOT class-filtered — on a
+    // machine with LEDs it returns the first LED, never the backlight.
     function _parse(text) {
         const line = text.split("\n").map(l => l.trim()).filter(l => l.length > 0)[0]
         if (!line) { root.available = false; return }
@@ -53,7 +55,7 @@ QtObject {
 
     readonly property Process _infoProc: Process {
         id: infoProc
-        command: ["brightnessctl", "-m", "info"]
+        command: ["brightnessctl", "-c", "backlight", "-m", "info"]
         stdout: StdioCollector {
             onStreamFinished: root._parse(this.text)
         }
@@ -61,7 +63,7 @@ QtObject {
 
     readonly property Process _setProc: Process {
         id: setProc
-        command: ["brightnessctl", "-m", "set", "50%"]
+        command: ["brightnessctl", "-c", "backlight", "-m", "set", "50%"]
         // -m set also echoes the device line, so reuse it for instant feedback.
         stdout: StdioCollector {
             onStreamFinished: root._parse(this.text)
