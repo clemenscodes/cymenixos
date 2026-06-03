@@ -185,7 +185,6 @@ in {
                 pickCommit: p
                 renameCommit: r
                 renameCommitWithEditor: R
-                resetCherryPick: <c-R>
                 resetCommitAuthor: a
                 revertCommit: t
                 squashAboveCommits: S

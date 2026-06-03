@@ -34,6 +34,7 @@ in {
           open_url_with = "default";
           allow_remote_control = "socket-only";
           listen_on = "unix:/tmp/kitty";
+          auto_reload_config = -1;
         };
       };
     };
