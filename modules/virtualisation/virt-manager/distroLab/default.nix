@@ -367,29 +367,46 @@
   # window so closing/reopening the viewer never touches audio.
   distrolab-stream = pkgs.writeShellApplication {
     name = "distrolab-stream";
-    runtimeInputs = [pkgs.pulseaudio] ++ gstViewPkgs;
+    # gawk is required: the systemd user-service PATH is minimal and has no awk,
+    # so without this find_audio_src's `pactl | awk` silently produces nothing.
+    runtimeInputs = [pkgs.pulseaudio pkgs.gawk] ++ gstViewPkgs;
     text = ''
       export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
+      # The source NAME is the sc0710's PCI path, but "sc0710" only appears in the
+      # description — so find the name by matching the (non-localized) description
+      # value in the long listing. State, however, must come from the short listing:
+      # the long listing's field labels ("Status:", "State:") are localized (this
+      # host runs German -> "Status:"), so grepping "State:" silently never matches.
+      # The short listing is tab-delimited and locale-independent (col5 = state).
       find_audio_src() {
         pactl list sources | awk '/Name:/{name=$2} /sc0710/{print name; exit}'
       }
       audio_src_state() {
-        pactl list sources 2>/dev/null | awk -v src="$1" '/State:/{st=$2} /Name:/{if($2==src){print st; exit}}'
+        pactl list sources short | awk -F'\t' -v src="$1" '$2==src{print $5; exit}'
       }
+      # A PipeWire source only goes RUNNING *while* a client captures it; idle it
+      # sits SUSPENDED. So we must NOT gate startup on RUNNING (chicken-and-egg —
+      # it would never start). Instead start capturing unconditionally, then use
+      # RUNNING purely as a liveness check: once the pipeline has driven the source
+      # to RUNNING, if it later falls out of RUNNING the HDMI stream stalled (VM
+      # display slept) — kill and relaunch so audio recovers when the signal is back.
       while true; do
         src=$(find_audio_src 2>/dev/null || true)
-        if [ -z "$src" ] || [ "$(audio_src_state "$src")" != "RUNNING" ]; then
+        if [ -z "$src" ]; then
           sleep 1
           continue
         fi
         gst-launch-1.0 pulsesrc device="$src" '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 &
         gst_pid=$!
+        seen_running=0
         while kill -0 "$gst_pid" 2>/dev/null; do
-          if [ "$(audio_src_state "$src")" != "RUNNING" ]; then
+          if [ "$(audio_src_state "$src")" = "RUNNING" ]; then
+            seen_running=1
+          elif [ "$seen_running" = 1 ]; then
             kill "$gst_pid" 2>/dev/null || true
             break
           fi
-          sleep 1
+          sleep 2
         done
         wait "$gst_pid" 2>/dev/null || true
         sleep 1
