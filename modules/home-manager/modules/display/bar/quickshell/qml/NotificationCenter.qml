@@ -52,6 +52,14 @@ PanelWindow {
         focus: true
         Keys.onEscapePressed: center.hide()
 
+        // While the center is open, C (or Delete) clears all notifications.
+        Keys.onPressed: (event) => {
+            if (event.key === Qt.Key_C || event.key === Qt.Key_Delete) {
+                Notifs.clearAll()
+                event.accepted = true
+            }
+        }
+
         // Click outside the card dismisses.
         MouseArea {
             anchors.fill: parent
