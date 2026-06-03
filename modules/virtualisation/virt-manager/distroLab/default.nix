@@ -363,33 +363,65 @@
   gstViewPkgs = with pkgs.gst_all_1; [gstreamer gst-plugins-base gst-plugins-good];
   distrolab-view = pkgs.writeShellApplication {
     name = "distrolab-view";
-    runtimeInputs = [pkgs.v4l-utils pkgs.libnotify] ++ gstViewPkgs;
+    runtimeInputs = [pkgs.v4l-utils pkgs.libnotify pkgs.procps] ++ gstViewPkgs;
     text = ''
       export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
-      dev=""
-      for d in /dev/video*; do
-        if v4l2-ctl -d "$d" -D 2>/dev/null | grep -qi "sc0710"; then
-          dev="$d"
-          break
-        fi
-      done
-      if [ -z "$dev" ]; then
+
+      # The sc0710 is a permanent PCIe card, so its /dev/video* node persists even
+      # while the GPU VM hibernates — only the HDMI *signal* drops. Re-find it on
+      # every relaunch (the node can renumber) instead of caching it once.
+      find_dev() {
+        for d in /dev/video*; do
+          if v4l2-ctl -d "$d" -D 2>/dev/null | grep -qi "sc0710"; then
+            printf '%s' "$d"
+            return 0
+          fi
+        done
+        return 1
+      }
+
+      if ! find_dev >/dev/null; then
         msg="No Elgato (sc0710) capture device found — is the card present and a GPU VM running?"
         echo "$msg" >&2
         # launched from the app launcher there's no terminal, so surface it visibly
         notify-send "distroLab View" "$msg" 2>/dev/null || true
         exit 1
       fi
-      echo "viewing GPU-VM output via $dev (ctrl-ctrl toggles kb/mouse into the VM; Super+F to fullscreen)"
-      # Best-effort HDMI audio: the sc0710 exposes the captured HDMI audio as an
-      # ALSA card named "sc0710"; play it to the host's default sink. Backgrounded
-      # + trap-killed so an audio hiccup never takes down the video viewer, and so
-      # it stops when the viewer window closes.
-      gst-launch-1.0 alsasrc device=hw:CARD=sc0710,DEV=0 '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 &
+      echo "viewing GPU-VM output (auto-recovers across VM hibernate / display sleep; ctrl-ctrl toggles kb/mouse into the VM, Super+F to fullscreen)"
+
+      # HDMI audio supervisor. When the VM hibernates the HDMI signal drops and
+      # the sc0710 ALSA stream ends, which kills this gst-launch; when the VM
+      # wakes, the loop relaunches it and audio comes back on its own — the whole
+      # point. pkill on exit reaps the pipeline (and any stale one) so it never
+      # squats on the single capture device: a leftover gst-launch still holding
+      # hw:CARD=sc0710 is exactly what silently kills audio for the next run.
+      audio_loop() {
+        while true; do
+          gst-launch-1.0 alsasrc device=hw:CARD=sc0710,DEV=0 '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 || true
+          sleep 1
+        done
+      }
+      audio_loop &
       audio_pid=$!
-      trap 'kill "$audio_pid" 2>/dev/null || true' EXIT
-      gst-launch-1.0 \
-        v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
+      trap 'kill "$audio_pid" 2>/dev/null || true; pkill -f "alsasrc device=hw:CARD=sc0710" 2>/dev/null || true' EXIT
+
+      # Video supervisor. A lost HDMI signal makes v4l2src error out; we re-find
+      # the device and relaunch until the signal returns — a fresh pipeline also
+      # renegotiates caps, so a different resolution on resume just works. Closing
+      # the viewer window makes glimagesink report "window was closed"; that is the
+      # one case we quit for real instead of relaunching.
+      while true; do
+        dev="$(find_dev || true)"
+        if [ -z "$dev" ]; then
+          sleep 1
+          continue
+        fi
+        out="$(gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false 2>&1 || true)"
+        if printf '%s' "$out" | grep -qi "window was closed"; then
+          break
+        fi
+        sleep 1
+      done
     '';
   };
 
