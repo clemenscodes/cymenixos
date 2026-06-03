@@ -262,6 +262,13 @@
         base.devices
         // {
           video.model.type = "virtio";
+          # ich9 HD-audio card so the guest has a sound device. With the SPICE
+          # graphics below present, libvirt auto-attaches a SPICE audio backend,
+          # so guest audio streams to the SPICE client (virt-viewer/virt-manager)
+          # — no audio over the VNC fallback. The GPU variant doesn't need this:
+          # its audio rides the passed-through GPU's HDMI function (03:00.1) into
+          # the Elgato capture, played by distrolab-view.
+          sound.model = "ich9";
           graphics = [
             {
               type = "spice";
@@ -420,8 +427,16 @@ in {
           };
           mouse = lib.mkOption {
             type = lib.types.str;
-            default = "/dev/input/by-id/usb-Razer_Razer_Viper_V3_Pro-event-mouse";
-            description = "evdev mouse passed to the GPU variants.";
+            # The Razer Viper V3 Pro enumerates under DIFFERENT by-id paths
+            # depending on connection: the wireless dongle reports
+            # usb-Razer_Razer_Viper_V3_Pro-event-mouse, but plugging the charging
+            # cable in (wired mode) reports usb-1532_Razer_Viper_V3_Pro_…-event-mouse.
+            # Hardcoding either path means the GPU VM fails to start in the other
+            # mode ("Path … is not accessible: No such file or directory"). The
+            # udev rule below pins the Razer pointer node (vendor 1532, whichever
+            # mode) to this stable symlink so charging the mouse never breaks the VM.
+            default = "/dev/input/distrolab-mouse";
+            description = "evdev mouse passed to the GPU variants — a stable udev symlink to the Razer pointer that follows it across wired (charging) and wireless (dongle) modes.";
           };
           grabToggle = lib.mkOption {
             type = lib.types.enum ["ctrl-ctrl" "alt-alt" "shift-shift" "meta-meta" "scrolllock" "ctrl-scrolllock"];
@@ -485,6 +500,7 @@ in {
     # were grabbing the raw, xremap-owned Wooting instead).
     services.udev.extraRules = ''
       SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="xremap", ENV{ID_INPUT_KEYBOARD}=="1", SYMLINK+="input/xremap-kbd"
+      SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="1532", ENV{ID_INPUT_MOUSE}=="1", SYMLINK+="input/distrolab-mouse"
     '';
 
     systemd.tmpfiles.rules = [
