@@ -389,22 +389,33 @@
       fi
       echo "viewing GPU-VM output (auto-recovers across VM hibernate / display sleep; ctrl-ctrl toggles kb/mouse into the VM, Super+F to fullscreen)"
 
-      # HDMI audio supervisor. When the VM hibernates the HDMI signal drops and
-      # PipeWire suspends the sc0710 source, which kills this gst-launch; when the
-      # VM wakes, the loop relaunches it and audio comes back on its own — the whole
-      # point. pkill on exit reaps the pipeline (and any stale one) so it never
-      # squats on the capture device.
-      # NOTE: alsasrc hw:CARD=sc0710 would block here — WirePlumber owns the device.
-      # Use pulsesrc (PipeWire PA compat) and discover the source by description.
+      # HDMI audio supervisor. pulsesrc goes through PipeWire (WirePlumber owns the
+      # raw hw: device). When the HDMI signal drops, PipeWire suspends the sc0710
+      # source — pulsesrc does NOT exit on its own, it just hangs. So we run the
+      # pipeline in the background and kill it the moment the source leaves RUNNING.
       find_audio_src() {
         pactl list sources | awk '/Name:/{name=$2} /sc0710/{print name; exit}'
       }
+      audio_src_state() {
+        pactl list sources 2>/dev/null | awk -v src="$1" '/State:/{st=$2} /Name:/{if($2==src){print st; exit}}'
+      }
       audio_loop() {
         while true; do
-          src=$(find_audio_src || true)
-          if [ -n "$src" ]; then
-            gst-launch-1.0 pulsesrc device="$src" '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 || true
+          src=$(find_audio_src 2>/dev/null || true)
+          if [ -z "$src" ] || [ "$(audio_src_state "$src")" != "RUNNING" ]; then
+            sleep 1
+            continue
           fi
+          gst-launch-1.0 pulsesrc device="$src" '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 &
+          gst_pid=$!
+          while kill -0 "$gst_pid" 2>/dev/null; do
+            if [ "$(audio_src_state "$src")" != "RUNNING" ]; then
+              kill "$gst_pid" 2>/dev/null || true
+              break
+            fi
+            sleep 1
+          done
+          wait "$gst_pid" 2>/dev/null || true
           sleep 1
         done
       }
