@@ -362,63 +362,19 @@
   # testing, laggy for fast pointer work; that floor is structural, not tunable.
   gstViewPkgs = with pkgs.gst_all_1; [gstreamer gst-plugins-base gst-plugins-good];
 
-  # Persistent audio bridge: captures sc0710 HDMI audio via PipeWire and plays it
-  # to the default sink. Runs as a systemd user service — independent of the viewer
-  # window so closing/reopening the viewer never touches audio.
-  distrolab-stream = pkgs.writeShellApplication {
-    name = "distrolab-stream";
-    # gawk is required: the systemd user-service PATH is minimal and has no awk,
-    # so without this find_audio_src's `pactl | awk` silently produces nothing.
-    runtimeInputs = [pkgs.pulseaudio pkgs.gawk] ++ gstViewPkgs;
-    text = ''
-      export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
-      # The source NAME is the sc0710's PCI path, but "sc0710" only appears in the
-      # description — so find the name by matching the (non-localized) description
-      # value in the long listing. State, however, must come from the short listing:
-      # the long listing's field labels ("Status:", "State:") are localized (this
-      # host runs German -> "Status:"), so grepping "State:" silently never matches.
-      # The short listing is tab-delimited and locale-independent (col5 = state).
-      find_audio_src() {
-        pactl list sources | awk '/Name:/{name=$2} /sc0710/{print name; exit}'
-      }
-      audio_src_state() {
-        pactl list sources short | awk -F'\t' -v src="$1" '$2==src{print $5; exit}'
-      }
-      # A PipeWire source only goes RUNNING *while* a client captures it; idle it
-      # sits SUSPENDED. So we must NOT gate startup on RUNNING (chicken-and-egg —
-      # it would never start). Instead start capturing unconditionally, then use
-      # RUNNING purely as a liveness check: once the pipeline has driven the source
-      # to RUNNING, if it later falls out of RUNNING the HDMI stream stalled (VM
-      # display slept) — kill and relaunch so audio recovers when the signal is back.
-      while true; do
-        src=$(find_audio_src 2>/dev/null || true)
-        if [ -z "$src" ]; then
-          sleep 1
-          continue
-        fi
-        gst-launch-1.0 pulsesrc device="$src" '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 &
-        gst_pid=$!
-        seen_running=0
-        while kill -0 "$gst_pid" 2>/dev/null; do
-          if [ "$(audio_src_state "$src")" = "RUNNING" ]; then
-            seen_running=1
-          elif [ "$seen_running" = 1 ]; then
-            kill "$gst_pid" 2>/dev/null || true
-            break
-          fi
-          sleep 2
-        done
-        wait "$gst_pid" 2>/dev/null || true
-        sleep 1
-      done
-    '';
-  };
-
-  # One-shot viewer: opens a window, exits when you close it. No restart logic.
-  # Audio is handled by distrolab-stream.service — unaffected by this window.
+  # Viewer + audio bridge, run as a plain script IN THE USER'S SESSION (NOT a
+  # systemd --user service — that ran in a different session slice and never got
+  # audio out; the in-session script is the only thing that ever worked).
+  #
+  # The audio loop runs gst `alsasrc` on the raw sc0710 continuously in the
+  # background and plays to pulsesink, so a brief sound in the VM is bridged to the
+  # speakers in real time — you press the test button once and hear it. The
+  # WirePlumber rule in the config block frees the raw device so alsasrc can open it.
+  # alsasrc exits when the HDMI audio stream drops and the loop relaunches it, so it
+  # self-recovers. The trap reaps the audio loop when the viewer window is closed.
   distrolab-view = pkgs.writeShellApplication {
     name = "distrolab-view";
-    runtimeInputs = [pkgs.v4l-utils pkgs.libnotify] ++ gstViewPkgs;
+    runtimeInputs = [pkgs.v4l-utils pkgs.libnotify pkgs.procps] ++ gstViewPkgs;
     text = ''
       export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
 
@@ -440,9 +396,25 @@
         exit 1
       fi
 
-      systemctl --user start distrolab-stream.service
+      # Kill any orphaned capture from a previously force-closed view (its EXIT trap
+      # never fired, so a stale alsasrc is still holding the single capture device and
+      # would make this launch silent with "device busy").
+      pkill -f "alsasrc device=hw:CARD=sc0710" 2>/dev/null || true
+      sleep 1
 
-      exec gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
+      # Continuous HDMI-audio bridge in the background.
+      audio_loop() {
+        while true; do
+          gst-launch-1.0 alsasrc device=hw:CARD=sc0710,DEV=0 '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 || true
+          sleep 1
+        done
+      }
+      audio_loop &
+      audio_pid=$!
+      trap 'kill "$audio_pid" 2>/dev/null || true; pkill -f "alsasrc device=hw:CARD=sc0710" 2>/dev/null || true' EXIT
+
+      # Video in the foreground; closing the window ends it and the trap reaps audio.
+      gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
     '';
   };
 
@@ -545,17 +517,19 @@ in {
       }
     ];
 
-    environment.systemPackages = [distrolab-release distrolab-stream distrolab-view distrolab-view-desktop];
+    environment.systemPackages = [distrolab-release distrolab-view distrolab-view-desktop];
 
-    systemd.user.services.distrolab-stream = {
-      description = "distroLab sc0710 HDMI audio bridge";
-      after = ["pipewire.service" "wireplumber.service"];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = lib.getExe distrolab-stream;
-        Restart = "on-failure";
-        RestartSec = 2;
-      };
+    # Stop WirePlumber from claiming the sc0710 capture card so the raw ALSA device
+    # (hw:CARD=sc0710) is free for distrolab-view's alsasrc audio loop to open;
+    # otherwise WirePlumber holds it exclusively and alsasrc gets "device busy".
+    # (Video is v4l2, wholly unaffected by this.)
+    services.pipewire.wireplumber.extraConfig."99-distrolab-sc0710-raw" = {
+      "monitor.alsa.rules" = [
+        {
+          matches = [{"device.name" = "alsa_card.pci-0000_06_00.0";}];
+          actions.update-props."device.disabled" = true;
+        }
+      ];
     };
 
     # xremap re-emits your keystrokes through a virtual input device; give it a
