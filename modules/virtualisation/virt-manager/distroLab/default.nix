@@ -361,15 +361,50 @@
   # receive a whole frame before handing it over) — fine for install/click
   # testing, laggy for fast pointer work; that floor is structural, not tunable.
   gstViewPkgs = with pkgs.gst_all_1; [gstreamer gst-plugins-base gst-plugins-good];
+
+  # Persistent audio bridge: captures sc0710 HDMI audio via PipeWire and plays it
+  # to the default sink. Runs as a systemd user service — independent of the viewer
+  # window so closing/reopening the viewer never touches audio.
+  distrolab-stream = pkgs.writeShellApplication {
+    name = "distrolab-stream";
+    runtimeInputs = [pkgs.pulseaudio] ++ gstViewPkgs;
+    text = ''
+      export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
+      find_audio_src() {
+        pactl list sources | awk '/Name:/{name=$2} /sc0710/{print name; exit}'
+      }
+      audio_src_state() {
+        pactl list sources 2>/dev/null | awk -v src="$1" '/State:/{st=$2} /Name:/{if($2==src){print st; exit}}'
+      }
+      while true; do
+        src=$(find_audio_src 2>/dev/null || true)
+        if [ -z "$src" ] || [ "$(audio_src_state "$src")" != "RUNNING" ]; then
+          sleep 1
+          continue
+        fi
+        gst-launch-1.0 pulsesrc device="$src" '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 &
+        gst_pid=$!
+        while kill -0 "$gst_pid" 2>/dev/null; do
+          if [ "$(audio_src_state "$src")" != "RUNNING" ]; then
+            kill "$gst_pid" 2>/dev/null || true
+            break
+          fi
+          sleep 1
+        done
+        wait "$gst_pid" 2>/dev/null || true
+        sleep 1
+      done
+    '';
+  };
+
+  # One-shot viewer: opens a window, exits when you close it. No restart logic.
+  # Audio is handled by distrolab-stream.service — unaffected by this window.
   distrolab-view = pkgs.writeShellApplication {
     name = "distrolab-view";
-    runtimeInputs = [pkgs.v4l-utils pkgs.libnotify pkgs.procps pkgs.pulseaudio] ++ gstViewPkgs;
+    runtimeInputs = [pkgs.v4l-utils pkgs.libnotify] ++ gstViewPkgs;
     text = ''
       export GST_PLUGIN_SYSTEM_PATH_1_0="${lib.makeSearchPath "lib/gstreamer-1.0" gstViewPkgs}"
 
-      # The sc0710 is a permanent PCIe card, so its /dev/video* node persists even
-      # while the GPU VM hibernates — only the HDMI *signal* drops. Re-find it on
-      # every relaunch (the node can renumber) instead of caching it once.
       find_dev() {
         for d in /dev/video*; do
           if v4l2-ctl -d "$d" -D 2>/dev/null | grep -qi "sc0710"; then
@@ -380,66 +415,17 @@
         return 1
       }
 
-      if ! find_dev >/dev/null; then
-        msg="No Elgato (sc0710) capture device found — is the card present and a GPU VM running?"
-        echo "$msg" >&2
-        # launched from the app launcher there's no terminal, so surface it visibly
+      dev="$(find_dev || true)"
+      if [ -z "$dev" ]; then
+        msg="No Elgato (sc0710) capture device found — is a GPU VM running?"
         notify-send "distroLab View" "$msg" 2>/dev/null || true
+        echo "$msg" >&2
         exit 1
       fi
-      echo "viewing GPU-VM output (auto-recovers across VM hibernate / display sleep; ctrl-ctrl toggles kb/mouse into the VM, Super+F to fullscreen)"
 
-      # HDMI audio supervisor. pulsesrc goes through PipeWire (WirePlumber owns the
-      # raw hw: device). When the HDMI signal drops, PipeWire suspends the sc0710
-      # source — pulsesrc does NOT exit on its own, it just hangs. So we run the
-      # pipeline in the background and kill it the moment the source leaves RUNNING.
-      find_audio_src() {
-        pactl list sources | awk '/Name:/{name=$2} /sc0710/{print name; exit}'
-      }
-      audio_src_state() {
-        pactl list sources 2>/dev/null | awk -v src="$1" '/State:/{st=$2} /Name:/{if($2==src){print st; exit}}'
-      }
-      audio_loop() {
-        while true; do
-          src=$(find_audio_src 2>/dev/null || true)
-          if [ -z "$src" ] || [ "$(audio_src_state "$src")" != "RUNNING" ]; then
-            sleep 1
-            continue
-          fi
-          gst-launch-1.0 pulsesrc device="$src" '!' audioconvert '!' audioresample '!' pulsesink >/dev/null 2>&1 &
-          gst_pid=$!
-          while kill -0 "$gst_pid" 2>/dev/null; do
-            if [ "$(audio_src_state "$src")" != "RUNNING" ]; then
-              kill "$gst_pid" 2>/dev/null || true
-              break
-            fi
-            sleep 1
-          done
-          wait "$gst_pid" 2>/dev/null || true
-          sleep 1
-        done
-      }
-      audio_loop &
-      audio_pid=$!
-      trap 'kill "$audio_pid" 2>/dev/null || true; pkill -f "gst-launch.*pulsesrc.*pci-0000_06_00" 2>/dev/null || true' EXIT
+      systemctl --user start distrolab-stream.service
 
-      # Video supervisor. A lost HDMI signal makes v4l2src error out; we re-find
-      # the device and relaunch until the signal returns — a fresh pipeline also
-      # renegotiates caps, so a different resolution on resume just works. Closing
-      # the viewer window sends EOS through the pipeline, so gst-launch prints
-      # "Got EOS" — that is the one case we quit for real instead of relaunching.
-      while true; do
-        dev="$(find_dev || true)"
-        if [ -z "$dev" ]; then
-          sleep 1
-          continue
-        fi
-        out="$(gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false 2>&1 || true)"
-        if printf '%s' "$out" | grep -qiE "Got EOS|window was closed"; then
-          break
-        fi
-        sleep 1
-      done
+      exec gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
     '';
   };
 
@@ -542,7 +528,18 @@ in {
       }
     ];
 
-    environment.systemPackages = [distrolab-release distrolab-view distrolab-view-desktop];
+    environment.systemPackages = [distrolab-release distrolab-stream distrolab-view distrolab-view-desktop];
+
+    systemd.user.services.distrolab-stream = {
+      description = "distroLab sc0710 HDMI audio bridge";
+      after = ["pipewire.service" "wireplumber.service"];
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = lib.getExe distrolab-stream;
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+    };
 
     # xremap re-emits your keystrokes through a virtual input device; give it a
     # stable symlink so the GPU VM grabs the node that actually carries keys
