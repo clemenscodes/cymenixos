@@ -498,6 +498,27 @@ final: prev: {
         fi
       '';
     };
+    nfc = prev.writeShellApplication {
+      name = "nfc";
+      runtimeInputs = [prev.nix-output-monitor];
+      text = ''
+        nix flake check --log-format internal-json -v "$@" 2>&1 | nom
+      '';
+    };
+    nba = prev.writeShellApplication {
+      name = "nba";
+      runtimeInputs = with prev; [nix-output-monitor jq];
+      excludeShellChecks = ["SC2086"];
+      text = ''
+        SYSTEM=$(nix eval --impure --expr 'builtins.currentSystem' --raw)
+        PKGS=$(nix flake show --json 2>/dev/null | jq -r --arg sys "$SYSTEM" '.packages[$sys] | keys[] | ".#packages." + $sys + "." + .')
+        if [ -z "$PKGS" ]; then
+          echo "No packages found for $SYSTEM"
+          exit 1
+        fi
+        nom build $PKGS
+      '';
+    };
   in
     prev.symlinkJoin {
       name = "cymenixos-scripts";
@@ -519,6 +540,8 @@ final: prev: {
         dump-efi
         verify-efi
         check-efi
+        nfc
+        nba
       ];
     };
 }
