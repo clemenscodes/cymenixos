@@ -253,12 +253,6 @@
       };
     };
 
-    overlays = {
-      ${system} = {
-        default = overlays;
-      };
-    };
-
     devShells = {
       ${system} = {
         default = pkgs.mkShell {

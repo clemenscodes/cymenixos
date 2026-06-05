@@ -502,7 +502,7 @@ final: prev: {
       name = "nfc";
       runtimeInputs = [prev.nix-output-monitor];
       text = ''
-        nix flake check --log-format internal-json -v "$@" 2>&1 | nom
+        nix flake check --log-format internal-json -v "$@" |& nom --json
       '';
     };
     nba = prev.writeShellApplication {
