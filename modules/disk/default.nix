@@ -14,6 +14,7 @@ in {
     inputs.disko.nixosModules.default
     (import ./raid.nix {inherit inputs lib;})
     (import ./zpool.nix {inherit lib;})
+    (import ./health.nix {inherit lib;})
   ];
   options = {
     modules = {

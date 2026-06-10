@@ -190,6 +190,27 @@ in {
         };
         script = importScript;
       };
+      # services.zfs.autoScrub is gated behind boot.zfs.enabled, which this
+      # module deliberately never sets (see importScript comment), so it is a
+      # silent no-op. Schedule the scrub ourselves instead.
+      timers."zfs-scrub-${cfg.name}" = lib.mkIf cfg.autoScrub.enable {
+        description = "Periodic ZFS scrub of pool \"${cfg.name}\"";
+        wantedBy = ["timers.target"];
+        timerConfig = {
+          OnCalendar = cfg.autoScrub.interval;
+          Persistent = true;
+        };
+      };
+      services."zfs-scrub-${cfg.name}" = lib.mkIf cfg.autoScrub.enable {
+        description = "ZFS scrub of pool \"${cfg.name}\"";
+        serviceConfig.Type = "oneshot";
+        # zpool scrub returns immediately (the scrub runs in-kernel). Skip if
+        # the pool is absent; tolerate "already scrubbing" errors.
+        script = ''
+          ${cfg.zfsPackage}/sbin/zpool list "${cfg.name}" >/dev/null 2>&1 || exit 0
+          ${cfg.zfsPackage}/sbin/zpool scrub "${cfg.name}" || true
+        '';
+      };
     };
 
     # nofail: a missing pool must never block boot and drop into emergency mode.
@@ -212,11 +233,6 @@ in {
         # extraPools kept so zpool.cache is managed if boot.zfs.enabled ever becomes true
         extraPools = [cfg.name];
       };
-    };
-
-    services.zfs.autoScrub = {
-      inherit (cfg.autoScrub) enable interval;
-      pools = [cfg.name];
     };
   };
 }
