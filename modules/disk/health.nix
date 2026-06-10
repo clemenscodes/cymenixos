@@ -90,17 +90,14 @@ in {
       disk = {
         health = {
           enable =
-            lib.mkEnableOption "Disk health monitoring (SMART + ZFS pool watch) with desktop alerts"
-            // {default = true;};
+            lib.mkEnableOption "Disk health monitoring (SMART + ZFS pool watch) with desktop alerts";
           smart = {
             enable =
-              lib.mkEnableOption "smartd SMART monitoring of physical disks"
-              // {default = true;};
+              lib.mkEnableOption "smartd SMART monitoring of physical disks";
           };
           poolWatch = {
             enable =
-              lib.mkEnableOption "Periodic ZFS pool health poll with desktop alerts"
-              // {default = true;};
+              lib.mkEnableOption "Periodic ZFS pool health poll with desktop alerts";
             interval = lib.mkOption {
               type = lib.types.str;
               default = "*:0/15";
