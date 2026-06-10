@@ -119,7 +119,7 @@ in {
         autodetect = true;
         # -m <nomailer> + our own -M exec: no email, just our notifier.
         # Short test daily 02:00, long test Saturday 03:00, temp warn at 45C.
-        defaults.monitored = "-a -o on -S on -s (S/../.././02|L/../../6/03) -W 4,40,45 -M exec ${smartHandler}/bin/smartd-health-notify";
+        defaults.monitored = "-a -o on -S on -s (S/../.././02|L/../../6/03) -W 4,50,60 -M exec ${smartHandler}/bin/smartd-health-notify";
       };
     })
     (lib.mkIf (cfg.poolWatch.enable && zpool.enable) {
