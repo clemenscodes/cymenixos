@@ -17,9 +17,9 @@ in {
   config = lib.mkIf (cfg.enable && cfg.sddm.enable) {
     environment = {
       systemPackages = [
-        pkgs.libsForQt5.qt5.qtquickcontrols2
-        pkgs.libsForQt5.qt5.qtsvg
-        pkgs.libsForQt5.qt5.qtgraphicaleffects
+        pkgs.qt5.qtquickcontrols2
+        pkgs.qt5.qtsvg
+        pkgs.qt5.qtgraphicaleffects
         pkgs.catppuccin-cursors.macchiatoBlue
       ];
     };

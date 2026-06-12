@@ -23,7 +23,7 @@ in {
       packages = [
         pkgs.libsForQt5.qtstyleplugin-kvantum
         pkgs.libsForQt5.qt5ct
-        pkgs.libsForQt5.qt5.qtwayland
+        pkgs.qt5.qtwayland
         pkgs.catppuccin-qt5ct
         pkgs.qt6.qtwayland
         kvantum
