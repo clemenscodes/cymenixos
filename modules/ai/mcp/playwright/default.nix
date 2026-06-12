@@ -10,7 +10,7 @@
   };
   config = lib.mkIf (config.modules.ai.enable && config.modules.ai.mcp.enable && config.modules.ai.mcp.playwright.enable) {
     modules.ai.mcp.servers.playwright = {
-      command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
+      command = "${pkgs.playwright-mcp}/bin/playwright-mcp";
     };
   };
 }
