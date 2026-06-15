@@ -123,6 +123,9 @@ in {
         profiles = {
           ${user} = {
             isDefault = true;
+            settings = {
+              "mail.shell.checkDefaultClient" = false;
+            };
           };
         };
       };
