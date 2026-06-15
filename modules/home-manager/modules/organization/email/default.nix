@@ -2,29 +2,30 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   config,
   osConfig,
   ...
-}:
-let
+}: let
   cfg = config.modules.organization;
   hasSecretsEnabled = osConfig.modules.security.sops.enable && config.modules.security.sops.enable;
   inherit (osConfig.modules.users) user;
-in
-{
+in {
   options = {
     modules = {
       organization = {
         email = {
-          enable = lib.mkEnableOption "Enable E-Mail support using neomutt" // {
-            default = false;
-          };
-          thunderbird = {
-            enable = lib.mkEnableOption "Enable thunderbird" // {
+          enable =
+            lib.mkEnableOption "Enable E-Mail support using neomutt"
+            // {
               default = false;
             };
+          thunderbird = {
+            enable =
+              lib.mkEnableOption "Enable thunderbird"
+              // {
+                default = false;
+              };
           };
           accounts = lib.mkOption {
             type = lib.types.listOf (
@@ -64,7 +65,7 @@ in
                 };
               }
             );
-            default = [ ];
+            default = [];
           };
         };
       };
@@ -97,24 +98,24 @@ in
         inherit (cfg.email) enable;
       };
     };
-    systemd.user.services =
-      let
-        safeName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
-      in
+    systemd.user.services = let
+      safeName = lib.replaceStrings ["@" ":" "\\" "[" "]"] ["-" "-" "-" "" ""];
+    in
       lib.mkMerge (
         map (
           account:
-          lib.mkIf account.useNeomutt {
-            "imapnotify-${safeName account.address}" = {
-              Unit = {
-                After = [
-                  "sops-nix.service"
-                  "network.target"
-                ];
+            lib.mkIf account.useNeomutt {
+              "imapnotify-${safeName account.address}" = {
+                Unit = {
+                  After = [
+                    "sops-nix.service"
+                    "network.target"
+                  ];
+                };
               };
-            };
-          }
-        ) cfg.email.accounts
+            }
+        )
+        cfg.email.accounts
       );
     programs = {
       thunderbird = {
@@ -145,123 +146,118 @@ in
       };
     };
     accounts = {
-      email =
-        let
-          mkEmailAccount =
-            {
-              primary,
-              address,
-              realName,
-              userName,
-              smtpHost,
-              smtpPort,
-              imapHost,
-              imapPort,
-              secretName,
-              useNeomutt ? true,
-            }:
-            let
-              pw = "${pkgs.bat}/bin/bat ${config.sops.secrets.${secretName}.path} --style=plain";
-            in
-            {
-              inherit
-                primary
-                address
-                userName
-                realName
-                ;
-              passwordCommand = pw;
+      email = let
+        mkEmailAccount = {
+          primary,
+          address,
+          realName,
+          userName,
+          smtpHost,
+          smtpPort,
+          imapHost,
+          imapPort,
+          secretName,
+          useNeomutt ? true,
+        }: let
+          pw = "${pkgs.bat}/bin/bat ${config.sops.secrets.${secretName}.path} --style=plain";
+        in {
+          inherit
+            primary
+            address
+            userName
+            realName
+            ;
+          passwordCommand = pw;
 
-              thunderbird = {
-                inherit (cfg.email.thunderbird) enable;
-                profiles = [ user ];
-              };
+          thunderbird = {
+            inherit (cfg.email.thunderbird) enable;
+            profiles = [user];
+          };
 
-              imapnotify = lib.mkIf useNeomutt {
-                boxes = [ "Inbox" ];
-                enable = true;
-                onNotify = "${pkgs.isync}/bin/mbsync -a";
-                onNotifyPost = ''${pkgs.notmuch}/bin/notmuch new && ${pkgs.libnotify}/bin/notify-send "===> 📬 <===" "Mail received"'';
-              };
+          imapnotify = lib.mkIf useNeomutt {
+            boxes = ["Inbox"];
+            enable = true;
+            onNotify = "${pkgs.isync}/bin/mbsync -a";
+            onNotifyPost = ''${pkgs.notmuch}/bin/notmuch new && ${pkgs.libnotify}/bin/notify-send "===> 📬 <===" "Mail received"'';
+          };
 
-              mbsync = lib.mkIf useNeomutt {
-                enable = true;
-                create = "both";
-                expunge = "both";
-                patterns = [ "*" ];
-                extraConfig = {
-                  channel = {
-                    MaxMessages = 10000;
-                    ExpireUnread = "no";
-                  };
-                  account = {
-                    AuthMechs = "LOGIN";
-                  };
-                };
+          mbsync = lib.mkIf useNeomutt {
+            enable = true;
+            create = "both";
+            expunge = "both";
+            patterns = ["*"];
+            extraConfig = {
+              channel = {
+                MaxMessages = 10000;
+                ExpireUnread = "no";
               };
-
-              notmuch = lib.mkIf useNeomutt {
-                enable = true;
-                neomutt.enable = true;
-              };
-
-              neomutt = lib.mkIf useNeomutt {
-                enable = true;
-                sendMailCommand = "${pkgs.msmtp}/bin/msmtp -a ${address}";
-                extraConfig = ''
-                  set sort = reverse-date
-                '';
-              };
-
-              msmtp = {
-                inherit (cfg.email) enable;
-                extraConfig = {
-                  auth = "on";
-                  passwordeval = ''"${pw}"'';
-                };
-              };
-              smtp = {
-                host = smtpHost;
-                port = smtpPort;
-                tls = {
-                  enable = true;
-                };
-              };
-              imap = {
-                host = imapHost;
-                port = imapPort;
-                tls = {
-                  enable = true;
-                };
+              account = {
+                AuthMechs = "LOGIN";
               };
             };
-        in
-        {
-          maildirBasePath = "${config.xdg.dataHome}/mail";
-          accounts =
-            let
-              mkAccount = accountCfg: {
-                "${accountCfg.address}" = mkEmailAccount {
-                  inherit (accountCfg)
-                    primary
-                    address
-                    realName
-                    userName
-                    smtpHost
-                    smtpPort
-                    imapHost
-                    imapPort
-                    secretName
-                    ;
+          };
 
-                  useNeomutt = accountCfg.useNeomutt or true;
-                };
-              };
+          notmuch = lib.mkIf useNeomutt {
+            enable = true;
+            neomutt.enable = true;
+          };
 
-              mergeAttrs = attrs: builtins.foldl' (acc: attr: acc // attr) { } attrs;
-            in
-            mergeAttrs (map mkAccount cfg.email.accounts);
+          neomutt = lib.mkIf useNeomutt {
+            enable = true;
+            sendMailCommand = "${pkgs.msmtp}/bin/msmtp -a ${address}";
+            extraConfig = ''
+              set sort = reverse-date
+            '';
+          };
+
+          msmtp = {
+            inherit (cfg.email) enable;
+            extraConfig = {
+              auth = "on";
+              passwordeval = ''"${pw}"'';
+            };
+          };
+          smtp = {
+            host = smtpHost;
+            port = smtpPort;
+            tls = {
+              enable = true;
+            };
+          };
+          imap = {
+            host = imapHost;
+            port = imapPort;
+            tls = {
+              enable = true;
+            };
+          };
         };
+      in {
+        maildirBasePath = "${config.xdg.dataHome}/mail";
+        accounts = let
+          mkAccount = accountCfg: {
+            "${accountCfg.address}" = mkEmailAccount {
+              inherit
+                (accountCfg)
+                primary
+                address
+                realName
+                userName
+                smtpHost
+                smtpPort
+                imapHost
+                imapPort
+                secretName
+                ;
+
+              useNeomutt = accountCfg.useNeomutt or true;
+            };
+          };
+
+          mergeAttrs = attrs: builtins.foldl' (acc: attr: acc // attr) {} attrs;
+        in
+          mergeAttrs (map mkAccount cfg.email.accounts);
+      };
     };
     programs = {
       msmtp = {
@@ -270,13 +266,12 @@ in
       mbsync = {
         inherit (cfg.email) enable;
       };
-      notmuch =
-        let
-          neomuttAccounts = lib.filter (a: a.useNeomutt) cfg.email.accounts;
+      notmuch = let
+        neomuttAccounts = lib.filter (a: a.useNeomutt) cfg.email.accounts;
 
-          primaryAccount = lib.findFirst (a: a.primary) null neomuttAccounts;
-        in
-        lib.mkIf (cfg.email.enable && neomuttAccounts != [ ] && primaryAccount != null) {
+        primaryAccount = lib.findFirst (a: a.primary) null neomuttAccounts;
+      in
+        lib.mkIf (cfg.email.enable && neomuttAccounts != [] && primaryAccount != null) {
           enable = true;
 
           maildir.synchronizeFlags = true;
@@ -344,42 +339,42 @@ in
             action = "noop";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = ''\Cf'';
             action = "noop";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "gg";
             action = "first-entry";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "j";
             action = "next-entry";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "k";
             action = "previous-entry";
           }
           {
-            map = [ "attach" ];
+            map = ["attach"];
             key = "<return>";
             action = "view-mailcap";
           }
           {
-            map = [ "attach" ];
+            map = ["attach"];
             key = "l";
             action = "view-mailcap";
           }
           {
-            map = [ "editor" ];
+            map = ["editor"];
             key = "<space>";
             action = "noop";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "G";
             action = "last-entry";
           }
@@ -392,42 +387,42 @@ in
             action = "exit";
           }
           {
-            map = [ "pager" ];
+            map = ["pager"];
             key = "j";
             action = "next-line";
           }
           {
-            map = [ "pager" ];
+            map = ["pager"];
             key = "k";
             action = "previous-line";
           }
           {
-            map = [ "pager" ];
+            map = ["pager"];
             key = "l";
             action = "view-attachments";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "D";
             action = "delete-message";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "U";
             action = "undelete-message";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "L";
             action = "limit";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "h";
             action = "noop";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = "l";
             action = "display-message";
           }
@@ -448,27 +443,27 @@ in
             action = "view-raw-message";
           }
           {
-            map = [ "browser" ];
+            map = ["browser"];
             key = "l";
             action = "select-entry";
           }
           {
-            map = [ "browser" ];
+            map = ["browser"];
             key = "gg";
             action = "top-page";
           }
           {
-            map = [ "browser" ];
+            map = ["browser"];
             key = "G";
             action = "bottom-page";
           }
           {
-            map = [ "pager" ];
+            map = ["pager"];
             key = "gg";
             action = "top";
           }
           {
-            map = [ "pager" ];
+            map = ["pager"];
             key = "G";
             action = "bottom";
           }
@@ -507,27 +502,27 @@ in
             action = "group-reply";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = ''\031'';
             action = "previous-undeleted";
           }
           {
-            map = [ "index" ];
+            map = ["index"];
             key = ''\005'';
             action = "next-undeleted";
           }
           {
-            map = [ "pager" ];
+            map = ["pager"];
             key = ''\031'';
             action = "previous-line";
           }
           {
-            map = [ "pager" ];
+            map = ["pager"];
             key = ''\005'';
             action = "next-line";
           }
           {
-            map = [ "editor" ];
+            map = ["editor"];
             key = "<Tab>";
             action = "complete-query";
           }
@@ -580,25 +575,24 @@ in
             action = "sidebar-toggle-visible";
           }
         ];
-        macros =
-          let
-            inherit (cfg.email) accounts;
-            generateAction =
-              address:
-              "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/${address}<enter><change-folder>!<enter>;<check-stats>";
-            inboxes = lib.map (account: {
+        macros = let
+          inherit (cfg.email) accounts;
+          generateAction = address: "<sync-mailbox><enter-command>source ${config.xdg.configHome}/neomutt/${address}<enter><change-folder>!<enter>;<check-stats>";
+          inboxes =
+            lib.map (account: {
               action = generateAction account.address;
               map = [
                 "index"
                 "pager"
               ];
               key = "i${toString ((lib.lists.findFirstIndex (a: a == account) 0 accounts) + 1)}";
-            }) accounts;
-          in
+            })
+            accounts;
+        in
           inboxes
           ++ [
             {
-              map = [ "browser" ];
+              map = ["browser"];
               key = "h";
               action = "<change-dir><kill-line>..<enter>";
             }
@@ -747,12 +741,12 @@ in
               action = ";<copy-message>=Archive<enter>";
             }
             {
-              map = [ "index" ];
+              map = ["index"];
               key = "A";
               action = ''<limit>all\n'';
             }
             {
-              map = [ "index" ];
+              map = ["index"];
               key = ''\Cr'';
               action = "<tag-pattern>~N<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>";
             }
