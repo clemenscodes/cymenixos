@@ -38,6 +38,14 @@ in {
       users = {
         ${user} = {
           imports = [inputs.voxtype.homeManagerModules.default];
+          # Voxtype's Parakeet engine opens the USB mic directly via ALSA at 16kHz.
+          # PipeWire claims ALSA devices at 48kHz on startup; if voxtype races in
+          # before PipeWire finishes device negotiation the USB device resets its
+          # sample rate, PipeWire sees the mismatch and kills itself (pw_log_fatal).
+          # A short ExecStartPre delay gives PipeWire time to fully claim all devices.
+          systemd.user.services.voxtype = {
+            Service.ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
+          };
           home = {
             packages = [meeting-toggle meeting-pause-toggle meeting-export];
             persistence = lib.mkIf (config.modules.boot.enable) {
