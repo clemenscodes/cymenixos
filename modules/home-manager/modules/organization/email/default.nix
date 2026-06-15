@@ -88,6 +88,17 @@ in {
         inherit (cfg.email) enable;
       };
     };
+    systemd.user.services = lib.mkMerge (
+      map (account:
+        lib.mkIf account.useNeomutt {
+          "imapnotify-${account.address}" = {
+            Unit = {
+              After = ["sops-nix.service" "network.target"];
+            };
+          };
+        }
+      ) cfg.email.accounts
+    );
     programs = {
       thunderbird = {
         inherit (cfg.email.thunderbird) enable;

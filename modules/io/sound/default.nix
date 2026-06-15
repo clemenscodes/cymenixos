@@ -89,31 +89,9 @@ in {
       systemPackages = [
         pkgs.alsa-utils
         pkgs.pavucontrol
-        pkgs.easyeffects
         pkgs.pulseaudio
         pkgs.at-spi2-core
       ];
-    };
-    systemd = {
-      user = {
-        services = {
-          easyeffects = {
-            wantedBy = ["graphical-session.target"];
-            unitConfig = {
-              Description = "Easyeffects daemon";
-              Requires = ["dbus.service"];
-              After = ["graphical-session-pre.target" "pipewire.service"];
-              PartOf = ["graphical-session.target" "pipewire.service"];
-            };
-            serviceConfig = {
-              ExecStart = "${pkgs.easyeffects}/bin/easyeffects --gapplication-service";
-              ExecStop = "${pkgs.easyeffects}/bin/easyeffects --quit";
-              Restart = "on-failure";
-              RestartSec = 5;
-            };
-          };
-        };
-      };
     };
     users = {
       users = {

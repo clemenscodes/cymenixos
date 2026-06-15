@@ -43,6 +43,7 @@ in {
     };
     networking = {
       hostName = config.modules.hostname.defaultHostname;
+      useDHCP = lib.mkForce false;
       networkmanager = {
         inherit (cfg.networking) enable;
         unmanaged = [
@@ -53,6 +54,7 @@ in {
         ];
       };
     };
+    systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
     users = {
       users = {
         ${user} = {
