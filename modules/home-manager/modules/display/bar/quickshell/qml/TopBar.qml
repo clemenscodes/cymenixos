@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Services.UPower
 
 PanelWindow {
     id: bar
@@ -209,6 +210,86 @@ PanelWindow {
             command: ["qs-nvidia"]
             intervalMs: 5000
             onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty nvtop"])
+        }
+
+        Pill {
+            id: batteryPill
+            Layout.alignment: Qt.AlignVCenter
+            interactive: true
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+
+            // UPower.displayDevice is the aggregate battery; on desktops it is
+            // not a laptop battery / not present, so the pill hides itself —
+            // matching the waybar `mkIf isLaptop "battery"` gating.
+            readonly property var dev: UPower.displayDevice
+            visible: dev && dev.isLaptopBattery && dev.isPresent
+
+            // Quickshell reports percentage as 0..1; scale to 0..100.
+            readonly property int pct: dev ? Math.round(dev.percentage * 100) : 0
+            readonly property int st: dev ? dev.state : UPowerDeviceState.Unknown
+            readonly property bool charging: st === UPowerDeviceState.Charging
+                || st === UPowerDeviceState.PendingCharge
+            readonly property bool plugged: st === UPowerDeviceState.FullyCharged
+                || st === UPowerDeviceState.PendingDischarge
+
+            // format-alt: tap to toggle remaining-time display, like waybar.
+            property bool showTime: false
+            onLeftClicked: showTime = !showTime
+
+            function _fmtDuration(secs) {
+                if (!secs || secs <= 0) return ""
+                const h = Math.floor(secs / 3600)
+                const m = Math.floor((secs % 3600) / 60)
+                return h > 0 ? (h + "h " + m + "m") : (m + "m")
+            }
+
+            // waybar states: good=60, warning=30, critical=15 -> 💀/🪫/🔋
+            readonly property string levelIcon: {
+                if (charging) return "⚡"
+                if (plugged) return "🔌"
+                if (pct <= 15) return "💀"
+                if (pct <= 30) return "🪫"
+                return "🔋"
+            }
+
+            readonly property string timeText: charging
+                ? _fmtDuration(dev ? dev.timeToFull : 0)
+                : _fmtDuration(dev ? dev.timeToEmpty : 0)
+
+            tooltipText: {
+                if (!batteryPill.dev) return "No battery"
+                let s = "Battery " + batteryPill.pct + "%"
+                if (batteryPill.charging) {
+                    s += " — charging"
+                    if (batteryPill.timeText) s += "\nTime to full: " + batteryPill.timeText
+                } else if (batteryPill.plugged) {
+                    s += " — plugged in"
+                } else {
+                    s += " — on battery"
+                    if (batteryPill.timeText) s += "\nTime to empty: " + batteryPill.timeText
+                }
+                if (batteryPill.dev.healthSupported && batteryPill.dev.healthPercentage > 0)
+                    s += "\nHealth: " + Math.round(batteryPill.dev.healthPercentage) + "%"
+                s += "\n\nClick: toggle remaining time"
+                return s
+            }
+
+            Text {
+                text: (batteryPill.showTime && batteryPill.timeText
+                        ? batteryPill.timeText
+                        : batteryPill.pct + "%")
+                    + " " + batteryPill.levelIcon
+                color: {
+                    if (batteryPill.charging || batteryPill.plugged) return Theme.textColor
+                    if (batteryPill.pct <= 15) return Theme.criticalColor
+                    if (batteryPill.pct <= 30) return Theme.warningColor
+                    return Theme.textColor
+                }
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
         }
 
         Pill {
