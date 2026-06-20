@@ -10,6 +10,9 @@ Rectangle {
     property string tooltipText: ""
     property var tooltipHost: null
     property var tooltipHostWindow: null
+    // Set true to keep the hover tooltip from showing — e.g. while this pill's
+    // slider popover is open, so the two don't stack on top of each other.
+    property bool tooltipSuppressed: false
 
     signal leftClicked()
     signal rightClicked()
@@ -70,7 +73,7 @@ Rectangle {
             }
             onEntered: {
                 pill._hovered = true
-                if (pill.tooltipText.length > 0 && pill.tooltipHost) {
+                if (!pill.tooltipSuppressed && pill.tooltipText.length > 0 && pill.tooltipHost) {
                     pill.tooltipHost.showFor(pill, pill.tooltipText, pill.tooltipHostWindow)
                 }
             }

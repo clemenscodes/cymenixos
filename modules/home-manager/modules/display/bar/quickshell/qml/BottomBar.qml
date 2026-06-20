@@ -482,11 +482,14 @@ PanelWindow {
                 return s
             }
 
-            onLeftClicked: { volSlider.hide(); micSlider.hide(); brightSlider.toggleFor(brightnessPill, bar) }
+            tooltipSuppressed: brightSlider.visible
+            onLeftClicked: { barTooltip.hide(); volSlider.hide(); micSlider.hide(); brightSlider.toggleFor(brightnessPill, bar) }
             onScrolledBy: function(n) { Brightness.setPercent(Brightness.percent + n * 5) }
 
             Text {
-                text: Brightness.percent + "% 🔆"
+                // padStart keeps the digit field a fixed width (monospace font)
+                // so the pill doesn't resize and shove the bar around at 9→10→100%.
+                text: String(Brightness.percent).padStart(3, " ") + "% 🔆"
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -517,7 +520,8 @@ PanelWindow {
                 return s
             }
 
-            onLeftClicked: { brightSlider.hide(); micSlider.hide(); volSlider.toggleFor(volPill, bar) }
+            tooltipSuppressed: volSlider.visible
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); micSlider.hide(); volSlider.toggleFor(volPill, bar) }
             onMiddleClicked: { if (volPill.audio) volPill.audio.muted = !volPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
             onScrolledBy: function(n) {
@@ -526,11 +530,12 @@ PanelWindow {
             }
 
             Text {
+                // Always show the padded number (monospace → stable width); the
+                // trailing icon swaps to 🔇 when muted instead of hiding the level.
                 text: {
-                    if (!volPill.audio) return "—"
-                    if (volPill.audio.muted) return "🔇"
+                    if (!volPill.audio) return "  — 🔊"
                     const v = Math.round(volPill.audio.volume * 100)
-                    return `${v}% 🔊`
+                    return `${String(v).padStart(3, " ")}% ${volPill.audio.muted ? "🔇" : "🔊"}`
                 }
                 color: Theme.textColor
                 font.family: Theme.fontFamily
@@ -562,7 +567,8 @@ PanelWindow {
                 return s
             }
 
-            onLeftClicked: { brightSlider.hide(); volSlider.hide(); micSlider.toggleFor(micPill, bar) }
+            tooltipSuppressed: micSlider.visible
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); micSlider.toggleFor(micPill, bar) }
             onMiddleClicked: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
             onScrolledBy: function(n) {
@@ -571,11 +577,11 @@ PanelWindow {
             }
 
             Text {
+                // Fixed-width number (monospace); icon swaps to 🚫 when muted.
                 text: {
-                    if (!micPill.audio) return "—"
-                    if (micPill.audio.muted) return "🚫 🎤"
+                    if (!micPill.audio) return "  — 🎤"
                     const v = Math.round(micPill.audio.volume * 100)
-                    return `${v}% 🎤`
+                    return `${String(v).padStart(3, " ")}% ${micPill.audio.muted ? "🚫" : "🎤"}`
                 }
                 color: Theme.textColor
                 font.family: Theme.fontFamily

@@ -152,7 +152,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.diskTooltip
             Text {
-                text: `${SysStats.diskUsage || "—"} 💾`
+                text: `${(SysStats.diskUsage || "—").padStart(4, " ")} 💾`
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -166,7 +166,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.memTooltip
             Text {
-                text: `${SysStats.memPercent}% 🧠`
+                text: `${String(SysStats.memPercent).padStart(3, " ")}% 🧠`
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -181,7 +181,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.tempTooltip
             Text {
-                text: `${SysStats.tempC}°C 🌡️`
+                text: `${String(SysStats.tempC).padStart(3, " ")}°C 🌡️`
                 color: SysStats.tempC >= 80 ? Theme.criticalColor : Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -195,7 +195,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.cpuTooltip
             Text {
-                text: `${SysStats.cpuPercent}% ⚙️`
+                text: `${String(SysStats.cpuPercent).padStart(3, " ")}% ⚙️`
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -316,9 +316,11 @@ PanelWindow {
             }
 
             Text {
+                // Pad the percent to a fixed width (monospace) so the pill does
+                // not resize at 9→10→100% and shove the rest of the bar around.
                 text: (batteryPill.showTime && batteryPill.timeText
                         ? batteryPill.timeText
-                        : batteryPill.pct + "%")
+                        : String(batteryPill.pct).padStart(3, " ") + "%")
                     + " " + batteryPill.levelIcon
                 color: {
                     if (batteryPill.charging || batteryPill.plugged) return Theme.textColor
