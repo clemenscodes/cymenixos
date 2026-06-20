@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Services.UPower
+import Quickshell.Io
 
 PanelWindow {
     id: bar
@@ -219,30 +219,45 @@ PanelWindow {
             tooltipHost: barTooltip
             tooltipHostWindow: bar
 
-            // UPower.displayDevice is the aggregate battery; on desktops it is
-            // not a laptop battery / not present, so the pill hides itself —
-            // matching the waybar `mkIf isLaptop "battery"` gating.
-            readonly property var dev: UPower.displayDevice
-            visible: dev && dev.isLaptopBattery && dev.isPresent
+            // Reads /sys/class/power_supply/BAT0 directly (like Brightness reads
+            // brightnessctl) — no upower daemon needed. On desktops BAT0 does not
+            // exist, the poll yields nothing, and the pill stays hidden. This is
+            // the runtime equivalent of waybar's `mkIf isLaptop "battery"`.
+            property bool available: false
+            property int pct: 0
+            property string status: ""
+            // energy_now/energy_full in µWh and power_now in µW (or the charge_*/
+            // current_* equivalents); the now/rate ratio gives hours either way.
+            property real energyNow: 0
+            property real energyFull: 0
+            property real powerNow: 0
 
-            // Quickshell reports percentage as 0..1; scale to 0..100.
-            readonly property int pct: dev ? Math.round(dev.percentage * 100) : 0
-            readonly property int st: dev ? dev.state : UPowerDeviceState.Unknown
-            readonly property bool charging: st === UPowerDeviceState.Charging
-                || st === UPowerDeviceState.PendingCharge
-            readonly property bool plugged: st === UPowerDeviceState.FullyCharged
-                || st === UPowerDeviceState.PendingDischarge
+            visible: available
+
+            readonly property bool charging: status === "Charging"
+            readonly property bool plugged: status === "Full" || status === "Not charging"
 
             // format-alt: tap to toggle remaining-time display, like waybar.
             property bool showTime: false
             onLeftClicked: showTime = !showTime
 
-            function _fmtDuration(secs) {
-                if (!secs || secs <= 0) return ""
-                const h = Math.floor(secs / 3600)
-                const m = Math.floor((secs % 3600) / 60)
-                return h > 0 ? (h + "h " + m + "m") : (m + "m")
+            // Hours until empty (discharging) or full (charging), 0 if unknown.
+            readonly property real hoursRemaining: {
+                if (powerNow <= 0) return 0
+                if (charging) return (energyFull - energyNow) / powerNow
+                if (status === "Discharging") return energyNow / powerNow
+                return 0
             }
+
+            function _fmtHours(h) {
+                if (!h || h <= 0) return ""
+                const total = Math.round(h * 60)
+                const hh = Math.floor(total / 60)
+                const mm = total % 60
+                return hh > 0 ? (hh + "h " + mm + "m") : (mm + "m")
+            }
+
+            readonly property string timeText: _fmtHours(hoursRemaining)
 
             // waybar states: good=60, warning=30, critical=15 -> 💀/🪫/🔋
             readonly property string levelIcon: {
@@ -253,12 +268,7 @@ PanelWindow {
                 return "🔋"
             }
 
-            readonly property string timeText: charging
-                ? _fmtDuration(dev ? dev.timeToFull : 0)
-                : _fmtDuration(dev ? dev.timeToEmpty : 0)
-
             tooltipText: {
-                if (!batteryPill.dev) return "No battery"
                 let s = "Battery " + batteryPill.pct + "%"
                 if (batteryPill.charging) {
                     s += " — charging"
@@ -269,10 +279,40 @@ PanelWindow {
                     s += " — on battery"
                     if (batteryPill.timeText) s += "\nTime to empty: " + batteryPill.timeText
                 }
-                if (batteryPill.dev.healthSupported && batteryPill.dev.healthPercentage > 0)
-                    s += "\nHealth: " + Math.round(batteryPill.dev.healthPercentage) + "%"
                 s += "\n\nClick: toggle remaining time"
                 return s
+            }
+
+            Timer {
+                interval: 10000
+                running: true
+                repeat: true
+                triggeredOnStart: true
+                onTriggered: batProc.running = true
+            }
+
+            Process {
+                id: batProc
+                command: ["sh", "-c",
+                    "b=/sys/class/power_supply/BAT0; [ -d \"$b\" ] || exit 0; " +
+                    "cat \"$b/capacity\"; cat \"$b/status\"; " +
+                    "cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0; " +
+                    "cat \"$b/energy_full\" 2>/dev/null || cat \"$b/charge_full\" 2>/dev/null || echo 0; " +
+                    "cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        const lines = this.text.split("\n").map(l => l.trim()).filter(l => l.length > 0)
+                        if (lines.length < 5) { batteryPill.available = false; return }
+                        const c = parseInt(lines[0])
+                        if (isNaN(c)) { batteryPill.available = false; return }
+                        batteryPill.pct = c
+                        batteryPill.status = lines[1]
+                        batteryPill.energyNow = parseFloat(lines[2]) || 0
+                        batteryPill.energyFull = parseFloat(lines[3]) || 0
+                        batteryPill.powerNow = parseFloat(lines[4]) || 0
+                        batteryPill.available = true
+                    }
+                }
             }
 
             Text {
