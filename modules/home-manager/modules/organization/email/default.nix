@@ -15,46 +15,56 @@ in {
     modules = {
       organization = {
         email = {
-          enable = lib.mkEnableOption "Enable E-Mail support using neomutt" // {default = false;};
+          enable =
+            lib.mkEnableOption "Enable E-Mail support using neomutt"
+            // {
+              default = false;
+            };
           thunderbird = {
-            enable = lib.mkEnableOption "Enable thunderbird" // {default = false;};
+            enable =
+              lib.mkEnableOption "Enable thunderbird"
+              // {
+                default = false;
+              };
           };
           accounts = lib.mkOption {
-            type = lib.types.listOf (lib.types.submodule {
-              options = {
-                address = lib.mkOption {
-                  type = lib.types.str;
+            type = lib.types.listOf (
+              lib.types.submodule {
+                options = {
+                  address = lib.mkOption {
+                    type = lib.types.str;
+                  };
+                  primary = lib.mkOption {
+                    type = lib.types.bool;
+                  };
+                  realName = lib.mkOption {
+                    type = lib.types.str;
+                  };
+                  userName = lib.mkOption {
+                    type = lib.types.str;
+                  };
+                  smtpHost = lib.mkOption {
+                    type = lib.types.str;
+                  };
+                  smtpPort = lib.mkOption {
+                    type = lib.types.int;
+                  };
+                  imapHost = lib.mkOption {
+                    type = lib.types.str;
+                  };
+                  imapPort = lib.mkOption {
+                    type = lib.types.int;
+                  };
+                  secretName = lib.mkOption {
+                    type = lib.types.str;
+                  };
+                  useNeomutt = lib.mkOption {
+                    type = lib.types.bool;
+                    default = true;
+                  };
                 };
-                primary = lib.mkOption {
-                  type = lib.types.bool;
-                };
-                realName = lib.mkOption {
-                  type = lib.types.str;
-                };
-                userName = lib.mkOption {
-                  type = lib.types.str;
-                };
-                smtpHost = lib.mkOption {
-                  type = lib.types.str;
-                };
-                smtpPort = lib.mkOption {
-                  type = lib.types.int;
-                };
-                imapHost = lib.mkOption {
-                  type = lib.types.str;
-                };
-                imapPort = lib.mkOption {
-                  type = lib.types.int;
-                };
-                secretName = lib.mkOption {
-                  type = lib.types.str;
-                };
-                useNeomutt = lib.mkOption {
-                  type = lib.types.bool;
-                  default = true;
-                };
-              };
-            });
+              }
+            );
             default = [];
           };
         };
@@ -88,12 +98,34 @@ in {
         inherit (cfg.email) enable;
       };
     };
+    systemd.user.services = let
+      safeName = lib.replaceStrings ["@" ":" "\\" "[" "]"] ["-" "-" "-" "" ""];
+    in
+      lib.mkMerge (
+        map (
+          account:
+            lib.mkIf account.useNeomutt {
+              "imapnotify-${safeName account.address}" = {
+                Unit = {
+                  After = [
+                    "sops-nix.service"
+                    "network.target"
+                  ];
+                };
+              };
+            }
+        )
+        cfg.email.accounts
+      );
     programs = {
       thunderbird = {
         inherit (cfg.email.thunderbird) enable;
         profiles = {
           ${user} = {
             isDefault = true;
+            settings = {
+              "mail.shell.checkDefaultClient" = false;
+            };
           };
         };
       };
@@ -132,7 +164,12 @@ in {
         }: let
           pw = "${pkgs.bat}/bin/bat ${config.sops.secrets.${secretName}.path} --style=plain";
         in {
-          inherit primary address userName realName;
+          inherit
+            primary
+            address
+            userName
+            realName
+            ;
           passwordCommand = pw;
 
           thunderbird = {
@@ -220,8 +257,7 @@ in {
             };
           };
 
-          mergeAttrs = attrs:
-            builtins.foldl' (acc: attr: acc // attr) {} attrs;
+          mergeAttrs = attrs: builtins.foldl' (acc: attr: acc // attr) {} attrs;
         in
           mergeAttrs (map mkAccount cfg.email.accounts);
       };
@@ -234,11 +270,9 @@ in {
         inherit (cfg.email) enable;
       };
       notmuch = let
-        neomuttAccounts =
-          lib.filter (a: a.useNeomutt) cfg.email.accounts;
+        neomuttAccounts = lib.filter (a: a.useNeomutt) cfg.email.accounts;
 
-        primaryAccount =
-          lib.findFirst (a: a.primary) null neomuttAccounts;
+        primaryAccount = lib.findFirst (a: a.primary) null neomuttAccounts;
       in
         lib.mkIf (cfg.email.enable && neomuttAccounts != [] && primaryAccount != null) {
           enable = true;
@@ -246,8 +280,14 @@ in {
           maildir.synchronizeFlags = true;
 
           new = {
-            tags = ["unread" "inbox"];
-            ignore = [".mbsyncstate" ".uivalidity"];
+            tags = [
+              "unread"
+              "inbox"
+            ];
+            ignore = [
+              ".mbsyncstate"
+              ".uivalidity"
+            ];
           };
 
           extraConfig = {
@@ -270,22 +310,34 @@ in {
         sort = "reverse-date";
         binds = [
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "i";
             action = "noop";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "g";
             action = "noop";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "M";
             action = "noop";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "C";
             action = "noop";
           }
@@ -296,12 +348,12 @@ in {
           }
           {
             map = ["index"];
-            key = ''gg'';
+            key = "gg";
             action = "first-entry";
           }
           {
             map = ["index"];
-            key = ''j'';
+            key = "j";
             action = "next-entry";
           }
           {
@@ -330,7 +382,10 @@ in {
             action = "last-entry";
           }
           {
-            map = ["pager" "attach"];
+            map = [
+              "pager"
+              "attach"
+            ];
             key = "h";
             action = "exit";
           }
@@ -375,12 +430,18 @@ in {
             action = "display-message";
           }
           {
-            map = ["index" "query"];
+            map = [
+              "index"
+              "query"
+            ];
             key = "<space>";
             action = "tag-entry";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "H";
             action = "view-raw-message";
           }
@@ -410,22 +471,36 @@ in {
             action = "bottom";
           }
           {
-            map = ["index" "pager" "browser"];
+            map = [
+              "index"
+              "pager"
+              "browser"
+            ];
             key = "d";
             action = "half-down";
           }
           {
-            map = ["index" "pager" "browser"];
+            map = [
+              "index"
+              "pager"
+              "browser"
+            ];
             key = "u";
             action = "half-up";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "S";
             action = "sync-mailbox";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "R";
             action = "group-reply";
           }
@@ -455,32 +530,50 @@ in {
             action = "complete-query";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = ''\Ck'';
             action = "sidebar-prev";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = ''\Cj'';
             action = "sidebar-next";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = ''\Co'';
             action = "sidebar-open";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = ''\Cp'';
             action = "sidebar-prev-new";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = ''\Cn'';
             action = "sidebar-next-new";
           }
           {
-            map = ["index" "pager"];
+            map = [
+              "index"
+              "pager"
+            ];
             key = "B";
             action = "sidebar-toggle-visible";
           }
@@ -491,7 +584,10 @@ in {
           inboxes =
             lib.map (account: {
               action = generateAction account.address;
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "i${toString ((lib.lists.findFirstIndex (a: a == account) 0 accounts) + 1)}";
             })
             accounts;
@@ -504,92 +600,146 @@ in {
               action = "<change-dir><kill-line>..<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "gi";
               action = "<change-folder>=Inbox<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Mi";
               action = ";<save-message>=Inbox<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Ci";
               action = ";<copy-message>=Inbox<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "gd";
               action = "<change-folder>=Drafts<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Md";
               action = ";<save-message>=Drafts<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Cd";
               action = ";<copy-message>=Drafts<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "gj";
               action = "<change-folder>=Junk<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Mj";
               action = ";<save-message>=Junk<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Cj";
               action = ";<copy-message>=Junk<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "gt";
               action = "<change-folder>=Trash<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Mt";
               action = ";<save-message>=Trash<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Ct";
               action = ";<copy-message>=Trash<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "gs";
               action = "<change-folder>=Sent<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Ms";
               action = ";<save-message>=Sent<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Cs";
               action = ";<copy-message>=Sent<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "ga";
               action = "<change-folder>=Archive<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Ma";
               action = ";<save-message>=Archive<enter>";
             }
             {
-              map = ["index" "pager"];
+              map = [
+                "index"
+                "pager"
+              ];
               key = "Ca";
               action = ";<copy-message>=Archive<enter>";
             }
@@ -601,7 +751,7 @@ in {
             {
               map = ["index"];
               key = ''\Cr'';
-              action = ''<tag-pattern>~N<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>'';
+              action = "<tag-pattern>~N<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>";
             }
           ];
         settings = {

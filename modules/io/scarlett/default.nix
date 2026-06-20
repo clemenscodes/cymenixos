@@ -42,7 +42,6 @@ in {
     # Runs at boot (after udev settle) and is re-triggered by udev on hotplug.
     systemd.services.scarlett-init = {
       description = "Initialize Focusrite Scarlett 2i2 ALSA controls";
-      wantedBy = ["multi-user.target"];
       after = ["systemd-udev-settle.service"];
       path = [pkgs.alsa-utils pkgs.gawk pkgs.coreutils];
       serviceConfig = {

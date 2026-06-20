@@ -322,15 +322,14 @@
   };
 
   # Three domains per distro: "<name>-install", "<name>-setup", "<name>".
-  domains =
-    lib.concatLists (
-      lib.mapAttrsToList (name: iso: [
-        (mkDomain name iso "install")
-        (mkDomain name iso "setup")
-        (mkDomain name iso "gpu")
-      ])
-      tcfg.distros
-    );
+  domains = lib.concatLists (
+    lib.mapAttrsToList (name: iso: [
+      (mkDomain name iso "install")
+      (mkDomain name iso "setup")
+      (mkDomain name iso "gpu")
+    ])
+    tcfg.distros
+  );
 
   # Emergency get-my-devices-back: stops any running GPU VM, which releases the
   # evdev grab and returns the keyboard/mouse to the host. Run it out-of-band:
