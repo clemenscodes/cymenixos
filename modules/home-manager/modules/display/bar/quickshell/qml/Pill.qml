@@ -16,6 +16,10 @@ Rectangle {
     signal middleClicked()
     signal scrolledUp()
     signal scrolledDown()
+    // Notches scrolled this event: +1.0 per mouse-wheel detent, but a fraction
+    // for touchpad scroll (which fires many small-delta events) — letting
+    // handlers scale the change so a tiny touchpad swipe is a tiny adjustment.
+    signal scrolledBy(real notches)
 
     property color baseColor: Theme.defaultBg
     property color hoverColor: Qt.lighter(baseColor, 1.4)
@@ -60,6 +64,8 @@ Rectangle {
                 if (!pill.interactive) { wheel.accepted = false; return }
                 if (wheel.angleDelta.y > 0) pill.scrolledUp()
                 else if (wheel.angleDelta.y < 0) pill.scrolledDown()
+                // 120 angle units == one mouse-wheel detent.
+                pill.scrolledBy(wheel.angleDelta.y / 120)
                 wheel.accepted = true
             }
             onEntered: {
