@@ -71,7 +71,7 @@ PopupWindow {
     // Short grace so moving from the pill up into the popover doesn't lose it.
     Timer {
         id: hideTimer
-        interval: 500
+        interval: 1000
         onTriggered: { if (!popup.hovered && !popup.dragging) popup.hide() }
     }
 
