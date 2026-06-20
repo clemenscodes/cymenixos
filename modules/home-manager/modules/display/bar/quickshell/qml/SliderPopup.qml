@@ -67,10 +67,11 @@ PopupWindow {
 
     function hide() { popup.visible = false }
 
-    // OSD-style: dismiss a short while after the mouse leaves, unless dragging.
+    // Dismiss promptly once the pointer leaves the popover, unless dragging.
+    // Short grace so moving from the pill up into the popover doesn't lose it.
     Timer {
         id: hideTimer
-        interval: 2500
+        interval: 500
         onTriggered: { if (!popup.hovered && !popup.dragging) popup.hide() }
     }
 
