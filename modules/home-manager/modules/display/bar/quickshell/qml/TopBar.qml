@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 
 PanelWindow {
     id: bar
@@ -151,7 +152,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.diskTooltip
             Text {
-                text: `${SysStats.diskUsage || "—"} 💾`
+                text: `${(SysStats.diskUsage || "—").padStart(4, " ")} 💾`
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -165,7 +166,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.memTooltip
             Text {
-                text: `${SysStats.memPercent}% 🧠`
+                text: `${String(SysStats.memPercent).padStart(3, " ")}% 🧠`
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -180,7 +181,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.tempTooltip
             Text {
-                text: `${SysStats.tempC}°C 🌡️`
+                text: `${String(SysStats.tempC).padStart(3, " ")}°C 🌡️`
                 color: SysStats.tempC >= 80 ? Theme.criticalColor : Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -194,7 +195,7 @@ PanelWindow {
             tooltipHostWindow: bar
             tooltipText: SysStats.cpuTooltip
             Text {
-                text: `${SysStats.cpuPercent}% ⚙️`
+                text: `${String(SysStats.cpuPercent).padStart(3, " ")}% ⚙️`
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -209,6 +210,128 @@ PanelWindow {
             command: ["qs-nvidia"]
             intervalMs: 5000
             onLeftClick: () => Quickshell.execDetached(["sh", "-c", "kitty -1 --title=kitty nvtop"])
+        }
+
+        Pill {
+            id: batteryPill
+            Layout.alignment: Qt.AlignVCenter
+            interactive: true
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+
+            // Reads /sys/class/power_supply/BAT0 directly (like Brightness reads
+            // brightnessctl) — no upower daemon needed. On desktops BAT0 does not
+            // exist, the poll yields nothing, and the pill stays hidden. This is
+            // the runtime equivalent of waybar's `mkIf isLaptop "battery"`.
+            property bool available: false
+            property int pct: 0
+            property string status: ""
+            // energy_now/energy_full in µWh and power_now in µW (or the charge_*/
+            // current_* equivalents); the now/rate ratio gives hours either way.
+            property real energyNow: 0
+            property real energyFull: 0
+            property real powerNow: 0
+
+            visible: available
+
+            readonly property bool charging: status === "Charging"
+            readonly property bool plugged: status === "Full" || status === "Not charging"
+
+            // format-alt: tap to toggle remaining-time display, like waybar.
+            property bool showTime: false
+            onLeftClicked: showTime = !showTime
+
+            // Hours until empty (discharging) or full (charging), 0 if unknown.
+            readonly property real hoursRemaining: {
+                if (powerNow <= 0) return 0
+                if (charging) return (energyFull - energyNow) / powerNow
+                if (status === "Discharging") return energyNow / powerNow
+                return 0
+            }
+
+            function _fmtHours(h) {
+                if (!h || h <= 0) return ""
+                const total = Math.round(h * 60)
+                const hh = Math.floor(total / 60)
+                const mm = total % 60
+                return hh > 0 ? (hh + "h " + mm + "m") : (mm + "m")
+            }
+
+            readonly property string timeText: _fmtHours(hoursRemaining)
+
+            // waybar states: good=60, warning=30, critical=15 -> 💀/🪫/🔋
+            readonly property string levelIcon: {
+                if (charging) return "⚡"
+                if (plugged) return "🔌"
+                if (pct <= 15) return "💀"
+                if (pct <= 30) return "🪫"
+                return "🔋"
+            }
+
+            tooltipText: {
+                let s = "Battery " + batteryPill.pct + "%"
+                if (batteryPill.charging) {
+                    s += " — charging"
+                    if (batteryPill.timeText) s += "\nTime to full: " + batteryPill.timeText
+                } else if (batteryPill.plugged) {
+                    s += " — plugged in"
+                } else {
+                    s += " — on battery"
+                    if (batteryPill.timeText) s += "\nTime to empty: " + batteryPill.timeText
+                }
+                s += "\n\nClick: toggle remaining time"
+                return s
+            }
+
+            Timer {
+                interval: 10000
+                running: true
+                repeat: true
+                triggeredOnStart: true
+                onTriggered: batProc.running = true
+            }
+
+            Process {
+                id: batProc
+                command: ["sh", "-c",
+                    "b=/sys/class/power_supply/BAT0; [ -d \"$b\" ] || exit 0; " +
+                    "cat \"$b/capacity\"; cat \"$b/status\"; " +
+                    "cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0; " +
+                    "cat \"$b/energy_full\" 2>/dev/null || cat \"$b/charge_full\" 2>/dev/null || echo 0; " +
+                    "cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        const lines = this.text.split("\n").map(l => l.trim()).filter(l => l.length > 0)
+                        if (lines.length < 5) { batteryPill.available = false; return }
+                        const c = parseInt(lines[0])
+                        if (isNaN(c)) { batteryPill.available = false; return }
+                        batteryPill.pct = c
+                        batteryPill.status = lines[1]
+                        batteryPill.energyNow = parseFloat(lines[2]) || 0
+                        batteryPill.energyFull = parseFloat(lines[3]) || 0
+                        batteryPill.powerNow = parseFloat(lines[4]) || 0
+                        batteryPill.available = true
+                    }
+                }
+            }
+
+            Text {
+                // Pad the percent to a fixed width (monospace) so the pill does
+                // not resize at 9→10→100% and shove the rest of the bar around.
+                text: (batteryPill.showTime && batteryPill.timeText
+                        ? batteryPill.timeText
+                        : String(batteryPill.pct).padStart(3, " ") + "%")
+                    + " " + batteryPill.levelIcon
+                color: {
+                    if (batteryPill.charging || batteryPill.plugged) return Theme.textColor
+                    if (batteryPill.pct <= 15) return Theme.criticalColor
+                    if (batteryPill.pct <= 30) return Theme.warningColor
+                    return Theme.textColor
+                }
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
         }
 
         Pill {

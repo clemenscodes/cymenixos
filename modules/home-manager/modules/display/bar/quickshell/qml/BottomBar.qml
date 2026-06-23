@@ -54,6 +54,45 @@ PanelWindow {
         id: barTooltip
     }
 
+    // Draggable fine-control sliders, opened by clicking their pill. Bottom
+    // bar, so they pop up above. Declared here (siblings of the tooltip) and
+    // bound to the pills below via id — forward refs resolve at completion.
+    SliderPopup {
+        id: brightSlider
+        placement: "above"
+        headerText: "Brightness"
+        iconText: "🔆"
+        maxPercent: 100
+        percent: Brightness.percent
+        onMoved: function(v) { Brightness.setPercent(v) }
+    }
+
+    SliderPopup {
+        id: volSlider
+        placement: "above"
+        headerText: "Speakers"
+        showMute: true
+        muted: volPill.audio ? volPill.audio.muted : false
+        iconText: (volPill.audio && volPill.audio.muted) ? "🔇" : "🔊"
+        maxPercent: 150
+        percent: volPill.audio ? Math.round(volPill.audio.volume * 100) : 0
+        onMoved: function(v) { if (volPill.audio) volPill.audio.volume = v / 100 }
+        onMuteToggled: { if (volPill.audio) volPill.audio.muted = !volPill.audio.muted }
+    }
+
+    SliderPopup {
+        id: micSlider
+        placement: "above"
+        headerText: "Microphone"
+        showMute: true
+        muted: micPill.audio ? micPill.audio.muted : false
+        iconText: (micPill.audio && micPill.audio.muted) ? "🚫" : "🎤"
+        maxPercent: 150
+        percent: micPill.audio ? Math.round(micPill.audio.volume * 100) : 0
+        onMoved: function(v) { if (micPill.audio) micPill.audio.volume = v / 100 }
+        onMuteToggled: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -439,17 +478,18 @@ PanelWindow {
             tooltipText: {
                 let s = "Display brightness: " + Brightness.percent + "%"
                 if (Brightness.device) s += "\nDevice: " + Brightness.device
-                s += "\n\nScroll: adjust  ·  Click: full  ·  Right-click: dim"
+                s += "\n\nClick: slider  ·  Scroll: adjust"
                 return s
             }
 
-            onScrolledUp: Brightness.increase(5)
-            onScrolledDown: Brightness.decrease(5)
-            onLeftClicked: Brightness.setPercent(100)
-            onRightClicked: Brightness.setPercent(10)
+            tooltipSuppressed: brightSlider.visible
+            onLeftClicked: { barTooltip.hide(); volSlider.hide(); micSlider.hide(); brightSlider.toggleFor(brightnessPill, bar) }
+            onScrolledBy: function(n) { Brightness.setPercent(Brightness.percent + n * 5) }
 
             Text {
-                text: Brightness.percent + "% 🔆"
+                // padStart keeps the digit field a fixed width (monospace font)
+                // so the pill doesn't resize and shove the bar around at 9→10→100%.
+                text: String(Brightness.percent).padStart(3, " ") + "% 🔆"
                 color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
@@ -476,27 +516,26 @@ PanelWindow {
                     s += "\nVolume: " + Math.round(volPill.audio.volume * 100) + "%"
                         + (volPill.audio.muted ? "  (muted)" : "")
                 }
-                s += "\n\nScroll: adjust  ·  Click: mute  ·  Right-click: pavucontrol"
+                s += "\n\nClick: slider  ·  Scroll: adjust  ·  Middle: mute  ·  Right-click: pavucontrol"
                 return s
             }
 
-            onLeftClicked: { if (volPill.audio) volPill.audio.muted = !volPill.audio.muted }
+            tooltipSuppressed: volSlider.visible
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); micSlider.hide(); volSlider.toggleFor(volPill, bar) }
+            onMiddleClicked: { if (volPill.audio) volPill.audio.muted = !volPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
-            onScrolledUp: {
+            onScrolledBy: function(n) {
                 if (!volPill.audio) return
-                volPill.audio.volume = Math.max(0, Math.min(1.5, volPill.audio.volume + 0.05))
-            }
-            onScrolledDown: {
-                if (!volPill.audio) return
-                volPill.audio.volume = Math.max(0, Math.min(1.5, volPill.audio.volume - 0.05))
+                volPill.audio.volume = Math.max(0, Math.min(1.5, volPill.audio.volume + n * 0.03))
             }
 
             Text {
+                // Always show the padded number (monospace → stable width); the
+                // trailing icon swaps to 🔇 when muted instead of hiding the level.
                 text: {
-                    if (!volPill.audio) return "—"
-                    if (volPill.audio.muted) return "🔇"
+                    if (!volPill.audio) return "  — 🔊"
                     const v = Math.round(volPill.audio.volume * 100)
-                    return `${v}% 🔊`
+                    return `${String(v).padStart(3, " ")}% ${volPill.audio.muted ? "🔇" : "🔊"}`
                 }
                 color: Theme.textColor
                 font.family: Theme.fontFamily
@@ -524,27 +563,25 @@ PanelWindow {
                     s += "\nVolume: " + Math.round(micPill.audio.volume * 100) + "%"
                         + (micPill.audio.muted ? "  (muted)" : "")
                 }
-                s += "\n\nScroll: adjust  ·  Click: mute  ·  Right-click: pavucontrol"
+                s += "\n\nClick: slider  ·  Scroll: adjust  ·  Middle: mute  ·  Right-click: pavucontrol"
                 return s
             }
 
-            onLeftClicked: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
+            tooltipSuppressed: micSlider.visible
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); micSlider.toggleFor(micPill, bar) }
+            onMiddleClicked: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
-            onScrolledUp: {
+            onScrolledBy: function(n) {
                 if (!micPill.audio) return
-                micPill.audio.volume = Math.max(0, Math.min(1.5, micPill.audio.volume + 0.01))
-            }
-            onScrolledDown: {
-                if (!micPill.audio) return
-                micPill.audio.volume = Math.max(0, Math.min(1.5, micPill.audio.volume - 0.01))
+                micPill.audio.volume = Math.max(0, Math.min(1.5, micPill.audio.volume + n * 0.02))
             }
 
             Text {
+                // Fixed-width number (monospace); icon swaps to 🚫 when muted.
                 text: {
-                    if (!micPill.audio) return "—"
-                    if (micPill.audio.muted) return "🚫 🎤"
+                    if (!micPill.audio) return "  — 🎤"
                     const v = Math.round(micPill.audio.volume * 100)
-                    return `${v}% 🎤`
+                    return `${String(v).padStart(3, " ")}% ${micPill.audio.muted ? "🚫" : "🎤"}`
                 }
                 color: Theme.textColor
                 font.family: Theme.fontFamily
