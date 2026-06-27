@@ -147,6 +147,12 @@ PanelWindow {
                             return appId
                         }
 
+                        // Hide wine helper windows (e.g. explorer.exe) from the taskbar.
+                        readonly property bool hiddenFromBar:
+                            ["explorer.exe"].includes((tlButton.modelData.appId || "").toLowerCase())
+
+                        visible: !hiddenFromBar
+
                         implicitWidth: 44
                         implicitHeight: Theme.pillHeight - 12
                         radius: Theme.innerRadius
