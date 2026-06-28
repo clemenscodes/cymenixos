@@ -42,6 +42,30 @@
       '';
     };
 
+  # Image distros (igris) are already-built, directly bootable raw disk images, so
+  # they skip the installer flow entirely. The per-VM qcow2 the GPU domain boots is
+  # a throwaway overlay backed by the raw image. It is recreated fresh on every
+  # libvirtd start so the live system boots clean each session and the base image
+  # (a build artifact, often a read-only nix store path) is never mutated.
+  mkOverlay = name: image:
+    pkgs.writeShellApplication {
+      name = "qemu-mkoverlay-${name}";
+      runtimeInputs = [pkgs.qemu];
+      text = ''
+        OVERLAY="/var/lib/libvirt/images/${name}.qcow2"
+        BACKING="${tcfg.isoDir}/${image}"
+        mkdir -p /var/lib/libvirt/images
+        if [ ! -e "$BACKING" ]; then
+          echo "distroLab: image '${image}' for VM '${name}' is missing at $BACKING." >&2
+          echo "distroLab: build it (nix build .#igrisConfigurations.<flavor>.disk) and symlink it there." >&2
+          exit 0
+        fi
+        rm -f "$OVERLAY"
+        qemu-img create -f qcow2 -F raw -b "$BACKING" "$OVERLAY"
+        qemu-img info "$OVERLAY"
+      '';
+    };
+
   # Three phases per distro, all sharing one qcow2 + one UEFI nvram:
   #   "install" -> "<name>-install": SPICE, boots the ISO. Install the OS.
   #   "setup"   -> "<name>-setup":   SPICE, boots the installed disk (no GPU).
@@ -321,8 +345,8 @@
     );
   };
 
-  # Three domains per distro: "<name>-install", "<name>-setup", "<name>".
-  domains = lib.concatLists (
+  # Three domains per installer distro: "<name>-install", "<name>-setup", "<name>".
+  installerDomains = lib.concatLists (
     lib.mapAttrsToList (name: iso: [
       (mkDomain name iso "install")
       (mkDomain name iso "setup")
@@ -331,6 +355,14 @@
     tcfg.distros
   );
 
+  # One domain per image distro: just "<name>", the GPU variant. It reuses the
+  # exact same gpu machinery (3080 passthrough, video=none, evdev), but the qcow2
+  # it boots is the throwaway overlay over the raw image, so there is no installer
+  # ISO and no install/setup phase. The iso argument is unused by the gpu variant.
+  imageDomains = lib.mapAttrsToList (name: image: mkDomain name image "gpu") tcfg.images;
+
+  domains = installerDomains ++ imageDomains;
+
   # Emergency get-my-devices-back: stops any running GPU VM, which releases the
   # evdev grab and returns the keyboard/mouse to the host. Run it out-of-band:
   # `ssh <host> distrolab-release` from your phone, or after Alt+SysRq+E.
@@ -338,7 +370,7 @@
     name = "distrolab-release";
     runtimeInputs = [pkgs.libvirt];
     text = ''
-      for vm in ${lib.concatStringsSep " " (lib.attrNames tcfg.distros)}; do
+      for vm in ${lib.concatStringsSep " " (lib.attrNames tcfg.distros ++ lib.attrNames tcfg.images)}; do
         if virsh --connect qemu:///system domstate "$vm" 2>/dev/null | grep -q running; then
           echo "stopping $vm to release your keyboard/mouse..."
           virsh --connect qemu:///system destroy "$vm"
@@ -431,6 +463,7 @@
   };
 
   mkdisks = lib.mapAttrsToList (name: _: mkDisk name) tcfg.distros;
+  mkoverlays = lib.mapAttrsToList (name: image: mkOverlay name image) tcfg.images;
 in {
   options = {
     modules = {
@@ -503,6 +536,22 @@ in {
             };
             description = "Map of VM name -> installer ISO filename (inside isoDir).";
           };
+          images = lib.mkOption {
+            type = lib.types.attrsOf lib.types.str;
+            default = {};
+            example = {igris = "igris.img";};
+            description = ''
+              Map of VM name -> bootable raw disk-image filename (inside isoDir),
+              for image-based distros like igris that ship a ready-to-boot system
+              and need no installer. Each entry gets one GPU-passthrough domain
+              that boots the image live through a throwaway overlay (writes
+              discarded, the base image untouched). Build the image with
+              `nix build .#igrisConfigurations.<flavor>.disk` and symlink the
+              result into isoDir under this filename. The image must be UEFI
+              bootable (the lab boots OVMF), which the igris disk image is and the
+              igris ISO is not.
+            '';
+          };
         };
       };
     };
@@ -513,6 +562,10 @@ in {
       {
         assertion = cfg.virt-manager.vfio.enable;
         message = "modules.virtualisation.distroLab requires modules.virtualisation.virt-manager.vfio.enable (the RTX 3080 must be vfio-bound for GPU passthrough).";
+      }
+      {
+        assertion = lib.intersectLists (lib.attrNames tcfg.distros) (lib.attrNames tcfg.images) == [];
+        message = "modules.virtualisation.distroLab: a VM name appears in both distros and images. Each name maps to one domain and one qcow2, so the names must be disjoint.";
       }
     ];
 
@@ -546,7 +599,7 @@ in {
     ];
 
     systemd.services.libvirtd.preStart = lib.mkAfter (
-      lib.concatMapStringsSep "\n" (s: lib.getExe s) mkdisks
+      lib.concatMapStringsSep "\n" (s: lib.getExe s) (mkdisks ++ mkoverlays)
     );
 
     virtualisation.libvirt.connections."qemu:///system".domains = domains;
