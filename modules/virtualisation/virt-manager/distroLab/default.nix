@@ -427,10 +427,15 @@
         exit 1
       fi
 
-      # Kill any orphaned capture from a previously force-closed view (its EXIT trap
-      # never fired, so a stale alsasrc is still holding the single capture device and
-      # would make this launch silent with "device busy").
-      pkill -f "alsasrc device=hw:CARD=sc0710" 2>/dev/null || true
+      # Free the single capture device from a previously force-closed view whose
+      # EXIT trap never fired, so a stale alsasrc (audio) or v4l2src (video) is
+      # still holding it and would make this launch silent or "device busy". Use
+      # SIGINT so gstreamer runs STREAMOFF cleanly. Never SIGKILL a video capture
+      # mid-stream: that leaves the sc0710 DMA engine wedged (the watchdog keeps
+      # logging "stalled video channel") and only a power cycle of the card
+      # recovers it.
+      pkill -INT -f "alsasrc device=hw:CARD=sc0710" 2>/dev/null || true
+      pkill -INT -f "v4l2src device=$dev" 2>/dev/null || true
       sleep 1
 
       # Continuous HDMI-audio bridge in the background.
@@ -442,10 +447,45 @@
       }
       audio_loop &
       audio_pid=$!
-      trap 'kill "$audio_pid" 2>/dev/null || true; pkill -f "alsasrc device=hw:CARD=sc0710" 2>/dev/null || true' EXIT
 
-      # Video in the foreground; closing the window ends it and the trap reaps audio.
-      gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false
+      # Video in the background so the watchdog below can stop it cleanly.
+      gst-launch-1.0 v4l2src device="$dev" io-mode=mmap '!' glupload '!' glcolorconvert '!' glimagesink sync=false &
+      video_pid=$!
+
+      # Stop the video pipeline without ever SIGKILLing it: SIGINT first so
+      # gstreamer sends EOS and runs STREAMOFF, then escalate to SIGTERM if it is
+      # stalled and ignores the interrupt. A SIGKILL here would wedge the sc0710
+      # DMA until the card is power-cycled.
+      stop_video() {
+        kill -INT "$video_pid" 2>/dev/null || true
+        for _ in 1 2 3; do
+          kill -0 "$video_pid" 2>/dev/null || return 0
+          sleep 1
+        done
+        kill -TERM "$video_pid" 2>/dev/null || true
+      }
+      trap 'stop_video; kill "$audio_pid" 2>/dev/null || true; pkill -INT -f "alsasrc device=hw:CARD=sc0710" 2>/dev/null || true' EXIT
+
+      # Signal-loss watchdog. When the GPU VM stops driving HDMI, v4l2src stops
+      # delivering buffers and glimagesink stalls into a window that can never be
+      # closed. Poll the capture device, and when it reports no signal for a few
+      # seconds, fall through so the EXIT trap stops the pipeline and the window
+      # closes instead of hanging forever. Querying DV timings does not disturb
+      # the running capture. Closing the window normally exits gst-launch, which
+      # ends this loop too.
+      no_signal=0
+      while kill -0 "$video_pid" 2>/dev/null; do
+        width="$(v4l2-ctl -d "$dev" --query-dv-timings 2>/dev/null | grep -i "active width" | grep -oE "[0-9]+" | head -1)" || true
+        if [ "$width" = "0" ]; then
+          no_signal=$((no_signal + 1))
+          if [ "$no_signal" -ge 3 ]; then
+            break
+          fi
+        elif [ -n "$width" ]; then
+          no_signal=0
+        fi
+        sleep 1
+      done
     '';
   };
 
