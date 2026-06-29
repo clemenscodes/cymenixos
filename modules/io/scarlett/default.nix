@@ -350,6 +350,12 @@ in {
               "audio.position" = ["FL"];
               "stream.dont-remix" = true;
               "node.passive" = true;
+              # Only ever capture from the Scarlett. If it is absent, wait for it
+              # (dont-fallback) instead of grabbing some other source (e.g. the
+              # webcam mic), and stay alive while waiting (linger) instead of
+              # being torn down. See wireplumber find-defined-target.lua.
+              "node.dont-fallback" = true;
+              "node.linger" = true;
               "target.object" = "alsa_input.usb-Focusrite_Scarlett_2i2_4th_Gen_S2AJV133401118-00.HiFi__Mic1__source";
             };
             "playback.props" = {
