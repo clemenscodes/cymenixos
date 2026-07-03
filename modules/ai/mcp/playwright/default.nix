@@ -29,7 +29,8 @@ in {
   };
   config = lib.mkIf (config.modules.ai.enable && config.modules.ai.mcp.enable && config.modules.ai.mcp.playwright.enable) {
     modules.ai.mcp.servers.playwright = {
-      command = "${wrapper}/bin/playwright-mcp --isolated";
+      command = "${wrapper}/bin/playwright-mcp";
+      args = ["--isolated"];
     };
   };
 }
