@@ -12,14 +12,12 @@
   # profile/output dirs to a writable cache location.
   wrapper = pkgs.writeShellScriptBin "playwright-mcp" ''
     set -euo pipefail
-    profile="$HOME/.cache/playwright-mcp/profile"
     output="$HOME/.cache/playwright-mcp/output"
-    mkdir -p "$profile" "$output"
+    mkdir -p "$output"
     chrome=( ${browsers}/chromium-*/chrome-linux64/chrome )
     exec ${pkgs.playwright-mcp}/bin/playwright-mcp \
       --browser chromium \
       --executable-path "''${chrome[0]}" \
-      --user-data-dir "$profile" \
       --output-dir "$output" \
       "$@"
   '';
