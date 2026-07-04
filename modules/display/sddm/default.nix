@@ -20,7 +20,7 @@ in {
         pkgs.qt5.qtquickcontrols2
         pkgs.qt5.qtsvg
         pkgs.qt5.qtgraphicaleffects
-        pkgs.catppuccin-cursors.macchiatoBlue
+        pkgs.bibata-cursors
       ];
     };
     services = {
@@ -48,7 +48,7 @@ in {
               DisplayServer = "wayland";
             };
             Theme = lib.mkForce {
-              CursorTheme = "catppuccin-macchiato-blue-cursors";
+              CursorTheme = "Bibata-Modern-Classic";
             };
           };
         };

@@ -17,8 +17,8 @@ in {
   config = lib.mkIf (cfg.enable && cfg.cursor.enable) {
     home = {
       pointerCursor = {
-        name = "catppuccin-macchiato-blue-cursors";
-        package = pkgs.catppuccin-cursors.macchiatoBlue;
+        name = "Bibata-Modern-Classic";
+        package = pkgs.bibata-cursors;
         size = 16;
       };
     };

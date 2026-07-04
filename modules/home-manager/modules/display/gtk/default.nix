@@ -60,8 +60,8 @@ in {
       inherit (cfg.gtk) enable;
       inherit theme;
       cursorTheme = lib.mkForce {
-        package = pkgs.catppuccin-cursors.macchiatoBlue;
-        name = "catppuccin-macchiato-blue-cursors";
+        package = pkgs.bibata-cursors;
+        name = "Bibata-Modern-Classic";
       };
       font = {
         package = pkgs.nerd-fonts.iosevka;
