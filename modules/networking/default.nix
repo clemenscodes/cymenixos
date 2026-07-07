@@ -19,6 +19,7 @@ in {
     (import ./torrent {inherit inputs pkgs lib;})
     (import ./upnp {inherit inputs pkgs lib;})
     (import ./vpn {inherit inputs pkgs lib;})
+    (import ./wireguard-server {inherit inputs pkgs lib;})
     (import ./wireless {inherit inputs pkgs lib;})
     (import ./wireshark {inherit inputs pkgs lib;})
   ];
