@@ -89,6 +89,10 @@ in {
           unbind C-a
           bind M-Escape send-prefix
 
+          # Secondary prefix Ctrl+b — mobile-friendly (Alt+Escape is unusable on
+          # phone keyboards); e.g. detach from an SSH/Termius session with C-b d
+          set -g prefix2 C-b
+
           # ── Prefix-free: pane navigation (Alt+hjkl) ─────────────────────────
           bind -n M-h select-pane -L
           bind -n M-j select-pane -D
