@@ -22,6 +22,9 @@ in {
         shellAliases = {
           # Rich session list: name + running program + directory (handy over SSH)
           tls = "tmux ls -F '#{session_name}: [#{pane_current_command}] #{pane_current_path}'";
+          # Attach a session by name/number, e.g. `tma 3`. No -d on purpose: -d would
+          # detach the desktop client and close its `exec tmux` terminal.
+          tma = "tmux attach -t";
         };
         initContent = lib.mkAfter ''
           # Auto-attach to tmux session on terminal start (outside of tmux)
