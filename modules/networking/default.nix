@@ -15,6 +15,7 @@ in {
     (import ./irc {inherit inputs pkgs lib;})
     (import ./mtr {inherit inputs pkgs lib;})
     (import ./stevenblack {inherit inputs pkgs lib;})
+    (import ./tailscale {inherit inputs pkgs lib;})
     (import ./torrent {inherit inputs pkgs lib;})
     (import ./upnp {inherit inputs pkgs lib;})
     (import ./vpn {inherit inputs pkgs lib;})
