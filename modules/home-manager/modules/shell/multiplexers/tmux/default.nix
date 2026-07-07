@@ -19,6 +19,10 @@ in {
   config = lib.mkIf (cfg.enable && cfg.tmux.enable) {
     programs = {
       zsh = {
+        shellAliases = {
+          # Rich session list: name + running program + directory (handy over SSH)
+          tls = "tmux ls -F '#{session_name}: [#{pane_current_command}] #{pane_current_path}'";
+        };
         initContent = lib.mkAfter ''
           # Auto-attach to tmux session on terminal start (outside of tmux)
           if [[ -z "$TMUX" ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
@@ -134,9 +138,10 @@ in {
           # Renumber windows when one is closed
           set -g renumber-windows on
 
-          # Keep custom window names
+          # Auto-name each window after the program running in it (claude, moon, nvim…)
           set -g allow-rename off
-          set -g automatic-rename off
+          set -g automatic-rename on
+          set -g automatic-rename-format '#{pane_current_command}'
 
           # Don't exit tmux when closing last pane
           set -g detach-on-destroy off
