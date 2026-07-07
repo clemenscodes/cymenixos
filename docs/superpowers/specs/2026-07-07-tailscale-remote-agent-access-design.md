@@ -1,7 +1,9 @@
 # Remote access to local Claude agents — design
 
 **Date:** 2026-07-07
-**Status:** Approved, pending implementation plan
+**Status:** SUPERSEDED — Tailscale conflicts with amaru's always-on full-tunnel Mullvad (two
+WireGuard clients on one host deadlock the routing table + firewall; confirmed live twice).
+Replaced by `2026-07-07-wireguard-remote-agent-access-design.md` (self-hosted WireGuard server).
 
 ## Problem
 
