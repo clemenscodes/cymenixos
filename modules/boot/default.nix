@@ -88,7 +88,7 @@ in {
       kernelPackages = lib.mkDefault (
         if cfg.boot.cachyos.enable
         then pkgs.cachyosKernels.${cfg.boot.cachyos.variant}
-        else pkgs.linuxPackages_latest
+        else pkgs.linuxPackages
       );
       kernelParams = lib.mkIf hibernation ["resume_offset=${builtins.toString swapResumeOffset}"];
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
