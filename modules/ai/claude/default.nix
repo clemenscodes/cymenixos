@@ -575,14 +575,23 @@ in {
 
                     **The invariant: always _await_ a subagent — block on its result before doing any dependent or overlapping work.** Never end a turn with "I've launched X, I'll report back," and never start work that consumes a subagent's output before that output is in hand. (This harness exposes no per-call `foreground`/`background` flag; foreground vs background is governed by the agent type and by env config, so reach for the right call below.)
 
-                    - **Foreground / blocking subagent (default):** `Agent({ subagent_type: "<type>", description, prompt })`; omit `subagent_type` for a fresh `general-purpose` agent. With agent teams disabled (see footer), this blocks and returns the subagent's final message inline as the tool result. Optional `model`, `mode`.
+                    - **Foreground / blocking subagent (default):** `Agent({ subagent_type: "<type>", description, prompt })`; omit `subagent_type` for a fresh `general-purpose` agent. This blocks and returns the subagent's final message inline as the tool result. Optional `model`, `mode`. Prefer this for almost everything — it's the cheapest and most predictable option.
                     - **Parallel:** issue several `Agent(...)` calls in a **single message** — they run concurrently and all results return before the turn proceeds. Many-calls-in-one-message buys concurrency; it is *not* a substitute for awaiting.
                     - **Fork (inherit the whole conversation):** `Agent({ subagent_type: "fork", description, prompt })`. A fork inherits the parent's entire history, system prompt, tools, and model (any `model` override is ignored) — use it when a fresh subagent would need too much re-explaining, or to try several approaches from the same starting point. A fork runs in the **background** by design, so after launching it, block on its completion before any dependent work — don't run overlapping work alongside it. Add `isolation: "worktree"` if it edits files; a fork cannot spawn another fork.
                     - **Parallel file-mutating agents:** add `isolation: "worktree"` so concurrent agents don't clobber the checkout.
                     - **Awaiting a backgrounded agent/fork:** there is no explicit "join" call — launch it (the call returns an `agentId`), then yield the turn and do nothing overlapping; the harness re-invokes you with a `<task-notification>` carrying the final result. For several, launch all in one message and await every notification. Do not `Read`/tail the task-output `.jsonl` — it floods context.
-                    - **Resume a prior subagent:** `SendMessage({ to: "<agentId>", message, summary })` continues it with full context — but it is only available when agent teams are enabled (which we keep OFF), so treat subagent runs as one-shot.
+                    - **Resume a prior subagent:** `SendMessage({ to: "<agentId>", message, summary })` continues it with full context.
 
-                    **Do not** launch fire-and-forget **team**/teammate agents; always use **sub**agents and await them (forks included). Enforced by config — `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=0`. The "subagent messages leak into the main context" failure is a real background-isolation bug; awaiting (a blocking subagent, or blocking on a fork's completion) avoids it. Use the appropriate model per task and lean on specialized subagent types where they fit.
+                    ## Agent teams (experimental, enabled)
+
+                    `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set, so teammate agents (`Agent({ name: "..." })`) are available in addition to subagents. Teams let teammates run independently in their own context windows and message each other directly, instead of only reporting back to you.
+
+                    **Default to subagents, not teammates.** Reach for a team only when the work genuinely needs peer-to-peer coordination (e.g. multiple independent research angles that should compare notes, or parallel code review with distinct foci) — not as a shortcut to avoid awaiting. Known rough edges to weigh before spawning one:
+                    - The "unsolicited subagent messages leak into the main context" background-isolation bug is real and applies to teammates — expect noise back in your context outside of your own turns.
+                    - No `/resume` support with in-process teammates — a session restart drops them.
+                    - Task status can lag (a teammate finishes but doesn't mark its task done) and shutdown can be slow (a teammate finishes current work before exiting).
+                    - Teammates cannot spawn their own teammates or background subagents (no nesting beyond one level).
+                    - Still **await** whatever you spawn — a team doesn't relax the "never end a turn on fire-and-forget work" rule, it just changes how the spawned work communicates back.
                   '';
                 };
                 ".config/claude/settings.json" = {
@@ -590,6 +599,9 @@ in {
                     "$schema" = "https://json.schemastore.org/claude-code-settings.json";
                     skipDangerousModePermissionPrompt = true;
                     effortLevel = "high";
+                    env = {
+                      CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+                    };
                     permissions = {
                       defaultMode = "bypassPermissions";
                     };
