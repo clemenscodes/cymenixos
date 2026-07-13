@@ -138,6 +138,47 @@
     ${pkgs.jq}/bin/jq -n --rawfile sp ${superpowers-skills}/using-superpowers/SKILL.md \
       '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n" + $sp + "\n</EXTREMELY_IMPORTANT>")}}'
   '';
+  # Globaler PreToolUse(Bash)-Hook: verhindert, dass ein Agent das
+  # touch-pflichtige Commit-Signing umgeht. Der eigentliche Schutz ist der
+  # YubiKey-Touch am Signaturschluessel (Signing ohne physische Anwesenheit
+  # unmoeglich); dieser Hook schliesst nur den verbleibenden Weg "einfach
+  # unsigniert bzw. mit uebersprungenem Verify committen/pushen". Weil er in
+  # der globalen settings.json haengt, greift er in JEDER Session und jedem
+  # Repo, unabhaengig davon, wo Claude gestartet wurde (also auch in pam).
+  block-unsigned-commit = pkgs.writeShellApplication {
+    name = "block-unsigned-commit";
+    runtimeInputs = [pkgs.jq pkgs.gnugrep];
+    text = ''
+      cmd="$(jq -r '.tool_input.command // empty' 2>/dev/null || true)"
+      [ -n "$cmd" ] || exit 0
+
+      reason=""
+      if printf '%s' "$cmd" | grep -qE -- '--no-gpg-sign'; then
+        reason="--no-gpg-sign"
+      elif printf '%s' "$cmd" | grep -qE 'commit\.gpgsign[[:space:]]*=[[:space:]]*(false|no|0)\b'; then
+        reason="-c commit.gpgsign=false"
+      elif printf '%s' "$cmd" | grep -qE 'commit\.gpgsign[[:space:]]+(false|no|0)\b'; then
+        reason="git config commit.gpgsign false"
+      elif printf '%s' "$cmd" | grep -qE -- '--unset[[:space:]]+commit\.gpgsign'; then
+        reason="--unset commit.gpgsign"
+      elif printf '%s' "$cmd" | grep -qE -- '--no-verify'; then
+        reason="--no-verify (ueberspringt den pre-push Signatur-Check)"
+      elif printf '%s' "$cmd" | grep -qiE 'core\.hookspath[[:space:]]*[= ]'; then
+        reason="core.hooksPath override (deaktiviert den pre-push Hook)"
+      fi
+
+      [ -n "$reason" ] || exit 0
+
+      {
+        echo "DENIED: dieser Befehl versucht, das Commit-Signing zu umgehen ($reason)."
+        echo "Signieren verlangt einen physischen YubiKey-Touch, Agents committen hier"
+        echo "nicht. Wenn Signing gerade fehlgeschlagen ist (YubiKey nicht gesteckt,"
+        echo "Touch-Timeout, falsche PIN): das heisst STOP und den Menschen informieren,"
+        echo "es ist KEINE Erlaubnis, Signing zu deaktivieren oder zu ueberspringen."
+      } >&2
+      exit 2
+    '';
+  };
 in {
   options = {
     modules = {
@@ -606,6 +647,18 @@ in {
                       defaultMode = "bypassPermissions";
                     };
                     hooks = {
+                      PreToolUse = [
+                        {
+                          matcher = "Bash";
+                          hooks = [
+                            {
+                              type = "command";
+                              command = "${block-unsigned-commit}/bin/block-unsigned-commit";
+                              timeout = 10;
+                            }
+                          ];
+                        }
+                      ];
                       SessionStart = [
                         {
                           matcher = "";
