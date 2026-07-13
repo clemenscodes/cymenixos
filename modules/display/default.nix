@@ -10,6 +10,7 @@ in {
     (import ./gnome {inherit inputs pkgs lib;})
     (import ./gtk {inherit inputs pkgs lib;})
     (import ./hyprland {inherit inputs pkgs lib;})
+    (import ./moonlight {inherit inputs pkgs lib;})
     (import ./plasma {inherit inputs pkgs lib;})
     (import ./qt {inherit inputs pkgs lib;})
     (import ./sddm {inherit inputs pkgs lib;})
