@@ -13,6 +13,7 @@ in {
     (import ./plasma {inherit inputs pkgs lib;})
     (import ./qt {inherit inputs pkgs lib;})
     (import ./sddm {inherit inputs pkgs lib;})
+    (import ./sunshine {inherit inputs pkgs lib;})
   ];
   options = {
     modules = {
