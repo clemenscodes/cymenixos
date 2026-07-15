@@ -277,8 +277,8 @@ in {
                 toggleRangeSelect: v
                 toggleWhitespaceInDiffView: <c-w>
                 undo: z
-              worktrees:
-                viewWorktreeOptions: w
+              universal:
+                newWorktree: w
             notARepository: prompt
             promptToReturnFromSubprocess: true
             quitOnTopLevelReturn: false
