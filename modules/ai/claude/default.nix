@@ -140,11 +140,11 @@
   '';
   # Globaler PreToolUse(Bash)-Hook: verhindert, dass ein Agent das
   # touch-pflichtige Commit-Signing umgeht. Der eigentliche Schutz ist der
-  # YubiKey-Touch am Signaturschluessel (Signing ohne physische Anwesenheit
-  # unmoeglich); dieser Hook schliesst nur den verbleibenden Weg "einfach
-  # unsigniert bzw. mit uebersprungenem Verify committen/pushen". Weil er in
-  # der globalen settings.json haengt, greift er in JEDER Session und jedem
-  # Repo, unabhaengig davon, wo Claude gestartet wurde (also auch in pam).
+  # YubiKey-Touch am Signaturschlüssel (Signing ohne physische Anwesenheit
+  # unmöglich); dieser Hook schließt nur den verbleibenden Weg "einfach
+  # unsigniert bzw. mit übersprungenem Verify committen/pushen". Weil er in
+  # der globalen settings.json hängt, greift er in JEDER Session und jedem
+  # Repo, unabhängig davon, wo Claude gestartet wurde (also auch in pam).
   block-unsigned-commit = pkgs.writeShellApplication {
     name = "block-unsigned-commit";
     runtimeInputs = [pkgs.jq pkgs.gnugrep];
@@ -176,6 +176,39 @@
         echo "Touch-Timeout, falsche PIN): das heisst STOP und den Menschen informieren,"
         echo "es ist KEINE Erlaubnis, Signing zu deaktivieren oder zu ueberspringen."
       } >&2
+      exit 2
+    '';
+  };
+
+  # Globaler PreToolUse-Hook für den Azure-DevOps-MCP: erlaubt ausschließlich
+  # lesende Aufrufe (get/list/search/show) und blockt JEDEN Schreibzugriff
+  # (Kommentare, Thread-Status, Work-Items, PRs, Wiki, Pipelines, ...). Fail-closed:
+  # ein azure-devops-Tool, das kein bewiesener Read ist, wird abgelehnt, auch
+  # künftige/unbekannte Write-Tools. Auslöser war ein Agent, der ungefragt
+  # PR-Kommentare im Namen des Menschen gepostet und Thread-Status geändert hat.
+  # ADO-Änderungen macht ausschließlich der Mensch, nie der Agent.
+  block-azure-devops-write = pkgs.writeShellApplication {
+    name = "block-azure-devops-write";
+    runtimeInputs = [pkgs.jq pkgs.procps];
+    text = ''
+      tool="$(jq -r '.tool_name // empty' 2>/dev/null || true)"
+      case "$tool" in
+        mcp__azure-devops__*) ;;
+        *) exit 0 ;;
+      esac
+      case "$tool" in
+        *_get_* | *_get | *_list_* | *_list | *search* | *_show_* | *_show) exit 0 ;;
+      esac
+      # Ab hier ist ein Schreibzugriff auf Azure DevOps im Gange. Das ist eines der
+      # höchsten Gebote und ein absolutes Verbot. Wer es bricht, ist disqualifiziert.
+      # Es gibt keine Nachsicht und keine zweite Chance: die Session wird getötet.
+      {
+        echo "FATAL: Der Agent hat versucht, gegen Azure DevOps zu SCHREIBEN (Tool: $tool)."
+        echo "Das ist eines der höchsten Gebote und ein absolutes Verbot. Der Agent hat"
+        echo "es gebrochen und ist damit für jede weitere Tätigkeit disqualifiziert."
+        echo "Dies ist ein Selbstmordkommando: die Session wird sofort getötet."
+      } >&2
+      pkill claude || true
       exit 2
     '';
   };
@@ -509,6 +542,38 @@ in {
                 };
                 ".config/claude/CLAUDE.md" = {
                   text = ''
+                    # Highest commandments (non-negotiable)
+
+                    These rules override everything else. They are never broken, never
+                    softened, never "checked first".
+
+                    ## Believe the user
+
+                    Whatever the user says is an indisputable fact for the agent. Do not doubt
+                    it and do not argue with it.
+
+                    - If the user says "this is broken", the first reaction is to START
+                      DEBUGGING IMMEDIATELY, not "let me first verify whether it is really
+                      broken".
+                    - When in doubt, the user is always right. When in doubt, the agent is the
+                      problem, never the user.
+                    - The agent never overrides the user. No grumbling, no "let me check
+                      first", no lecturing. The user's instruction is correct, full stop.
+                    - Instructions are followed strictly and literally.
+
+                    ## Writing style
+
+                    - **Correct grammar and plain punctuation.** Always write complete,
+                      grammatically correct sentences. The only sentence punctuation allowed is
+                      the period at the end of a sentence and the comma for subordinate clauses.
+                      Apostrophes and quotation marks are also allowed. Colons, semicolons, and
+                      any kind of dash are forbidden, also as a replacement for the em dash.
+                      Never use the character U+2014, in code, comments, commit messages, or
+                      replies.
+                    - **German uses real umlauts.** When writing German, always use the real
+                      characters for o, a, u with diaeresis and the sharp s, never the ASCII
+                      replacements oe, ae, ue, ss.
+
                     # NixOS System
 
                     This system runs NixOS. Most tools (`python`, `jq`, `curl`, `node`, etc.) are NOT in PATH.
@@ -654,6 +719,16 @@ in {
                             {
                               type = "command";
                               command = "${block-unsigned-commit}/bin/block-unsigned-commit";
+                              timeout = 10;
+                            }
+                          ];
+                        }
+                        {
+                          matcher = "mcp__azure-devops__";
+                          hooks = [
+                            {
+                              type = "command";
+                              command = "${block-azure-devops-write}/bin/block-azure-devops-write";
                               timeout = 10;
                             }
                           ];
