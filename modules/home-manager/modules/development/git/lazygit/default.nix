@@ -225,6 +225,7 @@ in {
                 decreaseContextInDiffView: '{'
                 decreaseRenameSimilarityThreshold: (
                 diffingMenu: W
+                newWorktree: w
                 edit: e
                 executeShellCommand: ':'
                 extrasMenu: '@'
@@ -277,8 +278,6 @@ in {
                 toggleRangeSelect: v
                 toggleWhitespaceInDiffView: <c-w>
                 undo: z
-              worktrees:
-                viewWorktreeOptions: w
             notARepository: prompt
             promptToReturnFromSubprocess: true
             quitOnTopLevelReturn: false

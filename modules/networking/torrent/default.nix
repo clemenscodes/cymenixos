@@ -8,13 +8,15 @@
   ...
 }: let
   cfg = config.modules.networking;
+  # Mullvad's DNS (194.242.2.x) only resolves through the tunnel, and glibc queries
+  # only the first 3 nameservers (MAXNS=3). Listing Mullvad servers first meant that
+  # with the VPN down every lookup timed out on dead servers for ~60s and never
+  # reached a reachable fallback. Keep a reachable public resolver in the first slots;
+  # when connected Mullvad still prepends 100.64.0.63, so ad-blocking is unaffected.
   nameservers = [
+    "1.1.1.1"
+    "8.8.4.4"
     "194.242.2.2"
-    "194.242.2.3"
-    "194.242.2.4"
-    "194.242.2.5"
-    "194.242.2.6"
-    "194.242.2.9"
   ];
 in {
   options = {
