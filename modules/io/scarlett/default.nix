@@ -86,15 +86,30 @@ in {
       };
     };
 
+    # The chain runs in its own process, so everything it needs hangs off
+    # filter-chain.service rather than pipewire.service (see the SIGKILL note at
+    # the chain below for why it must not live in the daemon).
+    #
+    # pipewire ships filter-chain.service and the NixOS module already installs
+    # it; it is simply not enabled by default. asDropin only appends the install
+    # target and our environment instead of replacing the shipped unit, so its
+    # BindsTo=pipewire.service and Restart=on-failure survive untouched.
+    #
     # PipeWire 1.6+ no longer resolves absolute LADSPA plugin paths directly;
     # it searches LADSPA_PATH by filename. Set it to include every plugin used
-    # by the filter-chain so the compressor and other nodes can be found.
-    systemd.user.services.pipewire.environment.LADSPA_PATH = lib.mkForce (lib.makeSearchPath "lib/ladspa" [
-      pkgs.lsp-plugins
-      pkgs.ladspaPlugins
-      pkgs.rnnoise-plugin
-      speexLadspa
-    ]);
+    # by the filter-chain so the compressor and other nodes can be found. The
+    # NixOS module already drops a LADSPA_PATH into this unit built from
+    # configPackages' requiredLadspaPackages passthru, hence mkForce.
+    systemd.user.services.filter-chain = {
+      overrideStrategy = "asDropin";
+      wantedBy = ["default.target"];
+      environment.LADSPA_PATH = lib.mkForce (lib.makeSearchPath "lib/ladspa" [
+        pkgs.lsp-plugins
+        pkgs.ladspaPlugins
+        pkgs.rnnoise-plugin
+        speexLadspa
+      ]);
+    };
 
     # Declare SM7B_Processed as the default audio input device.
     # WirePlumber reads this at startup and sets it before any app connects.
@@ -116,259 +131,279 @@ in {
     # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert
     #       DSP mode, exceeding the filter-chain's single-output SPA node → ENOSPC → all audio
     #       breaks system-wide.
-    services.pipewire.extraConfig.pipewire."51-sm7b-chain" = {
-      "context.modules" = [
-        {
-          name = "libpipewire-module-filter-chain";
-          flags = ["nofail"];
-          args = {
-            "node.description" = "SM7B Processed";
-            "media.name" = "SM7B Processed";
-            "filter.graph" = {
-              nodes = [
-                # 1. High-pass: remove sub-80Hz rumble
-                {
-                  type = "builtin";
-                  name = "eq_hp";
-                  label = "bq_highpass";
-                  control = {
-                    "Freq" = 80.0;
-                    "Q" = 0.707;
-                  };
-                }
-                # 2. Low shelf: cut SM7B proximity bass — the mic is naturally dark and
-                # close-mic'd proximity effect adds bass buildup that needs taming
-                {
-                  type = "builtin";
-                  name = "eq_warmth";
-                  label = "bq_lowshelf";
-                  control = {
-                    "Freq" = 200.0;
-                    "Q" = 0.707;
-                    "Gain" = -3.0;
-                  };
-                }
-                # 3. Boom cut: SM7B proximity/body resonance around 300Hz
-                {
-                  type = "builtin";
-                  name = "eq_box_cut";
-                  label = "bq_peaking";
-                  control = {
-                    "Freq" = 300.0;
-                    "Q" = 1.0;
-                    "Gain" = -4.0;
-                  };
-                }
-                # 4. Box/mud cut: cardboard resonance and low-mid muddiness
-                {
-                  type = "builtin";
-                  name = "eq_mud_cut";
-                  label = "bq_peaking";
-                  control = {
-                    "Freq" = 500.0;
-                    "Q" = 1.2;
-                    "Gain" = -3.0;
-                  };
-                }
-                # 5. LSP Compressor: lookahead prevents onset cutting, evens out level
-                # Attack raised from 6ms to 12ms — lets consonant transients through
-                # before gain reduction kicks in, preserving natural punch and clarity.
-                {
-                  type = "ladspa";
-                  name = "compressor";
-                  plugin = "${pkgs.lsp-plugins}/lib/ladspa/lsp-plugins-ladspa.so";
-                  label = "http://lsp-plug.in/plugins/ladspa/compressor_mono";
-                  control = {
-                    "Sidechain lookahead (ms)" = 5.0;
-                    "Sidechain reactivity (ms)" = 5.0;
-                    "Attack threshold (G)" = 0.12589; # -18 dB
-                    "Attack time (ms)" = 12.0;
-                    "Release time (ms)" = 60.0;
-                    "Ratio" = 4.0;
-                    "Knee (G)" = 0.5;
-                    "Makeup gain (G)" = 1.0; # 0 dB — let the presence EQ do the lifting
-                  };
-                }
-                # 6. Presence: voice forward, intelligible
-                {
-                  type = "builtin";
-                  name = "eq_presence";
-                  label = "bq_peaking";
-                  control = {
-                    "Freq" = 3000.0;
-                    "Q" = 0.9;
-                    "Gain" = 5.0;
-                  };
-                }
-                # 7. Definition: consonant crispness
-                {
-                  type = "builtin";
-                  name = "eq_definition";
-                  label = "bq_peaking";
-                  control = {
-                    "Freq" = 5500.0;
-                    "Q" = 1.2;
-                    "Gain" = 2.0;
-                  };
-                }
-                # 8. Clarity: sibilant detail without harshness
-                {
-                  type = "builtin";
-                  name = "eq_clarity";
-                  label = "bq_peaking";
-                  control = {
-                    "Freq" = 8000.0;
-                    "Q" = 1.0;
-                    "Gain" = 1.5;
-                  };
-                }
-                # 9. Air shelf: gentle sparkle — hardware Air mode already boosts this range
-                {
-                  type = "builtin";
-                  name = "eq_air";
-                  label = "bq_highshelf";
-                  control = {
-                    "Freq" = 10000.0;
-                    "Q" = 0.707;
-                    "Gain" = 0.0;
-                  };
-                }
-                # 10. Satan Maximiser: loudness/punch limiter
-                # Decay raised from 8 to 40 samples (~0.8ms at 48kHz) — the 8-sample
-                # setting causes intermodulation distortion on sharp transients.
-                # 40 samples still limits aggressively while sounding clean.
-                {
-                  type = "ladspa";
-                  name = "maximiser";
-                  plugin = "${pkgs.ladspaPlugins}/lib/ladspa/satan_maximiser_1408.so";
-                  label = "satanMaximiser";
-                  control = {
-                    "Decay time (samples)" = 40.0;
-                    "Knee point (dB)" = -6.0;
-                  };
-                }
-                # 11. RNNoise: neural noise suppressor — VAD-based, catches voice-frequency hum
-                {
-                  type = "ladspa";
-                  name = "rnnoise";
-                  plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
-                  label = "noise_suppressor_mono";
-                  control = {
-                    "VAD Threshold (%)" = 30.0;
-                  };
-                }
-                # 12. Speex: spectral subtraction suppressor — stationary noise floor estimation
-                # Custom LADSPA derivation wrapping libspeexdsp (same lib OBS uses).
-                # -15dB matches the OBS Speex filter setting exactly.
-                {
-                  type = "ladspa";
-                  name = "speex";
-                  plugin = "${speexLadspa}/lib/ladspa/libspeex_noise_suppressor_ladspa.so";
-                  label = "speex_noise_suppressor_mono";
-                  control = {
-                    "Suppress Level (dB)" = -15.0;
-                  };
-                }
-                # 13. Harmonic generator: tube-like even harmonics for richness.
-                # Placed after noise suppression so the synthesized harmonics are not
-                # treated as noise and suppressed — that interaction caused a hollow,
-                # phasey "hallway" artifact. Magnitudes reduced slightly for the same reason.
-                {
-                  type = "ladspa";
-                  name = "harmonics";
-                  plugin = "${pkgs.ladspaPlugins}/lib/ladspa/harmonic_gen_1220.so";
-                  label = "harmonicGen";
-                  control = {
-                    "Fundamental magnitude" = 1.0;
-                    "2nd harmonic magnitude" = 0.10;
-                    "3rd harmonic magnitude" = 0.03;
-                    "4th harmonic magnitude" = 0.01;
-                    "5th harmonic magnitude" = 0.0;
-                    "6th harmonic magnitude" = 0.0;
-                    "7th harmonic magnitude" = 0.0;
-                    "8th harmonic magnitude" = 0.0;
-                    "9th harmonic magnitude" = 0.0;
-                    "10th harmonic magnitude" = 0.0;
-                  };
-                }
-              ];
-              inputs = ["eq_hp:In"];
-              links = [
-                {
-                  output = "eq_hp:Out";
-                  input = "eq_warmth:In";
-                }
-                {
-                  output = "eq_warmth:Out";
-                  input = "eq_box_cut:In";
-                }
-                {
-                  output = "eq_box_cut:Out";
-                  input = "eq_mud_cut:In";
-                }
-                {
-                  output = "eq_mud_cut:Out";
-                  input = "compressor:Input";
-                }
-                {
-                  output = "compressor:Output";
-                  input = "eq_presence:In";
-                }
-                {
-                  output = "eq_presence:Out";
-                  input = "eq_definition:In";
-                }
-                {
-                  output = "eq_definition:Out";
-                  input = "eq_clarity:In";
-                }
-                {
-                  output = "eq_clarity:Out";
-                  input = "eq_air:In";
-                }
-                {
-                  output = "eq_air:Out";
-                  input = "maximiser:Input";
-                }
-                {
-                  output = "maximiser:Output";
-                  input = "rnnoise:Input";
-                }
-                {
-                  output = "rnnoise:Output";
-                  input = "speex:Input";
-                }
-                {
-                  output = "speex:Output";
-                  input = "harmonics:Input";
-                }
-              ];
-              outputs = ["harmonics:Output"];
+    #
+    # This MUST go to filter-chain.conf.d, never to pipewire.conf.d. A fragment in
+    # pipewire.conf.d is loaded as context.modules into the pipewire daemon itself,
+    # i.e. the very process that serves every device and every client. The chain's
+    # DSP then runs on the daemon's realtime data thread, and when that thread
+    # blows its RT budget (rtkit grants prio 20, RLIMIT_RTTIME is 200ms) the kernel
+    # does not kill the chain, it SIGKILLs the whole daemon: no coredump, no log
+    # line, just "code=killed, status=9/KILL". pipewire-pulse carries
+    # BindsTo=pipewire.service and is force-stopped along with it, so a single
+    # misbehaving mic chain takes down ALL audio (every sink, every source, every
+    # app) in a per-second restart loop where wireplumber never finishes
+    # enumerating and only auto_null remains. Happened for real after a nixpkgs
+    # bump rebuilt the LADSPA plugins.
+    # Upstream separates this on purpose: a standalone chain runs as its own
+    # process via `pipewire -c filter-chain.conf` (filter-chain.service, shipped by
+    # pipewire) which reads fragments from /etc/pipewire/filter-chain.conf.d/.
+    # configPackages lands there through the NixOS module's pathsToLink
+    # "/share/pipewire". A chain crash can then only ever take down the chain.
+    services.pipewire.configPackages = [
+      (pkgs.writeTextDir "share/pipewire/filter-chain.conf.d/51-sm7b-chain.conf" (builtins.toJSON {
+        "context.modules" = [
+          {
+            name = "libpipewire-module-filter-chain";
+            flags = ["nofail"];
+            args = {
+              "node.description" = "SM7B Processed";
+              "media.name" = "SM7B Processed";
+              "filter.graph" = {
+                nodes = [
+                  # 1. High-pass: remove sub-80Hz rumble
+                  {
+                    type = "builtin";
+                    name = "eq_hp";
+                    label = "bq_highpass";
+                    control = {
+                      "Freq" = 80.0;
+                      "Q" = 0.707;
+                    };
+                  }
+                  # 2. Low shelf: cut SM7B proximity bass — the mic is naturally dark and
+                  # close-mic'd proximity effect adds bass buildup that needs taming
+                  {
+                    type = "builtin";
+                    name = "eq_warmth";
+                    label = "bq_lowshelf";
+                    control = {
+                      "Freq" = 200.0;
+                      "Q" = 0.707;
+                      "Gain" = -3.0;
+                    };
+                  }
+                  # 3. Boom cut: SM7B proximity/body resonance around 300Hz
+                  {
+                    type = "builtin";
+                    name = "eq_box_cut";
+                    label = "bq_peaking";
+                    control = {
+                      "Freq" = 300.0;
+                      "Q" = 1.0;
+                      "Gain" = -4.0;
+                    };
+                  }
+                  # 4. Box/mud cut: cardboard resonance and low-mid muddiness
+                  {
+                    type = "builtin";
+                    name = "eq_mud_cut";
+                    label = "bq_peaking";
+                    control = {
+                      "Freq" = 500.0;
+                      "Q" = 1.2;
+                      "Gain" = -3.0;
+                    };
+                  }
+                  # 5. LSP Compressor: lookahead prevents onset cutting, evens out level
+                  # Attack raised from 6ms to 12ms — lets consonant transients through
+                  # before gain reduction kicks in, preserving natural punch and clarity.
+                  {
+                    type = "ladspa";
+                    name = "compressor";
+                    plugin = "${pkgs.lsp-plugins}/lib/ladspa/lsp-plugins-ladspa.so";
+                    label = "http://lsp-plug.in/plugins/ladspa/compressor_mono";
+                    control = {
+                      "Sidechain lookahead (ms)" = 5.0;
+                      "Sidechain reactivity (ms)" = 5.0;
+                      "Attack threshold (G)" = 0.12589; # -18 dB
+                      "Attack time (ms)" = 12.0;
+                      "Release time (ms)" = 60.0;
+                      "Ratio" = 4.0;
+                      "Knee (G)" = 0.5;
+                      "Makeup gain (G)" = 1.0; # 0 dB — let the presence EQ do the lifting
+                    };
+                  }
+                  # 6. Presence: voice forward, intelligible
+                  {
+                    type = "builtin";
+                    name = "eq_presence";
+                    label = "bq_peaking";
+                    control = {
+                      "Freq" = 3000.0;
+                      "Q" = 0.9;
+                      "Gain" = 5.0;
+                    };
+                  }
+                  # 7. Definition: consonant crispness
+                  {
+                    type = "builtin";
+                    name = "eq_definition";
+                    label = "bq_peaking";
+                    control = {
+                      "Freq" = 5500.0;
+                      "Q" = 1.2;
+                      "Gain" = 2.0;
+                    };
+                  }
+                  # 8. Clarity: sibilant detail without harshness
+                  {
+                    type = "builtin";
+                    name = "eq_clarity";
+                    label = "bq_peaking";
+                    control = {
+                      "Freq" = 8000.0;
+                      "Q" = 1.0;
+                      "Gain" = 1.5;
+                    };
+                  }
+                  # 9. Air shelf: gentle sparkle — hardware Air mode already boosts this range
+                  {
+                    type = "builtin";
+                    name = "eq_air";
+                    label = "bq_highshelf";
+                    control = {
+                      "Freq" = 10000.0;
+                      "Q" = 0.707;
+                      "Gain" = 0.0;
+                    };
+                  }
+                  # 10. Satan Maximiser: loudness/punch limiter
+                  # Decay raised from 8 to 40 samples (~0.8ms at 48kHz) — the 8-sample
+                  # setting causes intermodulation distortion on sharp transients.
+                  # 40 samples still limits aggressively while sounding clean.
+                  {
+                    type = "ladspa";
+                    name = "maximiser";
+                    plugin = "${pkgs.ladspaPlugins}/lib/ladspa/satan_maximiser_1408.so";
+                    label = "satanMaximiser";
+                    control = {
+                      "Decay time (samples)" = 40.0;
+                      "Knee point (dB)" = -6.0;
+                    };
+                  }
+                  # 11. RNNoise: neural noise suppressor — VAD-based, catches voice-frequency hum
+                  {
+                    type = "ladspa";
+                    name = "rnnoise";
+                    plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
+                    label = "noise_suppressor_mono";
+                    control = {
+                      "VAD Threshold (%)" = 30.0;
+                    };
+                  }
+                  # 12. Speex: spectral subtraction suppressor — stationary noise floor estimation
+                  # Custom LADSPA derivation wrapping libspeexdsp (same lib OBS uses).
+                  # -15dB matches the OBS Speex filter setting exactly.
+                  {
+                    type = "ladspa";
+                    name = "speex";
+                    plugin = "${speexLadspa}/lib/ladspa/libspeex_noise_suppressor_ladspa.so";
+                    label = "speex_noise_suppressor_mono";
+                    control = {
+                      "Suppress Level (dB)" = -15.0;
+                    };
+                  }
+                  # 13. Harmonic generator: tube-like even harmonics for richness.
+                  # Placed after noise suppression so the synthesized harmonics are not
+                  # treated as noise and suppressed — that interaction caused a hollow,
+                  # phasey "hallway" artifact. Magnitudes reduced slightly for the same reason.
+                  {
+                    type = "ladspa";
+                    name = "harmonics";
+                    plugin = "${pkgs.ladspaPlugins}/lib/ladspa/harmonic_gen_1220.so";
+                    label = "harmonicGen";
+                    control = {
+                      "Fundamental magnitude" = 1.0;
+                      "2nd harmonic magnitude" = 0.10;
+                      "3rd harmonic magnitude" = 0.03;
+                      "4th harmonic magnitude" = 0.01;
+                      "5th harmonic magnitude" = 0.0;
+                      "6th harmonic magnitude" = 0.0;
+                      "7th harmonic magnitude" = 0.0;
+                      "8th harmonic magnitude" = 0.0;
+                      "9th harmonic magnitude" = 0.0;
+                      "10th harmonic magnitude" = 0.0;
+                    };
+                  }
+                ];
+                inputs = ["eq_hp:In"];
+                links = [
+                  {
+                    output = "eq_hp:Out";
+                    input = "eq_warmth:In";
+                  }
+                  {
+                    output = "eq_warmth:Out";
+                    input = "eq_box_cut:In";
+                  }
+                  {
+                    output = "eq_box_cut:Out";
+                    input = "eq_mud_cut:In";
+                  }
+                  {
+                    output = "eq_mud_cut:Out";
+                    input = "compressor:Input";
+                  }
+                  {
+                    output = "compressor:Output";
+                    input = "eq_presence:In";
+                  }
+                  {
+                    output = "eq_presence:Out";
+                    input = "eq_definition:In";
+                  }
+                  {
+                    output = "eq_definition:Out";
+                    input = "eq_clarity:In";
+                  }
+                  {
+                    output = "eq_clarity:Out";
+                    input = "eq_air:In";
+                  }
+                  {
+                    output = "eq_air:Out";
+                    input = "maximiser:Input";
+                  }
+                  {
+                    output = "maximiser:Output";
+                    input = "rnnoise:Input";
+                  }
+                  {
+                    output = "rnnoise:Output";
+                    input = "speex:Input";
+                  }
+                  {
+                    output = "speex:Output";
+                    input = "harmonics:Input";
+                  }
+                ];
+                outputs = ["harmonics:Output"];
+              };
+              "capture.props" = {
+                "node.name" = "capture.sm7b";
+                "audio.position" = ["FL"];
+                "stream.dont-remix" = true;
+                "node.passive" = true;
+                # Only ever capture from the Scarlett. If it is absent, wait for it
+                # (dont-fallback) instead of grabbing some other source (e.g. the
+                # webcam mic), and stay alive while waiting (linger) instead of
+                # being torn down. See wireplumber find-defined-target.lua.
+                "node.dont-fallback" = true;
+                "node.linger" = true;
+                "target.object" = "alsa_input.usb-Focusrite_Scarlett_2i2_4th_Gen_S2AJV133401118-00.HiFi__Mic1__source";
+              };
+              "playback.props" = {
+                "node.name" = "SM7B_Processed";
+                "node.description" = "SM7B Processed (Shure SM7B + Scarlett 2i2 4th Gen)";
+                "media.class" = "Audio/Source";
+                "audio.channels" = 1;
+                "audio.position" = ["FL"];
+                "priority.session" = 2000;
+              };
             };
-            "capture.props" = {
-              "node.name" = "capture.sm7b";
-              "audio.position" = ["FL"];
-              "stream.dont-remix" = true;
-              "node.passive" = true;
-              # Only ever capture from the Scarlett. If it is absent, wait for it
-              # (dont-fallback) instead of grabbing some other source (e.g. the
-              # webcam mic), and stay alive while waiting (linger) instead of
-              # being torn down. See wireplumber find-defined-target.lua.
-              "node.dont-fallback" = true;
-              "node.linger" = true;
-              "target.object" = "alsa_input.usb-Focusrite_Scarlett_2i2_4th_Gen_S2AJV133401118-00.HiFi__Mic1__source";
-            };
-            "playback.props" = {
-              "node.name" = "SM7B_Processed";
-              "node.description" = "SM7B Processed (Shure SM7B + Scarlett 2i2 4th Gen)";
-              "media.class" = "Audio/Source";
-              "audio.channels" = 1;
-              "audio.position" = ["FL"];
-              "priority.session" = 2000;
-            };
-          };
-        }
-      ];
-    };
+          }
+        ];
+      }))
+    ];
   };
 }
