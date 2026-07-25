@@ -354,8 +354,13 @@ in {
           # no process is actively using them — this is normal kernel behaviour for
           # statically reserved huge pages (HugePages_Total=16384, HugePages_Free=16384
           # in /proc/meminfo while the VM is not running).
+          # hugepagesz=2M defines the 2 MB hugepage pool but no longer statically
+          # reserves it. vanix reserves the pages it needs on demand at up and frees
+          # them at down, see ADR 0026 in the vanix repo, so the pool is empty when no
+          # guest runs and the host keeps its full RAM. The old hugepages=16384, a 32 GB
+          # boot reservation for the deprecated Looking Glass VM, is removed, and the
+          # pre allocation note above no longer applies, trim it on the next edit.
           "hugepagesz=2M"
-          "hugepages=16384"
           # Disable transparent hugepages: THP's background compaction competes
           # with real-time vCPU workloads and causes unpredictable latency spikes.
           "transparent_hugepage=never"
