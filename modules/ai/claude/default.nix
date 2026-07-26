@@ -23,6 +23,11 @@
     ];
   };
   jsonFormat = pkgs.formats.json {};
+  # The Bash tool runs $SHELL. The login shell here is zsh, and zsh performs no
+  # word splitting on unquoted expansions, so bash idioms the model produces by
+  # reflex (for f in $(cmd), set -- $var, kill $(pgrep x)) silently collapse to a
+  # single argument. Forcing bash for agent sessions removes that whole class of
+  # bugs deterministically. The interactive login shell stays zsh.
   claude = pkgs.stdenv.mkDerivation {
     inherit (pkgs.claude-code) pname version;
     dontUnpack = true;
@@ -30,6 +35,7 @@
     installPhase = ''
       mkdir -p $out/bin
       makeBinaryWrapper ${pkgs.claude-code}/bin/claude $out/bin/claude \
+        --set SHELL ${pkgs.bashInteractive}/bin/bash \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping \
         "--append-flags" \
@@ -45,6 +51,7 @@
     installPhase = ''
       mkdir -p $out/bin
       makeBinaryWrapper ${pkgs.codex}/bin/codex $out/bin/codex \
+        --set SHELL ${pkgs.bashInteractive}/bin/bash \
         --set CODEX_HOME /home/${user}/.config/codex \
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
     '';
@@ -248,6 +255,38 @@
     - **German uses real umlauts.** When writing German, always use the real
       characters for o, a, u with diaeresis and the sharp s, never the ASCII
       replacements oe, ae, ue, ss.
+
+    # Shell
+
+    The Bash tool runs bash, because the claude wrapper forces `SHELL` to
+    bashInteractive. Inside the Bash tool, bash rules apply and unquoted
+    expansions word split as usual.
+
+    **The login shell is zsh, and zsh does no word splitting.** This matters for
+    everything that leaves the Bash tool, so for a command handed to the user to
+    run, a `zsh -c ...`, a `.zshrc` snippet, a Nix module that writes zsh code,
+    and any host where `SHELL` is zsh again. In zsh an unquoted parameter or
+    command substitution stays exactly one word.
+
+    - `for f in $(ls)` runs the body once, with the entire output as one word.
+    - `set -- $var` sets one positional parameter, not several.
+    - `kill $(pgrep foo)` passes all pids as a single argument.
+    - An unquoted empty variable expands to no argument at all, not to one empty
+      argument.
+    - A glob that matches nothing is a fatal error, `no matches found`, and the
+      command never runs. Quote the pattern or `setopt nullglob`.
+
+    The zsh idioms that actually work.
+
+    - `''${=var}` splits one expansion, `setopt shwordsplit` switches the whole
+      script to bash behaviour.
+    - `arr=(''${(f)"$(cmd)"})` splits command output into an array on newlines,
+      then pass it as `cmd "''${arr[@]}"`.
+    - `while IFS= read -r line; do ...; done <<< "$out"` behaves identically in
+      both shells and is the safe default.
+
+    When in doubt, check first with `echo ''${ZSH_VERSION-none} ''${BASH_VERSION-none}`
+    instead of assuming.
 
     # NixOS System
 
@@ -635,6 +674,7 @@
       installPhase = ''
         mkdir -p $out/bin
         makeBinaryWrapper ${pkgs.claude-code}/bin/claude $out/bin/claude${suffix} \
+          --set SHELL ${pkgs.bashInteractive}/bin/bash \
           --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude${suffix} \
           --set CLAUDE_PEON_DIR /home/${user}/.config/claude${suffix}/hooks/peon-ping \
           "--append-flags" \
@@ -768,6 +808,39 @@ in {
                 };
                 ".config/codex/AGENTS.md" = {
                   text = ''
+                    # Shell
+
+                    Shell commands run in bash, because the codex wrapper forces
+                    `SHELL` to bashInteractive. Inside the shell tool, bash rules apply
+                    and unquoted expansions word split as usual.
+
+                    **The login shell is zsh, and zsh does no word splitting.** This
+                    matters for everything that leaves the shell tool, so for a command
+                    handed to the user to run, a `zsh -c ...`, a `.zshrc` snippet, a Nix
+                    module that writes zsh code, and any host where `SHELL` is zsh again.
+                    In zsh an unquoted parameter or command substitution stays exactly
+                    one word.
+
+                    - `for f in $(ls)` runs the body once, with the entire output as one word.
+                    - `set -- $var` sets one positional parameter, not several.
+                    - `kill $(pgrep foo)` passes all pids as a single argument.
+                    - An unquoted empty variable expands to no argument at all, not to one
+                      empty argument.
+                    - A glob that matches nothing is a fatal error, `no matches found`, and
+                      the command never runs. Quote the pattern or `setopt nullglob`.
+
+                    The zsh idioms that actually work.
+
+                    - `''${=var}` splits one expansion, `setopt shwordsplit` switches the
+                      whole script to bash behaviour.
+                    - `arr=(''${(f)"$(cmd)"})` splits command output into an array on
+                      newlines, then pass it as `cmd "''${arr[@]}"`.
+                    - `while IFS= read -r line; do ...; done <<< "$out"` behaves identically
+                      in both shells and is the safe default.
+
+                    When in doubt, check first with
+                    `echo ''${ZSH_VERSION-none} ''${BASH_VERSION-none}` instead of assuming.
+
                     # NixOS System
 
                     This system runs NixOS. Most tools (`python`, `jq`, `curl`, `node`, etc.) are NOT in PATH.
