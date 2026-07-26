@@ -9,6 +9,7 @@
     (import ./elgato {inherit inputs pkgs lib;})
     (import ./evglow {inherit inputs pkgs lib;})
     (import ./firmware {inherit lib;})
+    (import ./ftdi {inherit lib;})
     (import ./hyprhook {inherit inputs pkgs lib;})
     (import ./input-remapper {inherit inputs pkgs lib;})
     (import ./printing {inherit inputs pkgs lib;})
