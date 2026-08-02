@@ -7,13 +7,13 @@
 }:
 stdenv.mkDerivation rec {
   pname = "sc0710";
-  version = "2026.03.21-1";
+  version = "2026.07.29-1";
 
   src = fetchFromGitHub {
     owner = "Nakildias";
     repo = "sc0710";
-    rev = "f1f5a722ccbdfc571450d9397e5e1b85da31f9d3";
-    hash = "sha256-8dFfGaMkJfRdHU98P+qXcwb4lYh9fTtk6rFz5X7xjOg=";
+    rev = "cbf0ba52b0f749b4f3ea7f79d92f50e1a892f56d";
+    hash = "sha256-xRMCL4HM8wo3LY3mDuUniFo8/9/asx/h6ydFSLckjZE=";
   };
 
   nativeBuildInputs = kernel.moduleBuildDependencies ++ [xz];
