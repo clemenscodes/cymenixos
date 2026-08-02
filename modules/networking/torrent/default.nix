@@ -56,7 +56,6 @@ in {
     services = {
       mullvad-vpn = {
         inherit (cfg.torrent) enable;
-        package = pkgs.mullvad-vpn;
       };
     };
     systemd = {
