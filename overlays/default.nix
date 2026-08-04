@@ -7,6 +7,7 @@
 }: [
   (import ./cymenixos-scripts.nix)
   (import ./grub2.nix)
+  (import ./hyprland.nix)
   (import ./obs-vkcapture.nix {inherit inputs;})
   (import ./tongo.nix)
   (import ./xmrig.nix)
