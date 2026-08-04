@@ -17,6 +17,11 @@
     config = {
       allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["wootility"];
     };
+    # wootility-launcher zieht hyprland herein. Ohne das glaze Overlay wäre das
+    # ein zweites, ungepatchtes hyprland. Siehe overlays/hyprland.nix.
+    overlays = [
+      (import ../../../overlays/hyprland.nix)
+    ];
   };
   wootilityVersion = "5.2.5";
   wootilitySrc = pkgs.fetchurl {

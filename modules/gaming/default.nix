@@ -20,8 +20,13 @@
           "rpcs3"
         ];
     };
+    # Dieses pkgs wird an den gesamten gaming Teilbaum weitergereicht, und
+    # ./hyprland, ./steam und ./w3champions ziehen darüber hyprland herein.
+    # Ohne das glaze Overlay wäre das ein zweites, ungepatchtes hyprland, das
+    # weiterhin am FetchContent Fallback scheitert. Siehe overlays/hyprland.nix.
     overlays = [
       (inputs.lutris-overlay.overlays.lutris)
+      (import ../../overlays/hyprland.nix)
     ];
   };
   inherit (config.modules.boot.impermanence) persistPath;
