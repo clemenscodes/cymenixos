@@ -26,6 +26,7 @@
       rpcs3
       pkgs.coreutils
       pkgs.gnugrep
+      pkgs.gawk
       pkgs.gnused
       pkgs.findutils
       pkgs.procps
@@ -46,25 +47,55 @@
         exit 1
       fi
 
-      # Die Erfolgsmeldungen nach einer Installation sind modale Boxen, die auf
-      # einen Klick warten. ShowBox ueberspringt sie, wenn ihr GUI Schluessel
-      # auf false steht, deshalb werden die Schluessel vor jedem Lauf gesetzt.
+      # RPCS3 schreibt CurrentSettings.ini im Betrieb selbst, sie kann daher
+      # keine Verknuepfung in den Store sein. Die gewuenschten Schluessel werden
+      # stattdessen vor jedem Lauf gesetzt, das bleibt idempotent und laesst
+      # alles andere unangetastet.
       set_ini_key() {
-        key="$1"
-        value="$2"
-        if [ ! -f "$gui_settings" ]; then
-          printf "[main_window]\n" > "$gui_settings"
-        fi
-        if grep -q "^$key=" "$gui_settings"; then
-          sed -i "s/^$key=.*/$key=$value/" "$gui_settings"
-        else
-          sed -i "0,/^\[main_window\]/s//[main_window]\n$key=$value/" "$gui_settings"
-        fi
+        section="[$1]"
+        key="$2"
+        value="$3"
+        touch "$gui_settings"
+        awk -v section="$section" -v key="$key" -v value="$value" '
+          /^\[/ {
+            if (insec && !done) {
+              print key "=" value
+              done = 1
+            }
+            insec = ($0 == section)
+            if (insec) {
+              seensec = 1
+            }
+          }
+          insec && index($0, key "=") == 1 {
+            print key "=" value
+            done = 1
+            next
+          }
+          { print }
+          END {
+            if (!seensec) {
+              print section
+              print key "=" value
+            } else if (!done) {
+              print key "=" value
+            }
+          }
+        ' "$gui_settings" > "$gui_settings.tmp" && mv "$gui_settings.tmp" "$gui_settings"
       }
 
-      set_ini_key infoBoxEnabledInstallPUP false
-      set_ini_key infoBoxEnabledInstallPKG false
-      set_ini_key infoBoxEnabledWelcome false
+      # Die Erfolgsmeldungen nach einer Installation sind modale Boxen, die auf
+      # einen Klick warten. ShowBox ueberspringt sie, wenn ihr Schluessel auf
+      # false steht.
+      set_ini_key main_window infoBoxEnabledInstallPUP false
+      set_ini_key main_window infoBoxEnabledInstallPKG false
+      set_ini_key main_window infoBoxEnabledWelcome false
+      set_ini_key Meta currentStylesheet "${cfg.rpcs3.theme}"
+
+      if pgrep -x rpcs3 > /dev/null 2>&1; then
+        echo "RPCS3 laeuft und ueberschreibt CurrentSettings.ini beim Beenden," >&2
+        echo "die Oberflaechen Einstellungen greifen erst nach einem Neustart." >&2
+      fi
 
       # RPCS3 beendet sich nach einer Installation ueber die Kommandozeile
       # nicht selbst, es bleibt im Hauptfenster stehen. Der Exitcode taugt also
@@ -220,6 +251,11 @@ in {
         emulation = {
           rpcs3 = {
             enable = lib.mkEnableOption "Enable rpcs3 emulation (PlayStation 3)" // {default = false;};
+            theme = lib.mkOption {
+              type = lib.types.str;
+              default = "Darker Style by TheMitoSan";
+              description = "Name of the GUI stylesheet from GuiConfigs, without the qss suffix";
+            };
             uncharted2 = {
               source = lib.mkOption {
                 type = lib.types.str;
