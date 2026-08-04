@@ -17,6 +17,7 @@
           "steam-original"
           "steam-run"
           "steam-unwrapped"
+          "rpcs3"
         ];
     };
     overlays = [

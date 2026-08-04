@@ -10,17 +10,7 @@
 }: let
   cfg = config.modules.gaming.emulation;
   ps3bios = import ./firmware {inherit pkgs;};
-  rpcs3 = pkgs.rpcs3.overrideAttrs (oldAttrs: {
-    version = "0.0.37";
-    src = pkgs.fetchFromGitHub {
-      owner = "RPCS3";
-      repo = "rpcs3";
-      rev = "v0.0.37";
-      hash = "sha256-/ve1qe76Rc+mXHemq8DI2U9IP6+tPV5m5SNh/wmppEw=";
-      fetchSubmodules = true;
-    };
-    patches = [];
-  });
+  rpcs3 = pkgs.rpcs3;
   user = config.modules.users.name;
   uncharted = pkgs.writeShellApplication {
     name = "uncharted";
@@ -49,12 +39,6 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
-    services = {
-      miniupnpd = {
-        enable = true;
-        upnp = true;
-      };
-    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${user} = {
@@ -1056,7 +1040,7 @@ in {
               };
             };
             persistence = lib.mkIf config.modules.boot.enable {
-              "${config.modules.boot.impermanence.persistPath}/home/${user}" = {
+              "${config.modules.boot.impermanence.persistPath}" = {
                 directories = [".config/rpcs3"];
               };
             };
