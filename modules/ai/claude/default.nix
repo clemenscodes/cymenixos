@@ -728,8 +728,14 @@
       ".config/claude${suffix}/CLAUDE.md" = {
         text = claudeMdText;
       };
+      # Claude Code rewrites settings.json at runtime (/effort, /model and other
+      # commands), so it must be a real writable file instead of a store symlink.
+      # The copy is refreshed on every activation, so runtime edits are lost on
+      # the next rebuild.
       ".config/claude${suffix}/settings.json" = {
         source = mkSettings peonshBin;
+        force = true;
+        mutable = true;
       };
     };
   peonsh1 = mkPeonsh "1";
