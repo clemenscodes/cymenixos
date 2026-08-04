@@ -169,6 +169,33 @@
 
       install_tree "${cfg.rpcs3.uncharted2.source}/Patches"
       install_tree "${cfg.rpcs3.uncharted2.source}/DLC"
+
+      # Nur was unter dev_hdd0 liegt findet RPCS3 von allein. Disc Dumps
+      # ausserhalb kennt es ausschliesslich ueber games.yml, eine Zuordnung von
+      # Seriennummer auf das Verzeichnis mit der PS3_DISC.SFB. Ohne diesen
+      # Eintrag bleibt die Spieleliste leer und die spielspezifische
+      # Konfiguration greift nicht. RPCS3 schreibt die Datei selbst, sie kann
+      # daher keine Verknuepfung in den Store sein.
+      register_discs() {
+        root="$1"
+        [ -d "$root" ] || return 0
+        games="$config_dir/games.yml"
+        touch "$games"
+        while IFS= read -r sfb; do
+          disc=$(dirname "$sfb")
+          sfo="$disc/PS3_GAME/PARAM.SFO"
+          [ -f "$sfo" ] || continue
+          serial=$(tr -d "\0" < "$sfo" | grep -oE "B[A-Z]{3}[0-9]{5}" | head -1)
+          [ -n "$serial" ] || continue
+          if grep -q "^$serial:" "$games"; then
+            continue
+          fi
+          echo "Registering $serial at $disc"
+          printf "%s: %s\n" "$serial" "$disc" >> "$games"
+        done < <(find "$root" -name PS3_DISC.SFB)
+      }
+
+      register_discs "${cfg.rpcs3.uncharted2.source}"
       echo "RPCS3 provisioning complete"
     '';
   };
