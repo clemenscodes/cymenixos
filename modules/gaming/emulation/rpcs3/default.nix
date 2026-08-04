@@ -10,8 +10,168 @@
 }: let
   cfg = config.modules.gaming.emulation;
   ps3bios = import ./firmware {inherit pkgs;};
-  rpcs3 = pkgs.rpcs3;
+  # RPCS3 kann Firmware und Pakete ausschliesslich ueber die GUI installieren,
+  # headless bricht es mit "Cannot perform installation in headless mode!" ab.
+  # Der Patch laesst die vier Bestaetigungsdialoge dieses Pfades unter
+  # RPCS3_UNATTENDED automatisch zusagen, damit das Provisioning ohne Klicks
+  # durchlaeuft. Die beiden Erfolgsmeldungen danach haengen an GUI Settings und
+  # werden ueber CurrentSettings.ini abgeschaltet, nicht ueber den Patch.
+  rpcs3 = pkgs.rpcs3.overrideAttrs (oldAttrs: {
+    patches = (oldAttrs.patches or []) ++ [./unattended-install.patch];
+  });
   user = config.modules.users.name;
+  rpcs3-provision = pkgs.writeShellApplication {
+    name = "rpcs3-provision";
+    runtimeInputs = [
+      rpcs3
+      pkgs.coreutils
+      pkgs.gnugrep
+      pkgs.gnused
+      pkgs.findutils
+      pkgs.procps
+      pkgs.util-linux
+      pkgs.xvfb-run
+    ];
+    text = ''
+      config_dir="$HOME/.config/rpcs3"
+      log_file="$HOME/.cache/rpcs3/RPCS3.log"
+      stamp_dir="$config_dir/.provisioned"
+      pup="$config_dir/bios/PS3UPDAT.PUP"
+      gui_settings="$config_dir/GuiConfigs/CurrentSettings.ini"
+
+      mkdir -p "$stamp_dir" "$config_dir/GuiConfigs" "$HOME/.cache/rpcs3"
+
+      if [ ! -f "$pup" ]; then
+        echo "PS3UPDAT.PUP not found at $pup" >&2
+        exit 1
+      fi
+
+      # Die Erfolgsmeldungen nach einer Installation sind modale Boxen, die auf
+      # einen Klick warten. ShowBox ueberspringt sie, wenn ihr GUI Schluessel
+      # auf false steht, deshalb werden die Schluessel vor jedem Lauf gesetzt.
+      set_ini_key() {
+        key="$1"
+        value="$2"
+        if [ ! -f "$gui_settings" ]; then
+          printf "[main_window]\n" > "$gui_settings"
+        fi
+        if grep -q "^$key=" "$gui_settings"; then
+          sed -i "s/^$key=.*/$key=$value/" "$gui_settings"
+        else
+          sed -i "0,/^\[main_window\]/s//[main_window]\n$key=$value/" "$gui_settings"
+        fi
+      }
+
+      set_ini_key infoBoxEnabledInstallPUP false
+      set_ini_key infoBoxEnabledInstallPKG false
+      set_ini_key infoBoxEnabledWelcome false
+
+      # RPCS3 beendet sich nach einer Installation ueber die Kommandozeile
+      # nicht selbst, es bleibt im Hauptfenster stehen. Der Exitcode taugt also
+      # nicht als Signal. Autoritativ ist stattdessen das Log, entweder eine
+      # eindeutige Erfolgszeile oder das Erreichen der erwarteten Anzahl an
+      # Erfolgszeilen. Erst danach wird der Prozess beendet.
+      # Alle Instanzen schreiben in dieselbe RPCS3.log, ein Ueberbleibsel wuerde
+      # also die Zaehlung des naechsten Laufs verfaelschen. xvfb-run startet
+      # RPCS3 als Enkelprozess, ein kill auf die Startprozessnummer erwischt ihn
+      # nicht. setsid macht den Start zum Anfuehrer einer eigenen Prozessgruppe,
+      # dadurch beendet ein kill auf die negierte Nummer RPCS3 und Xvfb
+      # zuverlaessig mit.
+      launch_rpcs3() {
+        : > "$log_file"
+        setsid xvfb-run -a env -u WAYLAND_DISPLAY QT_QPA_PLATFORM=xcb RPCS3_UNATTENDED=1 \
+          rpcs3 "$@" >/dev/null 2>&1 &
+        rpcs3_pid=$!
+      }
+
+      stop_rpcs3() {
+        kill -TERM -"$rpcs3_pid" >/dev/null 2>&1 || true
+        waited=0
+        while kill -0 -"$rpcs3_pid" >/dev/null 2>&1 && [ "$waited" -lt 10 ]; do
+          sleep 1
+          waited=$((waited + 1))
+        done
+        kill -KILL -"$rpcs3_pid" >/dev/null 2>&1 || true
+        wait "$rpcs3_pid" >/dev/null 2>&1 || true
+      }
+
+      log_count() {
+        grep -cE "$1" "$log_file" 2>/dev/null || true
+      }
+
+      # Wartet, bis das Log so viele Erfolgszeilen zeigt, wie Dateien uebergeben
+      # wurden. Bricht ab, sobald RPCS3 eine Fehlermeldung loggt oder der
+      # Prozess stirbt, damit ein Fehlschlag nicht bis zum Timeout haengt.
+      await_install() {
+        want_firmware="$1"
+        want_packages="$2"
+        want_licenses="$3"
+        deadline="$4"
+        waited=0
+        while [ "$waited" -lt "$deadline" ]; do
+          sleep 1
+          waited=$((waited + 1))
+          if [ "$(log_count "Successfully installed PS3 firmware")" -ge "$want_firmware" ] &&
+            [ "$(log_count "Successfully installed .* \(title_id=")" -ge "$want_packages" ] &&
+            [ "$(log_count "Successfully copied")" -ge "$want_licenses" ]; then
+            return 0
+          fi
+          if grep -qE "installation failed|Failed to install|Failure!|Partially installed" "$log_file" 2>/dev/null; then
+            return 1
+          fi
+          if ! kill -0 "$rpcs3_pid" 2>/dev/null; then
+            return 1
+          fi
+        done
+        return 1
+      }
+
+      if [ ! -f "$config_dir/dev_flash/vsh/etc/version.txt" ]; then
+        echo "Installing PS3 firmware"
+        launch_rpcs3 --installfw "$pup"
+        if await_install 1 0 0 300; then
+          stop_rpcs3
+          echo "Firmware installed"
+        else
+          stop_rpcs3
+          echo "Firmware installation failed" >&2
+          exit 1
+        fi
+      fi
+
+      # InstallPackages nimmt auch ein Verzeichnis und installiert dessen
+      # Inhalt in einer Sitzung. Ein Start pro Verzeichnis statt pro Datei
+      # spart den mehrsekuendigen Start von RPCS3 je Paket. get_dir_entries
+      # steigt nicht in Unterverzeichnisse ab, deshalb wird jedes Blatt
+      # einzeln uebergeben.
+      install_tree() {
+        root="$1"
+        [ -d "$root" ] || return 0
+        while IFS= read -r dir; do
+          stamp="$stamp_dir/$(echo "$dir" | tr -c "A-Za-z0-9" "_").done"
+          if [ -f "$stamp" ]; then
+            continue
+          fi
+          pkgs=$(find "$dir" -maxdepth 1 -iname "*.pkg" | wc -l)
+          lics=$(find "$dir" -maxdepth 1 \( -iname "*.rap" -o -iname "*.edat" \) | wc -l)
+          echo "Installing $(basename "$dir") ($pkgs packages, $lics licenses)"
+          launch_rpcs3 --installpkg "$dir"
+          if await_install 0 "$pkgs" "$lics" 900; then
+            stop_rpcs3
+            touch "$stamp"
+          else
+            stop_rpcs3
+            echo "Failed to install packages from $dir" >&2
+            return 1
+          fi
+        done < <(find "$root" \( -iname "*.pkg" -o -iname "*.rap" -o -iname "*.edat" \) -printf "%h\n" | sort -u)
+      }
+
+      install_tree "${cfg.rpcs3.uncharted2.source}/Patches"
+      install_tree "${cfg.rpcs3.uncharted2.source}/DLC"
+      echo "RPCS3 provisioning complete"
+    '';
+  };
   uncharted = pkgs.writeShellApplication {
     name = "uncharted";
     runtimeInputs = [
@@ -33,15 +193,47 @@ in {
         emulation = {
           rpcs3 = {
             enable = lib.mkEnableOption "Enable rpcs3 emulation (PlayStation 3)" // {default = false;};
+            uncharted2 = {
+              source = lib.mkOption {
+                type = lib.types.str;
+                default = "/mnt/raid/Games/U2";
+                description = "Directory containing the Uncharted 2 disc dump, DLC and Patches";
+              };
+            };
           };
         };
       };
     };
   };
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
+    systemd = {
+      tmpfiles = {
+        rules = [
+          "L /home/${user}/Games/U2 - - - - ${cfg.rpcs3.uncharted2.source}"
+        ];
+      };
+    };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
         ${user} = {
+          systemd = {
+            user = {
+              services = {
+                rpcs3-provision = {
+                  Unit = {
+                    Description = "Provision RPCS3 firmware, game patches and DLC";
+                  };
+                  Service = {
+                    Type = "oneshot";
+                    ExecStart = "${rpcs3-provision}/bin/rpcs3-provision";
+                  };
+                  Install = {
+                    WantedBy = ["default.target"];
+                  };
+                };
+              };
+            };
+          };
           xdg = {
             desktopEntries = {
               "Uncharted 2： Among Thieves" = {
@@ -60,6 +252,7 @@ in {
             packages = [
               pkgs.rusty-psn-gui
               rpcs3
+              rpcs3-provision
               uncharted
             ];
             file = {
@@ -73,59 +266,12 @@ in {
                 source = "${rpcs3}/share/rpcs3/Icons/ui";
                 recursive = true;
               };
-              ".config/rpcs3/GuiConfigs/check_mark_white.png" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/check_mark_white.png";
-              };
-              ".config/rpcs3/GuiConfigs/list_arrow_blue.png" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_blue.png";
-              };
-              ".config/rpcs3/GuiConfigs/list_arrow_down_blue.png" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_down_blue.png";
-              };
-              ".config/rpcs3/GuiConfigs/list_arrow_down_green.png" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_down_green.png";
-              };
-              ".config/rpcs3/GuiConfigs/list_arrow_down_white.png" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_down_white.png";
-              };
-              ".config/rpcs3/GuiConfigs/list_arrow_green.png" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_green.png";
-              };
-              ".config/rpcs3/GuiConfigs/list_arrow_white.png" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/list_arrow_white.png";
-              };
-              ".config/rpcs3/GuiConfigs/ModernBlue Theme by TheMitoSan.qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/ModernBlue Theme by TheMitoSan.qss";
-              };
-              ".config/rpcs3/GuiConfigs/Nekotekina by GooseWing.qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/Nekotekina by GooseWing.qss";
-              };
-              ".config/rpcs3/GuiConfigs/Skyline (Nightfall).qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/Skyline (Nightfall).qss";
-              };
-              ".config/rpcs3/GuiConfigs/Skyline.qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/Skyline.qss";
-              };
-              ".config/rpcs3/GuiConfigs/YoRHa by Ani.qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/YoRHa by Ani.qss";
-              };
-              ".config/rpcs3/GuiConfigs/YoRHa-background.jpg" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/YoRHa-background.jpg";
-              };
-              ".config/rpcs3/GuiConfigs/Classic (Bright).qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/Classic (Bright).qss";
-              };
-              ".config/rpcs3/GuiConfigs/Darker Style by TheMitoSan.qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/Darker Style by TheMitoSan.qss";
-              };
-              ".config/rpcs3/GuiConfigs/Envy.qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/Envy.qss";
-              };
-              ".config/rpcs3/GuiConfigs/Kuroi (Dark) by Ani.qss" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/Kuroi (Dark) by Ani.qss";
-              };
-              ".config/rpcs3/GuiConfigs/kot-bg.jpg" = {
-                source = "${rpcs3}/share/rpcs3/GuiConfigs/kot-bg.jpg";
+              # RPCS3 legt in GuiConfigs seine CurrentSettings.ini an, das
+              # Verzeichnis muss also beschreibbar bleiben. recursive verlinkt
+              # jede Datei einzeln und laesst das Verzeichnis selbst frei.
+              ".config/rpcs3/GuiConfigs" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs";
+                recursive = true;
               };
               ".config/rpcs3/input_configs/active_input_configurations.yml" = {
                 text = ''
