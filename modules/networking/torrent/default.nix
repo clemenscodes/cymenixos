@@ -38,6 +38,13 @@ in {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = [
             "/etc/mullvad-vpn"
+            # Impermanence wipes the root subvolume on every boot and the mullvad
+            # package ships no bundled relay list. Without the cached relays.json
+            # the daemon comes up with an empty relay list, auto-connect fails with
+            # "no relays matching current constraints", and the resulting blocked
+            # firewall state also kills DNS, so refetching the list stalls for
+            # minutes. Persisting the cache lets the daemon connect right away.
+            "/var/cache/mullvad-vpn"
           ];
           users = {
             ${config.modules.users.user} = {
