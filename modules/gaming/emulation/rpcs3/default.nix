@@ -241,8 +241,12 @@
   # theme name then finds nothing. That was the first attempt and it did not
   # render.
   #
-  # The source is the disc icon, squared to 256 by 256 because an icon theme
-  # directory promises a size and a disc icon is 320 by 176.
+  # The source is the disc icon at 256 by 256, because an icon theme directory
+  # promises a size. A disc icon is 320 by 176 and sits on a black field, so it
+  # is trimmed to the artwork first and then centred. Fitting the untrimmed
+  # image into the square wasted a third of the width on empty background and
+  # left the logo looking tiny in a launcher, and cropping to a square instead
+  # cuts the title in half.
   #
   # The file name, the desktop entry id and the Icon key all have to be the same
   # word. uncharted2.png, uncharted2.desktop, Icon=uncharted2.
