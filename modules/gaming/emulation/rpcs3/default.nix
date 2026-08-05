@@ -237,6 +237,7 @@
       # attribute that survived joymouse being restructured, and a launcher has
       # no business caring whether it gets the glibc or the static build.
       inputs.joymouse.packages.${system}.default
+      pkgs.procps
       pkgs.util-linux
     ];
     # The VPN stays up. This used to disconnect it for the length of a session
@@ -249,6 +250,17 @@
     # instead, so no name lookup leaves the machine and nothing has to be
     # switched off. See the Net section of the Uncharted 2 configuration.
     text = ''
+      # Starting a second instance gets you a modal box complaining about the
+      # first one and nothing else, so there is nothing useful to do here.
+      # The check comes before joymouse is started, because bailing out after
+      # would leave exactly the stray daemon this launcher is careful to avoid.
+      #
+      # The name is the wrapped binary rather than `rpcs3`, because that is what
+      # the process is actually called once the wrapper has exec'd into it.
+      if pgrep -x .rpcs3-wrapped > /dev/null; then
+        exit 0
+      fi
+
       # joymouse lives exactly as long as the game and not a moment longer.
       # PR_SET_PDEATHSIG has the kernel signal it the moment its parent goes
       # away, and the exec below makes RPCS3 that parent, in this very process.
@@ -381,8 +393,361 @@ in {
               ".config/rpcs3/bios" = {
                 source = "${ps3bios}/bios";
               };
+              # What patches EXIST. The community database, carried whole.
+              # The emulator wide configuration. Every game without a file of its own runs
+              # on this, so it is the baseline rather than a detail. It was the last
+              # piece still living only on disk, which meant a fresh machine started
+              # from RPCS3's own defaults and nobody would notice until a second game
+              # behaved differently.
+              #
+              # Taken from the emulator itself, so what is declared is what ran. Checked
+              # key by key against RPCS3's compiled in defaults: apart from the one line
+              # below it is stock, which is the point. Per game tuning belongs in a per
+              # game file, where it can be wrong for one title without being wrong for
+              # all of them.
+              #
+              # The one addition is the anisotropic filter, forced to its maximum. On
+              # this GPU it costs nothing measurable and it is the single setting that
+              # improves every game at once.
+              ".config/rpcs3/config.yml" = {
+                text = ''
+                  Core:
+                    PPU Decoder: Recompiler (LLVM)
+                    PPU Threads: 2
+                    PPU Debug: false
+                    PPU Calling History: false
+                    Save LLVM logs: false
+                    Use LLVM CPU: ""
+                    Max LLVM Compile Threads: 0
+                    PPU LLVM Greedy Mode: false
+                    LLVM Precompilation: true
+                    # Left alone deliberately, and not worth revisiting on
+                    # this machine. The alternatives pin threads with affinity
+                    # masks, and that table only has entries for CPU families
+                    # 0x17, 0x18 and 0x19, meaning Zen through Zen 3. This host
+                    # is family 0x1A, so no case matches, the mask stays at all
+                    # cores, and every mode behaves identically. Changing it
+                    # here would look like tuning and do nothing.
+                    Thread Scheduler Mode: Operating System
+                    Set DAZ and FTZ: false
+                    SPU Decoder: Recompiler (LLVM)
+                    SPU Reservation Busy Waiting Percentage 1: 100
+                    SPU Reservation Busy Waiting Enabled: false
+                    SPU GETLLAR Busy Waiting Percentage: 100
+                    Disable SPU GETLLAR Spin Optimization: false
+                    SPU Debug: false
+                    MFC Debug: false
+                    Preferred SPU Threads: 0
+                    SPU delay penalty: 3
+                    # Detects wait loops in SPU code and yields the thread
+                    # instead of spinning. RPCS3's own description is
+                    # improves performance and reduces CPU usage. The rare
+                    # failure mode is audio stuttering, which is loud and
+                    # obvious rather than subtle, so it is easy to catch.
+                    SPU loop detection: true
+                    Max SPURS Threads: 6
+                    # Ties smaller compiled units together, so the SPU
+                    # recompiler produces fewer and larger blocks and has more
+                    # to optimise across. Safe is the compatibility choice
+                    # rather than the fast one.
+                    SPU Block Size: Mega
+                    Accurate SPU DMA: false
+                    Accurate SPU Reservations: true
+                    Accurate Cache Line Stores: false
+                    Accurate RSX reservation access: false
+                    RSX FIFO Fetch Accuracy: Atomic
+                    SPU Verification: true
+                    SPU Cache: true
+                    SPU Profiler: false
+                    PPU Profiler: false
+                    MFC Commands Shuffling Limit: 0
+                    MFC Commands Timeout: 0
+                    MFC Commands Shuffling In Steps: false
+                    SPU XFloat Accuracy: Approximate
+                    Accurate PPU 128-byte Reservation Op Max Length: 0
+                    Stub PPU Traps: 0
+                    Precise SPU Verification: false
+                    PPU LLVM Java Mode Handling: true
+                    PPU Vector NaN Handling: true
+                    Use Accurate DFMA: true
+                    PPU Set Saturation Bit: false
+                    PPU Accurate Non-Java Mode: false
+                    PPU Accurate Vector NaN Values: false
+                    PPU Set FPCC Bits: false
+                    Debug Console Mode: false
+                    Hook static functions: false
+                    Libraries Control:
+                      []
+                    HLE lwmutex: false
+                    SPU LLVM Lower Bound: 0
+                    SPU LLVM Upper Bound: 18446744073709551615
+                    Clocks scale: 100
+                    SPU Wake-Up Delay: 0
+                    SPU Wake-Up Delay Thread Mask: 63
+                    Max CPU Preempt Count: 0
+                    Allow RSX CPU Preemptions: true
+                    Sleep Timers Accuracy: As Host
+                    Usleep Time Addend: 0
+                    Performance Report Threshold: 500
+                    Enable Performance Report: false
+                    Assume External Debugger: false
+                  VFS:
+                    Enable /host_root/: false
+                    Initialize Directories: true
+                    Limit disk cache size: false
+                    Disk cache maximum size (MB): 5120
+                    Empty /dev_hdd0/tmp/: true
+                  Video:
+                    Renderer: Vulkan
+                    Resolution: 1280x720
+                    Aspect ratio: 16:9
+                    Frame limit: Auto
+                    Second Frame Limit: 0
+                    MSAA: Auto
+                    Shader Mode: Async Recompiler (multi-threaded)
+                    Shader Precision: High
+                    VSync Mode: Disabled
+                    Write Color Buffers: false
+                    Write Depth Buffer: false
+                    Read Color Buffers: false
+                    Read Depth Buffer: false
+                    Handle RSX Memory Tiling: false
+                    Log shader programs: false
+                    Debug output: false
+                    Debug overlay: false
+                    Renderdoc Compatibility Mode: false
+                    Use GPU texture scaling: false
+                    Stretch To Display Area: false
+                    Force High Precision Z buffer: false
+                    Strict Rendering Mode: false
+                    Disable ZCull Occlusion Queries: false
+                    Disable Video Output: false
+                    Disable Vertex Cache: false
+                    Disable FIFO Reordering: false
+                    Enable Frame Skip: false
+                    Force CPU Blit: false
+                    Disable On-Disk Shader Cache: false
+                    Disable Vulkan Memory Allocator: false
+                    Use full RGB output range: true
+                    Strict Texture Flushing: false
+                    # Offloads the large RSX memory transfers onto a worker
+                    # thread. RPCS3 calls this an improvement for high core
+                    # processors and a slowdown for weak ones. This host has
+                    # thirty two threads, so it is on the good side of that.
+                    Multithreaded RSX: true
+                    Relaxed ZCULL Sync: false
+                    Force Hardware MSAA Resolve: false
+                    3D Display Enabled: false
+                    3D Display Mode: Disabled
+                    Screen size in inches: 24
+                    Debug Program Analyser: false
+                    Accurate ZCULL stats: true
+                    Consecutive Frames To Draw: 1
+                    Consecutive Frames To Skip: 1
+                    Resolution Scale: 100
+                    Anisotropic Filter Override: 16
+                    Texture LOD Bias Addend: 0
+                    Minimum Scalable Dimension: 16
+                    Shader Compiler Threads: 0
+                    Driver Recovery Timeout: 1000000
+                    Driver Wake-Up Delay: 0
+                    Vblank Rate: 60
+                    Vblank NTSC Fixup: false
+                    DECR memory layout: false
+                    Allow Host GPU Labels: false
+                    Disable MSL Fast Math: false
+                    Disable Asynchronous Memory Manager: false
+                    Output Scaling Mode: Bilinear
+                    Record With Overlays: true
+                    Disable Hardware ColorSpace Remapping: false
+                    FidelityFX CAS Sharpening Intensity: 50
+                    Vulkan:
+                      Adapter: ""
+                      Force primitive restart flag: false
+                      Exclusive Fullscreen Mode: Automatic
+                      Asynchronous Texture Streaming: false
+                      Asynchronous Queue Scheduler: Safe
+                      VRAM allocation limit (MB): 65536
+                      Use Re-BAR for GPU uploads: true
+                    Performance Overlay:
+                      Enabled: false
+                      Enable Framerate Graph: false
+                      Enable Frametime Graph: false
+                      Framerate datapoints: 50
+                      Frametime datapoints: 170
+                      Detail level: Medium
+                      Framerate graph detail level: All
+                      Frametime graph detail level: All
+                      Metrics update interval (ms): 350
+                      Font size (px): 10
+                      Position: Top Left
+                      Font: n023055ms.ttf
+                      Horizontal Margin (%): 4
+                      Vertical Margin (%): 7
+                      Center Horizontally: false
+                      Center Vertically: false
+                      Opacity (%): 70
+                      Body Color (hex): "#FFE138FF"
+                      Body Background (hex): "#002339FF"
+                      Title Color (hex): "#F26C24FF"
+                      Title Background (hex): "#00000000"
+                      Use Window Space: false
+                    Shader Loading Dialog:
+                      Allow custom background: true
+                      Darkening effect strength: 30
+                      Blur effect strength: 0
+                  Audio:
+                    Renderer: Cubeb
+                    Audio Provider: CellAudio
+                    RSXAudio Avport: HDMI 0
+                    Dump to file: false
+                    Convert to 16 bit: false
+                    Audio Format: Stereo
+                    Audio Formats: 0
+                    Audio Channel Layout: Automatic
+                    Audio Device: "@@@default@@@"
+                    Master Volume: 100
+                    Enable Buffering: true
+                    Desired Audio Buffer Duration: 34
+                    Enable Time Stretching: false
+                    Disable Sampling Skip: false
+                    Time Stretching Threshold: 75
+                    Microphone Type: "Null"
+                    Microphone Devices: "@@@@@@@@@@@@"
+                    Music Handler: Qt
+                  Input/Output:
+                    Keyboard: "Null"
+                    Mouse: Basic
+                    Camera: "Null"
+                    Camera type: Unknown
+                    Camera flip: None
+                    Camera ID: Default
+                    SDL Camera ID: Default
+                    Move: "Null"
+                    Buzz emulated controller: "Null"
+                    Turntable emulated controller: "Null"
+                    GHLtar emulated controller: "Null"
+                    Pad handler mode: Single-threaded
+                    Keep pads connected: false
+                    Pad handler sleep (microseconds): 1000
+                    Background input enabled: true
+                    Show move cursor: false
+                    Paint move spheres: false
+                    Allow move hue set by game: false
+                    Lock overlay input to player one: false
+                    Emulated Midi devices: Keyboardßßß@@@Keyboardßßß@@@Keyboardßßß@@@
+                    Load SDL GameController Mappings: true
+                    IO Debug overlay: false
+                    Mouse Debug overlay: false
+                    Fake Move Rotation Cone: 10
+                    Fake Move Rotation Cone (Vertical): 10
+                  System:
+                    License Area: SCEA
+                    Language: English (US)
+                    Keyboard Type: English keyboard (US standard)
+                    Enter button assignment: Enter with cross
+                    Date Format: ddmmyyyy
+                    Time Format: clock24
+                    Console time offset (s): 0
+                    System Name: RPCS3-582
+                    Console PSID: 0x94F3031EAAABD51779A2BA59D6827F7B
+                    HDD Model Name: ""
+                    HDD Serial Number: ""
+                    Process ARGV:
+                      {}
+                  Net:
+                    Internet enabled: Disconnected
+                    IP address: 0.0.0.0
+                    Bind address: 0.0.0.0
+                    DNS address: 8.8.8.8
+                    IP swap list: ""
+                    UPNP Enabled: false
+                    PSN status: Disconnected
+                    PSN Country: us
+                    Clans Enabled: false
+                  Savestate:
+                    Start Paused: false
+                    Suspend Emulation Savestate Mode: false
+                    Compatible Savestate Mode: false
+                    Inspection Mode Savestates: false
+                    Save Disc Game Data: false
+                    Maximum SaveState Files: 4
+                    Maximum SaveState Files Space (MiB): 4096
+                  Miscellaneous:
+                    Automatically start games after boot: true
+                    Exit RPCS3 when process finishes: false
+                    Pause emulation on RPCS3 focus loss: false
+                    Start games in fullscreen mode: true
+                    Prevent display sleep while running games: true
+                    Show trophy popups: true
+                    Show RPCN popups: true
+                    Show shader compilation hint: true
+                    Show PPU compilation hint: true
+                    Show autosave/autoload hint: false
+                    Show pressure intensity toggle hint: true
+                    Show analog limiter toggle hint: true
+                    Show mouse and keyboard toggle hint: true
+                    Show fatal error hints: false
+                    Show capture hints: true
+                    Use native user interface: true
+                    Use recursive scan: false
+                    GDB Server: 127.0.0.1:2345
+                    Silence All Logs: false
+                    Window Title Format: "FPS: %F | %R | %V | %T [%t]"
+                    Pause Emulation During Home Menu: false
+                    Play music during boot sequence: true
+                    Enable GameMode: false
+                  Log:
+                    {}
+                '';
+              };
               ".config/rpcs3/patches/patch.yml" = {
                 source = ./patch.yml;
+              };
+              # Which of them are switched ON. A separate file from the one
+              # above and easy to miss, because the definitions being declared
+              # looks like the job is done, while every patch still sits at its
+              # default of off.
+              #
+              # The list is written out here rather than the finished YAML,
+              # because the file is the same five lines repeated per patch with
+              # one name changing, and a list of names is the part anybody
+              # actually wants to read or edit. The hash identifies the game
+              # binary, the version has to match the disc revision, and both
+              # have to agree with an entry in patch.yml or the patch is simply
+              # ignored.
+              ".config/rpcs3/patch_config.yml" = {
+                text =
+                  let
+                    hash = "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
+                    title = "Uncharted 2: Among Thieves";
+                    serial = "BCES00757";
+                    version = "01.09";
+                    enabled = [
+                      "Skip Intro"
+                      "Unlock FPS"
+                      "Disable Mesh Trimming"
+                      "Enable GPU Lighting"
+                      "Disable SPU Post-processing"
+                      "Disable Depth of Field"
+                      "Disable Velocity Motion Blur"
+                      "Disable SSAO"
+                      "Disable Motion Blur"
+                    ];
+                    # Built from plain strings and not from an indented block,
+                    # because Nix strips the common indentation off a '' string
+                    # and YAML is indentation. A block here silently produced a
+                    # file where every patch name sat at the top level instead
+                    # of under the hash, which parses fine and applies nothing.
+                    entry =
+                      name:
+                      "  ${name}:\n"
+                      + "    \"${title}\":\n"
+                      + "      ${serial}:\n"
+                      + "        ${version}:\n"
+                      + "          Enabled: true\n";
+                  in
+                  "${hash}:\n" + lib.concatMapStrings entry enabled;
               };
               ".config/rpcs3/Icons/ui" = {
                 source = "${rpcs3}/share/rpcs3/Icons/ui";
@@ -1105,7 +1470,11 @@ in {
                   Core:
                     Accurate Cache Line Stores: false
                     Accurate PPU 128-byte Reservation Op Max Length: 0
-                    Accurate RSX reservation access: true
+                    # Back to RPCS3's default. Enabled it forces RSX pauses on
+                    # SPU atomic operations, so it serialises the graphics
+                    # thread against the SPUs by construction. It was the only
+                    # accuracy setting here raised above stock.
+                    Accurate RSX reservation access: false
                     Accurate SPU DMA: false
                     Accurate SPU Reservations: true
                     Allow RSX CPU Preemptions: true
@@ -1144,7 +1513,8 @@ in {
                     Preferred SPU Threads: 0
                     RSX FIFO Accuracy: Atomic
                     RSX FIFO Fetch Accuracy: Atomic
-                    SPU Block Size: Safe
+                    # As in the global configuration.
+                    SPU Block Size: Mega
                     SPU Cache: true
                     SPU Debug: false
                     SPU Decoder: Recompiler (LLVM)
@@ -1158,9 +1528,14 @@ in {
                     SPU Verification: true
                     SPU Wake-Up Delay: 0
                     SPU Wake-Up Delay Thread Mask: 63
-                    SPU XFloat Accuracy: Approximate
+                    # The fastest of the three. Float accuracy on the SPUs buys
+                    # correctness in games that need it, and this one is not
+                    # known to. First thing to put back to Approximate if
+                    # anything looks wrong in a way that is not obviously ZCULL.
+                    SPU XFloat Accuracy: Relaxed
                     SPU delay penalty: 3
-                    SPU loop detection: false
+                    # As in the global configuration.
+                    SPU loop detection: true
                     Save LLVM logs: false
                     Set DAZ and FTZ: false
                     Sleep Timers Accuracy: Usleep Only
@@ -1218,7 +1593,12 @@ in {
                     Show pressure intensity toggle hint: true
                     Show shader compilation hint: false
                     Show trophy popups: true
-                    Silence All Logs: true
+                    # Logging back on. This was the reason a broken RPCN
+                    # connection showed nothing but a spinner: the emulator knew
+                    # exactly what had failed and was told not to say so. The
+                    # cost is some disk writes, the benefit is that the next
+                    # problem is diagnosable at all.
+                    Silence All Logs: false
                     Start games in fullscreen mode: true
                     Use native user interface: true
                     Use recursive scan: false
@@ -1249,7 +1629,11 @@ in {
                     Internet enabled: Connected
                     PSN Country: us
                     PSN status: RPCN
-                    UPNP Enabled: true
+                    # Off, because it cannot succeed and is not free. RPCS3
+                    # asks the router to open the peer to peer port, there is no
+                    # router to ask inside a VPN tunnel, and the search runs a
+                    # full eight seconds into a timeout on every single launch.
+                    UPNP Enabled: false
                   Savestate:
                     Compatible Savestate Mode: false
                     Inspection Mode Savestates: false
@@ -1283,7 +1667,8 @@ in {
                     3D Display Mode: Disabled
                     Accurate ZCULL stats: false
                     Allow Host GPU Labels: false
-                    Anisotropic Filter Override: 0
+                    # Free on this GPU, see the global configuration.
+                    Anisotropic Filter Override: 16
                     Aspect ratio: 16:9
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
@@ -1312,7 +1697,11 @@ in {
                     Log shader programs: false
                     MSAA: Disabled
                     Minimum Scalable Dimension: 160
-                    Multithreaded RSX: false
+                    # As in the global configuration, and it matters more here.
+                    # What gets offloaded is large memory copies, and the write
+                    # and read buffer settings below produce exactly those in
+                    # quantity.
+                    Multithreaded RSX: true
                     Output Scaling Mode: FidelityFX Super Resolution
                     Performance Overlay:
                       Body Background (hex): '#002339FF'
@@ -1342,7 +1731,12 @@ in {
                     Read Color Buffers: false
                     Read Depth Buffer: true
                     Record With Overlays: true
-                    Relaxed ZCULL Sync: false
+                    # The occlusion query path, already half loosened here since
+                    # Accurate ZCULL stats is off. This is the other half.
+                    # RPCS3 recommends the approximate middle for most games, so
+                    # this is one step past the recommendation and the likeliest
+                    # of these to show up as flickering or missing geometry.
+                    Relaxed ZCULL Sync: true
                     Renderdoc Compatibility Mode: false
                     Renderer: Vulkan
                     Resolution: 1280x720
@@ -1384,7 +1778,19 @@ in {
             };
             persistence = lib.mkIf config.modules.boot.enable {
               "${config.modules.boot.impermanence.persistPath}" = {
-                directories = [".config/rpcs3"];
+                directories = [
+                  ".config/rpcs3"
+                  # The compiled caches: shaders, and the PPU and SPU code the
+                  # recompilers produce. Tens of megabytes that cost minutes of
+                  # stuttering to rebuild, and they were thrown away on every
+                  # reboot because they live under .cache, which is wiped.
+                  #
+                  # Only the cache subdirectory, not all of .cache/rpcs3. The
+                  # rest of it is the log and a lock file, and a lock file that
+                  # survived a crash and a reboot is exactly what makes RPCS3
+                  # refuse to start with a complaint about another instance.
+                  ".cache/rpcs3/cache"
+                ];
               };
             };
           };
