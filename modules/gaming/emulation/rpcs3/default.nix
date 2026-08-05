@@ -795,6 +795,13 @@ in {
                 source = "${rpcs3}/share/rpcs3/GuiConfigs";
                 recursive = true;
               };
+              # SDL guesses a mapping for a pad it does not know, and for the
+              # virtual one it guesses the face buttons the wrong way round, so
+              # triangle arrived as square. RPCS3 already looks for this file
+              # and logs a warning that it is missing.
+              ".config/rpcs3/input_configs/gamecontrollerdb.txt" = {
+                source = ./gamecontrollerdb.txt;
+              };
               ".config/rpcs3/input_configs/active_input_configurations.yml" = {
                 text = ''
                   Active Configurations:
@@ -906,11 +913,21 @@ in {
                       # (1 + 1/2.4) * cos(45) = 1.002, so it clamps to full.
                       # RPCS3's own default of 8000 only reaches 79.5 percent.
                       Left Pad Squircling Factor: 2400
-                      # The aiming stick keeps its circle. Pushing a direction
-                      # out towards a corner bends the aim off the line the hand
-                      # drew, and unlike walking, aiming has no threshold that
-                      # needs reaching.
-                      Right Pad Squircling Factor: 0
+                      # The aiming stick needs it too, and the reasoning that
+                      # kept it at zero here was simply wrong. It claimed
+                      # squircling bends the aim off the line the hand drew. It
+                      # does not: RPCS3 works in polar coordinates and leaves
+                      # the ANGLE untouched, only the radius grows.
+                      #
+                      # What it fixes is that a slanted flick travels less far
+                      # than a straight one for the same hand movement. JoyMouse
+                      # emits a perfect circle, the same magnitude in every
+                      # direction, which is right. But a circle is 70.7 percent
+                      # per axis on a diagonal, and a game that turns the camera
+                      # from each axis through a curve of its own turns much
+                      # less than that, about half. Aiming at anything off the
+                      # horizontal fought back.
+                      Right Pad Squircling Factor: 2400
                       Color Value R: 0
                       Color Value G: 0
                       Color Value B: 20
