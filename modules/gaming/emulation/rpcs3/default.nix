@@ -233,15 +233,38 @@
   uncharted = pkgs.writeShellApplication {
     name = "uncharted";
     runtimeInputs = [
-      pkgs.gamemode
-      pkgs.mullvad
-      inputs.joymouse.packages.${system}.joymouse-musl-static
+      # `default` on purpose rather than a named variant. It is the one
+      # attribute that survived joymouse being restructured, and a launcher has
+      # no business caring whether it gets the glibc or the static build.
+      inputs.joymouse.packages.${system}.default
+      pkgs.util-linux
     ];
+    # The VPN stays up. This used to disconnect it for the length of a session
+    # and reconnect afterwards, which put every other thing on the machine on
+    # the open internet in order to fix one game.
+    #
+    # It was only ever needed because the game resolved its server by name and
+    # a VPN with leak protection blocks port 53 to every destination. The IP
+    # swap list in the game configuration answers those names inside RPCS3
+    # instead, so no name lookup leaves the machine and nothing has to be
+    # switched off. See the Net section of the Uncharted 2 configuration.
     text = ''
-      joymouse &
-      mullvad disconnect
-      gamemoderun ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
-      mullvad connect
+      # joymouse lives exactly as long as the game and not a moment longer.
+      # PR_SET_PDEATHSIG has the kernel signal it the moment its parent goes
+      # away, and the exec below makes RPCS3 that parent, in this very process.
+      # So RPCS3 exiting, crashing, or being killed outright all end joymouse
+      # the same way.
+      #
+      # A shell trap would not do. It cannot run when the launcher itself is
+      # killed, and it would need a shell to stay alive alongside the game in
+      # order to run in, which is one more process to outlive RPCS3 and hold
+      # the pad open.
+      setpriv --pdeathsig TERM joymouse &
+
+      # exec, so this launcher IS the game rather than a parent watching it.
+      # Nothing supervises, nothing polls, nothing waits on anything, so there
+      # is nothing left that could wedge or be orphaned.
+      exec ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
     '';
   };
 in {
@@ -1203,9 +1226,26 @@ in {
                   Net:
                     Bind address: 0.0.0.0
                     Clans Enabled: false
+                    # Only consulted for a name the swap list below does not
+                    # match, which with a wildcard is none. It stays as the
+                    # honest fallback and as documentation of where the private
+                    # server lives.
                     DNS address: 51.75.22.125
                     IP address: 0.0.0.0
-                    IP swap list: ""
+                    # Every hostname the game asks for is answered with the
+                    # private server, inside RPCS3, without a packet leaving the
+                    # machine. The pattern is a real wildcard, RPCS3 turns `*`
+                    # into `.*` and matches the hostname against it.
+                    #
+                    # This is not a nicety, it is what lets the game run inside
+                    # a VPN. A DNS address alone means RPCS3 sends real queries
+                    # to port 53, and a VPN with leak protection blocks port 53
+                    # to every destination except its own resolver, its own
+                    # server included. The query dies, the hostname never
+                    # resolves, and the game sits at "Connecting..." for ever,
+                    # while the RPCN connection itself is perfectly healthy
+                    # because it is reached by address and never by name.
+                    IP swap list: "*=51.75.22.125"
                     Internet enabled: Connected
                     PSN Country: us
                     PSN status: RPCN
