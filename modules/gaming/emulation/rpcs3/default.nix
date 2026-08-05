@@ -887,10 +887,29 @@ in {
                       Left Trigger Threshold: 0
                       Right Trigger Threshold: 0
                       # Squircling pushes the round stick range out towards a
-                      # square, which changes how far a diagonal reaches.
-                      # JoyMouse already decides that, in its round gate and in
-                      # diagonal_expansion, and two opinions about it fight.
-                      Left Pad Squircling Factor: 0
+                      # square. RPCS3 computes
+                      #
+                      #   new_len = (1 + sin(2a)^2 / (factor / 1000)) * len
+                      #
+                      # and sin(2a) is zero on the axes and one on the
+                      # diagonals, so this touches nothing but the corners.
+                      #
+                      # The walking stick needs it. JoyMouse gates the stick
+                      # into a circle, which is right, but a circle only reaches
+                      # 70.7 percent per axis on a diagonal, and a game that
+                      # decides between walking and running from how far an axis
+                      # is pushed never sees a full push while you hold two keys.
+                      # This was set to zero and the character walked instead of
+                      # running for exactly that reason.
+                      #
+                      # 2400 is the value at which a diagonal reaches the corner:
+                      # (1 + 1/2.4) * cos(45) = 1.002, so it clamps to full.
+                      # RPCS3's own default of 8000 only reaches 79.5 percent.
+                      Left Pad Squircling Factor: 2400
+                      # The aiming stick keeps its circle. Pushing a direction
+                      # out towards a corner bends the aim off the line the hand
+                      # drew, and unlike walking, aiming has no threshold that
+                      # needs reaching.
                       Right Pad Squircling Factor: 0
                       Color Value R: 0
                       Color Value G: 0
