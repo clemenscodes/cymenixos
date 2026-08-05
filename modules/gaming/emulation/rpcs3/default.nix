@@ -487,18 +487,9 @@ in {
                     MFC Debug: false
                     Preferred SPU Threads: 0
                     SPU delay penalty: 3
-                    # Detects wait loops in SPU code and yields the thread
-                    # instead of spinning. RPCS3's own description is
-                    # improves performance and reduces CPU usage. The rare
-                    # failure mode is audio stuttering, which is loud and
-                    # obvious rather than subtle, so it is easy to catch.
-                    SPU loop detection: true
+                    SPU loop detection: false
                     Max SPURS Threads: 6
-                    # Ties smaller compiled units together, so the SPU
-                    # recompiler produces fewer and larger blocks and has more
-                    # to optimise across. Safe is the compatibility choice
-                    # rather than the fast one.
-                    SPU Block Size: Mega
+                    SPU Block Size: Safe
                     Accurate SPU DMA: false
                     Accurate SPU Reservations: true
                     Accurate Cache Line Stores: false
@@ -578,11 +569,7 @@ in {
                     Disable Vulkan Memory Allocator: false
                     Use full RGB output range: true
                     Strict Texture Flushing: false
-                    # Offloads the large RSX memory transfers onto a worker
-                    # thread. RPCS3 calls this an improvement for high core
-                    # processors and a slowdown for weak ones. This host has
-                    # thirty two threads, so it is on the good side of that.
-                    Multithreaded RSX: true
+                    Multithreaded RSX: false
                     Relaxed ZCULL Sync: false
                     Force Hardware MSAA Resolve: false
                     3D Display Enabled: false
@@ -593,7 +580,7 @@ in {
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
                     Resolution Scale: 100
-                    Anisotropic Filter Override: 16
+                    Anisotropic Filter Override: 0
                     Texture LOD Bias Addend: 0
                     Minimum Scalable Dimension: 16
                     Shader Compiler Threads: 0
@@ -1518,11 +1505,7 @@ in {
                   Core:
                     Accurate Cache Line Stores: false
                     Accurate PPU 128-byte Reservation Op Max Length: 0
-                    # Back to RPCS3's default. Enabled it forces RSX pauses on
-                    # SPU atomic operations, so it serialises the graphics
-                    # thread against the SPUs by construction. It was the only
-                    # accuracy setting here raised above stock.
-                    Accurate RSX reservation access: false
+                    Accurate RSX reservation access: true
                     Accurate SPU DMA: false
                     Accurate SPU Reservations: true
                     Allow RSX CPU Preemptions: true
@@ -1561,8 +1544,7 @@ in {
                     Preferred SPU Threads: 0
                     RSX FIFO Accuracy: Atomic
                     RSX FIFO Fetch Accuracy: Atomic
-                    # As in the global configuration.
-                    SPU Block Size: Mega
+                    SPU Block Size: Safe
                     SPU Cache: true
                     SPU Debug: false
                     SPU Decoder: Recompiler (LLVM)
@@ -1576,14 +1558,9 @@ in {
                     SPU Verification: true
                     SPU Wake-Up Delay: 0
                     SPU Wake-Up Delay Thread Mask: 63
-                    # The fastest of the three. Float accuracy on the SPUs buys
-                    # correctness in games that need it, and this one is not
-                    # known to. First thing to put back to Approximate if
-                    # anything looks wrong in a way that is not obviously ZCULL.
-                    SPU XFloat Accuracy: Relaxed
+                    SPU XFloat Accuracy: Approximate
                     SPU delay penalty: 3
-                    # As in the global configuration.
-                    SPU loop detection: true
+                    SPU loop detection: false
                     Save LLVM logs: false
                     Set DAZ and FTZ: false
                     Sleep Timers Accuracy: Usleep Only
@@ -1641,12 +1618,7 @@ in {
                     Show pressure intensity toggle hint: true
                     Show shader compilation hint: false
                     Show trophy popups: true
-                    # Logging back on. This was the reason a broken RPCN
-                    # connection showed nothing but a spinner: the emulator knew
-                    # exactly what had failed and was told not to say so. The
-                    # cost is some disk writes, the benefit is that the next
-                    # problem is diagnosable at all.
-                    Silence All Logs: false
+                    Silence All Logs: true
                     Start games in fullscreen mode: true
                     Use native user interface: true
                     Use recursive scan: false
@@ -1715,8 +1687,7 @@ in {
                     3D Display Mode: Disabled
                     Accurate ZCULL stats: false
                     Allow Host GPU Labels: false
-                    # Free on this GPU, see the global configuration.
-                    Anisotropic Filter Override: 16
+                    Anisotropic Filter Override: 0
                     Aspect ratio: 16:9
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
@@ -1745,11 +1716,7 @@ in {
                     Log shader programs: false
                     MSAA: Disabled
                     Minimum Scalable Dimension: 160
-                    # As in the global configuration, and it matters more here.
-                    # What gets offloaded is large memory copies, and the write
-                    # and read buffer settings below produce exactly those in
-                    # quantity.
-                    Multithreaded RSX: true
+                    Multithreaded RSX: false
                     Output Scaling Mode: FidelityFX Super Resolution
                     Performance Overlay:
                       Body Background (hex): '#002339FF'
@@ -1779,12 +1746,7 @@ in {
                     Read Color Buffers: false
                     Read Depth Buffer: true
                     Record With Overlays: true
-                    # The occlusion query path, already half loosened here since
-                    # Accurate ZCULL stats is off. This is the other half.
-                    # RPCS3 recommends the approximate middle for most games, so
-                    # this is one step past the recommendation and the likeliest
-                    # of these to show up as flickering or missing geometry.
-                    Relaxed ZCULL Sync: true
+                    Relaxed ZCULL Sync: false
                     Renderdoc Compatibility Mode: false
                     Renderer: Vulkan
                     Resolution: 1280x720
