@@ -33,7 +33,6 @@
       pkgs.gnused
       pkgs.findutils
       pkgs.procps
-      pkgs.imagemagick
       pkgs.util-linux
       pkgs.xvfb-run
     ];
@@ -232,30 +231,25 @@
 
       register_discs "${cfg.rpcs3.uncharted2.source}"
 
-      # Puts the game's own icon into the icon theme, so the desktop entry and
-      # the taskbar find it under the name uncharted2. It comes out of the disc
-      # dump, so it lives on a runtime path and cannot be a store path, which is
-      # why this happens here and not in a derivation.
-      #
-      # A disc icon is 320 by 176 and therefore not square. It is centred on a
-      # transparent background at 256 by 256, because an icon theme directory
-      # promises a size, and an image of another size is dropped or stretched
-      # depending on who is looking at it.
-      install_game_icon() {
-        src="${cfg.rpcs3.uncharted2.source}/Game/PS3_GAME/ICON0.PNG"
-        dest="$HOME/.local/share/icons/hicolor/256x256/apps/uncharted2.png"
-        [ -f "$src" ] || return 0
-        [ "$dest" -nt "$src" ] && return 0
-        mkdir -p "$(dirname "$dest")"
-        magick "$src" -background none -gravity center -resize 256x256 \
-          -extent 256x256 "$dest"
-        echo "Installed game icon at $dest"
-      }
-
-      install_game_icon
       echo "RPCS3 provisioning complete"
     '';
   };
+  # The icon, installed the way every other working launcher on this host does
+  # it: as part of a package, so it lands in the profile next to an index.theme
+  # and becomes part of an actual icon theme. A loose file dropped under the
+  # home directory is not part of one, and a taskbar that resolves an icon by
+  # theme name then finds nothing. That was the first attempt and it did not
+  # render.
+  #
+  # The source is the disc icon, squared to 256 by 256 because an icon theme
+  # directory promises a size and a disc icon is 320 by 176.
+  #
+  # The file name, the desktop entry id and the Icon key all have to be the same
+  # word. uncharted2.png, uncharted2.desktop, Icon=uncharted2.
+  uncharted-icon = pkgs.runCommand "uncharted2-icon" {} ''
+    install -Dm644 ${./uncharted2.png} \
+      $out/share/icons/hicolor/256x256/apps/uncharted2.png
+  '';
   uncharted = pkgs.writeShellApplication {
     name = "uncharted";
     runtimeInputs = [
@@ -437,6 +431,7 @@ in {
               rpcs3
               rpcs3-provision
               uncharted
+              uncharted-icon
             ];
             file = {
               ".config/rpcs3/bios" = {
