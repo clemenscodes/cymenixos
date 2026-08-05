@@ -263,6 +263,26 @@ in {
                 description = "Directory containing the Uncharted 2 disc dump, DLC and Patches";
               };
             };
+            rpcn = {
+              # rpcn.yml holds an account name, a password and a login token, so
+              # it cannot be a file in this repository and it cannot be a store
+              # symlink either, because everything in the store is world
+              # readable. It arrives as a sops secret instead, decrypted at
+              # activation and placed straight at the path RPCS3 reads.
+              #
+              # The secret is the WHOLE file, not just the credentials, so the
+              # custom server list travels with it. That keeps this module free
+              # of anybody's account and free of anybody's server.
+              secret = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                example = "rpcn";
+                description = ''
+                  Name of the sops secret holding the complete rpcn.yml. Null
+                  leaves RPCN configuration to RPCS3 itself.
+                '';
+              };
+            };
           };
         };
       };
@@ -308,6 +328,22 @@ in {
                 noDisplay = false;
                 startupNotify = true;
                 terminal = false;
+              };
+            };
+          };
+          # The RPCN account and the custom server list, decrypted at activation
+          # and placed straight where RPCS3 reads it. The file lands outside the
+          # store, readable by its owner only, which is why this is the one part
+          # of the configuration that is not a symlink into a store path.
+          #
+          # It stays read only afterwards. RPCS3 saves a login token here so the
+          # password does not have to be sent again, and it cannot do that now.
+          # That costs nothing, because the password travels in the same secret,
+          # so a login that cannot reuse a token simply performs one.
+          sops = lib.mkIf (cfg.rpcs3.rpcn.secret != null) {
+            secrets = {
+              ${cfg.rpcs3.rpcn.secret} = {
+                path = "/home/${user}/.config/rpcs3/rpcn.yml";
               };
             };
           };
@@ -403,16 +439,36 @@ in {
                       Pressure Intensity Deadzone: 0
                       Analog Limiter Button: ""
                       Analog Limiter Toggle Mode: false
+                      # JoyMouse is a virtual pad, so every shaping RPCS3 offers
+                      # here is off. These are not RPCS3's defaults, they are
+                      # chosen, and each one is off for its own reason.
+                      #
+                      # Multiplier 100 means unscaled. The one place to change
+                      # aiming speed is joymouse's own sensitivity, because
+                      # scaling here would clip against the axis range instead.
                       Left Stick Multiplier: 100
                       Right Stick Multiplier: 100
-                      Left Stick Deadzone: 8000
-                      Right Stick Deadzone: 8000
-                      Left Stick Anti-Deadzone: 4259
-                      Right Stick Anti-Deadzone: 4259
+                      # A dead zone exists so a worn physical stick does not
+                      # drift on its own. A virtual one never drifts, so this
+                      # would only swallow the smallest movements.
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      # RPCS3 applies its anti dead zone PER AXIS, so it jumps
+                      # by its full amount whenever one axis crosses zero, and a
+                      # small circular movement comes out jagged. JoyMouse does
+                      # the same job radially through deadzone_compensation, on
+                      # the length only, leaving the direction untouched. Both
+                      # at once would also compensate twice.
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
                       Left Trigger Threshold: 0
                       Right Trigger Threshold: 0
-                      Left Pad Squircling Factor: 8000
-                      Right Pad Squircling Factor: 8000
+                      # Squircling pushes the round stick range out towards a
+                      # square, which changes how far a diagonal reaches.
+                      # JoyMouse already decides that, in its round gate and in
+                      # diagonal_expansion, and two opinions about it fight.
+                      Left Pad Squircling Factor: 0
+                      Right Pad Squircling Factor: 0
                       Color Value R: 0
                       Color Value G: 0
                       Color Value B: 20
@@ -992,259 +1048,297 @@ in {
               };
               ".config/rpcs3/custom_configs/config_BCES00757.yml" = {
                 text = ''
+                  # Uncharted 2, BCES00757. This is the configuration that
+                  # actually ran, taken from the emulator itself rather than
+                  # written by hand, so what is declared and what was played
+                  # are the same thing.
+                  #
+                  # Two fields are deliberately not carried over. The Vulkan
+                  # adapter is left empty so RPCS3 picks the device present in
+                  # the host, because naming one pins the config to a single
+                  # machine and it silently falls back everywhere else. The
+                  # console PSID is left to the global configuration, since it
+                  # identifies the installation and has no business in a
+                  # per-title file.
+                  Audio:
+                    Audio Channel Layout: Automatic
+                    Audio Device: '@@@default@@@'
+                    Audio Format: Stereo
+                    Audio Formats: 0
+                    Audio Provider: CellAudio
+                    Convert to 16 bit: false
+                    Desired Audio Buffer Duration: 100
+                    Disable Sampling Skip: false
+                    Dump to file: false
+                    Enable Buffering: true
+                    Enable Time Stretching: false
+                    Master Volume: 100
+                    Microphone Devices: '@@@@@@@@@@@@'
+                    Microphone Type: "Null"
+                    Music Handler: Qt
+                    RSXAudio Avport: HDMI 0
+                    Renderer: Cubeb
+                    Time Stretching Threshold: 75
                   Core:
-                    PPU Decoder: Recompiler (LLVM)
-                    PPU Threads: 2
-                    PPU Debug: false
-                    PPU Calling History: false
-                    Save LLVM logs: false
-                    Use LLVM CPU: ""
-                    Max LLVM Compile Threads: 0
-                    PPU LLVM Greedy Mode: false
-                    LLVM Precompilation: true
-                    Thread Scheduler Mode: Operating System
-                    Set DAZ and FTZ: false
-                    SPU Decoder: Recompiler (LLVM)
-                    SPU Reservation Busy Waiting Percentage 1: 100
-                    SPU Reservation Busy Waiting Enabled: false
-                    SPU GETLLAR Busy Waiting Percentage: 100
-                    Disable SPU GETLLAR Spin Optimization: false
-                    SPU Debug: false
-                    MFC Debug: false
-                    Preferred SPU Threads: 0
-                    SPU delay penalty: 3
-                    SPU loop detection: false
-                    Max SPURS Threads: 6
-                    SPU Block Size: Safe
+                    Accurate Cache Line Stores: false
+                    Accurate PPU 128-byte Reservation Op Max Length: 0
+                    Accurate RSX reservation access: true
                     Accurate SPU DMA: false
                     Accurate SPU Reservations: true
-                    Accurate Cache Line Stores: false
-                    Accurate RSX reservation access: true
-                    RSX FIFO Accuracy: Atomic
-                    SPU Verification: true
-                    SPU Cache: true
-                    SPU Profiler: false
+                    Allow RSX CPU Preemptions: true
+                    Assume External Debugger: false
+                    Clocks scale: 100
+                    Debug Console Mode: false
+                    Disable SPU GETLLAR Spin Optimization: false
+                    Enable Performance Report: false
+                    Enable TSX: Disabled
+                    HLE lwmutex: false
+                    Hook static functions: false
+                    LLVM Precompilation: true
+                    Libraries Control: []
+                    MFC Commands Shuffling In Steps: false
                     MFC Commands Shuffling Limit: 0
                     MFC Commands Timeout: 0
-                    MFC Commands Shuffling In Steps: false
-                    Enable TSX: Disabled
-                    XFloat Accuracy: Approximate
-                    Accurate PPU 128-byte Reservation Op Max Length: 0
-                    Stub PPU Traps: 0
-                    Precise SPU Verification: false
-                    PPU LLVM Java Mode Handling: true
-                    Use Accurate DFMA: true
-                    PPU Set Saturation Bit: false
+                    MFC Debug: false
+                    Max CPU Preempt Count: 0
+                    Max LLVM Compile Threads: 0
+                    Max SPURS Threads: 6
                     PPU Accurate Non-Java Mode: false
-                    PPU Fixup Vector NaN Values: false
                     PPU Accurate Vector NaN Values: false
+                    PPU Calling History: false
+                    PPU Debug: false
+                    PPU Decoder: Recompiler (LLVM)
+                    PPU Fixup Vector NaN Values: false
+                    PPU LLVM Greedy Mode: false
+                    PPU LLVM Java Mode Handling: true
+                    PPU Profiler: false
                     PPU Set FPCC Bits: false
-                    Debug Console Mode: false
-                    Hook static functions: false
-                    Libraries Control:
-                      []
-                    HLE lwmutex: false
+                    PPU Set Saturation Bit: false
+                    PPU Threads: 2
+                    PPU Vector NaN Handling: true
+                    Performance Report Threshold: 500
+                    Precise SPU Verification: false
+                    Preferred SPU Threads: 0
+                    RSX FIFO Accuracy: Atomic
+                    RSX FIFO Fetch Accuracy: Atomic
+                    SPU Block Size: Safe
+                    SPU Cache: true
+                    SPU Debug: false
+                    SPU Decoder: Recompiler (LLVM)
+                    SPU GETLLAR Busy Waiting Percentage: 100
                     SPU LLVM Lower Bound: 0
                     SPU LLVM Upper Bound: 18446744073709551615
-                    TSX Transaction First Limit: 800
-                    TSX Transaction Second Limit: 2000
-                    Clocks scale: 100
+                    SPU Profiler: false
+                    SPU Reservation Busy Waiting Enabled: false
+                    SPU Reservation Busy Waiting Percentage: 0
+                    SPU Reservation Busy Waiting Percentage 1: 100
+                    SPU Verification: true
                     SPU Wake-Up Delay: 0
                     SPU Wake-Up Delay Thread Mask: 63
-                    Max CPU Preempt Count: 0
-                    Allow RSX CPU Preemptions: true
+                    SPU XFloat Accuracy: Approximate
+                    SPU delay penalty: 3
+                    SPU loop detection: false
+                    Save LLVM logs: false
+                    Set DAZ and FTZ: false
                     Sleep Timers Accuracy: Usleep Only
+                    Stub PPU Traps: 0
+                    TSX Transaction First Limit: 800
+                    TSX Transaction Second Limit: 2000
+                    Thread Scheduler Mode: Operating System
+                    Use Accurate DFMA: true
+                    Use LLVM CPU: ""
                     Usleep Time Addend: 0
-                    Performance Report Threshold: 500
-                    Enable Performance Report: false
-                    Assume External Debugger: false
-                    SPU Reservation Busy Waiting Percentage: 0
+                    XFloat Accuracy: Approximate
+                  Input/Output:
+                    Allow move hue set by game: false
+                    Background input enabled: true
+                    Buzz emulated controller: "Null"
+                    Camera: "Null"
+                    Camera ID: Default
+                    Camera flip: None
+                    Camera type: Unknown
+                    Emulated Midi devices: Keyboardßßß@@@Keyboardßßß@@@Keyboardßßß@@@
+                    Fake Move Rotation Cone: 10
+                    Fake Move Rotation Cone (Vertical): 10
+                    GHLtar emulated controller: "Null"
+                    IO Debug overlay: false
+                    Keep pads connected: false
+                    Keyboard: "Null"
+                    Load SDL GameController Mappings: true
+                    Lock overlay input to player one: false
+                    Mouse: "Null"
+                    Mouse Debug overlay: false
+                    Move: "Null"
+                    Pad handler mode: Single-threaded
+                    Pad handler sleep (microseconds): 1000
+                    Paint move spheres: false
+                    SDL Camera ID: Default
+                    Show move cursor: false
+                    Turntable emulated controller: "Null"
+                  Log: {}
+                  Miscellaneous:
+                    Automatically start games after boot: true
+                    Enable GameMode: false
+                    Exit RPCS3 when process finishes: false
+                    GDB Server: 127.0.0.1:2345
+                    Pause Emulation During Home Menu: false
+                    Pause emulation on RPCS3 focus loss: false
+                    Play music during boot sequence: true
+                    Prevent display sleep while running games: true
+                    Show PPU compilation hint: false
+                    Show RPCN popups: true
+                    Show analog limiter toggle hint: true
+                    Show autosave/autoload hint: false
+                    Show capture hints: true
+                    Show fatal error hints: false
+                    Show mouse and keyboard toggle hint: true
+                    Show pressure intensity toggle hint: true
+                    Show shader compilation hint: false
+                    Show trophy popups: true
+                    Silence All Logs: true
+                    Start games in fullscreen mode: true
+                    Use native user interface: true
+                    Use recursive scan: false
+                    Window Title Format: 'FPS: %F | %R | %V | %T [%t]'
+                  Net:
+                    Bind address: 0.0.0.0
+                    Clans Enabled: false
+                    DNS address: 51.75.22.125
+                    IP address: 0.0.0.0
+                    IP swap list: ""
+                    Internet enabled: Connected
+                    PSN Country: us
+                    PSN status: RPCN
+                    UPNP Enabled: true
+                  Savestate:
+                    Compatible Savestate Mode: false
+                    Inspection Mode Savestates: false
+                    Maximum SaveState Files: 4
+                    Maximum SaveState Files Space (MiB): 4096
+                    Save Disc Game Data: false
+                    Start Paused: false
+                    Suspend Emulation Savestate Mode: false
+                  System:
+                    Console time offset (s): 0
+                    Date Format: ddmmyyyy
+                    Enter button assignment: Enter with cross
+                    HDD Model Name: ""
+                    HDD Serial Number: ""
+                    Keyboard Type: German keyboard
+                    Language: German
+                    License Area: SCEE
+                    PSID high: 0
+                    PSID low: 0
+                    Process ARGV: {}
+                    System Name: RPCS3-577
+                    Time Format: clock24
                   VFS:
+                    Disk cache maximum size (MB): 5120
+                    Empty /dev_hdd0/tmp/: true
                     Enable /host_root/: false
                     Initialize Directories: true
                     Limit disk cache size: false
-                    Disk cache maximum size (MB): 5120
-                    Empty /dev_hdd0/tmp/: true
                   Video:
-                    Renderer: Vulkan
-                    Resolution: 1280x720
-                    Aspect ratio: 16:9
-                    Frame limit: Infinite
-                    Second Frame Limit: 0
-                    MSAA: Auto
-                    Shader Mode: Async Shader Recompiler
-                    Shader Precision: High
-                    Write Color Buffers: true
-                    Write Depth Buffer: true
-                    Read Color Buffers: false
-                    Read Depth Buffer: true
-                    Handle RSX Memory Tiling: false
-                    Log shader programs: false
-                    VSync: false
-                    Debug output: false
-                    Debug overlay: false
-                    Renderdoc Compatibility Mode: false
-                    Use GPU texture scaling: false
-                    Stretch To Display Area: false
-                    Force High Precision Z buffer: false
-                    Strict Rendering Mode: false
-                    Disable ZCull Occlusion Queries: false
-                    Disable Video Output: false
-                    Disable Vertex Cache: false
-                    Disable FIFO Reordering: false
-                    Enable Frame Skip: false
-                    Force CPU Blit: false
-                    Disable On-Disk Shader Cache: false
-                    Disable Vulkan Memory Allocator: false
-                    Use full RGB output range: true
-                    Strict Texture Flushing: false
-                    Multithreaded RSX: true
-                    Relaxed ZCULL Sync: false
-                    Force Hardware MSAA Resolve: false
+                    3D Display Enabled: false
                     3D Display Mode: Disabled
-                    Debug Program Analyser: false
                     Accurate ZCULL stats: false
+                    Allow Host GPU Labels: false
+                    Anisotropic Filter Override: 0
+                    Aspect ratio: 16:9
                     Consecutive Frames To Draw: 1
                     Consecutive Frames To Skip: 1
-                    Resolution Scale: 150
-                    Anisotropic Filter Override: 0
-                    Texture LOD Bias Addend: 0
-                    Minimum Scalable Dimension: 160
-                    Shader Compiler Threads: 0
+                    DECR memory layout: false
+                    Debug Program Analyser: false
+                    Debug output: false
+                    Debug overlay: false
+                    Disable Asynchronous Memory Manager: false
+                    Disable FIFO Reordering: false
+                    Disable Hardware ColorSpace Remapping: false
+                    Disable MSL Fast Math: false
+                    Disable On-Disk Shader Cache: false
+                    Disable Vertex Cache: false
+                    Disable Video Output: false
+                    Disable Vulkan Memory Allocator: false
+                    Disable ZCull Occlusion Queries: false
                     Driver Recovery Timeout: 1000000
                     Driver Wake-Up Delay: 20
-                    Vblank Rate: 240
-                    Vblank NTSC Fixup: false
-                    DECR memory layout: false
-                    Allow Host GPU Labels: false
-                    Disable MSL Fast Math: false
-                    Disable Asynchronous Memory Manager: false
+                    Enable Frame Skip: false
+                    FidelityFX CAS Sharpening Intensity: 50
+                    Force CPU Blit: false
+                    Force Hardware MSAA Resolve: false
+                    Force High Precision Z buffer: false
+                    Frame limit: Auto
+                    Handle RSX Memory Tiling: false
+                    Log shader programs: false
+                    MSAA: Disabled
+                    Minimum Scalable Dimension: 160
+                    Multithreaded RSX: false
                     Output Scaling Mode: FidelityFX Super Resolution
-                    Vulkan:
-                      Adapter: AMD Radeon RX 7900 XTX (RADV NAVI31)
-                      Force FIFO present mode: false
-                      Force primitive restart flag: false
-                      Exclusive Fullscreen Mode: Automatic
-                      Asynchronous Texture Streaming 2: true
-                      FidelityFX CAS Sharpening Intensity: 50
-                      Asynchronous Queue Scheduler: Safe
-                      VRAM allocation limit (MB): 65536
                     Performance Overlay:
-                      Enabled: false
-                      Enable Framerate Graph: true
-                      Enable Frametime Graph: false
-                      Framerate datapoints: 199
-                      Frametime datapoints: 170
-                      Detail level: None
-                      Framerate graph detail level: All
-                      Frametime graph detail level: All
-                      Metrics update interval (ms): 1000
-                      Font size (px): 6
-                      Position: Top Left
-                      Font: n023055ms.ttf
-                      Horizontal Margin (px): 10
-                      Vertical Margin (px): 10
+                      Body Background (hex): '#002339FF'
+                      Body Color (hex): '#FFE138FF'
                       Center Horizontally: false
                       Center Vertically: false
+                      Detail level: None
+                      Enable Framerate Graph: true
+                      Enable Frametime Graph: false
+                      Enabled: false
+                      Font: n023055ms.ttf
+                      Font size (px): 6
+                      Framerate datapoints: 199
+                      Framerate graph detail level: All
+                      Frametime datapoints: 170
+                      Frametime graph detail level: All
+                      Horizontal Margin (%): 4
+                      Horizontal Margin (px): 10
+                      Metrics update interval (ms): 1000
                       Opacity (%): 10
-                      Body Color (hex): "#FFE138FF"
-                      Body Background (hex): "#002339FF"
-                      Title Color (hex): "#F26C24FF"
-                      Title Background (hex): "#00000000"
+                      Position: Top Left
+                      Title Background (hex): '#00000000'
+                      Title Color (hex): '#F26C24FF'
+                      Use Window Space: false
+                      Vertical Margin (%): 7
+                      Vertical Margin (px): 10
+                    Read Color Buffers: false
+                    Read Depth Buffer: true
+                    Record With Overlays: true
+                    Relaxed ZCULL Sync: false
+                    Renderdoc Compatibility Mode: false
+                    Renderer: Vulkan
+                    Resolution: 1280x720
+                    Resolution Scale: 150
+                    Screen size in inches: 24
+                    Second Frame Limit: 0
+                    Shader Compiler Threads: 0
                     Shader Loading Dialog:
                       Allow custom background: true
-                      Darkening effect strength: 30
                       Blur effect strength: 0
-                  Audio:
-                    Renderer: Cubeb
-                    Audio Provider: CellAudio
-                    RSXAudio Avport: HDMI 0
-                    Dump to file: false
-                    Convert to 16 bit: false
-                    Audio Format: Stereo
-                    Audio Formats: 0
-                    Audio Channel Layout: Automatic
-                    Audio Device: "@@@default@@@"
-                    Master Volume: 100
-                    Enable Buffering: true
-                    Desired Audio Buffer Duration: 100
-                    Enable Time Stretching: false
-                    Disable Sampling Skip: false
-                    Time Stretching Threshold: 75
-                    Microphone Type: "Null"
-                    Microphone Devices: "@@@@@@@@@@@@"
-                    Music Handler: Qt
-                  Input/Output:
-                    Keyboard: "Null"
-                    Mouse: "Null"
-                    Camera: "Null"
-                    Camera type: Unknown
-                    Camera flip: None
-                    Camera ID: Default
-                    Move: "Null"
-                    Buzz emulated controller: "Null"
-                    Turntable emulated controller: "Null"
-                    GHLtar emulated controller: "Null"
-                    Pad handler mode: Single-threaded
-                    Keep pads connected: false
-                    Pad handler sleep (microseconds): 1000
-                    Background input enabled: true
-                    Show move cursor: false
-                    Paint move spheres: false
-                    Allow move hue set by game: false
-                    Lock overlay input to player one: false
-                    Emulated Midi devices: Keyboardßßß@@@Keyboardßßß@@@Keyboardßßß@@@
-                    Load SDL GameController Mappings: true
-                    IO Debug overlay: false
-                    Fake Move Rotation Cone: 10
-                    Fake Move Rotation Cone (Vertical): 10
-                  System:
-                    License Area: SCEE
-                    Language: German
-                    Keyboard Type: German keyboard
-                    Enter button assignment: Enter with cross
-                    Console time offset (s): 0
-                    System Name: RPCS3-577
-                    PSID high: 0
-                    PSID low: 0
-                    HDD Model Name: ""
-                    HDD Serial Number: ""
-                    Process ARGV: {}
-                  Net:
-                    Internet enabled: Connected
-                    IP address: 0.0.0.0
-                    Bind address: 0.0.0.0
-                    DNS address: 51.75.22.125
-                    IP swap list: ""
-                    UPNP Enabled: true
-                    PSN status: RPCN
-                    PSN Country: us
-                  Savestate:
-                    Start Paused: false
-                    Suspend Emulation Savestate Mode: false
-                    Compatible Savestate Mode: false
-                    Inspection Mode Savestates: false
-                    Save Disc Game Data: false
-                  Miscellaneous:
-                    Automatically start games after boot: true
-                    Exit RPCS3 when process finishes: false
-                    Pause emulation on RPCS3 focus loss: false
-                    Start games in fullscreen mode: true
-                    Prevent display sleep while running games: true
-                    Show trophy popups: true
-                    Show RPCN popups: true
-                    Show shader compilation hint: false
-                    Show PPU compilation hint: false
-                    Show autosave/autoload hint: false
-                    Show pressure intensity toggle hint: true
-                    Show analog limiter toggle hint: true
-                    Show mouse and keyboard toggle hint: true
-                    Use native user interface: true
-                    GDB Server: 127.0.0.1:2345
-                    Silence All Logs: true
-                    Window Title Format: "FPS: %F | %R | %V | %T [%t]"
-                    Pause Emulation During Home Menu: false
-                  Log: {}
+                      Darkening effect strength: 30
+                    Shader Mode: Async Recompiler (multi-threaded)
+                    Shader Precision: High
+                    Stretch To Display Area: false
+                    Strict Rendering Mode: false
+                    Strict Texture Flushing: false
+                    Texture LOD Bias Addend: 0
+                    Use GPU texture scaling: false
+                    Use full RGB output range: true
+                    VSync: false
+                    VSync Mode: Disabled
+                    Vblank NTSC Fixup: false
+                    Vblank Rate: 240
+                    Vulkan:
+                      Adapter: ""
+                      Asynchronous Queue Scheduler: Safe
+                      Asynchronous Texture Streaming: true
+                      Asynchronous Texture Streaming 2: true
+                      Exclusive Fullscreen Mode: Automatic
+                      FidelityFX CAS Sharpening Intensity: 50
+                      Force FIFO present mode: false
+                      Force primitive restart flag: false
+                      Use Re-BAR for GPU uploads: true
+                      VRAM allocation limit (MB): 65536
+                    Write Color Buffers: true
+                    Write Depth Buffer: true
                 '';
               };
             };
