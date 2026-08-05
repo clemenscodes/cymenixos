@@ -1,0 +1,23 @@
+--- a/rpcs3/rpcs3.cpp	2026-08-05 10:35:59.021570019 +0200
++++ b/rpcs3/rpcs3.cpp	2026-08-05 10:36:15.945031554 +0200
+@@ -803,6 +803,20 @@
+ 	app->setApplicationName("RPCS3");
+ 	app->setOrganizationName("RPCS3");
+ 
++	// A Wayland compositor identifies a window by its app id, and a taskbar uses
++	// that id to find the matching desktop entry and therefore the icon. Qt only
++	// sets one if the application asks, and RPCS3 never did, so Qt fell back to
++	// the file name of the running executable. Packaged through a wrapper that
++	// file is called ".rpcs3-wrapped", and QFileInfo::baseName returns what comes
++	// before the FIRST dot, which for a name starting with one is nothing at all.
++	// The window therefore announced an EMPTY app id, matched no desktop entry,
++	// and every taskbar showed a placeholder.
++	//
++	// The environment variable exists so one emulator binary can appear as
++	// several applications. A launcher for a single game sets it and gets that
++	// game own entry and icon instead of the emulator one.
++	QGuiApplication::setDesktopFileName(qEnvironmentVariable("RPCS3_DESKTOP_FILE_NAME", QStringLiteral("rpcs3")));
++
+ 	// Command line args
+ 	static QCommandLineParser parser;
+ 	parser.setApplicationDescription("Welcome to RPCS3 command line.");

@@ -17,7 +17,10 @@
   # durchlaeuft. Die beiden Erfolgsmeldungen danach haengen an GUI Settings und
   # werden ueber CurrentSettings.ini abgeschaltet, nicht ueber den Patch.
   rpcs3 = pkgs.rpcs3.overrideAttrs (oldAttrs: {
-    patches = (oldAttrs.patches or []) ++ [./unattended-install.patch];
+    # app-id.patch gives the window an app id in the first place. Without one no
+    # taskbar can tie the window to a desktop entry, and StartupWMClass does not
+    # help, because there is nothing for it to be compared against.
+    patches = (oldAttrs.patches or []) ++ [./unattended-install.patch ./app-id.patch];
   });
   user = config.modules.users.name;
   rpcs3-provision = pkgs.writeShellApplication {
@@ -30,6 +33,7 @@
       pkgs.gnused
       pkgs.findutils
       pkgs.procps
+      pkgs.imagemagick
       pkgs.util-linux
       pkgs.xvfb-run
     ];
@@ -227,6 +231,28 @@
       }
 
       register_discs "${cfg.rpcs3.uncharted2.source}"
+
+      # Puts the game's own icon into the icon theme, so the desktop entry and
+      # the taskbar find it under the name uncharted2. It comes out of the disc
+      # dump, so it lives on a runtime path and cannot be a store path, which is
+      # why this happens here and not in a derivation.
+      #
+      # A disc icon is 320 by 176 and therefore not square. It is centred on a
+      # transparent background at 256 by 256, because an icon theme directory
+      # promises a size, and an image of another size is dropped or stretched
+      # depending on who is looking at it.
+      install_game_icon() {
+        src="${cfg.rpcs3.uncharted2.source}/Game/PS3_GAME/ICON0.PNG"
+        dest="$HOME/.local/share/icons/hicolor/256x256/apps/uncharted2.png"
+        [ -f "$src" ] || return 0
+        [ "$dest" -nt "$src" ] && return 0
+        mkdir -p "$(dirname "$dest")"
+        magick "$src" -background none -gravity center -resize 256x256 \
+          -extent 256x256 "$dest"
+        echo "Installed game icon at $dest"
+      }
+
+      install_game_icon
       echo "RPCS3 provisioning complete"
     '';
   };
@@ -260,6 +286,13 @@
       if pgrep -x .rpcs3-wrapped > /dev/null; then
         exit 0
       fi
+
+      # Appear as Uncharted 2 rather than as the emulator. The patched RPCS3
+      # reads this and hands it to the compositor as the window's app id, so the
+      # taskbar finds uncharted2.desktop and shows the game's own icon instead
+      # of the emulator's. Without it one binary can only ever be one
+      # application.
+      export RPCS3_DESKTOP_FILE_NAME=uncharted2
 
       # joymouse lives exactly as long as the game and not a moment longer.
       # PR_SET_PDEATHSIG has the kernel signal it the moment its parent goes
@@ -353,16 +386,32 @@ in {
             };
           };
           xdg = {
+            # The attribute name is the file name, so this becomes
+            # uncharted2.desktop. That matters: an icon is resolved by THEME
+            # NAME, and that name has to equal the entry id and the icon file
+            # name. uncharted2.desktop, Icon=uncharted2, uncharted2.png. An
+            # absolute path in Icon does not render, which is exactly what this
+            # entry used to carry, pointing at a file RPCS3 only ever creates
+            # when somebody clicks Create Shortcut in its interface. That
+            # directory was empty, so the entry had two separate reasons to
+            # fall back to a placeholder.
+            #
+            # StartupWMClass is what lets a taskbar tie the RUNNING window back
+            # to this entry. It matches the app id the launcher asks RPCS3 to
+            # announce, see RPCS3_DESKTOP_FILE_NAME above.
             desktopEntries = {
-              "Uncharted 2： Among Thieves" = {
+              uncharted2 = {
                 name = "Uncharted 2: Among Thieves™";
                 type = "Application";
                 categories = ["Game"];
                 exec = "${uncharted}/bin/uncharted";
-                icon = "/home/${user}/.config/rpcs3/Icons/game_icons/BCES00757/shortcut.png";
+                icon = "uncharted2";
                 noDisplay = false;
                 startupNotify = true;
                 terminal = false;
+                settings = {
+                  StartupWMClass = "uncharted2";
+                };
               };
             };
           };
