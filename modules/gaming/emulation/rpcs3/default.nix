@@ -206,57 +206,17 @@ let
         done < <(find "$root" \( -iname "*.pkg" -o -iname "*.rap" -o -iname "*.edat" \) -printf "%h\n" | sort -u)
       }
 
-      # Nur was unter dev_hdd0 liegt findet RPCS3 von allein. Disc Dumps
-      # ausserhalb kennt es ausschliesslich ueber games.yml, eine Zuordnung von
-      # Seriennummer auf das Verzeichnis mit der PS3_DISC.SFB. Ohne diesen
-      # Eintrag bleibt die Spieleliste leer und die spielspezifische
-      # Konfiguration greift nicht. RPCS3 schreibt die Datei selbst, sie kann
-      # daher keine Verknuepfung in den Store sein.
-      #
-      # Eingetragen wird der LINK unter ~/Games, nicht das Verzeichnis auf der
-      # Platte. Der Eintrag ist dauerhaft und der Launcher bootet ebenfalls
-      # ueber den Link, beide muessen denselben Pfad nennen. find folgt einem
-      # Symlink nur mit -L.
-      register_discs() {
-        root="$1"
-        [ -d "$root" ] || return 0
-        games="$config_dir/games.yml"
-        touch "$games"
-        # RPCS3 schreibt games.yml OHNE abschliessenden Zeilenumbruch. Ein
-        # Anhaengen landet dann auf derselben Zeile wie der letzte Eintrag, und
-        # eine Zeile mit zwei Zuordnungen ist kein YAML. RPCS3 verwirft darauf
-        # die GANZE Datei und zeigt eine leere Spieleliste, statt nur diesen
-        # einen Eintrag zu verlieren. Genau das ist passiert, als zum ersten
-        # Mal ein zweites Spiel dazukam. Eine Kommandosubstitution frisst
-        # Zeilenumbrueche am Ende, ein leeres Ergebnis heisst also, die Datei
-        # endet bereits auf einem.
-        if [ -s "$games" ] && [ -n "$(tail -c 1 "$games")" ]; then
-          printf "\n" >> "$games"
-        fi
-        while IFS= read -r sfb; do
-          disc=$(dirname "$sfb")
-          sfo="$disc/PS3_GAME/PARAM.SFO"
-          [ -f "$sfo" ] || continue
-          serial=$(tr -d "\0" < "$sfo" | grep -oE "B[A-Z]{3}[0-9]{5}" | head -1)
-          [ -n "$serial" ] || continue
-          if grep -q "^$serial:" "$games"; then
-            continue
-          fi
-          echo "Registering $serial at $disc"
-          printf "%s: %s\n" "$serial" "$disc" >> "$games"
-        done < <(find -L "$root" -name PS3_DISC.SFB)
-      }
-
       # Every declared game gets the same treatment, and a game whose files have
-      # not arrived yet costs nothing: install_tree and register_discs both
-      # return immediately for a directory that is not there. So a title can be
-      # declared before its dump exists and starts working on the next run of
-      # this service.
+      # not arrived yet costs nothing: install_tree returns immediately for a
+      # directory that is not there. So a title can be declared before its dump
+      # exists and starts working on the next run of this service.
+      #
+      # Which discs EXIST is not decided here. That is games.yml, and it is
+      # declared rather than written, see gameRegistry below.
       ${lib.concatStrings (
         lib.mapAttrsToList (_: game: ''
           install_tree "${game.source}/Patches"
           install_tree "${game.source}/DLC"
-          register_discs "/home/${user}/Games/${game.link}"
         '') games
       )}
 
@@ -396,6 +356,31 @@ let
       text = game.customConfig;
     }
   ) (lib.filterAttrs (_: game: game.customConfig != null) games);
+  # Nur was unter dev_hdd0 liegt findet RPCS3 von allein. Disc Dumps ausserhalb
+  # kennt es ausschliesslich ueber games.yml, eine Zuordnung von Seriennummer
+  # auf das Verzeichnis mit der PS3_DISC.SFB. Ohne Eintrag bleibt die
+  # Spieleliste leer und die spielspezifische Konfiguration greift nicht.
+  #
+  # Die Datei wird DEKLARIERT und nicht fortgeschrieben. Vorher hat das
+  # Provisioning sie mit >> ergaenzt, und weil RPCS3 sie ohne abschliessenden
+  # Zeilenumbruch schreibt, klebte der erste zusaetzliche Eintrag an den letzten
+  # bestehenden. Eine Zeile mit zwei Zuordnungen ist kein YAML, RPCS3 verwarf
+  # daraufhin die GANZE Datei und zeigte gar keine Spiele mehr. Ein Anhaengen
+  # kennt eben nur den einen Eintrag, den es gerade schreibt, nie den
+  # Sollzustand. Als Store Symlink ist der Sollzustand dagegen das Einzige, was
+  # existieren kann, und jeder Switch stellt ihn wieder her.
+  #
+  # Dass RPCS3 selbst nicht mehr hineinschreiben kann, ist kein Verlust,
+  # sondern der Zweck: hier stehen genau die Spiele, die deklariert sind.
+  #
+  # Eingetragen wird der Pfad UEBER den Link unter ~/Games, derselbe, den auch
+  # der Launcher bootet, damit die Platte, auf der der Dump liegt, an keiner
+  # dauerhaften Stelle auftaucht.
+  gameRegistry = lib.concatStrings (
+    lib.mapAttrsToList (
+      _: game: "${game.serial}: /home/${user}/Games/${game.link}/${game.disc}\n"
+    ) games
+  );
   # Which patches are switched ON, for every game at once, because RPCS3 keeps
   # them all in one file keyed by the hash of the game binary.
   #
@@ -1100,6 +1085,12 @@ in
                   Log:
                     {}
                 '';
+              };
+              # Welche Discs es gibt, siehe gameRegistry oben.
+              ".config/rpcs3/games.yml" = {
+                text = gameRegistry;
+                force = true;
+                mutable = true;
               };
               ".config/rpcs3/patches/patch.yml" = {
                 source = ./patch.yml;
