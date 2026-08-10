@@ -1,16 +1,22 @@
 # SDL gamepad mappings.
 #
-# RPCS3 looks for this file and logs a warning when it is missing. Without it
-# SDL guesses, and for the JoyMouse pad it guesses wrong: it takes the four face
-# buttons in key code order and names them a, b, x, y by POSITION, which makes
-# BTN_NORTH into "x" and BTN_WEST into "y". Those are the wrong way round. The
-# kernel means north as the top button, x is the LEFT one, and the result was
-# that triangle came out as square in the game.
+# The entry below writes out exactly what SDL works out on its own for the
+# JoyMouse pad, so it changes nothing about how the pad behaves. The file is
+# here because RPCS3 looks for it and logs a warning when it is missing, and a
+# mapping that agrees with the guess is the quiet way to answer that.
 #
-# The entry below says it outright instead of leaving it to a guess: x is
-# BTN_WEST and y is BTN_NORTH. Everything else matches what SDL worked out on
-# its own, which was correct.
+# The four face buttons look crossed further down the stack and are not.
+# JoyMouse sends the TOP button as BTN_WEST and the LEFT one as BTN_NORTH,
+# because the kernel header carries BTN_X as a second name for BTN_NORTH and
+# BTN_Y as a second name for BTN_WEST, while SDL reads those header names and
+# means its own x as the LEFT button and its own y as the TOP one. JoyMouse
+# crosses the two codes so that the two crossings cancel. See linux/pad.rs in
+# the joymouse sources for the long version.
+#
+# What is left is plain. SDL takes the face buttons in key code order, b2 is
+# BTN_NORTH and becomes x, b3 is BTN_WEST and becomes y, north sits on top, and
+# triangle arrives as triangle.
 #
 # The GUID is the bus, vendor and product the virtual pad announces, 0x1234 and
 # 0x5678, so it only ever matches JoyMouse and no real hardware.
-0300d53b341200007856000000010000,JoyMouse,a:b0,b:b1,x:b3,y:b2,back:b8,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,platform:Linux,
+0300d53b341200007856000000010000,JoyMouse,a:b0,b:b1,x:b2,y:b3,back:b8,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,platform:Linux,

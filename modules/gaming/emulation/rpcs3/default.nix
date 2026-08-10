@@ -201,9 +201,6 @@
         done < <(find "$root" \( -iname "*.pkg" -o -iname "*.rap" -o -iname "*.edat" \) -printf "%h\n" | sort -u)
       }
 
-      install_tree "${cfg.rpcs3.uncharted2.source}/Patches"
-      install_tree "${cfg.rpcs3.uncharted2.source}/DLC"
-
       # Nur was unter dev_hdd0 liegt findet RPCS3 von allein. Disc Dumps
       # ausserhalb kennt es ausschliesslich ueber games.yml, eine Zuordnung von
       # Seriennummer auf das Verzeichnis mit der PS3_DISC.SFB. Ohne diesen
@@ -229,11 +226,24 @@
         done < <(find "$root" -name PS3_DISC.SFB)
       }
 
-      register_discs "${cfg.rpcs3.uncharted2.source}"
+      # Every declared game gets the same treatment, and a game whose files have
+      # not arrived yet costs nothing: install_tree and register_discs both
+      # return immediately for a directory that is not there. So a title can be
+      # declared before its dump exists and starts working on the next run of
+      # this service.
+      ${lib.concatStrings (lib.mapAttrsToList (_: game: ''
+          install_tree "${game.source}/Patches"
+          install_tree "${game.source}/DLC"
+          register_discs "${game.source}"
+        '')
+        games)}
 
       echo "RPCS3 provisioning complete"
     '';
   };
+  # Every game that is switched on. Everything below is built per entry of this
+  # set, so a new title is a declaration and nothing else.
+  games = lib.filterAttrs (_: game: game.enable) cfg.rpcs3.games;
   # The icon, installed the way every other working launcher on this host does
   # it: as part of a package, so it lands in the profile next to an index.theme
   # and becomes part of an actual icon theme. A loose file dropped under the
@@ -248,68 +258,155 @@
   # left the logo looking tiny in a launcher, and cropping to a square instead
   # cuts the title in half.
   #
-  # The file name, the desktop entry id and the Icon key all have to be the same
-  # word. uncharted2.png, uncharted2.desktop, Icon=uncharted2.
-  uncharted-icon = pkgs.runCommand "uncharted2-icon" {} ''
-    install -Dm644 ${./uncharted2.png} \
-      $out/share/icons/hicolor/256x256/apps/uncharted2.png
-  '';
-  uncharted = pkgs.writeShellApplication {
-    name = "uncharted";
-    runtimeInputs = [
-      # `default` on purpose rather than a named variant. It is the one
-      # attribute that survived joymouse being restructured, and a launcher has
-      # no business caring whether it gets the glibc or the static build.
-      inputs.joymouse.packages.${system}.default
-      pkgs.procps
-      pkgs.util-linux
-    ];
-    # The VPN stays up. This used to disconnect it for the length of a session
-    # and reconnect afterwards, which put every other thing on the machine on
-    # the open internet in order to fix one game.
-    #
-    # It was only ever needed because the game resolved its server by name and
-    # a VPN with leak protection blocks port 53 to every destination. The IP
-    # swap list in the game configuration answers those names inside RPCS3
-    # instead, so no name lookup leaves the machine and nothing has to be
-    # switched off. See the Net section of the Uncharted 2 configuration.
-    text = ''
-      # Starting a second instance gets you a modal box complaining about the
-      # first one and nothing else, so there is nothing useful to do here.
-      # The check comes before joymouse is started, because bailing out after
-      # would leave exactly the stray daemon this launcher is careful to avoid.
-      #
-      # The name is the wrapped binary rather than `rpcs3`, because that is what
-      # the process is actually called once the wrapper has exec'd into it.
-      if pgrep -x .rpcs3-wrapped > /dev/null; then
-        exit 0
-      fi
-
-      # Appear as Uncharted 2 rather than as the emulator. The patched RPCS3
-      # reads this and hands it to the compositor as the window's app id, so the
-      # taskbar finds uncharted2.desktop and shows the game's own icon instead
-      # of the emulator's. Without it one binary can only ever be one
-      # application.
-      export RPCS3_DESKTOP_FILE_NAME=uncharted2
-
-      # joymouse lives exactly as long as the game and not a moment longer.
-      # PR_SET_PDEATHSIG has the kernel signal it the moment its parent goes
-      # away, and the exec below makes RPCS3 that parent, in this very process.
-      # So RPCS3 exiting, crashing, or being killed outright all end joymouse
-      # the same way.
-      #
-      # A shell trap would not do. It cannot run when the launcher itself is
-      # killed, and it would need a shell to stay alive alongside the game in
-      # order to run in, which is one more process to outlive RPCS3 and hold
-      # the pad open.
-      setpriv --pdeathsig TERM joymouse &
-
-      # exec, so this launcher IS the game rather than a parent watching it.
-      # Nothing supervises, nothing polls, nothing waits on anything, so there
-      # is nothing left that could wedge or be orphaned.
-      exec ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/U2/Game
+  # The installed file name, the desktop entry id and the Icon key all have to
+  # be the same word, and that word is the attribute name of the game. So
+  # uncharted2.png, uncharted2.desktop, Icon=uncharted2. The name of the file
+  # that is copied FROM does not matter, which is why every game keeps its
+  # artwork under its own directory as plain icon.png.
+  gameIcon = key: game:
+    pkgs.runCommand "${key}-icon" {} ''
+      install -Dm644 ${game.icon} \
+        $out/share/icons/hicolor/256x256/apps/${key}.png
     '';
-  };
+  gameLauncher = key: game:
+    pkgs.writeShellApplication {
+      name = game.command;
+      runtimeInputs = [
+        # `default` on purpose rather than a named variant. It is the one
+        # attribute that survived joymouse being restructured, and a launcher has
+        # no business caring whether it gets the glibc or the static build.
+        inputs.joymouse.packages.${system}.default
+        pkgs.procps
+        pkgs.util-linux
+      ];
+      # The VPN stays up. This used to disconnect it for the length of a session
+      # and reconnect afterwards, which put every other thing on the machine on
+      # the open internet in order to fix one game.
+      #
+      # It was only ever needed because the game resolved its server by name and
+      # a VPN with leak protection blocks port 53 to every destination. The IP
+      # swap list in the game configuration answers those names inside RPCS3
+      # instead, so no name lookup leaves the machine and nothing has to be
+      # switched off. See the Net section of the per game configuration.
+      text = ''
+        # Starting a second instance gets you a modal box complaining about the
+        # first one and nothing else, so there is nothing useful to do here.
+        # The check comes before joymouse is started, because bailing out after
+        # would leave exactly the stray daemon this launcher is careful to avoid.
+        #
+        # The name is the wrapped binary rather than `rpcs3`, because that is what
+        # the process is actually called once the wrapper has exec'd into it.
+        if pgrep -x .rpcs3-wrapped > /dev/null; then
+          exit 0
+        fi
+
+        # Appear as the game rather than as the emulator. The patched RPCS3
+        # reads this and hands it to the compositor as the window's app id, so the
+        # taskbar finds ${key}.desktop and shows the game's own icon instead
+        # of the emulator's. Without it one binary can only ever be one
+        # application.
+        export RPCS3_DESKTOP_FILE_NAME=${key}
+
+        # joymouse lives exactly as long as the game and not a moment longer.
+        # PR_SET_PDEATHSIG has the kernel signal it the moment its parent goes
+        # away, and the exec below makes RPCS3 that parent, in this very process.
+        # So RPCS3 exiting, crashing, or being killed outright all end joymouse
+        # the same way.
+        #
+        # A shell trap would not do. It cannot run when the launcher itself is
+        # killed, and it would need a shell to stay alive alongside the game in
+        # order to run in, which is one more process to outlive RPCS3 and hold
+        # the pad open.
+        # --game picks the profiles and the key assignment written down under
+        # ${game.joymouse} in ~/.config/joymouse. What stands there is only ever
+        # in force here, so the next game launched this way brings its own
+        # without either of them having to be edited around the other.
+        setpriv --pdeathsig TERM joymouse --game ${game.joymouse} &
+
+        # exec, so this launcher IS the game rather than a parent watching it.
+        # Nothing supervises, nothing polls, nothing waits on anything, so there
+        # is nothing left that could wedge or be orphaned.
+        exec ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/${game.link}/${game.disc}
+      '';
+    };
+  gamePackages = lib.concatLists (lib.mapAttrsToList (key: game:
+    [(gameLauncher key game)]
+    ++ lib.optional (game.icon != null) (gameIcon key game))
+  games);
+  # The attribute name is the file name, so this becomes uncharted2.desktop.
+  # That matters: an icon is resolved by THEME NAME, and that name has to equal
+  # the entry id and the icon file name. uncharted2.desktop, Icon=uncharted2,
+  # uncharted2.png. An absolute path in Icon does not render, which is exactly
+  # what this entry used to carry, pointing at a file RPCS3 only ever creates
+  # when somebody clicks Create Shortcut in its interface. That directory was
+  # empty, so the entry had two separate reasons to fall back to a placeholder.
+  #
+  # StartupWMClass is what lets a taskbar tie the RUNNING window back to this
+  # entry. It matches the app id the launcher asks RPCS3 to announce, see
+  # RPCS3_DESKTOP_FILE_NAME above.
+  gameDesktopEntries =
+    lib.mapAttrs (key: game: {
+      name = game.displayName;
+      type = "Application";
+      categories = ["Game"];
+      exec = "${gameLauncher key game}/bin/${game.command}";
+      icon =
+        if game.icon != null
+        then key
+        else "rpcs3";
+      noDisplay = false;
+      startupNotify = true;
+      terminal = false;
+      settings = {
+        StartupWMClass = key;
+      };
+    })
+    games;
+  # RPCS3 reads a per title configuration by serial, so the file name is the
+  # serial and nothing else. A game without one simply runs on the emulator
+  # wide config.yml.
+  #
+  # These go through xdg.configFile rather than home.file, which is the same
+  # thing with ~/.config prepended, because the name of every one of them is
+  # computed and a computed name cannot be written into the literal that holds
+  # the files with fixed names.
+  gameCustomConfigs = lib.mapAttrs' (_: game:
+    lib.nameValuePair "rpcs3/custom_configs/config_${game.serial}.yml" {
+      text = game.customConfig;
+    })
+  (lib.filterAttrs (_: game: game.customConfig != null) games);
+  # Which patches are switched ON, for every game at once, because RPCS3 keeps
+  # them all in one file keyed by the hash of the game binary.
+  #
+  # This is a separate file from patch.yml above and easy to miss, because the
+  # definitions being declared looks like the job is done, while every patch
+  # still sits at its default of off.
+  #
+  # Per game only the list of names is written down, because the YAML is the
+  # same five lines repeated per patch with one name changing, and a list of
+  # names is the part anybody actually wants to read or edit. The hash
+  # identifies the game binary, the version has to match the disc revision, and
+  # both have to agree with an entry in patch.yml or the patch is simply
+  # ignored.
+  #
+  # Built from plain strings and not from an indented block, because Nix strips
+  # the common indentation off a '' string and YAML is indentation. A block here
+  # silently produced a file where every patch name sat at the top level instead
+  # of under the hash, which parses fine and applies nothing.
+  gamePatchConfig = lib.concatStrings (lib.mapAttrsToList (
+      _: game:
+        "${game.patch.hash}:\n"
+        + lib.concatMapStrings (
+          name:
+            "  ${name}:\n"
+            + "    \"${game.patch.title}\":\n"
+            + "      ${game.serial}:\n"
+            + "        ${game.patch.version}:\n"
+            + "          Enabled: true\n"
+        )
+        game.patch.enabled
+    )
+    (lib.filterAttrs (_: game: game.patch.enabled != []) games));
 in {
   options = {
     modules = {
@@ -322,12 +419,153 @@ in {
               default = "Darker Style by TheMitoSan";
               description = "Name of the GUI stylesheet from GuiConfigs, without the qss suffix";
             };
-            uncharted2 = {
-              source = lib.mkOption {
-                type = lib.types.str;
-                default = "/mnt/raid/Games/U2";
-                description = "Directory containing the Uncharted 2 disc dump, DLC and Patches";
-              };
+            # One entry per game. Everything that differs between titles lives
+            # here and nothing else does, so adding a game is a declaration
+            # rather than an edit spread over the module.
+            #
+            # This module already declares uncharted2 below. Those definitions
+            # merge with whatever is declared elsewhere, so a configuration adds
+            # a title without repeating the one that is already there.
+            games = lib.mkOption {
+              default = {};
+              description = ''
+                Games to provision, launch and configure. The attribute name is
+                the identity of the game across the whole desktop: it is the
+                desktop entry id, the icon name in the theme and the app id the
+                window announces, and all three have to agree.
+              '';
+              example = lib.literalExpression ''
+                {
+                  uncharted3 = {
+                    source = "/mnt/raid/Games/U3";
+                    displayName = "Uncharted 3: Drake's Deception™";
+                    serial = "BCES01175";
+                    icon = ./uncharted3/icon.png;
+                    customConfig = builtins.readFile ./uncharted3/config.yml;
+                    patch = {
+                      title = "Uncharted 3: Drake's Deception";
+                      hash = "PPU-0000000000000000000000000000000000000000";
+                      version = "01.20";
+                      enabled = ["Skip Intro" "Unlock FPS"];
+                    };
+                  };
+                }
+              '';
+              type = lib.types.attrsOf (lib.types.submodule ({
+                name,
+                config,
+                ...
+              }: {
+                options = {
+                  enable = lib.mkEnableOption "Enable this game" // {default = true;};
+                  source = lib.mkOption {
+                    type = lib.types.str;
+                    description = ''
+                      Directory containing the disc dump, its DLC and its
+                      Patches. It does not have to exist yet, a game whose files
+                      are still missing is simply skipped when provisioning.
+                    '';
+                  };
+                  disc = lib.mkOption {
+                    type = lib.types.str;
+                    default = "Game";
+                    description = "Subdirectory of source holding PS3_DISC.SFB";
+                  };
+                  link = lib.mkOption {
+                    type = lib.types.str;
+                    default = builtins.baseNameOf config.source;
+                    defaultText = lib.literalExpression "builtins.baseNameOf source";
+                    description = ''
+                      Name of the symlink under ~/Games that points at source,
+                      so the game is booted from a path that does not depend on
+                      where the dump is kept.
+                    '';
+                  };
+                  command = lib.mkOption {
+                    type = lib.types.str;
+                    default = name;
+                    defaultText = lib.literalExpression "the attribute name";
+                    description = "Name of the launcher on PATH";
+                  };
+                  displayName = lib.mkOption {
+                    type = lib.types.str;
+                    description = "Name shown by the launcher and the taskbar";
+                  };
+                  serial = lib.mkOption {
+                    type = lib.types.str;
+                    example = "BCES00757";
+                    description = ''
+                      Title id of the disc. RPCS3 names the per game
+                      configuration after it, so it has to be the serial of the
+                      dump in source and not that of another region.
+                    '';
+                  };
+                  joymouse = lib.mkOption {
+                    type = lib.types.str;
+                    default = name;
+                    defaultText = lib.literalExpression "the attribute name";
+                    description = ''
+                      Profile joymouse is started with, meaning the section of
+                      that name in ~/.config/joymouse.
+                    '';
+                  };
+                  icon = lib.mkOption {
+                    type = lib.types.nullOr lib.types.path;
+                    default = null;
+                    example = lib.literalExpression "./uncharted2/icon.png";
+                    description = ''
+                      The disc icon at 256 by 256, trimmed to the artwork and
+                      centred. Null falls back to the emulator's own icon.
+                    '';
+                  };
+                  customConfig = lib.mkOption {
+                    type = lib.types.nullOr lib.types.lines;
+                    default = null;
+                    example = lib.literalExpression "builtins.readFile ./uncharted2/config.yml";
+                    description = ''
+                      The per title configuration RPCS3 keeps under
+                      custom_configs. Null runs the game on the emulator wide
+                      config.yml.
+                    '';
+                  };
+                  patch = {
+                    title = lib.mkOption {
+                      type = lib.types.str;
+                      default = config.displayName;
+                      defaultText = lib.literalExpression "displayName";
+                      description = ''
+                        The name of the game AS patch.yml spells it. It is a key
+                        there, so a stray trademark sign or a missing subtitle
+                        means every patch below is ignored.
+                      '';
+                    };
+                    hash = lib.mkOption {
+                      type = lib.types.str;
+                      default = "";
+                      example = "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
+                      description = ''
+                        Hash of the game binary the patches belong to, as
+                        patch.yml and the RPCS3 log spell it.
+                      '';
+                    };
+                    version = lib.mkOption {
+                      type = lib.types.str;
+                      default = "";
+                      example = "01.09";
+                      description = "Disc revision the patches were written for";
+                    };
+                    enabled = lib.mkOption {
+                      type = lib.types.listOf lib.types.str;
+                      default = [];
+                      example = ["Skip Intro" "Unlock FPS"];
+                      description = ''
+                        Patches from patch.yml to switch on, by name. Every
+                        patch is off until it is named here.
+                      '';
+                    };
+                  };
+                };
+              }));
             };
             rpcn = {
               # rpcn.yml holds an account name, a password and a login token, so
@@ -355,11 +593,55 @@ in {
     };
   };
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
+    modules = {
+      gaming = {
+        emulation = {
+          rpcs3 = {
+            games = {
+              # Uncharted 2 travels with the module, because everything about it
+              # apart from where the dump sits is a property of the game and not
+              # of a machine. The three values that DO belong to a dump are
+              # overridable without mkForce: the location, and the binary hash
+              # and disc revision the patches were written against, which differ
+              # between regions and revisions of the same game.
+              uncharted2 = {
+                source = lib.mkDefault "/mnt/raid/Games/U2";
+                displayName = "Uncharted 2: Among Thieves™";
+                serial = "BCES00757";
+                icon = ./games/uncharted2/icon.png;
+                customConfig = builtins.readFile ./games/uncharted2/config.yml;
+                patch = {
+                  title = "Uncharted 2: Among Thieves";
+                  hash = lib.mkDefault "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
+                  version = lib.mkDefault "01.09";
+                  enabled = [
+                    "Skip Intro"
+                    "Unlock FPS"
+                    "Disable Mesh Trimming"
+                    "Enable GPU Lighting"
+                    "Disable SPU Post-processing"
+                    "Disable Depth of Field"
+                    "Disable Velocity Motion Blur"
+                    "Disable SSAO"
+                    "Disable Motion Blur"
+                  ];
+                };
+              };
+            };
+          };
+        };
+      };
+    };
     systemd = {
       tmpfiles = {
-        rules = [
-          "L /home/${user}/Games/U2 - - - - ${cfg.rpcs3.uncharted2.source}"
-        ];
+        # Only what is under dev_hdd0 is RPCS3's own. A disc dump is reached
+        # through a link with a stable name instead, so the boot path never
+        # mentions the disk the dump happens to live on.
+        rules =
+          lib.mapAttrsToList (
+            _: game: "L /home/${user}/Games/${game.link} - - - - ${game.source}"
+          )
+          games;
       };
     };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
@@ -384,34 +666,8 @@ in {
             };
           };
           xdg = {
-            # The attribute name is the file name, so this becomes
-            # uncharted2.desktop. That matters: an icon is resolved by THEME
-            # NAME, and that name has to equal the entry id and the icon file
-            # name. uncharted2.desktop, Icon=uncharted2, uncharted2.png. An
-            # absolute path in Icon does not render, which is exactly what this
-            # entry used to carry, pointing at a file RPCS3 only ever creates
-            # when somebody clicks Create Shortcut in its interface. That
-            # directory was empty, so the entry had two separate reasons to
-            # fall back to a placeholder.
-            #
-            # StartupWMClass is what lets a taskbar tie the RUNNING window back
-            # to this entry. It matches the app id the launcher asks RPCS3 to
-            # announce, see RPCS3_DESKTOP_FILE_NAME above.
-            desktopEntries = {
-              uncharted2 = {
-                name = "Uncharted 2: Among Thieves™";
-                type = "Application";
-                categories = ["Game"];
-                exec = "${uncharted}/bin/uncharted";
-                icon = "uncharted2";
-                noDisplay = false;
-                startupNotify = true;
-                terminal = false;
-                settings = {
-                  StartupWMClass = "uncharted2";
-                };
-              };
-            };
+            desktopEntries = gameDesktopEntries;
+            configFile = gameCustomConfigs;
           };
           # The RPCN account and the custom server list, decrypted at activation
           # and placed straight where RPCS3 reads it. The file lands outside the
@@ -430,13 +686,13 @@ in {
             };
           };
           home = {
-            packages = [
-              pkgs.rusty-psn-gui
-              rpcs3
-              rpcs3-provision
-              uncharted
-              uncharted-icon
-            ];
+            packages =
+              [
+                pkgs.rusty-psn-gui
+                rpcs3
+                rpcs3-provision
+              ]
+              ++ gamePackages;
             file = {
               ".config/rpcs3/bios" = {
                 source = "${ps3bios}/bios";
@@ -739,50 +995,9 @@ in {
               ".config/rpcs3/patches/patch.yml" = {
                 source = ./patch.yml;
               };
-              # Which of them are switched ON. A separate file from the one
-              # above and easy to miss, because the definitions being declared
-              # looks like the job is done, while every patch still sits at its
-              # default of off.
-              #
-              # The list is written out here rather than the finished YAML,
-              # because the file is the same five lines repeated per patch with
-              # one name changing, and a list of names is the part anybody
-              # actually wants to read or edit. The hash identifies the game
-              # binary, the version has to match the disc revision, and both
-              # have to agree with an entry in patch.yml or the patch is simply
-              # ignored.
+              # Which of them are switched ON, see gamePatchConfig above.
               ".config/rpcs3/patch_config.yml" = {
-                text =
-                  let
-                    hash = "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
-                    title = "Uncharted 2: Among Thieves";
-                    serial = "BCES00757";
-                    version = "01.09";
-                    enabled = [
-                      "Skip Intro"
-                      "Unlock FPS"
-                      "Disable Mesh Trimming"
-                      "Enable GPU Lighting"
-                      "Disable SPU Post-processing"
-                      "Disable Depth of Field"
-                      "Disable Velocity Motion Blur"
-                      "Disable SSAO"
-                      "Disable Motion Blur"
-                    ];
-                    # Built from plain strings and not from an indented block,
-                    # because Nix strips the common indentation off a '' string
-                    # and YAML is indentation. A block here silently produced a
-                    # file where every patch name sat at the top level instead
-                    # of under the hash, which parses fine and applies nothing.
-                    entry =
-                      name:
-                      "  ${name}:\n"
-                      + "    \"${title}\":\n"
-                      + "      ${serial}:\n"
-                      + "        ${version}:\n"
-                      + "          Enabled: true\n";
-                  in
-                  "${hash}:\n" + lib.concatMapStrings entry enabled;
+                text = gamePatchConfig;
               };
               ".config/rpcs3/Icons/ui" = {
                 source = "${rpcs3}/share/rpcs3/Icons/ui";
@@ -796,9 +1011,13 @@ in {
                 recursive = true;
               };
               # SDL guesses a mapping for a pad it does not know, and for the
-              # virtual one it guesses the face buttons the wrong way round, so
-              # triangle arrived as square. RPCS3 already looks for this file
-              # and logs a warning that it is missing.
+              # virtual one it now guesses right, because joymouse sends the
+              # face buttons under the names SDL reads them by. The file writes
+              # that same guess out, so nothing depends on a guess, and RPCS3
+              # stops logging a warning that it is missing.
+              #
+              # It once corrected the guess instead of repeating it, back when
+              # triangle arrived as square. That was fixed in joymouse itself.
               ".config/rpcs3/input_configs/gamecontrollerdb.txt" = {
                 source = ./gamecontrollerdb.txt;
               };
@@ -1503,322 +1722,6 @@ in {
                       Vendor ID: 0
                       Product ID: 0
                     Buddy Device: "Null"
-                '';
-              };
-              ".config/rpcs3/custom_configs/config_BCES00757.yml" = {
-                text = ''
-                  # Uncharted 2, BCES00757. This is the configuration that
-                  # actually ran, taken from the emulator itself rather than
-                  # written by hand, so what is declared and what was played
-                  # are the same thing.
-                  #
-                  # Two fields are deliberately not carried over. The Vulkan
-                  # adapter is left empty so RPCS3 picks the device present in
-                  # the host, because naming one pins the config to a single
-                  # machine and it silently falls back everywhere else. The
-                  # console PSID is left to the global configuration, since it
-                  # identifies the installation and has no business in a
-                  # per-title file.
-                  Audio:
-                    Audio Channel Layout: Automatic
-                    Audio Device: '@@@default@@@'
-                    Audio Format: Stereo
-                    Audio Formats: 0
-                    Audio Provider: CellAudio
-                    Convert to 16 bit: false
-                    Desired Audio Buffer Duration: 100
-                    Disable Sampling Skip: false
-                    Dump to file: false
-                    Enable Buffering: true
-                    Enable Time Stretching: false
-                    Master Volume: 100
-                    Microphone Devices: '@@@@@@@@@@@@'
-                    Microphone Type: "Null"
-                    Music Handler: Qt
-                    RSXAudio Avport: HDMI 0
-                    Renderer: Cubeb
-                    Time Stretching Threshold: 75
-                  Core:
-                    Accurate Cache Line Stores: false
-                    Accurate PPU 128-byte Reservation Op Max Length: 0
-                    Accurate RSX reservation access: true
-                    Accurate SPU DMA: false
-                    Accurate SPU Reservations: true
-                    Allow RSX CPU Preemptions: true
-                    Assume External Debugger: false
-                    Clocks scale: 100
-                    Debug Console Mode: false
-                    Disable SPU GETLLAR Spin Optimization: false
-                    Enable Performance Report: false
-                    Enable TSX: Disabled
-                    HLE lwmutex: false
-                    Hook static functions: false
-                    LLVM Precompilation: true
-                    Libraries Control: []
-                    MFC Commands Shuffling In Steps: false
-                    MFC Commands Shuffling Limit: 0
-                    MFC Commands Timeout: 0
-                    MFC Debug: false
-                    Max CPU Preempt Count: 0
-                    Max LLVM Compile Threads: 0
-                    Max SPURS Threads: 6
-                    PPU Accurate Non-Java Mode: false
-                    PPU Accurate Vector NaN Values: false
-                    PPU Calling History: false
-                    PPU Debug: false
-                    PPU Decoder: Recompiler (LLVM)
-                    PPU Fixup Vector NaN Values: false
-                    PPU LLVM Greedy Mode: false
-                    PPU LLVM Java Mode Handling: true
-                    PPU Profiler: false
-                    PPU Set FPCC Bits: false
-                    PPU Set Saturation Bit: false
-                    PPU Threads: 2
-                    PPU Vector NaN Handling: true
-                    Performance Report Threshold: 500
-                    Precise SPU Verification: false
-                    Preferred SPU Threads: 0
-                    RSX FIFO Accuracy: Atomic
-                    RSX FIFO Fetch Accuracy: Atomic
-                    SPU Block Size: Safe
-                    SPU Cache: true
-                    SPU Debug: false
-                    SPU Decoder: Recompiler (LLVM)
-                    SPU GETLLAR Busy Waiting Percentage: 100
-                    SPU LLVM Lower Bound: 0
-                    SPU LLVM Upper Bound: 18446744073709551615
-                    SPU Profiler: false
-                    SPU Reservation Busy Waiting Enabled: false
-                    SPU Reservation Busy Waiting Percentage: 0
-                    SPU Reservation Busy Waiting Percentage 1: 100
-                    SPU Verification: true
-                    SPU Wake-Up Delay: 0
-                    SPU Wake-Up Delay Thread Mask: 63
-                    SPU XFloat Accuracy: Approximate
-                    SPU delay penalty: 3
-                    SPU loop detection: false
-                    Save LLVM logs: false
-                    Set DAZ and FTZ: false
-                    Sleep Timers Accuracy: Usleep Only
-                    Stub PPU Traps: 0
-                    TSX Transaction First Limit: 800
-                    TSX Transaction Second Limit: 2000
-                    Thread Scheduler Mode: Operating System
-                    Use Accurate DFMA: true
-                    Use LLVM CPU: ""
-                    Usleep Time Addend: 0
-                    XFloat Accuracy: Approximate
-                  Input/Output:
-                    Allow move hue set by game: false
-                    Background input enabled: true
-                    Buzz emulated controller: "Null"
-                    Camera: "Null"
-                    Camera ID: Default
-                    Camera flip: None
-                    Camera type: Unknown
-                    Emulated Midi devices: Keyboardßßß@@@Keyboardßßß@@@Keyboardßßß@@@
-                    Fake Move Rotation Cone: 10
-                    Fake Move Rotation Cone (Vertical): 10
-                    GHLtar emulated controller: "Null"
-                    IO Debug overlay: false
-                    Keep pads connected: false
-                    Keyboard: "Null"
-                    Load SDL GameController Mappings: true
-                    Lock overlay input to player one: false
-                    Mouse: "Null"
-                    Mouse Debug overlay: false
-                    Move: "Null"
-                    Pad handler mode: Single-threaded
-                    Pad handler sleep (microseconds): 1000
-                    Paint move spheres: false
-                    SDL Camera ID: Default
-                    Show move cursor: false
-                    Turntable emulated controller: "Null"
-                  Log: {}
-                  Miscellaneous:
-                    Automatically start games after boot: true
-                    Enable GameMode: false
-                    Exit RPCS3 when process finishes: false
-                    GDB Server: 127.0.0.1:2345
-                    Pause Emulation During Home Menu: false
-                    Pause emulation on RPCS3 focus loss: false
-                    Play music during boot sequence: true
-                    Prevent display sleep while running games: true
-                    Show PPU compilation hint: false
-                    Show RPCN popups: true
-                    Show analog limiter toggle hint: true
-                    Show autosave/autoload hint: false
-                    Show capture hints: true
-                    Show fatal error hints: false
-                    Show mouse and keyboard toggle hint: true
-                    Show pressure intensity toggle hint: true
-                    Show shader compilation hint: false
-                    Show trophy popups: true
-                    Silence All Logs: true
-                    Start games in fullscreen mode: true
-                    Use native user interface: true
-                    Use recursive scan: false
-                    Window Title Format: 'FPS: %F | %R | %V | %T [%t]'
-                  Net:
-                    Bind address: 0.0.0.0
-                    Clans Enabled: false
-                    # Only consulted for a name the swap list below does not
-                    # match, which with a wildcard is none. It stays as the
-                    # honest fallback and as documentation of where the private
-                    # server lives.
-                    DNS address: 51.75.22.125
-                    IP address: 0.0.0.0
-                    # Every hostname the game asks for is answered with the
-                    # private server, inside RPCS3, without a packet leaving the
-                    # machine. The pattern is a real wildcard, RPCS3 turns `*`
-                    # into `.*` and matches the hostname against it.
-                    #
-                    # This is not a nicety, it is what lets the game run inside
-                    # a VPN. A DNS address alone means RPCS3 sends real queries
-                    # to port 53, and a VPN with leak protection blocks port 53
-                    # to every destination except its own resolver, its own
-                    # server included. The query dies, the hostname never
-                    # resolves, and the game sits at "Connecting..." for ever,
-                    # while the RPCN connection itself is perfectly healthy
-                    # because it is reached by address and never by name.
-                    IP swap list: "*=51.75.22.125"
-                    Internet enabled: Connected
-                    PSN Country: us
-                    PSN status: RPCN
-                    # Off, because it cannot succeed and is not free. RPCS3
-                    # asks the router to open the peer to peer port, there is no
-                    # router to ask inside a VPN tunnel, and the search runs a
-                    # full eight seconds into a timeout on every single launch.
-                    UPNP Enabled: false
-                  Savestate:
-                    Compatible Savestate Mode: false
-                    Inspection Mode Savestates: false
-                    Maximum SaveState Files: 4
-                    Maximum SaveState Files Space (MiB): 4096
-                    Save Disc Game Data: false
-                    Start Paused: false
-                    Suspend Emulation Savestate Mode: false
-                  System:
-                    Console time offset (s): 0
-                    Date Format: ddmmyyyy
-                    Enter button assignment: Enter with cross
-                    HDD Model Name: ""
-                    HDD Serial Number: ""
-                    Keyboard Type: German keyboard
-                    Language: German
-                    License Area: SCEE
-                    PSID high: 0
-                    PSID low: 0
-                    Process ARGV: {}
-                    System Name: RPCS3-577
-                    Time Format: clock24
-                  VFS:
-                    Disk cache maximum size (MB): 5120
-                    Empty /dev_hdd0/tmp/: true
-                    Enable /host_root/: false
-                    Initialize Directories: true
-                    Limit disk cache size: false
-                  Video:
-                    3D Display Enabled: false
-                    3D Display Mode: Disabled
-                    Accurate ZCULL stats: false
-                    Allow Host GPU Labels: false
-                    Anisotropic Filter Override: 0
-                    Aspect ratio: 16:9
-                    Consecutive Frames To Draw: 1
-                    Consecutive Frames To Skip: 1
-                    DECR memory layout: false
-                    Debug Program Analyser: false
-                    Debug output: false
-                    Debug overlay: false
-                    Disable Asynchronous Memory Manager: false
-                    Disable FIFO Reordering: false
-                    Disable Hardware ColorSpace Remapping: false
-                    Disable MSL Fast Math: false
-                    Disable On-Disk Shader Cache: false
-                    Disable Vertex Cache: false
-                    Disable Video Output: false
-                    Disable Vulkan Memory Allocator: false
-                    Disable ZCull Occlusion Queries: false
-                    Driver Recovery Timeout: 1000000
-                    Driver Wake-Up Delay: 20
-                    Enable Frame Skip: false
-                    FidelityFX CAS Sharpening Intensity: 50
-                    Force CPU Blit: false
-                    Force Hardware MSAA Resolve: false
-                    Force High Precision Z buffer: false
-                    Frame limit: Auto
-                    Handle RSX Memory Tiling: false
-                    Log shader programs: false
-                    MSAA: Disabled
-                    Minimum Scalable Dimension: 160
-                    Multithreaded RSX: false
-                    Output Scaling Mode: FidelityFX Super Resolution
-                    Performance Overlay:
-                      Body Background (hex): '#002339FF'
-                      Body Color (hex): '#FFE138FF'
-                      Center Horizontally: false
-                      Center Vertically: false
-                      Detail level: None
-                      Enable Framerate Graph: true
-                      Enable Frametime Graph: false
-                      Enabled: false
-                      Font: n023055ms.ttf
-                      Font size (px): 6
-                      Framerate datapoints: 199
-                      Framerate graph detail level: All
-                      Frametime datapoints: 170
-                      Frametime graph detail level: All
-                      Horizontal Margin (%): 4
-                      Horizontal Margin (px): 10
-                      Metrics update interval (ms): 1000
-                      Opacity (%): 10
-                      Position: Top Left
-                      Title Background (hex): '#00000000'
-                      Title Color (hex): '#F26C24FF'
-                      Use Window Space: false
-                      Vertical Margin (%): 7
-                      Vertical Margin (px): 10
-                    Read Color Buffers: false
-                    Read Depth Buffer: true
-                    Record With Overlays: true
-                    Relaxed ZCULL Sync: false
-                    Renderdoc Compatibility Mode: false
-                    Renderer: Vulkan
-                    Resolution: 1280x720
-                    Resolution Scale: 150
-                    Screen size in inches: 24
-                    Second Frame Limit: 0
-                    Shader Compiler Threads: 0
-                    Shader Loading Dialog:
-                      Allow custom background: true
-                      Blur effect strength: 0
-                      Darkening effect strength: 30
-                    Shader Mode: Async Recompiler (multi-threaded)
-                    Shader Precision: High
-                    Stretch To Display Area: false
-                    Strict Rendering Mode: false
-                    Strict Texture Flushing: false
-                    Texture LOD Bias Addend: 0
-                    Use GPU texture scaling: false
-                    Use full RGB output range: true
-                    VSync: false
-                    VSync Mode: Disabled
-                    Vblank NTSC Fixup: false
-                    Vblank Rate: 240
-                    Vulkan:
-                      Adapter: ""
-                      Asynchronous Queue Scheduler: Safe
-                      Asynchronous Texture Streaming: true
-                      Asynchronous Texture Streaming 2: true
-                      Exclusive Fullscreen Mode: Automatic
-                      FidelityFX CAS Sharpening Intensity: 50
-                      Force FIFO present mode: false
-                      Force primitive restart flag: false
-                      Use Re-BAR for GPU uploads: true
-                      VRAM allocation limit (MB): 65536
-                    Write Color Buffers: true
-                    Write Depth Buffer: true
                 '';
               };
             };
