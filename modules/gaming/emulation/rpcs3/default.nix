@@ -212,11 +212,27 @@ let
       # Eintrag bleibt die Spieleliste leer und die spielspezifische
       # Konfiguration greift nicht. RPCS3 schreibt die Datei selbst, sie kann
       # daher keine Verknuepfung in den Store sein.
+      #
+      # Eingetragen wird der LINK unter ~/Games, nicht das Verzeichnis auf der
+      # Platte. Der Eintrag ist dauerhaft und der Launcher bootet ebenfalls
+      # ueber den Link, beide muessen denselben Pfad nennen. find folgt einem
+      # Symlink nur mit -L.
       register_discs() {
         root="$1"
         [ -d "$root" ] || return 0
         games="$config_dir/games.yml"
         touch "$games"
+        # RPCS3 schreibt games.yml OHNE abschliessenden Zeilenumbruch. Ein
+        # Anhaengen landet dann auf derselben Zeile wie der letzte Eintrag, und
+        # eine Zeile mit zwei Zuordnungen ist kein YAML. RPCS3 verwirft darauf
+        # die GANZE Datei und zeigt eine leere Spieleliste, statt nur diesen
+        # einen Eintrag zu verlieren. Genau das ist passiert, als zum ersten
+        # Mal ein zweites Spiel dazukam. Eine Kommandosubstitution frisst
+        # Zeilenumbrueche am Ende, ein leeres Ergebnis heisst also, die Datei
+        # endet bereits auf einem.
+        if [ -s "$games" ] && [ -n "$(tail -c 1 "$games")" ]; then
+          printf "\n" >> "$games"
+        fi
         while IFS= read -r sfb; do
           disc=$(dirname "$sfb")
           sfo="$disc/PS3_GAME/PARAM.SFO"
@@ -228,7 +244,7 @@ let
           fi
           echo "Registering $serial at $disc"
           printf "%s: %s\n" "$serial" "$disc" >> "$games"
-        done < <(find "$root" -name PS3_DISC.SFB)
+        done < <(find -L "$root" -name PS3_DISC.SFB)
       }
 
       # Every declared game gets the same treatment, and a game whose files have
@@ -240,7 +256,7 @@ let
         lib.mapAttrsToList (_: game: ''
           install_tree "${game.source}/Patches"
           install_tree "${game.source}/DLC"
-          register_discs "${game.source}"
+          register_discs "/home/${user}/Games/${game.link}"
         '') games
       )}
 
