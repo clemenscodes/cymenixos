@@ -3,13 +3,15 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   config,
   system,
   ...
-}: let
+}:
+let
   cfg = config.modules.gaming.emulation;
-  ps3bios = import ./firmware {inherit pkgs;};
+  ps3bios = import ./firmware { inherit pkgs; };
   # RPCS3 kann Firmware und Pakete ausschliesslich ueber die GUI installieren,
   # headless bricht es mit "Cannot perform installation in headless mode!" ab.
   # Der Patch laesst die vier Bestaetigungsdialoge dieses Pfades unter
@@ -20,7 +22,10 @@
     # app-id.patch gives the window an app id in the first place. Without one no
     # taskbar can tie the window to a desktop entry, and StartupWMClass does not
     # help, because there is nothing for it to be compared against.
-    patches = (oldAttrs.patches or []) ++ [./unattended-install.patch ./app-id.patch];
+    patches = (oldAttrs.patches or [ ]) ++ [
+      ./unattended-install.patch
+      ./app-id.patch
+    ];
   });
   user = config.modules.users.name;
   rpcs3-provision = pkgs.writeShellApplication {
@@ -231,12 +236,13 @@
       # return immediately for a directory that is not there. So a title can be
       # declared before its dump exists and starts working on the next run of
       # this service.
-      ${lib.concatStrings (lib.mapAttrsToList (_: game: ''
+      ${lib.concatStrings (
+        lib.mapAttrsToList (_: game: ''
           install_tree "${game.source}/Patches"
           install_tree "${game.source}/DLC"
           register_discs "${game.source}"
-        '')
-        games)}
+        '') games
+      )}
 
       echo "RPCS3 provisioning complete"
     '';
@@ -263,12 +269,14 @@
   # uncharted2.png, uncharted2.desktop, Icon=uncharted2. The name of the file
   # that is copied FROM does not matter, which is why every game keeps its
   # artwork under its own directory as plain icon.png.
-  gameIcon = key: game:
-    pkgs.runCommand "${key}-icon" {} ''
+  gameIcon =
+    key: game:
+    pkgs.runCommand "${key}-icon" { } ''
       install -Dm644 ${game.icon} \
         $out/share/icons/hicolor/256x256/apps/${key}.png
     '';
-  gameLauncher = key: game:
+  gameLauncher =
+    key: game:
     pkgs.writeShellApplication {
       name = game.command;
       runtimeInputs = [
@@ -329,10 +337,11 @@
         exec ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/${game.link}/${game.disc}
       '';
     };
-  gamePackages = lib.concatLists (lib.mapAttrsToList (key: game:
-    [(gameLauncher key game)]
-    ++ lib.optional (game.icon != null) (gameIcon key game))
-  games);
+  gamePackages = lib.concatLists (
+    lib.mapAttrsToList (
+      key: game: [ (gameLauncher key game) ] ++ lib.optional (game.icon != null) (gameIcon key game)
+    ) games
+  );
   # The attribute name is the file name, so this becomes uncharted2.desktop.
   # That matters: an icon is resolved by THEME NAME, and that name has to equal
   # the entry id and the icon file name. uncharted2.desktop, Icon=uncharted2,
@@ -344,24 +353,19 @@
   # StartupWMClass is what lets a taskbar tie the RUNNING window back to this
   # entry. It matches the app id the launcher asks RPCS3 to announce, see
   # RPCS3_DESKTOP_FILE_NAME above.
-  gameDesktopEntries =
-    lib.mapAttrs (key: game: {
-      name = game.displayName;
-      type = "Application";
-      categories = ["Game"];
-      exec = "${gameLauncher key game}/bin/${game.command}";
-      icon =
-        if game.icon != null
-        then key
-        else "rpcs3";
-      noDisplay = false;
-      startupNotify = true;
-      terminal = false;
-      settings = {
-        StartupWMClass = key;
-      };
-    })
-    games;
+  gameDesktopEntries = lib.mapAttrs (key: game: {
+    name = game.displayName;
+    type = "Application";
+    categories = [ "Game" ];
+    exec = "${gameLauncher key game}/bin/${game.command}";
+    icon = if game.icon != null then key else "rpcs3";
+    noDisplay = false;
+    startupNotify = true;
+    terminal = false;
+    settings = {
+      StartupWMClass = key;
+    };
+  }) games;
   # RPCS3 reads a per title configuration by serial, so the file name is the
   # serial and nothing else. A game without one simply runs on the emulator
   # wide config.yml.
@@ -370,11 +374,12 @@
   # thing with ~/.config prepended, because the name of every one of them is
   # computed and a computed name cannot be written into the literal that holds
   # the files with fixed names.
-  gameCustomConfigs = lib.mapAttrs' (_: game:
+  gameCustomConfigs = lib.mapAttrs' (
+    _: game:
     lib.nameValuePair "rpcs3/custom_configs/config_${game.serial}.yml" {
       text = game.customConfig;
-    })
-  (lib.filterAttrs (_: game: game.customConfig != null) games);
+    }
+  ) (lib.filterAttrs (_: game: game.customConfig != null) games);
   # Which patches are switched ON, for every game at once, because RPCS3 keeps
   # them all in one file keyed by the hash of the game binary.
   #
@@ -393,27 +398,30 @@
   # the common indentation off a '' string and YAML is indentation. A block here
   # silently produced a file where every patch name sat at the top level instead
   # of under the hash, which parses fine and applies nothing.
-  gamePatchConfig = lib.concatStrings (lib.mapAttrsToList (
+  gamePatchConfig = lib.concatStrings (
+    lib.mapAttrsToList (
       _: game:
-        "${game.patch.hash}:\n"
-        + lib.concatMapStrings (
-          name:
-            "  ${name}:\n"
-            + "    \"${game.patch.title}\":\n"
-            + "      ${game.serial}:\n"
-            + "        ${game.patch.version}:\n"
-            + "          Enabled: true\n"
-        )
-        game.patch.enabled
-    )
-    (lib.filterAttrs (_: game: game.patch.enabled != []) games));
-in {
+      "${game.patch.hash}:\n"
+      + lib.concatMapStrings (
+        name:
+        "  ${name}:\n"
+        + "    \"${game.patch.title}\":\n"
+        + "      ${game.serial}:\n"
+        + "        ${game.patch.version}:\n"
+        + "          Enabled: true\n"
+      ) game.patch.enabled
+    ) (lib.filterAttrs (_: game: game.patch.enabled != [ ]) games)
+  );
+in
+{
   options = {
     modules = {
       gaming = {
         emulation = {
           rpcs3 = {
-            enable = lib.mkEnableOption "Enable rpcs3 emulation (PlayStation 3)" // {default = false;};
+            enable = lib.mkEnableOption "Enable rpcs3 emulation (PlayStation 3)" // {
+              default = false;
+            };
             theme = lib.mkOption {
               type = lib.types.str;
               default = "Darker Style by TheMitoSan";
@@ -427,7 +435,7 @@ in {
             # merge with whatever is declared elsewhere, so a configuration adds
             # a title without repeating the one that is already there.
             games = lib.mkOption {
-              default = {};
+              default = { };
               description = ''
                 Games to provision, launch and configure. The attribute name is
                 the identity of the game across the whole desktop: it is the
@@ -451,121 +459,131 @@ in {
                   };
                 }
               '';
-              type = lib.types.attrsOf (lib.types.submodule ({
-                name,
-                config,
-                ...
-              }: {
-                options = {
-                  enable = lib.mkEnableOption "Enable this game" // {default = true;};
-                  source = lib.mkOption {
-                    type = lib.types.str;
-                    description = ''
-                      Directory containing the disc dump, its DLC and its
-                      Patches. It does not have to exist yet, a game whose files
-                      are still missing is simply skipped when provisioning.
-                    '';
-                  };
-                  disc = lib.mkOption {
-                    type = lib.types.str;
-                    default = "Game";
-                    description = "Subdirectory of source holding PS3_DISC.SFB";
-                  };
-                  link = lib.mkOption {
-                    type = lib.types.str;
-                    default = builtins.baseNameOf config.source;
-                    defaultText = lib.literalExpression "builtins.baseNameOf source";
-                    description = ''
-                      Name of the symlink under ~/Games that points at source,
-                      so the game is booted from a path that does not depend on
-                      where the dump is kept.
-                    '';
-                  };
-                  command = lib.mkOption {
-                    type = lib.types.str;
-                    default = name;
-                    defaultText = lib.literalExpression "the attribute name";
-                    description = "Name of the launcher on PATH";
-                  };
-                  displayName = lib.mkOption {
-                    type = lib.types.str;
-                    description = "Name shown by the launcher and the taskbar";
-                  };
-                  serial = lib.mkOption {
-                    type = lib.types.str;
-                    example = "BCES00757";
-                    description = ''
-                      Title id of the disc. RPCS3 names the per game
-                      configuration after it, so it has to be the serial of the
-                      dump in source and not that of another region.
-                    '';
-                  };
-                  joymouse = lib.mkOption {
-                    type = lib.types.str;
-                    default = name;
-                    defaultText = lib.literalExpression "the attribute name";
-                    description = ''
-                      Profile joymouse is started with, meaning the section of
-                      that name in ~/.config/joymouse.
-                    '';
-                  };
-                  icon = lib.mkOption {
-                    type = lib.types.nullOr lib.types.path;
-                    default = null;
-                    example = lib.literalExpression "./uncharted2/icon.png";
-                    description = ''
-                      The disc icon at 256 by 256, trimmed to the artwork and
-                      centred. Null falls back to the emulator's own icon.
-                    '';
-                  };
-                  customConfig = lib.mkOption {
-                    type = lib.types.nullOr lib.types.lines;
-                    default = null;
-                    example = lib.literalExpression "builtins.readFile ./uncharted2/config.yml";
-                    description = ''
-                      The per title configuration RPCS3 keeps under
-                      custom_configs. Null runs the game on the emulator wide
-                      config.yml.
-                    '';
-                  };
-                  patch = {
-                    title = lib.mkOption {
-                      type = lib.types.str;
-                      default = config.displayName;
-                      defaultText = lib.literalExpression "displayName";
-                      description = ''
-                        The name of the game AS patch.yml spells it. It is a key
-                        there, so a stray trademark sign or a missing subtitle
-                        means every patch below is ignored.
-                      '';
+              type = lib.types.attrsOf (
+                lib.types.submodule (
+                  {
+                    name,
+                    config,
+                    ...
+                  }:
+                  {
+                    options = {
+                      enable = lib.mkEnableOption "Enable this game" // {
+                        default = true;
+                      };
+                      source = lib.mkOption {
+                        type = lib.types.str;
+                        description = ''
+                          Directory containing the disc dump, its DLC and its
+                          Patches. It does not have to exist yet, a game whose files
+                          are still missing is simply skipped when provisioning.
+                        '';
+                      };
+                      disc = lib.mkOption {
+                        type = lib.types.str;
+                        default = "Game";
+                        description = "Subdirectory of source holding PS3_DISC.SFB";
+                      };
+                      link = lib.mkOption {
+                        type = lib.types.str;
+                        default = builtins.baseNameOf config.source;
+                        defaultText = lib.literalExpression "builtins.baseNameOf source";
+                        description = ''
+                          Name of the symlink under ~/Games that points at source,
+                          so the game is booted from a path that does not depend on
+                          where the dump is kept.
+                        '';
+                      };
+                      command = lib.mkOption {
+                        type = lib.types.str;
+                        default = name;
+                        defaultText = lib.literalExpression "the attribute name";
+                        description = "Name of the launcher on PATH";
+                      };
+                      displayName = lib.mkOption {
+                        type = lib.types.str;
+                        description = "Name shown by the launcher and the taskbar";
+                      };
+                      serial = lib.mkOption {
+                        type = lib.types.str;
+                        example = "BCES00757";
+                        description = ''
+                          Title id of the disc. RPCS3 names the per game
+                          configuration after it, so it has to be the serial of the
+                          dump in source and not that of another region.
+                        '';
+                      };
+                      joymouse = lib.mkOption {
+                        type = lib.types.str;
+                        default = name;
+                        defaultText = lib.literalExpression "the attribute name";
+                        description = ''
+                          Profile joymouse is started with, meaning the section of
+                          that name in ~/.config/joymouse.
+                        '';
+                      };
+                      icon = lib.mkOption {
+                        type = lib.types.nullOr lib.types.path;
+                        default = null;
+                        example = lib.literalExpression "./uncharted2/icon.png";
+                        description = ''
+                          The disc icon at 256 by 256, trimmed to the artwork and
+                          centred. Null falls back to the emulator's own icon.
+                        '';
+                      };
+                      customConfig = lib.mkOption {
+                        type = lib.types.nullOr lib.types.lines;
+                        default = null;
+                        example = lib.literalExpression "builtins.readFile ./uncharted2/config.yml";
+                        description = ''
+                          The per title configuration RPCS3 keeps under
+                          custom_configs. Null runs the game on the emulator wide
+                          config.yml.
+                        '';
+                      };
+                      patch = {
+                        title = lib.mkOption {
+                          type = lib.types.str;
+                          default = config.displayName;
+                          defaultText = lib.literalExpression "displayName";
+                          description = ''
+                            The name of the game AS patch.yml spells it. It is a key
+                            there, so a stray trademark sign or a missing subtitle
+                            means every patch below is ignored.
+                          '';
+                        };
+                        hash = lib.mkOption {
+                          type = lib.types.str;
+                          default = "";
+                          example = "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
+                          description = ''
+                            Hash of the game binary the patches belong to, as
+                            patch.yml and the RPCS3 log spell it.
+                          '';
+                        };
+                        version = lib.mkOption {
+                          type = lib.types.str;
+                          default = "";
+                          example = "01.09";
+                          description = "Disc revision the patches were written for";
+                        };
+                        enabled = lib.mkOption {
+                          type = lib.types.listOf lib.types.str;
+                          default = [ ];
+                          example = [
+                            "Skip Intro"
+                            "Unlock FPS"
+                          ];
+                          description = ''
+                            Patches from patch.yml to switch on, by name. Every
+                            patch is off until it is named here.
+                          '';
+                        };
+                      };
                     };
-                    hash = lib.mkOption {
-                      type = lib.types.str;
-                      default = "";
-                      example = "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
-                      description = ''
-                        Hash of the game binary the patches belong to, as
-                        patch.yml and the RPCS3 log spell it.
-                      '';
-                    };
-                    version = lib.mkOption {
-                      type = lib.types.str;
-                      default = "";
-                      example = "01.09";
-                      description = "Disc revision the patches were written for";
-                    };
-                    enabled = lib.mkOption {
-                      type = lib.types.listOf lib.types.str;
-                      default = [];
-                      example = ["Skip Intro" "Unlock FPS"];
-                      description = ''
-                        Patches from patch.yml to switch on, by name. Every
-                        patch is off until it is named here.
-                      '';
-                    };
-                  };
-                };
-              }));
+                  }
+                )
+              );
             };
             rpcn = {
               # rpcn.yml holds an account name, a password and a login token, so
@@ -598,12 +616,19 @@ in {
         emulation = {
           rpcs3 = {
             games = {
-              # Uncharted 2 travels with the module, because everything about it
+              # The games travel with the module, because everything about them
               # apart from where the dump sits is a property of the game and not
               # of a machine. The three values that DO belong to a dump are
               # overridable without mkForce: the location, and the binary hash
               # and disc revision the patches were written against, which differ
               # between regions and revisions of the same game.
+              #
+              # Every hash and version below was read out of patch.yml by the
+              # serial of the dump on this host, which is the same lookup RPCS3
+              # performs, and the enabled lists only ever name patches that
+              # patch.yml really offers for that hash. A name that is not there
+              # is silently ignored, so a typo looks exactly like a patch that
+              # does nothing.
               uncharted2 = {
                 source = lib.mkDefault "/mnt/raid/Games/U2";
                 displayName = "Uncharted 2: Among Thieves™";
@@ -627,6 +652,77 @@ in {
                   ];
                 };
               };
+              # The Game of the Year disc, which is BCES01670 and not the
+              # BCES01175 of the original release. That matters twice: the per
+              # title configuration is named after the serial, and a patch only
+              # applies to the serial it is listed under.
+              #
+              # 01.19 is the level the update in Patches raises this serial to,
+              # and it has to be an update ISSUED FOR THIS SERIAL. The
+              # identically sized one for BCES01175 does not do it, RPCS3 looks
+              # for an update under the serial it is booting and would install
+              # that one beside the game rather than over it, leaving the disc
+              # at the 01.10 it ships with.
+              uncharted3 = {
+                source = lib.mkDefault "/mnt/raid/Games/U3";
+                displayName = "Uncharted 3: Drake's Deception™";
+                serial = "BCES01670";
+                icon = ./games/uncharted3/icon.png;
+                customConfig = builtins.readFile ./games/uncharted3/config.yml;
+                patch = {
+                  title = "Uncharted 3: Drake's Deception";
+                  hash = lib.mkDefault "PPU-02a88c3c6cd415b0bb81f1606bc743835881a4ba";
+                  version = lib.mkDefault "01.19";
+                  # The Uncharted 2 selection, minus the two names this game
+                  # simply does not have, Disable SPU Post-processing and
+                  # Disable Velocity Motion Blur, plus the two the copied
+                  # settings ask for. Disable in-built MLAA is what makes
+                  # Resolution Scale 150 work at all in this engine, and
+                  # Performance (WCB) buys back what Write Color Buffers costs.
+                  enabled = [
+                    "Skip Intro"
+                    "Unlock FPS"
+                    "Disable Mesh Trimming"
+                    "Enable GPU Lighting"
+                    "Disable Depth of Field"
+                    "Disable SSAO"
+                    "Disable Motion Blur"
+                    "Disable in-built MLAA"
+                    "Performance (WCB)"
+                  ];
+                };
+              };
+              # The European disc at 01.11, the level the update in Patches
+              # raises it to. The patches are declared for 01.11 and therefore
+              # only bite once that update is installed, which the provisioning
+              # service does on its own.
+              tlou = {
+                source = lib.mkDefault "/mnt/raid/Games/TLOU";
+                displayName = "The Last of Us™";
+                serial = "BCES01584";
+                icon = ./games/tlou/icon.png;
+                customConfig = builtins.readFile ./games/tlou/config.yml;
+                patch = {
+                  title = "The Last of Us";
+                  hash = lib.mkDefault "PPU-120fb71f7352d62521c639b0e99f960018c10a56";
+                  version = lib.mkDefault "01.11";
+                  # The Uncharted 2 selection as far as it exists here, plus the
+                  # two the copied settings ask for. Mind the lower case t in
+                  # trimming, patch.yml spells this one differently from the
+                  # Uncharted patches and the name is a key.
+                  enabled = [
+                    "Skip Intro"
+                    "Unlock FPS"
+                    "Disable Mesh trimming"
+                    "Enable GPU Lighting"
+                    "Disable Depth of Field"
+                    "Disable SSAO"
+                    "Disable Motion Blur"
+                    "Disable in-built MLAA"
+                    "WCB/WDB Performance fix"
+                  ];
+                };
+              };
             };
           };
         };
@@ -637,11 +733,9 @@ in {
         # Only what is under dev_hdd0 is RPCS3's own. A disc dump is reached
         # through a link with a stable name instead, so the boot path never
         # mentions the disk the dump happens to live on.
-        rules =
-          lib.mapAttrsToList (
-            _: game: "L /home/${user}/Games/${game.link} - - - - ${game.source}"
-          )
-          games;
+        rules = lib.mapAttrsToList (
+          _: game: "L /home/${user}/Games/${game.link} - - - - ${game.source}"
+        ) games;
       };
     };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
@@ -659,7 +753,7 @@ in {
                     ExecStart = "${rpcs3-provision}/bin/rpcs3-provision";
                   };
                   Install = {
-                    WantedBy = ["default.target"];
+                    WantedBy = [ "default.target" ];
                   };
                 };
               };
@@ -686,13 +780,12 @@ in {
             };
           };
           home = {
-            packages =
-              [
-                pkgs.rusty-psn-gui
-                rpcs3
-                rpcs3-provision
-              ]
-              ++ gamePackages;
+            packages = [
+              pkgs.rusty-psn-gui
+              rpcs3
+              rpcs3-provision
+            ]
+            ++ gamePackages;
             file = {
               ".config/rpcs3/bios" = {
                 source = "${ps3bios}/bios";
