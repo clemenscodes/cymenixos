@@ -3,10 +3,12 @@
   pkgs,
   lib,
   ...
-}: {...}: let
+}: {config, ...}: let
+  # Take the CLI from the same package as the daemon so both stay on one version.
+  mullvad = config.services.mullvad-vpn.package;
   mullvad-ensure-connected = pkgs.writeShellApplication {
     name = "mullvad-ensure-connected";
-    runtimeInputs = [pkgs.mullvad];
+    runtimeInputs = [mullvad];
     text = ''
       if mullvad status 2>/dev/null | grep -q "^Connected"; then
         exit 0
@@ -16,7 +18,7 @@
   };
   mullvad-ensure-disconnected = pkgs.writeShellApplication {
     name = "mullvad-ensure-disconnected";
-    runtimeInputs = [pkgs.mullvad];
+    runtimeInputs = [mullvad];
     text = ''
       if mullvad status 2>/dev/null | grep -q "^Disconnected"; then
         exit 0

@@ -34,6 +34,12 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.torrent.enable) {
     environment = {
+      # services.mullvad-vpn already adds its package, which provides the daemon,
+      # the CLI and the GUI.
+      systemPackages = with pkgs; [
+        wireguard-tools
+        qbittorrent
+      ];
       persistence = {
         ${config.modules.boot.impermanence.persistPath} = {
           directories = [
@@ -63,6 +69,12 @@ in {
     services = {
       mullvad-vpn = {
         inherit (cfg.torrent) enable;
+        # The default package is pkgs.mullvad, which ships only the daemon and CLI
+        # and is versioned independently of pkgs.mullvad-vpn. When the two drift
+        # apart the GUI talks to a daemon of a different version and reports
+        # "app is out of sync". pkgs.mullvad-vpn contains the daemon, the CLI and
+        # the GUI, so using it for the daemon keeps every part on one version.
+        package = pkgs.mullvad-vpn;
       };
     };
     systemd = {
@@ -88,14 +100,6 @@ in {
           '';
         };
       };
-    };
-    environment = {
-      systemPackages = with pkgs; [
-        wireguard-tools
-        qbittorrent
-        mullvad
-        mullvad-vpn
-      ];
     };
   };
 }
