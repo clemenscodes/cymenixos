@@ -12,7 +12,12 @@
   osCfg = osConfig.modules.home-manager;
   user = osConfig.modules.users.user;
   fileOptionAttrPaths = [["home" "file"] ["xdg" "configFile"] ["xdg" "dataFile"]];
-  mergeAttrsList = builtins.foldl' (lib.mergeAttrs) {};
+  # lib.mergeAttrs merges one level deep, and two of the paths above share the
+  # attribute xdg, so folding with it kept only the last of them. The mutable
+  # option was therefore never declared on xdg.configFile, and setting it there
+  # failed with an error about an option that does not exist. Only home.file and
+  # xdg.dataFile ever had it, which is why this went unnoticed for so long.
+  mergeAttrsList = builtins.foldl' lib.recursiveUpdate {};
   fileAttrsType = lib.types.attrsOf (lib.types.submodule ({config, ...}: {
     options.mutable = lib.mkOption {
       type = lib.types.bool;
@@ -86,9 +91,12 @@ in {
           rm -rf ${config.home.homeDirectory}/.nix-profile
         '';
         mutableFileGeneration = let
-          allFiles = builtins.concatLists (map
-            (attrPath: builtins.attrValues (lib.getAttrFromPath attrPath config))
-            fileOptionAttrPaths);
+          # home.file alone, even though mutable can be set on the xdg options
+          # as well. Home manager folds xdg.configFile and xdg.dataFile into
+          # home.file unconditionally, so home.file is already the complete
+          # list, and reading the xdg options on top would copy those files a
+          # second time.
+          allFiles = builtins.attrValues config.home.file;
           filterMutableFiles = builtins.filter (file:
             (file.mutable or false)
             && lib.assertMsg file.force

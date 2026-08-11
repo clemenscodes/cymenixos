@@ -28,6 +28,42 @@ let
     ];
   });
   user = config.modules.users.name;
+  # Uncharted 3 will not leave "Connecting..." until it has downloaded
+  # campaign.config.txt.crypt over plain HTTP. The backend's own DNS answers
+  # u3.campaign.config.s3.amazonaws.com with 194.13.80.115, where nginx has no
+  # server block for that name and closes the connection without sending a
+  # byte, so upstream that download cannot succeed at all. The per title IP
+  # swap list sends the name to 127.0.0.1 instead and this is what answers
+  # there.
+  #
+  # The bytes are the ones the very same host still returns through its
+  # u3.final.prod vhost, which does answer, so nothing here is invented. The
+  # queue address inside the file is stale and goes nowhere, 50.18.47.114 has
+  # been dead since Naughty Dog shut the servers down, but that does not
+  # matter. The address the game really dials comes out of
+  # net18.bin.psarc.crypt, and this download only has to succeed.
+  # Fetched rather than vendored, and fixed output, so the hash is what
+  # guarantees the bytes and not the fact that somebody once committed them.
+  # Plain HTTP is not a weakness here, the hash pins the content and the file
+  # is public configuration either way.
+  #
+  # The URL carries the hostname the game itself sends, because that is the
+  # only Host header the server will serve this file for, while --resolve aims
+  # the connection at the machine that answers. Resolving the name normally
+  # reaches Amazon, where the bucket was deleted, and resolving it through the
+  # backend's DNS reaches a vhost that drops the connection.
+  u3-campaign-config-file = pkgs.fetchurl {
+    url = "http://u3.final.prod.s3.amazonaws.com/campaign.config.txt.crypt";
+    curlOptsList = [
+      "--resolve"
+      "u3.final.prod.s3.amazonaws.com:80:194.13.80.115"
+    ];
+    hash = "sha256-eSLUcn/I67flt3KbwUCoX1ZCjNebLvxnqPkA5tZvngg=";
+  };
+  u3-campaign-config = pkgs.runCommand "u3-campaign-config" { } ''
+    mkdir -p "$out"
+    cp ${u3-campaign-config-file} "$out/campaign.config.txt.crypt"
+  '';
   rpcs3-provision = pkgs.writeShellApplication {
     name = "rpcs3-provision";
     runtimeInputs = [
@@ -350,12 +386,37 @@ let
   # thing with ~/.config prepended, because the name of every one of them is
   # computed and a computed name cannot be written into the literal that holds
   # the files with fixed names.
+  #
+  # Like every other RPCS3 file here they go through rpcs3File below.
   gameCustomConfigs = lib.mapAttrs' (
     _: game:
-    lib.nameValuePair "rpcs3/custom_configs/config_${game.serial}.yml" {
+    lib.nameValuePair "rpcs3/custom_configs/config_${game.serial}.yml" (rpcs3File {
       text = game.customConfig;
-    }
+    })
   ) (lib.filterAttrs (_: game: game.customConfig != null) games);
+  # Every declared RPCS3 file lands in the home directory as a real copy rather
+  # than as a symlink into the store, and every switch writes it again.
+  #
+  # mutable, because RPCS3 writes its own configuration back. It cannot do that
+  # to a read only store symlink, and what it does instead differs from file to
+  # file and is never what is declared here. As a copy the file reads and writes
+  # like any other.
+  #
+  # force, because otherwise Home Manager first moves whatever it finds aside,
+  # to serial.yml.home-manager-backup next to it. On the second switch that
+  # backup is already there, Home Manager refuses to back up over a backup and
+  # aborts the whole activation. A state that blocks itself after exactly one
+  # run. That is what happened here.
+  #
+  # Nothing that was meant to be kept is lost either. What the file should
+  # contain is declared here, not in whatever RPCS3 wrote into it last.
+  rpcs3File =
+    file:
+    file
+    // {
+      force = true;
+      mutable = true;
+    };
   # Nur was unter dev_hdd0 liegt findet RPCS3 von allein. Disc Dumps ausserhalb
   # kennt es ausschliesslich ueber games.yml, eine Zuordnung von Seriennummer
   # auf das Verzeichnis mit der PS3_DISC.SFB. Ohne Eintrag bleibt die
@@ -738,6 +799,55 @@ in
           _: game: "L /home/${user}/Games/${game.link} - - - - ${game.source}"
         ) games;
       };
+      services = {
+        # Serves the one file described at u3-campaign-config above, on the
+        # loopback address the Uncharted 3 swap list points that hostname at.
+        # Port 80 is not a choice, the game builds the URL itself and never
+        # names a port, so the stand-in has to sit where a default HTTP
+        # request lands.
+        #
+        # This is a workaround for somebody else's misconfiguration and it
+        # should not outlive it. If the backend ever gives that hostname a
+        # server block, delete this service and the 127.0.0.1 entry in the
+        # Uncharted 3 swap list together, and the game goes back to fetching
+        # the file from them.
+        rpcs3-u3-campaign-config = {
+          description = "Local stand-in for the Uncharted 3 campaign config host";
+          wantedBy = [ "multi-user.target" ];
+          after = [ "network.target" ];
+          serviceConfig = {
+            ExecStart = lib.concatStringsSep " " [
+              (lib.getExe pkgs.darkhttpd)
+              "${u3-campaign-config}"
+              "--addr 127.0.0.1"
+              "--port 80"
+              "--no-listing"
+            ];
+            # Binding 80 is the only privilege this needs, so it gets that one
+            # capability and nothing else, under a user that does not outlive
+            # the unit.
+            DynamicUser = true;
+            AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+            CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+            NoNewPrivileges = true;
+            PrivateTmp = true;
+            PrivateDevices = true;
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            ProtectKernelTunables = true;
+            ProtectKernelModules = true;
+            ProtectControlGroups = true;
+            RestrictAddressFamilies = [
+              "AF_INET"
+              "AF_INET6"
+            ];
+            RestrictNamespaces = true;
+            SystemCallArchitectures = "native";
+            MemoryDenyWriteExecute = true;
+            Restart = "on-failure";
+          };
+        };
+      };
     };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
       users = {
@@ -807,7 +917,7 @@ in
               # The one addition is the anisotropic filter, forced to its maximum. On
               # this GPU it costs nothing measurable and it is the single setting that
               # improves every game at once.
-              ".config/rpcs3/config.yml" = {
+              ".config/rpcs3/config.yml" = rpcs3File {
                 text = ''
                   Core:
                     PPU Decoder: Recompiler (LLVM)
@@ -1087,18 +1197,18 @@ in
                 '';
               };
               # Welche Discs es gibt, siehe gameRegistry oben.
-              ".config/rpcs3/games.yml" = {
+              ".config/rpcs3/games.yml" = rpcs3File {
                 text = gameRegistry;
-                force = true;
-                mutable = true;
               };
-              ".config/rpcs3/patches/patch.yml" = {
+              ".config/rpcs3/patches/patch.yml" = rpcs3File {
                 source = ./patch.yml;
               };
               # Which of them are switched ON, see gamePatchConfig above.
-              ".config/rpcs3/patch_config.yml" = {
+              ".config/rpcs3/patch_config.yml" = rpcs3File {
                 text = gamePatchConfig;
               };
+              # The two directories below stay symlinked. rpcs3File copies a
+              # single file, and these are whole trees that RPCS3 only reads.
               ".config/rpcs3/Icons/ui" = {
                 source = "${rpcs3}/share/rpcs3/Icons/ui";
                 recursive = true;
@@ -1118,16 +1228,16 @@ in
               #
               # It once corrected the guess instead of repeating it, back when
               # triangle arrived as square. That was fixed in joymouse itself.
-              ".config/rpcs3/input_configs/gamecontrollerdb.txt" = {
+              ".config/rpcs3/input_configs/gamecontrollerdb.txt" = rpcs3File {
                 source = ./gamecontrollerdb.txt;
               };
-              ".config/rpcs3/input_configs/active_input_configurations.yml" = {
+              ".config/rpcs3/input_configs/active_input_configurations.yml" = rpcs3File {
                 text = ''
                   Active Configurations:
                     global: Default
                 '';
               };
-              ".config/rpcs3/input_configs/global/Default.yml" = {
+              ".config/rpcs3/input_configs/global/Default.yml" = rpcs3File {
                 text = ''
                   Player 1 Input:
                     Handler: SDL
