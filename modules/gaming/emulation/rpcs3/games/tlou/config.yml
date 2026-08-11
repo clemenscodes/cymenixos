@@ -159,20 +159,40 @@ Net:
   # server lives.
   DNS address: 51.75.22.125
   IP address: 0.0.0.0
-  # Every hostname the game asks for is answered with the
-  # private server, inside RPCS3, without a packet leaving the
-  # machine. The pattern is a real wildcard, RPCS3 turns `*`
-  # into `.*` and matches the hostname against it.
+  # Every hostname the game asks for is answered inside RPCS3,
+  # without a packet leaving the machine. The entries are tried
+  # in order and the first match wins, RPCS3 turns `*` into
+  # `.*` and matches the whole hostname against it. See
+  # get_redir in rpcs3/Emu/NP/np_dnshook.cpp, which walks the
+  # list and returns on the first regex that matches.
   #
-  # This is not a nicety, it is what lets the game run inside
-  # a VPN. A DNS address alone means RPCS3 sends real queries
-  # to port 53, and a VPN with leak protection blocks port 53
-  # to every destination except its own resolver, its own
-  # server included. The query dies, the hostname never
+  # Resolving here rather than by DNS is what lets the game run
+  # inside a VPN. A DNS address alone means RPCS3 sends real
+  # queries to port 53, and a VPN with leak protection blocks
+  # port 53 to every destination except its own resolver, its
+  # own server included. The query dies, the hostname never
   # resolves, and the game sits at "Connecting..." for ever,
   # while the RPCN connection itself is perfectly healthy
   # because it is reached by address and never by name.
-  IP swap list: "*=51.75.22.125"
+  #
+  # This title asks for exactly one file over HTTP, captured
+  # over a full connect attempt,
+  #
+  #   GET /net10.bin.psarc.crypt
+  #   Host: t1.final.prod.s3.amazonaws.com
+  #
+  # and that name lives on 194.13.80.115, which the backend's
+  # own DNS confirms and which serves the file, 102368 bytes.
+  # A bare wildcard sent it to 51.75.22.125 instead, where it
+  # came back 404 and the game never left "Connecting...".
+  #
+  # Unlike Uncharted 3 this needs no local stand-in. That title
+  # also asks for u3.campaign.config, a name no machine answers
+  # for, so its file has to be served from 127.0.0.1. The Last
+  # of Us never requests a campaign config at all, so one
+  # correct entry is the whole fix. An earlier guess that both
+  # titles shared a cause was wrong and was settled by capture.
+  IP swap list: "t1.final.prod.s3.amazonaws.com=194.13.80.115&&*=51.75.22.125"
   Internet enabled: Connected
   PSN Country: us
   PSN status: RPCN

@@ -159,20 +159,42 @@ Net:
   # server lives.
   DNS address: 51.75.22.125
   IP address: 0.0.0.0
-  # Every hostname the game asks for is answered with the
-  # private server, inside RPCS3, without a packet leaving the
-  # machine. The pattern is a real wildcard, RPCS3 turns `*`
-  # into `.*` and matches the hostname against it.
+  # Every hostname the game asks for is answered inside RPCS3,
+  # without a packet leaving the machine. The entries are tried
+  # in order and the first match wins, RPCS3 turns `*` into
+  # `.*` and matches the whole hostname against it. See
+  # get_redir in rpcs3/Emu/NP/np_dnshook.cpp, which walks the
+  # list and returns on the first regex that matches.
   #
-  # This is not a nicety, it is what lets the game run inside
-  # a VPN. A DNS address alone means RPCS3 sends real queries
-  # to port 53, and a VPN with leak protection blocks port 53
-  # to every destination except its own resolver, its own
-  # server included. The query dies, the hostname never
+  # Resolving here rather than by DNS is what lets the game run
+  # inside a VPN. A DNS address alone means RPCS3 sends real
+  # queries to port 53, and a VPN with leak protection blocks
+  # port 53 to every destination except its own resolver, its
+  # own server included. The query dies, the hostname never
   # resolves, and the game sits at "Connecting..." for ever,
   # while the RPCN connection itself is perfectly healthy
   # because it is reached by address and never by name.
-  IP swap list: "*=51.75.22.125"
+  #
+  # The three names below are every hostname this game was
+  # observed to ask for, counted over a full successful session,
+  # 31 requests to the first, 17 to the second and one to the
+  # third. All three really are served by 51.75.22.125, so a
+  # bare wildcard was already correct here and naming them
+  # changes no behaviour whatsoever today.
+  #
+  # It is still worth naming them. A bare wildcard is correct
+  # for this title by luck and not by intent, and that luck ran
+  # out for Uncharted 3, whose content sits on a different host
+  # and which therefore answered every request with a 404 until
+  # the hostnames were named explicitly. If this backend ever
+  # moves a bucket the same way, this list is where it becomes
+  # visible instead of turning into a silent 404 storm.
+  #
+  # The wildcard stays last on purpose rather than being
+  # deleted. Without it an unnamed hostname falls through to the
+  # DNS address above, and that resolver is not dependable, it
+  # was refusing connections on port 53 while this was written.
+  IP swap list: "u2livedata.final1.prod.naughtydog.com=51.75.22.125&&u2livedata.final1.prod.s3.amazonaws.com=51.75.22.125&&queue.amazonaws.com=51.75.22.125&&*=51.75.22.125"
   Internet enabled: Connected
   PSN Country: us
   PSN status: RPCN
