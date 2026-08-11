@@ -238,13 +238,13 @@ Video:
   Force CPU Blit: false
   Force Hardware MSAA Resolve: false
   Force High Precision Z buffer: false
-  Frame limit: Auto
+  Frame limit: 60
   Handle RSX Memory Tiling: false
   Log shader programs: false
   MSAA: Disabled
   Minimum Scalable Dimension: 160
   Multithreaded RSX: false
-  Output Scaling Mode: FidelityFX Super Resolution
+  Output Scaling Mode: Bilinear
   Performance Overlay:
     Body Background (hex): '#002339FF'
     Body Color (hex): '#FFE138FF'
@@ -270,10 +270,10 @@ Video:
     Use Window Space: false
     Vertical Margin (%): 7
     Vertical Margin (px): 10
-  Read Color Buffers: false
-  Read Depth Buffer: true
+  Read Color Buffers: true
+  Read Depth Buffer: false
   Record With Overlays: true
-  Relaxed ZCULL Sync: false
+  Relaxed ZCULL Sync: true
   Renderdoc Compatibility Mode: false
   Renderer: Vulkan
   Resolution: 1280x720
@@ -300,13 +300,13 @@ Video:
   Vulkan:
     Adapter: ""
     Asynchronous Queue Scheduler: Safe
-    Asynchronous Texture Streaming: true
+    Asynchronous Texture Streaming: false
     Asynchronous Texture Streaming 2: true
     Exclusive Fullscreen Mode: Automatic
     FidelityFX CAS Sharpening Intensity: 50
     Force FIFO present mode: false
     Force primitive restart flag: false
-    Use Re-BAR for GPU uploads: true
+    Use Re-BAR for GPU uploads: false
     VRAM allocation limit (MB): 65536
-  Write Color Buffers: true
-  Write Depth Buffer: true
+  Write Color Buffers: false
+  Write Depth Buffer: false

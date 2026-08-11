@@ -86,9 +86,9 @@ Core:
   SPU Verification: true
   SPU Wake-Up Delay: 0
   SPU Wake-Up Delay Thread Mask: 63
-  SPU XFloat Accuracy: Approximate
+  SPU XFloat Accuracy: Relaxed
   SPU delay penalty: 3
-  SPU loop detection: false
+  SPU loop detection: true
   Save LLVM logs: false
   Set DAZ and FTZ: false
   Sleep Timers Accuracy: Usleep Only
@@ -245,7 +245,7 @@ Video:
   MSAA: Disabled
   Minimum Scalable Dimension: 160
   Multithreaded RSX: false
-  Output Scaling Mode: FidelityFX Super Resolution
+  Output Scaling Mode: Bilinear
   Performance Overlay:
     Body Background (hex): '#002339FF'
     Body Color (hex): '#FFE138FF'
@@ -272,7 +272,7 @@ Video:
     Vertical Margin (%): 7
     Vertical Margin (px): 10
   Read Color Buffers: false
-  Read Depth Buffer: true
+  Read Depth Buffer: false
   Record With Overlays: true
   Relaxed ZCULL Sync: false
   Renderdoc Compatibility Mode: false
@@ -310,4 +310,4 @@ Video:
     Use Re-BAR for GPU uploads: true
     VRAM allocation limit (MB): 65536
   Write Color Buffers: true
-  Write Depth Buffer: true
+  Write Depth Buffer: false
