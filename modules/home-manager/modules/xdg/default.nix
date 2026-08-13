@@ -2,15 +2,18 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   config,
   osConfig,
   ...
-}: let
+}:
+let
   cfg = config.modules;
   osCfg = osConfig.modules;
   desktop = "Desktop";
   documents = "Documents";
+  projects = "Projects";
   downloads = "Downloads";
   music = "Music";
   pictures = "Pictures";
@@ -30,11 +33,14 @@
       rm $out/README.md
     '';
   };
-in {
+in
+{
   options = {
     modules = {
       xdg = {
-        enable = lib.mkEnableOption "Enable XDG in home" // {default = false;};
+        enable = lib.mkEnableOption "Enable XDG in home" // {
+          default = false;
+        };
       };
     };
   };
@@ -50,6 +56,7 @@ in {
             pictures
             public
             videos
+            projects
           ];
         };
       };
@@ -90,7 +97,7 @@ in {
           '';
         };
       };
-      sessionVariables = {} // config.xdg.userDirs.extraConfig;
+      sessionVariables = { } // config.xdg.userDirs.extraConfig;
     };
     xdg = {
       inherit (cfg.xdg) enable;
@@ -113,6 +120,7 @@ in {
           XDG_PICTURES_DIR = "${config.home.homeDirectory}/${pictures}";
           XDG_PUBLIC_DIR = "${config.home.homeDirectory}/${public}";
           XDG_VIDEOS_DIR = "${config.home.homeDirectory}/${videos}";
+          XDG_PROJECTS_DIR = "${config.home.homeDirectory}/${projects}";
           XDG_BIN_HOME = "${config.home.homeDirectory}/.local/bin";
           XDG_SCREENSHOT_DIR = "${config.xdg.userDirs.pictures}/screenshots";
           XDG_WALLPAPER_DIR = "${config.xdg.userDirs.pictures}/wallpaper";
@@ -124,9 +132,9 @@ in {
       mimeApps = {
         inherit (cfg.xdg) enable;
         defaultApplications = {
-          "application/x-pie-executable" = ["nvim.desktop"];
-          "application/octet-stream" = ["nvim.desktop"];
-          "application/x-object" = ["nvim.desktop"];
+          "application/x-pie-executable" = [ "nvim.desktop" ];
+          "application/octet-stream" = [ "nvim.desktop" ];
+          "application/x-object" = [ "nvim.desktop" ];
         };
       };
       portal = lib.mkIf (osConfig.modules.display.gui != "headless") {
@@ -137,22 +145,26 @@ in {
           pkgs.xdg-desktop-portal-gtk
         ];
         config =
-          if config.modules.display.compositor.hyprland.enable
-          then {
-            common = {
-              default = ["gtk"];
+          if config.modules.display.compositor.hyprland.enable then
+            {
+              common = {
+                default = [ "gtk" ];
+              };
+              hyprland = {
+                default = [
+                  "hyprland"
+                  "gtk"
+                ];
+                "org.freedesktop.portal.FileChooser" = [ "gtk" ];
+                "org.freedesktop.portal.OpenURI" = [ "gtk" ];
+              };
+            }
+          else
+            {
+              common = {
+                default = [ "gtk" ];
+              };
             };
-            hyprland = {
-              default = ["hyprland" "gtk"];
-              "org.freedesktop.portal.FileChooser" = ["gtk"];
-              "org.freedesktop.portal.OpenURI" = ["gtk"];
-            };
-          }
-          else {
-            common = {
-              default = ["gtk"];
-            };
-          };
       };
       dataFile = {
         "chars" = {
@@ -166,23 +178,19 @@ in {
       };
       configFile = {
         nixpkgs = {
-          text =
-            /*
-            nix
-            */
-            ''
-              {
-                packageOverrides = pkgs: {
-                  nur =
-                    import (builtins.fetchTarball {
-                      url = "https://github.com/nix-community/NUR/archive/3a6a6f4da737da41e27922ce2cfacf68a109ebce.tar.gz";
-                      sha256 = "04387gzgl8y555b3lkz9aiw9xsldfg4zmzp930m62qw8zbrvrshd";
-                    }) {
-                      inherit pkgs;
-                    };
-                };
-              }
-            '';
+          text = /* nix */ ''
+            {
+              packageOverrides = pkgs: {
+                nur =
+                  import (builtins.fetchTarball {
+                    url = "https://github.com/nix-community/NUR/archive/3a6a6f4da737da41e27922ce2cfacf68a109ebce.tar.gz";
+                    sha256 = "04387gzgl8y555b3lkz9aiw9xsldfg4zmzp930m62qw8zbrvrshd";
+                  }) {
+                    inherit pkgs;
+                  };
+              };
+            }
+          '';
         };
       };
     };

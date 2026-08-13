@@ -150,35 +150,56 @@ Miscellaneous:
   Use native user interface: true
   Use recursive scan: false
   Window Title Format: 'FPS: %F | %R | %V | %T [%t]'
-# This title stays offline, and that is the whole of the
-# difference from the three Naughty Dog files.
+# This title needs both halves of a network, and that is what
+# makes it different from the three Naughty Dog files.
 #
-# Everything the network section does over there exists to reach
-# one private server, 51.75.22.125, which somebody keeps running
-# for those games after Naughty Dog shut theirs down. It answers
-# for Naughty Dog hostnames and for nothing else, so pointing
-# this game at it would only send Rockstar hostnames somewhere
-# that has never heard of them.
+# Those three reach one private server, 51.75.22.125, which
+# somebody keeps running after Naughty Dog shut theirs down. It
+# answers for Naughty Dog hostnames and for nothing else, so this
+# game has nothing to look for there.
 #
-# There is nothing to point at instead. GTA Online on PS3 ran on
-# Rockstar's own services behind PSN, RPCN does not carry them
-# and no revival serves them, so the only honest setting is
-# Disconnected. The single player campaign is what this disc is
-# here for and it asks for no network at all.
+# The first half is PSN, and RPCN carries it. The screen that says
+# the console is signed out of PlayStation Network is that half
+# and nothing else, and Internet enabled and PSN status are two
+# separate switches which the game needs both of. At update 01.06
+# the lobby itself is built out of sceNpMatching2, a PSN library
+# RPCN implements, and the session is peer to peer between the
+# consoles.
 #
-# The empty swap list is what Disconnected implies, spelled out,
-# and the DNS address falls back to a public resolver that is
-# never consulted while the emulator is disconnected.
+# The second half is Rockstar's own services, which carried the
+# persistent side, the character and the money and the stats.
+# Those are gone, and the swap list below is what replaces them.
+# Every hostname the game resolves is sent to 127.0.0.77, where a
+# local reimplementation answers. See ~/.local/src/gta.
+#
+# The address is a loopback one of its own rather than 127.0.0.1
+# because a reverse proxy already holds port 80 on this machine,
+# and an nftables rule in table ip gtao forwards 127.0.0.77:80 to
+# the port the server actually listens on. Nothing in the RPCS3
+# swap list carries a port, which is why the detour exists.
+#
+# The wildcard is deliberate. A named list would only carry the
+# hostnames already known, and finding the ones that are not is
+# the whole reason the server records what it is asked for. RPCN
+# is unaffected, it connects to a bare address of its own and
+# resolves no name.
+#
+# That is also why the update level is not a detail. Rockstar
+# moved the session setup onto their own backend during the 01.1x
+# series, so 01.06 is the level that works, 01.12 is the last one
+# where anything works at all, and 01.27 does not go online no
+# matter what stands in this file. games/gta5/patch.yml relocates
+# the two RPCS3 patches to 01.06 for the same reason.
 Net:
   Bind address: 0.0.0.0
   Clans Enabled: false
   DNS address: 8.8.8.8
   IP address: 0.0.0.0
-  IP swap list: ""
-  Internet enabled: Disconnected
+  IP swap list: "*=127.0.0.77"
+  Internet enabled: Connected
   PSN Country: us
-  PSN status: Disconnected
-  UPNP Enabled: false
+  PSN status: RPCN
+  UPNP Enabled: true
 Savestate:
   Compatible Savestate Mode: false
   Inspection Mode Savestates: false
