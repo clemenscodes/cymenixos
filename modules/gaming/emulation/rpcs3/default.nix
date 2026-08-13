@@ -394,6 +394,26 @@ let
       text = game.customConfig;
     })
   ) (lib.filterAttrs (_: game: game.customConfig != null) games);
+  # Patch definitions that the community database does not carry.
+  #
+  # Keeping them out of patch.yml is the point. That file is carried whole and
+  # a local edit to it would have to be redone by hand on every update of it.
+  #
+  # There is exactly ONE such file and it has to be called imported_patch.yml.
+  # RPCS3 loads that name and patch.yml and nothing else from this directory,
+  # which was established by putting a deliberately broken file there under
+  # another name and getting no complaint out of the emulator, then renaming it
+  # and watching both patches apply. The *_patch.yml that turns up in the RPCS3
+  # binary is the filter of a file dialog, not a search pattern.
+  #
+  # So this is one file for the whole emulator rather than one per game. An
+  # option per game would promise something the emulator cannot deliver, and
+  # two games declaring one would silently overwrite each other.
+  extraPatchFile = lib.optionalAttrs (cfg.rpcs3.extraPatches != null) {
+    "rpcs3/patches/imported_patch.yml" = rpcs3File {
+      source = cfg.rpcs3.extraPatches;
+    };
+  };
   # Every declared RPCS3 file lands in the home directory as a real copy rather
   # than as a symlink into the store, and every switch writes it again.
   #
@@ -488,6 +508,18 @@ in
               type = lib.types.str;
               default = "Darker Style by TheMitoSan";
               description = "Name of the GUI stylesheet from GuiConfigs, without the qss suffix";
+            };
+            extraPatches = lib.mkOption {
+              type = lib.types.nullOr lib.types.path;
+              default = null;
+              example = lib.literalExpression "./games/gta5/patch.yml";
+              description = ''
+                Patch definitions the community database does not carry,
+                installed as imported_patch.yml beside patch.yml. RPCS3 loads
+                exactly those two files out of its patches directory, so this
+                is one file for the whole emulator and not one per game. Null
+                means patch.yml is all there is.
+              '';
             };
             # One entry per game. Everything that differs between titles lives
             # here and nothing else does, so adding a game is a declaration
@@ -677,6 +709,11 @@ in
       gaming = {
         emulation = {
           rpcs3 = {
+            # Currently only the two GTA V patches, relocated to the level
+            # this host runs that game at. The file explains how, and how to
+            # redo it. If another game ever needs the same, its definitions go
+            # into this one file too, because the emulator reads no other.
+            extraPatches = lib.mkDefault ./games/gta5/patch.yml;
             games = {
               # The games travel with the module, because everything about them
               # apart from where the dump sits is a property of the game and not
@@ -785,6 +822,51 @@ in
                   ];
                 };
               };
+              # The European disc, BLES01807, run at 01.06, the oldest title
+              # update Sony still serves for this serial. The update itself is
+              # the pkg in Patches and the provisioning service installs it,
+              # so nothing here has to name a level.
+              #
+              # This is the one game here whose patches do not come out of
+              # patch.yml, and the hash below is why. That database knows this
+              # serial at exactly two levels, the untouched disc at 01.00 and
+              # the final update at 01.27. Patches are found by the hash of
+              # the game binary, every title update produces a new binary, so
+              # at 01.06 neither entry is ever consulted and both patches
+              # would silently do nothing.
+              #
+              # What was missing at 01.06 was only the two addresses, so they
+              # were relocated into the 01.06 binary and written down in
+              # games/gta5/patch.yml. That file explains how, and how to redo
+              # it for another level. The hash below is the one RPCS3 logs for
+              # this binary and it is what ties the two together.
+              #
+              # "60 FPS" only does anything alongside Vblank Rate 120 in
+              # games/gta5/config.yml. It does not unlock the limiter, it
+              # points it at half the vblank rate, so the two belong together
+              # and the note at that key says so from the other side.
+              gta5 = {
+                source = lib.mkDefault "/mnt/raid/Games/GTA5";
+                displayName = "Grand Theft Auto V";
+                serial = "BLES01807";
+                icon = ./games/gta5/icon.png;
+                customConfig = builtins.readFile ./games/gta5/config.yml;
+                patch = {
+                  # Spelled as the patch file spells it, brackets and all. It
+                  # is a key there, so the plain title would match nothing and
+                  # both patches would be ignored without a word of complaint.
+                  title = "Grand Theft Auto V (Grand Theft Auto 5)";
+                  hash = lib.mkDefault "PPU-918a2bb3b48af4dcf3b8c940318ac1a7e833791f";
+                  version = lib.mkDefault "01.06";
+                  # Both of them, which is the whole of what exists for this
+                  # game. None of the names the Naughty Dog titles use are
+                  # among them, so this list is short rather than trimmed.
+                  enabled = [
+                    "60 FPS"
+                    "Skip Rockstar Boot Logo"
+                  ];
+                };
+              };
             };
           };
         };
@@ -872,7 +954,7 @@ in
           };
           xdg = {
             desktopEntries = gameDesktopEntries;
-            configFile = gameCustomConfigs;
+            configFile = gameCustomConfigs // extraPatchFile;
           };
           # The RPCN account and the custom server list, decrypted at activation
           # and placed straight where RPCS3 reads it. The file lands outside the

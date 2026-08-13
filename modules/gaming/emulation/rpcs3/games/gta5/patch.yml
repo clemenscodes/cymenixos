@@ -1,0 +1,89 @@
+Version: 1.2
+
+# The two GTA V patches, relocated to the 01.06 title update.
+#
+# They are not an invention. illusion and akemin_dayo wrote them, and
+# patch.yml carries them for exactly two levels of BLES01807, the untouched
+# disc at 01.00 and the final update at 01.27. A patch is looked up by the
+# hash of the game binary, every title update produces a new binary and
+# therefore a new hash, so at 01.06 neither of those entries is ever
+# consulted. What is missing at 01.06 is only the pair of addresses. This
+# file supplies them.
+#
+# It is a file of its own rather than an addition to patch.yml, because that
+# one is the community database carried whole and it is worth keeping it
+# that way. It is installed as imported_patch.yml, which is the only other
+# name RPCS3 reads out of that directory. Any other name is ignored in
+# silence, a broken file under one does not even produce a complaint. The
+# *_patch.yml that turns up in the RPCS3 binary is the filter of a file
+# dialog and not a search pattern.
+#
+# HOW THE ADDRESSES WERE FOUND
+#
+# By locating the same code and the same string in the 01.06 binary, not by
+# guessing an offset. Both binaries were decrypted with `rpcs3 --decrypt`,
+# and the addresses in patch.yml are emulated addresses, which map into the
+# ELF through its first PT_LOAD segment at vaddr 0x00010000.
+#
+# For 60 FPS the site in the 01.00 binary is
+#
+#   fc 20 08 18   fabs     f1, f1
+#   ec 21 07 72   fmuls    f1, f1, f14
+#   fc 01 f0 00   fcmpu    cr0, f1, f30
+#   4c c1 13 82   crandc   4*cr1+eq, ...
+#   41 86 00 6c   beq      cr1, +0x6c        <- 0x004367fc, the patched word
+#
+# and the patch writes 0x4800 over the top halfword, which turns the
+# conditional branch into 0x4800006c, an unconditional one with the same
+# displacement. Those twenty bytes carry no absolute address, so they are
+# the same in every build, and they occur EXACTLY ONCE in the 01.00 binary
+# and exactly once in the 01.06 binary. That is what makes the match a
+# identification rather than a resemblance.
+#
+# The boot logo patch needs no code reading at all. Its address is the first
+# byte of the string "platform:/movies/rockstar_logos", and writing a zero
+# there makes it the empty string, so the movie is never loaded. That string
+# also occurs exactly once in each binary.
+#
+# The word at the relocated address was checked afterwards and is 41 86 00
+# 6c, byte for byte what stands at 01.00, and the relocated string address
+# does begin "platform:/movies/rockstar_logos".
+#
+#          60 FPS      Skip Rockstar Boot Logo
+#   01.00  0x004367fc  0x016808e0    from patch.yml
+#   01.06  0x0045a93c  0x01701aec    derived here
+#
+# HOW TO REDO THIS FOR ANOTHER LEVEL
+#
+# Install the update, take the hash from the RPCS3 log, it prints
+# "ppu_loader: PPU executable hash: PPU-..." within seconds of booting.
+# Decrypt the EBOOT under dev_hdd0/game/BLES01807/USRDIR, then search it for
+# the twenty bytes above and for the string. Both are unique, so there is
+# nothing to choose between.
+
+Anchors:
+  gta5_EU106title: &gta5_EU106title
+    "Grand Theft Auto V (Grand Theft Auto 5)":
+      BLES01807: [ 01.06 ]
+
+  gta5_60fps_notes: &gta5_60fps_notes
+    "Allows the game to run at 60 FPS when the VBlank frequency is set to 120 Hz.\n\n※ While this patch does set the frame limit to be half of the VBlank frequency, the game will not actually run any higher than 62 FPS except during the legal/copyright notice screen that is shown at boot.\n\n※ Addresses relocated to the 01.06 title update, see the header of gta5_patch.yml."
+
+  gta5_skiprockstarbootlogo_notes: &gta5_skiprockstarbootlogo_notes
+    "Skips the Rockstar boot logo like the PS5 version.\n\n※ Does not skip the legal/copyright notice screen.\n\n※ Addresses relocated to the 01.06 title update, see the header of gta5_patch.yml."
+
+PPU-918a2bb3b48af4dcf3b8c940318ac1a7e833791f:
+  "60 FPS":
+    Games: *gta5_EU106title
+    Author: "illusion, Karen/あけみ (akemin_dayo)"
+    Notes: *gta5_60fps_notes
+    Patch Version: 1.0
+    Patch:
+      - [ be16, 0x0045a93c, 0x4800 ]
+  "Skip Rockstar Boot Logo":
+    Games: *gta5_EU106title
+    Author: "illusion, Karen/あけみ (akemin_dayo)"
+    Notes: *gta5_skiprockstarbootlogo_notes
+    Patch Version: 1.0
+    Patch:
+      - [ byte, 0x01701aec, 0x00 ]
