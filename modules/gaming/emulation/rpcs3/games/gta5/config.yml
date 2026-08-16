@@ -184,6 +184,17 @@ Miscellaneous:
 # is unaffected, it connects to a bare address of its own and
 # resolves no name.
 #
+# The resolver is the one this machine actually uses, and not
+# 8.8.8.8, which is what it said for a long time. Traffic here
+# leaves through a Mullvad tunnel and that blocks foreign
+# resolvers, so every lookup to Google's went out and never came
+# back. The swap list answers most names before a resolver is
+# ever asked, which is why this hid so well, but the ones it does
+# not answer left a cloud request outstanding, and GTA Online
+# refuses to start while anything is still outstanding. It says
+# it could not synchronise the files it needs, which is true and
+# says nothing about the cause.
+#
 # That is also why the update level is not a detail. Rockstar
 # moved the session setup onto their own backend during the 01.1x
 # series, so 01.06 is the level that works, 01.12 is the last one
@@ -193,7 +204,7 @@ Miscellaneous:
 Net:
   Bind address: 0.0.0.0
   Clans Enabled: false
-  DNS address: 8.8.8.8
+  DNS address: 100.64.0.63
   IP address: 0.0.0.0
   IP swap list: "*=127.0.0.77"
   Internet enabled: Connected
@@ -374,5 +385,22 @@ Video:
     Force primitive restart flag: false
     Use Re-BAR for GPU uploads: false
     VRAM allocation limit (MB): 65536
-  Write Color Buffers: false
+  # True, against the emulator default, and against the note at
+  # Read Color Buffers a few hundred lines up which says this is
+  # only ever switched on for a game with a concrete symptom.
+  # This game now has one.
+  #
+  # GTA Online builds a character's head by blending the parent
+  # heads into a render target and then sampling that target back
+  # as the head's own diffuse texture. With the write back off
+  # there is nothing to sample, so every face in the character
+  # creator and every face in a session comes out flat orange
+  # with colourless eyes. It is the whole skin and not a detail,
+  # which is what makes it easy to mistake for missing data from
+  # the server, and it is not. Nothing is asked of the server
+  # while the creator is up.
+  #
+  # Read Color Buffers stays false. Only the write back is needed
+  # here, and the two are separate costs.
+  Write Color Buffers: true
   Write Depth Buffer: false
