@@ -740,9 +740,11 @@
     };
   peonsh1 = mkPeonsh "1";
   peonsh2 = mkPeonsh "2";
+  peonsh3 = mkPeonsh "3";
   peonsh-nexo = mkPeonsh "-nexo";
   claude1 = mkClaude "1";
   claude2 = mkClaude "2";
+  claude3 = mkClaude "3";
   claude-nexo = mkClaude "-nexo";
 in {
   options = {
@@ -795,6 +797,7 @@ in {
               claude-monitor
               claude1
               claude2
+              claude3
               claude-nexo
             ];
             persistence = lib.mkIf (config.modules.boot.enable) {
@@ -803,6 +806,7 @@ in {
                   ".config/claude"
                   ".config/claude1"
                   ".config/claude2"
+                  ".config/claude3"
                   ".config/claude-nexo"
                   ".config/codex"
                 ];
@@ -812,6 +816,7 @@ in {
               (mkClaudeFiles "" peonsh)
               // (mkClaudeFiles "1" peonsh1)
               // (mkClaudeFiles "2" peonsh2)
+              // (mkClaudeFiles "3" peonsh3)
               // (mkClaudeFiles "-nexo" peonsh-nexo)
               // {
                 ".config/codex/skills/karpathy/SKILL.md" = {

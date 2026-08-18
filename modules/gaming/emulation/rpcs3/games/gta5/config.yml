@@ -320,7 +320,41 @@ Video:
   # ever switched on for a game with a concrete symptom that
   # needs it. This one has no such symptom on record, so it
   # would be a large cost bought for nothing.
-  Read Color Buffers: false
+  # True, and it is the other half of Write Color Buffers rather than a
+  # second guess at the same symptom.
+  #
+  # With only the write back on, the character creator draws a face
+  # correctly and the same character in a session does not. The creator
+  # renders the head and shows it. A session generates the head texture
+  # once and then SAMPLES it from the ped's own shader, so the result has
+  # to travel back into a texture the next draw reads, and that is the
+  # read half. Without it the ped samples nothing and the face comes out
+  # flat orange with no eyes while the creator's preview of the same
+  # character is right. With both on the textures are right in a session.
+  #
+  # A NOTE ABOUT WHAT THIS COSTS, BECAUSE IT WAS MEASURED WRONG ONCE
+  #
+  # Switched on, this game was seen running at between six and sixteen
+  # frames where it had been at sixty, and that was written down as the
+  # price of the read back. It was not. This machine runs more than one
+  # emulated console at a time and another game was running beside it, so
+  # the reading was of the machine being shared and not of this setting.
+  # Measure a frame rate here with one emulator running or do not measure
+  # it at all.
+  #
+  # With only the write back on, the character creator draws a face
+  # correctly and the same character in a session does not. The creator
+  # renders the head and shows it. The session generates the head texture
+  # once and then SAMPLES it from the ped's own shader, so the result has
+  # to travel back into a texture the next draw reads, and that is the
+  # read half. Without it the ped samples nothing and the face comes out
+  # flat orange with no eyes while the creator's preview of the same
+  # character is right.
+  #
+  # The two together are expensive. They are on for this title because
+  # this title has the symptom, and the note further down at Write Color
+  # Buffers says the same thing from the other side.
+  Read Color Buffers: true
   Read Depth Buffer: false
   Record With Overlays: true
   # False, the emulator default. Relaxing the ZCULL
