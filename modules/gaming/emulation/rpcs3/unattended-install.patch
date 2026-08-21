@@ -1,55 +1,55 @@
---- a/rpcs3/rpcs3qt/main_window.cpp	2026-08-04 16:48:52.390466850 +0200
-+++ b/rpcs3/rpcs3qt/main_window.cpp	2026-08-04 16:57:31.770260356 +0200
-@@ -994,7 +994,7 @@
- 		}
+--- a/rpcs3/rpcs3qt/main_window.cpp
++++ b/rpcs3/rpcs3qt/main_window.cpp
+@@ -1026,7 +1026,7 @@
+ 			}
  
- 		packages = dlg.get_paths_to_install();
--		precompile_caches = dlg.precompile_caches();
-+		precompile_caches = dlg.precompile_caches() && !qEnvironmentVariableIsSet("RPCS3_UNATTENDED");
+ 			packages = dlg.get_paths_to_install();
+-			precompile_caches = dlg.precompile_caches();
++			precompile_caches = dlg.precompile_caches() && !qEnvironmentVariableIsSet("RPCS3_UNATTENDED");
  
- 		if (dlg.create_desktop_shortcuts())
- 			shortcut_locations.insert(gui::utils::shortcut_location::desktop);
-@@ -1005,7 +1005,14 @@
- 		if (dlg.create_steam_shortcut())
- 			shortcut_locations.insert(gui::utils::shortcut_location::steam);
- 	});
--	dlg.exec();
-+	if (qEnvironmentVariableIsSet("RPCS3_UNATTENDED"))
-+	{
-+		dlg.done(QDialog::Accepted);
-+	}
-+	else
-+	{
-+		dlg.exec();
-+	}
- 
- 	if (canceled)
- 	{
-@@ -1313,7 +1320,7 @@
- 		const QString path_last_pup = m_gui_settings->GetValue(gui::fd_install_pup).toString();
- 		file_path = QFileDialog::getOpenFileName(this, tr("Select PS3UPDAT.PUP To Install"), path_last_pup, tr("PS3 update file (PS3UPDAT.PUP);;All pup files (*.pup *.PUP);;All files (*.*)"));
+ 			if (dlg.create_desktop_shortcuts())
+ 				shortcut_locations.insert(gui::utils::shortcut_location::desktop);
+@@ -1037,7 +1037,14 @@
+ 			if (dlg.create_steam_shortcut())
+ 				shortcut_locations.insert(gui::utils::shortcut_location::steam);
+ 		});
+-		dlg.exec();
++		if (qEnvironmentVariableIsSet("RPCS3_UNATTENDED"))
++		{
++			dlg.done(QDialog::Accepted);
++		}
++		else
++		{
++			dlg.exec();
++		}
  	}
--	else
-+	else if (!qEnvironmentVariableIsSet("RPCS3_UNATTENDED"))
+ 	else
  	{
- 		if (QMessageBox::question(this, tr("RPCS3 Firmware Installer"), tr("Install firmware: %1?").arg(file_path),
+@@ -1410,7 +1417,7 @@
+ 		const QString path_last_pup = mw->m_gui_settings->GetValue(gui::fd_install_pup).toString();
+ 		file_path = QFileDialog::getOpenFileName(mw, tr("Select PS3UPDAT.PUP To Install"), path_last_pup, tr("PS3 update file (PS3UPDAT.PUP);;All pup files (*.pup *.PUP);;All files (*.*)"));
+ 	}
+-	else if (mw)
++	else if (mw && !qEnvironmentVariableIsSet("RPCS3_UNATTENDED"))
+ 	{
+ 		if (QMessageBox::question(mw, tr("RPCS3 Firmware Installer"), tr("Install firmware: %1?").arg(file_path),
  			QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
-@@ -1589,7 +1596,7 @@
+@@ -1699,7 +1706,7 @@
  		return;
  	}
  
--	if (version_string < cur_version &&
-+	if (version_string < cur_version && !qEnvironmentVariableIsSet("RPCS3_UNATTENDED") &&
- 		QMessageBox::question(this, tr("RPCS3 Firmware Installer"), tr("Old firmware detected.\nThe newest firmware version is %1 and you are trying to install version %2\nContinue installation?").arg(QString::fromUtf8(cur_version.data(), ::size32(cur_version)), QString::fromStdString(version_string)),
+-	if (version_string < cur_version && mw &&
++	if (version_string < cur_version && mw && !qEnvironmentVariableIsSet("RPCS3_UNATTENDED") &&
+ 		QMessageBox::question(mw, tr("RPCS3 Firmware Installer"), tr("Old firmware detected.\nThe newest firmware version is %1 and you are trying to install version %2\nContinue installation?").arg(QString::fromUtf8(cur_version.data(), ::size32(cur_version)), QString::fromStdString(version_string)),
  			QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::No)
  	{
-@@ -1600,7 +1607,8 @@
+@@ -1710,7 +1717,8 @@
  	{
  		gui_log.warning("Reinstalling firmware: old=%s, new=%s", installed, version_string);
  
--		if (QMessageBox::question(this, tr("RPCS3 Firmware Installer"), tr("Firmware of version %1 has already been installed.\nOverwrite current installation with version %2?").arg(QString::fromStdString(installed), QString::fromStdString(version_string)),
-+		if (!qEnvironmentVariableIsSet("RPCS3_UNATTENDED") &&
-+			QMessageBox::question(this, tr("RPCS3 Firmware Installer"), tr("Firmware of version %1 has already been installed.\nOverwrite current installation with version %2?").arg(QString::fromStdString(installed), QString::fromStdString(version_string)),
+-		if (mw && QMessageBox::question(mw, tr("RPCS3 Firmware Installer"), tr("Firmware of version %1 has already been installed.\nOverwrite current installation with version %2?").arg(QString::fromStdString(installed), QString::fromStdString(version_string)),
++		if (mw && !qEnvironmentVariableIsSet("RPCS3_UNATTENDED") &&
++			QMessageBox::question(mw, tr("RPCS3 Firmware Installer"), tr("Firmware of version %1 has already been installed.\nOverwrite current installation with version %2?").arg(QString::fromStdString(installed), QString::fromStdString(version_string)),
  			QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::No)
  		{
  			gui_log.warning("Reinstallation of firmware aborted.");

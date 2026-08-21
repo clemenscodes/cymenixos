@@ -18,14 +18,76 @@ let
   # RPCS3_UNATTENDED automatisch zusagen, damit das Provisioning ohne Klicks
   # durchlaeuft. Die beiden Erfolgsmeldungen danach haengen an GUI Settings und
   # werden ueber CurrentSettings.ini abgeschaltet, nicht ueber den Patch.
+  # **The revision is pinned here rather than taken from nixpkgs, and it has to be.**
+  #
+  # On 2026-08-20 the console stopped signing in to PSN. The emulator says why in its
+  # own log, once the game's Silence All Logs is off.
+  #
+  #     rpcn: Server returned protocol version: 31, expected: 30
+  #
+  # np.rpcs3.net moved to protocol 31. The number the client expects is compiled in,
+  # at rpcs3/Emu/NP/rpcn_client.cpp, so no setting reaches it. nixpkgs pins rpcs3 to
+  # 96f73f44 from April 2026, which carries 30, and has not moved it since, neither
+  # in the channel nor in unstable. Both numbers were read at their own commit rather
+  # than taken from anybody's word for it.
+  #
+  # Without this the desktop entry launches an emulator that cannot sign in, and
+  # without a sign in nothing that needs PSN works at all.
+  rpcs3Revision = "bab81aa23e66ea0014ddcfe506caea640db6569a";
   rpcs3 = pkgs.rpcs3.overrideAttrs (oldAttrs: {
+    # Upstream moved from 0.0.40 to 0.0.42 between the nixpkgs pin and this revision.
+    # The number is not guessed, the built emulator titles its own window
+    # RPCS3 0.0.42-nixpkgs-bab81aa.
+    version = "0.0.42-unstable-2026-08-19";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "RPCS3";
+      repo = "rpcs3";
+      rev = rpcs3Revision;
+      hash = "sha256-onqhWGy2XhFWZOVELo9deoYZtjnt0IZ56NopMGQFdZY=";
+      # The same submodules nixpkgs checks out. The build refuses without them and a
+      # full recursive checkout drags in gigabytes that are never compiled.
+      postCheckout = ''
+        cd $out/3rdparty
+        git submodule update --init \
+          fusion/fusion asmjit/asmjit yaml-cpp/yaml-cpp SoundTouch/soundtouch stblib/stb \
+          feralinteractive/feralinteractive wolfssl/wolfssl
+      '';
+    };
+
+    # nixpkgs builds this out of finalAttrs.src.rev, which an override does not carry
+    # along, so it is written out here against the revision pinned above.
+    preConfigure = ''
+      cat > ./rpcs3/git-version.h <<EOF
+      #define RPCS3_GIT_VERSION "nixpkgs-${builtins.substring 0 7 rpcs3Revision}"
+      #define RPCS3_GIT_FULL_BRANCH "RPCS3/rpcs3/master"
+      #define RPCS3_GIT_BRANCH "HEAD"
+      #define RPCS3_GIT_VERSION_NO_UPDATE 1
+      EOF
+    '';
+
     # app-id.patch gives the window an app id in the first place. Without one no
     # taskbar can tie the window to a desktop entry, and StartupWMClass does not
     # help, because there is nothing for it to be compared against.
-    patches = (oldAttrs.patches or [ ]) ++ [
-      ./unattended-install.patch
-      ./app-id.patch
-    ];
+    #
+    # **A backport onto an April revision is redundant on an August one, and
+    # redundant is fatal.** nixpkgs carries ffmpeg-9-pix-fmts.patch because its own
+    # pin predates that fix. This revision already has it, so the patch reverses,
+    # patch refuses it, and the build stops in the patch phase with a rejects file
+    # that names nothing useful. It is dropped by name rather than by emptying the
+    # list, so a future patch nixpkgs adds is still applied and still fails loudly
+    # if it does not belong.
+    patches =
+      (builtins.filter (
+        patch: baseNameOf (toString patch) != "ffmpeg-9-pix-fmts.patch"
+      ) (oldAttrs.patches or [ ]))
+      ++ [
+        ./unattended-install.patch
+        ./app-id.patch
+      ];
+
+    # The update script belongs to the nixpkgs pin, not to this one.
+    passthru = builtins.removeAttrs (oldAttrs.passthru or { }) [ "updateScript" ];
   });
   user = config.modules.users.name;
   # Uncharted 3 will not leave "Connecting..." until it has downloaded

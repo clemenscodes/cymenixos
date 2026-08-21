@@ -280,13 +280,13 @@ Video:
   Handle RSX Memory Tiling: false
   Log shader programs: false
   MSAA: Disabled
-  # 16, the emulator default, because the 160 in the Naughty Dog
-  # files only ever mattered alongside their Resolution Scale of
-  # 150. It names the smallest surface still worth scaling up,
-  # so at a scale of 100 it decides nothing at all, and leaving
-  # a chosen looking number on an inert key reads as tuning that
-  # is not happening.
-  Minimum Scalable Dimension: 16
+  # 160, and this key is live again now that the scale below is
+  # 300. It names the smallest surface still worth scaling up,
+  # so at a scale of 100 it decided nothing at all and sat at
+  # the emulator default of 16 for exactly that reason. Above
+  # 100 it starts deciding, and 160 is the number the Naughty
+  # Dog files on this host use for the same job.
+  Minimum Scalable Dimension: 160
   Multithreaded RSX: false
   Output Scaling Mode: Bilinear
   Performance Overlay:
@@ -370,11 +370,17 @@ Video:
   # Naughty Dog titles run at 150. Those are 2010 era games that
   # leave this GPU idle at native resolution, so the scale is
   # spare capacity being spent. GTA V is the heaviest thing the
-  # PS3 ever shipped and it is unlikely to leave anything spare.
-  # Raising this is the first thing to try once the game is
-  # measured, and dropping it back is the first thing to try if
-  # it is slow.
-  Resolution Scale: 100
+  # PS3 ever shipped and it was unlikely to leave anything
+  # spare, so this began at 100 with a note saying that raising
+  # it was the first thing to try once the game was measured.
+  #
+  # **It has been measured and it was raised to 300**, which is
+  # three times the console's own resolution in each direction.
+  # The host carries an RTX 5090 and the game holds its frame
+  # limit there. Dropping this back is still the first thing to
+  # try if it ever stops holding, and the key above stops being
+  # inert as soon as this is above 100.
+  Resolution Scale: 300
   Screen size in inches: 24
   Second Frame Limit: 0
   Shader Compiler Threads: 0
@@ -409,7 +415,16 @@ Video:
   # there by hand, see games/gta5/patch.yml.
   Vblank Rate: 120
   Vulkan:
-    Adapter: ""
+    # Named rather than left empty, because this host has two
+    # Vulkan devices and the empty string takes whichever one
+    # the driver enumerates first. That has been the integrated
+    # AMD part, which runs this at a fraction of the speed. The
+    # name is the one the emulator itself prints for the card.
+    #
+    # **This is the one host specific value in the file.** A
+    # machine without that card falls back to first enumerated,
+    # which is what the empty string always did.
+    Adapter: "NVIDIA GeForce RTX 5090"
     Asynchronous Queue Scheduler: Safe
     Asynchronous Texture Streaming: false
     Asynchronous Texture Streaming 2: true
@@ -417,7 +432,11 @@ Video:
     FidelityFX CAS Sharpening Intensity: 50
     Force FIFO present mode: false
     Force primitive restart flag: false
-    Use Re-BAR for GPU uploads: false
+    # True, because the card and the board both do resizable
+    # BAR, so the whole of video memory is addressable at once
+    # and an upload no longer goes through a staging window.
+    # It is a property of this host rather than of the game.
+    Use Re-BAR for GPU uploads: true
     VRAM allocation limit (MB): 65536
   # True, against the emulator default, and against the note at
   # Read Color Buffers a few hundred lines up which says this is
