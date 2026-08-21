@@ -145,7 +145,19 @@ Miscellaneous:
   Show pressure intensity toggle hint: true
   Show shader compilation hint: false
   Show trophy popups: true
-  Silence All Logs: true
+  # **False, and this is the one setting the crossplay measurement hangs on.**
+  #
+  # It silences the whole logging subsystem, so a session runs a little faster
+  # and leaves no account of itself. RPCS3 names every sceNpMatching2 call it
+  # makes, and whether this title makes any at all is the open question that
+  # decides whether crossplay with a real console is reachable or whether this
+  # project stands where the Uncharted 2 work stopped. See
+  # ~/.local/src/gta/docs/crossplay-spec.md, section 1.
+  #
+  # A run with this on produces nothing to read, which is how a measurement
+  # gets wasted without anybody noticing. It goes back to true once the gate
+  # has been walked through and written down.
+  Silence All Logs: false
   Start games in fullscreen mode: true
   Use native user interface: true
   Use recursive scan: false
