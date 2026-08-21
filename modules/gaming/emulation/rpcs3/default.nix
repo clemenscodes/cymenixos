@@ -1,12 +1,10 @@
 {
-  inputs,
   pkgs,
   lib,
   ...
 }:
 {
   config,
-  system,
   ...
 }:
 let
@@ -324,122 +322,6 @@ let
   # Every game that is switched on. Everything below is built per entry of this
   # set, so a new title is a declaration and nothing else.
   games = lib.filterAttrs (_: game: game.enable) cfg.rpcs3.games;
-  # The icon, installed the way every other working launcher on this host does
-  # it: as part of a package, so it lands in the profile next to an index.theme
-  # and becomes part of an actual icon theme. A loose file dropped under the
-  # home directory is not part of one, and a taskbar that resolves an icon by
-  # theme name then finds nothing. That was the first attempt and it did not
-  # render.
-  #
-  # The source is the disc icon at 256 by 256, because an icon theme directory
-  # promises a size. A disc icon is 320 by 176 and sits on a black field, so it
-  # is trimmed to the artwork first and then centred. Fitting the untrimmed
-  # image into the square wasted a third of the width on empty background and
-  # left the logo looking tiny in a launcher, and cropping to a square instead
-  # cuts the title in half.
-  #
-  # The installed file name, the desktop entry id and the Icon key all have to
-  # be the same word, and that word is the attribute name of the game. So
-  # uncharted2.png, uncharted2.desktop, Icon=uncharted2. The name of the file
-  # that is copied FROM does not matter, which is why every game keeps its
-  # artwork under its own directory as plain icon.png.
-  gameIcon =
-    key: game:
-    pkgs.runCommand "${key}-icon" { } ''
-      install -Dm644 ${game.icon} \
-        $out/share/icons/hicolor/256x256/apps/${key}.png
-    '';
-  gameLauncher =
-    key: game:
-    pkgs.writeShellApplication {
-      name = game.command;
-      runtimeInputs = [
-        # `default` on purpose rather than a named variant. It is the one
-        # attribute that survived joymouse being restructured, and a launcher has
-        # no business caring whether it gets the glibc or the static build.
-        inputs.joymouse.packages.${system}.default
-        pkgs.procps
-        pkgs.util-linux
-      ];
-      # The VPN stays up. This used to disconnect it for the length of a session
-      # and reconnect afterwards, which put every other thing on the machine on
-      # the open internet in order to fix one game.
-      #
-      # It was only ever needed because the game resolved its server by name and
-      # a VPN with leak protection blocks port 53 to every destination. The IP
-      # swap list in the game configuration answers those names inside RPCS3
-      # instead, so no name lookup leaves the machine and nothing has to be
-      # switched off. See the Net section of the per game configuration.
-      text = ''
-        # Starting a second instance gets you a modal box complaining about the
-        # first one and nothing else, so there is nothing useful to do here.
-        # The check comes before joymouse is started, because bailing out after
-        # would leave exactly the stray daemon this launcher is careful to avoid.
-        #
-        # The name is the wrapped binary rather than `rpcs3`, because that is what
-        # the process is actually called once the wrapper has exec'd into it.
-        if pgrep -x .rpcs3-wrapped > /dev/null; then
-          exit 0
-        fi
-
-        # Appear as the game rather than as the emulator. The patched RPCS3
-        # reads this and hands it to the compositor as the window's app id, so the
-        # taskbar finds ${key}.desktop and shows the game's own icon instead
-        # of the emulator's. Without it one binary can only ever be one
-        # application.
-        export RPCS3_DESKTOP_FILE_NAME=${key}
-
-        # joymouse lives exactly as long as the game and not a moment longer.
-        # PR_SET_PDEATHSIG has the kernel signal it the moment its parent goes
-        # away, and the exec below makes RPCS3 that parent, in this very process.
-        # So RPCS3 exiting, crashing, or being killed outright all end joymouse
-        # the same way.
-        #
-        # A shell trap would not do. It cannot run when the launcher itself is
-        # killed, and it would need a shell to stay alive alongside the game in
-        # order to run in, which is one more process to outlive RPCS3 and hold
-        # the pad open.
-        # --game picks the profiles and the key assignment written down under
-        # ${game.joymouse} in ~/.config/joymouse. What stands there is only ever
-        # in force here, so the next game launched this way brings its own
-        # without either of them having to be edited around the other.
-        setpriv --pdeathsig TERM joymouse --game ${game.joymouse} &
-
-        # exec, so this launcher IS the game rather than a parent watching it.
-        # Nothing supervises, nothing polls, nothing waits on anything, so there
-        # is nothing left that could wedge or be orphaned.
-        exec ${rpcs3}/bin/.rpcs3-wrapped --no-gui /home/${user}/Games/${game.link}/${game.disc}
-      '';
-    };
-  gamePackages = lib.concatLists (
-    lib.mapAttrsToList (
-      key: game: [ (gameLauncher key game) ] ++ lib.optional (game.icon != null) (gameIcon key game)
-    ) games
-  );
-  # The attribute name is the file name, so this becomes uncharted2.desktop.
-  # That matters: an icon is resolved by THEME NAME, and that name has to equal
-  # the entry id and the icon file name. uncharted2.desktop, Icon=uncharted2,
-  # uncharted2.png. An absolute path in Icon does not render, which is exactly
-  # what this entry used to carry, pointing at a file RPCS3 only ever creates
-  # when somebody clicks Create Shortcut in its interface. That directory was
-  # empty, so the entry had two separate reasons to fall back to a placeholder.
-  #
-  # StartupWMClass is what lets a taskbar tie the RUNNING window back to this
-  # entry. It matches the app id the launcher asks RPCS3 to announce, see
-  # RPCS3_DESKTOP_FILE_NAME above.
-  gameDesktopEntries = lib.mapAttrs (key: game: {
-    name = game.displayName;
-    type = "Application";
-    categories = [ "Game" ];
-    exec = "${gameLauncher key game}/bin/${game.command}";
-    icon = if game.icon != null then key else "rpcs3";
-    noDisplay = false;
-    startupNotify = true;
-    terminal = false;
-    settings = {
-      StartupWMClass = key;
-    };
-  }) games;
   # RPCS3 reads a per title configuration by serial, so the file name is the
   # serial and nothing else. A game without one simply runs on the emulator
   # wide config.yml.
@@ -593,10 +475,10 @@ in
             games = lib.mkOption {
               default = { };
               description = ''
-                Games to provision, launch and configure. The attribute name is
-                the identity of the game across the whole desktop: it is the
-                desktop entry id, the icon name in the theme and the app id the
-                window announces, and all three have to agree.
+                Games to provision and configure. The attribute name is the
+                identity of the game inside this module. It names the folder
+                under ~/Games that the registry boots through, and a per title
+                configuration and a patch are keyed by it.
               '';
               example = lib.literalExpression ''
                 {
@@ -604,7 +486,6 @@ in
                     source = "/mnt/raid/Games/U3";
                     displayName = "Uncharted 3: Drake's Deception™";
                     serial = "BCES01175";
-                    icon = ./uncharted3/icon.png;
                     customConfig = builtins.readFile ./uncharted3/config.yml;
                     patch = {
                       title = "Uncharted 3: Drake's Deception";
@@ -618,7 +499,6 @@ in
               type = lib.types.attrsOf (
                 lib.types.submodule (
                   {
-                    name,
                     config,
                     ...
                   }:
@@ -650,15 +530,13 @@ in
                           where the dump is kept.
                         '';
                       };
-                      command = lib.mkOption {
-                        type = lib.types.str;
-                        default = name;
-                        defaultText = lib.literalExpression "the attribute name";
-                        description = "Name of the launcher on PATH";
-                      };
                       displayName = lib.mkOption {
                         type = lib.types.str;
-                        description = "Name shown by the launcher and the taskbar";
+                        description = ''
+                          What the title is called. It is what a patch is named
+                          after where the patch does not say so itself, see
+                          patch.title.
+                        '';
                       };
                       serial = lib.mkOption {
                         type = lib.types.str;
@@ -667,24 +545,6 @@ in
                           Title id of the disc. RPCS3 names the per game
                           configuration after it, so it has to be the serial of the
                           dump in source and not that of another region.
-                        '';
-                      };
-                      joymouse = lib.mkOption {
-                        type = lib.types.str;
-                        default = name;
-                        defaultText = lib.literalExpression "the attribute name";
-                        description = ''
-                          Profile joymouse is started with, meaning the section of
-                          that name in ~/.config/joymouse.
-                        '';
-                      };
-                      icon = lib.mkOption {
-                        type = lib.types.nullOr lib.types.path;
-                        default = null;
-                        example = lib.literalExpression "./uncharted2/icon.png";
-                        description = ''
-                          The disc icon at 256 by 256, trimmed to the artwork and
-                          centred. Null falls back to the emulator's own icon.
                         '';
                       };
                       customConfig = lib.mkOption {
@@ -794,7 +654,6 @@ in
                 source = lib.mkDefault "/mnt/raid/Games/U2";
                 displayName = "Uncharted 2: Among Thieves™";
                 serial = "BCES00757";
-                icon = ./games/uncharted2/icon.png;
                 customConfig = builtins.readFile ./games/uncharted2/config.yml;
                 patch = {
                   title = "Uncharted 2: Among Thieves";
@@ -828,7 +687,6 @@ in
                 source = lib.mkDefault "/mnt/raid/Games/U3";
                 displayName = "Uncharted 3: Drake's Deception™";
                 serial = "BCES01670";
-                icon = ./games/uncharted3/icon.png;
                 customConfig = builtins.readFile ./games/uncharted3/config.yml;
                 patch = {
                   title = "Uncharted 3: Drake's Deception";
@@ -861,7 +719,6 @@ in
                 source = lib.mkDefault "/mnt/raid/Games/TLOU";
                 displayName = "The Last of Us™";
                 serial = "BCES01584";
-                icon = ./games/tlou/icon.png;
                 customConfig = builtins.readFile ./games/tlou/config.yml;
                 patch = {
                   title = "The Last of Us";
@@ -911,7 +768,6 @@ in
                 source = lib.mkDefault "/mnt/raid/Games/GTA5";
                 displayName = "Grand Theft Auto V";
                 serial = "BLES01807";
-                icon = ./games/gta5/icon.png;
                 customConfig = builtins.readFile ./games/gta5/config.yml;
                 patch = {
                   # Spelled as the patch file spells it, brackets and all. It
@@ -1015,7 +871,6 @@ in
             };
           };
           xdg = {
-            desktopEntries = gameDesktopEntries;
             configFile = gameCustomConfigs // extraPatchFile;
           };
           # The RPCN account and the custom server list, decrypted at activation
@@ -1039,8 +894,7 @@ in
               pkgs.rusty-psn-gui
               rpcs3
               rpcs3-provision
-            ]
-            ++ gamePackages;
+            ];
             file = {
               ".config/rpcs3/bios" = {
                 source = "${ps3bios}/bios";

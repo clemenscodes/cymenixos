@@ -123,10 +123,6 @@
     pwndbg = {
       url = "github:pwndbg/pwndbg";
     };
-    joymouse = {
-      url = "github:clemenscodes/joymouse-rs";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     umu = {
       url = "github:Open-Wine-Components/umu-launcher?dir=packaging/nix";
       inputs = {
