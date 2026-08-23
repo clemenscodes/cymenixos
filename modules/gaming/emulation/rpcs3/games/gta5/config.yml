@@ -186,9 +186,21 @@ Miscellaneous:
 #
 # The address is a loopback one of its own rather than 127.0.0.1
 # because a reverse proxy already holds port 80 on this machine,
-# and an nftables rule in table ip gtao forwards 127.0.0.77:80 to
-# the port the server actually listens on. Nothing in the RPCS3
-# swap list carries a port, which is why the detour exists.
+# and port 80 is held once per address rather than once per
+# machine. Nothing in the RPCS3 swap list carries a port, so the
+# server has to be reachable on 80, and its own address is what
+# gives it one.
+#
+# This used to say an nftables rule in `table ip gtao` forwarded
+# 127.0.0.77:80 to some other port. There is no such table on this
+# machine and gtao-api binds 127.0.0.77:80 itself. Checked
+# 2026-08-23, `nft list table ip gtao` and `ss -tlnp`.
+#
+# A loopback address serves an emulator here and can never serve a
+# console on the wire, which is the difference from Uncharted 2, on
+# this machine's own network address. The day this title wants a
+# console it needs an address of its own on the LAN, because it
+# cannot share port 80 with that one.
 #
 # The wildcard is deliberate. A named list would only carry the
 # hostnames already known, and finding the ones that are not is
@@ -237,29 +249,37 @@ Net:
   # nothing here stops a console talking to a server on a different one.
   Bind address: 127.0.0.5
   Clans Enabled: false
-  # This machine, which is this console's resolver and answers every
-  # name this title asks for with the server that serves it. It was
-  # Mullvad's own resolver until 2026-08-23, which never answered any
-  # of them, so the swap list below was carrying the whole redirection
-  # on its own.
+  # The resolver this machine actually uses, reached at its address on
+  # the network. Not 8.8.8.8, which is what this said for a long time
+  # and which the Mullvad tunnel blocks, and not the tunnel's own
+  # 100.64.0.63 either, because a resolver on this machine answers
+  # without depending on the tunnel being up.
+  #
+  # With the wildcard below catching every name, this is consulted for
+  # nothing. It matters anyway, because the day a name escapes the
+  # wildcard a lookup that never comes back leaves a cloud request
+  # outstanding and GTA Online refuses to start while anything is.
   DNS address: 192.168.178.147
   IP address: 0.0.0.0
-  # Empty, because the resolver above does it. See
-  # amaru/console-rig.nix, where /rockstargames.com/ is answered with
-  # 127.0.0.77, the address gtao-api serves on.
+  # Empty. The resolver named in DNS address above answers every
+  # hostname this title has been seen to ask for with 127.0.0.77,
+  # where gtao-api serves. See amaru/console-rig.nix.
   #
-  # It was "*=127.0.0.77", a bare wildcard, and that sent every name
-  # this emulator resolved to that server, not only this title's own.
-  # It worked because nothing else in this configuration resolves a
-  # name, which is working by luck rather than by intent.
+  # **This costs the discovery the wildcard was there for**, and that
+  # was a deliberate decision recorded in the note above this section
+  # rather than an oversight. A named list carries only the hostnames
+  # already known, and one of the reasons that server records what it
+  # is asked for is to find the ones that are not. Twelve are named
+  # now, out of that project's own documents, and a thirteenth will
+  # resolve for real and leave this machine rather than showing up in
+  # a log.
   #
-  # What RPCS3 does with an empty list, read rather than assumed.
-  # analyze_dns_packet returns -1 when nothing matches,
-  # np_dnshook.cpp:181, the send falls through to a real sendto, and
-  # the destination is overwritten with the DNS address above on the
-  # way out, lv2_socket_native.cpp:919. So an empty list means every
-  # query goes to that resolver, whichever nameserver the game thought
-  # it was asking.
+  # The named list in the resolver is safe where a wildcard there
+  # would not be. That dnsmasq holds 127.0.0.1:53 as well as the LAN
+  # address, so it is this desktop's resolver too, and a wildcard
+  # would point a browser at a local server. None of the twelve is a
+  # name anybody types, and rockstargames.com and www.rockstargames.com
+  # are deliberately not among them.
   IP swap list: ""
   Internet enabled: Connected
   PSN Country: us

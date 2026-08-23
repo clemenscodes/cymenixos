@@ -171,11 +171,14 @@ Net:
   # the console takes the loopback and the server keeps the
   # address named in DNS address below.
   #
-  # The consequence, and it is fine for an emulator on this
-  # machine. The private server answers the address question
-  # with the source address it saw, so this console is recorded
-  # at 127.0.0.1, which nothing off this machine could reach. A
-  # second console here would take 127.0.0.2 the same way.
+  # The consequence, and it is worth knowing rather than being
+  # surprised by. The private server answers the address question
+  # with the source address it saw, so this console is recorded at
+  # 127.0.0.1, which nothing off this machine can reach. That is
+  # fine for an emulator talking to a server here, and it is not
+  # fine for a peer to peer match between this emulator and a real
+  # PlayStation 3, which would have to be told an address on the
+  # network instead. A second console here would take 127.0.0.2.
   #
   # One address per title, so any two emulators can be up at once. RPCS3
   # binds one fixed peer to peer port, 3658, and the first on 0.0.0.0 owns
@@ -188,21 +191,27 @@ Net:
   #   127.0.0.5   Grand Theft Auto V
   Bind address: 127.0.0.1
   Clans Enabled: false
-  # Only consulted for a name the swap list below does not
-  # match, which with a wildcard is none. It stays as the
-  # honest fallback and as documentation of where the private
-  # server lives.
+  # This machine, on its address on the network, which is where
+  # dnsmasq answers. See amaru/console-rig.nix.
+  #
+  # **Not a fallback any more.** It read that way while the swap
+  # list below carried a wildcard and caught every name before a
+  # resolver was ever asked. That list is empty now, so this is
+  # the only thing that resolves anything at all, for this title.
+  #
+  # It is the network address rather than a loopback one because
+  # a real PlayStation 3 has one field for a name server and has
+  # to be able to reach whatever goes in it.
   DNS address: 192.168.178.147
   IP address: 0.0.0.0
   # Empty, because this machine is the console's resolver and the
   # resolver answers every one of these names itself.
   #
-  # It used to carry the three hostnames plus a `*` catch all, and
-  # that was doing real work for as long as the DNS address pointed
+  # It used to carry three hostnames plus a `*` catch all, and that
+  # was doing real work for as long as the DNS address pointed
   # somewhere that did not answer them. It does not any more. See
-  # amaru/console-rig.nix, where dnsmasq answers the two content
-  # domains, the cloudfront host and the statistics queue with this
-  # machine and forwards everything else.
+  # amaru/console-rig.nix, which names all six hosts this title has
+  # ever been seen to ask for and forwards everything else.
   #
   # Why the resolver and not this list. A real PlayStation 3 has one
   # field for a name server and no swap list at all, so anything that
@@ -213,7 +222,7 @@ Net:
   # What RPCS3 does with an empty list, read rather than assumed.
   # analyze_dns_packet returns -1 when nothing matches,
   # np_dnshook.cpp:181, the send falls through to a real sendto, and
-  # the destination is overwritten with the DNS address below on the
+  # the destination is overwritten with the DNS address above on the
   # way out, lv2_socket_native.cpp:919. So an empty list means every
   # query goes to that resolver, whichever nameserver the game
   # thought it was asking.
@@ -223,12 +232,24 @@ Net:
   # the console binds 127.0.0.1 above, so a query to this machine
   # never leaves the loopback.
   #
-  # The one thing given up. The old `*` caught a hostname nobody has
-  # ever seen this title ask for. Without it such a name resolves
-  # for real and the request leaves this machine. The domain entries
-  # in console-rig.nix cover both bucket templates the title builds
-  # names from, so that would take a fourth template nobody has
-  # found.
+  # **What is given up, and it is not nothing.** The old `*` caught
+  # a hostname nobody has ever seen this title ask for. The resolver
+  # names hosts rather than domains, because it is this machine's own
+  # resolver as well as the console's and a domain entry there would
+  # take the studio's website away from the browser on this desktop.
+  # So a bucket that has never appeared resolves for real and that
+  # request leaves this machine.
+  #
+  # The title builds content hostnames from three templates at
+  # 0x00b3a5f8 in its own executable, two of them with a bucket
+  # substituted in, so a new bucket is a thing that can happen rather
+  # than a thing that cannot. `s3.amazonaws.com` is already in that
+  # position: this title really does use it, for shared replay
+  # upload, and it is deliberately not in the resolver because
+  # overriding it there would break S3 for this whole desktop.
+  #
+  # If a request is ever seen leaving for Amazon, this list is where
+  # to catch it, one entry, because this list reaches only RPCS3.
   IP swap list: ""
   Internet enabled: Connected
   PSN Country: us
