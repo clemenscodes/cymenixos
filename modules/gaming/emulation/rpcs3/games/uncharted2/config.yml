@@ -12,7 +12,7 @@
 # per-title file.
 Audio:
   Audio Channel Layout: Automatic
-  Audio Device: '@@@default@@@'
+  Audio Device: "@@@default@@@"
   Audio Format: Stereo
   Audio Formats: 0
   Audio Provider: CellAudio
@@ -23,7 +23,7 @@ Audio:
   Enable Buffering: true
   Enable Time Stretching: false
   Master Volume: 100
-  Microphone Devices: '@@@@@@@@@@@@'
+  Microphone Devices: "@@@@@@@@@@@@"
   Microphone Type: "Null"
   Music Handler: Qt
   RSXAudio Avport: HDMI 0
@@ -149,7 +149,7 @@ Miscellaneous:
   Start games in fullscreen mode: true
   Use native user interface: true
   Use recursive scan: false
-  Window Title Format: 'FPS: %F | %R | %V | %T [%t]'
+  Window Title Format: "FPS: %F | %R | %V | %T [%t]"
 Net:
   Bind address: 0.0.0.0
   Clans Enabled: false
@@ -157,7 +157,7 @@ Net:
   # match, which with a wildcard is none. It stays as the
   # honest fallback and as documentation of where the private
   # server lives.
-  DNS address: 51.75.22.125
+  DNS address: 192.168.178.147
   IP address: 0.0.0.0
   # Every hostname the game asks for is answered inside RPCS3,
   # without a packet leaving the machine. The entries are tried
@@ -178,9 +178,7 @@ Net:
   # The three names below are every hostname this game was
   # observed to ask for, counted over a full successful session,
   # 31 requests to the first, 17 to the second and one to the
-  # third. All three really are served by 51.75.22.125, so a
-  # bare wildcard was already correct here and naming them
-  # changes no behaviour whatsoever today.
+  # third.
   #
   # It is still worth naming them. A bare wildcard is correct
   # for this title by luck and not by intent, and that luck ran
@@ -194,7 +192,7 @@ Net:
   # deleted. Without it an unnamed hostname falls through to the
   # DNS address above, and that resolver is not dependable, it
   # was refusing connections on port 53 while this was written.
-  IP swap list: "u2livedata.final1.prod.naughtydog.com=51.75.22.125&&u2livedata.final1.prod.s3.amazonaws.com=51.75.22.125&&queue.amazonaws.com=51.75.22.125&&*=51.75.22.125"
+  IP swap list: "u2livedata.final1.prod.naughtydog.com=192.168.178.147&&u2livedata.final1.prod.s3.amazonaws.com=192.168.178.147&&queue.amazonaws.com=192.168.178.147&&*=192.168.178.147"
   Internet enabled: Connected
   PSN Country: us
   PSN status: RPCN
@@ -268,8 +266,8 @@ Video:
   Multithreaded RSX: false
   Output Scaling Mode: FidelityFX Super Resolution
   Performance Overlay:
-    Body Background (hex): '#002339FF'
-    Body Color (hex): '#FFE138FF'
+    Body Background (hex): "#002339FF"
+    Body Color (hex): "#FFE138FF"
     Center Horizontally: false
     Center Vertically: false
     Detail level: None
@@ -287,8 +285,8 @@ Video:
     Metrics update interval (ms): 1000
     Opacity (%): 10
     Position: Top Left
-    Title Background (hex): '#00000000'
-    Title Color (hex): '#F26C24FF'
+    Title Background (hex): "#00000000"
+    Title Color (hex): "#F26C24FF"
     Use Window Space: false
     Vertical Margin (%): 7
     Vertical Margin (px): 10
