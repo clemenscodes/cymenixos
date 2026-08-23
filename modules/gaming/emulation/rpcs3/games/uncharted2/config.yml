@@ -151,7 +151,32 @@ Miscellaneous:
   Use recursive scan: false
   Window Title Format: "FPS: %F | %R | %V | %T [%t]"
 Net:
-  Bind address: 0.0.0.0
+  # Which local address this console's own sockets bind, and not
+  # every address, which is the default and is wrong here.
+  #
+  # Uncharted 2 binds UDP port 3233 itself, for the datagram it
+  # sends its PlayStation Network ticket in and waits on that
+  # same port for a reply. The private server has to answer that
+  # datagram, so something on this machine has to hold 3233 as
+  # well, and 0.0.0.0 overlaps every address, so the title's own
+  # bind fails with EADDRINUSE before it has sent anything.
+  #
+  # The title puts that on screen as `Error initializing socket`,
+  # which is `socket.Init() failed. 0x%x` at 0x00b3a6a8 in its
+  # own executable, and it says nothing at all about a port.
+  #
+  # One specific address each is what lets both hold 3233. The
+  # server has to be the one on the address the game is sent to,
+  # because that address is baked into the downloaded patch, so
+  # the console takes the loopback and the server keeps the
+  # address named in DNS address below.
+  #
+  # The consequence, and it is fine for an emulator on this
+  # machine. The private server answers the address question
+  # with the source address it saw, so this console is recorded
+  # at 127.0.0.1, which nothing off this machine could reach. A
+  # second console here would take 127.0.0.2 the same way.
+  Bind address: 127.0.0.1
   Clans Enabled: false
   # Only consulted for a name the swap list below does not
   # match, which with a wildcard is none. It stays as the
@@ -297,7 +322,20 @@ Video:
   Renderdoc Compatibility Mode: false
   Renderer: Vulkan
   Resolution: 1280x720
-  Resolution Scale: 150
+  # Three times the title's own 1280x720, which is 3840x2160 exactly.
+  #
+  # A multiplier rather than an output size, because this scales the
+  # render targets the game draws into and the game's own resolution
+  # is what it is multiplying. 150 gave 1920x1080 and 300 gives 4K
+  # with no fractional pixel anywhere, which is the reason to prefer
+  # a whole multiple over any number that merely reaches 2160.
+  #
+  # Resolution Scale Threshold is deliberately not set. It decides
+  # which render targets are scaled at all, its default of 16x16
+  # leaves the small ones alone, and a target that should not have
+  # been scaled shows up as a broken overlay rather than as anything
+  # that names itself.
+  Resolution Scale: 300
   Screen size in inches: 24
   Second Frame Limit: 0
   Shader Compiler Threads: 0
