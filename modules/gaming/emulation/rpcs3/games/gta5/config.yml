@@ -214,11 +214,53 @@ Miscellaneous:
 # matter what stands in this file. games/gta5/patch.yml relocates
 # the two RPCS3 patches to 01.06 for the same reason.
 Net:
-  Bind address: 0.0.0.0
+  # Which local address this console's own sockets bind, one per title.
+  #
+  # Every address, 0.0.0.0, is RPCS3's default and it is wrong the moment two
+  # of anything want the same port. RPCS3 binds one fixed UDP port for the
+  # console's peer to peer traffic, 3658, and a title may bind a fixed port of
+  # its own besides, so the first emulator to start on 0.0.0.0 owns those on
+  # every address at once and the second cannot boot.
+  #
+  # A specific address each is what lets them coexist, and it is the same rule
+  # that lets a private server hold port 80 on 127.0.0.55 while another holds
+  # it on 127.0.0.77.
+  #
+  #   127.0.0.1   Uncharted 2
+  #   127.0.0.2   a second Uncharted 2 console, for two player tests
+  #   127.0.0.3   Uncharted 3
+  #   127.0.0.4   The Last of Us
+  #   127.0.0.5   Grand Theft Auto V
+  #
+  # A loopback address reaches every server on this machine, since the kernel
+  # routes an address this machine holds over lo whatever the source, so
+  # nothing here stops a console talking to a server on a different one.
+  Bind address: 127.0.0.5
   Clans Enabled: false
-  DNS address: 100.64.0.63
+  # This machine, which is this console's resolver and answers every
+  # name this title asks for with the server that serves it. It was
+  # Mullvad's own resolver until 2026-08-23, which never answered any
+  # of them, so the swap list below was carrying the whole redirection
+  # on its own.
+  DNS address: 192.168.178.147
   IP address: 0.0.0.0
-  IP swap list: "*=127.0.0.77"
+  # Empty, because the resolver above does it. See
+  # amaru/console-rig.nix, where /rockstargames.com/ is answered with
+  # 127.0.0.77, the address gtao-api serves on.
+  #
+  # It was "*=127.0.0.77", a bare wildcard, and that sent every name
+  # this emulator resolved to that server, not only this title's own.
+  # It worked because nothing else in this configuration resolves a
+  # name, which is working by luck rather than by intent.
+  #
+  # What RPCS3 does with an empty list, read rather than assumed.
+  # analyze_dns_packet returns -1 when nothing matches,
+  # np_dnshook.cpp:181, the send falls through to a real sendto, and
+  # the destination is overwritten with the DNS address above on the
+  # way out, lv2_socket_native.cpp:919. So an empty list means every
+  # query goes to that resolver, whichever nameserver the game thought
+  # it was asking.
+  IP swap list: ""
   Internet enabled: Connected
   PSN Country: us
   PSN status: RPCN

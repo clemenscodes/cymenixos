@@ -151,7 +151,28 @@ Miscellaneous:
   Use recursive scan: false
   Window Title Format: 'FPS: %F | %R | %V | %T [%t]'
 Net:
-  Bind address: 0.0.0.0
+  # Which local address this console's own sockets bind, one per title.
+  #
+  # Every address, 0.0.0.0, is RPCS3's default and it is wrong the moment two
+  # of anything want the same port. RPCS3 binds one fixed UDP port for the
+  # console's peer to peer traffic, 3658, and a title may bind a fixed port of
+  # its own besides, so the first emulator to start on 0.0.0.0 owns those on
+  # every address at once and the second cannot boot.
+  #
+  # A specific address each is what lets them coexist, and it is the same rule
+  # that lets a private server hold port 80 on 127.0.0.55 while another holds
+  # it on 127.0.0.77.
+  #
+  #   127.0.0.1   Uncharted 2
+  #   127.0.0.2   a second Uncharted 2 console, for two player tests
+  #   127.0.0.3   Uncharted 3
+  #   127.0.0.4   The Last of Us
+  #   127.0.0.5   Grand Theft Auto V
+  #
+  # A loopback address reaches every server on this machine, since the kernel
+  # routes an address this machine holds over lo whatever the source, so
+  # nothing here stops a console talking to a server on a different one.
+  Bind address: 127.0.0.4
   Clans Enabled: false
   # Only consulted for a name the swap list below does not
   # match, which with a wildcard is none. It stays as the
