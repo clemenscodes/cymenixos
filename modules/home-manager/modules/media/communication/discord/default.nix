@@ -13,7 +13,7 @@
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
-      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["discord"];
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["discord" "discord-unwrapped"];
     };
   };
 in {

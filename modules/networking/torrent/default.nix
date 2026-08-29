@@ -34,7 +34,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.torrent.enable) {
     environment = {
-      # services.mullvad-vpn already adds its package, which provides the daemon,
+      # services.mullvad-vpn already adds its packages, which provide the daemon,
       # the CLI and the GUI.
       systemPackages = with pkgs; [
         wireguard-tools
@@ -69,12 +69,14 @@ in {
     services = {
       mullvad-vpn = {
         inherit (cfg.torrent) enable;
-        # The default package is pkgs.mullvad, which ships only the daemon and CLI
-        # and is versioned independently of pkgs.mullvad-vpn. When the two drift
-        # apart the GUI talks to a daemon of a different version and reports
-        # "app is out of sync". pkgs.mullvad-vpn contains the daemon, the CLI and
-        # the GUI, so using it for the daemon keeps every part on one version.
-        package = pkgs.mullvad-vpn;
+        # pkgs.mullvad-vpn ships only the GUI, der Daemon und die CLI stecken in
+        # pkgs.mullvad, dem Default von services.mullvad-vpn.package. Das Modul
+        # setzt hier eine Assertion, wenn package auf die GUI zeigt. Beide Pakete
+        # kommen aus derselben Version, also bleibt alles in sync, wenn der
+        # Default fuer den Daemon steht und die GUI ueber gui.enable dazukommt.
+        gui = {
+          enable = true;
+        };
       };
     };
     systemd = {
