@@ -88,30 +88,6 @@ let
     passthru = builtins.removeAttrs (oldAttrs.passthru or { }) [ "updateScript" ];
   });
   user = config.modules.users.name;
-  # Uncharted 3 will not leave "Connecting..." until it has downloaded
-  # campaign.config.txt.crypt over plain HTTP. The backend's own DNS answers
-  # u3.campaign.config.s3.amazonaws.com with 194.13.80.115, where nginx has no
-  # server block for that name and closes the connection without sending a
-  # byte, so upstream that download cannot succeed at all. The per title IP
-  # swap list sends the name to 127.0.0.1 instead and this is what answers
-  # there.
-  #
-  # The bytes are the ones the very same host still returns through its
-  # u3.final.prod vhost, which does answer, so nothing here is invented. The
-  # queue address inside the file is stale and goes nowhere, 50.18.47.114 has
-  # been dead since Naughty Dog shut the servers down, but that does not
-  # matter. The address the game really dials comes out of
-  # net18.bin.psarc.crypt, and this download only has to succeed.
-  # Fetched rather than vendored, and fixed output, so the hash is what
-  # guarantees the bytes and not the fact that somebody once committed them.
-  # Plain HTTP is not a weakness here, the hash pins the content and the file
-  # is public configuration either way.
-  #
-  # The URL carries the hostname the game itself sends, because that is the
-  # only Host header the server will serve this file for, while --resolve aims
-  # the connection at the machine that answers. Resolving the name normally
-  # reaches Amazon, where the bucket was deleted, and resolving it through the
-  # backend's DNS reaches a vhost that drops the connection.
   rpcs3-provision = pkgs.writeShellApplication {
     name = "rpcs3-provision";
     runtimeInputs = [
@@ -788,1106 +764,1106 @@ in
         ) games;
       };
     };
-  };
-  home-manager = lib.mkIf (config.modules.home-manager.enable) {
-    users = {
-      ${user} = {
-        systemd = {
-          user = {
-            services = {
-              rpcs3-provision = {
-                Unit = {
-                  Description = "Provision RPCS3 firmware, game patches and DLC";
-                };
-                Service = {
-                  Type = "oneshot";
-                  ExecStart = "${rpcs3-provision}/bin/rpcs3-provision";
-                };
-                Install = {
-                  WantedBy = [ "default.target" ];
+    home-manager = lib.mkIf (config.modules.home-manager.enable) {
+      users = {
+        ${user} = {
+          systemd = {
+            user = {
+              services = {
+                rpcs3-provision = {
+                  Unit = {
+                    Description = "Provision RPCS3 firmware, game patches and DLC";
+                  };
+                  Service = {
+                    Type = "oneshot";
+                    ExecStart = "${rpcs3-provision}/bin/rpcs3-provision";
+                  };
+                  Install = {
+                    WantedBy = [ "default.target" ];
+                  };
                 };
               };
             };
           };
-        };
-        xdg = {
-          configFile = gameCustomConfigs // extraPatchFile;
-        };
-        # The RPCN account and the custom server list, decrypted at activation
-        # and placed straight where RPCS3 reads it. The file lands outside the
-        # store, readable by its owner only, which is why this is the one part
-        # of the configuration that is not a symlink into a store path.
-        #
-        # It stays read only afterwards. RPCS3 saves a login token here so the
-        # password does not have to be sent again, and it cannot do that now.
-        # That costs nothing, because the password travels in the same secret,
-        # so a login that cannot reuse a token simply performs one.
-        sops = lib.mkIf (cfg.rpcs3.rpcn.secret != null) {
-          secrets = {
-            ${cfg.rpcs3.rpcn.secret} = {
-              path = "/home/${user}/.config/rpcs3/rpcn.yml";
+          xdg = {
+            configFile = gameCustomConfigs // extraPatchFile;
+          };
+          # The RPCN account and the custom server list, decrypted at activation
+          # and placed straight where RPCS3 reads it. The file lands outside the
+          # store, readable by its owner only, which is why this is the one part
+          # of the configuration that is not a symlink into a store path.
+          #
+          # It stays read only afterwards. RPCS3 saves a login token here so the
+          # password does not have to be sent again, and it cannot do that now.
+          # That costs nothing, because the password travels in the same secret,
+          # so a login that cannot reuse a token simply performs one.
+          sops = lib.mkIf (cfg.rpcs3.rpcn.secret != null) {
+            secrets = {
+              ${cfg.rpcs3.rpcn.secret} = {
+                path = "/home/${user}/.config/rpcs3/rpcn.yml";
+              };
             };
           };
-        };
-        home = {
-          packages = [
-            pkgs.rusty-psn-gui
-            rpcs3
-            rpcs3-provision
-          ];
-          file = {
-            ".config/rpcs3/bios" = {
-              source = "${ps3bios}/bios";
-            };
-            # What patches EXIST. The community database, carried whole.
-            # The emulator wide configuration. Every game without a file of its own runs
-            # on this, so it is the baseline rather than a detail. It was the last
-            # piece still living only on disk, which meant a fresh machine started
-            # from RPCS3's own defaults and nobody would notice until a second game
-            # behaved differently.
-            #
-            # Taken from the emulator itself, so what is declared is what ran. Checked
-            # key by key against RPCS3's compiled in defaults: apart from the one line
-            # below it is stock, which is the point. Per game tuning belongs in a per
-            # game file, where it can be wrong for one title without being wrong for
-            # all of them.
-            #
-            # The one addition is the anisotropic filter, forced to its maximum. On
-            # this GPU it costs nothing measurable and it is the single setting that
-            # improves every game at once.
-            ".config/rpcs3/config.yml" = rpcs3File {
-              text = ''
-                Core:
-                  PPU Decoder: Recompiler (LLVM)
-                  PPU Threads: 2
-                  PPU Debug: false
-                  PPU Calling History: false
-                  Save LLVM logs: false
-                  Use LLVM CPU: ""
-                  Max LLVM Compile Threads: 0
-                  PPU LLVM Greedy Mode: false
-                  LLVM Precompilation: true
-                  # Left alone deliberately, and not worth revisiting on
-                  # this machine. The alternatives pin threads with affinity
-                  # masks, and that table only has entries for CPU families
-                  # 0x17, 0x18 and 0x19, meaning Zen through Zen 3. This host
-                  # is family 0x1A, so no case matches, the mask stays at all
-                  # cores, and every mode behaves identically. Changing it
-                  # here would look like tuning and do nothing.
-                  Thread Scheduler Mode: Operating System
-                  Set DAZ and FTZ: false
-                  SPU Decoder: Recompiler (LLVM)
-                  SPU Reservation Busy Waiting Percentage 1: 100
-                  SPU Reservation Busy Waiting Enabled: false
-                  SPU GETLLAR Busy Waiting Percentage: 100
-                  Disable SPU GETLLAR Spin Optimization: false
-                  SPU Debug: false
-                  MFC Debug: false
-                  Preferred SPU Threads: 0
-                  SPU delay penalty: 3
-                  SPU loop detection: false
-                  Max SPURS Threads: 6
-                  SPU Block Size: Safe
-                  Accurate SPU DMA: false
-                  Accurate SPU Reservations: true
-                  Accurate Cache Line Stores: false
-                  Accurate RSX reservation access: false
-                  RSX FIFO Fetch Accuracy: Atomic
-                  SPU Verification: true
-                  SPU Cache: true
-                  SPU Profiler: false
-                  PPU Profiler: false
-                  MFC Commands Shuffling Limit: 0
-                  MFC Commands Timeout: 0
-                  MFC Commands Shuffling In Steps: false
-                  SPU XFloat Accuracy: Approximate
-                  Accurate PPU 128-byte Reservation Op Max Length: 0
-                  Stub PPU Traps: 0
-                  Precise SPU Verification: false
-                  PPU LLVM Java Mode Handling: true
-                  PPU Vector NaN Handling: true
-                  Use Accurate DFMA: true
-                  PPU Set Saturation Bit: false
-                  PPU Accurate Non-Java Mode: false
-                  PPU Accurate Vector NaN Values: false
-                  PPU Set FPCC Bits: false
-                  Debug Console Mode: false
-                  Hook static functions: false
-                  Libraries Control:
-                    []
-                  HLE lwmutex: false
-                  SPU LLVM Lower Bound: 0
-                  SPU LLVM Upper Bound: 18446744073709551615
-                  Clocks scale: 100
-                  SPU Wake-Up Delay: 0
-                  SPU Wake-Up Delay Thread Mask: 63
-                  Max CPU Preempt Count: 0
-                  Allow RSX CPU Preemptions: true
-                  Sleep Timers Accuracy: As Host
-                  Usleep Time Addend: 0
-                  Performance Report Threshold: 500
-                  Enable Performance Report: false
-                  Assume External Debugger: false
-                VFS:
-                  Enable /host_root/: false
-                  Initialize Directories: true
-                  Limit disk cache size: false
-                  Disk cache maximum size (MB): 5120
-                  Empty /dev_hdd0/tmp/: true
-                Video:
-                  Renderer: Vulkan
-                  Resolution: 1280x720
-                  Aspect ratio: 16:9
-                  Frame limit: Auto
-                  Second Frame Limit: 0
-                  MSAA: Auto
-                  Shader Mode: Async Recompiler (multi-threaded)
-                  Shader Precision: High
-                  VSync Mode: Disabled
-                  Write Color Buffers: false
-                  Write Depth Buffer: false
-                  Read Color Buffers: false
-                  Read Depth Buffer: false
-                  Handle RSX Memory Tiling: false
-                  Log shader programs: false
-                  Debug output: false
-                  Debug overlay: false
-                  Renderdoc Compatibility Mode: false
-                  Use GPU texture scaling: false
-                  Stretch To Display Area: false
-                  Force High Precision Z buffer: false
-                  Strict Rendering Mode: false
-                  Disable ZCull Occlusion Queries: false
-                  Disable Video Output: false
-                  Disable Vertex Cache: false
-                  Disable FIFO Reordering: false
-                  Enable Frame Skip: false
-                  Force CPU Blit: false
-                  Disable On-Disk Shader Cache: false
-                  Disable Vulkan Memory Allocator: false
-                  Use full RGB output range: true
-                  Strict Texture Flushing: false
-                  Multithreaded RSX: false
-                  Relaxed ZCULL Sync: false
-                  Force Hardware MSAA Resolve: false
-                  3D Display Enabled: false
-                  3D Display Mode: Disabled
-                  Screen size in inches: 24
-                  Debug Program Analyser: false
-                  Accurate ZCULL stats: true
-                  Consecutive Frames To Draw: 1
-                  Consecutive Frames To Skip: 1
-                  Resolution Scale: 100
-                  Anisotropic Filter Override: 0
-                  Texture LOD Bias Addend: 0
-                  Minimum Scalable Dimension: 16
-                  Shader Compiler Threads: 0
-                  Driver Recovery Timeout: 1000000
-                  Driver Wake-Up Delay: 0
-                  Vblank Rate: 60
-                  Vblank NTSC Fixup: false
-                  DECR memory layout: false
-                  Allow Host GPU Labels: false
-                  Disable MSL Fast Math: false
-                  Disable Asynchronous Memory Manager: false
-                  Output Scaling Mode: Bilinear
-                  Record With Overlays: true
-                  Disable Hardware ColorSpace Remapping: false
-                  FidelityFX CAS Sharpening Intensity: 50
-                  Vulkan:
-                    Adapter: ""
-                    Force primitive restart flag: false
-                    Exclusive Fullscreen Mode: Automatic
-                    Asynchronous Texture Streaming: false
-                    Asynchronous Queue Scheduler: Safe
-                    VRAM allocation limit (MB): 65536
-                    Use Re-BAR for GPU uploads: true
-                  Performance Overlay:
-                    Enabled: false
-                    Enable Framerate Graph: false
-                    Enable Frametime Graph: false
-                    Framerate datapoints: 50
-                    Frametime datapoints: 170
-                    Detail level: Medium
-                    Framerate graph detail level: All
-                    Frametime graph detail level: All
-                    Metrics update interval (ms): 350
-                    Font size (px): 10
-                    Position: Top Left
-                    Font: n023055ms.ttf
-                    Horizontal Margin (%): 4
-                    Vertical Margin (%): 7
-                    Center Horizontally: false
-                    Center Vertically: false
-                    Opacity (%): 70
-                    Body Color (hex): "#FFE138FF"
-                    Body Background (hex): "#002339FF"
-                    Title Color (hex): "#F26C24FF"
-                    Title Background (hex): "#00000000"
-                    Use Window Space: false
-                  Shader Loading Dialog:
-                    Allow custom background: true
-                    Darkening effect strength: 30
-                    Blur effect strength: 0
-                Audio:
-                  Renderer: Cubeb
-                  Audio Provider: CellAudio
-                  RSXAudio Avport: HDMI 0
-                  Dump to file: false
-                  Convert to 16 bit: false
-                  Audio Format: Stereo
-                  Audio Formats: 0
-                  Audio Channel Layout: Automatic
-                  Audio Device: "@@@default@@@"
-                  Master Volume: 100
-                  Enable Buffering: true
-                  Desired Audio Buffer Duration: 34
-                  Enable Time Stretching: false
-                  Disable Sampling Skip: false
-                  Time Stretching Threshold: 75
-                  Microphone Type: "Null"
-                  Microphone Devices: "@@@@@@@@@@@@"
-                  Music Handler: Qt
-                Input/Output:
-                  Keyboard: "Null"
-                  Mouse: Basic
-                  Camera: "Null"
-                  Camera type: Unknown
-                  Camera flip: None
-                  Camera ID: Default
-                  SDL Camera ID: Default
-                  Move: "Null"
-                  Buzz emulated controller: "Null"
-                  Turntable emulated controller: "Null"
-                  GHLtar emulated controller: "Null"
-                  Pad handler mode: Single-threaded
-                  Keep pads connected: false
-                  Pad handler sleep (microseconds): 1000
-                  Background input enabled: true
-                  Show move cursor: false
-                  Paint move spheres: false
-                  Allow move hue set by game: false
-                  Lock overlay input to player one: false
-                  Emulated Midi devices: Keyboardßßß@@@Keyboardßßß@@@Keyboardßßß@@@
-                  Load SDL GameController Mappings: true
-                  IO Debug overlay: false
-                  Mouse Debug overlay: false
-                  Fake Move Rotation Cone: 10
-                  Fake Move Rotation Cone (Vertical): 10
-                System:
-                  License Area: SCEA
-                  Language: English (US)
-                  Keyboard Type: English keyboard (US standard)
-                  Enter button assignment: Enter with cross
-                  Date Format: ddmmyyyy
-                  Time Format: clock24
-                  Console time offset (s): 0
-                  System Name: RPCS3-582
-                  Console PSID: 0x94F3031EAAABD51779A2BA59D6827F7B
-                  HDD Model Name: ""
-                  HDD Serial Number: ""
-                  Process ARGV:
+          home = {
+            packages = [
+              pkgs.rusty-psn-gui
+              rpcs3
+              rpcs3-provision
+            ];
+            file = {
+              ".config/rpcs3/bios" = {
+                source = "${ps3bios}/bios";
+              };
+              # What patches EXIST. The community database, carried whole.
+              # The emulator wide configuration. Every game without a file of its own runs
+              # on this, so it is the baseline rather than a detail. It was the last
+              # piece still living only on disk, which meant a fresh machine started
+              # from RPCS3's own defaults and nobody would notice until a second game
+              # behaved differently.
+              #
+              # Taken from the emulator itself, so what is declared is what ran. Checked
+              # key by key against RPCS3's compiled in defaults: apart from the one line
+              # below it is stock, which is the point. Per game tuning belongs in a per
+              # game file, where it can be wrong for one title without being wrong for
+              # all of them.
+              #
+              # The one addition is the anisotropic filter, forced to its maximum. On
+              # this GPU it costs nothing measurable and it is the single setting that
+              # improves every game at once.
+              ".config/rpcs3/config.yml" = rpcs3File {
+                text = ''
+                  Core:
+                    PPU Decoder: Recompiler (LLVM)
+                    PPU Threads: 2
+                    PPU Debug: false
+                    PPU Calling History: false
+                    Save LLVM logs: false
+                    Use LLVM CPU: ""
+                    Max LLVM Compile Threads: 0
+                    PPU LLVM Greedy Mode: false
+                    LLVM Precompilation: true
+                    # Left alone deliberately, and not worth revisiting on
+                    # this machine. The alternatives pin threads with affinity
+                    # masks, and that table only has entries for CPU families
+                    # 0x17, 0x18 and 0x19, meaning Zen through Zen 3. This host
+                    # is family 0x1A, so no case matches, the mask stays at all
+                    # cores, and every mode behaves identically. Changing it
+                    # here would look like tuning and do nothing.
+                    Thread Scheduler Mode: Operating System
+                    Set DAZ and FTZ: false
+                    SPU Decoder: Recompiler (LLVM)
+                    SPU Reservation Busy Waiting Percentage 1: 100
+                    SPU Reservation Busy Waiting Enabled: false
+                    SPU GETLLAR Busy Waiting Percentage: 100
+                    Disable SPU GETLLAR Spin Optimization: false
+                    SPU Debug: false
+                    MFC Debug: false
+                    Preferred SPU Threads: 0
+                    SPU delay penalty: 3
+                    SPU loop detection: false
+                    Max SPURS Threads: 6
+                    SPU Block Size: Safe
+                    Accurate SPU DMA: false
+                    Accurate SPU Reservations: true
+                    Accurate Cache Line Stores: false
+                    Accurate RSX reservation access: false
+                    RSX FIFO Fetch Accuracy: Atomic
+                    SPU Verification: true
+                    SPU Cache: true
+                    SPU Profiler: false
+                    PPU Profiler: false
+                    MFC Commands Shuffling Limit: 0
+                    MFC Commands Timeout: 0
+                    MFC Commands Shuffling In Steps: false
+                    SPU XFloat Accuracy: Approximate
+                    Accurate PPU 128-byte Reservation Op Max Length: 0
+                    Stub PPU Traps: 0
+                    Precise SPU Verification: false
+                    PPU LLVM Java Mode Handling: true
+                    PPU Vector NaN Handling: true
+                    Use Accurate DFMA: true
+                    PPU Set Saturation Bit: false
+                    PPU Accurate Non-Java Mode: false
+                    PPU Accurate Vector NaN Values: false
+                    PPU Set FPCC Bits: false
+                    Debug Console Mode: false
+                    Hook static functions: false
+                    Libraries Control:
+                      []
+                    HLE lwmutex: false
+                    SPU LLVM Lower Bound: 0
+                    SPU LLVM Upper Bound: 18446744073709551615
+                    Clocks scale: 100
+                    SPU Wake-Up Delay: 0
+                    SPU Wake-Up Delay Thread Mask: 63
+                    Max CPU Preempt Count: 0
+                    Allow RSX CPU Preemptions: true
+                    Sleep Timers Accuracy: As Host
+                    Usleep Time Addend: 0
+                    Performance Report Threshold: 500
+                    Enable Performance Report: false
+                    Assume External Debugger: false
+                  VFS:
+                    Enable /host_root/: false
+                    Initialize Directories: true
+                    Limit disk cache size: false
+                    Disk cache maximum size (MB): 5120
+                    Empty /dev_hdd0/tmp/: true
+                  Video:
+                    Renderer: Vulkan
+                    Resolution: 1280x720
+                    Aspect ratio: 16:9
+                    Frame limit: Auto
+                    Second Frame Limit: 0
+                    MSAA: Auto
+                    Shader Mode: Async Recompiler (multi-threaded)
+                    Shader Precision: High
+                    VSync Mode: Disabled
+                    Write Color Buffers: false
+                    Write Depth Buffer: false
+                    Read Color Buffers: false
+                    Read Depth Buffer: false
+                    Handle RSX Memory Tiling: false
+                    Log shader programs: false
+                    Debug output: false
+                    Debug overlay: false
+                    Renderdoc Compatibility Mode: false
+                    Use GPU texture scaling: false
+                    Stretch To Display Area: false
+                    Force High Precision Z buffer: false
+                    Strict Rendering Mode: false
+                    Disable ZCull Occlusion Queries: false
+                    Disable Video Output: false
+                    Disable Vertex Cache: false
+                    Disable FIFO Reordering: false
+                    Enable Frame Skip: false
+                    Force CPU Blit: false
+                    Disable On-Disk Shader Cache: false
+                    Disable Vulkan Memory Allocator: false
+                    Use full RGB output range: true
+                    Strict Texture Flushing: false
+                    Multithreaded RSX: false
+                    Relaxed ZCULL Sync: false
+                    Force Hardware MSAA Resolve: false
+                    3D Display Enabled: false
+                    3D Display Mode: Disabled
+                    Screen size in inches: 24
+                    Debug Program Analyser: false
+                    Accurate ZCULL stats: true
+                    Consecutive Frames To Draw: 1
+                    Consecutive Frames To Skip: 1
+                    Resolution Scale: 100
+                    Anisotropic Filter Override: 0
+                    Texture LOD Bias Addend: 0
+                    Minimum Scalable Dimension: 16
+                    Shader Compiler Threads: 0
+                    Driver Recovery Timeout: 1000000
+                    Driver Wake-Up Delay: 0
+                    Vblank Rate: 60
+                    Vblank NTSC Fixup: false
+                    DECR memory layout: false
+                    Allow Host GPU Labels: false
+                    Disable MSL Fast Math: false
+                    Disable Asynchronous Memory Manager: false
+                    Output Scaling Mode: Bilinear
+                    Record With Overlays: true
+                    Disable Hardware ColorSpace Remapping: false
+                    FidelityFX CAS Sharpening Intensity: 50
+                    Vulkan:
+                      Adapter: ""
+                      Force primitive restart flag: false
+                      Exclusive Fullscreen Mode: Automatic
+                      Asynchronous Texture Streaming: false
+                      Asynchronous Queue Scheduler: Safe
+                      VRAM allocation limit (MB): 65536
+                      Use Re-BAR for GPU uploads: true
+                    Performance Overlay:
+                      Enabled: false
+                      Enable Framerate Graph: false
+                      Enable Frametime Graph: false
+                      Framerate datapoints: 50
+                      Frametime datapoints: 170
+                      Detail level: Medium
+                      Framerate graph detail level: All
+                      Frametime graph detail level: All
+                      Metrics update interval (ms): 350
+                      Font size (px): 10
+                      Position: Top Left
+                      Font: n023055ms.ttf
+                      Horizontal Margin (%): 4
+                      Vertical Margin (%): 7
+                      Center Horizontally: false
+                      Center Vertically: false
+                      Opacity (%): 70
+                      Body Color (hex): "#FFE138FF"
+                      Body Background (hex): "#002339FF"
+                      Title Color (hex): "#F26C24FF"
+                      Title Background (hex): "#00000000"
+                      Use Window Space: false
+                    Shader Loading Dialog:
+                      Allow custom background: true
+                      Darkening effect strength: 30
+                      Blur effect strength: 0
+                  Audio:
+                    Renderer: Cubeb
+                    Audio Provider: CellAudio
+                    RSXAudio Avport: HDMI 0
+                    Dump to file: false
+                    Convert to 16 bit: false
+                    Audio Format: Stereo
+                    Audio Formats: 0
+                    Audio Channel Layout: Automatic
+                    Audio Device: "@@@default@@@"
+                    Master Volume: 100
+                    Enable Buffering: true
+                    Desired Audio Buffer Duration: 34
+                    Enable Time Stretching: false
+                    Disable Sampling Skip: false
+                    Time Stretching Threshold: 75
+                    Microphone Type: "Null"
+                    Microphone Devices: "@@@@@@@@@@@@"
+                    Music Handler: Qt
+                  Input/Output:
+                    Keyboard: "Null"
+                    Mouse: Basic
+                    Camera: "Null"
+                    Camera type: Unknown
+                    Camera flip: None
+                    Camera ID: Default
+                    SDL Camera ID: Default
+                    Move: "Null"
+                    Buzz emulated controller: "Null"
+                    Turntable emulated controller: "Null"
+                    GHLtar emulated controller: "Null"
+                    Pad handler mode: Single-threaded
+                    Keep pads connected: false
+                    Pad handler sleep (microseconds): 1000
+                    Background input enabled: true
+                    Show move cursor: false
+                    Paint move spheres: false
+                    Allow move hue set by game: false
+                    Lock overlay input to player one: false
+                    Emulated Midi devices: Keyboardßßß@@@Keyboardßßß@@@Keyboardßßß@@@
+                    Load SDL GameController Mappings: true
+                    IO Debug overlay: false
+                    Mouse Debug overlay: false
+                    Fake Move Rotation Cone: 10
+                    Fake Move Rotation Cone (Vertical): 10
+                  System:
+                    License Area: SCEA
+                    Language: English (US)
+                    Keyboard Type: English keyboard (US standard)
+                    Enter button assignment: Enter with cross
+                    Date Format: ddmmyyyy
+                    Time Format: clock24
+                    Console time offset (s): 0
+                    System Name: RPCS3-582
+                    Console PSID: 0x94F3031EAAABD51779A2BA59D6827F7B
+                    HDD Model Name: ""
+                    HDD Serial Number: ""
+                    Process ARGV:
+                      {}
+                  Net:
+                    Internet enabled: Disconnected
+                    IP address: 0.0.0.0
+                    Bind address: 0.0.0.0
+                    DNS address: 8.8.8.8
+                    IP swap list: ""
+                    UPNP Enabled: false
+                    PSN status: Disconnected
+                    PSN Country: us
+                    Clans Enabled: false
+                  Savestate:
+                    Start Paused: false
+                    Suspend Emulation Savestate Mode: false
+                    Compatible Savestate Mode: false
+                    Inspection Mode Savestates: false
+                    Save Disc Game Data: false
+                    Maximum SaveState Files: 4
+                    Maximum SaveState Files Space (MiB): 4096
+                  Miscellaneous:
+                    Automatically start games after boot: true
+                    Exit RPCS3 when process finishes: false
+                    Pause emulation on RPCS3 focus loss: false
+                    Start games in fullscreen mode: true
+                    Prevent display sleep while running games: true
+                    Show trophy popups: true
+                    Show RPCN popups: true
+                    Show shader compilation hint: true
+                    Show PPU compilation hint: true
+                    Show autosave/autoload hint: false
+                    Show pressure intensity toggle hint: true
+                    Show analog limiter toggle hint: true
+                    Show mouse and keyboard toggle hint: true
+                    Show fatal error hints: false
+                    Show capture hints: true
+                    Use native user interface: true
+                    Use recursive scan: false
+                    GDB Server: 127.0.0.1:2345
+                    Silence All Logs: false
+                    Window Title Format: "FPS: %F | %R | %V | %T [%t]"
+                    Pause Emulation During Home Menu: false
+                    Play music during boot sequence: true
+                    Enable GameMode: false
+                  Log:
                     {}
-                Net:
-                  Internet enabled: Disconnected
-                  IP address: 0.0.0.0
-                  Bind address: 0.0.0.0
-                  DNS address: 8.8.8.8
-                  IP swap list: ""
-                  UPNP Enabled: false
-                  PSN status: Disconnected
-                  PSN Country: us
-                  Clans Enabled: false
-                Savestate:
-                  Start Paused: false
-                  Suspend Emulation Savestate Mode: false
-                  Compatible Savestate Mode: false
-                  Inspection Mode Savestates: false
-                  Save Disc Game Data: false
-                  Maximum SaveState Files: 4
-                  Maximum SaveState Files Space (MiB): 4096
-                Miscellaneous:
-                  Automatically start games after boot: true
-                  Exit RPCS3 when process finishes: false
-                  Pause emulation on RPCS3 focus loss: false
-                  Start games in fullscreen mode: true
-                  Prevent display sleep while running games: true
-                  Show trophy popups: true
-                  Show RPCN popups: true
-                  Show shader compilation hint: true
-                  Show PPU compilation hint: true
-                  Show autosave/autoload hint: false
-                  Show pressure intensity toggle hint: true
-                  Show analog limiter toggle hint: true
-                  Show mouse and keyboard toggle hint: true
-                  Show fatal error hints: false
-                  Show capture hints: true
-                  Use native user interface: true
-                  Use recursive scan: false
-                  GDB Server: 127.0.0.1:2345
-                  Silence All Logs: false
-                  Window Title Format: "FPS: %F | %R | %V | %T [%t]"
-                  Pause Emulation During Home Menu: false
-                  Play music during boot sequence: true
-                  Enable GameMode: false
-                Log:
-                  {}
-              '';
+                '';
+              };
+              # Welche Discs es gibt, siehe gameRegistry oben.
+              ".config/rpcs3/games.yml" = rpcs3File {
+                text = gameRegistry;
+              };
+              ".config/rpcs3/patches/patch.yml" = rpcs3File {
+                source = ./patch.yml;
+              };
+              # Which of them are switched ON, see gamePatchConfig above.
+              ".config/rpcs3/patch_config.yml" = rpcs3File {
+                text = gamePatchConfig;
+              };
+              # The two directories below stay symlinked. rpcs3File copies a
+              # single file, and these are whole trees that RPCS3 only reads.
+              ".config/rpcs3/Icons/ui" = {
+                source = "${rpcs3}/share/rpcs3/Icons/ui";
+                recursive = true;
+              };
+              # RPCS3 legt in GuiConfigs seine CurrentSettings.ini an, das
+              # Verzeichnis muss also beschreibbar bleiben. recursive verlinkt
+              # jede Datei einzeln und laesst das Verzeichnis selbst frei.
+              ".config/rpcs3/GuiConfigs" = {
+                source = "${rpcs3}/share/rpcs3/GuiConfigs";
+                recursive = true;
+              };
+              # SDL guesses a mapping for a pad it does not know, and for the
+              # virtual one it now guesses right, because joymouse sends the
+              # face buttons under the names SDL reads them by. The file writes
+              # that same guess out, so nothing depends on a guess, and RPCS3
+              # stops logging a warning that it is missing.
+              #
+              # It once corrected the guess instead of repeating it, back when
+              # triangle arrived as square. That was fixed in joymouse itself.
+              ".config/rpcs3/input_configs/gamecontrollerdb.txt" = rpcs3File {
+                source = ./gamecontrollerdb.txt;
+              };
+              ".config/rpcs3/input_configs/active_input_configurations.yml" = rpcs3File {
+                text = ''
+                  Active Configurations:
+                    global: Default
+                '';
+              };
+              ".config/rpcs3/input_configs/global/Default.yml" = rpcs3File {
+                text = ''
+                  Player 1 Input:
+                    Handler: SDL
+                    Device: JoyMouse 1
+                    Config:
+                      Left Stick Left: LS X-
+                      Left Stick Down: LS Y-
+                      Left Stick Right: LS X+
+                      Left Stick Up: LS Y+
+                      Right Stick Left: RS X-
+                      Right Stick Down: RS Y-
+                      Right Stick Right: RS X+
+                      Right Stick Up: RS Y+
+                      Start: Start
+                      Select: Back
+                      PS Button: Guide
+                      Square: West
+                      Cross: South
+                      Circle: East
+                      Triangle: North
+                      Left: Left
+                      Down: Down
+                      Right: Right
+                      Up: Up
+                      R1: RB
+                      R2: RT
+                      R3: RS
+                      L1: LB
+                      L2: LT
+                      L3: LS
+                      IR Nose: ""
+                      IR Tail: ""
+                      IR Left: ""
+                      IR Right: ""
+                      Tilt Left: ""
+                      Tilt Right: ""
+                      Motion Sensor X:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Y:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Z:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor G:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Orientation Reset Button: ""
+                      Orientation Enabled: false
+                      Pressure Intensity Button: ""
+                      Pressure Intensity Percent: 50
+                      Pressure Intensity Toggle Mode: false
+                      Pressure Intensity Deadzone: 0
+                      Analog Limiter Button: ""
+                      Analog Limiter Toggle Mode: false
+                      # JoyMouse is a virtual pad, so every shaping RPCS3 offers
+                      # here is off. These are not RPCS3's defaults, they are
+                      # chosen, and each one is off for its own reason.
+                      #
+                      # Multiplier 100 means unscaled. The one place to change
+                      # aiming speed is joymouse's own sensitivity, because
+                      # scaling here would clip against the axis range instead.
+                      Left Stick Multiplier: 100
+                      Right Stick Multiplier: 100
+                      # A dead zone exists so a worn physical stick does not
+                      # drift on its own. A virtual one never drifts, so this
+                      # would only swallow the smallest movements.
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      # RPCS3 applies its anti dead zone PER AXIS, so it jumps
+                      # by its full amount whenever one axis crosses zero, and a
+                      # small circular movement comes out jagged. JoyMouse does
+                      # the same job radially through deadzone_compensation, on
+                      # the length only, leaving the direction untouched. Both
+                      # at once would also compensate twice.
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
+                      Left Trigger Threshold: 0
+                      Right Trigger Threshold: 0
+                      # Squircling pushes the round stick range out towards a
+                      # square. RPCS3 computes
+                      #
+                      #   new_len = (1 + sin(2a)^2 / (factor / 1000)) * len
+                      #
+                      # and sin(2a) is zero on the axes and one on the
+                      # diagonals, so this touches nothing but the corners.
+                      #
+                      # The walking stick needs it. JoyMouse gates the stick
+                      # into a circle, which is right, but a circle only reaches
+                      # 70.7 percent per axis on a diagonal, and a game that
+                      # decides between walking and running from how far an axis
+                      # is pushed never sees a full push while you hold two keys.
+                      # This was set to zero and the character walked instead of
+                      # running for exactly that reason.
+                      #
+                      # 2400 is the value at which a diagonal reaches the corner:
+                      # (1 + 1/2.4) * cos(45) = 1.002, so it clamps to full.
+                      # RPCS3's own default of 8000 only reaches 79.5 percent.
+                      Left Pad Squircling Factor: 2400
+                      # The aiming stick needs it too, and the reasoning that
+                      # kept it at zero here was simply wrong. It claimed
+                      # squircling bends the aim off the line the hand drew. It
+                      # does not: RPCS3 works in polar coordinates and leaves
+                      # the ANGLE untouched, only the radius grows.
+                      #
+                      # What it fixes is that a slanted flick travels less far
+                      # than a straight one for the same hand movement. JoyMouse
+                      # emits a perfect circle, the same magnitude in every
+                      # direction, which is right. But a circle is 70.7 percent
+                      # per axis on a diagonal, and a game that turns the camera
+                      # from each axis through a curve of its own turns much
+                      # less than that, about half. Aiming at anything off the
+                      # horizontal fought back.
+                      Right Pad Squircling Factor: 2400
+                      Color Value R: 0
+                      Color Value G: 0
+                      Color Value B: 20
+                      Blink LED when battery is below 20%: true
+                      Use LED as a battery indicator: false
+                      LED battery indicator brightness: 10
+                      Player LED enabled: true
+                      Large Vibration Motor Multiplier: 100
+                      Small Vibration Motor Multiplier: 100
+                      Switch Vibration Motors: false
+                      Mouse Movement Mode: Relative
+                      Mouse Deadzone X Axis: 60
+                      Mouse Deadzone Y Axis: 60
+                      Mouse Acceleration X Axis: 200
+                      Mouse Acceleration Y Axis: 250
+                      Left Stick Lerp Factor: 100
+                      Right Stick Lerp Factor: 100
+                      Analog Button Lerp Factor: 100
+                      Trigger Lerp Factor: 100
+                      Device Class Type: 0
+                      Vendor ID: 1356
+                      Product ID: 616
+                    Buddy Device: ""
+                  Player 2 Input:
+                    Handler: "Null"
+                    Device: "Null"
+                    Config:
+                      Left Stick Left: ""
+                      Left Stick Down: ""
+                      Left Stick Right: ""
+                      Left Stick Up: ""
+                      Right Stick Left: ""
+                      Right Stick Down: ""
+                      Right Stick Right: ""
+                      Right Stick Up: ""
+                      Start: ""
+                      Select: ""
+                      PS Button: ""
+                      Square: ""
+                      Cross: ""
+                      Circle: ""
+                      Triangle: ""
+                      Left: ""
+                      Down: ""
+                      Right: ""
+                      Up: ""
+                      R1: ""
+                      R2: ""
+                      R3: ""
+                      L1: ""
+                      L2: ""
+                      L3: ""
+                      IR Nose: ""
+                      IR Tail: ""
+                      IR Left: ""
+                      IR Right: ""
+                      Tilt Left: ""
+                      Tilt Right: ""
+                      Motion Sensor X:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Y:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Z:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor G:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Orientation Reset Button: ""
+                      Orientation Enabled: false
+                      Pressure Intensity Button: ""
+                      Pressure Intensity Percent: 50
+                      Pressure Intensity Toggle Mode: false
+                      Pressure Intensity Deadzone: 0
+                      Analog Limiter Button: ""
+                      Analog Limiter Toggle Mode: false
+                      Left Stick Multiplier: 100
+                      Right Stick Multiplier: 100
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
+                      Left Trigger Threshold: 0
+                      Right Trigger Threshold: 0
+                      Left Pad Squircling Factor: 8000
+                      Right Pad Squircling Factor: 8000
+                      Color Value R: 0
+                      Color Value G: 0
+                      Color Value B: 0
+                      Blink LED when battery is below 20%: true
+                      Use LED as a battery indicator: false
+                      LED battery indicator brightness: 50
+                      Player LED enabled: true
+                      Large Vibration Motor Multiplier: 100
+                      Small Vibration Motor Multiplier: 100
+                      Switch Vibration Motors: false
+                      Mouse Movement Mode: Relative
+                      Mouse Deadzone X Axis: 60
+                      Mouse Deadzone Y Axis: 60
+                      Mouse Acceleration X Axis: 200
+                      Mouse Acceleration Y Axis: 250
+                      Left Stick Lerp Factor: 100
+                      Right Stick Lerp Factor: 100
+                      Analog Button Lerp Factor: 100
+                      Trigger Lerp Factor: 100
+                      Device Class Type: 0
+                      Vendor ID: 0
+                      Product ID: 0
+                    Buddy Device: "Null"
+                  Player 3 Input:
+                    Handler: "Null"
+                    Device: "Null"
+                    Config:
+                      Left Stick Left: ""
+                      Left Stick Down: ""
+                      Left Stick Right: ""
+                      Left Stick Up: ""
+                      Right Stick Left: ""
+                      Right Stick Down: ""
+                      Right Stick Right: ""
+                      Right Stick Up: ""
+                      Start: ""
+                      Select: ""
+                      PS Button: ""
+                      Square: ""
+                      Cross: ""
+                      Circle: ""
+                      Triangle: ""
+                      Left: ""
+                      Down: ""
+                      Right: ""
+                      Up: ""
+                      R1: ""
+                      R2: ""
+                      R3: ""
+                      L1: ""
+                      L2: ""
+                      L3: ""
+                      IR Nose: ""
+                      IR Tail: ""
+                      IR Left: ""
+                      IR Right: ""
+                      Tilt Left: ""
+                      Tilt Right: ""
+                      Motion Sensor X:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Y:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Z:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor G:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Orientation Reset Button: ""
+                      Orientation Enabled: false
+                      Pressure Intensity Button: ""
+                      Pressure Intensity Percent: 50
+                      Pressure Intensity Toggle Mode: false
+                      Pressure Intensity Deadzone: 0
+                      Analog Limiter Button: ""
+                      Analog Limiter Toggle Mode: false
+                      Left Stick Multiplier: 100
+                      Right Stick Multiplier: 100
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
+                      Left Trigger Threshold: 0
+                      Right Trigger Threshold: 0
+                      Left Pad Squircling Factor: 8000
+                      Right Pad Squircling Factor: 8000
+                      Color Value R: 0
+                      Color Value G: 0
+                      Color Value B: 0
+                      Blink LED when battery is below 20%: true
+                      Use LED as a battery indicator: false
+                      LED battery indicator brightness: 50
+                      Player LED enabled: true
+                      Large Vibration Motor Multiplier: 100
+                      Small Vibration Motor Multiplier: 100
+                      Switch Vibration Motors: false
+                      Mouse Movement Mode: Relative
+                      Mouse Deadzone X Axis: 60
+                      Mouse Deadzone Y Axis: 60
+                      Mouse Acceleration X Axis: 200
+                      Mouse Acceleration Y Axis: 250
+                      Left Stick Lerp Factor: 100
+                      Right Stick Lerp Factor: 100
+                      Analog Button Lerp Factor: 100
+                      Trigger Lerp Factor: 100
+                      Device Class Type: 0
+                      Vendor ID: 0
+                      Product ID: 0
+                    Buddy Device: "Null"
+                  Player 4 Input:
+                    Handler: "Null"
+                    Device: "Null"
+                    Config:
+                      Left Stick Left: ""
+                      Left Stick Down: ""
+                      Left Stick Right: ""
+                      Left Stick Up: ""
+                      Right Stick Left: ""
+                      Right Stick Down: ""
+                      Right Stick Right: ""
+                      Right Stick Up: ""
+                      Start: ""
+                      Select: ""
+                      PS Button: ""
+                      Square: ""
+                      Cross: ""
+                      Circle: ""
+                      Triangle: ""
+                      Left: ""
+                      Down: ""
+                      Right: ""
+                      Up: ""
+                      R1: ""
+                      R2: ""
+                      R3: ""
+                      L1: ""
+                      L2: ""
+                      L3: ""
+                      IR Nose: ""
+                      IR Tail: ""
+                      IR Left: ""
+                      IR Right: ""
+                      Tilt Left: ""
+                      Tilt Right: ""
+                      Motion Sensor X:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Y:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Z:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor G:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Orientation Reset Button: ""
+                      Orientation Enabled: false
+                      Pressure Intensity Button: ""
+                      Pressure Intensity Percent: 50
+                      Pressure Intensity Toggle Mode: false
+                      Pressure Intensity Deadzone: 0
+                      Analog Limiter Button: ""
+                      Analog Limiter Toggle Mode: false
+                      Left Stick Multiplier: 100
+                      Right Stick Multiplier: 100
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
+                      Left Trigger Threshold: 0
+                      Right Trigger Threshold: 0
+                      Left Pad Squircling Factor: 8000
+                      Right Pad Squircling Factor: 8000
+                      Color Value R: 0
+                      Color Value G: 0
+                      Color Value B: 0
+                      Blink LED when battery is below 20%: true
+                      Use LED as a battery indicator: false
+                      LED battery indicator brightness: 50
+                      Player LED enabled: true
+                      Large Vibration Motor Multiplier: 100
+                      Small Vibration Motor Multiplier: 100
+                      Switch Vibration Motors: false
+                      Mouse Movement Mode: Relative
+                      Mouse Deadzone X Axis: 60
+                      Mouse Deadzone Y Axis: 60
+                      Mouse Acceleration X Axis: 200
+                      Mouse Acceleration Y Axis: 250
+                      Left Stick Lerp Factor: 100
+                      Right Stick Lerp Factor: 100
+                      Analog Button Lerp Factor: 100
+                      Trigger Lerp Factor: 100
+                      Device Class Type: 0
+                      Vendor ID: 0
+                      Product ID: 0
+                    Buddy Device: "Null"
+                  Player 5 Input:
+                    Handler: "Null"
+                    Device: "Null"
+                    Config:
+                      Left Stick Left: ""
+                      Left Stick Down: ""
+                      Left Stick Right: ""
+                      Left Stick Up: ""
+                      Right Stick Left: ""
+                      Right Stick Down: ""
+                      Right Stick Right: ""
+                      Right Stick Up: ""
+                      Start: ""
+                      Select: ""
+                      PS Button: ""
+                      Square: ""
+                      Cross: ""
+                      Circle: ""
+                      Triangle: ""
+                      Left: ""
+                      Down: ""
+                      Right: ""
+                      Up: ""
+                      R1: ""
+                      R2: ""
+                      R3: ""
+                      L1: ""
+                      L2: ""
+                      L3: ""
+                      IR Nose: ""
+                      IR Tail: ""
+                      IR Left: ""
+                      IR Right: ""
+                      Tilt Left: ""
+                      Tilt Right: ""
+                      Motion Sensor X:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Y:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Z:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor G:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Orientation Reset Button: ""
+                      Orientation Enabled: false
+                      Pressure Intensity Button: ""
+                      Pressure Intensity Percent: 50
+                      Pressure Intensity Toggle Mode: false
+                      Pressure Intensity Deadzone: 0
+                      Analog Limiter Button: ""
+                      Analog Limiter Toggle Mode: false
+                      Left Stick Multiplier: 100
+                      Right Stick Multiplier: 100
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
+                      Left Trigger Threshold: 0
+                      Right Trigger Threshold: 0
+                      Left Pad Squircling Factor: 8000
+                      Right Pad Squircling Factor: 8000
+                      Color Value R: 0
+                      Color Value G: 0
+                      Color Value B: 0
+                      Blink LED when battery is below 20%: true
+                      Use LED as a battery indicator: false
+                      LED battery indicator brightness: 50
+                      Player LED enabled: true
+                      Large Vibration Motor Multiplier: 100
+                      Small Vibration Motor Multiplier: 100
+                      Switch Vibration Motors: false
+                      Mouse Movement Mode: Relative
+                      Mouse Deadzone X Axis: 60
+                      Mouse Deadzone Y Axis: 60
+                      Mouse Acceleration X Axis: 200
+                      Mouse Acceleration Y Axis: 250
+                      Left Stick Lerp Factor: 100
+                      Right Stick Lerp Factor: 100
+                      Analog Button Lerp Factor: 100
+                      Trigger Lerp Factor: 100
+                      Device Class Type: 0
+                      Vendor ID: 0
+                      Product ID: 0
+                    Buddy Device: "Null"
+                  Player 6 Input:
+                    Handler: "Null"
+                    Device: "Null"
+                    Config:
+                      Left Stick Left: ""
+                      Left Stick Down: ""
+                      Left Stick Right: ""
+                      Left Stick Up: ""
+                      Right Stick Left: ""
+                      Right Stick Down: ""
+                      Right Stick Right: ""
+                      Right Stick Up: ""
+                      Start: ""
+                      Select: ""
+                      PS Button: ""
+                      Square: ""
+                      Cross: ""
+                      Circle: ""
+                      Triangle: ""
+                      Left: ""
+                      Down: ""
+                      Right: ""
+                      Up: ""
+                      R1: ""
+                      R2: ""
+                      R3: ""
+                      L1: ""
+                      L2: ""
+                      L3: ""
+                      IR Nose: ""
+                      IR Tail: ""
+                      IR Left: ""
+                      IR Right: ""
+                      Tilt Left: ""
+                      Tilt Right: ""
+                      Motion Sensor X:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Y:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Z:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor G:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Orientation Reset Button: ""
+                      Orientation Enabled: false
+                      Pressure Intensity Button: ""
+                      Pressure Intensity Percent: 50
+                      Pressure Intensity Toggle Mode: false
+                      Pressure Intensity Deadzone: 0
+                      Analog Limiter Button: ""
+                      Analog Limiter Toggle Mode: false
+                      Left Stick Multiplier: 100
+                      Right Stick Multiplier: 100
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
+                      Left Trigger Threshold: 0
+                      Right Trigger Threshold: 0
+                      Left Pad Squircling Factor: 8000
+                      Right Pad Squircling Factor: 8000
+                      Color Value R: 0
+                      Color Value G: 0
+                      Color Value B: 0
+                      Blink LED when battery is below 20%: true
+                      Use LED as a battery indicator: false
+                      LED battery indicator brightness: 50
+                      Player LED enabled: true
+                      Large Vibration Motor Multiplier: 100
+                      Small Vibration Motor Multiplier: 100
+                      Switch Vibration Motors: false
+                      Mouse Movement Mode: Relative
+                      Mouse Deadzone X Axis: 60
+                      Mouse Deadzone Y Axis: 60
+                      Mouse Acceleration X Axis: 200
+                      Mouse Acceleration Y Axis: 250
+                      Left Stick Lerp Factor: 100
+                      Right Stick Lerp Factor: 100
+                      Analog Button Lerp Factor: 100
+                      Trigger Lerp Factor: 100
+                      Device Class Type: 0
+                      Vendor ID: 0
+                      Product ID: 0
+                    Buddy Device: "Null"
+                  Player 7 Input:
+                    Handler: "Null"
+                    Device: "Null"
+                    Config:
+                      Left Stick Left: ""
+                      Left Stick Down: ""
+                      Left Stick Right: ""
+                      Left Stick Up: ""
+                      Right Stick Left: ""
+                      Right Stick Down: ""
+                      Right Stick Right: ""
+                      Right Stick Up: ""
+                      Start: ""
+                      Select: ""
+                      PS Button: ""
+                      Square: ""
+                      Cross: ""
+                      Circle: ""
+                      Triangle: ""
+                      Left: ""
+                      Down: ""
+                      Right: ""
+                      Up: ""
+                      R1: ""
+                      R2: ""
+                      R3: ""
+                      L1: ""
+                      L2: ""
+                      L3: ""
+                      IR Nose: ""
+                      IR Tail: ""
+                      IR Left: ""
+                      IR Right: ""
+                      Tilt Left: ""
+                      Tilt Right: ""
+                      Motion Sensor X:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Y:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor Z:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Motion Sensor G:
+                        Axis: ""
+                        Mirrored: false
+                        Shift: 0
+                      Orientation Reset Button: ""
+                      Orientation Enabled: false
+                      Pressure Intensity Button: ""
+                      Pressure Intensity Percent: 50
+                      Pressure Intensity Toggle Mode: false
+                      Pressure Intensity Deadzone: 0
+                      Analog Limiter Button: ""
+                      Analog Limiter Toggle Mode: false
+                      Left Stick Multiplier: 100
+                      Right Stick Multiplier: 100
+                      Left Stick Deadzone: 0
+                      Right Stick Deadzone: 0
+                      Left Stick Anti-Deadzone: 0
+                      Right Stick Anti-Deadzone: 0
+                      Left Trigger Threshold: 0
+                      Right Trigger Threshold: 0
+                      Left Pad Squircling Factor: 8000
+                      Right Pad Squircling Factor: 8000
+                      Color Value R: 0
+                      Color Value G: 0
+                      Color Value B: 0
+                      Blink LED when battery is below 20%: true
+                      Use LED as a battery indicator: false
+                      LED battery indicator brightness: 50
+                      Player LED enabled: true
+                      Large Vibration Motor Multiplier: 100
+                      Small Vibration Motor Multiplier: 100
+                      Switch Vibration Motors: false
+                      Mouse Movement Mode: Relative
+                      Mouse Deadzone X Axis: 60
+                      Mouse Deadzone Y Axis: 60
+                      Mouse Acceleration X Axis: 200
+                      Mouse Acceleration Y Axis: 250
+                      Left Stick Lerp Factor: 100
+                      Right Stick Lerp Factor: 100
+                      Analog Button Lerp Factor: 100
+                      Trigger Lerp Factor: 100
+                      Device Class Type: 0
+                      Vendor ID: 0
+                      Product ID: 0
+                    Buddy Device: "Null"
+                '';
+              };
             };
-            # Welche Discs es gibt, siehe gameRegistry oben.
-            ".config/rpcs3/games.yml" = rpcs3File {
-              text = gameRegistry;
-            };
-            ".config/rpcs3/patches/patch.yml" = rpcs3File {
-              source = ./patch.yml;
-            };
-            # Which of them are switched ON, see gamePatchConfig above.
-            ".config/rpcs3/patch_config.yml" = rpcs3File {
-              text = gamePatchConfig;
-            };
-            # The two directories below stay symlinked. rpcs3File copies a
-            # single file, and these are whole trees that RPCS3 only reads.
-            ".config/rpcs3/Icons/ui" = {
-              source = "${rpcs3}/share/rpcs3/Icons/ui";
-              recursive = true;
-            };
-            # RPCS3 legt in GuiConfigs seine CurrentSettings.ini an, das
-            # Verzeichnis muss also beschreibbar bleiben. recursive verlinkt
-            # jede Datei einzeln und laesst das Verzeichnis selbst frei.
-            ".config/rpcs3/GuiConfigs" = {
-              source = "${rpcs3}/share/rpcs3/GuiConfigs";
-              recursive = true;
-            };
-            # SDL guesses a mapping for a pad it does not know, and for the
-            # virtual one it now guesses right, because joymouse sends the
-            # face buttons under the names SDL reads them by. The file writes
-            # that same guess out, so nothing depends on a guess, and RPCS3
-            # stops logging a warning that it is missing.
-            #
-            # It once corrected the guess instead of repeating it, back when
-            # triangle arrived as square. That was fixed in joymouse itself.
-            ".config/rpcs3/input_configs/gamecontrollerdb.txt" = rpcs3File {
-              source = ./gamecontrollerdb.txt;
-            };
-            ".config/rpcs3/input_configs/active_input_configurations.yml" = rpcs3File {
-              text = ''
-                Active Configurations:
-                  global: Default
-              '';
-            };
-            ".config/rpcs3/input_configs/global/Default.yml" = rpcs3File {
-              text = ''
-                Player 1 Input:
-                  Handler: SDL
-                  Device: JoyMouse 1
-                  Config:
-                    Left Stick Left: LS X-
-                    Left Stick Down: LS Y-
-                    Left Stick Right: LS X+
-                    Left Stick Up: LS Y+
-                    Right Stick Left: RS X-
-                    Right Stick Down: RS Y-
-                    Right Stick Right: RS X+
-                    Right Stick Up: RS Y+
-                    Start: Start
-                    Select: Back
-                    PS Button: Guide
-                    Square: West
-                    Cross: South
-                    Circle: East
-                    Triangle: North
-                    Left: Left
-                    Down: Down
-                    Right: Right
-                    Up: Up
-                    R1: RB
-                    R2: RT
-                    R3: RS
-                    L1: LB
-                    L2: LT
-                    L3: LS
-                    IR Nose: ""
-                    IR Tail: ""
-                    IR Left: ""
-                    IR Right: ""
-                    Tilt Left: ""
-                    Tilt Right: ""
-                    Motion Sensor X:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Y:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Z:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor G:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Orientation Reset Button: ""
-                    Orientation Enabled: false
-                    Pressure Intensity Button: ""
-                    Pressure Intensity Percent: 50
-                    Pressure Intensity Toggle Mode: false
-                    Pressure Intensity Deadzone: 0
-                    Analog Limiter Button: ""
-                    Analog Limiter Toggle Mode: false
-                    # JoyMouse is a virtual pad, so every shaping RPCS3 offers
-                    # here is off. These are not RPCS3's defaults, they are
-                    # chosen, and each one is off for its own reason.
-                    #
-                    # Multiplier 100 means unscaled. The one place to change
-                    # aiming speed is joymouse's own sensitivity, because
-                    # scaling here would clip against the axis range instead.
-                    Left Stick Multiplier: 100
-                    Right Stick Multiplier: 100
-                    # A dead zone exists so a worn physical stick does not
-                    # drift on its own. A virtual one never drifts, so this
-                    # would only swallow the smallest movements.
-                    Left Stick Deadzone: 0
-                    Right Stick Deadzone: 0
-                    # RPCS3 applies its anti dead zone PER AXIS, so it jumps
-                    # by its full amount whenever one axis crosses zero, and a
-                    # small circular movement comes out jagged. JoyMouse does
-                    # the same job radially through deadzone_compensation, on
-                    # the length only, leaving the direction untouched. Both
-                    # at once would also compensate twice.
-                    Left Stick Anti-Deadzone: 0
-                    Right Stick Anti-Deadzone: 0
-                    Left Trigger Threshold: 0
-                    Right Trigger Threshold: 0
-                    # Squircling pushes the round stick range out towards a
-                    # square. RPCS3 computes
-                    #
-                    #   new_len = (1 + sin(2a)^2 / (factor / 1000)) * len
-                    #
-                    # and sin(2a) is zero on the axes and one on the
-                    # diagonals, so this touches nothing but the corners.
-                    #
-                    # The walking stick needs it. JoyMouse gates the stick
-                    # into a circle, which is right, but a circle only reaches
-                    # 70.7 percent per axis on a diagonal, and a game that
-                    # decides between walking and running from how far an axis
-                    # is pushed never sees a full push while you hold two keys.
-                    # This was set to zero and the character walked instead of
-                    # running for exactly that reason.
-                    #
-                    # 2400 is the value at which a diagonal reaches the corner:
-                    # (1 + 1/2.4) * cos(45) = 1.002, so it clamps to full.
-                    # RPCS3's own default of 8000 only reaches 79.5 percent.
-                    Left Pad Squircling Factor: 2400
-                    # The aiming stick needs it too, and the reasoning that
-                    # kept it at zero here was simply wrong. It claimed
-                    # squircling bends the aim off the line the hand drew. It
-                    # does not: RPCS3 works in polar coordinates and leaves
-                    # the ANGLE untouched, only the radius grows.
-                    #
-                    # What it fixes is that a slanted flick travels less far
-                    # than a straight one for the same hand movement. JoyMouse
-                    # emits a perfect circle, the same magnitude in every
-                    # direction, which is right. But a circle is 70.7 percent
-                    # per axis on a diagonal, and a game that turns the camera
-                    # from each axis through a curve of its own turns much
-                    # less than that, about half. Aiming at anything off the
-                    # horizontal fought back.
-                    Right Pad Squircling Factor: 2400
-                    Color Value R: 0
-                    Color Value G: 0
-                    Color Value B: 20
-                    Blink LED when battery is below 20%: true
-                    Use LED as a battery indicator: false
-                    LED battery indicator brightness: 10
-                    Player LED enabled: true
-                    Large Vibration Motor Multiplier: 100
-                    Small Vibration Motor Multiplier: 100
-                    Switch Vibration Motors: false
-                    Mouse Movement Mode: Relative
-                    Mouse Deadzone X Axis: 60
-                    Mouse Deadzone Y Axis: 60
-                    Mouse Acceleration X Axis: 200
-                    Mouse Acceleration Y Axis: 250
-                    Left Stick Lerp Factor: 100
-                    Right Stick Lerp Factor: 100
-                    Analog Button Lerp Factor: 100
-                    Trigger Lerp Factor: 100
-                    Device Class Type: 0
-                    Vendor ID: 1356
-                    Product ID: 616
-                  Buddy Device: ""
-                Player 2 Input:
-                  Handler: "Null"
-                  Device: "Null"
-                  Config:
-                    Left Stick Left: ""
-                    Left Stick Down: ""
-                    Left Stick Right: ""
-                    Left Stick Up: ""
-                    Right Stick Left: ""
-                    Right Stick Down: ""
-                    Right Stick Right: ""
-                    Right Stick Up: ""
-                    Start: ""
-                    Select: ""
-                    PS Button: ""
-                    Square: ""
-                    Cross: ""
-                    Circle: ""
-                    Triangle: ""
-                    Left: ""
-                    Down: ""
-                    Right: ""
-                    Up: ""
-                    R1: ""
-                    R2: ""
-                    R3: ""
-                    L1: ""
-                    L2: ""
-                    L3: ""
-                    IR Nose: ""
-                    IR Tail: ""
-                    IR Left: ""
-                    IR Right: ""
-                    Tilt Left: ""
-                    Tilt Right: ""
-                    Motion Sensor X:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Y:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Z:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor G:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Orientation Reset Button: ""
-                    Orientation Enabled: false
-                    Pressure Intensity Button: ""
-                    Pressure Intensity Percent: 50
-                    Pressure Intensity Toggle Mode: false
-                    Pressure Intensity Deadzone: 0
-                    Analog Limiter Button: ""
-                    Analog Limiter Toggle Mode: false
-                    Left Stick Multiplier: 100
-                    Right Stick Multiplier: 100
-                    Left Stick Deadzone: 0
-                    Right Stick Deadzone: 0
-                    Left Stick Anti-Deadzone: 0
-                    Right Stick Anti-Deadzone: 0
-                    Left Trigger Threshold: 0
-                    Right Trigger Threshold: 0
-                    Left Pad Squircling Factor: 8000
-                    Right Pad Squircling Factor: 8000
-                    Color Value R: 0
-                    Color Value G: 0
-                    Color Value B: 0
-                    Blink LED when battery is below 20%: true
-                    Use LED as a battery indicator: false
-                    LED battery indicator brightness: 50
-                    Player LED enabled: true
-                    Large Vibration Motor Multiplier: 100
-                    Small Vibration Motor Multiplier: 100
-                    Switch Vibration Motors: false
-                    Mouse Movement Mode: Relative
-                    Mouse Deadzone X Axis: 60
-                    Mouse Deadzone Y Axis: 60
-                    Mouse Acceleration X Axis: 200
-                    Mouse Acceleration Y Axis: 250
-                    Left Stick Lerp Factor: 100
-                    Right Stick Lerp Factor: 100
-                    Analog Button Lerp Factor: 100
-                    Trigger Lerp Factor: 100
-                    Device Class Type: 0
-                    Vendor ID: 0
-                    Product ID: 0
-                  Buddy Device: "Null"
-                Player 3 Input:
-                  Handler: "Null"
-                  Device: "Null"
-                  Config:
-                    Left Stick Left: ""
-                    Left Stick Down: ""
-                    Left Stick Right: ""
-                    Left Stick Up: ""
-                    Right Stick Left: ""
-                    Right Stick Down: ""
-                    Right Stick Right: ""
-                    Right Stick Up: ""
-                    Start: ""
-                    Select: ""
-                    PS Button: ""
-                    Square: ""
-                    Cross: ""
-                    Circle: ""
-                    Triangle: ""
-                    Left: ""
-                    Down: ""
-                    Right: ""
-                    Up: ""
-                    R1: ""
-                    R2: ""
-                    R3: ""
-                    L1: ""
-                    L2: ""
-                    L3: ""
-                    IR Nose: ""
-                    IR Tail: ""
-                    IR Left: ""
-                    IR Right: ""
-                    Tilt Left: ""
-                    Tilt Right: ""
-                    Motion Sensor X:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Y:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Z:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor G:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Orientation Reset Button: ""
-                    Orientation Enabled: false
-                    Pressure Intensity Button: ""
-                    Pressure Intensity Percent: 50
-                    Pressure Intensity Toggle Mode: false
-                    Pressure Intensity Deadzone: 0
-                    Analog Limiter Button: ""
-                    Analog Limiter Toggle Mode: false
-                    Left Stick Multiplier: 100
-                    Right Stick Multiplier: 100
-                    Left Stick Deadzone: 0
-                    Right Stick Deadzone: 0
-                    Left Stick Anti-Deadzone: 0
-                    Right Stick Anti-Deadzone: 0
-                    Left Trigger Threshold: 0
-                    Right Trigger Threshold: 0
-                    Left Pad Squircling Factor: 8000
-                    Right Pad Squircling Factor: 8000
-                    Color Value R: 0
-                    Color Value G: 0
-                    Color Value B: 0
-                    Blink LED when battery is below 20%: true
-                    Use LED as a battery indicator: false
-                    LED battery indicator brightness: 50
-                    Player LED enabled: true
-                    Large Vibration Motor Multiplier: 100
-                    Small Vibration Motor Multiplier: 100
-                    Switch Vibration Motors: false
-                    Mouse Movement Mode: Relative
-                    Mouse Deadzone X Axis: 60
-                    Mouse Deadzone Y Axis: 60
-                    Mouse Acceleration X Axis: 200
-                    Mouse Acceleration Y Axis: 250
-                    Left Stick Lerp Factor: 100
-                    Right Stick Lerp Factor: 100
-                    Analog Button Lerp Factor: 100
-                    Trigger Lerp Factor: 100
-                    Device Class Type: 0
-                    Vendor ID: 0
-                    Product ID: 0
-                  Buddy Device: "Null"
-                Player 4 Input:
-                  Handler: "Null"
-                  Device: "Null"
-                  Config:
-                    Left Stick Left: ""
-                    Left Stick Down: ""
-                    Left Stick Right: ""
-                    Left Stick Up: ""
-                    Right Stick Left: ""
-                    Right Stick Down: ""
-                    Right Stick Right: ""
-                    Right Stick Up: ""
-                    Start: ""
-                    Select: ""
-                    PS Button: ""
-                    Square: ""
-                    Cross: ""
-                    Circle: ""
-                    Triangle: ""
-                    Left: ""
-                    Down: ""
-                    Right: ""
-                    Up: ""
-                    R1: ""
-                    R2: ""
-                    R3: ""
-                    L1: ""
-                    L2: ""
-                    L3: ""
-                    IR Nose: ""
-                    IR Tail: ""
-                    IR Left: ""
-                    IR Right: ""
-                    Tilt Left: ""
-                    Tilt Right: ""
-                    Motion Sensor X:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Y:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Z:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor G:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Orientation Reset Button: ""
-                    Orientation Enabled: false
-                    Pressure Intensity Button: ""
-                    Pressure Intensity Percent: 50
-                    Pressure Intensity Toggle Mode: false
-                    Pressure Intensity Deadzone: 0
-                    Analog Limiter Button: ""
-                    Analog Limiter Toggle Mode: false
-                    Left Stick Multiplier: 100
-                    Right Stick Multiplier: 100
-                    Left Stick Deadzone: 0
-                    Right Stick Deadzone: 0
-                    Left Stick Anti-Deadzone: 0
-                    Right Stick Anti-Deadzone: 0
-                    Left Trigger Threshold: 0
-                    Right Trigger Threshold: 0
-                    Left Pad Squircling Factor: 8000
-                    Right Pad Squircling Factor: 8000
-                    Color Value R: 0
-                    Color Value G: 0
-                    Color Value B: 0
-                    Blink LED when battery is below 20%: true
-                    Use LED as a battery indicator: false
-                    LED battery indicator brightness: 50
-                    Player LED enabled: true
-                    Large Vibration Motor Multiplier: 100
-                    Small Vibration Motor Multiplier: 100
-                    Switch Vibration Motors: false
-                    Mouse Movement Mode: Relative
-                    Mouse Deadzone X Axis: 60
-                    Mouse Deadzone Y Axis: 60
-                    Mouse Acceleration X Axis: 200
-                    Mouse Acceleration Y Axis: 250
-                    Left Stick Lerp Factor: 100
-                    Right Stick Lerp Factor: 100
-                    Analog Button Lerp Factor: 100
-                    Trigger Lerp Factor: 100
-                    Device Class Type: 0
-                    Vendor ID: 0
-                    Product ID: 0
-                  Buddy Device: "Null"
-                Player 5 Input:
-                  Handler: "Null"
-                  Device: "Null"
-                  Config:
-                    Left Stick Left: ""
-                    Left Stick Down: ""
-                    Left Stick Right: ""
-                    Left Stick Up: ""
-                    Right Stick Left: ""
-                    Right Stick Down: ""
-                    Right Stick Right: ""
-                    Right Stick Up: ""
-                    Start: ""
-                    Select: ""
-                    PS Button: ""
-                    Square: ""
-                    Cross: ""
-                    Circle: ""
-                    Triangle: ""
-                    Left: ""
-                    Down: ""
-                    Right: ""
-                    Up: ""
-                    R1: ""
-                    R2: ""
-                    R3: ""
-                    L1: ""
-                    L2: ""
-                    L3: ""
-                    IR Nose: ""
-                    IR Tail: ""
-                    IR Left: ""
-                    IR Right: ""
-                    Tilt Left: ""
-                    Tilt Right: ""
-                    Motion Sensor X:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Y:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Z:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor G:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Orientation Reset Button: ""
-                    Orientation Enabled: false
-                    Pressure Intensity Button: ""
-                    Pressure Intensity Percent: 50
-                    Pressure Intensity Toggle Mode: false
-                    Pressure Intensity Deadzone: 0
-                    Analog Limiter Button: ""
-                    Analog Limiter Toggle Mode: false
-                    Left Stick Multiplier: 100
-                    Right Stick Multiplier: 100
-                    Left Stick Deadzone: 0
-                    Right Stick Deadzone: 0
-                    Left Stick Anti-Deadzone: 0
-                    Right Stick Anti-Deadzone: 0
-                    Left Trigger Threshold: 0
-                    Right Trigger Threshold: 0
-                    Left Pad Squircling Factor: 8000
-                    Right Pad Squircling Factor: 8000
-                    Color Value R: 0
-                    Color Value G: 0
-                    Color Value B: 0
-                    Blink LED when battery is below 20%: true
-                    Use LED as a battery indicator: false
-                    LED battery indicator brightness: 50
-                    Player LED enabled: true
-                    Large Vibration Motor Multiplier: 100
-                    Small Vibration Motor Multiplier: 100
-                    Switch Vibration Motors: false
-                    Mouse Movement Mode: Relative
-                    Mouse Deadzone X Axis: 60
-                    Mouse Deadzone Y Axis: 60
-                    Mouse Acceleration X Axis: 200
-                    Mouse Acceleration Y Axis: 250
-                    Left Stick Lerp Factor: 100
-                    Right Stick Lerp Factor: 100
-                    Analog Button Lerp Factor: 100
-                    Trigger Lerp Factor: 100
-                    Device Class Type: 0
-                    Vendor ID: 0
-                    Product ID: 0
-                  Buddy Device: "Null"
-                Player 6 Input:
-                  Handler: "Null"
-                  Device: "Null"
-                  Config:
-                    Left Stick Left: ""
-                    Left Stick Down: ""
-                    Left Stick Right: ""
-                    Left Stick Up: ""
-                    Right Stick Left: ""
-                    Right Stick Down: ""
-                    Right Stick Right: ""
-                    Right Stick Up: ""
-                    Start: ""
-                    Select: ""
-                    PS Button: ""
-                    Square: ""
-                    Cross: ""
-                    Circle: ""
-                    Triangle: ""
-                    Left: ""
-                    Down: ""
-                    Right: ""
-                    Up: ""
-                    R1: ""
-                    R2: ""
-                    R3: ""
-                    L1: ""
-                    L2: ""
-                    L3: ""
-                    IR Nose: ""
-                    IR Tail: ""
-                    IR Left: ""
-                    IR Right: ""
-                    Tilt Left: ""
-                    Tilt Right: ""
-                    Motion Sensor X:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Y:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Z:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor G:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Orientation Reset Button: ""
-                    Orientation Enabled: false
-                    Pressure Intensity Button: ""
-                    Pressure Intensity Percent: 50
-                    Pressure Intensity Toggle Mode: false
-                    Pressure Intensity Deadzone: 0
-                    Analog Limiter Button: ""
-                    Analog Limiter Toggle Mode: false
-                    Left Stick Multiplier: 100
-                    Right Stick Multiplier: 100
-                    Left Stick Deadzone: 0
-                    Right Stick Deadzone: 0
-                    Left Stick Anti-Deadzone: 0
-                    Right Stick Anti-Deadzone: 0
-                    Left Trigger Threshold: 0
-                    Right Trigger Threshold: 0
-                    Left Pad Squircling Factor: 8000
-                    Right Pad Squircling Factor: 8000
-                    Color Value R: 0
-                    Color Value G: 0
-                    Color Value B: 0
-                    Blink LED when battery is below 20%: true
-                    Use LED as a battery indicator: false
-                    LED battery indicator brightness: 50
-                    Player LED enabled: true
-                    Large Vibration Motor Multiplier: 100
-                    Small Vibration Motor Multiplier: 100
-                    Switch Vibration Motors: false
-                    Mouse Movement Mode: Relative
-                    Mouse Deadzone X Axis: 60
-                    Mouse Deadzone Y Axis: 60
-                    Mouse Acceleration X Axis: 200
-                    Mouse Acceleration Y Axis: 250
-                    Left Stick Lerp Factor: 100
-                    Right Stick Lerp Factor: 100
-                    Analog Button Lerp Factor: 100
-                    Trigger Lerp Factor: 100
-                    Device Class Type: 0
-                    Vendor ID: 0
-                    Product ID: 0
-                  Buddy Device: "Null"
-                Player 7 Input:
-                  Handler: "Null"
-                  Device: "Null"
-                  Config:
-                    Left Stick Left: ""
-                    Left Stick Down: ""
-                    Left Stick Right: ""
-                    Left Stick Up: ""
-                    Right Stick Left: ""
-                    Right Stick Down: ""
-                    Right Stick Right: ""
-                    Right Stick Up: ""
-                    Start: ""
-                    Select: ""
-                    PS Button: ""
-                    Square: ""
-                    Cross: ""
-                    Circle: ""
-                    Triangle: ""
-                    Left: ""
-                    Down: ""
-                    Right: ""
-                    Up: ""
-                    R1: ""
-                    R2: ""
-                    R3: ""
-                    L1: ""
-                    L2: ""
-                    L3: ""
-                    IR Nose: ""
-                    IR Tail: ""
-                    IR Left: ""
-                    IR Right: ""
-                    Tilt Left: ""
-                    Tilt Right: ""
-                    Motion Sensor X:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Y:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor Z:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Motion Sensor G:
-                      Axis: ""
-                      Mirrored: false
-                      Shift: 0
-                    Orientation Reset Button: ""
-                    Orientation Enabled: false
-                    Pressure Intensity Button: ""
-                    Pressure Intensity Percent: 50
-                    Pressure Intensity Toggle Mode: false
-                    Pressure Intensity Deadzone: 0
-                    Analog Limiter Button: ""
-                    Analog Limiter Toggle Mode: false
-                    Left Stick Multiplier: 100
-                    Right Stick Multiplier: 100
-                    Left Stick Deadzone: 0
-                    Right Stick Deadzone: 0
-                    Left Stick Anti-Deadzone: 0
-                    Right Stick Anti-Deadzone: 0
-                    Left Trigger Threshold: 0
-                    Right Trigger Threshold: 0
-                    Left Pad Squircling Factor: 8000
-                    Right Pad Squircling Factor: 8000
-                    Color Value R: 0
-                    Color Value G: 0
-                    Color Value B: 0
-                    Blink LED when battery is below 20%: true
-                    Use LED as a battery indicator: false
-                    LED battery indicator brightness: 50
-                    Player LED enabled: true
-                    Large Vibration Motor Multiplier: 100
-                    Small Vibration Motor Multiplier: 100
-                    Switch Vibration Motors: false
-                    Mouse Movement Mode: Relative
-                    Mouse Deadzone X Axis: 60
-                    Mouse Deadzone Y Axis: 60
-                    Mouse Acceleration X Axis: 200
-                    Mouse Acceleration Y Axis: 250
-                    Left Stick Lerp Factor: 100
-                    Right Stick Lerp Factor: 100
-                    Analog Button Lerp Factor: 100
-                    Trigger Lerp Factor: 100
-                    Device Class Type: 0
-                    Vendor ID: 0
-                    Product ID: 0
-                  Buddy Device: "Null"
-              '';
-            };
-          };
-          persistence = lib.mkIf config.modules.boot.enable {
-            "${config.modules.boot.impermanence.persistPath}" = {
-              directories = [
-                ".config/rpcs3"
-                # The compiled caches: shaders, and the PPU and SPU code the
-                # recompilers produce. Tens of megabytes that cost minutes of
-                # stuttering to rebuild, and they were thrown away on every
-                # reboot because they live under .cache, which is wiped.
-                #
-                # Only the cache subdirectory, not all of .cache/rpcs3. The
-                # rest of it is the log and a lock file, and a lock file that
-                # survived a crash and a reboot is exactly what makes RPCS3
-                # refuse to start with a complaint about another instance.
-                ".cache/rpcs3/cache"
-              ];
+            persistence = lib.mkIf config.modules.boot.enable {
+              "${config.modules.boot.impermanence.persistPath}" = {
+                directories = [
+                  ".config/rpcs3"
+                  # The compiled caches: shaders, and the PPU and SPU code the
+                  # recompilers produce. Tens of megabytes that cost minutes of
+                  # stuttering to rebuild, and they were thrown away on every
+                  # reboot because they live under .cache, which is wiped.
+                  #
+                  # Only the cache subdirectory, not all of .cache/rpcs3. The
+                  # rest of it is the log and a lock file, and a lock file that
+                  # survived a crash and a reboot is exactly what makes RPCS3
+                  # refuse to start with a complaint about another instance.
+                  ".cache/rpcs3/cache"
+                ];
+              };
             };
           };
         };
