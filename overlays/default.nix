@@ -9,6 +9,7 @@
   (import ./grub2.nix)
   (import ./hyprland.nix)
   (import ./obs-vkcapture.nix {inherit inputs;})
+  (import ./obs-deprecations.nix)
   (import ./tongo.nix)
   (import ./xmrig.nix)
   inputs.lutris-overlay.overlays.lutris
