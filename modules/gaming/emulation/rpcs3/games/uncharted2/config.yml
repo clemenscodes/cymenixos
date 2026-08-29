@@ -145,7 +145,23 @@ Miscellaneous:
   Show pressure intensity toggle hint: true
   Show shader compilation hint: false
   Show trophy popups: true
-  Silence All Logs: true
+  # False, because the title explains itself and we were stopping it.
+  #
+  # Its executable carries the whole co-op failure path as plain strings,
+  # `NetEventCoopTeamFailed - fails = %i` at 0x0b3d630, `Missing coop spawner
+  # for player '%s'!` at 0x0b40000, and `NetGameManager - no player matching
+  # coop id %s` at 0x0b400f8. With this on, not one of them reaches the TTY
+  # while `VbManager` and `EntitySpawner` fill it, so the network half is the
+  # exact half that is silenced.
+  #
+  # A single player co-op match ends by itself after about eighteen seconds
+  # with `Mission Failed!` and no checkpoints, and the server is proven not to
+  # be the cause, no notification is sent and every reply is inside 25 ms. The
+  # reason is in the title and the title will say it.
+  #
+  # Turn it back on when the question is answered. It costs frame rate and a
+  # large log while it is off.
+  Silence All Logs: false
   Start games in fullscreen mode: true
   Use native user interface: true
   Use recursive scan: false

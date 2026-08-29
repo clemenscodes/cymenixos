@@ -799,54 +799,6 @@ in
           _: game: "L /home/${user}/Games/${game.link} - - - - ${game.source}"
         ) games;
       };
-      services = {
-        # Serves the one file described at u3-campaign-config above, on the
-        # loopback address the Uncharted 3 swap list points that hostname at.
-        # Port 80 is not a choice, the game builds the URL itself and never
-        # names a port, so the stand-in has to sit where a default HTTP
-        # request lands.
-        #
-        # This is a workaround for somebody else's misconfiguration and it
-        # should not outlive it. If the backend ever gives that hostname a
-        # server block, delete this service and the 127.0.0.1 entry in the
-        # Uncharted 3 swap list together, and the game goes back to fetching
-        # the file from them.
-        rpcs3-u3-campaign-config = {
-          description = "Local stand-in for the Uncharted 3 campaign config host";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network.target" ];
-          serviceConfig = {
-            ExecStart = lib.concatStringsSep " " [
-              (lib.getExe pkgs.darkhttpd)
-              "${u3-campaign-config}"
-              "--addr 127.0.0.1"
-              "--port 80"
-              "--no-listing"
-            ];
-            # Binding 80 is the only privilege this needs, so it gets that one
-            # capability and nothing else, under a user that does not outlive
-            # the unit.
-            DynamicUser = true;
-            AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
-            CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
-            NoNewPrivileges = true;
-            PrivateTmp = true;
-            PrivateDevices = true;
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            ProtectKernelTunables = true;
-            ProtectKernelModules = true;
-            ProtectControlGroups = true;
-            RestrictAddressFamilies = [
-              "AF_INET"
-              "AF_INET6"
-            ];
-            RestrictNamespaces = true;
-            SystemCallArchitectures = "native";
-            MemoryDenyWriteExecute = true;
-            Restart = "on-failure";
-          };
-        };
       };
     };
     home-manager = lib.mkIf (config.modules.home-manager.enable) {
