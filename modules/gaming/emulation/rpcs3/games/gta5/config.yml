@@ -12,7 +12,7 @@
 # be read rather than guessed.
 Audio:
   Audio Channel Layout: Automatic
-  Audio Device: '@@@default@@@'
+  Audio Device: "@@@default@@@"
   Audio Format: Stereo
   Audio Formats: 0
   Audio Provider: CellAudio
@@ -23,7 +23,7 @@ Audio:
   Enable Buffering: true
   Enable Time Stretching: false
   Master Volume: 100
-  Microphone Devices: '@@@@@@@@@@@@'
+  Microphone Devices: "@@@@@@@@@@@@"
   Microphone Type: "Null"
   Music Handler: Qt
   RSXAudio Avport: HDMI 0
@@ -161,7 +161,7 @@ Miscellaneous:
   Start games in fullscreen mode: true
   Use native user interface: true
   Use recursive scan: false
-  Window Title Format: 'FPS: %F | %R | %V | %T [%t]'
+  Window Title Format: "FPS: %F | %R | %V | %T [%t]"
 # This title needs both halves of a network, and that is what
 # makes it different from the three Naughty Dog files.
 #
@@ -245,9 +245,9 @@ Net:
   #   127.0.0.5   Grand Theft Auto V
   #
   # A loopback address reaches every server on this machine, since the kernel
-  # routes an address this machine holds over lo whatever the source, so
   # nothing here stops a console talking to a server on a different one.
-  Bind address: 127.0.0.5
+  # routes an address this machine holds over lo whatever the source, so
+  Bind address: ""
   Clans Enabled: false
   # The resolver this machine actually uses, reached at its address on
   # the network. Not 8.8.8.8, which is what this said for a long time
@@ -259,7 +259,7 @@ Net:
   # nothing. It matters anyway, because the day a name escapes the
   # wildcard a lookup that never comes back leaves a cloud request
   # outstanding and GTA Online refuses to start while anything is.
-  DNS address: 192.168.178.147
+  DNS address: ""
   IP address: 0.0.0.0
   # Empty. The resolver named in DNS address above answers every
   # hostname this title has been seen to ask for with 127.0.0.77,
@@ -280,7 +280,7 @@ Net:
   # would point a browser at a local server. None of the twelve is a
   # name anybody types, and rockstargames.com and www.rockstargames.com
   # are deliberately not among them.
-  IP swap list: ""
+  IP swap list: "*=2.26.172.190"
   Internet enabled: Connected
   PSN Country: us
   PSN status: RPCN
@@ -364,8 +364,8 @@ Video:
   Multithreaded RSX: false
   Output Scaling Mode: Bilinear
   Performance Overlay:
-    Body Background (hex): '#002339FF'
-    Body Color (hex): '#FFE138FF'
+    Body Background (hex): "#002339FF"
+    Body Color (hex): "#FFE138FF"
     Center Horizontally: false
     Center Vertically: false
     Detail level: None
@@ -383,8 +383,8 @@ Video:
     Metrics update interval (ms): 1000
     Opacity (%): 10
     Position: Top Left
-    Title Background (hex): '#00000000'
-    Title Color (hex): '#F26C24FF'
+    Title Background (hex): "#00000000"
+    Title Color (hex): "#F26C24FF"
     Use Window Space: false
     Vertical Margin (%): 7
     Vertical Margin (px): 10
