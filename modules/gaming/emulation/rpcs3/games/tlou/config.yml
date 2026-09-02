@@ -163,8 +163,10 @@ Net:
   # that lets a private server hold port 80 on 127.0.0.55 while another holds
   # it on 127.0.0.77.
   #
-  #   127.0.0.1   Uncharted 2
-  #   127.0.0.2   a second Uncharted 2 console, for two player tests
+  #   127.0.0.1   free since 2026-09-02, Uncharted 2 binds every address
+  #               inside a network namespace of its own instead
+  #   127.0.0.2   free for the same reason, a second Uncharted 2 console is
+  #               a second namespace rather than a second loopback address
   #   127.0.0.3   Uncharted 3
   #   127.0.0.4   The Last of Us
   #   127.0.0.5   Grand Theft Auto V

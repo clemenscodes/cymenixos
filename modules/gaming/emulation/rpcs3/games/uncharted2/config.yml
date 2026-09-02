@@ -167,45 +167,63 @@ Miscellaneous:
   Use recursive scan: false
   Window Title Format: "FPS: %F | %R | %V | %T [%t]"
 Net:
-  # Which local address this console's own sockets bind, and not
-  # every address, which is the default and is wrong here.
+  # Which local address this console's own sockets bind, and every
+  # address is right because this console has a machine to itself.
   #
-  # Uncharted 2 binds UDP port 3233 itself, for the datagram it
-  # sends its PlayStation Network ticket in and waits on that
-  # same port for a reply. The private server has to answer that
-  # datagram, so something on this machine has to hold 3233 as
-  # well, and 0.0.0.0 overlaps every address, so the title's own
-  # bind fails with EADDRINUSE before it has sent anything.
+  # **This presumes a network namespace of its own**, drawn by
+  # plunderfall's tools/uncharted-console-network.sh, and it is
+  # wrong without one. Started on the bare desktop beside a server
+  # this value takes ports away from everything, so the namespace
+  # is a precondition rather than a convenience.
   #
-  # The title puts that on screen as `Error initializing socket`,
-  # which is `socket.Init() failed. 0x%x` at 0x00b3a6a8 in its
-  # own executable, and it says nothing at all about a port.
+  # # What this used to be, and why it stopped being right
   #
-  # One specific address each is what lets both hold 3233. The
-  # server has to be the one on the address the game is sent to,
-  # because that address is baked into the downloaded patch, so
-  # the console takes the loopback and the server keeps the
-  # address named in DNS address below.
+  # It read 127.0.0.1 until 2026-09-02, with one loopback address
+  # handed out per title, because Uncharted 2 binds UDP 3233
+  # itself. It sends its PlayStation Network ticket from that port
+  # and waits on the same one, so it has to hold it, and a server
+  # sharing the machine on 0.0.0.0 holds it on every address at
+  # once. The title's own bind then fails with EADDRINUSE and what
+  # a player sees is `Error initializing socket`, which is
+  # `socket.Init() failed. 0x%x` at 0x00b3a6a8 in its own
+  # executable and names no port at all. An address each was what
+  # let both hold 3233.
   #
-  # The consequence, and it is worth knowing rather than being
-  # surprised by. The private server answers the address question
-  # with the source address it saw, so this console is recorded at
-  # 127.0.0.1, which nothing off this machine can reach. That is
-  # fine for an emulator talking to a server here, and it is not
-  # fine for a peer to peer match between this emulator and a real
-  # PlayStation 3, which would have to be told an address on the
-  # network instead. A second console here would take 127.0.0.2.
+  # **That answer stopped working when the server moved into
+  # containers, and no setting brings it back.** A packet sent from
+  # a loopback address to a published port is rewritten onto the
+  # container's own network and arrives there carrying a source of
+  # 127.0.0.1, which inside that container is the container, so the
+  # reply is sent to itself. Measured on 2026-09-02, the SYN
+  # arrives on the container's interface and no SYN ACK is ever
+  # emitted, and route_localnet on the bridge, in the container and
+  # on both changes nothing, because the fault is that the answer
+  # has nowhere to go rather than that the question was refused.
   #
-  # One address per title, so any two emulators can be up at once. RPCS3
-  # binds one fixed peer to peer port, 3658, and the first on 0.0.0.0 owns
-  # it everywhere.
+  # # Why the namespace settles it rather than working around it
   #
-  #   127.0.0.1   Uncharted 2
-  #   127.0.0.2   a second Uncharted 2 console, for two player tests
-  #   127.0.0.3   Uncharted 3
-  #   127.0.0.4   The Last of Us
-  #   127.0.0.5   Grand Theft Auto V
-  Bind address: 127.0.0.1
+  # A console with an interface and an address of its own is what a
+  # console is on hardware and what a player is against a deployed
+  # server, so the desk stops being a special case that has to be
+  # reasoned about separately. 3233 is free in there, the fixed
+  # peer to peer port 3658 is free in there, and two consoles are
+  # two namespaces that collide in nothing, which is what the table
+  # of loopback addresses existed to arrange.
+  #
+  # It also fixes what that table could never fix. A server answers
+  # the address question with the source it saw, so a console on a
+  # loopback address was recorded at one, which nothing off this
+  # machine can reach. A console in a namespace is recorded at an
+  # address that is reachable, so a match against something that is
+  # not on this machine is a question of routing rather than of
+  # being impossible.
+  #
+  # Everything the console is told stays where it was. The served
+  # patch, rpcn.yml and the DNS address below all name this
+  # machine's own address on the network and all three are reached
+  # from inside the namespace, proved on 2026-09-02 with the ticket
+  # answered in 268 bytes and the patch returned in 40160.
+  Bind address: 0.0.0.0
   Clans Enabled: false
   # This machine, on its address on the network, which is where
   # dnsmasq answers. See amaru/console-rig.nix.
