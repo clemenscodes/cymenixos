@@ -2,15 +2,20 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}:
+{ config, ... }:
+let
   cfg = config.modules.development.git;
-in {
+in
+{
   options = {
     modules = {
       development = {
         git = {
           lazygit = {
-            enable = lib.mkEnableOption "Enable lazygit" // {default = false;};
+            enable = lib.mkEnableOption "Enable lazygit" // {
+              default = false;
+            };
           };
         };
       };
@@ -18,7 +23,7 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.lazygit.enable) {
     home = {
-      packages = [pkgs.lazygit];
+      packages = [ pkgs.lazygit ];
       file = {
         ".config/lazygit/config.yml" = {
           text = ''
@@ -51,9 +56,9 @@ in {
                 manualCommit: false
                 squashMergeMessage: Squash merge {{selectedRef}} into {{currentBranch}}
               overrideGpg: false
-              pagers:
+              diffRenderers:
                 - colorArg: always
-                  externalDiffCommand: ${pkgs.difftastic}/bin/difft --color=always
+                  command: ${pkgs.difftastic}/bin/difft --color=always
                   pager: '''
                   useConfig: false
               parseEmoji: false
