@@ -57,10 +57,9 @@ in
                 squashMergeMessage: Squash merge {{selectedRef}} into {{currentBranch}}
               overrideGpg: false
               diffRenderers:
-                - colorArg: always
-                  command: ${pkgs.difftastic}/bin/difft --color=always
-                  pager: '''
-                  useConfig: false
+                - type: extDiff
+                  name: difftastic
+                  command: ${pkgs.difftastic}/bin/difft --color=always --context={{diffContext}}
               parseEmoji: false
               skipHookPrefix: WIP
               truncateCopiedCommitHashesTo: 12
