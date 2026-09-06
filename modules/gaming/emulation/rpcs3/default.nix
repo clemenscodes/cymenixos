@@ -420,7 +420,7 @@ in
             extraPatches = lib.mkOption {
               type = lib.types.nullOr lib.types.path;
               default = null;
-              example = lib.literalExpression "./games/gta5/patch.yml";
+              example = lib.literalExpression "./games/imported-patches.yml";
               description = ''
                 Patch definitions the community database does not carry,
                 installed as imported_patch.yml beside patch.yml. RPCS3 loads
@@ -599,7 +599,7 @@ in
             # this host runs that game at. The file explains how, and how to
             # redo it. If another game ever needs the same, its definitions go
             # into this one file too, because the emulator reads no other.
-            extraPatches = lib.mkDefault ./games/gta5/patch.yml;
+            extraPatches = lib.mkDefault ./games/imported-patches.yml;
             games = {
               # The games travel with the module, because everything about them
               # apart from where the dump sits is a property of the game and not
@@ -623,9 +623,22 @@ in
                   title = "Uncharted 2: Among Thieves";
                   hash = lib.mkDefault "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
                   version = lib.mkDefault "01.09";
+                  # "Fix deferred mesh stats crash" is this machine's own and
+                  # it lives in games/imported-patches.yml, which carries the
+                  # whole reading behind it. Without it a session ends in an
+                  # access violation at 0x0072db0c after ten to thirty
+                  # minutes, whether or not a match was ever entered.
+                  #
+                  # It belongs beside "Unlock FPS" rather than instead of it.
+                  # The fault is the game reading a record's entry count and
+                  # its entry pointer as two separate words and following the
+                  # pointer unchecked, and an unlocked frame rate only samples
+                  # that window more often. Dropping "Unlock FPS" would make
+                  # the crash rarer and would not remove it.
                   enabled = [
                     "Skip Intro"
                     "Unlock FPS"
+                    "Fix deferred mesh stats crash"
                     "Disable Mesh Trimming"
                     "Enable GPU Lighting"
                     "Disable SPU Post-processing"

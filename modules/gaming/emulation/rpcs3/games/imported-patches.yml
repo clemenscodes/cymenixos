@@ -1,0 +1,263 @@
+Version: 1.2
+
+# The patches this machine wrote itself, for every title, in one file.
+#
+# RPCS3 reads exactly two names out of its patches directory, patch.yml and
+# imported_patch.yml, and any other name is ignored in silence. patch.yml is
+# the community database carried whole and it is worth keeping it that way,
+# so everything written here goes in the other one. That is why one file
+# holds more than one game.
+#
+# ============================================================
+#
+# The two GTA V patches, relocated to the 01.06 title update.
+#
+# They are not an invention. illusion and akemin_dayo wrote them, and
+# patch.yml carries them for exactly two levels of BLES01807, the untouched
+# disc at 01.00 and the final update at 01.27. A patch is looked up by the
+# hash of the game binary, every title update produces a new binary and
+# therefore a new hash, so at 01.06 neither of those entries is ever
+# consulted. What is missing at 01.06 is only the pair of addresses. This
+# file supplies them.
+#
+# It is a file of its own rather than an addition to patch.yml, because that
+# one is the community database carried whole and it is worth keeping it
+# that way. It is installed as imported_patch.yml, which is the only other
+# name RPCS3 reads out of that directory. Any other name is ignored in
+# silence, a broken file under one does not even produce a complaint. The
+# *_patch.yml that turns up in the RPCS3 binary is the filter of a file
+# dialog and not a search pattern.
+#
+# HOW THE ADDRESSES WERE FOUND
+#
+# By locating the same code and the same string in the 01.06 binary, not by
+# guessing an offset. Both binaries were decrypted with `rpcs3 --decrypt`,
+# and the addresses in patch.yml are emulated addresses, which map into the
+# ELF through its first PT_LOAD segment at vaddr 0x00010000.
+#
+# For 60 FPS the site in the 01.00 binary is
+#
+#   fc 20 08 18   fabs     f1, f1
+#   ec 21 07 72   fmuls    f1, f1, f14
+#   fc 01 f0 00   fcmpu    cr0, f1, f30
+#   4c c1 13 82   crandc   4*cr1+eq, ...
+#   41 86 00 6c   beq      cr1, +0x6c        <- 0x004367fc, the patched word
+#
+# and the patch writes 0x4800 over the top halfword, which turns the
+# conditional branch into 0x4800006c, an unconditional one with the same
+# displacement. Those twenty bytes carry no absolute address, so they are
+# the same in every build, and they occur EXACTLY ONCE in the 01.00 binary
+# and exactly once in the 01.06 binary. That is what makes the match a
+# identification rather than a resemblance.
+#
+# The boot logo patch needs no code reading at all. Its address is the first
+# byte of the string "platform:/movies/rockstar_logos", and writing a zero
+# there makes it the empty string, so the movie is never loaded. That string
+# also occurs exactly once in each binary.
+#
+# The word at the relocated address was checked afterwards and is 41 86 00
+# 6c, byte for byte what stands at 01.00, and the relocated string address
+# does begin "platform:/movies/rockstar_logos".
+#
+#          60 FPS      Skip Rockstar Boot Logo
+#   01.00  0x004367fc  0x016808e0    from patch.yml
+#   01.06  0x0045a93c  0x01701aec    derived here
+#
+# HOW TO REDO THIS FOR ANOTHER LEVEL
+#
+# Install the update, take the hash from the RPCS3 log, it prints
+# "ppu_loader: PPU executable hash: PPU-..." within seconds of booting.
+# Decrypt the EBOOT under dev_hdd0/game/BLES01807/USRDIR, then search it for
+# the twenty bytes above and for the string. Both are unique, so there is
+# nothing to choose between.
+
+Anchors:
+  gta5_EU106title: &gta5_EU106title
+    "Grand Theft Auto V (Grand Theft Auto 5)":
+      BLES01807: [ 01.06 ]
+
+  gta5_60fps_notes: &gta5_60fps_notes
+    "Allows the game to run at 60 FPS when the VBlank frequency is set to 120 Hz.\n\n※ While this patch does set the frame limit to be half of the VBlank frequency, the game will not actually run any higher than 62 FPS except during the legal/copyright notice screen that is shown at boot.\n\n※ Addresses relocated to the 01.06 title update, see the header of imported-patches.yml."
+
+  gta5_skiprockstarbootlogo_notes: &gta5_skiprockstarbootlogo_notes
+    "Skips the Rockstar boot logo like the PS5 version.\n\n※ Does not skip the legal/copyright notice screen.\n\n※ Addresses relocated to the 01.06 title update, see the header of imported-patches.yml."
+
+PPU-918a2bb3b48af4dcf3b8c940318ac1a7e833791f:
+  "60 FPS":
+    Games: *gta5_EU106title
+    Author: "illusion, Karen/あけみ (akemin_dayo)"
+    Notes: *gta5_60fps_notes
+    Patch Version: 1.0
+    Patch:
+      - [ be16, 0x0045a93c, 0x4800 ]
+  "Skip Rockstar Boot Logo":
+    Games: *gta5_EU106title
+    Author: "illusion, Karen/あけみ (akemin_dayo)"
+    Notes: *gta5_skiprockstarbootlogo_notes
+    Patch Version: 1.0
+    Patch:
+      - [ byte, 0x01701aec, 0x00 ]
+
+# ============================================================
+#
+# UNCHARTED 2, THE DEFERRED MESH STATISTICS CRASH
+#
+# What it fixes. The main thread dies with
+#
+#   VM: Access violation reading location 0x0 (unmapped memory)
+#   {PPU[0x1000000] Thread (main_thread) [0x0072db0c]}
+#
+# somewhere between ten and thirty minutes into any session, including one
+# left standing on the title screen with no lobby and no match. 0x0072db0c is
+# the nop behind a bl, so it is the return address and the fault is inside
+# 0x0072d47c, whose first instruction is lwz r14, 0(r4).
+#
+# WHAT THE CODE DOES
+#
+# CollectDpmShadingStats at 0x0072d928 walks the deferred mesh renderer's
+# passes. A pass holds eight records of forty eight bytes each, at
+# renderer + 384 + pass * 512 + 96 + record * 48. A record is
+#
+#   +0    a doubleword whose low ten bits of the first word are a COUNT
+#   +32   three counters
+#   +44   a POINTER to an array of ninety six byte entries
+#
+# The loop reads the count, then reads the pointer, then hands
+# pointer + 96 * n to 0x0072d47c, which dereferences it at once.
+#
+#   0072daf0  lwz  r4, 44(r28)      the pointer
+#   0072dafc  add  r4, r31, r4
+#   0072db08  bl   0x72d47c         which reads 0(r4) immediately
+#   0072db10  lwz  r0, 0(r28)       the count, read again
+#
+# WHO WRITES THE RECORD
+#
+# An SPU does, since no PowerPC instruction in the module ever writes that
+# count to anything but nought, which was checked at all eighteen sites that
+# write the field. The writer is the job at guest 0x00bf9a00, whose strings
+# name it game/render/spu/dpmesh/dpmesh-partition-spu.cpp. It gets the whole
+# forty eight byte record in, allocates the count times ninety six bytes out
+# of the SPU arena, writes the count into the ten bit field at record+2 and
+# that address into record+44 while both are in local store, and puts the
+# whole record back in ONE plain forty eight byte transfer.
+#
+#   00448  il    $5,1023       a ten bit mask
+#   00458  and   $14,$83,$5    the count, masked
+#   00460  chd   $7,2($1)      a halfword insert at byte offset two
+#   00468  shufb $4,$9,$11,$12 the allocated address into record +44
+#   00470  stqd  $4,128($1)
+#   00474  stqd  $3,96($1)
+#   007a0  il    $36,48        size 48
+#   007a4  il    $81,32        command 0x20, plain, no barrier and no fence
+#   007c4  wrch  $ch21,$81
+#
+# Across all fifty one SPU jobs in the module there are exactly two puts of
+# forty eight bytes, and the pairing of the constant 1023 with a chd at byte
+# offset two occurs exactly once, which is that site. DpMeshShading is
+# downstream of it and writes no record at all.
+#
+# WHERE THE HALF WRITTEN RECORD COMES FROM
+#
+# So there is nothing to order on the SPU's side. What splits the transfer is
+# the emulator. A put that fits inside one hundred and twenty eight byte line
+# takes this arm of do_dma_transfer in rpcs3/Emu/Cell/SPUThread.cpp.
+#
+#   if (((eal & 127) + size) <= 128)
+#   {
+#       vm::range_lock(range_lock, eal, size);
+#       while (size)
+#       {
+#           *reinterpret_cast<v128*>(dst) = *reinterpret_cast<const v128*>(src);
+#           dst += 16; src += 16; size -= 16;
+#       }
+#       range_lock->release(0);
+#       break;
+#   }
+#
+# Forty eight bytes is three sixteen byte stores, ascending. The count at
+# record+2 is in the first and the pointer at record+44 is in the third, so a
+# reader that looks between them sees a count that says there are entries and
+# a pointer that is still nought. range_lock is taken by the writer and no
+# PowerPC read takes it, so it orders the copy against other transfers rather
+# than hiding it from a reader.
+#
+# What a console does with the same transfer is not established. What is
+# established is that the game does not tolerate a half written record, and
+# that this emulator produces one. Making a sub line transfer indivisible
+# would need the reading side to take a lock as well, and the PowerPC read
+# path takes none, so there is no small change to the emulator that closes it.
+# The game is one instruction away from not caring, which is this patch.
+#
+# WHY IT NEVER HAPPENED ON A CONSOLE
+#
+# A console ran this title frame locked, at the shipped framelock of 2, and
+# with none of the nine community patches this machine enables. Unlock FPS
+# overwrites the instruction that writes that framelock. Running the renderer
+# several times more often per second samples the window several times more
+# often per second, which is the whole difference between a race that never
+# bites in ten years and one that bites twice an hour.
+#
+# WHY SKIPPING THE WALK COSTS NOTHING
+#
+# The walk accumulates into the stack buffer at r1 + 112, and the only
+# accesses to 112(1) through 192(1) in the whole function are the twenty one
+# stores that zero it. Nothing ever reads it back. The three counters at
+# record +32, +36 and +40 go into a real global before the walk and are not
+# touched here. So the loop computes a result this build discards, and a pass
+# that does not run it is a pass that produces the same everything.
+#
+# WHAT THE PATCH IS
+#
+# Seven words, so that the walk stops when the pointer is nought. One
+# instruction had to go to make room for the test, and it is clrldi r4, r4, 32
+# at 0x0072db04, which masked the sum of the pointer and an offset of at most
+# 96 * 1023 to thirty two bits. That mask can only ever change the value for a
+# pointer within 98208 bytes of four gigabytes, and this console's main memory
+# ends far below that, so it never changed anything for a pointer the walk was
+# about to follow. The nop behind the bl is a table of contents restore slot
+# that a call inside the same module does not use, which is where the seventh
+# word comes from.
+#
+#   0072daf0  lwz    r4, 44(r28)          unchanged
+#   0072daf4  cmpwi  cr7, r4, 0
+#   0072daf8  beq    cr7, 0x0072db20      the record clearing, so the pass ends
+#   0072dafc  clrldi r3, r22, 32
+#   0072db00  addi   r29, r29, 1
+#   0072db04  add    r4, r31, r4
+#   0072db08  addi   r31, r31, 96
+#   0072db0c  bl     0x0072d47c           and it returns to 0x0072db10
+#
+# The patched stream was disassembled back out of a patched copy of the
+# executable before this was written, and the branch reaches 0x0072db20, the
+# call still reaches 0x0072d47c, and the loop back edge still reaches
+# 0x0072daf0.
+#
+# HOW TO REDO THIS FOR ANOTHER LEVEL OR REGION
+#
+# The addresses are the 01.09 disc executable's, hash
+# PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2. Decrypt the EBOOT with
+# rpcs3 --decrypt, find the twelve byte run 80 9c 00 2c 7a c3 00 20 3b bd 00 01,
+# which is the loop head, and the seven words follow it.
+
+Anchors:
+  uc2_disc109title: &uc2_disc109title
+    "Uncharted 2: Among Thieves":
+      BCES00757: [ 01.09 ]
+
+  uc2_statscrash_notes: &uc2_statscrash_notes
+    "Stops the access violation at 0x0072db0c that ends a session after ten to thirty minutes.\n\nAn SPU job writes a 48 byte record carrying an entry count and an entry pointer in one transfer, and RPCS3 carries that transfer out as three 16 byte stores. The count is in the first and the pointer is in the third. CollectDpmShadingStats reads the two as separate words and follows the pointer without checking it, so a walk that lands between those stores dereferences nought. This makes the walk stop when the pointer is nought.\n\nThe walk accumulates into a stack buffer nothing in the function ever reads, so a pass that does not run it produces the same everything."
+
+PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2:
+  "Fix deferred mesh stats crash":
+    Games: *uc2_disc109title
+    Author: "plunderfall"
+    Notes: *uc2_statscrash_notes
+    Patch Version: 1.0
+    Patch:
+      - [ be32, 0x0072daf4, 0x2f840000 ] # cmpwi  cr7, r4, 0
+      - [ be32, 0x0072daf8, 0x419e0028 ] # beq    cr7, 0x0072db20
+      - [ be32, 0x0072dafc, 0x7ac30020 ] # clrldi r3, r22, 32
+      - [ be32, 0x0072db00, 0x3bbd0001 ] # addi   r29, r29, 1
+      - [ be32, 0x0072db04, 0x7c9f2214 ] # add    r4, r31, r4
+      - [ be32, 0x0072db08, 0x3bff0060 ] # addi   r31, r31, 96
+      - [ be32, 0x0072db0c, 0x4bfff971 ] # bl     0x0072d47c
