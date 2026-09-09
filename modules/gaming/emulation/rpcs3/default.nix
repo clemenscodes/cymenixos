@@ -302,26 +302,27 @@ let
       text = game.customConfig;
     })
   ) (lib.filterAttrs (_: game: game.customConfig != null) games);
-  # Patch definitions that the community database does not carry.
+  # Patch definitions that the community database does not carry, for one game
+  # each, under the name RPCS3 loads for that game.
   #
-  # Keeping them out of patch.yml is the point. That file is carried whole and
-  # a local edit to it would have to be redone by hand on every update of it.
+  # patch_engine::append_title_patches loads <TITLE_ID>_patch.yml for the title
+  # being booted, which Emu/System.cpp calls right after the global pair, so a
+  # patch of one game has a name of its own and two games can never overwrite
+  # each other. Read out of Utilities/bin_patch.cpp rather than assumed.
   #
-  # There is exactly ONE such file and it has to be called imported_patch.yml.
-  # RPCS3 loads that name and patch.yml and nothing else from this directory,
-  # which was established by putting a deliberately broken file there under
-  # another name and getting no complaint out of the emulator, then renaming it
-  # and watching both patches apply. The *_patch.yml that turns up in the RPCS3
-  # binary is the filter of a file dialog, not a search pattern.
-  #
-  # So this is one file for the whole emulator rather than one per game. An
-  # option per game would promise something the emulator cannot deliver, and
-  # two games declaring one would silently overwrite each other.
-  extraPatchFile = lib.optionalAttrs (cfg.rpcs3.extraPatches != null) {
-    "rpcs3/patches/imported_patch.yml" = rpcs3File {
-      source = cfg.rpcs3.extraPatches;
-    };
-  };
+  # The serial is the same one the per title configuration is named after, so a
+  # game declaring both gets two files that agree about which dump they are for.
+  gamePatchFiles = lib.mapAttrs' (
+    _: game:
+    lib.nameValuePair "rpcs3/patches/${game.serial}_patch.yml" (rpcs3File {
+      source = game.patches;
+    })
+  ) (lib.filterAttrs (_: game: game.patches != null) games);
+  # There is deliberately no equivalent for imported_patch.yml, the name RPCS3
+  # loads for every run whatever is booted. Every patch this machine has ever
+  # written is about one title, so every one of them has a name of its own and
+  # nothing needs the global file. An option for it would be an option with no
+  # user, and the day a patch really belongs to no title is the day to add one.
   # Every declared RPCS3 file lands in the home directory as a real copy rather
   # than as a symlink into the store, and every switch writes it again.
   #
@@ -417,18 +418,6 @@ in
               default = "Darker Style by TheMitoSan";
               description = "Name of the GUI stylesheet from GuiConfigs, without the qss suffix";
             };
-            extraPatches = lib.mkOption {
-              type = lib.types.nullOr lib.types.path;
-              default = null;
-              example = lib.literalExpression "./games/imported-patches.yml";
-              description = ''
-                Patch definitions the community database does not carry,
-                installed as imported_patch.yml beside patch.yml. RPCS3 loads
-                exactly those two files out of its patches directory, so this
-                is one file for the whole emulator and not one per game. Null
-                means patch.yml is all there is.
-              '';
-            };
             # One entry per game. Everything that differs between titles lives
             # here and nothing else does, so adding a game is a declaration
             # rather than an edit spread over the module.
@@ -521,6 +510,21 @@ in
                           config.yml.
                         '';
                       };
+                      patches = lib.mkOption {
+                        type = lib.types.nullOr lib.types.path;
+                        default = null;
+                        example = lib.literalExpression "./games/uncharted2/patch.yml";
+                        description = ''
+                          Patch definitions of this game that the community
+                          database does not carry, installed under
+                          patches/<serial>_patch.yml, which is the name RPCS3
+                          loads for the title it is booting. A patch declared
+                          here reaches this game and no other, so two games
+                          declaring one cannot overwrite each other. Null means
+                          patch.yml and imported_patch.yml are all this game
+                          gets.
+                        '';
+                      };
                       patch = {
                         title = lib.mkOption {
                           type = lib.types.str;
@@ -595,11 +599,6 @@ in
       gaming = {
         emulation = {
           rpcs3 = {
-            # Currently only the two GTA V patches, relocated to the level
-            # this host runs that game at. The file explains how, and how to
-            # redo it. If another game ever needs the same, its definitions go
-            # into this one file too, because the emulator reads no other.
-            extraPatches = lib.mkDefault ./games/imported-patches.yml;
             games = {
               # The games travel with the module, because everything about them
               # apart from where the dump sits is a property of the game and not
@@ -619,13 +618,16 @@ in
                 displayName = "Uncharted 2: Among Thieves™";
                 serial = "BCES00757";
                 customConfig = builtins.readFile ./games/uncharted2/config.yml;
+                patches = ./games/uncharted2/patch.yml;
                 patch = {
                   title = "Uncharted 2: Among Thieves";
                   hash = lib.mkDefault "PPU-a3a5789c12711291dfe16a7d5d81c906d2b4c0c2";
                   version = lib.mkDefault "01.09";
                   # "Fix deferred mesh stats crash" is this machine's own and
-                  # it lives in games/imported-patches.yml, which carries the
-                  # whole reading behind it. Without it a session ends in an
+                  # it is in games/uncharted2/patch.yml, which carries the
+                  # whole reading behind it and is installed as
+                  # patches/BCES00757_patch.yml because it is this title's and
+                  # no other's. Without it a session ends in an
                   # access violation at 0x0072db0c after ten to thirty
                   # minutes, whether or not a match was ever entered.
                   #
@@ -746,6 +748,7 @@ in
                 displayName = "Grand Theft Auto V";
                 serial = "BLES01807";
                 customConfig = builtins.readFile ./games/gta5/config.yml;
+                patches = ./games/gta5/patch.yml;
                 patch = {
                   # Spelled as the patch file spells it, brackets and all. It
                   # is a key there, so the plain title would match nothing and
@@ -799,7 +802,7 @@ in
             };
           };
           xdg = {
-            configFile = gameCustomConfigs // extraPatchFile;
+            configFile = gameCustomConfigs // gamePatchFiles;
           };
           # The RPCN account and the custom server list, decrypted at activation
           # and placed straight where RPCS3 reads it. The file lands outside the
