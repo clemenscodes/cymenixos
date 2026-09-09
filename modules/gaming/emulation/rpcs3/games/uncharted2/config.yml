@@ -350,7 +350,16 @@ Video:
   Force CPU Blit: false
   Force Hardware MSAA Resolve: false
   Force High Precision Z buffer: false
-  Frame limit: Auto
+  # Not Auto. RSXThread.cpp resolves Auto to the Vblank Rate below, so the
+  # two settings were one setting and the frame cap could not be chosen
+  # without moving the rate the guest is clocked at. Infinite takes the
+  # emulator out of the way entirely, which leaves the unlocked framelock the
+  # patch writes as the only thing deciding how fast this game renders.
+  #
+  # The accepted words are Off, 30, 50, 60, 120, Display, Auto, PS3 Native
+  # and Infinite, read out of fmt_class_string<frame_limit_type>. Anything
+  # else is not refused, it is silently the default.
+  Frame limit: Infinite
   Handle RSX Memory Tiling: false
   Log shader programs: false
   MSAA: Disabled
@@ -421,7 +430,27 @@ Video:
   VSync: false
   VSync Mode: Disabled
   Vblank NTSC Fixup: false
-  Vblank Rate: 240
+  # 60, which is what a console delivers, and not the 240 this carried before.
+  #
+  # WHY IT WAS RAISED AND WHY IT DOES NOT BELONG HERE. Raising this is how a
+  # game that paces itself on vblank is made to run faster, because the guest
+  # gets its interrupts four times as often. Uncharted 2 does not need that.
+  # The framelock this machine patches to 0, which is "Unlock FPS" at
+  # 0x000c26f0, is the game's own limiter, and with it off the vblank rate is
+  # not what holds the frame rate down.
+  #
+  # WHAT IT COST. Everything the game paces by counting vblanks runs at four
+  # times its speed while the audio keeps its own, which is what the story
+  # cutscenes running fast and out of sync with the sound looks like. RPCS3
+  # says as much about this setting in Emu/system_config.h, "Changing this
+  # from 60 may affect game speed in unexpected ways".
+  #
+  # WHAT TO WATCH AFTER THE SWITCH. The frame rate during play. Well above 60
+  # means the game never paced on vblank, the 240 bought nothing, and the
+  # cutscenes are right again. About 60 means it does pace on vblank after
+  # all, and then this is a real trade between frame rate and cutscene speed
+  # rather than a setting that was simply wrong.
+  Vblank Rate: 60
   Vulkan:
     Adapter: ""
     Asynchronous Queue Scheduler: Safe
