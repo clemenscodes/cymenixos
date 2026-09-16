@@ -60,7 +60,7 @@ in {
       extension="$out/share/vscode/extensions/${identifier}"
       mkdir --parents "$extension/client" "$extension/server"
       cp package.json language-configuration.json "$extension/"
-      cp --recursive syntax snippets images "$extension/"
+      cp --recursive syntax snippets images node_modules "$extension/"
       cp --recursive client/out client/node_modules "$extension/client/"
       cp --recursive server/out server/node_modules "$extension/server/"
       runHook postInstall
