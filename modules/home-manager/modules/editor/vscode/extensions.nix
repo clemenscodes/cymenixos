@@ -45,6 +45,7 @@ in {
               ms-vscode-remote.remote-containers
               ms-vscode.remote-server
               ms-vscode-remote.remote-ssh-edit
+              pkgs.vscode-powerpc-syntax
             ];
           };
         };

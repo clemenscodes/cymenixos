@@ -1,29 +1,13 @@
 {
   inputs,
   lib,
+  pkgs,
   ...
 }: {
   config,
   osConfig,
-  system,
   ...
 }: let
-  pkgs = import inputs.nixpkgs {
-    inherit system;
-    config = {
-      allowUnfreePredicate = pkg:
-        builtins.elem (lib.getName pkg) [
-          "vscode"
-          "vscode-extension-fill-labs-dependi"
-          "vscode-extension-ms-vscode-remote-remote-containers"
-          "vscode-extension-ms-vscode-remote-remote-wsl"
-          "vscode-extension-ms-vscode-remote-remote-ssh-edit"
-          "vscode-extension-anthropic-claude-code"
-          "claude-code"
-        ];
-    };
-    overlays = [inputs.nix-vscode-extensions.overlays.default];
-  };
   codevim = pkgs.writeShellScriptBin "codevim" ''
     exec ${pkgs.neovim}/bin/nvim "$@"
   '';

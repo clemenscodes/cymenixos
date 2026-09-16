@@ -11,6 +11,7 @@
   (import ./obs-vkcapture.nix {inherit inputs;})
   (import ./obs-deprecations.nix)
   (import ./tongo.nix)
+  (import ./vscode-powerpc-syntax.nix)
   (import ./xmrig.nix)
   inputs.lutris-overlay.overlays.lutris
   # HDR screencopy: patched Hyprland (wlr-screencopy v4 color_info) and xdph

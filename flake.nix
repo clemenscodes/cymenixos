@@ -221,6 +221,7 @@
         overlays
         ++ [
           inputs.nix-cachyos-kernel.overlays.default
+          inputs.nix-vscode-extensions.overlays.default
         ];
       config = {
         allowUnfreePredicate = pkg:
@@ -228,6 +229,13 @@
             "nvidia-x11"
             "nvidia-settings"
             "nvidia-persistenced"
+            "vscode"
+            "vscode-extension-fill-labs-dependi"
+            "vscode-extension-ms-vscode-remote-remote-containers"
+            "vscode-extension-ms-vscode-remote-remote-wsl"
+            "vscode-extension-ms-vscode-remote-remote-ssh-edit"
+            "vscode-extension-anthropic-claude-code"
+            "claude-code"
           ];
         permittedInsecurePackages = [
           "nodejs-20.20.2"
@@ -245,7 +253,7 @@
 
     packages = {
       ${system} = {
-        inherit (pkgs) tongo;
+        inherit (pkgs) tongo vscode-powerpc-syntax;
       };
     };
 
