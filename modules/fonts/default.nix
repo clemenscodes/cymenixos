@@ -9,6 +9,7 @@
   sansSerif = "${font} Nerd Font";
   serif = "${font} Nerd Font";
   size = 8;
+  uiFontAliases = ["system-ui" "Ubuntu" "Droid Sans"];
 in {
   options = {
     modules = {
@@ -34,6 +35,21 @@ in {
           sansSerif = ["${sansSerif}"];
           serif = ["${serif}"];
         };
+        localConf = ''
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+          <fontconfig>
+          ${
+            lib.concatMapStrings (family: ''
+              <match target="pattern">
+                <test name="family"><string>${family}</string></test>
+                <edit name="family" mode="assign" binding="same"><string>${cfg.fonts.defaultFont}</string></edit>
+              </match>
+            '')
+            uiFontAliases
+          }
+          </fontconfig>
+        '';
       };
       fontDir = {
         inherit (cfg.fonts) enable;
