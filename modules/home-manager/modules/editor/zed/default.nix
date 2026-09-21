@@ -230,8 +230,8 @@ in {
           use_smartcase_search = true;
           autosave = "off";
           format_on_save = "on";
-          ui_font_family = "Lilex Nerd Font";
-          buffer_font_family = "Lilex Nerd Font";
+          ui_font_family = "Iosevka Nerd Font";
+          buffer_font_family = "Iosevka Nerd Font";
           load_direnv = "shell_hook";
           hour_format = "hour24";
           base_keymap = "VSCode";
@@ -331,7 +331,7 @@ in {
           };
 
           terminal = {
-            font_family = "Lilex Nerd Font";
+            font_family = "Iosevka Nerd Font";
             copy_on_select = true;
             max_scroll_history_lines = 50000;
           };

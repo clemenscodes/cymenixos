@@ -4,7 +4,7 @@
   ...
 }: {config, ...}: let
   cfg = config.modules;
-  font = "Lilex";
+  font = "Iosevka";
   monospace = "${font} Nerd Font Mono";
   sansSerif = "${font} Nerd Font";
   serif = "${font} Nerd Font";

@@ -62,7 +62,7 @@
           };
           fonts = {
             enable = true;
-            defaultFont = "Lilex Nerd Font";
+            defaultFont = "Iosevka Nerd Font";
             size = 12;
           };
           config = {
