@@ -1,8 +1,8 @@
 final: pkgs: let
   owner = "clemenscodes";
   repo = "VSCode-PowerPC-Syntax";
-  rev = "5e93213a9fdb2146ea343b4f8b020d2321ce10ff";
-  hash = "sha256-H63Vox8me6cuDnS4Ak9WVgpQyxzxQalxPmob71wBuFY=";
+  rev = "1ce443a30399925c052c7a3f2ca2efae14842f3c";
+  hash = "sha256-GM9hQaCXLf3PXko50X7clAW+3lYigRtfEnae3XCbYME=";
   version = "1.1.9";
   publisher = "ogoodness";
   name = "powerpc-syntax";
