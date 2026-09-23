@@ -40,11 +40,7 @@ in {
     programs = {
       firefox = {
         inherit (cfg.firefox) enable;
-        package = pkgs.wrapFirefox (
-          pkgs.firefox-unwrapped.override {
-            pipewireSupport = true;
-          }
-        ) {};
+        package = pkgs.wrapFirefox pkgs.firefox-unwrapped {};
         nativeMessagingHosts = [pkgs.gnome-browser-connector];
         languagePacks = [
           "en-US"
