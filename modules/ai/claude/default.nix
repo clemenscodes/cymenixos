@@ -92,12 +92,6 @@
     rev = "v1.3.0";
     hash = "sha256-zrpdEQFWWeX0V2nGRU8MYLB8HnoSpP+kFij+A5Ymj74=";
   };
-  agents = pkgs.fetchFromGitHub {
-    owner = "msitarzewski";
-    repo = "agency-agents";
-    rev = "746efaa6b4e8a0ea15cf9c7fe6f5b5425ed1ba8e";
-    hash = "sha256-YPC8QXrq2uv6iM3z7MuZ4Zi7XMkTVTprYnq+VCywGzc=";
-  };
   # obra/superpowers v6.0.3 — a skills library for Claude Code (TDD, debugging,
   # planning, code-review workflows). Upstream ships it as a plugin, but the
   # plugin registry (plugins/installed_plugins.json) is mutable runtime state,
@@ -128,7 +122,6 @@
     "systematic-debugging"
     "test-driven-development"
     "using-git-worktrees"
-    "using-superpowers"
     "verification-before-completion"
     "writing-plans"
     "writing-skills"
@@ -139,13 +132,6 @@
         source = "${superpowers-skills}/${name}";
       })
     superpowersSkillNames);
-  # Replicates superpowers' own SessionStart hook: injects the
-  # using-superpowers bootstrap skill so skill usage is active from the first
-  # message of every session.
-  superpowers-session-start = pkgs.writeShellScript "superpowers-session-start" ''
-    ${pkgs.jq}/bin/jq -n --rawfile sp ${superpowers-skills}/using-superpowers/SKILL.md \
-      '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: ("<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n" + $sp + "\n</EXTREMELY_IMPORTANT>")}}'
-  '';
   # Globaler PreToolUse(Bash)-Hook: verhindert, dass ein Agent das
   # touch-pflichtige Commit-Signing umgeht. Der eigentliche Schutz ist der
   # YubiKey-Touch am Signaturschlüssel (Signing ohne physische Anwesenheit
@@ -245,13 +231,8 @@
 
     ## Writing style
 
-    - **Correct grammar and plain punctuation.** Always write complete,
-      grammatically correct sentences. The only sentence punctuation allowed is
-      the period at the end of a sentence and the comma for subordinate clauses.
-      Apostrophes and quotation marks are also allowed. Colons, semicolons, and
-      any kind of dash are forbidden, also as a replacement for the em dash.
-      Never use the character U+2014, in code, comments, commit messages, or
-      replies.
+    - **No em dash.** Never use the character U+2014, in code, comments,
+      commit messages, or replies.
     - **German uses real umlauts.** When writing German, always use the real
       characters for o, a, u with diaeresis and the sharp s, never the ASCII
       replacements oe, ae, ue, ss.
@@ -389,18 +370,11 @@
 
     Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-    ## Subagents and nested subagents
+    ## Subagents
 
-    Make extensive use of subagents — and nested subagents (up to 5 levels deep) — at every stage to keep contexts focused: delegate non-trivial searches, investigations, and self-contained implementation tasks.
+    Use subagents only when they clearly help, for broad searches across many files or for independent tasks that can run in parallel. Do the work yourself when you already know where to look.
 
-    **The invariant: always _await_ a subagent — block on its result before doing any dependent or overlapping work.** Never end a turn with "I've launched X, I'll report back," and never start work that consumes a subagent's output before that output is in hand. (This harness exposes no per-call `foreground`/`background` flag; foreground vs background is governed by the agent type and by env config, so reach for the right call below.)
-
-    - **Foreground / blocking subagent (default):** `Agent({ subagent_type: "<type>", description, prompt })`; omit `subagent_type` for a fresh `general-purpose` agent. This blocks and returns the subagent's final message inline as the tool result. Optional `model`, `mode`. Prefer this for almost everything — it's the cheapest and most predictable option.
-    - **Parallel:** issue several `Agent(...)` calls in a **single message** — they run concurrently and all results return before the turn proceeds. Many-calls-in-one-message buys concurrency; it is *not* a substitute for awaiting.
-    - **Fork (inherit the whole conversation):** `Agent({ subagent_type: "fork", description, prompt })`. A fork inherits the parent's entire history, system prompt, tools, and model (any `model` override is ignored) — use it when a fresh subagent would need too much re-explaining, or to try several approaches from the same starting point. A fork runs in the **background** by design, so after launching it, block on its completion before any dependent work — don't run overlapping work alongside it. Add `isolation: "worktree"` if it edits files; a fork cannot spawn another fork.
-    - **Parallel file-mutating agents:** add `isolation: "worktree"` so concurrent agents don't clobber the checkout.
-    - **Awaiting a backgrounded agent/fork:** there is no explicit "join" call — launch it (the call returns an `agentId`), then yield the turn and do nothing overlapping; the harness re-invokes you with a `<task-notification>` carrying the final result. For several, launch all in one message and await every notification. Do not `Read`/tail the task-output `.jsonl` — it floods context.
-    - **Resume a prior subagent:** `SendMessage({ to: "<agentId>", message, summary })` continues it with full context.
+    Always await a subagent before doing any dependent or overlapping work. Never end a turn with "I've launched X, I'll report back."
 
     ## Agent teams (experimental, enabled)
 
@@ -532,16 +506,6 @@
               {
                 type = "command";
                 command = "${peonshBin}/bin/peon";
-                timeout = 10;
-              }
-            ];
-          }
-          {
-            matcher = "startup|clear|compact";
-            hooks = [
-              {
-                type = "command";
-                command = "${superpowers-session-start}";
                 timeout = 10;
               }
             ];
@@ -704,13 +668,6 @@
   mkClaudeFiles = suffix: peonshBin:
     (mkSkillFiles suffix)
     // {
-      ".config/claude${suffix}/agents" = {
-        source = agents;
-        recursive = true;
-      };
-      ".config/claude${suffix}/skills/karpathy/SKILL.md" = {
-        text = karpathySkillText;
-      };
       ".config/claude${suffix}/hooks/peon-ping/peon.sh" = {
         source = "${peonshBin}/bin/peon";
       };
