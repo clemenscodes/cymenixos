@@ -139,7 +139,6 @@ in {
           enable_swallow = true;
           disable_hyprland_logo = true;
           disable_splash_rendering = true;
-          vrr = 1;
         };
         binds.allow_workspace_cycles = true;
         ecosystem.no_update_news = true;
@@ -182,8 +181,6 @@ in {
 
         -- Window rules
         hl.window_rule({ match = { class = "^(org.kde.polkit-kde-authentication-agent-1)$" }, float = true })
-        hl.window_rule({ match = { class = "^(gamescope)$", title = "^(Counter-Strike 2)$" },
-          fullscreen = true, stay_focused = true, immediate = true })
         ${lib.optionalString useKitty ''hl.window_rule({ match = { class = "kitty" }, opacity = 0.90 })''}
         ${lib.optionalString useRofi ''hl.window_rule({ match = { class = "Rofi" }, float = true })''}
         ${lib.optionalString useBlueman ''hl.window_rule({ match = { class = "^(blueman-manager)$" }, float = true })''}

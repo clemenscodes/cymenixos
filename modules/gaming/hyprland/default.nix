@@ -59,7 +59,7 @@ in {
       gaming = {
         hyprland = {
           enable =
-            lib.mkEnableOption "Enable Hyprland gaming window rules and gamemode toggle"
+            lib.mkEnableOption "Enable Hyprland gamemode toggle"
             // {
               default = false;
             };
@@ -90,22 +90,6 @@ in {
         home.packages = [hypr-gamemode];
 
         wayland.windowManager.hyprland.extraConfig = ''
-          -- Steam Big Picture: send to games workspace and fullscreen
-          hl.window_rule({ match = { class = "^(?i)steam$", title = "^(?i).*Big Picture.*$" }, workspace = "special:games" })
-          hl.window_rule({ match = { class = "^(?i)steam$", title = "^(?i).*Big Picture.*$" }, fullscreen = true })
-
-          -- Game clients (steam_app_*, gamescope, sunshine, proton, wine)
-          -- CS2 runs natively and has an explicit workspace 2 rule in cs2.nix that takes precedence.
-          hl.window_rule({ match = { class = "^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$" }, workspace = "special:games" })
-          hl.window_rule({ match = { initial_class = "^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$" }, workspace = "special:games" })
-          hl.window_rule({ match = { class = "^(?i)(steam_app_.*|gamescope|sunshine|proton|wine)$" }, fullscreen = true })
-
-          -- Per-workspace compositor optimizations and input behaviour for special:games
-          hl.window_rule({ match = { workspace = "special:games" },
-            no_anim = true, no_blur = true, no_shadow = true,
-            decorate = false, border_size = 0, rounding = 0, fullscreen = true,
-            idle_inhibit = "always", stay_focused = true, suppress_event = "activatefocus" })
-
           -- Gamemode toggle
           hl.bind("SUPER + ${hyprCfg.gamemode.keybind}", hl.dsp.exec_cmd("${hypr-gamemode}/bin/hypr-gamemode"))
         '';
