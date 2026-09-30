@@ -30,7 +30,14 @@ in {
               exiasr.hadolint
               firsttris.vscode-jest-runner
               bierner.markdown-mermaid
-              moonrepo.moon-console
+              (moonrepo.moon-console.overrideAttrs (old: {
+                postPatch =
+                  (old.postPatch or "")
+                  + ''
+                    substituteInPlace lib/extension.js \
+                      --replace-fail 'workspace.getMoonDirPath("**/*")' 'workspace.getMoonDirPath("{*.*,tasks/**/*}")'
+                  '';
+              }))
               arrterian.nix-env-selector
               jnoortheen.nix-ide
               mkhl.direnv
