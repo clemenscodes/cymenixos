@@ -35,7 +35,8 @@ in {
                   (old.postPatch or "")
                   + ''
                     substituteInPlace lib/extension.js \
-                      --replace-fail 'workspace.getMoonDirPath("**/*")' 'workspace.getMoonDirPath("{*.*,tasks/**/*}")'
+                      --replace-fail 'workspace.getMoonDirPath("**/*")' 'workspace.getMoonDirPath("{*.*,tasks/**/*}")' \
+                      --replace-fail 'return stats.isFile() && stats.size > 100;' 'return stats.isFile();'
                   '';
               }))
               arrterian.nix-env-selector
