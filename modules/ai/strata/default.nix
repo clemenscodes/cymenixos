@@ -95,6 +95,7 @@
     port = cfg.strata.port;
     host = cfg.strata.host;
     gpu = cfg.strata.gpu;
+    layer_split = cfg.strata.layerSplit;
     gpus_asked = true;
     vision =
       if vision
@@ -185,9 +186,20 @@ in {
             '';
           };
           gpu = lib.mkOption {
-            type = lib.types.int;
+            type = lib.types.either lib.types.int (lib.types.listOf lib.types.int);
             default = 0;
-            description = "GPU to run on, as nvidia-smi numbers them";
+            description = ''
+              GPU to run on, as nvidia-smi numbers them, or several sharing the model in a layer split
+              (the first is the main card, put the fastest first)
+            '';
+          };
+          layerSplit = lib.mkOption {
+            type = lib.types.str;
+            default = "auto";
+            description = ''
+              With several GPUs: where each later GPU's layers start ("18", "16,32"), or "auto" for the
+              placement whose expert caches hold the most of the profile
+            '';
           };
           cudaArchitectures = lib.mkOption {
             type = lib.types.listOf lib.types.str;
@@ -242,7 +254,8 @@ in {
         strata = {
           isSystemUser = true;
           group = "strata";
-          extraGroups = ["video" "render"];
+          # gpu-compute opens the passthrough GPU, which is kept from everyone else on the host
+          extraGroups = ["video" "render"] ++ lib.optional (config.users.groups ? gpu-compute) "gpu-compute";
           home = cfg.strata.dataDir;
           createHome = false;
         };
