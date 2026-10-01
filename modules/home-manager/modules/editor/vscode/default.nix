@@ -53,6 +53,33 @@ in {
   };
   config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
     home = {
+      # VSCode has no setting for the activity bar order, it lives in its state database.
+      # Takes effect when VSCode is closed during activation, a running instance overwrites it on exit.
+      activation.vscodeActivityBarOrder = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
+        db="${userDir}/globalStorage/state.vscdb"
+        key="workbench.activity.pinnedViewlets2"
+        if [ -f "$db" ]; then
+          current=$(${pkgs.sqlite}/bin/sqlite3 "$db" "select value from ItemTable where key = '$key';")
+          if [ -n "$current" ]; then
+            updated=$(printf '%s' "$current" | ${pkgs.jq}/bin/jq -c '
+              ["workbench.view.explorer",
+               "workbench.view.search",
+               "workbench.view.extension.test",
+               "workbench.view.debug",
+               "workbench.view.scm",
+               "workbench.view.extension.containersView",
+               "workbench.view.extension.dockerView"] as $first
+              | map(.id as $id
+                  | ($first | index($id)) as $i
+                  | if $i != null then .order = $i
+                    elif $id == "workbench.view.extension.moonConsole" then .order = 998
+                    elif $id == "workbench.view.extensions" then .order = 999
+                    else .order = 100 + (.order // 0)
+                    end)')
+            run ${pkgs.sqlite}/bin/sqlite3 "$db" "update ItemTable set value = '$updated' where key = '$key';"
+          fi
+        fi
+      '';
       file =
         lib.genAttrs pathsToMakeWritable (_: {
           force = true;
