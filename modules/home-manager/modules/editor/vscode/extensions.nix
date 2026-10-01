@@ -19,7 +19,6 @@ in {
               ms-vscode-remote.remote-wsl
               mark-wiemer.vscode-autohotkey-plus-plus
               angular.ng-template
-              biomejs.biome
               ambar.bundle-size
               ms-azuretools.vscode-containers
               fill-labs.dependi

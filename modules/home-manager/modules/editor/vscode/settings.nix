@@ -10,6 +10,9 @@ in {
             enableUpdateCheck = false;
             userSettings = {
               "angular.forceStrictTemplates" = true;
+              "chat.agent.enabled" = false;
+              "chat.commandCenter.enabled" = false;
+              "chat.disableAIFeatures" = true;
               "chat.editor.fontFamily" = "Iosevka Nerd Font";
               "css.lint.unknownAtRules" = "ignore";
               "debug.terminal.clearBeforeReusing" = true;
@@ -20,7 +23,6 @@ in {
               "editor.scrollbar.horizontal" = "hidden";
               "editor.scrollbar.vertical" = "hidden";
               "editor.cursorBlinking" = "solid";
-              "editor.defaultFormatter" = "biomejs.biome";
               "editor.fontFamily" = "Iosevka Nerd Font";
               "editor.linkedEditing" = true;
               "editor.fontSize" = 16;
@@ -29,7 +31,6 @@ in {
               "editor.inlayHints.fontFamily" = "Iosevka Nerd Font";
               "editor.codeLensFontFamily" = "Iosevka Nerd Font";
               "editor.inlayHints.enabled" = "off";
-              "editor.defaultFoldingRangeProvider" = "biomejs.biome";
               "editor.minimap.enabled" = false;
               "editor.tokenColorCustomizations" = {
                 "textMateRules" = [

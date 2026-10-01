@@ -472,6 +472,7 @@
       effortLevel = "high";
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+        CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL = "1";
       };
       permissions = {
         defaultMode = "bypassPermissions";
