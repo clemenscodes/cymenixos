@@ -23,6 +23,11 @@
     inherit (cfg.strata) cudaArchitectures;
   };
   share = "${strata}/share/strata";
+  strataVision = cudaPkgs.callPackage ./vision.nix {
+    inherit strata;
+    inherit (cfg.strata) cudaArchitectures;
+  };
+  vision = cfg.strata.vision.enable;
 
   # the Coder is its own family (half the experts, own repository and expert profile); every other size is the original
   coder = cfg.strata.model == "IQ1_M";
@@ -35,6 +40,9 @@
   modelsDir = "${dataDir}/models/${tag}";
   packDir = "${dataDir}/packs/${lib.toLower tag}";
   mtpDir = "${dataDir}/mtp";
+  # the vision encoder: the Coder ships its own copy of the original's file
+  mmprojName = "mmproj-Qwen3.8-Flash-Next-BF16.gguf";
+  mmproj = "${dataDir}/models/${mmprojName}";
   shard = i: "${modelsDir}/Qwen3.8-Flash-Next-GSQ-RCO-${cfg.strata.model}-0000${toString i}-of-00002.gguf";
   ctx = cfg.strata.context;
 
@@ -71,6 +79,8 @@
       ++ lib.optionals (ctx > 8192) ["--kv" cfg.strata.kv]
       # KV streaming: from 64K the KV cache lives in RAM and the VRAM it frees holds more experts
       ++ lib.optionals (ctx >= 65536 && cfg.strata.kv != "k8v4") ["--kv-resident" "32768"]
+      # the encoder warms up before the engine, which then sizes its expert cache around it
+      ++ lib.optionals vision ["--vision"]
       ++ lib.optionals (cfg.strata.vramReserveMiB != null) ["--vram-reserve-mib" (toString cfg.strata.vramReserveMiB)]
       ++ cfg.strata.extraArgs;
     cwd = dataDir;
@@ -86,6 +96,16 @@
     host = cfg.strata.host;
     gpu = cfg.strata.gpu;
     gpus_asked = true;
+    vision =
+      if vision
+      then {
+        exe = lib.getExe strataVision;
+        model = shard 1;
+        gpu = true;
+        max_tokens = 1024;
+        inherit mmproj;
+      }
+      else null;
   };
   engineConfigFile = pkgs.writeText "strata-${lib.toLower tag}.json" (builtins.toJSON engineConfig);
 
@@ -106,6 +126,14 @@
         mv "$f.part" "$f"
         date '+%Y-%m-%d %H:%M' > "$f.done"
       done
+      ${lib.optionalString vision ''
+        if [ ! -e ${mmproj}.done ]; then
+          echo "downloading ${mmprojName} ..."
+          curl -fL --retry 10 --retry-all-errors -C - -o ${mmproj}.part "${hf}/${mmprojName}"
+          mv ${mmproj}.part ${mmproj}
+          date '+%Y-%m-%d %H:%M' > ${mmproj}.done
+        fi
+      ''}
       if [ ! -e ${packDir}/native_experts.txt ] || [ ! -e ${packDir}/tokenizer/vocab.json ]; then
         "$py" ${share}/tools/iq_pack.py --gguf ${shard 1} --out ${packDir}
       fi
@@ -186,6 +214,9 @@ in {
             type = lib.types.str;
             default = "strata";
             description = "User the services run as (created when left at the default)";
+          };
+          vision = {
+            enable = lib.mkEnableOption "Let the model read images (0.9 GB download, ~1.4 GB of VRAM for the encoder)";
           };
           extraArgs = lib.mkOption {
             type = lib.types.listOf lib.types.str;
