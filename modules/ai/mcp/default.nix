@@ -20,7 +20,6 @@
     (import ./memory {inherit pkgs lib;})
     (import ./mongodb {inherit pkgs lib;})
     (import ./ms365 {inherit pkgs lib;})
-    (import ./neon {inherit pkgs lib;})
     (import ./nixos {inherit pkgs lib;})
     (import ./nx {inherit pkgs lib;})
     (import ./playwright {inherit pkgs lib;})
