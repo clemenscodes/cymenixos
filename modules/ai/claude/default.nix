@@ -706,6 +706,58 @@
   # profile in ~/.config/Claude<suffix> (login, single-instance lock), and the
   # Code tab runs that account's claude<suffix> wrapper on its config dir.
   # Only the base instance owns the claude:// handler.
+  # Chat and Cowork never read ~/.config/claude*/skills. Cowork loads plugins
+  # from its own registry per account and org under
+  # <userData>/local-agent-mode-sessions/<account>/<org>/cowork_plugins and
+  # refuses symlinks out of it, so superpowers is installed there as a real
+  # copy, laid out exactly like a plugin uploaded through the app
+  # (marketplace local-desktop-app-uploads). The account and org ids only
+  # exist after the first login, so this runs on every launch.
+  coworkPluginMarketplace = "local-desktop-app-uploads";
+  coworkPluginSync = pkgs.writeShellScript "claude-cowork-plugin-sync" ''
+    set -eu
+    jq=${pkgs.jq}/bin/jq
+    src=${superpowers}
+    name=superpowers
+    version=$($jq -r .version $src/.claude-plugin/plugin.json)
+    id=$name@${coworkPluginMarketplace}
+    now=$(${pkgs.coreutils}/bin/date -u +%Y-%m-%dT%H:%M:%S.000Z)
+    update() {
+      [ -s "$1" ] || echo '{}' > "$1"
+      $jq "''${@:2}" "$1" > "$1.tmp"
+      mv "$1.tmp" "$1"
+    }
+    for org in "$CLAUDE_USER_DATA_DIR"/local-agent-mode-sessions/*-*-*-*-*/*-*-*-*-*/; do
+      [ -d "$org" ] || continue
+      org=''${org%/}
+      plugins=$org/cowork_plugins
+      market=$plugins/marketplaces/${coworkPluginMarketplace}
+      dest=$market/$name
+      if [ "$(cat "$dest/.nix-source" 2>/dev/null)" != "$src" ]; then
+        mkdir -p "$market/.claude-plugin"
+        rm -rf "$dest"
+        cp -r --no-preserve=mode,ownership "$src" "$dest"
+        chmod +x "$dest"/hooks/session-start "$dest"/hooks/run-hook.cmd
+        echo "$src" > "$dest/.nix-source"
+      fi
+      update "$market/.claude-plugin/marketplace.json" \
+        --arg name "$name" --arg version "$version" '
+          {name: "${coworkPluginMarketplace}", version: "1.0.0",
+           description: "Locally uploaded plugins via Claude Desktop app",
+           owner: {name: "Local User"}, plugins: []} + .
+          | .plugins = [.plugins[] | select(.name != $name)]
+            + [{name: $name, version: $version, source: ("./" + $name)}]'
+      update "$plugins/known_marketplaces.json" --arg path "$market" --arg now "$now" '
+        .["${coworkPluginMarketplace}"] = {source: {source: "directory", path: $path},
+          installLocation: $path, lastUpdated: $now}'
+      update "$plugins/installed_plugins.json" \
+        --arg id "$id" --arg path "$dest" --arg version "$version" --arg now "$now" '
+          .version = 2
+          | .plugins[$id] = [{scope: "user", installPath: $path, version: $version,
+              installedAt: (.plugins[$id][0].installedAt // $now), lastUpdated: $now}]'
+      update "$org/cowork_settings.json" --arg id "$id" '.enabledPlugins[$id] = true'
+    done
+  '';
   mkClaudeDesktop = suffix: name: claudeWrapper:
     pkgs.runCommand "claude-desktop${suffix}" {
       nativeBuildInputs = [pkgs.makeWrapper];
@@ -714,7 +766,8 @@
         --set CHROME_DESKTOP com.anthropic.Claude${suffix}.desktop \
         --set CLAUDE_USER_DATA_DIR /home/${user}/.config/Claude${suffix} \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude${suffix} \
-        --set CLAUDE_CODE_LOCAL_BINARY ${claudeWrapper}/bin/claude${suffix}
+        --set CLAUDE_CODE_LOCAL_BINARY ${claudeWrapper}/bin/claude${suffix} \
+        --run '${coworkPluginSync} || true'
       mkdir -p $out/share/applications
       sed \
         -e "s|${claude-desktop}/bin/claude-desktop|$out/bin/claude-desktop${suffix}|" \
