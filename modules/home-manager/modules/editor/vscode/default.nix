@@ -79,6 +79,19 @@ in {
                     end)')
             run ${pkgs.sqlite}/bin/sqlite3 "$db" "update ItemTable set value = '$updated' where key = '$key';"
           fi
+          # Dragging the file view out of the explorer leaves the explorer empty and hidden,
+          # move every view of that container back so the explorer is the first tab again.
+          views=$(${pkgs.sqlite}/bin/sqlite3 "$db" "select value from ItemTable where key = 'views.customizations';")
+          if [ -n "$views" ]; then
+            updated=$(printf '%s' "$views" | ${pkgs.jq}/bin/jq -c '
+              .viewLocations["workbench.explorer.fileView"] as $c
+              | if $c != null and $c != "workbench.view.explorer"
+                then .viewLocations |= with_entries(select(.value != $c))
+                  | del(.viewContainerLocations[$c])
+                else .
+                end')
+            run ${pkgs.sqlite}/bin/sqlite3 "$db" "update ItemTable set value = '$updated' where key = 'views.customizations';"
+          fi
         fi
       '';
       file =
