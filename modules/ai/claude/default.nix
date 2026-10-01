@@ -724,6 +724,55 @@
         > $out/share/applications/com.anthropic.Claude${suffix}.desktop
       ${lib.optionalString (suffix == "") "ln -s ${claude-desktop}/share/icons $out/share/icons"}
     '';
+  mcp-remote = pkgs.callPackage ./mcp-remote/package.nix {};
+  # Chat and Cowork in Claude Desktop read mcpServers from
+  # claude_desktop_config.json, which only accepts stdio servers
+  # (command, args, env) and never expands ${VAR}. Remote servers go through
+  # mcp-remote, which does the OAuth flow itself. Servers that reference
+  # ${VAR} get a launcher that resolves the secrets the same way the app does
+  # for the Code tab: a login shell with a minimal environment, so .zshrc
+  # skips the tmux auto-attach.
+  shellWord = v: let
+    ref = builtins.match "\\$\\{([A-Za-z_][A-Za-z0-9_]*)}" v;
+  in
+    if ref != null
+    then "\"\${${builtins.head ref}}\""
+    else lib.escapeShellArg v;
+  mkDesktopMcpServer = name: server: let
+    args = server.args or [];
+  in
+    if server ? url
+    then {
+      command = "${mcp-remote}/bin/mcp-remote";
+      args = [server.url];
+      env = {MCP_REMOTE_CONFIG_DIR = "/home/${user}/.config/mcp-remote";};
+    }
+    else if server ? env || lib.any (lib.hasInfix "\${") args
+    then {
+      command = "${pkgs.writeShellScript "claude-desktop-mcp-${name}" ''
+        while IFS= read -r -d "" kv; do
+          export "$kv" 2>/dev/null
+        done < <(${pkgs.coreutils}/bin/env -i HOME="$HOME" PATH="$PATH" USER="$USER" SHELL=${pkgs.zsh}/bin/zsh \
+          ${pkgs.zsh}/bin/zsh -l -i -c 'env -0' </dev/null 2>/dev/null)
+        ${lib.concatStrings (lib.mapAttrsToList (k: v: "export ${k}=${shellWord v}\n") (server.env or {}))}
+        exec ${server.command} ${lib.concatMapStringsSep " " shellWord args}
+      ''}";
+      args = [];
+    }
+    else {
+      inherit (server) command;
+      inherit args;
+    };
+  desktopMcpConfig = jsonFormat.generate "claude-desktop-mcp-servers.json" (lib.mapAttrs mkDesktopMcpServer mcpServers);
+  # The app keeps its own preferences in the same file, so only the
+  # mcpServers key is replaced and everything else is left alone.
+  mkDesktopMcpActivation = suffix: ''
+    f=/home/${user}/.config/Claude${suffix}/claude_desktop_config.json
+    mkdir -p "$(dirname "$f")"
+    [ -s "$f" ] || echo '{}' > "$f"
+    ${pkgs.jq}/bin/jq --slurpfile s ${desktopMcpConfig} '.mcpServers = $s[0]' "$f" > "$f.tmp"
+    mv "$f.tmp" "$f"
+  '';
 in {
   options = {
     modules = {
@@ -779,6 +828,11 @@ in {
             };
           };
           home = {
+            activation = lib.mkIf cfg.claude.desktop.enable {
+              claudeDesktopMcp = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] (
+                lib.concatMapStrings mkDesktopMcpActivation ["" "2" "3" "-nexo"]
+              );
+            };
             packages =
               [
                 claude
@@ -806,6 +860,7 @@ in {
                   ".config/Claude2"
                   ".config/Claude3"
                   ".config/Claude-nexo"
+                  ".config/mcp-remote"
                   ".config/codex"
                 ];
               };
