@@ -207,7 +207,7 @@
     '';
   };
   # Shared, config-dir-independent content, extracted verbatim from the base
-  # setup so the base output stays byte-identical while claude1 and claude2
+  # setup so the base output stays byte-identical while claude2, claude3 and claude-nexo
   # reuse the exact same instructions, skills, hooks, and peon config.
   claudeMdText = ''
     # Highest commandments (non-negotiable)
@@ -695,11 +695,9 @@
         mutable = true;
       };
     };
-  peonsh1 = mkPeonsh "1";
   peonsh2 = mkPeonsh "2";
   peonsh3 = mkPeonsh "3";
   peonsh-nexo = mkPeonsh "-nexo";
-  claude1 = mkClaude "1";
   claude2 = mkClaude "2";
   claude3 = mkClaude "3";
   claude-nexo = mkClaude "-nexo";
@@ -708,7 +706,7 @@
   # profile in ~/.config/Claude<suffix> (login, single-instance lock), and the
   # Code tab runs that account's claude<suffix> wrapper on its config dir.
   # Only the base instance owns the claude:// handler.
-  mkClaudeDesktop = suffix: claudeWrapper:
+  mkClaudeDesktop = suffix: name: claudeWrapper:
     pkgs.runCommand "claude-desktop${suffix}" {
       nativeBuildInputs = [pkgs.makeWrapper];
     } ''
@@ -720,7 +718,7 @@
       mkdir -p $out/share/applications
       sed \
         -e "s|${claude-desktop}/bin/claude-desktop|$out/bin/claude-desktop${suffix}|" \
-        -e "s|^Name=Claude$|Name=Claude${lib.optionalString (suffix != "") " ${lib.removePrefix "-" suffix}"}|" \
+        -e "s|^Name=Claude$|Name=${name}|" \
         ${lib.optionalString (suffix != "") "-e '/^MimeType=/d'"} \
         ${claude-desktop}/share/applications/com.anthropic.Claude.desktop \
         > $out/share/applications/com.anthropic.Claude${suffix}.desktop
@@ -787,28 +785,24 @@ in {
                 codex
                 peonsh
                 claude-monitor
-                claude1
                 claude2
                 claude3
                 claude-nexo
               ]
               ++ lib.optionals cfg.claude.desktop.enable [
-                (mkClaudeDesktop "" claude)
-                (mkClaudeDesktop "1" claude1)
-                (mkClaudeDesktop "2" claude2)
-                (mkClaudeDesktop "3" claude3)
-                (mkClaudeDesktop "-nexo" claude-nexo)
+                (mkClaudeDesktop "" "Claude" claude)
+                (mkClaudeDesktop "2" "Claude 2" claude2)
+                (mkClaudeDesktop "3" "Claude 3" claude3)
+                (mkClaudeDesktop "-nexo" "Claude Nexobility" claude-nexo)
               ];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
                 directories = [
                   ".config/claude"
-                  ".config/claude1"
                   ".config/claude2"
                   ".config/claude3"
                   ".config/claude-nexo"
                   ".config/Claude"
-                  ".config/Claude1"
                   ".config/Claude2"
                   ".config/Claude3"
                   ".config/Claude-nexo"
@@ -818,7 +812,6 @@ in {
             };
             file =
               (mkClaudeFiles "" peonsh)
-              // (mkClaudeFiles "1" peonsh1)
               // (mkClaudeFiles "2" peonsh2)
               // (mkClaudeFiles "3" peonsh3)
               // (mkClaudeFiles "-nexo" peonsh-nexo)
