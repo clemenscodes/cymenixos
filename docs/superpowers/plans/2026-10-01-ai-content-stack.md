@@ -67,7 +67,7 @@ Ein Modus stoppt beim Start automatisch die Dienste der anderen (`Conflicts=`).
 
 ## Entscheidungen, die vor Phase 2 und 3 fallen müssen
 
-- **D1 PyTorch mit CUDA:** `cudaPkgs.comfyui` ist im Cache `cache.nixos-cuda.org` nicht vorhanden. `nix build --dry-run` zeigt 36 lokal zu bauende Derivationen, darunter `torch-2.13.0`, `torchvision`, `torchaudio`. Das ist ein Build über mehrere Stunden. Empfehlung: einmal lokal bauen und hinnehmen. Die Alternative (Container mit fertigem PyTorch über podman und nvidia CDI) bricht mit dem deklarativen Stil.
+- **D1 PyTorch mit CUDA, entschieden: lokal bauen.** Das ComfyUI-Paket zwingt `torch` 2.13.0 auf CUDA 13.3, diese Variante ist nicht im Cache (die gecachte nutzt CUDA 12.9, darunter schaltet ComfyUI seine optimierten Kernels ab). 36 Derivationen, mehrere Stunden, über Nacht. Begründung in `docs/ai-content-stack/comfyui.md`.
 - **D2 Chatterbox-Paketierung:** nicht in nixpkgs. Empfehlung: Nix-Paket mit `buildPythonApplication` auf derselben `python`-Umgebung wie ComfyUI, damit Torch nur einmal gebaut wird. Die konkrete Aufgabenliste schreibt der Phase-3-Plan.
 - **D3 Sprache des Kanals:** Deutsch, Englisch oder beides. Bestimmt die Stimmwahl (Chatterbox Multilingual für Deutsch, Kokoro wäre nur Englisch).
 
@@ -132,7 +132,7 @@ journalctl -u strata -f | grep -m1 'layer split'
 ```
 Expected: eine Zeile `layer split: layers 0-K (CUDA0), K+1-47 (CUDA1)`. Dann im Web-UI unter `http://127.0.0.1:8090` denselben Prompt dreimal ausführen und tok/s notieren. Danach `gpu = 0` in `amaru/configuration.nix` setzen, `nixos-rebuild switch`, gleiche Messung. Die schnellere Variante bleibt.
 
-### Task 0.2: Commit und amaru-Bump
+### Task 0.2: Commit und amaru-Bump (erledigt am 2026-10-01, cymenixos `670af04f`)
 
 **Files:**
 - Commit: `cymenixos/modules/virtualisation/virt-manager/default.nix`, `cymenixos/modules/ai/strata/default.nix`
@@ -163,7 +163,7 @@ Expected: Build ohne `--override-input` erfolgreich.
 
 ## Phase 1: Resolve Studio dauerhaft aktivieren
 
-Code steht (`home.persistence` für `.local/share/DaVinciResolve`), noch nicht aktiviert.
+Erledigt am 2026-10-01 bis auf den Reboot-Test (Step 4). Die Lizenz lässt sich nicht deklarativ bereitstellen, weil RLM kopierte Dateien ablehnt; Hintergrund und Neuaktivierung in `docs/ai-content-stack/resolve.md`. Die Schritte unten bleiben als Ablauf für eine Neuaktivierung.
 
 ### Task 1.1: Persistenz aktivieren und Lizenz eintragen
 
