@@ -796,8 +796,10 @@
   in
     if server ? url
     then {
-      command = "${mcp-remote}/bin/mcp-remote";
-      args = [server.url];
+      # Without a parent death signal mcp-remote outlives the app and keeps
+      # holding the OAuth callback port, so every later sign-in times out.
+      command = "${pkgs.util-linux}/bin/setpriv";
+      args = ["--pdeathsig" "TERM" "--" "${mcp-remote}/bin/mcp-remote" server.url];
       env = {MCP_REMOTE_CONFIG_DIR = "/home/${user}/.config/mcp-remote";};
     }
     else if server ? env || lib.any (lib.hasInfix "\${") args
