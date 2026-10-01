@@ -15,7 +15,7 @@
   pkgs = import inputs.nixpkgs {
     inherit system;
     config = {
-      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["claude-code"];
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["claude-code" "claude-desktop"];
     };
     overlays = [
       inputs.claude.overlays.default
@@ -703,12 +703,38 @@
   claude2 = mkClaude "2";
   claude3 = mkClaude "3";
   claude-nexo = mkClaude "-nexo";
+  claude-desktop = pkgs.callPackage ./desktop.nix {};
+  # Claude Desktop launcher bound to one account, mirroring mkClaude: its own
+  # profile in ~/.config/Claude<suffix> (login, single-instance lock), and the
+  # Code tab runs that account's claude<suffix> wrapper on its config dir.
+  # Only the base instance owns the claude:// handler.
+  mkClaudeDesktop = suffix: claudeWrapper:
+    pkgs.runCommand "claude-desktop${suffix}" {
+      nativeBuildInputs = [pkgs.makeWrapper];
+    } ''
+      makeWrapper ${claude-desktop}/bin/claude-desktop $out/bin/claude-desktop${suffix} \
+        --set CHROME_DESKTOP com.anthropic.Claude${suffix}.desktop \
+        --set CLAUDE_USER_DATA_DIR /home/${user}/.config/Claude${suffix} \
+        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude${suffix} \
+        --set CLAUDE_CODE_LOCAL_BINARY ${claudeWrapper}/bin/claude${suffix}
+      mkdir -p $out/share/applications
+      sed \
+        -e "s|${claude-desktop}/bin/claude-desktop|$out/bin/claude-desktop${suffix}|" \
+        -e "s|^Name=Claude$|Name=Claude${lib.optionalString (suffix != "") " ${lib.removePrefix "-" suffix}"}|" \
+        ${lib.optionalString (suffix != "") "-e '/^MimeType=/d'"} \
+        ${claude-desktop}/share/applications/com.anthropic.Claude.desktop \
+        > $out/share/applications/com.anthropic.Claude${suffix}.desktop
+      ${lib.optionalString (suffix == "") "ln -s ${claude-desktop}/share/icons $out/share/icons"}
+    '';
 in {
   options = {
     modules = {
       ai = {
         claude = {
           enable = lib.mkEnableOption "Enable Claude Code";
+          desktop = {
+            enable = lib.mkEnableOption "Enable Claude Desktop (Chat, Code tab and Claude Design) on the system Claude Code" // {default = true;};
+          };
         };
       };
     };
@@ -746,17 +772,33 @@ in {
               };
             };
           };
+          # The browser hands the login callback back through claude://.
+          xdg = lib.mkIf cfg.claude.desktop.enable {
+            mimeApps = {
+              defaultApplications = {
+                "x-scheme-handler/claude" = ["com.anthropic.Claude.desktop"];
+              };
+            };
+          };
           home = {
-            packages = [
-              claude
-              codex
-              peonsh
-              claude-monitor
-              claude1
-              claude2
-              claude3
-              claude-nexo
-            ];
+            packages =
+              [
+                claude
+                codex
+                peonsh
+                claude-monitor
+                claude1
+                claude2
+                claude3
+                claude-nexo
+              ]
+              ++ lib.optionals cfg.claude.desktop.enable [
+                (mkClaudeDesktop "" claude)
+                (mkClaudeDesktop "1" claude1)
+                (mkClaudeDesktop "2" claude2)
+                (mkClaudeDesktop "3" claude3)
+                (mkClaudeDesktop "-nexo" claude-nexo)
+              ];
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
                 directories = [
@@ -765,6 +807,11 @@ in {
                   ".config/claude2"
                   ".config/claude3"
                   ".config/claude-nexo"
+                  ".config/Claude"
+                  ".config/Claude1"
+                  ".config/Claude2"
+                  ".config/Claude3"
+                  ".config/Claude-nexo"
                   ".config/codex"
                 ];
               };
