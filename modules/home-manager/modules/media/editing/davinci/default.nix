@@ -5,6 +5,7 @@
 }: {
   system,
   config,
+  osConfig,
   ...
 }: let
   cfg = config.modules.media.editing;
@@ -121,6 +122,14 @@ in {
   };
 
   config = lib.mkIf (cfg.enable && cfg.davinci.enable) {
+    # the Studio activation (license/), the project database and the preferences all live here.
+    # The activation must be made on the persistent volume itself: RLM rejects its files once they
+    # are copied or restored, even byte for byte, so it can only be persisted, never deployed.
+    home.persistence = lib.mkIf (osConfig.modules.boot.enable) {
+      "${osConfig.modules.boot.impermanence.persistPath}" = {
+        directories = [".local/share/DaVinciResolve"];
+      };
+    };
     home.packages = [
       (
         if cfg.davinci.studio
