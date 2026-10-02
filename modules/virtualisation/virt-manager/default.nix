@@ -21,143 +21,6 @@
     '';
   };
 
-  # The passthrough GPU belongs to the host by default and moves to vfio-pci only while a VM
-  # runs. `vfio-gpu guest` hands it to vfio-pci, `vfio-gpu host` gives it back, `vfio-gpu status`
-  # shows who has it. Unbinding the nvidia driver while a process still has the card open blocks
-  # in the kernel for good, so guest refuses and names the processes instead.
-  gpuGroup = "gpu-compute";
-  vfio-gpu = pkgs.writeShellApplication {
-    name = "vfio-gpu";
-    runtimeInputs = [pkgs.coreutils pkgs.gawk pkgs.psmisc pkgs.systemd];
-    text = ''
-      devices=(${lib.concatStringsSep " " cfg.virt-manager.vfio.devices})
-      sys=/sys/bus/pci/devices
-
-      driver_of() {
-        if [ -e "$sys/$1/driver" ]; then basename "$(readlink "$sys/$1/driver")"; fi
-      }
-
-      vfio_node() {
-        echo "/dev/vfio/$(basename "$(readlink "$sys/''${devices[0]}/iommu_group")")"
-      }
-
-      # /dev/nvidiaN of a card bound after boot is never created, the NixOS rule makes them only
-      # when the module loads; the nodes are kept to the compute group so the desktop leaves the card alone
-      nodes() {
-        for dev in "''${devices[@]}"; do
-          info=/proc/driver/nvidia/gpus/$dev/information
-          [ -r "$info" ] || continue
-          minor=$(awk '/^Device Minor/ {print $3}' "$info")
-          mknod "/dev/nvidia$minor" c 195 "$minor" 2>/dev/null || true
-          chown root:${gpuGroup} "/dev/nvidia$minor"
-          chmod 0660 "/dev/nvidia$minor"
-        done
-      }
-
-      # the nodes processes on the host reach the card through
-      host_nodes() {
-        for dev in "''${devices[@]}"; do
-          info=/proc/driver/nvidia/gpus/$dev/information
-          if [ -r "$info" ]; then echo "/dev/nvidia$(awk '/^Device Minor/ {print $3}' "$info")"; fi
-          for n in "$sys/$dev/drm/renderD"*; do
-            if [ -e "$n" ]; then echo "/dev/dri/$(basename "$n")"; fi
-          done
-        done
-      }
-
-      rebind() {
-        for dev in "''${devices[@]}"; do
-          echo "$1" > "$sys/$dev/driver_override"
-          if [ -e "$sys/$dev/driver" ]; then echo "$dev" > "$sys/$dev/driver/unbind"; fi
-          echo "$dev" > /sys/bus/pci/drivers_probe
-        done
-      }
-
-      guest() {
-        if [ "$(driver_of "''${devices[0]}")" = vfio-pci ]; then return 0; fi
-        mapfile -t busy < <(host_nodes)
-        if [ "''${#busy[@]}" -gt 0 ] && fuser -s "''${busy[@]}" 2>/dev/null; then
-          echo "vfio-gpu: the card is still in use on the host, close these first:" >&2
-          fuser -v "''${busy[@]}" >&2 || true
-          exit 1
-        fi
-        rebind vfio-pci
-        if [ "$(driver_of "''${devices[0]}")" != vfio-pci ]; then
-          echo "vfio-gpu: ''${devices[0]} did not bind to vfio-pci" >&2
-          exit 1
-        fi
-      }
-
-      host() {
-        if [ "$(driver_of "''${devices[0]}")" != vfio-pci ]; then return 0; fi
-        if fuser -s "$(vfio_node)" 2>/dev/null; then
-          echo "vfio-gpu: a VM still has the card" >&2
-          exit 1
-        fi
-        rebind ""
-        nodes
-      }
-
-      # for a VM libvirt does not manage: wait until it opens the card, then until it lets go for
-      # a minute, so a guest that restarts its qemu keeps the card, then give it back
-      watch() {
-        node=$(vfio_node)
-        for _ in $(seq 300); do
-          if fuser -s "$node" 2>/dev/null; then break; fi
-          sleep 2
-        done
-        idle=0
-        while [ "$idle" -lt 30 ]; do
-          if fuser -s "$node" 2>/dev/null; then idle=0; else idle=$((idle + 1)); fi
-          sleep 2
-        done
-        host
-      }
-
-      case "''${1-status}" in
-        guest)
-          guest
-          if [ "''${2-}" != --no-return ]; then
-            systemctl stop vfio-gpu-return.service 2>/dev/null || true
-            systemd-run --unit=vfio-gpu-return --collect --quiet "$(readlink -f "$0")" watch
-          fi
-          ;;
-        host) host ;;
-        nodes) nodes ;;
-        watch) watch ;;
-        status)
-          for dev in "''${devices[@]}"; do echo "$dev: $(driver_of "$dev")"; done
-          mapfile -t busy < <(host_nodes)
-          if [ "''${#busy[@]}" -gt 0 ]; then fuser -v "''${busy[@]}" 2>&1 || true; fi
-          ;;
-        *)
-          echo "usage: vfio-gpu [status|guest [--no-return]|host]" >&2
-          exit 2
-          ;;
-      esac
-    '';
-  };
-
-  # libvirt hands the card over itself (managed hostdevs); this hook runs guest first so a busy
-  # card fails the start with the processes named instead of hanging it, and gives it back after
-  vfio-gpu-hook = pkgs.writeShellApplication {
-    name = "vfio-gpu-hook";
-    runtimeInputs = [pkgs.coreutils];
-    text = ''
-      # only a hostdev's source address names the host card, guest side addresses look alike
-      xml=$(tr -d ' \n')
-      IFS=':.' read -r domain bus slot function <<< "${lib.head cfg.virt-manager.vfio.devices}"
-      case "$xml" in
-        *"<source><addressdomain='0x$domain'bus='0x$bus'slot='0x$slot'function='0x$function'/>"*) ;;
-        *) exit 0 ;;
-      esac
-      case "$2/$3" in
-        prepare/begin) exec ${lib.getExe vfio-gpu} guest --no-return ;;
-        release/end) exec ${lib.getExe vfio-gpu} host ;;
-      esac
-    '';
-  };
-
   qemu = pkgs.writeShellApplication {
     name = "qemu";
     text = ''
@@ -341,14 +204,6 @@ in {
           enable = lib.mkEnableOption "Enable virt-manager" // {default = false;};
           vfio = {
             enable = lib.mkEnableOption "Enable VFIO GPU passthrough (huge pages, IOMMU, kvmfr, scream)" // {default = false;};
-            devices = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
-              default = ["0000:03:00.0" "0000:03:00.1"];
-              description = ''
-                PCI functions of the passthrough GPU, the video function first. The card stays with the
-                host driver, kept from the desktop, and moves to vfio-pci only while a VM runs.
-              '';
-            };
           };
         };
       };
@@ -544,7 +399,6 @@ in {
           looking-glass-client
           scream
           iommu-check
-          vfio-gpu
         ];
         etc = {
           "modules-load.d/kvmfr.conf".text = ''
@@ -573,24 +427,7 @@ in {
           '';
           destination = "/etc/udev/rules.d/70-vfio.rules";
         })
-
-        # after 71-seat.rules: the passthrough GPU's DRM nodes go to a seat no session runs on, so
-        # logind refuses them to the compositor, and only the compute group opens the card
-        (pkgs.writeTextFile {
-          name = "vfio-gpu";
-          text = ''
-            SUBSYSTEM=="drm", KERNELS=="${lib.head cfg.virt-manager.vfio.devices}", ENV{ID_SEAT}="seat-vfio", TAG-="master-of-seat", TAG-="uaccess", GROUP="${gpuGroup}", MODE="0660"
-            ACTION=="bind", SUBSYSTEM=="pci", KERNEL=="${lib.head cfg.virt-manager.vfio.devices}", DRIVER=="nvidia", RUN+="${lib.getExe vfio-gpu} nodes"
-          '';
-          destination = "/etc/udev/rules.d/72-vfio-gpu.rules";
-        })
       ];
-
-      users = {
-        groups = {
-          ${gpuGroup} = {};
-        };
-      };
 
       virtualisation = {
         libvirtd = {
@@ -612,7 +449,6 @@ in {
             qemu = {
               start = lib.getExe qemu-start-hook;
               stop = lib.getExe qemu-stop-hook;
-              vfio-gpu = lib.getExe vfio-gpu-hook;
             };
           };
         };
