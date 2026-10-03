@@ -7,7 +7,6 @@ import Quickshell.Io
 PanelWindow {
     id: bar
 
-    required property var screen
     required property var powerMenu
 
     anchors {

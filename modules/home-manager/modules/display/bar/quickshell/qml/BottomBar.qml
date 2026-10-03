@@ -12,7 +12,6 @@ import Quickshell.Bluetooth
 PanelWindow {
     id: bar
 
-    required property var screen
     required property var appLauncher
     required property var bluetoothMenu
     required property var notifCenter
