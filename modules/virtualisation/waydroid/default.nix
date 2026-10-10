@@ -13,6 +13,14 @@
   propScript = pkgs.writeShellScript "waydroid-base-props" ''
     prop=/var/lib/waydroid/waydroid_base.prop
     [ -f "$prop" ] || exit 0
+    # waydroid init pins the DRM render node once, in both
+    # lxc/waydroid/config_nodes and gralloc.gbm.device, but renderD
+    # numbers shift when GPUs are added or probe in a different order.
+    # Mesa cannot drive an nvidia node (hwcomposer segfaults, black
+    # screen), so let waydroid pick the node again on every container
+    # start. The offline upgrade downloads nothing, it only regenerates
+    # the lxc config and the base props.
+    ${config.virtualisation.waydroid.package}/bin/waydroid upgrade --offline
     ${lib.optionalString (w.density != null) ''
       ${pkgs.gnused}/bin/sed -i '/^ro\.sf\.lcd_density=/d' "$prop"
       echo 'ro.sf.lcd_density=${toString w.density}' >> "$prop"
@@ -26,8 +34,6 @@
       echo 'persist.waydroid.height=${toString w.height}' >> "$prop"
     ''}
   '';
-
-  hasProps = w.density != null || w.width != null || w.height != null;
 
   waydroid-ui = pkgs.writeShellApplication {
     name = "waydroid-ui";
@@ -172,7 +178,7 @@ in {
       ];
     };
 
-    systemd.services.waydroid-container = lib.mkIf hasProps {
+    systemd.services.waydroid-container = {
       serviceConfig.ExecStartPre = "${propScript}";
     };
 
