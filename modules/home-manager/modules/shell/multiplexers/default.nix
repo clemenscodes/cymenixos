@@ -5,6 +5,7 @@
   ...
 }: {...}: {
   imports = [
+    (import ./herdr {inherit inputs pkgs lib;})
     (import ./tmux {inherit inputs pkgs lib;})
     (import ./zellij {inherit inputs pkgs lib;})
   ];

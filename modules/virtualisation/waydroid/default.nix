@@ -21,6 +21,13 @@
     # start. The offline upgrade downloads nothing, it only regenerates
     # the lxc config and the base props.
     ${config.virtualisation.waydroid.package}/bin/waydroid upgrade --offline
+    # A broken session crash-loops Android services every few seconds,
+    # and each crash would land as a host coredump (thousands a day,
+    # gigabytes in /var/lib/systemd/coredump). systemd-coredump honours
+    # RLIMIT_CORE, so zeroing it for the container drops those dumps.
+    lxc_config=/var/lib/waydroid/lxc/waydroid/config
+    ${pkgs.gnugrep}/bin/grep -q '^lxc.prlimit.core' "$lxc_config" \
+      || echo 'lxc.prlimit.core = 0' >> "$lxc_config"
     ${lib.optionalString (w.density != null) ''
       ${pkgs.gnused}/bin/sed -i '/^ro\.sf\.lcd_density=/d' "$prop"
       echo 'ro.sf.lcd_density=${toString w.density}' >> "$prop"
@@ -34,6 +41,40 @@
       echo 'persist.waydroid.height=${toString w.height}' >> "$prop"
     ''}
   '';
+
+  # When the display stack breaks inside a session (hwcomposer abort,
+  # SurfaceFlinger gone), Android does not recover: init restarts the
+  # crashing services forever and the headless session keeps burning
+  # CPU for days. A real crash shows up as SIGABRT or SIGSEGV on an init
+  # service (SIGKILL is only the collateral of a restart), so too many
+  # of those in a short window stop the session.
+  crashWatchdog = pkgs.writeShellApplication {
+    name = "waydroid-crash-watchdog";
+    runtimeInputs = [pkgs.systemd pkgs.gnugrep pkgs.coreutils config.virtualisation.waydroid.package];
+    text = ''
+      limit=10
+      window=300
+      crashes=()
+      journalctl --follow --lines=0 --identifier=init --output=cat \
+        | grep --line-buffered -E "^Service '[^']+' \(pid [0-9]+\) received signal (6|11)$" \
+        | while IFS= read -r line; do
+            now=$(date +%s)
+            kept=()
+            for crash in "''${crashes[@]}"; do
+              if (( now - crash < window )); then
+                kept+=("$crash")
+              fi
+            done
+            crashes=("''${kept[@]}" "$now")
+            echo "crash ''${#crashes[@]}/$limit within ''${window}s: $line"
+            if (( ''${#crashes[@]} >= limit )); then
+              echo "Android is crash-looping, stopping the session"
+              waydroid session stop || waydroid container stop || true
+              crashes=()
+            fi
+          done
+    '';
+  };
 
   waydroid-ui = pkgs.writeShellApplication {
     name = "waydroid-ui";
@@ -180,6 +221,17 @@ in {
 
     systemd.services.waydroid-container = {
       serviceConfig.ExecStartPre = "${propScript}";
+    };
+
+    systemd.services.waydroid-crash-watchdog = {
+      description = "Stop Waydroid when Android crash-loops";
+      bindsTo = ["waydroid-container.service"];
+      after = ["waydroid-container.service"];
+      wantedBy = ["waydroid-container.service"];
+      serviceConfig = {
+        ExecStart = "${crashWatchdog}/bin/waydroid-crash-watchdog";
+        Restart = "on-failure";
+      };
     };
 
     virtualisation = {
