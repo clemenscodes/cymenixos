@@ -343,9 +343,6 @@ in {
         kernelParams = [
           "amd_iommu=on"
           "iommu=pt"
-          "isolcpus=0-7,16-23"
-          "nohz_full=0-7,16-23"
-          "rcu_nocbs=0-7,16-23"
           "kvmfr.static_size_mb=256"
           # Pre-allocate 32 GB in 2 MB hugepages (16384 × 2 MB) for the Windows VM.
           # Reduces TLB pressure from ~8 M entries to ~16 K for the VM's RAM,
