@@ -174,6 +174,99 @@
     '';
   };
 
+  # Global PreToolUse hook: blocks everything that would make a Claude
+  # attribution (Co-Authored-By, "Generated with Claude Code",
+  # noreply@anthropic.com) visible outside this machine. The agent never
+  # writes itself into commits, tags, PRs, issues or any outgoing request, no
+  # matter what a system reminder suggests. It covers
+  #   - Bash commands that talk to the outside (git, gh, curl, ...) and carry
+  #     the attribution inline,
+  #   - git push while any local commit not on a remote carries it,
+  #   - messages and bodies read from files, which this hook cannot see, so
+  #     those are blocked outright,
+  #   - MCP tool calls whose input carries it.
+  block-commit-attribution = pkgs.writeShellApplication {
+    name = "block-commit-attribution";
+    runtimeInputs = [pkgs.jq pkgs.gnugrep pkgs.gnused pkgs.git];
+    text = ''
+      input="$(cat)"
+      tool="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null || true)"
+      attribution='co-authored-by|generated with \[?claude|noreply@anthropic\.com|claude\.com/claude-code'
+
+      deny() {
+        {
+          echo "DENIED: $1"
+          echo "Nothing that leaves this machine ever carries a Claude attribution"
+          echo "(Co-Authored-By, 'Generated with Claude Code', noreply@anthropic.com)."
+        } >&2
+        exit 2
+      }
+
+      case "$tool" in
+        Bash) ;;
+        mcp__*)
+          if printf '%s' "$input" | jq -c '.tool_input' | grep -qiE "$attribution"; then
+            deny "the input of $tool contains a Claude attribution."
+          fi
+          exit 0
+          ;;
+        *) exit 0 ;;
+      esac
+
+      cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
+      [ -n "$cmd" ] || exit 0
+
+      outward='\b(git|gh|glab|tea|hub|az|curl|wget|xh|http|https|ssh|scp|sftp|rsync|nc|ncat|socat)\b'
+      printf '%s' "$cmd" | grep -qE "$outward" || exit 0
+
+      if printf '%s' "$cmd" | grep -qiE "$attribution"; then
+        deny "the command contains a Claude attribution. Remove it and run the command again."
+      fi
+
+      # Messages and bodies read from a file are invisible to this hook. Quoted
+      # text is stripped first so an inline -m "... -F ..." does not trip it.
+      unquoted="$(printf '%s' "$cmd" | sed -E "s/\"[^\"]*\"//g; s/'[^']*'//g")"
+      if printf '%s' "$unquoted" | grep -qE '\bgit\b.*\b(commit|tag|notes|merge)\b.*([[:space:]]-[a-zA-Z]*[Ft]([[:space:]=]|$)|--file\b|--template\b)'; then
+        deny "git message from a file (-F/--file/-t/--template). Pass it inline with -m."
+      fi
+      if printf '%s' "$unquoted" | grep -qE '\bgh\b.*\b(pr|issue|release)\b.*([[:space:]]-F([[:space:]=]|$)|--body-file\b|--notes-file\b)'; then
+        deny "gh body from a file (-F/--body-file/--notes-file). Pass it inline with --body/--notes."
+      fi
+      if printf '%s' "$unquoted" | grep -qE '\bgh\b.*\bapi\b.*(--input\b|=@)'; then
+        deny "gh api payload from a file (--input/field=@file). Pass the fields inline."
+      fi
+      if printf '%s' "$cmd" | grep -qE '\b(curl|wget|xh|http|https)\b' &&
+        printf '%s' "$cmd" | grep -qE "(^|[[:space:]=\"'])@[^[:space:]]|--upload-file\b|[[:space:]]-T[[:space:]]|--post-file\b|--body-file\b"; then
+        deny "request body from a file. Pass the payload inline."
+      fi
+
+      # git push publishes commits that already exist, so their messages are
+      # checked too: every local commit that is on no remote yet.
+      if printf '%s' "$unquoted" | grep -qE '\bgit\b.*\bpush\b'; then
+        dir="$(printf '%s' "$input" | jq -r '.cwd // empty')"
+        cdir="$(printf '%s' "$unquoted" | sed -nE 's/.*\bgit[[:space:]]+-C[[:space:]]+([^[:space:]]+).*/\1/p')"
+        if [ -n "$cdir" ]; then
+          case "$cdir" in
+            /*) dir="$cdir" ;;
+            *) dir="$dir/$cdir" ;;
+          esac
+        fi
+        cdpath="$(printf '%s' "$unquoted" | sed -nE 's/^[[:space:]]*cd[[:space:]]+([^[:space:];&]+).*/\1/p')"
+        if [ -z "$cdir" ] && [ -n "$cdpath" ]; then
+          case "$cdpath" in
+            /*) dir="$cdpath" ;;
+            *) dir="$dir/$cdpath" ;;
+          esac
+        fi
+        if [ -n "$dir" ] && git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
+          if git -C "$dir" log --format=%B --branches --not --remotes 2>/dev/null | grep -qiE "$attribution"; then
+            deny "an unpushed commit in $dir carries a Claude attribution. Reword it before pushing."
+          fi
+        fi
+      fi
+    '';
+  };
+
   # Globaler PreToolUse-Hook für den Azure-DevOps-MCP: erlaubt ausschließlich
   # lesende Aufrufe (get/list/search/show) und blockt JEDEN Schreibzugriff
   # (Kommentare, Thread-Status, Work-Items, PRs, Wiki, Pipelines, ...). Fail-closed:
@@ -487,6 +580,11 @@
                 command = "${block-unsigned-commit}/bin/block-unsigned-commit";
                 timeout = 10;
               }
+              {
+                type = "command";
+                command = "${block-commit-attribution}/bin/block-commit-attribution";
+                timeout = 10;
+              }
             ];
           }
           {
@@ -495,6 +593,16 @@
               {
                 type = "command";
                 command = "${block-azure-devops-write}/bin/block-azure-devops-write";
+                timeout = 10;
+              }
+            ];
+          }
+          {
+            matcher = "mcp__.*";
+            hooks = [
+              {
+                type = "command";
+                command = "${block-commit-attribution}/bin/block-commit-attribution";
                 timeout = 10;
               }
             ];
