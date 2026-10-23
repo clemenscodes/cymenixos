@@ -174,6 +174,43 @@
     '';
   };
 
+  # Global PreToolUse(Bash) hook against two shell footguns that keep killing
+  # the agent's own shell or hanging the session:
+  #   - `pgrep -f` / `pkill -f` match against the FULL command line, which
+  #     includes the agent's own wrapper process. pkill therefore routinely
+  #     kills the running session itself (or the wrong process).
+  #   - `until ! pgrep ...` / `while ... pgrep` busy-waits turn into endless
+  #     loops.
+  # Wait on background jobs via the task-notification mechanism
+  # (run_in_background), never by polling processes. Fail-closed, exit 2.
+  block-shell-footgun = pkgs.writeShellApplication {
+    name = "block-shell-footgun";
+    runtimeInputs = [pkgs.jq pkgs.gnugrep];
+    text = ''
+      cmd="$(jq -r '.tool_input.command // empty' 2>/dev/null || true)"
+      [ -n "$cmd" ] || exit 0
+
+      reason=""
+      if printf '%s' "$cmd" | grep -qE '(^|[^[:alnum:]_])(pgrep|pkill)[[:space:]]+(-[[:alnum:]]*f|--full)'; then
+        reason="pgrep/pkill with -f/--full matches the agent's own shell and kills it (or the wrong process)"
+      elif printf '%s' "$cmd" | grep -qE '(^|[^[:alnum:]_])(until|while)([[:space:]]|$)' \
+        && printf '%s' "$cmd" | grep -qE '(^|[^[:alnum:]_])(pgrep|pkill)([[:space:]]|$)'; then
+        reason="busy-wait loop on pgrep/pkill becomes an endless loop"
+      fi
+
+      [ -n "$reason" ] || exit 0
+
+      {
+        echo "DENIED: $reason."
+        echo "To wait on a background job, start it with run_in_background and wait for"
+        echo "the task notification - do not poll with pgrep/pkill. Never address a"
+        echo "process by its full command line (-f/--full); use exact PIDs or the task"
+        echo "mechanism."
+      } >&2
+      exit 2
+    '';
+  };
+
   # Global PreToolUse hook: blocks everything that would make a Claude
   # attribution (Co-Authored-By, "Generated with Claude Code",
   # noreply@anthropic.com) visible outside this machine. The agent never
@@ -583,6 +620,11 @@
               {
                 type = "command";
                 command = "${block-commit-attribution}/bin/block-commit-attribution";
+                timeout = 10;
+              }
+              {
+                type = "command";
+                command = "${block-shell-footgun}/bin/block-shell-footgun";
                 timeout = 10;
               }
             ];

@@ -26,7 +26,7 @@ in {
           pkgs.gdk-pixbuf
           pkgs.glib.dev
           pkgs.dbus
-          pkgs.openssl_3
+          pkgs.openssl
           pkgs.stdenv.cc.cc
           pkgs.systemd
           pkgs.pkg-config

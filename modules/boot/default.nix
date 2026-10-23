@@ -94,7 +94,17 @@ in {
       resumeDevice = lib.mkIf hibernation "/dev/disk/by-label/nixos";
       consoleLogLevel = lib.mkDefault 0;
       extraModulePackages = with config.boot.kernelPackages; [
-        v4l2loopback.out
+        # v4l2loopback 0.15.4 ships generated lib/modules/<ver>/modules.alias
+        # (and friends) that collide with the base kernel's modules tree when
+        # NixOS aggregates extraModulePackages via buildEnv. Those index files
+        # are regenerated during aggregation, so drop them from the output.
+        (v4l2loopback.overrideAttrs (old: {
+          postInstall =
+            (old.postInstall or "")
+            + ''
+              rm -f "$out"/lib/modules/*/modules.*
+            '';
+        })).out
       ];
       extraModprobeConfig = ''
         options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
