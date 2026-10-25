@@ -9,6 +9,7 @@
   (import ./hyprland.nix)
   (import ./obs-vkcapture.nix {inherit inputs;})
   (import ./obs-deprecations.nix)
+  (import ./kmod-aggregator.nix)
   (import ./tongo.nix)
   (import ./vscode-powerpc-syntax.nix)
   (import ./xmrig.nix)
