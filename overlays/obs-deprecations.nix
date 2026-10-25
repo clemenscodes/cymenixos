@@ -20,6 +20,15 @@
 # module closes over the pkgs this overlay list builds, passed in as a plain function
 # argument by modules/home-manager/default.nix, so useGlobalPkgs and a consumer side
 # nixpkgs.overlays never reach it. Same reason obs-vkcapture.nix sits here.
+#
+# Same -Werror problem, different warning and different plugins: gcc 16 promotes
+# assigning a const-qualified pointer (e.g. the result of strrchr on a const char*)
+# to a plain char* to an error under -Werror=discarded-qualifiers. The four
+# FiniteSingularity plugins below (obs-noise, obs-advanced-masks,
+# obs-stroke-glow-shadow, obs-retro-effects) share an obs-utils.c that does exactly
+# this, so each dies the same way and takes wrapped-obs-studio down with it.
+# -Wno-error=discarded-qualifiers demotes it back to a warning; no code changes.
+# Drop once they fix it upstream or nixpkgs carries the flag.
 final: prev: {
   obs-studio-plugins =
     prev.obs-studio-plugins
@@ -35,6 +44,21 @@ final: prev: {
             (old.env or {})
             // {
               NIX_CFLAGS_COMPILE = (old.env.NIX_CFLAGS_COMPILE or "") + " -Wno-error=deprecated-declarations";
+            };
+        })
+    )
+    // prev.lib.genAttrs [
+      "obs-noise"
+      "obs-advanced-masks"
+      "obs-stroke-glow-shadow"
+      "obs-retro-effects"
+    ] (
+      name:
+        prev.obs-studio-plugins.${name}.overrideAttrs (old: {
+          env =
+            (old.env or {})
+            // {
+              NIX_CFLAGS_COMPILE = (old.env.NIX_CFLAGS_COMPILE or "") + " -Wno-error=discarded-qualifiers";
             };
         })
     );

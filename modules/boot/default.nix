@@ -12,6 +12,7 @@
   inherit (cfg.boot) biosSupport efiSupport libreboot device hibernation swapResumeOffset;
 in {
   imports = [
+    ./scripted-stage1
     (import ./impermanence {inherit inputs pkgs lib;})
     "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
     "${inputs.nixpkgs}/nixos/modules/profiles/all-hardware.nix"
