@@ -19,35 +19,12 @@
     inherit system;
     config = {
       cudaSupport = true;
-      allowUnfreePredicate = pkg:
-        builtins.elem (lib.getName pkg) [
-          "nvidia-x11"
-          "nvidia-settings"
-          "nvidia-persistenced"
-          "cuda-merged"
-          "cuda_cuobjdump"
-          "cuda_gdb"
-          "cuda_nvcc"
-          "cuda_nvdisasm"
-          "cuda_nvprune"
-          "cuda_cccl"
-          "cuda_cudart"
-          "cuda_cupti"
-          "cuda_cuxxfilt"
-          "cuda_nvml_dev"
-          "cuda_nvrtc"
-          "cuda_nvtx"
-          "cuda_profiler_api"
-          "cuda_sanitizer_api"
-          "libcublas"
-          "libcufft"
-          "libcurand"
-          "libcusolver"
-          "libnvjitlink"
-          "libcusparse"
-          "libnpp"
-          "cudnn"
-        ];
+      # CUDA splits and renames its components on every major bump (13.4 added
+      # libnvvm, renamed cuda_cccl to cccl, added cuda_crt, ...), so an explicit
+      # per-package allowlist breaks on each toolkit bump. This pkgs is built for
+      # the nvidia/cuda stack only, so allow its unfree bits wholesale, matching
+      # how the strata and vibevoice modules already handle their cuda pkgs.
+      allowUnfree = true;
     };
   };
 in {
