@@ -100,7 +100,7 @@ pkgs.writeShellApplication {
 
     if [[ "$KEY_EXISTS" -eq 0 ]]; then
         echo "Deleting GPG keys with identity $IDENTITY"
-        key_id=$(gpg --list-keys --with-colons | grep '^pub' | cut -d: -f5)
+        key_id=$(gpg --list-keys --with-colons "$IDENTITY" | grep '^pub' | cut -d: -f5)
         fingerprints=$(gpg --fingerprint $key_id | grep -oP '=\s*([A-F0-9]{4}\s*){9}[A-F0-9]{4}' | tr -d ' =')
 
         for fingerprint in $fingerprints; do
@@ -180,9 +180,7 @@ pkgs.writeShellApplication {
 
     mkdir -p "$(dirname "$CERTIFY_KEY")" "$(dirname "$SUBKEYS")" "$(dirname "$PUBLIC_KEY")"
 
-    echo $CERTIFY_PASS | gpg --output "$REVOCATION_CERT" \
-        --batch --pinentry-mode=loopback --passphrase-fd 0 \
-        --gen-revoke "$KEYID"
+    cp "$(gpgconf --list-dirs homedir)/openpgp-revocs.d/$KEYFP.rev" "$REVOCATION_CERT"
 
     echo "Revocation certificate saved to $REVOCATION_CERT"
 
