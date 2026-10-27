@@ -253,7 +253,9 @@
       cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
       [ -n "$cmd" ] || exit 0
 
-      outward='\b(git|gh|glab|tea|hub|az|curl|wget|xh|http|https|ssh|scp|sftp|rsync|nc|ncat|socat)\b'
+      # Read-only git (diff, log, status, show, ...) never leaves the machine,
+      # only the subcommands that write or publish messages count.
+      outward='\b(gh|glab|tea|hub|az|curl|wget|xh|http|https|ssh|scp|sftp|rsync|nc|ncat|socat)\b|\bgit\b.*\b(commit|tag|notes|merge|push|am|rebase|revert|cherry-pick|send-email|request-pull)\b'
       printf '%s' "$cmd" | grep -qE "$outward" || exit 0
 
       if printf '%s' "$cmd" | grep -qiE "$attribution"; then
