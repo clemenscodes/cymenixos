@@ -65,8 +65,6 @@ in
               truncateCopiedCommitHashesTo: 12
             gui:
               animateExplosion: true
-              authorColors:
-                '*': '#b7bdf8'
               border: rounded
               commandLogSize: 8
               commitAuthorLongLength: 17
@@ -118,6 +116,8 @@ in
               switchToFilesAfterStashApply: true
               switchToFilesAfterStashPop: true
               theme:
+                authorColors:
+                  '*': '#b7bdf8'
                 activeBorderColor:
                   - '#8aadf4'
                   - bold
@@ -155,7 +155,7 @@ in
                   - '#ed8796'
                   - red
               timeFormat: 02 Jan 06
-              wrapLinesInStagingView: true
+              wrapLinesInDiffView: true
             keybinding:
               branches:
                 checkoutBranchByName: c
