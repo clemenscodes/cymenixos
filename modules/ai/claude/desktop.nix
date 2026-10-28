@@ -172,11 +172,15 @@ in
         --replace-fail "Exec=claude-desktop" "Exec=$out/bin/claude-desktop"
 
       mkdir -p $out/bin
+      # Chromium only picks libsecret on desktops it knows (GNOME, KDE, ...).
+      # Elsewhere, e.g. Hyprland, safeStorage falls back to basic_text, so the
+      # app refuses to persist its login.
       makeWrapper $out/lib/${pname}/${pname} $out/bin/${pname} \
         --add-flags "--ozone-platform-hint=auto" \
         --add-flags "--enable-features=WaylandWindowDecorations" \
         --add-flags "--enable-wayland-ime" \
         --add-flags "--wayland-text-input-version=3" \
+        --add-flags "--password-store=gnome-libsecret" \
         --set-default GTK_USE_PORTAL 1 \
         --set-default CHROME_DESKTOP com.anthropic.Claude.desktop \
         --prefix PATH : ${lib.makeBinPath [xdg-utils]} \
