@@ -339,7 +339,7 @@
     '';
   };
   # Shared, config-dir-independent content, extracted verbatim from the base
-  # setup so the base output stays byte-identical while claude2, claude3 and claude-nexo
+  # setup so the base output stays byte-identical while the extra accounts
   # reuse the exact same instructions, skills, hooks, and peon config.
   claudeMdText = ''
     # Highest commandments (non-negotiable)
@@ -848,12 +848,14 @@
         mutable = true;
       };
     };
-  peonsh2 = mkPeonsh "2";
-  peonsh3 = mkPeonsh "3";
-  peonsh-nexo = mkPeonsh "-nexo";
-  claude2 = mkClaude "2";
-  claude3 = mkClaude "3";
-  claude-nexo = mkClaude "-nexo";
+  # Extra accounts besides the base one, keyed by config-dir suffix.
+  accounts =
+    lib.mapAttrs (suffix: account: {
+      inherit (account) desktopName;
+      peonsh = mkPeonsh suffix;
+      claude = mkClaude suffix;
+    })
+    cfg.claude.accounts;
   claude-desktop = pkgs.callPackage ./desktop.nix {};
   # Claude Desktop launcher bound to one account, mirroring mkClaude: its own
   # profile in ~/.config/Claude<suffix> (login, single-instance lock), and the
@@ -990,6 +992,27 @@ in {
           desktop = {
             enable = lib.mkEnableOption "Enable Claude Desktop (Chat, Code tab and Claude Design) on the system Claude Code" // {default = true;};
           };
+          accounts = lib.mkOption {
+            type = lib.types.attrsOf (lib.types.submodule ({name, ...}: {
+              options = {
+                desktopName = lib.mkOption {
+                  type = lib.types.str;
+                  default = "Claude ${name}";
+                  description = "Name of the Claude Desktop launcher for this account";
+                };
+              };
+            }));
+            default = {};
+            example = {
+              "2" = {};
+              "-work" = {desktopName = "Claude Work";};
+            };
+            description = ''
+              Additional Claude accounts besides the base one, keyed by suffix.
+              Each gets a claude<suffix> wrapper on ~/.config/claude<suffix> and,
+              with desktop enabled, a Claude Desktop launcher on ~/.config/Claude<suffix>.
+            '';
+          };
         };
       };
     };
@@ -1038,7 +1061,7 @@ in {
           home = {
             activation = lib.mkIf cfg.claude.desktop.enable {
               claudeDesktopMcp = inputs.home-manager.lib.hm.dag.entryAfter ["writeBoundary"] (
-                lib.concatMapStrings mkDesktopMcpActivation ["" "2" "3" "-nexo"]
+                lib.concatMapStrings mkDesktopMcpActivation ([""] ++ lib.attrNames accounts)
               );
             };
             packages =
@@ -1047,37 +1070,25 @@ in {
                 codex
                 peonsh
                 claude-monitor
-                claude2
-                claude3
-                claude-nexo
               ]
-              ++ lib.optionals cfg.claude.desktop.enable [
-                (mkClaudeDesktop "" "Claude" claude)
-                (mkClaudeDesktop "2" "Claude 2" claude2)
-                (mkClaudeDesktop "3" "Claude 3" claude3)
-                (mkClaudeDesktop "-nexo" "Claude Nexobility" claude-nexo)
-              ];
+              ++ lib.mapAttrsToList (_: account: account.claude) accounts
+              ++ lib.optionals cfg.claude.desktop.enable (
+                [(mkClaudeDesktop "" "Claude" claude)]
+                ++ lib.mapAttrsToList (suffix: account: mkClaudeDesktop suffix account.desktopName account.claude) accounts
+              );
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
-                directories = [
-                  ".config/claude"
-                  ".config/claude2"
-                  ".config/claude3"
-                  ".config/claude-nexo"
-                  ".config/Claude"
-                  ".config/Claude2"
-                  ".config/Claude3"
-                  ".config/Claude-nexo"
-                  ".config/mcp-remote"
-                  ".config/codex"
-                ];
+                directories =
+                  lib.concatMap (suffix: [".config/claude${suffix}" ".config/Claude${suffix}"]) ([""] ++ lib.attrNames accounts)
+                  ++ [
+                    ".config/mcp-remote"
+                    ".config/codex"
+                  ];
               };
             };
             file =
               (mkClaudeFiles "" peonsh)
-              // (mkClaudeFiles "2" peonsh2)
-              // (mkClaudeFiles "3" peonsh3)
-              // (mkClaudeFiles "-nexo" peonsh-nexo)
+              // lib.concatMapAttrs (suffix: account: mkClaudeFiles suffix account.peonsh) accounts
               // {
                 ".config/codex/skills/karpathy/SKILL.md" = {
                   text = karpathySkillText;
