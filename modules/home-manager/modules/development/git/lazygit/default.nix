@@ -30,7 +30,7 @@ in
             confirmOnQuit: false
             disableStartupPopups: true
             git:
-              autoFetch: true
+              autoFetch: false
               autoRefresh: true
               autoStageResolvedConflicts: true
               branchLogCmd: git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --
