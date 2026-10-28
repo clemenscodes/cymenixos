@@ -860,7 +860,7 @@
   # Claude Desktop launcher bound to one account, mirroring mkClaude: its own
   # profile in ~/.config/Claude<suffix> (login, single-instance lock), and the
   # Code tab runs that account's claude<suffix> wrapper on its config dir.
-  # Only the base instance owns the claude:// handler.
+  # No instance owns the claude:// handler, claudeDesktopUrlHandler does.
   # Chat and Cowork never read ~/.config/claude*/skills. Cowork loads plugins
   # from its own registry per account and org under
   # <userData>/local-agent-mode-sessions/<account>/<org>/cowork_plugins and
@@ -922,16 +922,46 @@
         --set CLAUDE_USER_DATA_DIR /home/${user}/.config/Claude${suffix} \
         --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude${suffix} \
         --set CLAUDE_CODE_LOCAL_BINARY ${claudeWrapper}/bin/claude${suffix} \
+        --run 'printf %s "${suffix}" > "$XDG_RUNTIME_DIR/claude-desktop-account" || true' \
         --run '${coworkPluginSync} || true'
       mkdir -p $out/share/applications
       sed \
         -e "s|${claude-desktop}/bin/claude-desktop|$out/bin/claude-desktop${suffix}|" \
         -e "s|^Name=Claude$|Name=${name}|" \
-        ${lib.optionalString (suffix != "") "-e '/^MimeType=/d'"} \
+        -e '/^MimeType=/d' \
         ${claude-desktop}/share/applications/com.anthropic.Claude.desktop \
         > $out/share/applications/com.anthropic.Claude${suffix}.desktop
       ${lib.optionalString (suffix == "") "ln -s ${claude-desktop}/share/icons $out/share/icons"}
     '';
+  # The login callback comes back from the browser as a claude:// URL, and
+  # xdg-open hands it to exactly one desktop entry. Every launcher records its
+  # suffix on start, so the URL goes to the account launched last, which is
+  # the one whose login is in flight.
+  mkClaudeDesktopUrlHandler = launchers:
+    pkgs.writeTextFile {
+      name = "claude-desktop-url-handler";
+      destination = "/share/applications/com.anthropic.Claude-url-handler.desktop";
+      text = ''
+        [Desktop Entry]
+        Name=Claude URL Handler
+        Exec=${pkgs.writeShellScript "claude-desktop-url-handler" ''
+          account=$(cat "$XDG_RUNTIME_DIR/claude-desktop-account" 2>/dev/null)
+          case "$account" in
+          ${lib.concatStrings (lib.mapAttrsToList (suffix: launcher: ''
+            "${suffix}") exec ${launcher}/bin/claude-desktop${suffix} "$@" ;;
+          '')
+          launchers)}
+          *) exec ${launchers.""}/bin/claude-desktop "$@" ;;
+          esac
+        ''} %u
+        Type=Application
+        NoDisplay=true
+        MimeType=x-scheme-handler/claude;
+      '';
+    };
+  desktopLaunchers =
+    {"" = mkClaudeDesktop "" "Claude" claude;}
+    // lib.mapAttrs (suffix: account: mkClaudeDesktop suffix account.desktopName account.claude) accounts;
   mcp-remote = pkgs.callPackage ./mcp-remote/package.nix {};
   # Chat and Cowork in Claude Desktop read mcpServers from
   # claude_desktop_config.json, which only accepts stdio servers
@@ -1054,7 +1084,7 @@ in {
           xdg = lib.mkIf cfg.claude.desktop.enable {
             mimeApps = {
               defaultApplications = {
-                "x-scheme-handler/claude" = ["com.anthropic.Claude.desktop"];
+                "x-scheme-handler/claude" = ["com.anthropic.Claude-url-handler.desktop"];
               };
             };
           };
@@ -1073,8 +1103,8 @@ in {
               ]
               ++ lib.mapAttrsToList (_: account: account.claude) accounts
               ++ lib.optionals cfg.claude.desktop.enable (
-                [(mkClaudeDesktop "" "Claude" claude)]
-                ++ lib.mapAttrsToList (suffix: account: mkClaudeDesktop suffix account.desktopName account.claude) accounts
+                lib.attrValues desktopLaunchers
+                ++ [(mkClaudeDesktopUrlHandler desktopLaunchers)]
               );
             persistence = lib.mkIf (config.modules.boot.enable) {
               "${persistPath}" = {
