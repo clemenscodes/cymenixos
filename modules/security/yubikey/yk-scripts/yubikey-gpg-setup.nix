@@ -16,6 +16,7 @@ pkgs.writeShellApplication {
     PASSPHRASE_FILE=""
     ADMIN_PIN_FILE=""
     USER_PIN_FILE=""
+    SERIAL=""
     FORCE=0
 
     usage() {
@@ -33,7 +34,8 @@ pkgs.writeShellApplication {
         echo "  --passphrase-file FILE Export the certify passphrase to the specified file"
         echo "  --admin-pin-file FILE  Export the admin pin to the specified file"
         echo "  --user-pin-file FILE   Export the user pin to the specified file"
-        echo "  --force                Force deleting of GPG keys with given identity"
+        echo "  --serial SERIAL        Serial of the YubiKey to reset and set up (required)"
+        echo "  --force              Force deleting of GPG keys with given identity"
         echo "  --help                 Display this help message"
         echo
         echo "Example: $0 \\"
@@ -49,6 +51,7 @@ pkgs.writeShellApplication {
         echo "  --passphrase-file ./gpg/private/passphrase \\"
         echo "  --admin-pin-file ./gpg/private/admin-pin \\"
         echo "  --user-pin-file ./gpg/private/user-pin \\"
+        echo "  --serial 12345678 \\"
         echo "  --force"
         exit 1
     }
@@ -67,11 +70,33 @@ pkgs.writeShellApplication {
             --passphrase-file) PASSPHRASE_FILE="$2"; shift 2 ;;
             --admin-pin-file) ADMIN_PIN_FILE="$2"; shift 2 ;;
             --user-pin-file) USER_PIN_FILE="$2"; shift 2 ;;
+            --serial) SERIAL="$2"; shift 2 ;;
             --force) FORCE=1; shift ;;
             --help) usage ;;
             *) echo "Unknown option: $1" usage ;;
         esac
     done
+
+    if [[ -z "$SERIAL" ]]; then
+        echo "Missing required argument --serial."
+        usage
+    fi
+
+    CONNECTED=$(command ykman list --serials)
+
+    if [[ "$CONNECTED" != "$SERIAL" ]]; then
+        echo "Refusing to continue: exactly the YubiKey $SERIAL must be connected, found: $CONNECTED"
+        exit 1
+    fi
+
+    # gpg loses the card to scdaemon after ykman used it, so every ykman call
+    # targets the YubiKey by its serial and restarts scdaemon afterwards.
+    ykman() {
+        local status=0
+        command ykman --device "$SERIAL" "$@" || status=$?
+        gpgconf --kill scdaemon
+        return "$status"
+    }
 
     echo "Enabling OPENPGP application over USB"
 

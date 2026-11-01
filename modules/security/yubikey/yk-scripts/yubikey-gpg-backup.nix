@@ -11,6 +11,7 @@ pkgs.writeShellApplication {
     SUBKEYS_FILE=""
     PUBLIC_KEY_FILE=""
     IDENTITY_FILE=""
+    SERIAL=""
 
     usage() {
         echo "Usage: $0 [options]"
@@ -23,7 +24,8 @@ pkgs.writeShellApplication {
         echo "  --public-key-file FILE  Path to the public key file"
         echo "  --private-key-file FILE Path to the private key file"
         echo "  --identity-file FILE    Path to the indentity file (name and email)"
-        echo "  --help                  Display this help message"
+        echo "  --serial SERIAL         Serial of the YubiKey to reset and set up"
+        echo "  --help                Display this help message"
         echo
         echo "Example: $0 \\"
         echo "  --gnupg-home ~/.config/gnupg \\"
@@ -33,7 +35,8 @@ pkgs.writeShellApplication {
         echo "  --subkeys-file ./gpg/private/subkeys.key \\"
         echo "  --public-key-file ./gpg/public/public-key.asc \\"
         echo "  --private-key-file ./gpg/private/private-key.key\\"
-        echo "  --identity-file ./gpg/public/identity"
+        echo "  --identity-file ./gpg/public/identity \\"
+        echo "  --serial 12345678"
         exit 1
     }
 
@@ -47,15 +50,32 @@ pkgs.writeShellApplication {
             --private-key-file) PRIVATE_KEY_FILE="$2"; shift 2 ;;
             --public-key-file) PUBLIC_KEY_FILE="$2"; shift 2 ;;
             --identity-file) IDENTITY_FILE="$2"; shift 2 ;;
+            --serial) SERIAL="$2"; shift 2 ;;
             --help) usage ;;
             *) echo "Unknown option: $1"; usage ;;
         esac
     done
 
-    if [[ -z "$PASSPHRASE_FILE" || -z "$ADMIN_PIN_FILE" || -z "$USER_PIN_FILE" || -z "$SUBKEYS_FILE" || -z "$PUBLIC_KEY_FILE" || -z "$PRIVATE_KEY_FILE"  || -z "$IDENTITY_FILE" ]]; then
+    if [[ -z "$PASSPHRASE_FILE" || -z "$ADMIN_PIN_FILE" || -z "$USER_PIN_FILE" || -z "$SUBKEYS_FILE" || -z "$PUBLIC_KEY_FILE" || -z "$PRIVATE_KEY_FILE"  || -z "$IDENTITY_FILE" || -z "$SERIAL" ]]; then
         echo "Missing required arguments."
         usage
     fi
+
+    CONNECTED=$(command ykman list --serials)
+
+    if [[ "$CONNECTED" != "$SERIAL" ]]; then
+        echo "Refusing to continue: exactly the YubiKey $SERIAL must be connected, found: $CONNECTED"
+        exit 1
+    fi
+
+    # gpg loses the card to scdaemon after ykman used it, so every ykman call
+    # targets the YubiKey by its serial and restarts scdaemon afterwards.
+    ykman() {
+        local status=0
+        command ykman --device "$SERIAL" "$@" || status=$?
+        gpgconf --kill scdaemon
+        return "$status"
+    }
 
     echo "Enabling OPENPGP application over USB"
     ykman config usb --enable OPENPGP --force || echo "Failed enabling OPENPGP application over USB"
