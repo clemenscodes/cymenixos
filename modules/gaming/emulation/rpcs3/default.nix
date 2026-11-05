@@ -266,6 +266,23 @@ let
         done < <(find "$root" \( -iname "*.pkg" -o -iname "*.rap" -o -iname "*.edat" \) -printf "%h\n" | sort -u)
       }
 
+      # A title whose executable is replaced wholesale, the modified EBOOT.BIN a
+      # mod ships in place of the one the update leaves behind. It runs after
+      # install_tree above has installed that update, so it overwrites the stock
+      # executable rather than racing it, and a game whose replacement has not
+      # arrived is skipped exactly like a missing dump. The copy happens on every
+      # run, because the source is declared and the file under dev_hdd0 is not,
+      # the same reasoning that makes games.yml a declaration rather than an
+      # append.
+      install_eboot() {
+        serial="$1"
+        source="$2"
+        [ -f "$source" ] || return 0
+        install -D -m 644 "$source" \
+          "$config_dir/dev_hdd0/game/$serial/USRDIR/EBOOT.BIN"
+        echo "Installed replacement EBOOT for $serial"
+      }
+
       # Every declared game gets the same treatment, and a game whose files have
       # not arrived yet costs nothing: install_tree returns immediately for a
       # directory that is not there. So a title can be declared before its dump
@@ -274,10 +291,16 @@ let
       # Which discs EXIST is not decided here. That is games.yml, and it is
       # declared rather than written, see gameRegistry below.
       ${lib.concatStrings (
-        lib.mapAttrsToList (_: game: ''
-          install_tree "${game.source}/Patches"
-          install_tree "${game.source}/DLC"
-        '') games
+        lib.mapAttrsToList (
+          _: game:
+          ''
+            install_tree "${game.source}/Patches"
+            install_tree "${game.source}/DLC"
+          ''
+          + lib.optionalString (game.eboot != null) ''
+            install_eboot "${game.serial}" "${game.eboot}"
+          ''
+        ) games
       )}
 
       echo "RPCS3 provisioning complete"
@@ -525,6 +548,23 @@ in
                           gets.
                         '';
                       };
+                      eboot = lib.mkOption {
+                        type = lib.types.nullOr lib.types.str;
+                        default = null;
+                        example = "/mnt/raid/Games/GTA5REV/rev/EBOOT.BIN";
+                        description = ''
+                          Path to an EBOOT.BIN that replaces the one the title
+                          update leaves at dev_hdd0/game/<serial>/USRDIR, copied
+                          there by the provisioning service after that update is
+                          installed. It is a filesystem path read at activation
+                          and not a store path, so a fifteen megabyte modified
+                          executable neither enters the world readable store nor
+                          has to exist when the configuration is evaluated, and a
+                          game whose replacement has not arrived yet is skipped
+                          like a missing dump. Null leaves the executable the
+                          update installed in place.
+                        '';
+                      };
                       patch = {
                         title = lib.mkOption {
                           type = lib.types.str;
@@ -595,6 +635,27 @@ in
     };
   };
   config = lib.mkIf (cfg.enable && cfg.rpcs3.enable) {
+    # No two enabled games may share a serial. RPCS3 names the per title
+    # configuration, the registry line and the patches after the serial and
+    # holds one update slot for it under dev_hdd0, so a second enabled game on
+    # the same serial overwrites the first's files and its update. gta5 and
+    # gta5rev are exactly such a pair and deliberately so: the switch between
+    # them is to disable one and enable the other, and this turns forgetting
+    # that into an evaluation error rather than a game that quietly runs the
+    # wrong executable.
+    assertions = [
+      {
+        assertion =
+          let
+            serials = lib.mapAttrsToList (_: game: game.serial) games;
+          in
+          lib.length serials == lib.length (lib.unique serials);
+        message =
+          "modules.gaming.emulation.rpcs3.games: two enabled games share a serial ("
+          + lib.concatStringsSep ", " (lib.mapAttrsToList (_: game: game.serial) games)
+          + "). A serial can have at most one enabled game.";
+      }
+    ];
     modules = {
       gaming = {
         emulation = {
@@ -763,6 +824,41 @@ in
                     "60 FPS"
                     "Skip Rockstar Boot Logo"
                   ];
+                };
+              };
+              # The same European disc as gta5 above, but at 01.27 and with its
+              # executable replaced by the RE:V modification, for watching that
+              # mod reach its own server. It shares the serial with gta5, so the
+              # two can never be enabled together: RPCS3 keys the per title
+              # configuration, the registry and the patches by serial, and
+              # dev_hdd0 holds one update slot per serial. The assertion below
+              # enforces it, and both stay declared so the choice is one bool.
+              #
+              # source is GTA5REV, whose Game and DLC are the gta5 dump reached
+              # through a symlink and whose Patches holds the 01.27 title update
+              # rather than the 01.06 one, so moving between the two is a switch
+              # and not a reinstall over the same files.
+              #
+              # The net configuration is gta5's unchanged. GTA Online's own
+              # hosts still resolve to the local gtao-api, so the game boots and
+              # runs, while a host the mod reaches that console-rig does not
+              # name resolves for real and leaves this machine, which is the
+              # whole point of running it here.
+              #
+              # patches is null and the patch list is empty on purpose. A
+              # replaced EBOOT hashes differently from every entry patch.yml
+              # knows, so no patch of this title would ever be consulted. eboot
+              # is the path to that replacement and belongs to the machine, so
+              # it is set where the dump is and defaulted to null here.
+              gta5rev = {
+                enable = lib.mkDefault false;
+                source = lib.mkDefault "/mnt/raid/Games/GTA5REV";
+                displayName = "Grand Theft Auto V";
+                serial = "BLES01807";
+                customConfig = builtins.readFile ./games/gta5/config.yml;
+                eboot = lib.mkDefault null;
+                patch = {
+                  title = "Grand Theft Auto V (Grand Theft Auto 5)";
                 };
               };
             };
