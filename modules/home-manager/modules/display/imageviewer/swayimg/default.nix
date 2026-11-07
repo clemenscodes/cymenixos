@@ -26,6 +26,16 @@ in {
           # Load the other images of the opened file's directory so they can be browsed.
           text = ''
             swayimg.imagelist.adjacent = true
+
+            -- Vim keys
+            for key, dir in pairs({ h = "prev", k = "prev", l = "next", j = "next", g = "first", ["Shift+g"] = "last" }) do
+              swayimg.viewer.on_key(key, function() swayimg.viewer.open(dir) end)
+            end
+            for key, dir in pairs({ h = "left", j = "down", k = "up", l = "right", g = "first", ["Shift+g"] = "last" }) do
+              swayimg.gallery.on_key(key, function() swayimg.gallery.select(dir) end)
+            end
+            swayimg.viewer.on_key("q", function() swayimg.exit() end)
+            swayimg.gallery.on_key("q", function() swayimg.exit() end)
           '';
         };
       };
