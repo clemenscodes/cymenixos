@@ -18,31 +18,34 @@ let
   # werden ueber CurrentSettings.ini abgeschaltet, nicht ueber den Patch.
   # **The revision is pinned here rather than taken from nixpkgs, and it has to be.**
   #
-  # On 2026-08-20 the console stopped signing in to PSN. The emulator says why in its
-  # own log, once the game's Silence All Logs is off.
+  # On 2026-08-20 the console stopped signing in to PSN, and on 2026-11-05 it
+  # stopped again. The emulator says why in its own log, once the game's Silence
+  # All Logs is off.
   #
-  #     rpcn: Server returned protocol version: 31, expected: 30
+  #     rpcn: Server returned protocol version: 34, expected: 31
   #
-  # np.rpcs3.net moved to protocol 31. The number the client expects is compiled in,
-  # at rpcs3/Emu/NP/rpcn_client.cpp, so no setting reaches it. nixpkgs pins rpcs3 to
-  # 96f73f44 from April 2026, which carries 30, and has not moved it since, neither
-  # in the channel nor in unstable. Both numbers were read at their own commit rather
-  # than taken from anybody's word for it.
+  # np.rpcs3.net has raised its protocol version twice since the nixpkgs pin, to
+  # 31 and then to 34. The number the client expects is compiled in, at
+  # rpcs3/Emu/NP/rpcn_client.cpp as RPCN_PROTOCOL_VERSION, so no setting reaches
+  # it. nixpkgs pins rpcs3 to 96f73f44 from April 2026, which carries 30 and has
+  # not moved it since. This revision carries 34, the number the server returns
+  # today. Both were read at their own commit rather than taken from anybody's
+  # word for it.
   #
   # Without this the desktop entry launches an emulator that cannot sign in, and
   # without a sign in nothing that needs PSN works at all.
-  rpcs3Revision = "bab81aa23e66ea0014ddcfe506caea640db6569a";
+  rpcs3Revision = "eee3f0f7c285f2b8aa18fec278a2146c5cd874eb";
   rpcs3 = pkgs.rpcs3.overrideAttrs (oldAttrs: {
-    # Upstream moved from 0.0.40 to 0.0.42 between the nixpkgs pin and this revision.
-    # The number is not guessed, the built emulator titles its own window
-    # RPCS3 0.0.42-nixpkgs-bab81aa.
-    version = "0.0.42-unstable-2026-08-19";
+    # Upstream is 0.0.43 alpha at this revision, read from rpcs3_version.cpp
+    # rather than guessed, and the built emulator titles its own window
+    # RPCS3 0.0.43-nixpkgs-eee3f0f.
+    version = "0.0.43-unstable-2026-11-05";
 
     src = pkgs.fetchFromGitHub {
       owner = "RPCS3";
       repo = "rpcs3";
       rev = rpcs3Revision;
-      hash = "sha256-onqhWGy2XhFWZOVELo9deoYZtjnt0IZ56NopMGQFdZY=";
+      hash = "sha256-U72B+HazIa811/QnZk+5mm+Gwx0DGTPeQvcUVf47pjs=";
       # The same submodules nixpkgs checks out. The build refuses without them and a
       # full recursive checkout drags in gigabytes that are never compiled.
       postCheckout = ''
@@ -215,7 +218,14 @@ let
             [ "$(log_count "Successfully copied")" -ge "$want_licenses" ]; then
             return 0
           fi
-          if grep -qE "installation failed|Failed to install|Failure!|Partially installed" "$log_file" 2>/dev/null; then
+          # "Cannot install" and the version line next to it are how RPCS3
+          # refuses an update whose base is not installed. GTA V's title
+          # updates are incremental, each one patches the version before it, so
+          # a Patches directory that jumps over a level makes RPCS3 log exactly
+          # this and then sit at its main window. Without catching it here the
+          # wait ran the full deadline every time, which is the fifteen minute
+          # hang this was.
+          if grep -qE "installation failed|Failed to install|Failure!|Partially installed|Cannot install|does not match the target app version" "$log_file" 2>/dev/null; then
             return 1
           fi
           if ! kill -0 "$rpcs3_pid" 2>/dev/null; then

@@ -171,14 +171,14 @@ in {
             # Openers are referenced by name in open.prepend_rules below.
             mpv = [
               {
-                run = ''mpv "$@"'';
+                run = "mpv %s";
                 orphan = true;
                 desc = "Play with MPV";
               }
             ];
             swayimg = [
               {
-                run = ''swayimg "$@"'';
+                run = "swayimg %s";
                 orphan = true;
                 desc = "View with Swayimg";
               }
@@ -264,7 +264,7 @@ in {
             prepend_keymap = [
               {
                 on = "y";
-                run = [''shell -- for path in "$@"; do echo "file://$path"; done | wl-copy -t text/uri-list'' "yank"];
+                run = [''shell -- for path in %s; do echo "file://$path"; done | wl-copy -t text/uri-list'' "yank"];
               }
               {
                 on = ["g" "i"];
@@ -278,7 +278,7 @@ in {
               }
               {
                 on = ["d"];
-                run = "shell --confirm 'rm -rf $@'";
+                run = "shell --confirm 'rm -rf %s'";
                 desc = "Remove files instantly";
               }
               {
