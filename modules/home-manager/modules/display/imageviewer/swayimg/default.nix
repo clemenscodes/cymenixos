@@ -21,6 +21,14 @@ in {
       packages = [pkgs.swayimg];
     };
     xdg = {
+      configFile = {
+        "swayimg/init.lua" = {
+          # Load the other images of the opened file's directory so they can be browsed.
+          text = ''
+            swayimg.imagelist.adjacent = true
+          '';
+        };
+      };
       desktopEntries = {
         swayimg = {
           name = "Swayimg";
