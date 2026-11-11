@@ -35,6 +35,22 @@
 # ist zwischen alt und neu identisch, from-env.nix und der Testschluessel
 # existieren im aktuellen nixpkgs weiter.
 #
+# Auch Module außerhalb dieses Satzes haben ihre scripted Hooks verloren.
+# Wo der Rest des Moduls weiter gilt, wird nur der fehlende Teil ergänzt
+# statt das Modul zu ersetzen:
+#
+#  - tasks/filesystems/btrfs.nix: btrfs Binary in extraUtils und
+#    btrfs device scan, sonst scheitert der Wipe von modules/boot/impermanence.
+#  - config/console.nix: Keymap (und Font) in der initrd, sonst gilt bei der
+#    LUKS Passphrase das US Layout.
+#  - tasks/filesystems/ext.nix und vfat.nix: e2fsck bzw. dosfsck für den fsck
+#    in stage-1.
+#  - tasks/lvm.nix: Werkzeuge für thin und VDO sowie die lvm.conf dafür.
+#
+# Nicht zurückgeholt, weil cymenixos sie nicht nutzt: plymouth, swraid,
+# multipath, encrypted-devices, iSCSI Root und die übrigen Dateisysteme
+# (zfs, bcachefs, xfs, f2fs, jfs, cifs, unionfs-fuse).
+#
 # Bei jedem vanix/nixpkgs Bump pruefen, ob die ersetzten Dateien upstream
 # weiter so aussehen, sonst driftet dieser Satz gegen den Rest von nixpkgs.
 {...}: {
@@ -64,5 +80,10 @@
     ./system/boot/stratisroot.nix
     ./system/boot/systemd/initrd.nix
     ./system/boot/systemd/initrd-secrets.nix
+    ./config/console.nix
+    ./tasks/filesystems/btrfs.nix
+    ./tasks/filesystems/ext.nix
+    ./tasks/filesystems/vfat.nix
+    ./tasks/lvm.nix
   ];
 }
