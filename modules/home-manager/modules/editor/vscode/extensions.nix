@@ -13,6 +13,7 @@ in {
             extensions = with pkgs.vscode-marketplace; [
               ahmadalli.vscode-nginx-conf
               mskelton.one-dark-theme
+              joelcrosby.one-dark-darker
               asvetliakov.vscode-neovim
               vscode-icons-team.vscode-icons
               catppuccin.catppuccin-vsc

@@ -168,8 +168,8 @@ in {
                 "vs-kubernetes.crd-code-completion" = "disabled";
               };
               "workbench.startupEditor" = "none";
-              "workbench.iconTheme" = lib.mkDefault "material-icon-theme";
-              "workbench.colorTheme" = lib.mkDefault "Catppuccin Mocha";
+              "workbench.iconTheme" = lib.mkDefault "vscode-icons";
+              "workbench.colorTheme" = lib.mkDefault "One Dark Darker";
               "whichkey.sortOrder" = "alphabetically";
               "whichkey.bindings" = [
                 {
