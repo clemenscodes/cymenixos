@@ -106,6 +106,7 @@
     import json
     import os
     import sys
+    import time
     import warnings
 
     from openrgb import OpenRGBClient
@@ -156,25 +157,36 @@
         return low is not None and high is not None and low != high
 
 
-    def switch_off(device):
+    def off_mode(device):
         for name in ("Off", "Direct", "Static"):
-            mode = find_mode(device, name)
-            if mode is None:
-                continue
-            if mode.colors:
-                mode.colors = [BLACK] * len(mode.colors)
-            device.set_mode(mode)
-            if name == "Direct" and device.leds:
-                device.set_color(BLACK)
-            return True
-        return False
+            if find_mode(device, name) is not None:
+                return name
+        return None
+
+
+    def switch_off(device, name):
+        mode = find_mode(device, name)
+        if mode.colors:
+            mode.colors = [BLACK] * len(mode.colors)
+        device.set_mode(mode)
+        if name == "Direct" and device.leds:
+            device.set_color(BLACK)
+
+
+    def is_black(color):
+        return color.red == 0 and color.green == 0 and color.blue == 0
+
+
+    def check_off(name):
+        def check(device):
+            if device.modes[device.active_mode].name.lower() != name.lower():
+                return False
+            return name != "Direct" or all(is_black(c) for c in device.colors)
+        return check
 
 
     def switch_on(device, wanted, global_brightness):
         mode = find_mode(device, wanted["mode"])
-        if mode is None:
-            print(f"{device.name}: no mode {wanted['mode']!r}", file=sys.stderr)
-            return False
         colors = [RGBColor.fromHEX(c) for c in wanted.get("colors") or []]
         if colors and mode.colors:
             mode.colors = [colors[i % len(colors)] for i in range(len(mode.colors))]
@@ -189,23 +201,76 @@
         device.set_mode(mode)
         if colors and mode.name.lower() == "direct" and device.leds:
             device.set_color(colors[0])
-        return True
 
 
-    def for_each_device(config, action):
+    def check_mode(name):
+        return lambda device: device.modes[device.active_mode].name.lower() == name.lower()
+
+
+    def run(config, plan):
+        """Apply plan(device) -> (apply, check) | None on every server and verify the result.
+
+        SDK colour and mode updates are fire-and-forget, so after applying, a synchronous
+        refresh waits for the server and the state is read back. Devices that do not show
+        the expected state are applied again (slow buses: SMBus RAM, wireless fans), and a
+        stalled server gets a fresh connection, so one stuck device never skips the rest.
+        """
         ok = True
         for server in config["servers"]:
             host, _, port = server.rpartition(":")
-            try:
-                client = OpenRGBClient(host, int(port), "rgb-control")
-            except Exception as error:
-                print(f"{server}: {error}", file=sys.stderr)
+            todo = None
+            names = {}
+            for attempt in range(3):
+                try:
+                    client = OpenRGBClient(host, int(port), "rgb-control")
+                except Exception as error:
+                    print(f"{server}: {error}", file=sys.stderr)
+                    time.sleep(1)
+                    continue
+                try:
+                    checks = {}
+                    for index, device in enumerate(client.devices):
+                        if todo is not None and index not in todo:
+                            continue
+                        step = plan(device)
+                        if step is None:
+                            continue
+                        apply, check = step
+                        names[index] = device.name
+                        try:
+                            apply(device)
+                            checks[index] = check
+                        except Exception as error:
+                            print(f"{device.name}: {error}", file=sys.stderr)
+                            checks[index] = None
+                    time.sleep(1)
+                    client.update()
+                    todo = {i for i, check in checks.items() if check is None or not check(client.devices[i])}
+                except Exception as error:
+                    print(f"{server}: {error}", file=sys.stderr)
+                finally:
+                    try:
+                        client.disconnect()
+                    except Exception:
+                        pass
+                if todo == set():
+                    break
+                time.sleep(1)
+            if todo != set():
+                failed = sorted(names.get(i, f"device {i}") for i in (todo or names))
+                print(f"{server}: not applied: {', '.join(failed) or 'all devices'}", file=sys.stderr)
                 ok = False
-                continue
-            for device in client.devices:
-                ok &= action(device)
-            client.disconnect()
         return ok
+
+
+    def on_step(device, on_modes, global_brightness):
+        wanted = wanted_for(device, on_modes)
+        if wanted is None:
+            return None
+        if find_mode(device, wanted["mode"]) is None:
+            print(f"{device.name}: no mode {wanted['mode']!r}", file=sys.stderr)
+            return None
+        return (lambda d: switch_on(d, wanted, global_brightness)), check_mode(wanted["mode"])
 
 
     def main():
@@ -219,13 +284,15 @@
             print(json.dumps(state))
             return
         if command == "off":
-            ok = for_each_device(config, switch_off)
+            def off(device):
+                name = off_mode(device)
+                if name is None:
+                    return None
+                return (lambda d: switch_off(d, name)), check_off(name)
+            ok = run(config, off)
             state["on"] = False
         elif command == "on":
-            def on(device):
-                wanted = wanted_for(device, on_modes)
-                return switch_on(device, wanted, state["brightness"]) if wanted else True
-            ok = for_each_device(config, on)
+            ok = run(config, lambda device: on_step(device, on_modes, state["brightness"]))
             state["on"] = True
         elif command == "toggle":
             save_state(state)
@@ -239,12 +306,10 @@
             ok = True
             if state["on"]:
                 def dim(device):
+                    step = on_step(device, on_modes, state["brightness"])
                     wanted = wanted_for(device, on_modes)
-                    mode = find_mode(device, wanted["mode"]) if wanted else None
-                    if mode is None or not has_brightness(mode):
-                        return True
-                    return switch_on(device, wanted, state["brightness"])
-                ok = for_each_device(config, dim)
+                    return step if step and has_brightness(find_mode(device, wanted["mode"])) else None
+                ok = run(config, dim)
         else:
             sys.exit("usage: rgb-control on|off|toggle|status|brightness [+-]PERCENT CONFIG")
         save_state(state)
