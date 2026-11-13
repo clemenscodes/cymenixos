@@ -92,6 +92,7 @@
   rgbConfig = pkgs.writeText "rgb-control.json" (builtins.toJSON {
     inherit servers;
     onModes = rgb.onModes;
+    zoneSizes = rgb.zoneSizes;
   });
 
   rgb-control = pkgs.writers.writePython3Bin "rgb-control" {
@@ -264,7 +265,17 @@
         return ok
 
 
-    def on_step(device, on_modes, global_brightness):
+    def resize_zones(device, zone_sizes):
+        serial = getattr(device.metadata, "serial", "") or ""
+        sizes = zone_sizes.get(serial) or zone_sizes.get(device.name) or {}
+        for zone in device.zones:
+            size = sizes.get(zone.name)
+            if size is not None and len(zone.leds) != size:
+                zone.resize(size)
+
+
+    def on_step(device, on_modes, global_brightness, zone_sizes):
+        resize_zones(device, zone_sizes)
         wanted = wanted_for(device, on_modes)
         if wanted is None:
             return None
@@ -293,7 +304,7 @@
             ok = run(config, off)
             state["on"] = False
         elif command == "on":
-            ok = run(config, lambda device: on_step(device, on_modes, state["brightness"]))
+            ok = run(config, lambda device: on_step(device, on_modes, state["brightness"], config["zoneSizes"]))
             state["on"] = True
         elif command == "toggle":
             save_state(state)
@@ -307,7 +318,7 @@
             ok = True
             if state["on"]:
                 def dim(device):
-                    step = on_step(device, on_modes, state["brightness"])
+                    step = on_step(device, on_modes, state["brightness"], config["zoneSizes"])
                     wanted = wanted_for(device, on_modes)
                     return step if step and has_brightness(find_mode(device, wanted["mode"])) else None
                 ok = run(config, dim)
@@ -467,6 +478,15 @@ in {
             name (all devices with that name). A serial key wins over a name key.
           '';
         };
+        zoneSizes = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.attrsOf lib.types.ints.unsigned);
+          default = {};
+          example = {"ASUS ROG CROSSHAIR X870E HERO"."Addressable RGB Header 1" = 60;};
+          description = ''
+            LED counts of resizable zones (e.g. ARGB headers), keyed by device serial or name and
+            zone name. rgb-on applies them, so they do not depend on OpenRGB's saved state.
+          '';
+        };
         schedule = {
           off = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
@@ -502,6 +522,18 @@ in {
     };
 
     boot.kernelModules = lib.optional (rgb.i2cBuses != []) "i2c-dev";
+
+    # Impermanence wipes /var/lib on boot; keep OpenRGB's runtime state (zone sizes, profiles).
+    environment.persistence = lib.mkIf cfg.boot.enable {
+      ${config.modules.boot.impermanence.persistPath}.directories = [
+        {
+          directory = stateDir;
+          user = "openrgb";
+          group = "openrgb";
+          mode = "0750";
+        }
+      ];
+    };
 
     services.udev.extraRules = usbRules + i2cRules;
 
