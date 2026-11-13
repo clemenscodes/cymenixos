@@ -92,6 +92,11 @@ PanelWindow {
         onMuteToggled: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
     }
 
+    NightLightPopup {
+        id: nightPopup
+        placement: "above"
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -473,6 +478,37 @@ PanelWindow {
         }
 
         Pill {
+            id: nightPill
+            Layout.alignment: Qt.AlignVCenter
+            interactive: true
+            visible: NightLight.available
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+
+            tooltipText: {
+                let s = NightLight.warm ? "Warm light: " + NightLight.temperature + " K" : "Warm light: off"
+                s += "\nBrightness: " + NightLight.brightness + "%"
+                s += "\n\nClick: controls  ·  Scroll: brightness  ·  Right-click: warm light  ·  Middle: display off"
+                return s
+            }
+
+            tooltipSuppressed: nightPopup.visible
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); micSlider.hide(); nightPopup.toggleFor(nightPill, bar) }
+            onRightClicked: NightLight.toggleWarm()
+            onMiddleClicked: NightLight.displayOff()
+            onScrolledBy: function(n) { NightLight.setBrightness(NightLight.brightness + n * 5) }
+
+            Text {
+                // Fixed-width number like the other pills; icon shows the colour mode.
+                text: String(NightLight.brightness).padStart(3, " ") + "% " + (NightLight.warm ? "🌅" : "🔆")
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        Pill {
             id: brightnessPill
             Layout.alignment: Qt.AlignVCenter
             interactive: true
@@ -488,7 +524,7 @@ PanelWindow {
             }
 
             tooltipSuppressed: brightSlider.visible
-            onLeftClicked: { barTooltip.hide(); volSlider.hide(); micSlider.hide(); brightSlider.toggleFor(brightnessPill, bar) }
+            onLeftClicked: { barTooltip.hide(); volSlider.hide(); micSlider.hide(); nightPopup.hide(); brightSlider.toggleFor(brightnessPill, bar) }
             onScrolledBy: function(n) { Brightness.setPercent(Brightness.percent + n * 5) }
 
             Text {
@@ -526,7 +562,7 @@ PanelWindow {
             }
 
             tooltipSuppressed: volSlider.visible
-            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); micSlider.hide(); volSlider.toggleFor(volPill, bar) }
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); micSlider.hide(); nightPopup.hide(); volSlider.toggleFor(volPill, bar) }
             onMiddleClicked: { if (volPill.audio) volPill.audio.muted = !volPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
             onScrolledBy: function(n) {
@@ -573,7 +609,7 @@ PanelWindow {
             }
 
             tooltipSuppressed: micSlider.visible
-            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); micSlider.toggleFor(micPill, bar) }
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); nightPopup.hide(); micSlider.toggleFor(micPill, bar) }
             onMiddleClicked: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
             onScrolledBy: function(n) {
