@@ -118,7 +118,7 @@ in {
           ''
             require("git"):setup()
             require("starship"):setup()
-            require("full-border"):setup({ type = ui.Border.ROUNDED })
+            require("full-border"):setup({ set = "rounded" })
             Status:children_add(function(self)
               local h = self._current.hovered
               if h and h.link_to then
