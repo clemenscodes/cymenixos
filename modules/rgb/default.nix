@@ -82,38 +82,92 @@
 
   servers = ["127.0.0.1:${toString rgb.port}"] ++ rgb.extraServers;
 
-  # Client side: talks to the SDK servers only, never to hardware (--nodetect).
-  # rgb-off snapshots the current look per server, rgb-on restores it.
-  mkRgbScript = name: body:
-    pkgs.writeShellApplication {
-      inherit name;
-      runtimeInputs = [rgb.package pkgs.coreutils];
-      text = ''
-        state="''${XDG_STATE_HOME:-$HOME/.local/state}/openrgb-client"
-        mkdir -p "$state"
-        client() {
-          openrgb --nodetect --noautoconnect --config "$state" --client "$1" "''${@:2}"
-        }
-        status=0
-        servers=(${lib.escapeShellArgs servers})
-        for server in "''${servers[@]}"; do
-          profile="on-''${server//[^0-9]/_}"
-          ${body}
-        done
-        exit "$status"
-      '';
-    };
+  # Client side: talks to the SDK servers only, through openrgb-python. The openrgb CLI
+  # client exits before its updates reach the server, so changes were applied at random.
+  #
+  # "On" is declarative: devices cannot always report their running effect (Corsair DRAM
+  # and Zotac GPUs report a default instead), so a snapshot taken before switching off
+  # restores black. rgb-on applies modules.rgb.onModes by device name instead.
+  # "Off" picks per device: Off, else Direct in black, else Static in black.
+  rgbConfig = pkgs.writeText "rgb-control.json" (builtins.toJSON {
+    inherit servers;
+    onModes = rgb.onModes;
+  });
 
-  rgb-off = mkRgbScript "rgb-off" ''
-    client "$server" --save-profile "$profile" >/dev/null 2>&1 || true
-    client "$server" ${lib.escapeShellArgs rgb.offArgs} >/dev/null 2>&1 || status=1
+  rgb-control = pkgs.writers.writePython3Bin "rgb-control" {
+    libraries = [pkgs.python3Packages.openrgb-python];
+    flakeIgnore = ["E501"];
+  } ''
+    import json
+    import sys
+
+    from openrgb import OpenRGBClient
+    from openrgb.utils import RGBColor
+
+    BLACK = RGBColor(0, 0, 0)
+
+
+    def find_mode(device, name):
+        for mode in device.modes:
+            if mode.name.lower() == name.lower():
+                return mode
+        return None
+
+
+    def switch_off(device):
+        for name in ("Off", "Direct", "Static"):
+            mode = find_mode(device, name)
+            if mode is None:
+                continue
+            if mode.colors:
+                mode.colors = [BLACK] * len(mode.colors)
+            device.set_mode(mode)
+            if name == "Direct" and device.leds:
+                device.set_color(BLACK)
+            return True
+        return False
+
+
+    def switch_on(device, wanted):
+        mode = find_mode(device, wanted["mode"])
+        if mode is None:
+            print(f"{device.name}: no mode {wanted['mode']!r}", file=sys.stderr)
+            return False
+        color = wanted.get("color")
+        if color and mode.colors:
+            mode.colors = [RGBColor.fromHEX(color)] * len(mode.colors)
+        device.set_mode(mode)
+        if color and mode.name.lower() == "direct" and device.leds:
+            device.set_color(RGBColor.fromHEX(color))
+        return True
+
+
+    def main():
+        action = sys.argv[1]
+        config = json.load(open(sys.argv[2]))
+        ok = True
+        for server in config["servers"]:
+            host, _, port = server.rpartition(":")
+            try:
+                client = OpenRGBClient(host, int(port), f"rgb-{action}")
+            except Exception as error:
+                print(f"{server}: {error}", file=sys.stderr)
+                ok = False
+                continue
+            for device in client.devices:
+                if action == "off":
+                    ok &= switch_off(device)
+                elif device.name in config["onModes"]:
+                    ok &= switch_on(device, config["onModes"][device.name])
+            client.disconnect()
+        sys.exit(0 if ok else 1)
+
+
+    main()
   '';
 
-  rgb-on = mkRgbScript "rgb-on" ''
-    if [ -e "$state/$profile.orp" ]; then
-      client "$server" --profile "$profile" >/dev/null 2>&1 || status=1
-    fi
-  '';
+  rgb-off = pkgs.writeShellScriptBin "rgb-off" ''exec ${rgb-control}/bin/rgb-control off ${rgbConfig}'';
+  rgb-on = pkgs.writeShellScriptBin "rgb-on" ''exec ${rgb-control}/bin/rgb-control on ${rgbConfig}'';
 in {
   options = {
     modules = {
@@ -197,10 +251,24 @@ in {
           example = ["127.0.0.1:6743"];
           description = "Further OpenRGB SDK servers rgb-on/rgb-off switch, e.g. lian-li-linux.";
         };
-        offArgs = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = ["--mode" "off"];
-          description = "OpenRGB client arguments rgb-off applies to all devices.";
+        onModes = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.submodule {
+            options = {
+              mode = lib.mkOption {
+                type = lib.types.str;
+                example = "Rainbow Wave";
+                description = "OpenRGB mode name, as listed by `openrgb --client --list-detailed`.";
+              };
+              color = lib.mkOption {
+                type = lib.types.nullOr (lib.types.strMatching "[0-9A-Fa-f]{6}");
+                default = null;
+                description = "Colour for modes that take one, as RRGGBB.";
+              };
+            };
+          });
+          default = {};
+          example = {"Corsair Dominator Titanium RGB DDR5".mode = "Rainbow Wave";};
+          description = "What rgb-on sets, keyed by OpenRGB device name (all devices with that name).";
         };
         schedule = {
           off = lib.mkOption {
