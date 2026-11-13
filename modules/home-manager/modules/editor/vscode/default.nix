@@ -94,22 +94,10 @@ in {
           fi
         fi
       '';
-      file =
-        lib.genAttrs pathsToMakeWritable (_: {
-          force = true;
-          mutable = true;
-        })
-        // {
-          ".config/nvim/init.vscode.lua" = {
-            text = ''
-              if vim.g.vscode then
-                  -- VSCode extension
-              else
-                  -- ordinary Neovim
-              end
-            '';
-          };
-        };
+      file = lib.genAttrs pathsToMakeWritable (_: {
+        force = true;
+        mutable = true;
+      });
       packages = [codevim];
       persistence = lib.mkIf osConfig.modules.boot.enable {
         "${osConfig.modules.boot.impermanence.persistPath}" = {

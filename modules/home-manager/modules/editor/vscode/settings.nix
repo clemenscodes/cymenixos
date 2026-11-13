@@ -152,8 +152,8 @@ in {
               "testing.showAllMessages" = true;
               "typescript.updateImportsOnFileMove.enabled" = "always";
               "vscode-neovim.logOutputToConsole" = true;
+              # nvim --clean: no user config and no plugins, so nothing competes with the editor settings
               "vscode-neovim.neovimClean" = true;
-              "vscode-neovim.neovimInitVimPaths.linux" = "$HOME/.config/nvim/init.vscode.lua";
               "vscode-neovim.neovimExecutablePaths.linux" = "codevim";
               "vsicons.dontShowNewVersionMessage" = true;
               "vs-kubernetes" = {
@@ -161,7 +161,6 @@ in {
               };
               "workbench.startupEditor" = "none";
               "workbench.iconTheme" = lib.mkDefault "material-icon-theme";
-              "workbench.productIconTheme" = lib.mkDefault "viraUIIcons";
               "workbench.colorTheme" = lib.mkDefault "Catppuccin Mocha";
               "whichkey.sortOrder" = "alphabetically";
               "whichkey.bindings" = [
