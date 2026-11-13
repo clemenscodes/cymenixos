@@ -133,6 +133,10 @@
         if mode is None:
             print(f"{device.name}: no mode {wanted['mode']!r}", file=sys.stderr)
             return False
+        speed = wanted.get("speed")
+        if speed is not None and mode.speed_min != mode.speed_max:
+            # percent of the device's range; some devices count downwards (min > max)
+            mode.speed = round(mode.speed_min + (mode.speed_max - mode.speed_min) * speed / 100)
         color = wanted.get("color")
         if color and mode.colors:
             mode.colors = [RGBColor.fromHEX(color)] * len(mode.colors)
@@ -164,6 +168,25 @@
 
 
     main()
+  '';
+
+  # The OpenRGB GUI connects to every server in Client.clients at startup. It connects to
+  # the local server on its own, so only the extra servers are listed. Everything else in
+  # the user's OpenRGB.json stays as the GUI wrote it.
+  clientConfig = pkgs.writeShellScript "openrgb-client-config" ''
+    set -eu
+    dir="''${XDG_CONFIG_HOME:-$HOME/.config}/OpenRGB"
+    file="$dir/OpenRGB.json"
+    mkdir -p "$dir"
+    [ -s "$file" ] || echo '{}' > "$file"
+    ${lib.getExe pkgs.jq} --argjson clients ${lib.escapeShellArg (builtins.toJSON (map (server: let
+        parts = lib.splitString ":" server;
+      in {
+        ip = builtins.head parts;
+        port = lib.toInt (lib.last parts);
+      })
+      rgb.extraServers))} '.Client.clients = $clients' "$file" > "$file.tmp"
+    mv "$file.tmp" "$file"
   '';
 
   rgb-off = pkgs.writeShellScriptBin "rgb-off" ''exec ${rgb-control}/bin/rgb-control off ${rgbConfig}'';
@@ -264,6 +287,11 @@ in {
                 default = null;
                 description = "Colour for modes that take one, as RRGGBB.";
               };
+              speed = lib.mkOption {
+                type = lib.types.nullOr (lib.types.ints.between 0 100);
+                default = null;
+                description = "Effect speed in percent of the device's range (0 = slowest), for modes that have one.";
+              };
             };
           });
           default = {};
@@ -352,6 +380,14 @@ in {
 
     systemd.user = {
       services = {
+        openrgb-client-config = {
+          description = "Point the OpenRGB GUI at the extra SDK servers";
+          wantedBy = ["default.target"];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = clientConfig;
+          };
+        };
         rgb-off = {
           description = "Switch RGB lighting off";
           serviceConfig = {
