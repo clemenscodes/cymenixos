@@ -753,11 +753,29 @@
   #   1. stop replay buffer (flush buffered frames)
   #   2. stop recording (OBS muxes and seals the container)
   #   3. poll recording status up to 30 s until outputActive = false
-  #   4. pkill obs (safe only after the file is sealed)
+  #   4. stop OBS with SIGINT and wait for it to exit (safe only after the file is sealed)
+  # Graceful OBS shutdown. SIGINT makes OBS save everything and close its main window, the same
+  # path as quitting from the GUI. SIGTERM only saves and quits the Qt loop, and a second signal
+  # during that teardown can save a half torn down scene collection. Only `.obs-wrapped` is
+  # signalled: a pattern like `pkill obs` also hits obs-cmd and these scripts themselves.
+  stopObsFunction = ''
+    stop_obs() {
+      local pid
+      pid="$(pgrep -x '.obs-wrapped' | head -n 1)" || return 0
+      [ -n "$pid" ] || return 0
+      kill -INT "$pid" 2>/dev/null || return 0
+      if ! timeout 30 tail --pid="$pid" -f /dev/null; then
+        echo "OBS did not exit within 30 s; leaving it running" >&2
+        return 1
+      fi
+    }
+  '';
+
   obs-toggle = pkgs.writeShellApplication {
     name = "obs-toggle";
-    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps pkgs.coreutils];
     text = ''
+      ${stopObsFunction}
       if pgrep -x '.obs-wrapped' > /dev/null 2>&1; then
         CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
         if [[ -f "$CONFIG_PATH" ]]; then
@@ -778,7 +796,7 @@
             done
           fi
         fi
-        pkill obs 2>/dev/null || true
+        stop_obs
       else
         exec ${obs-launch}/bin/obs-launch
       fi
@@ -830,8 +848,9 @@
   #   OBS not running → no-op
   obs-ensure-closed = pkgs.writeShellApplication {
     name = "obs-ensure-closed";
-    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps pkgs.coreutils];
     text = ''
+      ${stopObsFunction}
       CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
 
       if pgrep -x '.obs-wrapped' > /dev/null 2>&1; then
@@ -853,7 +872,7 @@
             done
           fi
         fi
-        pkill obs 2>/dev/null || true
+        stop_obs
       fi
     '';
   };
