@@ -160,9 +160,9 @@ in {
                 "vs-kubernetes.crd-code-completion" = "disabled";
               };
               "workbench.startupEditor" = "none";
-              "workbench.iconTheme" = "material-icon-theme";
-              "workbench.productIconTheme" = "viraUIIcons";
-              "workbench.colorTheme" = "Catppuccin Mocha";
+              "workbench.iconTheme" = lib.mkDefault "material-icon-theme";
+              "workbench.productIconTheme" = lib.mkDefault "viraUIIcons";
+              "workbench.colorTheme" = lib.mkDefault "Catppuccin Mocha";
               "whichkey.sortOrder" = "alphabetically";
               "whichkey.bindings" = [
                 {
