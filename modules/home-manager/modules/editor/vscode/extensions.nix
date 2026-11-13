@@ -52,10 +52,10 @@ in {
               bradlc.vscode-tailwindcss
               rluvaton.vscode-vitest
               redhat.vscode-yaml
-              ms-vscode-remote.remote-containers
               ms-vscode.remote-server
               ms-vscode-remote.remote-ssh-edit
               ms-vscode-remote.remote-ssh
+              ms-vscode.remote-explorer
               pkgs.vscode-powerpc-syntax
             ];
           };

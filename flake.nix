@@ -231,10 +231,10 @@
             "nvidia-persistenced"
             "vscode"
             "vscode-extension-fill-labs-dependi"
-            "vscode-extension-ms-vscode-remote-remote-containers"
             "vscode-extension-ms-vscode-remote-remote-wsl"
             "vscode-extension-ms-vscode-remote-remote-ssh-edit"
             "vscode-extension-ms-vscode-remote-remote-ssh"
+            "vscode-extension-ms-vscode-remote-explorer"
             "vscode-extension-anthropic-claude-code"
             "claude-code"
           ];

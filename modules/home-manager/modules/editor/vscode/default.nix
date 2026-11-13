@@ -111,7 +111,10 @@ in {
     programs = {
       vscode = {
         enable = true;
-        package = pkgs.vscode;
+        # Hyprland is no desktop VS Code recognizes, so it cannot pick a keyring on its own.
+        package = pkgs.vscode.override {
+          commandLineArgs = "--password-store=gnome-libsecret";
+        };
       };
     };
   };
