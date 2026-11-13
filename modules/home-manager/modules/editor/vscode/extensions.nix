@@ -15,6 +15,9 @@ in {
               mskelton.one-dark-theme
               asvetliakov.vscode-neovim
               vscode-icons-team.vscode-icons
+              catppuccin.catppuccin-vsc
+              pkief.material-icon-theme
+              vira.vsc-vira-theme
               vspacecode.whichkey
               ms-vscode-remote.remote-wsl
               mark-wiemer.vscode-autohotkey-plus-plus

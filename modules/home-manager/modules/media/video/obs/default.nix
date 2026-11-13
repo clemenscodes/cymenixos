@@ -16,6 +16,15 @@
   isPersisted = osConfig.modules.boot.enable;
   persistPath = osConfig.modules.boot.impermanence.persistPath;
 
+  # NV_ENC_SPLIT_ENCODE_MODE values as stored by obs-nvenc in "split_encode"
+  splitEncodeModes = {
+    auto = 0;
+    two = 2;
+    three = 3;
+    four = 4;
+    disabled = 15;
+  };
+
   # Bitmask: enable first N audio tracks (1=0b1, 2=0b11, 3=0b111 … 6=0b111111)
   trackMask = builtins.foldl' (acc: _: acc * 2 + 1) 0 (lib.range 1 obsCfg.audio.tracks);
 
@@ -34,7 +43,7 @@
   );
 
   recordEncoderFile = pkgs.writeText "obs-record-encoder.json" (
-    builtins.toJSON {
+    builtins.toJSON ({
       rate_control = "CQP";
       preset = obsCfg.output.preset;
       multipass = obsCfg.output.multipass;
@@ -43,6 +52,9 @@
       adaptive_quantization = obsCfg.output.adaptiveQuantization;
       bf = obsCfg.output.bFrames;
     }
+    // lib.optionalAttrs (obsCfg.output.splitEncode != "auto") {
+      split_encode = splitEncodeModes.${obsCfg.output.splitEncode};
+    })
   );
 
   streamEncoderFile = pkgs.writeText "obs-stream-encoder.json" (
@@ -1338,6 +1350,12 @@ in {
               // {
                 default = false;
               };
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = pkgs.obs-studio.override {cudaSupport = true;};
+              defaultText = lib.literalExpression "pkgs.obs-studio.override {cudaSupport = true;}";
+              description = "OBS package, e.g. with machine-specific patches applied via overrideAttrs.";
+            };
             websocket = {
               port = lib.mkOption {
                 type = lib.types.port;
@@ -1388,6 +1406,7 @@ in {
                   "I444"
                   "P010"
                   "I010"
+                  "P416"
                   "BGRA"
                 ];
                 default = "NV12";
@@ -1395,6 +1414,8 @@ in {
                   OBS internal color format.
                   P010 = semi-planar 4:2:0 10-bit, NVENC native — use for HDR on NVIDIA.
                   NV12 = semi-planar 4:2:0 8-bit — safe default for SDR on any hardware.
+                  P416 = 4:4:4 16-bit planes, for 4:4:4 HDR (Rec.2100). Stock obs-nvenc rejects it;
+                         it needs a patched OBS package (see the package option).
                 '';
               };
               colorSpace = lib.mkOption {
@@ -1633,6 +1654,22 @@ in {
                 default = 0;
                 description = "Number of B-frames. 0 disables B-frames (required for some encoders like AV1).";
               };
+              splitEncode = lib.mkOption {
+                type = lib.types.enum [
+                  "auto"
+                  "disabled"
+                  "two"
+                  "three"
+                  "four"
+                ];
+                default = "auto";
+                description = ''
+                  NVENC split frame encoding (HEVC and AV1 only): split each frame across several
+                  NVENC engines for more throughput, e.g. 4K at high frame rates.
+                  auto = driver decides (OBS default), two/three/four = forced number of strips,
+                  only effective when the GPU has that many engines.
+                '';
+              };
             };
             replayBuffer = {
               enable = lib.mkOption {
@@ -1839,7 +1876,7 @@ in {
     programs = {
       obs-studio = {
         inherit (obsCfg) enable;
-        package = pkgs.obs-studio.override {cudaSupport = true;};
+        inherit (obsCfg) package;
         plugins = [
           # === Capture ===
           pkgs.obs-studio-plugins.obs-vkcapture

@@ -24,8 +24,10 @@ in {
               "editor.scrollbar.vertical" = "hidden";
               "editor.cursorBlinking" = "solid";
               "editor.fontFamily" = "Iosevka Nerd Font";
+              "editor.fontLigatures" = true;
               "editor.linkedEditing" = true;
-              "editor.fontSize" = 16;
+              "editor.fontSize" = 17;
+              "editor.letterSpacing" = -0.5;
               "editor.snippetSuggestions" = "top";
               "editor.inlineSuggest.fontFamily" = "Iosevka Nerd Font";
               "editor.inlayHints.fontFamily" = "Iosevka Nerd Font";
@@ -35,40 +37,70 @@ in {
               "editor.tokenColorCustomizations" = {
                 "textMateRules" = [
                   {
-                    "name" = "One Dark italic";
+                    "name" = "No italics";
                     "scope" = [
                       "comment"
-                      "entity.other.attribute-name"
-                      "keyword"
-                      "markup.underline.link"
-                      "storage.modifier"
-                      "storage.type"
-                      "string.url"
-                      "variable.language.super"
-                      "variable.language.this"
-                    ];
-                    "settings" = {
-                      "fontStyle" = "italic";
-                    };
-                  }
-                  {
-                    "name" = "One Dark italic reset";
-                    "scope" = [
-                      "keyword.operator"
-                      "keyword.other.type"
-                      "storage.modifier.import"
-                      "storage.modifier.package"
-                      "storage.type.built-in"
-                      "storage.type.function.arrow"
-                      "storage.type.generic"
-                      "storage.type.java"
-                      "storage.type.primitive"
+                      "comment.line.shebang"
+                      "comment.line.shebang constant.language"
+                      "comment.line.shebang punctuation.definition.comment"
+                      "entity.name.class"
+                      "entity.name.enum"
+                      "entity.name.function"
+                      "entity.name.function.decorator.python"
+                      "entity.name.function.macro.rust"
+                      "entity.name.impl.rust"
+                      "entity.name.struct"
+                      "entity.name.trait.rust"
+                      "entity.name.type"
+                      "entity.name.type.lifetime"
+                      "entity.other.inherited-class"
+                      "meta.annotation.rust"
+                      "meta.annotation.rust punctuation"
+                      "meta.attribute.rust"
+                      "meta.function-call.constructor"
+                      "meta.function-call.method"
+                      "meta.function.parameters"
+                      "meta.indexed-name.python"
+                      "meta.item-access.python"
+                      "meta.macro.rust support.function.rust"
+                      "meta.shebang.shell"
+                      "meta.string meta.interpolation.parameter.shell variable.other.readwrite"
+                      "meta.type"
+                      "meta.type-alias"
+                      "punctuation.decorator.ts"
+                      "punctuation.definition.attribute.rust"
+                      "punctuation.definition.comment"
+                      "punctuation.definition.comment.shebang.shell"
+                      "punctuation.definition.decorator.python"
+                      "storage.modifier.lifetime.rust"
+                      "storage.type.haskell"
+                      "storage.type.string.python"
+                      "support.class"
+                      "support.function"
+                      "support.function.macro.julia"
+                      "support.function.magic.python"
+                      "support.function.misc"
+                      "support.macro.rust"
+                      "support.type"
+                      "variable.function"
+                      "variable.language.special.self.python"
+                      "variable.other.member.definition.haskell"
+                      "variable.other.member.haskell"
+                      "variable.parameter"
+                      "variable.parameter.function.language.special.self.python"
                     ];
                     "settings" = {
                       "fontStyle" = "";
                     };
                   }
                 ];
+              };
+              "editor.semanticTokenColorCustomizations" = {
+                "rules" = {
+                  "enum:haskell" = {"italic" = false;};
+                  "type:haskell" = {"italic" = false;};
+                  "property:haskell" = {"italic" = false;};
+                };
               };
               "eslint.format.enable" = false;
               "eslint.lintTask.options" = "";
@@ -128,8 +160,9 @@ in {
                 "vs-kubernetes.crd-code-completion" = "disabled";
               };
               "workbench.startupEditor" = "none";
-              "workbench.iconTheme" = "vscode-icons";
-              "workbench.colorTheme" = "One Dark Vivid";
+              "workbench.iconTheme" = "material-icon-theme";
+              "workbench.productIconTheme" = "viraUIIcons";
+              "workbench.colorTheme" = "Catppuccin Mocha";
               "whichkey.sortOrder" = "alphabetically";
               "whichkey.bindings" = [
                 {
