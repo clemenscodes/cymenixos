@@ -92,6 +92,7 @@
   rgbConfig = pkgs.writeText "rgb-control.json" (builtins.toJSON {
     inherit servers;
     onModes = rgb.onModes;
+    offModes = rgb.offModes;
     zoneSizes = rgb.zoneSizes;
   });
 
@@ -188,6 +189,15 @@
 
     def switch_on(device, wanted, global_brightness):
         mode = find_mode(device, wanted["mode"])
+        serial = getattr(device.metadata, "serial", "") or ""
+        if serial.startswith("wireless:") and device.modes[device.active_mode].name.lower() == mode.name.lower():
+            # Lian Li wireless devices ignore a change that keeps the effect and only alters
+            # its colours or brightness (e.g. black to white); passing through another effect
+            # makes them take it.
+            other = next((m for m in device.modes if m.name.lower() != mode.name.lower()), None)
+            if other is not None:
+                device.set_mode(other)
+                time.sleep(0.5)
         colors = [RGBColor.fromHEX(c) for c in wanted.get("colors") or []]
         if colors and mode.colors:
             mode.colors = [colors[i % len(colors)] for i in range(len(mode.colors))]
@@ -225,7 +235,7 @@
                 try:
                     client = OpenRGBClient(host, int(port), "rgb-control")
                 except Exception as error:
-                    print(f"{server}: {error}", file=sys.stderr)
+                    print(f"{server}: {error!r}", file=sys.stderr)
                     time.sleep(1)
                     continue
                 try:
@@ -242,14 +252,14 @@
                             apply(device)
                             checks[index] = check
                         except Exception as error:
-                            print(f"{device.name}: {error}", file=sys.stderr)
+                            print(f"{device.name}: {error!r}", file=sys.stderr)
                             checks[index] = None
                     # the refresh is synchronous; the pause only lets queued colour updates land
                     time.sleep(0.3 if attempt == 0 else 1)
                     client.update()
                     todo = {i for i, check in checks.items() if check is None or not check(client.devices[i])}
                 except Exception as error:
-                    print(f"{server}: {error}", file=sys.stderr)
+                    print(f"{server}: {error!r}", file=sys.stderr)
                 finally:
                     try:
                         client.disconnect()
@@ -297,6 +307,9 @@
             return
         if command == "off":
             def off(device):
+                # a declared native "off" look wins: wireless devices drop Direct frames
+                if wanted_for(device, config["offModes"]) is not None:
+                    return on_step(device, config["offModes"], 100, {})
                 name = off_mode(device)
                 if name is None:
                     return None
@@ -476,6 +489,48 @@ in {
           description = ''
             What rgb-on sets, keyed by device serial (as reported over the SDK) or by device
             name (all devices with that name). A serial key wins over a name key.
+          '';
+        };
+        offModes = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.submodule {
+            options = {
+              mode = lib.mkOption {
+                type = lib.types.str;
+                example = "Rainbow Wave";
+                description = "OpenRGB mode name, as listed by `openrgb --client --list-detailed`.";
+              };
+              colors = lib.mkOption {
+                type = lib.types.listOf (lib.types.strMatching "[0-9A-Fa-f]{6}");
+                default = [];
+                description = "Colours (RRGGBB) for modes that take them, repeated to fill the mode's colour slots.";
+              };
+              speed = lib.mkOption {
+                type = lib.types.nullOr (lib.types.ints.between 0 100);
+                default = null;
+                description = "Effect speed in percent of the device's range (0 = slowest), for modes that have one.";
+              };
+              brightness = lib.mkOption {
+                type = lib.types.nullOr (lib.types.ints.between 0 100);
+                default = null;
+                description = "Brightness in percent of the device's range (default 100), scaled by rgb-brightness.";
+              };
+              direction = lib.mkOption {
+                type = lib.types.nullOr (lib.types.ints.between 0 5);
+                default = null;
+                description = "OpenRGB direction: 0 left, 1 right, 2 up, 3 down, 4 horizontal, 5 vertical.";
+              };
+            };
+          });
+          default = {};
+          example = {"UNI FAN SL-INF Wireless" = {
+            mode = "Gradient Ribbon";
+            colors = ["000000"];
+            brightness = 0;
+          };};
+          description = ''
+            How rgb-off switches specific devices, same keys and fields as onModes. Without an
+            entry a device uses its "Off" mode, else Direct or Static in black. Wireless Lian Li
+            devices may drop Direct frames, a native effect in black with brightness 0 is reliable.
           '';
         };
         zoneSizes = lib.mkOption {
