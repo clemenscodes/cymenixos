@@ -98,13 +98,44 @@
     libraries = [pkgs.python3Packages.openrgb-python];
     flakeIgnore = ["E501"];
   } ''
+    """Switch all SDK servers' devices on (declared modes), off, or set the global brightness.
+
+    State (on/off, global brightness in percent) lives in $XDG_STATE_HOME/rgb-control/state.json,
+    so rgb-on restores the last brightness and the bar can show the current state.
+    """
     import json
+    import os
     import sys
+    import warnings
 
     from openrgb import OpenRGBClient
     from openrgb.utils import RGBColor
 
     BLACK = RGBColor(0, 0, 0)
+    STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")), "rgb-control")
+    STATE_FILE = os.path.join(STATE_DIR, "state.json")
+
+
+    def load_state():
+        try:
+            with open(STATE_FILE) as f:
+                state = json.load(f)
+        except (OSError, ValueError):
+            state = {}
+        return {"on": state.get("on", True), "brightness": int(state.get("brightness", 100))}
+
+
+    def save_state(state):
+        os.makedirs(STATE_DIR, exist_ok=True)
+        tmp = STATE_FILE + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(state, f)
+        os.replace(tmp, STATE_FILE)
+
+
+    def scale(low, high, percent):
+        # percent of a device range; some ranges count downwards (low > high)
+        return round(low + (high - low) * percent / 100)
 
 
     def find_mode(device, name):
@@ -112,6 +143,17 @@
             if mode.name.lower() == name.lower():
                 return mode
         return None
+
+
+    def wanted_for(device, on_modes):
+        serial = getattr(device.metadata, "serial", "") or ""
+        return on_modes.get(serial) or on_modes.get(device.name)
+
+
+    def has_brightness(mode):
+        low = getattr(mode, "brightness_min", None)
+        high = getattr(mode, "brightness_max", None)
+        return low is not None and high is not None and low != high
 
 
     def switch_off(device):
@@ -128,42 +170,85 @@
         return False
 
 
-    def switch_on(device, wanted):
+    def switch_on(device, wanted, global_brightness):
         mode = find_mode(device, wanted["mode"])
         if mode is None:
             print(f"{device.name}: no mode {wanted['mode']!r}", file=sys.stderr)
             return False
-        speed = wanted.get("speed")
-        if speed is not None and mode.speed_min != mode.speed_max:
-            # percent of the device's range; some devices count downwards (min > max)
-            mode.speed = round(mode.speed_min + (mode.speed_max - mode.speed_min) * speed / 100)
-        color = wanted.get("color")
-        if color and mode.colors:
-            mode.colors = [RGBColor.fromHEX(color)] * len(mode.colors)
+        colors = [RGBColor.fromHEX(c) for c in wanted.get("colors") or []]
+        if colors and mode.colors:
+            mode.colors = [colors[i % len(colors)] for i in range(len(mode.colors))]
+        if wanted.get("speed") is not None and mode.speed_min != mode.speed_max:
+            mode.speed = scale(mode.speed_min, mode.speed_max, wanted["speed"])
+        if wanted.get("direction") is not None:
+            mode.direction = wanted["direction"]
+        if has_brightness(mode):
+            base = wanted.get("brightness")
+            base = 100 if base is None else base
+            mode.brightness = scale(mode.brightness_min, mode.brightness_max, base * global_brightness / 100)
         device.set_mode(mode)
-        if color and mode.name.lower() == "direct" and device.leds:
-            device.set_color(RGBColor.fromHEX(color))
+        if colors and mode.name.lower() == "direct" and device.leds:
+            device.set_color(colors[0])
         return True
 
 
-    def main():
-        action = sys.argv[1]
-        config = json.load(open(sys.argv[2]))
+    def for_each_device(config, action):
         ok = True
         for server in config["servers"]:
             host, _, port = server.rpartition(":")
             try:
-                client = OpenRGBClient(host, int(port), f"rgb-{action}")
+                client = OpenRGBClient(host, int(port), "rgb-control")
             except Exception as error:
                 print(f"{server}: {error}", file=sys.stderr)
                 ok = False
                 continue
             for device in client.devices:
-                if action == "off":
-                    ok &= switch_off(device)
-                elif device.name in config["onModes"]:
-                    ok &= switch_on(device, config["onModes"][device.name])
+                ok &= action(device)
             client.disconnect()
+        return ok
+
+
+    def main():
+        warnings.simplefilter("ignore")
+        command = sys.argv[1]
+        config = json.load(open(sys.argv[2]))
+        on_modes = config["onModes"]
+        state = load_state()
+
+        if command == "status":
+            print(json.dumps(state))
+            return
+        if command == "off":
+            ok = for_each_device(config, switch_off)
+            state["on"] = False
+        elif command == "on":
+            def on(device):
+                wanted = wanted_for(device, on_modes)
+                return switch_on(device, wanted, state["brightness"]) if wanted else True
+            ok = for_each_device(config, on)
+            state["on"] = True
+        elif command == "toggle":
+            save_state(state)
+            os.execv(sys.argv[0], [sys.argv[0], "off" if state["on"] else "on", sys.argv[2]])
+        elif command == "brightness":
+            value = sys.argv[3]
+            if value[0] in "+-":
+                state["brightness"] = max(0, min(100, state["brightness"] + int(value)))
+            else:
+                state["brightness"] = max(0, min(100, int(value)))
+            ok = True
+            if state["on"]:
+                def dim(device):
+                    wanted = wanted_for(device, on_modes)
+                    mode = find_mode(device, wanted["mode"]) if wanted else None
+                    if mode is None or not has_brightness(mode):
+                        return True
+                    return switch_on(device, wanted, state["brightness"])
+                ok = for_each_device(config, dim)
+        else:
+            sys.exit("usage: rgb-control on|off|toggle|status|brightness [+-]PERCENT CONFIG")
+        save_state(state)
+        print(json.dumps(state))
         sys.exit(0 if ok else 1)
 
 
@@ -189,8 +274,13 @@
     mv "$file.tmp" "$file"
   '';
 
-  rgb-off = pkgs.writeShellScriptBin "rgb-off" ''exec ${rgb-control}/bin/rgb-control off ${rgbConfig}'';
-  rgb-on = pkgs.writeShellScriptBin "rgb-on" ''exec ${rgb-control}/bin/rgb-control on ${rgbConfig}'';
+  mkRgbCommand = name: args: pkgs.writeShellScriptBin name ''exec ${rgb-control}/bin/rgb-control ${args} ${rgbConfig} "$@"'';
+  rgb-off = mkRgbCommand "rgb-off" "off";
+  rgb-on = mkRgbCommand "rgb-on" "on";
+  rgb-toggle = mkRgbCommand "rgb-toggle" "toggle";
+  rgb-status = mkRgbCommand "rgb-status" "status";
+  # rgb-brightness 50 | +25 | -25
+  rgb-brightness = pkgs.writeShellScriptBin "rgb-brightness" ''exec ${rgb-control}/bin/rgb-control brightness ${rgbConfig} "$1"'';
 in {
   options = {
     modules = {
@@ -282,21 +372,34 @@ in {
                 example = "Rainbow Wave";
                 description = "OpenRGB mode name, as listed by `openrgb --client --list-detailed`.";
               };
-              color = lib.mkOption {
-                type = lib.types.nullOr (lib.types.strMatching "[0-9A-Fa-f]{6}");
-                default = null;
-                description = "Colour for modes that take one, as RRGGBB.";
+              colors = lib.mkOption {
+                type = lib.types.listOf (lib.types.strMatching "[0-9A-Fa-f]{6}");
+                default = [];
+                description = "Colours (RRGGBB) for modes that take them, repeated to fill the mode's colour slots.";
               };
               speed = lib.mkOption {
                 type = lib.types.nullOr (lib.types.ints.between 0 100);
                 default = null;
                 description = "Effect speed in percent of the device's range (0 = slowest), for modes that have one.";
               };
+              brightness = lib.mkOption {
+                type = lib.types.nullOr (lib.types.ints.between 0 100);
+                default = null;
+                description = "Brightness in percent of the device's range (default 100), scaled by rgb-brightness.";
+              };
+              direction = lib.mkOption {
+                type = lib.types.nullOr (lib.types.ints.between 0 5);
+                default = null;
+                description = "OpenRGB direction: 0 left, 1 right, 2 up, 3 down, 4 horizontal, 5 vertical.";
+              };
             };
           });
           default = {};
           example = {"Corsair Dominator Titanium RGB DDR5".mode = "Rainbow Wave";};
-          description = "What rgb-on sets, keyed by OpenRGB device name (all devices with that name).";
+          description = ''
+            What rgb-on sets, keyed by device serial (as reported over the SDK) or by device
+            name (all devices with that name). A serial key wins over a name key.
+          '';
         };
         schedule = {
           off = lib.mkOption {
@@ -418,6 +521,6 @@ in {
         };
     };
 
-    environment.systemPackages = [rgb.package rgb-off rgb-on];
+    environment.systemPackages = [rgb.package rgb-off rgb-on rgb-toggle rgb-status rgb-brightness];
   };
 }

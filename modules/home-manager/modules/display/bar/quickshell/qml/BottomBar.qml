@@ -509,6 +509,35 @@ PanelWindow {
         }
 
         Pill {
+            id: rgbPill
+            Layout.alignment: Qt.AlignVCenter
+            interactive: true
+            visible: Rgb.available
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+
+            tooltipText: {
+                let s = Rgb.on ? "RGB lighting: on, " + Rgb.brightness + "%" : "RGB lighting: off"
+                if (Rgb.busy) s += "  (switching…)"
+                s += "\nBrightness follows only devices whose effects support it."
+                s += "\n\nClick: on / off  ·  Scroll: brightness"
+                return s
+            }
+
+            onLeftClicked: Rgb.toggle()
+            onScrolledBy: function(n) { Rgb.changeBrightness(n > 0 ? Rgb.brightnessStep : -Rgb.brightnessStep) }
+
+            Text {
+                // fixed-width number like the other pills; the icon shows on / off
+                text: (Rgb.on ? String(Rgb.brightness).padStart(3, " ") + "%" : " off") + (Rgb.on ? " 🌈" : " ⚫")
+                color: Rgb.busy ? Theme.mutedColor : Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        Pill {
             id: brightnessPill
             Layout.alignment: Qt.AlignVCenter
             interactive: true
