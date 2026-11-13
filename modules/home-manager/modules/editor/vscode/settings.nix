@@ -1,4 +1,8 @@
-{lib, ...}: {config, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: {config, ...}: let
   cfg = config.modules.editor;
 in {
   config = lib.mkIf (cfg.enable && cfg.vscode.enable) {
@@ -151,6 +155,10 @@ in {
               "testing.followRunningTest" = true;
               "testing.showAllMessages" = true;
               "typescript.updateImportsOnFileMove.enabled" = "always";
+              # Use the server shipped with the rust-analyzer extension instead of the one from a
+              # project toolchain: an older toolchain server rejects settings of the newer extension
+              # (e.g. inlayHints.implicitDrops.enable = "never" where it expects a boolean).
+              "rust-analyzer.server.path" = "${pkgs.vscode-marketplace.rust-lang.rust-analyzer}/share/vscode/extensions/rust-lang.rust-analyzer/server/rust-analyzer";
               "vscode-neovim.logOutputToConsole" = true;
               # nvim --clean: no user config and no plugins, so nothing competes with the editor settings
               "vscode-neovim.neovimClean" = true;
