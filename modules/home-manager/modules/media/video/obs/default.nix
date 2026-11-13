@@ -64,71 +64,6 @@
     }
   );
 
-  # PipeWire application audio output capture (game sound, SDL, etc.)
-  mkPipeWireAppSource = name: uuid: targetName: vol: {
-    prev_ver = 536936448;
-    inherit name uuid;
-    id = "pipewire_audio_application_capture";
-    versioned_id = "pipewire_audio_application_capture";
-    settings = {
-      TargetName = targetName;
-    };
-    mixers = 255;
-    sync = 0;
-    flags = 0;
-    volume = vol;
-    balance = 0.5;
-    enabled = true;
-    muted = false;
-    push-to-mute = false;
-    push-to-mute-delay = 0;
-    push-to-talk = false;
-    push-to-talk-delay = 0;
-    hotkeys = {
-      "libobs.mute" = [];
-      "libobs.unmute" = [];
-      "libobs.push-to-mute" = [];
-      "libobs.push-to-talk" = [];
-    };
-    deinterlace_mode = 0;
-    deinterlace_field_order = 0;
-    monitoring_type = 0;
-    private_settings = {};
-  };
-
-  # PipeWire audio input source with filters (for scene sources like SM7B)
-  mkPipeWireSource = name: uuid: targetName: filters: {
-    prev_ver = 536936448;
-    inherit name uuid filters;
-    id = "pipewire_audio_input_capture";
-    versioned_id = "pipewire_audio_input_capture";
-    settings = {
-      TargetName = targetName;
-      TargetId = 0;
-    };
-    mixers = 255;
-    sync = 0;
-    flags = 0;
-    volume = 1.0;
-    balance = 0.5;
-    enabled = true;
-    muted = false;
-    push-to-mute = false;
-    push-to-mute-delay = 0;
-    push-to-talk = false;
-    push-to-talk-delay = 0;
-    hotkeys = {
-      "libobs.mute" = [];
-      "libobs.unmute" = [];
-      "libobs.push-to-mute" = [];
-      "libobs.push-to-talk" = [];
-    };
-    deinterlace_mode = 0;
-    deinterlace_field_order = 0;
-    monitoring_type = 0;
-    private_settings = {};
-  };
-
   mkFilter = name: uuid: id: settings: {
     prev_ver = 536936448;
     inherit
@@ -164,14 +99,130 @@
     (mkFilter "Limiter" "f98982cf-dd71-4a24-ac47-f1d5a3b13760" "limiter_filter" {threshold = -2.0;})
   ];
 
-  # PipeWire desktop audio output capture (all system audio, no app filter)
-  mkPipeWireOutputSource = name: uuid: {
+  scenesCfg = obsCfg.scenes;
+
+  # Deterministic UUID-shaped id, so generated sources and scenes keep their identity across switches
+  mkUuid = seed: let
+    h = builtins.hashString "sha256" seed;
+    part = start: len: builtins.substring start len h;
+  in "${part 0 8}-${part 8 4}-${part 12 4}-${part 16 4}-${part 20 12}";
+
+  mkSourceJson = name: src: {
     prev_ver = 536936448;
-    inherit name uuid;
-    id = "pipewire_audio_output_capture";
-    versioned_id = "pipewire_audio_output_capture";
-    settings = {};
-    mixers = 255;
+    inherit name;
+    inherit (src) uuid settings volume filters;
+    id = src.type;
+    versioned_id = src.type;
+    mixers =
+      if src.audioTrack == null
+      then 0
+      else singleTrackMixer src.audioTrack;
+    sync = 0;
+    flags = 0;
+    balance = 0.5;
+    enabled = true;
+    muted = false;
+    push-to-mute = false;
+    push-to-mute-delay = 0;
+    push-to-talk = false;
+    push-to-talk-delay = 0;
+    hotkeys = {};
+    deinterlace_mode = 0;
+    deinterlace_field_order = 0;
+    monitoring_type = 0;
+    private_settings = {};
+  };
+
+  mkSceneItemJson = index: item: let
+    bw = obsCfg.profile.baseWidth * 1.0;
+    bh = obsCfg.profile.baseHeight * 1.0;
+    halfH = bh / 2.0;
+    fill = item.fit == "canvas";
+  in {
+    name = item.source;
+    source_uuid = scenesCfg.sources.${item.source}.uuid;
+    inherit (item) visible;
+    locked = false;
+    rot = 0.0;
+    scale_ref = {
+      x = bw;
+      y = bh;
+    };
+    align = 5;
+    bounds_type =
+      if fill
+      then 2
+      else 0;
+    bounds_align = 0;
+    bounds_crop = false;
+    crop_left = 0;
+    crop_top = 0;
+    crop_right = 0;
+    crop_bottom = 0;
+    id = index + 1;
+    group_item_backup = false;
+    pos = {
+      inherit (item) x y;
+    };
+    pos_rel = {
+      x = (item.x - bw / 2.0) / halfH;
+      y = (item.y - bh / 2.0) / halfH;
+    };
+    scale = {
+      x = 1.0;
+      y = 1.0;
+    };
+    scale_rel = {
+      x = 1.0;
+      y = 1.0;
+    };
+    bounds =
+      if fill
+      then {
+        x = bw;
+        y = bh;
+      }
+      else {
+        x = 0.0;
+        y = 0.0;
+      };
+    bounds_rel =
+      if fill
+      then {
+        x = bw / halfH;
+        y = bh / halfH;
+      }
+      else {
+        x = 0.0;
+        y = 0.0;
+      };
+    scale_filter = "disable";
+    blend_method = "default";
+    blend_type = "normal";
+    show_transition = {
+      duration = 0;
+    };
+    hide_transition = {
+      duration = 0;
+    };
+    private_settings = {};
+  };
+
+  orderedScenes = lib.sort (a: b: a.order < b.order || (a.order == b.order && a.name < b.name)) (
+    lib.mapAttrsToList (name: scene: scene // {inherit name;}) scenesCfg.scenes
+  );
+
+  mkSceneJson = scene: {
+    prev_ver = 536936448;
+    inherit (scene) name uuid;
+    id = "scene";
+    versioned_id = "scene";
+    settings = {
+      id_counter = builtins.length scene.items;
+      custom_size = false;
+      items = lib.imap0 mkSceneItemJson scene.items;
+    };
+    mixers = 0;
     sync = 0;
     flags = 0;
     volume = 1.0;
@@ -182,628 +233,111 @@
     push-to-mute-delay = 0;
     push-to-talk = false;
     push-to-talk-delay = 0;
-    hotkeys = {
-      "libobs.mute" = [];
-      "libobs.unmute" = [];
-      "libobs.push-to-mute" = [];
-      "libobs.push-to-talk" = [];
-    };
+    hotkeys = {};
     deinterlace_mode = 0;
     deinterlace_field_order = 0;
     monitoring_type = 0;
+    canvas_uuid = "6c69626f-6273-4c00-9d88-c5136d61696e";
     private_settings = {};
   };
+
+  sourceType = lib.types.submodule ({name, ...}: {
+    options = {
+      type = lib.mkOption {
+        type = lib.types.str;
+        example = "kms-capture-source";
+        description = "OBS source id (e.g. vkcapture-source, v4l2_input, pipewire_audio_input_capture, kms-capture-source).";
+      };
+      uuid = lib.mkOption {
+        type = lib.types.str;
+        default = mkUuid "source:${name}";
+        defaultText = lib.literalMD "derived from the source name";
+        description = "Source UUID. Keep it stable so OBS keeps per-source state across switches.";
+      };
+      settings = lib.mkOption {
+        type = lib.types.attrsOf lib.types.anything;
+        default = {};
+        description = "Source settings as OBS stores them in the scene collection.";
+      };
+      audioTrack = lib.mkOption {
+        type = lib.types.nullOr (lib.types.ints.between 1 6);
+        default = null;
+        description = "Recording track this audio source is isolated to. null for video-only sources.";
+      };
+      volume = lib.mkOption {
+        type = lib.types.float;
+        default = 1.0;
+        description = "Linear volume multiplier (convert from dB with 10^(dB/20)).";
+      };
+      filters = lib.mkOption {
+        type = lib.types.listOf (lib.types.attrsOf lib.types.anything);
+        default = [];
+        description = "Filters as OBS stores them in the scene collection.";
+      };
+    };
+  });
+
+  sceneItemType = lib.types.submodule {
+    options = {
+      source = lib.mkOption {
+        type = lib.types.str;
+        description = "Name of a source defined in scenes.sources.";
+      };
+      fit = lib.mkOption {
+        type = lib.types.enum [
+          "none"
+          "canvas"
+        ];
+        default = "none";
+        description = "canvas = scale to fit the whole canvas, none = native size at x/y.";
+      };
+      x = lib.mkOption {
+        type = lib.types.float;
+        default = 0.0;
+        description = "Horizontal position of the top-left corner in canvas pixels.";
+      };
+      y = lib.mkOption {
+        type = lib.types.float;
+        default = 0.0;
+        description = "Vertical position of the top-left corner in canvas pixels.";
+      };
+      visible = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Whether the item is visible.";
+      };
+    };
+  };
+
+  sceneType = lib.types.submodule ({name, ...}: {
+    options = {
+      order = lib.mkOption {
+        type = lib.types.int;
+        default = 100;
+        description = "Position in the scene list (ascending).";
+      };
+      uuid = lib.mkOption {
+        type = lib.types.str;
+        default = mkUuid "scene:${name}";
+        defaultText = lib.literalMD "derived from the scene name";
+        description = "Scene UUID.";
+      };
+      items = lib.mkOption {
+        type = lib.types.listOf sceneItemType;
+        default = [];
+        description = "Scene items, bottom to top.";
+      };
+    };
+  });
 
   sceneCollectionFile = pkgs.writeText "obs-scene-collection.json" (
     builtins.toJSON {
       name = obsCfg.scenes.name;
-      sources =
-        [
-          # 1. VK Capture
-          {
-            prev_ver = 536936448;
-            name = "VK Capture";
-            uuid = "cyme0001-0001-0001-0001-000000000004";
-            id = "vkcapture-source";
-            versioned_id = "vkcapture-source";
-            settings = {
-              show_cursor = false;
-            };
-            mixers = 0;
-            sync = 0;
-            flags = 0;
-            volume = 1.0;
-            balance = 0.5;
-            enabled = true;
-            muted = false;
-            push-to-mute = false;
-            push-to-mute-delay = 0;
-            push-to-talk = false;
-            push-to-talk-delay = 0;
-            hotkeys = {};
-            deinterlace_mode = 0;
-            deinterlace_field_order = 0;
-            monitoring_type = 0;
-            private_settings = {};
-          }
-          # 2. GameSound (SDL Application via PipeWire app capture) — isolated to its track
-          (
-            (mkPipeWireAppSource "GameSound" "b84d7fe9-1968-45f5-864d-d656d56b019b" obsCfg.audio.gameSource obsCfg.audio.gameSourceVolume)
-            // {mixers = singleTrackMixer obsCfg.audio.gameSourceTrack;}
-          )
-          # 3. Shure SM7B (PipeWire input with broadcast filter chain)
-          (
-            (mkPipeWireSource "Shure SM7B" "9e0dd964-6f7e-4aca-9f09-f118d39826ab" obsCfg.audio.mic sm7bFilters)
-            // {
-              mixers = singleTrackMixer obsCfg.audio.micTrack;
-              settings = {
-                TargetId = 43;
-                TargetName = obsCfg.audio.mic;
-              };
-            }
-          )
-        ]
-        ++ lib.optional keyboardOverlayCfg.enable {
-          # Keyboard Overlay browser source
-          prev_ver = 536936448;
-          name = "Keyboard Overlay";
-          uuid = "cyme0001-0001-0001-0001-000000000005";
-          id = "browser_source";
-          versioned_id = "browser_source";
-          settings = {
-            url = keyboardOverlayCfg.url;
-            width = keyboardOverlayCfg.width;
-            height = keyboardOverlayCfg.height;
-            fps = keyboardOverlayCfg.fps;
-            css = keyboardOverlayCfg.extraCss;
-            shutdown = false;
-            restart_when_active = false;
-          };
-          mixers = 0;
-          sync = 0;
-          flags = 0;
-          volume = 1.0;
-          balance = 0.5;
-          enabled = true;
-          muted = false;
-          push-to-mute = false;
-          push-to-mute-delay = 0;
-          push-to-talk = false;
-          push-to-talk-delay = 0;
-          hotkeys = {};
-          deinterlace_mode = 0;
-          deinterlace_field_order = 0;
-          monitoring_type = 0;
-          private_settings = {};
-        }
-        ++ [
-          # 6. Screen — PipeWire desktop portal capture (hardware DMA-buf path, zero-copy)
-          # Uses pipewire-desktop-capture-source (xdg-desktop-portal → PipeWire → DMA-buf EGL import).
-          # Requires NVIDIA's EGL to be used (not Mesa's) — obs-launch sets
-          # __EGL_VENDOR_LIBRARY_FILENAMES to force 10_nvidia.json when modules.gpu.nvidia.enable.
-          # On first launch OBS shows the portal picker; the RestoreToken is saved back to the
-          # seeded scene JSON and persisted via impermanence so no re-selection is needed after reboot.
-          {
-            prev_ver = 536936448;
-            name = "Screen";
-            uuid = "cyme0001-0001-0001-0001-000000000006";
-            id = "pipewire-desktop-capture-source";
-            versioned_id = "pipewire-desktop-capture-source";
-            settings = {
-              ShowCursor = true;
-              RestoreToken = "";
-            };
-            mixers = 0;
-            sync = 0;
-            flags = 0;
-            volume = 1.0;
-            balance = 0.5;
-            enabled = true;
-            muted = false;
-            push-to-mute = false;
-            push-to-mute-delay = 0;
-            push-to-talk = false;
-            push-to-talk-delay = 0;
-            hotkeys = {};
-            deinterlace_mode = 0;
-            deinterlace_field_order = 0;
-            monitoring_type = 0;
-            private_settings = {};
-          }
-          # 7. DesktopAudio (all PipeWire output — used by the Work scene)
-          (
-            (mkPipeWireOutputSource "DesktopAudio" "cyme0001-0001-0001-0001-000000000008")
-            // {mixers = singleTrackMixer obsCfg.audio.desktopAudioTrack;}
-          )
-          # Game scene — contains VK Capture (video) + GameSound + SM7B (audio)
-          {
-            prev_ver = 536936448;
-            name = "Game";
-            uuid = "cyme0001-0001-0001-0001-000000000003";
-            id = "scene";
-            versioned_id = "scene";
-            settings = {
-              id_counter =
-                if keyboardOverlayCfg.enable
-                then 4
-                else 3;
-              custom_size = false;
-              items =
-                [
-                  {
-                    name = "VK Capture";
-                    source_uuid = "cyme0001-0001-0001-0001-000000000004";
-                    visible = true;
-                    locked = false;
-                    rot = 0.0;
-                    scale_ref = {
-                      x = 3840.0;
-                      y = 2160.0;
-                    };
-                    align = 5;
-                    bounds_type = 2;
-                    bounds_align = 0;
-                    bounds_crop = false;
-                    crop_left = 0;
-                    crop_top = 0;
-                    crop_right = 0;
-                    crop_bottom = 0;
-                    id = 1;
-                    group_item_backup = false;
-                    pos = {
-                      x = 0.0;
-                      y = 0.0;
-                    };
-                    pos_rel = {
-                      x = -1.7777777910232544;
-                      y = -1.0;
-                    };
-                    scale = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    scale_rel = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    bounds = {
-                      x = 3840.0;
-                      y = 2160.0;
-                    };
-                    bounds_rel = {
-                      x = 3.555555582046509;
-                      y = 2.0;
-                    };
-                    scale_filter = "disable";
-                    blend_method = "default";
-                    blend_type = "normal";
-                    show_transition = {
-                      duration = 0;
-                    };
-                    hide_transition = {
-                      duration = 0;
-                    };
-                    private_settings = {};
-                  }
-                  {
-                    name = "GameSound";
-                    source_uuid = "b84d7fe9-1968-45f5-864d-d656d56b019b";
-                    visible = true;
-                    locked = false;
-                    rot = 0.0;
-                    scale_ref = {
-                      x = 3840.0;
-                      y = 2160.0;
-                    };
-                    align = 5;
-                    bounds_type = 0;
-                    bounds_align = 0;
-                    bounds_crop = false;
-                    crop_left = 0;
-                    crop_top = 0;
-                    crop_right = 0;
-                    crop_bottom = 0;
-                    id = 2;
-                    group_item_backup = false;
-                    pos = {
-                      x = 0.0;
-                      y = 0.0;
-                    };
-                    pos_rel = {
-                      x = -1.7777777910232544;
-                      y = -1.0;
-                    };
-                    scale = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    scale_rel = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    bounds = {
-                      x = 0.0;
-                      y = 0.0;
-                    };
-                    bounds_rel = {
-                      x = 0.0;
-                      y = 0.0;
-                    };
-                    scale_filter = "disable";
-                    blend_method = "default";
-                    blend_type = "normal";
-                    show_transition = {
-                      duration = 300;
-                    };
-                    hide_transition = {
-                      duration = 300;
-                    };
-                    private_settings = {};
-                  }
-                  {
-                    name = "Shure SM7B";
-                    source_uuid = "9e0dd964-6f7e-4aca-9f09-f118d39826ab";
-                    visible = true;
-                    locked = false;
-                    rot = 0.0;
-                    scale_ref = {
-                      x = 3840.0;
-                      y = 2160.0;
-                    };
-                    align = 5;
-                    bounds_type = 0;
-                    bounds_align = 0;
-                    bounds_crop = false;
-                    crop_left = 0;
-                    crop_top = 0;
-                    crop_right = 0;
-                    crop_bottom = 0;
-                    id = 3;
-                    group_item_backup = false;
-                    pos = {
-                      x = 0.0;
-                      y = 0.0;
-                    };
-                    pos_rel = {
-                      x = -1.7777777910232544;
-                      y = -1.0;
-                    };
-                    scale = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    scale_rel = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    bounds = {
-                      x = 0.0;
-                      y = 0.0;
-                    };
-                    bounds_rel = {
-                      x = 0.0;
-                      y = 0.0;
-                    };
-                    scale_filter = "disable";
-                    blend_method = "default";
-                    blend_type = "normal";
-                    show_transition = {
-                      duration = 300;
-                    };
-                    hide_transition = {
-                      duration = 300;
-                    };
-                    private_settings = {};
-                  }
-                ]
-                ++ lib.optional keyboardOverlayCfg.enable (
-                  let
-                    bw = obsCfg.profile.baseWidth * 1.0;
-                    bh = obsCfg.profile.baseHeight * 1.0;
-                    halfH = bh / 2.0;
-                    px = keyboardOverlayCfg.pos.x;
-                    py = keyboardOverlayCfg.pos.y;
-                  in {
-                    name = "Keyboard Overlay";
-                    source_uuid = "cyme0001-0001-0001-0001-000000000005";
-                    visible = true;
-                    locked = false;
-                    rot = 0.0;
-                    scale_ref = {
-                      x = bw;
-                      y = bh;
-                    };
-                    align = 5;
-                    bounds_type = 2;
-                    bounds_align = 0;
-                    bounds_crop = false;
-                    crop_left = 0;
-                    crop_top = 0;
-                    crop_right = 0;
-                    crop_bottom = 0;
-                    id = 4;
-                    group_item_backup = false;
-                    pos = {
-                      x = px;
-                      y = py;
-                    };
-                    pos_rel = {
-                      x = (px - bw / 2.0) / halfH;
-                      y = (py - bh / 2.0) / halfH;
-                    };
-                    scale = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    scale_rel = {
-                      x = 1.0;
-                      y = 1.0;
-                    };
-                    bounds = {
-                      x = bw;
-                      y = bh;
-                    };
-                    bounds_rel = {
-                      x = bw / halfH;
-                      y = bh / halfH;
-                    };
-                    scale_filter = "disable";
-                    blend_method = "default";
-                    blend_type = "normal";
-                    show_transition = {
-                      duration = 300;
-                    };
-                    hide_transition = {
-                      duration = 300;
-                    };
-                    private_settings = {};
-                  }
-                );
-            };
-            mixers = 0;
-            sync = 0;
-            flags = 0;
-            volume = 1.0;
-            balance = 0.5;
-            enabled = true;
-            muted = false;
-            push-to-mute = false;
-            push-to-mute-delay = 0;
-            push-to-talk = false;
-            push-to-talk-delay = 0;
-            hotkeys =
-              {
-                "OBSBasic.SelectScene" = [];
-                "libobs.show_scene_item.1" = [];
-                "libobs.hide_scene_item.1" = [];
-                "libobs.show_scene_item.2" = [];
-                "libobs.hide_scene_item.2" = [];
-                "libobs.show_scene_item.3" = [];
-                "libobs.hide_scene_item.3" = [];
-              }
-              // lib.optionalAttrs keyboardOverlayCfg.enable {
-                "libobs.show_scene_item.4" = [];
-                "libobs.hide_scene_item.4" = [];
-              };
-            deinterlace_mode = 0;
-            deinterlace_field_order = 0;
-            monitoring_type = 0;
-            canvas_uuid = "6c69626f-6273-4c00-9d88-c5136d61696e";
-            private_settings = {};
-          }
-          # Work scene — Screen capture (video) + desktop sound + SM7B (audio)
-          {
-            prev_ver = 536936448;
-            name = "Work";
-            uuid = "cyme0001-0001-0001-0001-000000000007";
-            id = "scene";
-            versioned_id = "scene";
-            settings = {
-              id_counter = 3;
-              custom_size = false;
-              items = [
-                {
-                  name = "Screen";
-                  source_uuid = "cyme0001-0001-0001-0001-000000000006";
-                  visible = true;
-                  locked = false;
-                  rot = 0.0;
-                  scale_ref = {
-                    x = 3840.0;
-                    y = 2160.0;
-                  };
-                  align = 5;
-                  bounds_type = 2;
-                  bounds_align = 0;
-                  bounds_crop = false;
-                  crop_left = 0;
-                  crop_top = 0;
-                  crop_right = 0;
-                  crop_bottom = 0;
-                  id = 1;
-                  group_item_backup = false;
-                  pos = {
-                    x = 0.0;
-                    y = 0.0;
-                  };
-                  pos_rel = {
-                    x = -1.7777777910232544;
-                    y = -1.0;
-                  };
-                  scale = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  scale_rel = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  bounds = {
-                    x = 3840.0;
-                    y = 2160.0;
-                  };
-                  bounds_rel = {
-                    x = 3.555555582046509;
-                    y = 2.0;
-                  };
-                  scale_filter = "disable";
-                  blend_method = "default";
-                  blend_type = "normal";
-                  show_transition = {
-                    duration = 0;
-                  };
-                  hide_transition = {
-                    duration = 0;
-                  };
-                  private_settings = {};
-                }
-                {
-                  name = "DesktopAudio";
-                  source_uuid = "cyme0001-0001-0001-0001-000000000008";
-                  visible = true;
-                  locked = false;
-                  rot = 0.0;
-                  scale_ref = {
-                    x = 3840.0;
-                    y = 2160.0;
-                  };
-                  align = 5;
-                  bounds_type = 0;
-                  bounds_align = 0;
-                  bounds_crop = false;
-                  crop_left = 0;
-                  crop_top = 0;
-                  crop_right = 0;
-                  crop_bottom = 0;
-                  id = 2;
-                  group_item_backup = false;
-                  pos = {
-                    x = 0.0;
-                    y = 0.0;
-                  };
-                  pos_rel = {
-                    x = -1.7777777910232544;
-                    y = -1.0;
-                  };
-                  scale = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  scale_rel = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  bounds = {
-                    x = 0.0;
-                    y = 0.0;
-                  };
-                  bounds_rel = {
-                    x = 0.0;
-                    y = 0.0;
-                  };
-                  scale_filter = "disable";
-                  blend_method = "default";
-                  blend_type = "normal";
-                  show_transition = {
-                    duration = 300;
-                  };
-                  hide_transition = {
-                    duration = 300;
-                  };
-                  private_settings = {};
-                }
-                {
-                  name = "Shure SM7B";
-                  source_uuid = "9e0dd964-6f7e-4aca-9f09-f118d39826ab";
-                  visible = true;
-                  locked = false;
-                  rot = 0.0;
-                  scale_ref = {
-                    x = 3840.0;
-                    y = 2160.0;
-                  };
-                  align = 5;
-                  bounds_type = 0;
-                  bounds_align = 0;
-                  bounds_crop = false;
-                  crop_left = 0;
-                  crop_top = 0;
-                  crop_right = 0;
-                  crop_bottom = 0;
-                  id = 3;
-                  group_item_backup = false;
-                  pos = {
-                    x = 0.0;
-                    y = 0.0;
-                  };
-                  pos_rel = {
-                    x = -1.7777777910232544;
-                    y = -1.0;
-                  };
-                  scale = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  scale_rel = {
-                    x = 1.0;
-                    y = 1.0;
-                  };
-                  bounds = {
-                    x = 0.0;
-                    y = 0.0;
-                  };
-                  bounds_rel = {
-                    x = 0.0;
-                    y = 0.0;
-                  };
-                  scale_filter = "disable";
-                  blend_method = "default";
-                  blend_type = "normal";
-                  show_transition = {
-                    duration = 300;
-                  };
-                  hide_transition = {
-                    duration = 300;
-                  };
-                  private_settings = {};
-                }
-              ];
-            };
-            mixers = 0;
-            sync = 0;
-            flags = 0;
-            volume = 1.0;
-            balance = 0.5;
-            enabled = true;
-            muted = false;
-            push-to-mute = false;
-            push-to-mute-delay = 0;
-            push-to-talk = false;
-            push-to-talk-delay = 0;
-            hotkeys = {
-              "OBSBasic.SelectScene" = [];
-              "libobs.show_scene_item.1" = [];
-              "libobs.hide_scene_item.1" = [];
-              "libobs.show_scene_item.2" = [];
-              "libobs.hide_scene_item.2" = [];
-              "libobs.show_scene_item.3" = [];
-              "libobs.hide_scene_item.3" = [];
-            };
-            deinterlace_mode = 0;
-            deinterlace_field_order = 0;
-            monitoring_type = 0;
-            canvas_uuid = "6c69626f-6273-4c00-9d88-c5136d61696e";
-            private_settings = {};
-          }
-        ];
-
+      sources = lib.mapAttrsToList mkSourceJson scenesCfg.sources ++ map mkSceneJson orderedScenes;
       groups = [];
-      scene_order = [
-        {name = "Game";}
-        {name = "Work";}
-      ];
-      current_scene = "Game";
-      current_program_scene = "Game";
+      scene_order = map (scene: {inherit (scene) name;}) orderedScenes;
+      current_scene = scenesCfg.current;
+      current_program_scene = scenesCfg.current;
       canvases = [];
       current_transition = "Überblende";
       transition_duration = 300;
@@ -1171,12 +705,12 @@
       "--profile"
       obsCfg.profile.name
       "--multi"
-      "--minimize-to-tray"
       "--disable-missing-files-check"
       "--disable-updater"
-      "--startreplaybuffer"
-      "--startrecording"
     ]
+    ++ lib.optional obsCfg.launch.minimized "--minimize-to-tray"
+    ++ lib.optional obsCfg.launch.startReplayBuffer "--startreplaybuffer"
+    ++ lib.optional obsCfg.launch.startRecording "--startrecording"
     ++ lib.optionals obsCfg.scenes.enable [
       "--collection"
       obsCfg.scenes.name
@@ -1282,7 +816,7 @@
           fi
         fi
       else
-        exec ${obs-launch}/bin/obs-launch
+        exec ${obs-launch}/bin/obs-launch --startrecording --startreplaybuffer
       fi
     '';
   };
@@ -1355,6 +889,33 @@ in {
               default = pkgs.obs-studio.override {cudaSupport = true;};
               defaultText = lib.literalExpression "pkgs.obs-studio.override {cudaSupport = true;}";
               description = "OBS package, e.g. with machine-specific patches applied via overrideAttrs.";
+            };
+            resetOnSwitch = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = ''
+                Overwrite the seeded OBS config (profile, encoders, websocket, scene collection) on every
+                home-manager activation. The files stay regular and writable, so OBS can still change them
+                at runtime for tweaking; the next switch restores the declared state.
+                When false, they are only written if missing (first run or after obs-reset-config).
+              '';
+            };
+            launch = {
+              minimized = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Start OBS minimized to the tray (obs-launch, obs-toggle, SUPER + O).";
+              };
+              startRecording = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Start recording when OBS is launched. obs-ensure-open always starts recording.";
+              };
+              startReplayBuffer = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Start the replay buffer when OBS is launched. obs-ensure-open always starts it.";
+              };
             };
             websocket = {
               port = lib.mkOption {
@@ -1729,6 +1290,28 @@ in {
                 default = "Default";
                 description = "Scene collection name (shown in OBS menu and used as the filename).";
               };
+              sources = lib.mkOption {
+                type = lib.types.attrsOf sourceType;
+                default = {};
+                description = ''
+                  Sources of the scene collection, keyed by source name. The module defines the built-in
+                  sources (VK Capture, GameSound, Shure SM7B, Keyboard Overlay, Screen, DesktopAudio) with
+                  overridable defaults; add machine-specific sources here.
+                '';
+              };
+              scenes = lib.mkOption {
+                type = lib.types.attrsOf sceneType;
+                default = {};
+                description = ''
+                  Scenes of the collection, keyed by scene name. The built-in "Game" and "Work" scenes have
+                  overridable default items; set items to replace them or add new scenes.
+                '';
+              };
+              current = lib.mkOption {
+                type = lib.types.str;
+                default = "Game";
+                description = "Scene that is active when OBS starts.";
+              };
               screenCapture = {
                 output = lib.mkOption {
                   type = lib.types.str;
@@ -1794,6 +1377,97 @@ in {
   config = lib.mkIf (cfg.enable && obsCfg.enable && isDesktop) {
     modules.media.video.obs.scripts = {inherit obs-ensure-open obs-ensure-closed;};
 
+    modules.media.video.obs.scenes = {
+      sources =
+        {
+          "VK Capture" = {
+            type = lib.mkDefault "vkcapture-source";
+            uuid = lib.mkDefault "cyme0001-0001-0001-0001-000000000004";
+            settings = lib.mkDefault {show_cursor = false;};
+          };
+          GameSound = {
+            type = lib.mkDefault "pipewire_audio_application_capture";
+            uuid = lib.mkDefault "b84d7fe9-1968-45f5-864d-d656d56b019b";
+            settings = lib.mkDefault {TargetName = obsCfg.audio.gameSource;};
+            audioTrack = lib.mkDefault obsCfg.audio.gameSourceTrack;
+            volume = lib.mkDefault obsCfg.audio.gameSourceVolume;
+          };
+          "Shure SM7B" = {
+            type = lib.mkDefault "pipewire_audio_input_capture";
+            uuid = lib.mkDefault "9e0dd964-6f7e-4aca-9f09-f118d39826ab";
+            settings = lib.mkDefault {
+              TargetId = 43;
+              TargetName = obsCfg.audio.mic;
+            };
+            audioTrack = lib.mkDefault obsCfg.audio.micTrack;
+            filters = lib.mkDefault sm7bFilters;
+          };
+          # PipeWire/portal capture (hardware DMA-buf). On NVIDIA, obs-launch forces NVIDIA's EGL vendor.
+          # The portal RestoreToken is written back by OBS; resetOnSwitch clears it again.
+          Screen = {
+            type = lib.mkDefault "pipewire-desktop-capture-source";
+            uuid = lib.mkDefault "cyme0001-0001-0001-0001-000000000006";
+            settings = lib.mkDefault {
+              ShowCursor = true;
+              RestoreToken = "";
+            };
+          };
+          DesktopAudio = {
+            type = lib.mkDefault "pipewire_audio_output_capture";
+            uuid = lib.mkDefault "cyme0001-0001-0001-0001-000000000008";
+            audioTrack = lib.mkDefault obsCfg.audio.desktopAudioTrack;
+          };
+        }
+        // lib.optionalAttrs keyboardOverlayCfg.enable {
+          "Keyboard Overlay" = {
+            type = lib.mkDefault "browser_source";
+            uuid = lib.mkDefault "cyme0001-0001-0001-0001-000000000005";
+            settings = lib.mkDefault {
+              url = keyboardOverlayCfg.url;
+              width = keyboardOverlayCfg.width;
+              height = keyboardOverlayCfg.height;
+              fps = keyboardOverlayCfg.fps;
+              css = keyboardOverlayCfg.extraCss;
+              shutdown = false;
+              restart_when_active = false;
+            };
+          };
+        };
+      scenes = {
+        Game = {
+          order = lib.mkDefault 10;
+          uuid = lib.mkDefault "cyme0001-0001-0001-0001-000000000003";
+          items = lib.mkDefault (
+            [
+              {
+                source = "VK Capture";
+                fit = "canvas";
+              }
+              {source = "GameSound";}
+              {source = "Shure SM7B";}
+            ]
+            ++ lib.optional keyboardOverlayCfg.enable {
+              source = "Keyboard Overlay";
+              fit = "canvas";
+              inherit (keyboardOverlayCfg.pos) x y;
+            }
+          );
+        };
+        Work = {
+          order = lib.mkDefault 20;
+          uuid = lib.mkDefault "cyme0001-0001-0001-0001-000000000007";
+          items = lib.mkDefault [
+            {
+              source = "Screen";
+              fit = "canvas";
+            }
+            {source = "DesktopAudio";}
+            {source = "Shure SM7B";}
+          ];
+        };
+      };
+    };
+
     home = {
       persistence = lib.mkIf isPersisted {
         "${persistPath}" = {
@@ -1846,7 +1520,7 @@ in {
 
         seed() {
           local dest="$1" src="$2"
-          if [[ ! -f "$dest" ]] || [[ -L "$dest" ]]; then
+          if ${lib.boolToString obsCfg.resetOnSwitch} || [[ ! -f "$dest" ]] || [[ -L "$dest" ]]; then
             run install -m 644 "$src" "$dest"
           fi
         }
