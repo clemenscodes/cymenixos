@@ -70,7 +70,6 @@ in {
         pkgs.hplip
         pkgs.cups
         pkgs.system-config-printer
-        pkgs.xsane
         pkgs.simple-scan
         unfreePkgs.hplipWithPlugin
       ];
