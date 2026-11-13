@@ -168,6 +168,12 @@ in {
                 "vs-kubernetes.crd-code-completion" = "disabled";
               };
               "workbench.startupEditor" = "none";
+              # Nix-installed extensions lack gallery metadata, so VS Code would copy the
+              # read-only store copy to an SSH host and fail. The server fetches every
+              # declared extension from the marketplace itself; powerpc-syntax is not there.
+              "remote.SSH.defaultExtensions" =
+                map (e: e.vscodeExtUniqueId)
+                (lib.remove pkgs.vscode-powerpc-syntax config.programs.vscode.profiles.default.extensions);
               "workbench.iconTheme" = lib.mkDefault "vscode-icons";
               "workbench.colorTheme" = lib.mkDefault "One Dark Darker";
               "whichkey.sortOrder" = "alphabetically";
