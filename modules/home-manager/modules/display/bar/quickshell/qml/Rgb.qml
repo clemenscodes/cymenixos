@@ -22,7 +22,12 @@ QtObject {
     property int brightness: 100
     property bool busy: runProc.running
 
-    function toggle() { root._run(["rgb-toggle"]) }
+    // Optimistic: show the new state at once, the command result and the poll correct it.
+    function toggle() {
+        if (runProc.running) return
+        root.on = !root.on
+        root._run(["rgb-toggle"])
+    }
 
     function changeBrightness(delta) {
         root.brightness = Math.max(0, Math.min(100, root.brightness + delta))

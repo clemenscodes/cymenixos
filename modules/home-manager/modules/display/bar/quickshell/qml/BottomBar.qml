@@ -530,7 +530,7 @@ PanelWindow {
             Text {
                 // fixed-width number like the other pills; the icon shows on / off
                 text: (Rgb.on ? String(Rgb.brightness).padStart(3, " ") + "%" : " off") + (Rgb.on ? " 🌈" : " ⚫")
-                color: Rgb.busy ? Theme.mutedColor : Theme.textColor
+                color: Theme.textColor
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 font.bold: true

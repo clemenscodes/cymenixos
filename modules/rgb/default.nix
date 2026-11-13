@@ -243,7 +243,8 @@
                         except Exception as error:
                             print(f"{device.name}: {error}", file=sys.stderr)
                             checks[index] = None
-                    time.sleep(1)
+                    # the refresh is synchronous; the pause only lets queued colour updates land
+                    time.sleep(0.3 if attempt == 0 else 1)
                     client.update()
                     todo = {i for i, check in checks.items() if check is None or not check(client.devices[i])}
                 except Exception as error:
