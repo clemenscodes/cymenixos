@@ -28,10 +28,13 @@
       if cfg.gamescope.enable
       then "gamescope ${lib.concatStringsSep " " cfg.gamescope.args} -- %command%"
       else "%command%";
-    commandStr =
-      if cfg.commandWrapper != ""
-      then "${cfg.commandWrapper} ${baseCmd}"
-      else baseCmd;
+    # Steam runs launch options in its own FHS environment without the system PATH,
+    # so wrappers are referenced by store path; that also keeps them alive across GC.
+    wrappers =
+      lib.optional cfg.gamemode "${pkgs.gamemode}/bin/gamemoderun"
+      ++ lib.optional (cfg.cpuAffinity != null) "${pkgs.util-linux}/bin/taskset -c ${cfg.cpuAffinity}"
+      ++ lib.optional (cfg.commandWrapper != "") cfg.commandWrapper;
+    commandStr = lib.concatStringsSep " " (wrappers ++ [baseCmd]);
     gameArgsStr = lib.concatStringsSep " " cfg.gameArgs;
   in
     lib.concatStringsSep " " (
@@ -59,12 +62,16 @@
         if "730" not in apps:
             apps["730"] = {}
         apps["730"]["LaunchOptions"] = opts
-        apps["730"]["OverlayAppEnable"] = "0"
+        apps["730"]["OverlayAppEnable"] = "${
+      if cfg.overlay
+      then "1"
+      else "0"
+    }"
 
         with open(path, "w", encoding="utf-8") as f:
             vdf.dump(data, f, pretty=True)
 
-        print("cs2: updated LaunchOptions and disabled overlay in localconfig.vdf")
+        print("cs2: updated LaunchOptions and overlay setting in localconfig.vdf")
     except Exception as e:
         print("cs2: failed to update localconfig.vdf: " + str(e), file=sys.stderr)
         sys.exit(1)
@@ -352,11 +359,29 @@ in {
                 ];
               };
             };
+            overlay = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Enable the Steam in-game overlay for CS2.";
+            };
+            gamemode = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Run CS2 through gamemoderun. Needs modules.gaming.gamemode.enable for the daemon.";
+            };
+            cpuAffinity = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "CPU list CS2 is pinned to with taskset.";
+              example = "0-7,16-23";
+            };
             commandWrapper = lib.mkOption {
               type = lib.types.str;
               default = "";
-              description = "Command prepended before %command% in Steam launch options (e.g. 'taskset -c 0-7,16-23').";
-              example = "taskset -c 0-7,16-23";
+              description = ''
+                Extra command prepended before %command% in Steam launch options. Steam runs it
+                without the system PATH, so use absolute paths, e.g. "''${pkgs.foo}/bin/foo".
+              '';
             };
             gameArgs = lib.mkOption {
               type = lib.types.listOf lib.types.str;
@@ -655,6 +680,13 @@ in {
   config =
     lib.mkIf (config.modules.gaming.enable && config.modules.gaming.steam.enable && cfg.enable)
     {
+      assertions = [
+        {
+          assertion = !cfg.gamemode || config.programs.gamemode.enable;
+          message = "modules.gaming.steam.cs2.gamemode needs modules.gaming.gamemode.enable";
+        }
+      ];
+
       environment.systemPackages = [
         killCs2
         toggleCs2
@@ -664,7 +696,8 @@ in {
         users = {
           ${config.modules.users.user} = {
             wayland.windowManager.hyprland.extraConfig = ''
-              hl.window_rule({ match = { class = "^(cs2)$" }, workspace = "2" })
+              -- SDL grabs the keyboard in fullscreen, which would switch off every compositor bind
+              hl.window_rule({ match = { class = "^(cs2)$" }, workspace = "2", fullscreen = true, no_shortcuts_inhibit = true })
             '';
 
             xdg = {
