@@ -3319,11 +3319,11 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1779960678,
-        "narHash": "sha256-4U8GY+Z/YC0PScF/1VbrCL1sfQ9qr605bHJiv5lXJmY=",
+        "lastModified": 1794688553,
+        "narHash": "sha256-gMPwMqWs4vFn1NVBt+e/lqK/aJ7wet3oPsaNc0kjVF4=",
         "owner": "clemenscodes",
         "repo": "wootswitch",
-        "rev": "247a784869e30bb6cb89406fa9726db63f899ebf",
+        "rev": "384198fce0aa287ad35f71096ce6b5923c901768",
         "type": "github"
       },
       "original": {
