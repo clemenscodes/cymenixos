@@ -35,7 +35,9 @@
   # (or on demand via obs-reset-config)
   websocketConfigFile = pkgs.writeText "obs-websocket-config.json" (
     builtins.toJSON {
-      alerts_enabled = true;
+      # obs-websocket notifies every client connect and disconnect; obs-cmd (the OBS keybinds)
+      # connects for each command, so every keypress left two desktop notifications.
+      alerts_enabled = false;
       server_enabled = true;
       server_port = obsCfg.websocket.port;
       server_password = obsCfg.websocket.password;

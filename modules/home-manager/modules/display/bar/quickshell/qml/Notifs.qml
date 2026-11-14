@@ -26,11 +26,56 @@ Singleton {
         ? server.trackedNotifications.values.length
         : 0
 
+    // At most this many toasts on screen; the oldest make room (they stay in the history).
+    readonly property int maxPopups: 5
+    // History is capped too; the oldest notifications are dismissed.
+    readonly property int maxHistory: 100
+
+    // When each toast goes away (ms since epoch, 0 = stays until dismissed), keyed by
+    // notification id. Kept here rather than in the toast: the toast list is rebuilt when it
+    // changes, and per-toast timers restarted with every new notification, so with a steady
+    // stream nothing ever expired and the stack grew off the screen.
+    property var deadlines: ({})
+
+    function toastDuration(n) {
+        if (!n || n.urgency === NotificationUrgency.Critical) return 0
+        // Apps asking for "never expire" (0, e.g. OBS) still get a normal toast; the
+        // notification stays in the history.
+        return n.expireTimeout > 0 ? n.expireTimeout : 5000
+    }
+
     function pushPopup(n) {
-        root.popups = root.popups.concat([n])
+        const d = root.toastDuration(n)
+        root.deadlines[n.id] = d > 0 ? Date.now() + d : 0
+        const arr = root.popups.concat([n])
+        root.popups = arr.length > root.maxPopups ? arr.slice(arr.length - root.maxPopups) : arr
+    }
+
+    // Keeps a hovered toast up a little longer.
+    function holdPopup(n) {
+        if (n && root.deadlines[n.id] > 0)
+            root.deadlines[n.id] = Math.max(root.deadlines[n.id], Date.now() + 1500)
+    }
+
+    readonly property Timer expiry: Timer {
+        interval: 250
+        repeat: true
+        running: root.popups.length > 0
+        onTriggered: {
+            const now = Date.now()
+            const keep = root.popups.filter(n => !(root.deadlines[n.id] > 0 && root.deadlines[n.id] <= now))
+            if (keep.length !== root.popups.length) root.popups = keep
+        }
+    }
+
+    function trimHistory() {
+        if (!server.trackedNotifications) return
+        const items = server.trackedNotifications.values.slice()
+        for (let i = 0; i < items.length - root.maxHistory; i++) items[i].dismiss()
     }
 
     function removePopup(n) {
+        if (n) delete root.deadlines[n.id]
         const arr = root.popups.slice()
         const i = arr.indexOf(n)
         if (i >= 0) {
@@ -81,6 +126,7 @@ Singleton {
             // Retain it so it shows up in trackedNotifications (history).
             notification.tracked = true
             if (!root.dnd) root.pushPopup(notification)
+            root.trimHistory()
         }
     }
 }

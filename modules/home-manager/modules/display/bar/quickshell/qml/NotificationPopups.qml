@@ -54,7 +54,11 @@ PanelWindow {
         }
 
         Repeater {
-            model: Notifs.popups
+            // ScriptModel keeps the toasts that are still listed instead of rebuilding all of
+            // them on every change (which replayed their fade-in and restarted their timers).
+            model: ScriptModel {
+                values: Notifs.popups
+            }
 
             delegate: Rectangle {
                 id: toast
@@ -62,13 +66,6 @@ PanelWindow {
 
                 readonly property bool critical:
                     modelData && modelData.urgency === NotificationUrgency.Critical
-                readonly property int duration: {
-                    if (toast.critical) return 0
-                    if (!modelData) return 5000
-                    if (modelData.expireTimeout === 0) return 0
-                    if (modelData.expireTimeout > 0) return modelData.expireTimeout
-                    return 5000
-                }
 
                 width: parent.width
                 implicitHeight: layout.implicitHeight + 24
@@ -84,11 +81,13 @@ PanelWindow {
                     function onClosed() { Notifs.removePopup(toast.modelData) }
                 }
 
+                // expiry is handled in Notifs; hovering keeps the toast up
                 Timer {
-                    running: toast.duration > 0 && !hoverArea.containsMouse
-                    interval: toast.duration
-                    repeat: false
-                    onTriggered: Notifs.dropPopup(toast.modelData)
+                    running: hoverArea.containsMouse
+                    interval: 500
+                    repeat: true
+                    triggeredOnStart: true
+                    onTriggered: Notifs.holdPopup(toast.modelData)
                 }
 
                 MouseArea {
