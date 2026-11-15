@@ -116,6 +116,8 @@
     bh = obsCfg.profile.baseHeight * 1.0;
     halfH = bh / 2.0;
     fill = item.fit == "canvas";
+    # Items built in this module, outside the option type, carry no scale.
+    scale = item.scale or 1.0;
   in {
     name = item.source;
     source_uuid = scenesCfg.sources.${item.source}.uuid;
@@ -147,12 +149,12 @@
       y = (item.y - bh / 2.0) / halfH;
     };
     scale = {
-      x = 1.0;
-      y = 1.0;
+      x = scale;
+      y = scale;
     };
     scale_rel = {
-      x = 1.0;
-      y = 1.0;
+      x = scale;
+      y = scale;
     };
     bounds =
       if fill
@@ -286,6 +288,11 @@
         type = lib.types.bool;
         default = true;
         description = "Whether the item is visible.";
+      };
+      scale = lib.mkOption {
+        type = lib.types.float;
+        default = 1.0;
+        description = "Scale of the item at native size (fit = none), such as 0.25 for a picture in the picture.";
       };
     };
   };
@@ -1053,6 +1060,15 @@ in {
                 default = "changeme";
                 description = "OBS WebSocket password. Use SOPS for secrets management.";
               };
+              passwordFile = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = ''
+                  A file whose content is the OBS WebSocket password, such as a SOPS secret owned by
+                  the user. The activation writes it into the websocket config in place of
+                  `password`, so the password never lands in the Nix store.
+                '';
+              };
             };
             profile = {
               name = lib.mkOption {
@@ -1753,6 +1769,18 @@ in {
         seed "$PROFILE_DIR/streamEncoder.json" ${streamEncoderFile}
         ${lib.optionalString obsCfg.scenes.enable ''
           seed "$OBS_DIR/basic/scenes/${obsCfg.scenes.name}.json" ${sceneCollectionFile}
+        ''}
+        ${lib.optionalString (obsCfg.websocket.passwordFile != null) ''
+          # The password comes from its file, never from the store.
+          if [[ -r ${obsCfg.websocket.passwordFile} ]]; then
+            websocket_config="$(mktemp)"
+            ${pkgs.jq}/bin/jq --rawfile password ${obsCfg.websocket.passwordFile} \
+              '.server_password = ($password | rtrimstr("\n"))' "$WS_DIR/config.json" > "$websocket_config"
+            run install -m 600 "$websocket_config" "$WS_DIR/config.json"
+            rm -f "$websocket_config"
+          else
+            echo "obs: ${obsCfg.websocket.passwordFile} cannot be read, so obs-websocket keeps its password" >&2
+          fi
         ''}
         run chmod 600 "$WS_DIR/config.json" 2>/dev/null || true
       '';
