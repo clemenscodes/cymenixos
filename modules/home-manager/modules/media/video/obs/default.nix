@@ -28,8 +28,10 @@
   # Bitmask: enable first N audio tracks (1=0b1, 2=0b11, 3=0b111 … 6=0b111111)
   trackMask = builtins.foldl' (acc: _: acc * 2 + 1) 0 (lib.range 1 obsCfg.audio.tracks);
 
-  # Bitmask: isolate a single track (track 1 → 1, track 2 → 2, track 3 → 4, …)
+  # Bitmask of one track (track 1 → 1, track 2 → 2, track 3 → 4, …)
   singleTrackMixer = track: builtins.foldl' (acc: _: acc * 2) 1 (lib.range 1 (track - 1));
+  # Bitmask of the tracks a source feeds
+  tracksMixer = tracks: builtins.foldl' (acc: track: acc + singleTrackMixer track) 0 (lib.unique tracks);
 
   # Files precomputed in the Nix store — copied to ~/.config/obs-studio on first run
   # (or on demand via obs-reset-config)
@@ -66,42 +68,19 @@
     }
   );
 
-  mkFilter = name: uuid: id: settings: {
-    prev_ver = 536936448;
-    inherit
-      name
-      uuid
-      id
-      settings
-      ;
-    versioned_id = id;
-    mixers = 255;
-    sync = 0;
-    flags = 0;
-    volume = 1.0;
-    balance = 0.5;
-    enabled = true;
-    muted = false;
-    push-to-mute = false;
-    push-to-mute-delay = 0;
-    push-to-talk = false;
-    push-to-talk-delay = 0;
-    hotkeys = {};
-    deinterlace_mode = 0;
-    deinterlace_field_order = 0;
-    monitoring_type = 0;
-    private_settings = {};
-  };
-
-  # OBS receives SM7B_Processed — already fully processed by the PipeWire filter-chain
-  # (HP → EQ → compressor → EQ → harmonics → maximiser → RNNoise → Speex).
-  # Only a safety limiter is needed here; duplicating noise suppression or compression
-  # causes metallic artifacts and over-squashed dynamics.
-  sm7bFilters = [
-    (mkFilter "Limiter" "f98982cf-dd71-4a24-ac47-f1d5a3b13760" "limiter_filter" {threshold = -2.0;})
-  ];
-
   scenesCfg = obsCfg.scenes;
+
+  # A scene that records the microphone records it raw as well (audio.micRaw)
+  rawMicSource = "Shure SM7B (raw)";
+  withRawMic = items:
+    items
+    ++ lib.optional (obsCfg.audio.micRaw != null && builtins.any (item: item.source == "Shure SM7B") items) {
+      source = rawMicSource;
+      fit = "none";
+      x = 0.0;
+      y = 0.0;
+      visible = true;
+    };
 
   # Deterministic UUID-shaped id, so generated sources and scenes keep their identity across switches
   mkUuid = seed: let
@@ -115,10 +94,7 @@
     inherit (src) uuid settings volume filters;
     id = src.type;
     versioned_id = src.type;
-    mixers =
-      if src.audioTrack == null
-      then 0
-      else singleTrackMixer src.audioTrack;
+    mixers = tracksMixer src.audioTracks;
     sync = 0;
     flags = 0;
     balance = 0.5;
@@ -214,15 +190,17 @@
     lib.mapAttrsToList (name: scene: scene // {inherit name;}) scenesCfg.scenes
   );
 
-  mkSceneJson = scene: {
+  mkSceneJson = scene: let
+    items = withRawMic scene.items;
+  in {
     prev_ver = 536936448;
     inherit (scene) name uuid;
     id = "scene";
     versioned_id = "scene";
     settings = {
-      id_counter = builtins.length scene.items;
+      id_counter = builtins.length items;
       custom_size = false;
-      items = lib.imap0 mkSceneItemJson scene.items;
+      items = lib.imap0 mkSceneItemJson items;
     };
     mixers = 0;
     sync = 0;
@@ -261,10 +239,11 @@
         default = {};
         description = "Source settings as OBS stores them in the scene collection.";
       };
-      audioTrack = lib.mkOption {
-        type = lib.types.nullOr (lib.types.ints.between 1 6);
-        default = null;
-        description = "Recording track this audio source is isolated to. null for video-only sources.";
+      audioTracks = lib.mkOption {
+        type = lib.types.listOf (lib.types.ints.between 1 6);
+        default = [];
+        example = [1 2];
+        description = "Recording tracks this audio source feeds. Empty for video-only sources.";
       };
       volume = lib.mkOption {
         type = lib.types.float;
@@ -641,12 +620,7 @@
     Track4Bitrate=${toString obsCfg.audio.trackBitrate}
     Track5Bitrate=${toString obsCfg.audio.trackBitrate}
     Track6Bitrate=${toString obsCfg.audio.trackBitrate}
-    Track1Name=Desktop
-    Track2Name=Mic
-    Track3Name=Browser
-    Track4Name=Game
-    Track5Name=AUX 1
-    Track6Name=AUX 2
+    ${lib.concatStringsSep "\n" (lib.imap1 (index: name: "Track${toString index}Name=${name}") obsCfg.audio.trackNames)}
     RecRB=${lib.boolToString obsCfg.replayBuffer.enable}
     RecRBTime=${toString obsCfg.replayBuffer.seconds}
     RecRBSize=512
@@ -681,6 +655,7 @@
       runtimeInputs = [
         pkgs.jq
         pkgs.obs-cmd
+        pkgs.gnugrep
       ];
       text = ''
         CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
@@ -735,15 +710,27 @@
   obs-cmd-wrapped = mkObsScript "obs-cmd" ''exec obs-cmd "$@"'';
   obs-record-toggle = mkObsScript "obs-record-toggle" "obs-cmd recording toggle";
   obs-stream-toggle = mkObsScript "obs-stream-toggle" "obs-cmd streaming toggle";
-  obs-replay-save = mkObsScript "obs-replay-save" "obs-cmd replay-buffer save";
-  obs-replay-toggle = mkObsScript "obs-replay-toggle" "obs-cmd replay-buffer toggle";
-  obs-vcam-toggle = mkObsScript "obs-vcam-toggle" "obs-cmd virtual-cam toggle";
+  # obs-cmd prints text, not JSON: "recording status-active" exits 0 only while recording,
+  # "streaming status" prints "Active: true|false", "replay status" prints
+  # "Replay Buffer is (not) running". The replay buffer is "replay", the virtual camera
+  # "virtual-camera" (which has no status).
+  obs-replay-save = mkObsScript "obs-replay-save" "obs-cmd replay save";
+  obs-replay-toggle = mkObsScript "obs-replay-toggle" "obs-cmd replay toggle";
+  obs-vcam-toggle = mkObsScript "obs-vcam-toggle" "obs-cmd virtual-camera toggle";
   obs-status = mkObsScript "obs-status" ''
-    rec=$(obs-cmd recording status 2>/dev/null | jq -r '.outputActive // false')
-    stream=$(obs-cmd streaming status 2>/dev/null | jq -r '.outputActive // false')
-    replay=$(obs-cmd replay-buffer status 2>/dev/null | jq -r '.outputActive // false')
-    vcam=$(obs-cmd virtual-cam status 2>/dev/null | jq -r '.outputActive // false')
-    echo "rec=$rec stream=$stream replay=$replay vcam=$vcam"
+    rec=false
+    if obs-cmd recording status-active >/dev/null 2>&1; then
+      rec=true
+    fi
+    stream=false
+    if obs-cmd streaming status 2>/dev/null | grep -q 'Active: true'; then
+      stream=true
+    fi
+    replay=false
+    if obs-cmd replay status 2>/dev/null | grep -q 'Replay Buffer is running'; then
+      replay=true
+    fi
+    echo "rec=$rec stream=$stream replay=$replay"
   '';
 
   # obs-toggle: launch OBS if not running; gracefully stop it if it is.
@@ -754,7 +741,7 @@
   # Shutdown order:
   #   1. stop replay buffer (flush buffered frames)
   #   2. stop recording (OBS muxes and seals the container)
-  #   3. poll recording status up to 30 s until outputActive = false
+  #   3. poll recording status up to 30 s until it is no longer active
   #   4. stop OBS with SIGINT and wait for it to exit (safe only after the file is sealed)
   # Graceful OBS shutdown. SIGINT makes OBS save everything and close its main window, the same
   # path as quitting from the GUI. SIGTERM only saves and quits the Qt loop, and a second signal
@@ -785,12 +772,11 @@
           OBS_WEBSOCKET_PASSWORD="$(jq -r '.server_password // empty' "$CONFIG_PATH")"
           if [[ -n "$OBS_WEBSOCKET_PORT" && -n "$OBS_WEBSOCKET_PASSWORD" ]]; then
             export OBS_WEBSOCKET_URL="obsws://localhost:$OBS_WEBSOCKET_PORT/$OBS_WEBSOCKET_PASSWORD"
-            obs-cmd replay-buffer stop 2>/dev/null || true
+            obs-cmd replay stop 2>/dev/null || true
             obs-cmd recording stop 2>/dev/null || true
             remaining=30
             while [ "$remaining" -gt 0 ]; do
-              active=$(obs-cmd recording status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
-              if [ "$active" = "false" ]; then
+              if ! obs-cmd recording status-active >/dev/null 2>&1; then
                 break
               fi
               sleep 1
@@ -805,6 +791,123 @@
     '';
   };
 
+  # obs-proxy: creates Proxy/<name>.mov for every recording in the output folder that has
+  # none. It never encodes while OBS does (recording or replay buffer): the recording uses
+  # every NVENC engine, so a proxy job beside it would cost frames. When OBS starts encoding
+  # during a job, the job is stopped, its partial file removed, and the recording is picked
+  # up again on the next run.
+  proxyCfg = obsCfg.output.proxy;
+  proxyWidth = obsCfg.profile.outputWidth * proxyCfg.height / obsCfg.profile.outputHeight;
+  proxyColorArgs =
+    {
+      "2100PQ" = "-color_primaries bt2020 -color_trc smpte2084 -colorspace bt2020nc";
+      "2100HLG" = "-color_primaries bt2020 -color_trc arib-std-b67 -colorspace bt2020nc";
+      "709" = "-color_primaries bt709 -color_trc bt709 -colorspace bt709";
+    }
+    .${
+      obsCfg.profile.colorSpace
+    }
+    or "";
+  obs-proxy = pkgs.writeShellApplication {
+    name = "obs-proxy";
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps pkgs.coreutils pkgs.util-linux pkgs.ffmpeg-full];
+    text = ''
+      recordings=${lib.escapeShellArg obsCfg.output.path}
+      proxies="$recordings/Proxy"
+      config="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
+
+      # True while OBS records or keeps its replay buffer, and while OBS runs but cannot be
+      # asked (unknown counts as encoding).
+      obs_encodes() {
+        if ! pgrep -x '.obs-wrapped' >/dev/null; then
+          return 1
+        fi
+        if [ ! -f "$config" ]; then
+          return 0
+        fi
+        OBS_WEBSOCKET_URL="obsws://localhost:$(jq -r '.server_port' "$config")/$(jq -r '.server_password' "$config")"
+        export OBS_WEBSOCKET_URL
+        # obs-cmd prints text: "Active: true|false" and "Replay Buffer is (not) running"
+        local recording replay
+        if ! recording=$(obs-cmd recording status); then
+          return 0
+        fi
+        if ! replay=$(obs-cmd replay status); then
+          return 0
+        fi
+        [[ "$recording" != *"Active: false"* || "$replay" != *"Replay Buffer is not running"* ]]
+      }
+
+      # Encodes the proxy of $master into $part: decoded and scaled on the GPU, or with
+      # "cpu" scaled on the CPU, for what NVDEC or scale_cuda cannot take (H.264 4:4:4,
+      # 8 bit 4:4:4 HEVC to 10 bit). Returns the status of ffmpeg; ends the script when
+      # OBS starts encoding meanwhile.
+      encode() {
+        local pipeline job
+        if [ "$1" = gpu ]; then
+          pipeline=(-hwaccel cuda -hwaccel_output_format cuda -i "$master" -vf scale_cuda=${toString proxyWidth}:${toString proxyCfg.height}:format=p010le)
+        else
+          pipeline=(-hwaccel cuda -i "$master" -vf "scale=${toString proxyWidth}:${toString proxyCfg.height}:flags=bicubic,format=p010le")
+        fi
+        # shellcheck disable=SC2086
+        ffmpeg -nostdin -hide_banner -loglevel error -y "''${pipeline[@]}" \
+          -map 0:v:0 -map '0:a?' \
+          -c:v hevc_nvenc -preset p4 -rc vbr -cq 23 -b:v 0 -maxrate 60M -bufsize 120M -profile:v main10 \
+          ${proxyColorArgs} \
+          -c:a pcm_s24le "$part" &
+        job=$!
+        while kill -0 "$job" 2>/dev/null; do
+          if obs_encodes; then
+            kill "$job"
+            wait "$job" || true
+            rm -f "$part"
+            echo "OBS started encoding, proxy of $name postponed"
+            exit 0
+          fi
+          sleep 5
+        done
+        wait "$job"
+      }
+
+      mkdir -p "$proxies"
+      exec 9>"$proxies/.lock"
+      if ! flock -n 9; then
+        exit 0
+      fi
+
+      # Newest first: OBS names recordings by date and time, so the name order is the
+      # time order, and the recordings edited next are the latest ones
+      shopt -s nullglob
+      masters=("$recordings"/*.${obsCfg.output.format})
+      for ((index = ''${#masters[@]} - 1; index >= 0; index--)); do
+        master=''${masters[index]}
+        name=$(basename "$master" .${obsCfg.output.format})
+        proxy="$proxies/$name.mov"
+        if [ -e "$proxy" ]; then
+          continue
+        fi
+        # A master no larger than a proxy and in 4:2:0 already plays easily
+        height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$master" | head -n 1)
+        pixel_format=$(ffprobe -v error -select_streams v:0 -show_entries stream=pix_fmt -of default=noprint_wrappers=1:nokey=1 "$master" | head -n 1)
+        if [ "$height" -le ${toString proxyCfg.height} ] && [[ "$pixel_format" != *444* && "$pixel_format" != *422* ]]; then
+          continue
+        fi
+        if obs_encodes; then
+          echo "OBS is encoding, proxies wait"
+          exit 0
+        fi
+        part="$proxies/.$name.part.mov"
+        if encode gpu || encode cpu; then
+          mv "$part" "$proxy"
+          echo "proxy $proxy"
+        else
+          rm -f "$part"
+          echo "proxy of $name failed" >&2
+        fi
+      done
+    '';
+  };
+
   # obs-ensure-open: Idempotently bring OBS to the running+recording state.
   #
   # Owns OBS state only — callers are responsible for any other side effects.
@@ -815,7 +918,7 @@
   #   OBS running, recording → ensure replay buffer running; otherwise no-op
   obs-ensure-open = pkgs.writeShellApplication {
     name = "obs-ensure-open";
-    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps];
+    runtimeInputs = [pkgs.jq pkgs.obs-cmd pkgs.procps pkgs.gnugrep];
     text = ''
       CONFIG_PATH="$HOME/.config/obs-studio/plugin_config/obs-websocket/config.json"
 
@@ -825,13 +928,11 @@
           OBS_WEBSOCKET_PASSWORD="$(jq -r '.server_password // empty' "$CONFIG_PATH")"
           if [[ -n "$OBS_WEBSOCKET_PORT" && -n "$OBS_WEBSOCKET_PASSWORD" ]]; then
             export OBS_WEBSOCKET_URL="obsws://localhost:$OBS_WEBSOCKET_PORT/$OBS_WEBSOCKET_PASSWORD"
-            recording=$(obs-cmd recording status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
-            if [ "$recording" = "false" ]; then
+            if ! obs-cmd recording status-active >/dev/null 2>&1; then
               obs-cmd recording start 2>/dev/null || true
             fi
-            replay=$(obs-cmd replay-buffer status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
-            if [ "$replay" = "false" ]; then
-              obs-cmd replay-buffer start 2>/dev/null || true
+            if ! obs-cmd replay status 2>/dev/null | grep -q 'Replay Buffer is running'; then
+              obs-cmd replay start 2>/dev/null || true
             fi
           fi
         fi
@@ -861,12 +962,11 @@
           OBS_WEBSOCKET_PASSWORD="$(jq -r '.server_password // empty' "$CONFIG_PATH")"
           if [[ -n "$OBS_WEBSOCKET_PORT" && -n "$OBS_WEBSOCKET_PASSWORD" ]]; then
             export OBS_WEBSOCKET_URL="obsws://localhost:$OBS_WEBSOCKET_PORT/$OBS_WEBSOCKET_PASSWORD"
-            obs-cmd replay-buffer stop 2>/dev/null || true
+            obs-cmd replay stop 2>/dev/null || true
             obs-cmd recording stop 2>/dev/null || true
             remaining=30
             while [ "$remaining" -gt 0 ]; do
-              active=$(obs-cmd recording status 2>/dev/null | jq -r '.outputActive // false' 2>/dev/null || echo "false")
-              if [ "$active" = "false" ]; then
+              if ! obs-cmd recording status-active >/dev/null 2>&1; then
                 break
               fi
               sleep 1
@@ -875,6 +975,10 @@
           fi
         fi
         stop_obs
+        ${lib.optionalString proxyCfg.enable ''
+        # OBS no longer encodes: the recordings of this session get their proxies now
+        ${pkgs.systemd}/bin/systemctl --user start --no-block obs-proxy.service
+      ''}
       fi
     '';
   };
@@ -1047,6 +1151,14 @@ in {
                 default = 1;
                 description = "Number of audio tracks to record (1–6). Enables the first N tracks.";
               };
+              trackNames = lib.mkOption {
+                type = lib.types.addCheck (lib.types.listOf lib.types.str) (names: builtins.length names == 6);
+                default = ["Desktop" "Mic" "Browser" "Game" "AUX 1" "AUX 2"];
+                description = ''
+                  Names of the six recording tracks. OBS writes them into the recording as the
+                  track titles, which is what an editor such as DaVinci Resolve shows.
+                '';
+              };
               trackBitrate = lib.mkOption {
                 type = lib.types.int;
                 default = 320;
@@ -1068,6 +1180,18 @@ in {
                   PipeWire application name to capture as game audio.
                   Shown in the OBS "Game Sound" source (application_audio_output_capture).
                   Common values: "SDL Application" (most games), or the specific process name.
+                '';
+              };
+              gameSourceExcept = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+                example = ["Brave" "Firefox" "Discord"];
+                description = ''
+                  When not empty, GameSound captures every application except these
+                  (matched by PipeWire application name) instead of the single gameSource.
+                  Games name their streams after themselves (cs2, CrimsonDesert.exe, …), so
+                  a list of what is not a game catches every game, including new ones,
+                  without routing game audio through an extra sink and its latency.
                 '';
               };
               gameSourceVolume = lib.mkOption {
@@ -1092,33 +1216,42 @@ in {
                     -50 dB → 0.00316
                 '';
               };
-              gameSourceTrack = lib.mkOption {
-                type = lib.types.ints.between 1 6;
-                default = 1;
+              gameSourceTracks = lib.mkOption {
+                type = lib.types.listOf (lib.types.ints.between 1 6);
+                default = [1];
                 description = ''
-                  OBS recording track for the GameSound source (1–6).
-                  The source is isolated to this single track (all other tracks disabled).
-                  Track assignments must be unique across sources for clean per-source stems.
+                  OBS recording tracks the GameSound source feeds (1–6). One track of its own
+                  per source keeps clean stems; a shared mix track may be added.
                 '';
               };
-              micTrack = lib.mkOption {
-                type = lib.types.ints.between 1 6;
-                default = 2;
-                description = ''
-                  OBS recording track for the microphone (Shure SM7B) source (1–6).
-                  The source is isolated to this single track (all other tracks disabled).
-                  Track assignments must be unique across sources for clean per-source stems.
-                '';
+              micTracks = lib.mkOption {
+                type = lib.types.listOf (lib.types.ints.between 1 6);
+                default = [2];
+                description = "OBS recording tracks the microphone (Shure SM7B) source feeds (1–6).";
               };
-              desktopAudioTrack = lib.mkOption {
-                type = lib.types.ints.between 1 6;
-                default = 3;
+              desktopAudioTracks = lib.mkOption {
+                type = lib.types.listOf (lib.types.ints.between 1 6);
+                default = [3];
                 description = ''
-                  OBS recording track for the DesktopAudio source (pipewire_audio_output_capture, 1–6).
-                  The source is isolated to this single track (all other tracks disabled).
-                  Keeping it on a separate track from gameSourceTrack avoids track collisions when
+                  OBS recording tracks the DesktopAudio source (pipewire_audio_output_capture)
+                  feeds (1–6). Keeping it apart from the game tracks avoids collisions when
                   switching between the Game and Work scenes mid-recording.
                 '';
+              };
+              micRaw = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                example = "alsa_input.usb-Focusrite_Scarlett_2i2_4th_Gen_S2AJV133401118-00.HiFi__Mic1__source";
+                description = ''
+                  PipeWire node of the unprocessed microphone input. When set, every scene with
+                  the microphone also records it raw on micRawTracks, so the voice can be
+                  processed again in post without what the live chain baked in.
+                '';
+              };
+              micRawTracks = lib.mkOption {
+                type = lib.types.listOf (lib.types.ints.between 1 6);
+                default = [];
+                description = "OBS recording tracks the raw microphone source feeds (1–6).";
               };
             };
             stream = {
@@ -1153,6 +1286,19 @@ in {
                 type = lib.types.str;
                 default = "/home/${osConfig.modules.users.user}/Videos";
                 description = "Recording output directory (absolute path — OBS %HOME expansion is unreliable on NixOS/Wayland).";
+              };
+              proxy = {
+                enable = lib.mkEnableOption ''
+                  a proxy for every recording, in Proxy/<name>.mov beside it. DaVinci Resolve
+                  links such a proxy on import and edits with it, while it renders from the
+                  recording. A 4K 4:4:4 240 fps master decodes slower than real time even on
+                  NVDEC; the proxy (1080p, H.265 4:2:0 10 bit) plays easily
+                '';
+                height = lib.mkOption {
+                  type = lib.types.int;
+                  default = 1080;
+                  description = "Height of the proxies; the width follows the output aspect ratio.";
+                };
               };
               format = lib.mkOption {
                 type = lib.types.enum [
@@ -1409,10 +1555,30 @@ in {
           GameSound = {
             type = lib.mkDefault "pipewire_audio_application_capture";
             uuid = lib.mkDefault "b84d7fe9-1968-45f5-864d-d656d56b019b";
-            settings = lib.mkDefault {TargetName = obsCfg.audio.gameSource;};
-            audioTrack = lib.mkDefault obsCfg.audio.gameSourceTrack;
+            # obs-pipewire-audio-capture: CaptureMode 1 captures several applications,
+            # ExceptApp inverts the list, MatchPriorty (sic) 1 matches the application
+            # name before the binary
+            settings = lib.mkDefault (
+              if obsCfg.audio.gameSourceExcept == []
+              then {TargetName = obsCfg.audio.gameSource;}
+              else {
+                CaptureMode = 1;
+                ExceptApp = true;
+                MatchPriorty = 1;
+                apps =
+                  map (app: {
+                    value = app;
+                    selected = false;
+                    hidden = false;
+                  })
+                  obsCfg.audio.gameSourceExcept;
+              }
+            );
+            audioTracks = lib.mkDefault obsCfg.audio.gameSourceTracks;
             volume = lib.mkDefault obsCfg.audio.gameSourceVolume;
           };
+          # No filter: the microphone arrives processed (e.g. SM7B_Processed, limited at
+          # -1.5 dBFS), and a second processing stage in OBS would be baked into the take.
           "Shure SM7B" = {
             type = lib.mkDefault "pipewire_audio_input_capture";
             uuid = lib.mkDefault "9e0dd964-6f7e-4aca-9f09-f118d39826ab";
@@ -1420,8 +1586,7 @@ in {
               TargetId = 43;
               TargetName = obsCfg.audio.mic;
             };
-            audioTrack = lib.mkDefault obsCfg.audio.micTrack;
-            filters = lib.mkDefault sm7bFilters;
+            audioTracks = lib.mkDefault obsCfg.audio.micTracks;
           };
           # PipeWire/portal capture (hardware DMA-buf). On NVIDIA, obs-launch forces NVIDIA's EGL vendor.
           # The portal RestoreToken is written back by OBS; resetOnSwitch clears it again.
@@ -1436,7 +1601,14 @@ in {
           DesktopAudio = {
             type = lib.mkDefault "pipewire_audio_output_capture";
             uuid = lib.mkDefault "cyme0001-0001-0001-0001-000000000008";
-            audioTrack = lib.mkDefault obsCfg.audio.desktopAudioTrack;
+            audioTracks = lib.mkDefault obsCfg.audio.desktopAudioTracks;
+          };
+        }
+        // lib.optionalAttrs (obsCfg.audio.micRaw != null) {
+          ${rawMicSource} = {
+            type = lib.mkDefault "pipewire_audio_input_capture";
+            settings = lib.mkDefault {TargetName = obsCfg.audio.micRaw;};
+            audioTracks = lib.mkDefault obsCfg.audio.micRawTracks;
           };
         }
         // lib.optionalAttrs keyboardOverlayCfg.enable {
@@ -1489,6 +1661,33 @@ in {
       };
     };
 
+    # Proxies run when a recording lands in the output folder, every 10 minutes for the
+    # recordings that had to wait for OBS, and after obs-ensure-closed.
+    systemd.user = lib.mkIf proxyCfg.enable {
+      services.obs-proxy = {
+        Unit.Description = "Proxies for OBS recordings";
+        Service = {
+          Type = "oneshot";
+          ExecStart = "${obs-proxy}/bin/obs-proxy";
+          Nice = 19;
+          IOSchedulingClass = "idle";
+        };
+      };
+      paths.obs-proxy = {
+        Unit.Description = "New OBS recordings";
+        Path.PathChanged = obsCfg.output.path;
+        Install.WantedBy = ["default.target"];
+      };
+      timers.obs-proxy = {
+        Unit.Description = "Proxies for OBS recordings that waited";
+        Timer = {
+          OnBootSec = "5min";
+          OnUnitActiveSec = "10min";
+        };
+        Install.WantedBy = ["timers.target"];
+      };
+    };
+
     home = {
       persistence = lib.mkIf isPersisted {
         "${persistPath}" = {
@@ -1501,27 +1700,29 @@ in {
           ];
         };
       };
-      packages = [
-        obs-launch
-        pkgs.gst_all_1.gstreamer
-        pkgs.gst_all_1.gst-plugins-base
-        pkgs.gst_all_1.gst-plugins-good
-        pkgs.gst_all_1.gst-plugins-bad
-        pkgs.gst_all_1.gst-plugins-ugly
-        pkgs.gst_all_1.gst-libav
-        pkgs.nv-codec-headers-12
-        obs-toggle
-        obs-ensure-open
-        obs-ensure-closed
-        obs-cmd-wrapped
-        obs-record-toggle
-        obs-stream-toggle
-        obs-replay-save
-        obs-replay-toggle
-        obs-vcam-toggle
-        obs-status
-        obs-reset-config
-      ];
+      packages =
+        [
+          obs-launch
+          pkgs.gst_all_1.gstreamer
+          pkgs.gst_all_1.gst-plugins-base
+          pkgs.gst_all_1.gst-plugins-good
+          pkgs.gst_all_1.gst-plugins-bad
+          pkgs.gst_all_1.gst-plugins-ugly
+          pkgs.gst_all_1.gst-libav
+          pkgs.nv-codec-headers-12
+          obs-toggle
+          obs-ensure-open
+          obs-ensure-closed
+          obs-cmd-wrapped
+          obs-record-toggle
+          obs-stream-toggle
+          obs-replay-save
+          obs-replay-toggle
+          obs-vcam-toggle
+          obs-status
+          obs-reset-config
+        ]
+        ++ lib.optional proxyCfg.enable obs-proxy;
 
       # All config files use seed-if-absent so OBS can freely update them at runtime.
       # global.ini is intentionally NOT seeded: OBS creates it on first run with the

@@ -4,7 +4,6 @@
   ...
 }: {config, ...}: let
   cfg = config.modules.io;
-  speexLadspa = import ./speex-ladspa.nix {inherit pkgs;};
   scarlettCfg = cfg.scarlett;
   phantomPower =
     if scarlettCfg.useCloudLifter
@@ -24,6 +23,23 @@ in {
               The CloudLifter requires phantom power to operate its active circuit,
               but does not pass voltage through to the SM7B (safe for dynamic mics).
               Set to false if using the Scarlett directly without an inline preamp.
+            '';
+          };
+          inputGain = lib.mkOption {
+            type = lib.types.nullOr (lib.types.ints.between 0 69);
+            default = null;
+            description = ''
+              Gain of input 1 in dB, set at boot. The SM7B chain expects its input at the
+              level this gain gives, so it belongs to the declaration. null leaves the gain
+              the device stored.
+            '';
+          };
+          clipSafe = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = ''
+              Clip Safe of input 1: the Scarlett lowers its own gain before the converter
+              clips on a sudden peak (shout, laugh).
             '';
           };
         };
@@ -82,6 +98,14 @@ in {
           # CloudLifter/Fethead need phantom power to run their active circuit
           # but do not pass voltage through to the SM7B (safe for dynamic mics).
           amixer -c "$card" cset name='Line In 1-2 Phantom Power Capture Switch' ${phantomPower}
+          ${lib.optionalString (scarlettCfg.inputGain != null) ''
+            amixer -c "$card" cset name='Line In 1 Gain Capture Volume' ${toString scarlettCfg.inputGain}
+          ''}
+          amixer -c "$card" cset name='Line In 1 Safe Capture Switch' ${
+            if scarlettCfg.clipSafe
+            then "on"
+            else "off"
+          }
         ''}";
       };
     };
@@ -105,9 +129,7 @@ in {
       wantedBy = ["default.target"];
       environment.LADSPA_PATH = lib.mkForce (lib.makeSearchPath "lib/ladspa" [
         pkgs.lsp-plugins
-        pkgs.ladspaPlugins
-        pkgs.rnnoise-plugin
-        speexLadspa
+        pkgs.deepfilternet
       ]);
     };
 
@@ -120,13 +142,16 @@ in {
     };
 
     # PipeWire filter-chain: SM7B processing chain (single source of truth for all apps)
-    # HP(80Hz) → EQ → compressor → EQ → harmonics → maximiser → RNNoise → Speex
+    # high-pass, headroom, DeepFilterNet, expander, low shelf, compressor, presence,
+    # air, de-esser, limiter
     #
-    # All processing lives here. OBS captures SM7B_Processed and applies only a safety
-    # limiter — duplicating suppression or compression in OBS causes artifacts.
-    # Speex is a custom LADSPA derivation (speex-ladspa.nix) wrapping libspeexdsp.
-    # No off-the-shelf LADSPA Speex plugin exists.
-    # To revert noise suppression: remove nodes 12-13, restore outputs=["maximiser:Output"].
+    # The chain controls noise and dynamics and keeps the tone of the SM7B; its static
+    # EQ is within about 2 dB of flat between 150 Hz and 14 kHz. It was tuned against
+    # recordings of this mic in this room, played through a test instance of this
+    # exact graph: -18 LUFS, -1.4 dBTP, noise floor -83 to -88 dBFS (about -64 raw),
+    # loudness range about 8 LU (13 raw), identical results at quantum 64, 256, 2048.
+    # OBS records this source processed and the Scarlett input raw on its own track,
+    # so nothing here is baked into a recording that cannot be redone in post.
     #
     # Note: audio.position must use [FL] not [MONO] — MONO maps to port_id=1 in audioconvert
     #       DSP mode, exceeding the filter-chain's single-output SPA node → ENOSPC → all audio
@@ -160,21 +185,82 @@ in {
               "media.name" = "SM7B Processed";
               "filter.graph" = {
                 nodes = [
-                  # 1. High-pass: remove sub-80Hz rumble
+                  # 1-2. High-pass, 4th-order Butterworth at 85 Hz (two biquads with
+                  # Q 0.5412 and 1.3066). Most of the raw noise floor of this room lies
+                  # below 20 Hz (air, desk, fans) and mains hum at 50 Hz; the voice
+                  # fundamental (about 85-155 Hz) stays. Measured: -16 dB at 60 Hz,
+                  # -4 dB at 100 Hz.
                   {
                     type = "builtin";
-                    name = "eq_hp";
+                    name = "hp1";
                     label = "bq_highpass";
                     control = {
-                      "Freq" = 80.0;
-                      "Q" = 0.707;
+                      "Freq" = 85.0;
+                      "Q" = 0.5412;
                     };
                   }
-                  # 2. Low shelf: cut SM7B proximity bass — the mic is naturally dark and
-                  # close-mic'd proximity effect adds bass buildup that needs taming
                   {
                     type = "builtin";
-                    name = "eq_warmth";
+                    name = "hp2";
+                    label = "bq_highpass";
+                    control = {
+                      "Freq" = 85.0;
+                      "Q" = 1.3066;
+                    };
+                  }
+                  # 3. 3 dB headroom. With 35 dB input gain the loudest shout reaches about
+                  # -3 dBFS at the input and overshoots after the high-pass, and
+                  # DeepFilterNet clips above full scale. From here on every level below
+                  # is the one this stage delivers; the compressor makeup gives the 3 dB
+                  # back.
+                  {
+                    type = "builtin";
+                    name = "headroom";
+                    label = "linear";
+                    control = {
+                      "Mult" = 0.7079;
+                      "Add" = 0.0;
+                    };
+                  }
+                  # 4. DeepFilterNet (neural noise suppression), at most 30 dB of
+                  # attenuation so the voice stays natural. Replaces RNNoise and Speex
+                  # (the Speex plugin rebuilt its state inside the realtime thread and
+                  # the kernel killed the chain whenever a client linked).
+                  {
+                    type = "ladspa";
+                    name = "denoise";
+                    plugin = "${pkgs.deepfilternet}/lib/ladspa/libdeep_filter_ladspa.so";
+                    label = "deep_filter_mono";
+                    control = {
+                      "Attenuation Limit (dB)" = 30.0;
+                    };
+                  }
+                  # 5. Downward expander, 2:1 below -56 dBFS. DeepFilterNet
+                  # leaves the tonal pump and fan noise (about 120 and 132 Hz, drifting
+                  # with load, so no fixed notch); the expander lowers it in pauses only.
+                  # Its sidechain ignores everything below 200 Hz so those tones cannot
+                  # hold it open. Measured on silence: -80 to -94 dBFS, speech unchanged.
+                  {
+                    type = "ladspa";
+                    name = "expander";
+                    plugin = "${pkgs.lsp-plugins}/lib/ladspa/lsp-plugins-ladspa.so";
+                    label = "http://lsp-plug.in/plugins/ladspa/expander_mono";
+                    control = {
+                      "Expander mode" = 0;
+                      "Attack threshold (G)" = 0.0015849;
+                      "Ratio" = 2.0;
+                      "Attack time (ms)" = 2.0;
+                      "Hold time (ms)" = 80.0;
+                      "Release time (ms)" = 150.0;
+                      "High-pass filter mode" = 2;
+                      "High-pass filter frequency (Hz)" = 200.0;
+                    };
+                  }
+                  # 6. Low shelf -3 dB at 200 Hz: the SM7B close up adds low-mid weight,
+                  # and the compressor below lifts it further over a whole take.
+                  {
+                    type = "builtin";
+                    name = "warmth";
                     label = "bq_lowshelf";
                     control = {
                       "Freq" = 200.0;
@@ -182,202 +268,124 @@ in {
                       "Gain" = -3.0;
                     };
                   }
-                  # 3. Boom cut: SM7B proximity/body resonance around 300Hz
-                  {
-                    type = "builtin";
-                    name = "eq_box_cut";
-                    label = "bq_peaking";
-                    control = {
-                      "Freq" = 300.0;
-                      "Q" = 1.0;
-                      "Gain" = -4.0;
-                    };
-                  }
-                  # 4. Box/mud cut: cardboard resonance and low-mid muddiness
-                  {
-                    type = "builtin";
-                    name = "eq_mud_cut";
-                    label = "bq_peaking";
-                    control = {
-                      "Freq" = 500.0;
-                      "Q" = 1.2;
-                      "Gain" = -3.0;
-                    };
-                  }
-                  # 5. LSP Compressor: lookahead prevents onset cutting, evens out level
-                  # Attack raised from 6ms to 12ms — lets consonant transients through
-                  # before gain reduction kicks in, preserving natural punch and clarity.
+                  # 7. Compressor 3:1 from -34 dBFS, 10 ms attack, 120 ms release, 6 dB
+                  # knee, 21 dB makeup. Speech arrives here at about -36 dBFS RMS
+                  # (-33 dBFS from the Scarlett at 35 dB gain, 3 dB headroom); the take
+                  # ends at -18 LUFS with a loudness range of about 8 LU (13 LU raw).
                   {
                     type = "ladspa";
                     name = "compressor";
                     plugin = "${pkgs.lsp-plugins}/lib/ladspa/lsp-plugins-ladspa.so";
                     label = "http://lsp-plug.in/plugins/ladspa/compressor_mono";
                     control = {
-                      "Sidechain lookahead (ms)" = 5.0;
-                      "Sidechain reactivity (ms)" = 5.0;
-                      "Attack threshold (G)" = 0.12589; # -18 dB
-                      "Attack time (ms)" = 12.0;
-                      "Release time (ms)" = 60.0;
-                      "Ratio" = 4.0;
-                      "Knee (G)" = 0.5;
-                      "Makeup gain (G)" = 1.0; # 0 dB — let the presence EQ do the lifting
+                      "Attack threshold (G)" = 0.019953;
+                      "Ratio" = 3.0;
+                      "Attack time (ms)" = 10.0;
+                      "Release time (ms)" = 120.0;
+                      "Knee (G)" = 0.5012;
+                      "Makeup gain (G)" = 11.220;
                     };
                   }
-                  # 6. Presence: voice forward, intelligible
+                  # 8-9. Presence +2 dB at 3.5 kHz and air +2 dB shelf from 9 kHz: the
+                  # voice falls off steeply above 2 kHz on this mic.
                   {
                     type = "builtin";
-                    name = "eq_presence";
+                    name = "presence";
                     label = "bq_peaking";
                     control = {
-                      "Freq" = 3000.0;
-                      "Q" = 0.9;
-                      "Gain" = 5.0;
-                    };
-                  }
-                  # 7. Definition: consonant crispness
-                  {
-                    type = "builtin";
-                    name = "eq_definition";
-                    label = "bq_peaking";
-                    control = {
-                      "Freq" = 5500.0;
-                      "Q" = 1.2;
+                      "Freq" = 3500.0;
+                      "Q" = 0.8;
                       "Gain" = 2.0;
                     };
                   }
-                  # 8. Clarity: sibilant detail without harshness
                   {
                     type = "builtin";
-                    name = "eq_clarity";
-                    label = "bq_peaking";
-                    control = {
-                      "Freq" = 8000.0;
-                      "Q" = 1.0;
-                      "Gain" = 1.5;
-                    };
-                  }
-                  # 9. Air shelf: gentle sparkle — hardware Air mode already boosts this range
-                  {
-                    type = "builtin";
-                    name = "eq_air";
+                    name = "air";
                     label = "bq_highshelf";
                     control = {
-                      "Freq" = 10000.0;
+                      "Freq" = 9000.0;
                       "Q" = 0.707;
-                      "Gain" = 0.0;
+                      "Gain" = 2.0;
                     };
                   }
-                  # 10. Satan Maximiser: loudness/punch limiter
-                  # Decay raised from 8 to 40 samples (~0.8ms at 48kHz) — the 8-sample
-                  # setting causes intermodulation distortion on sharp transients.
-                  # 40 samples still limits aggressively while sounding clean.
+                  # 10. De-esser on 5-12 kHz, 4:1 from -30 dBFS. Sibilant peaks drop from
+                  # about 35 dB to 20-26 dB above the median of speech in that band.
                   {
                     type = "ladspa";
-                    name = "maximiser";
-                    plugin = "${pkgs.ladspaPlugins}/lib/ladspa/satan_maximiser_1408.so";
-                    label = "satanMaximiser";
+                    name = "deesser";
+                    plugin = "${pkgs.lsp-plugins}/lib/ladspa/lsp-plugins-ladspa.so";
+                    label = "http://lsp-plug.in/plugins/ladspa/deesser_mono";
                     control = {
-                      "Decay time (samples)" = 40.0;
-                      "Knee point (dB)" = -6.0;
+                      "High-pass filter frequency (Hz)" = 5000.0;
+                      "Low-pass filter frequency (Hz)" = 12000.0;
+                      "Low-pass filter slope" = 1;
+                      "Peak filter 1 on" = 0;
+                      "Threshold (G)" = 0.031623;
+                      "Ratio" = 4.0;
+                      "Attack time (ms)" = 1.0;
+                      "Release time (ms)" = 40.0;
                     };
                   }
-                  # 11. RNNoise: neural noise suppressor — VAD-based, catches voice-frequency hum
+                  # 11. Limiter at -1.5 dBFS with 5 ms lookahead. "Gain boost" off: it
+                  # normalises the output back to 0 dBFS and clipped the shouts.
+                  # Measured: -1.4 dBTP.
                   {
                     type = "ladspa";
-                    name = "rnnoise";
-                    plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
-                    label = "noise_suppressor_mono";
+                    name = "limiter";
+                    plugin = "${pkgs.lsp-plugins}/lib/ladspa/lsp-plugins-ladspa.so";
+                    label = "http://lsp-plug.in/plugins/ladspa/limiter_mono";
                     control = {
-                      "VAD Threshold (%)" = 30.0;
-                    };
-                  }
-                  # 12. Speex: spectral subtraction suppressor — stationary noise floor estimation
-                  # Custom LADSPA derivation wrapping libspeexdsp (same lib OBS uses).
-                  # -15dB matches the OBS Speex filter setting exactly.
-                  {
-                    type = "ladspa";
-                    name = "speex";
-                    plugin = "${speexLadspa}/lib/ladspa/libspeex_noise_suppressor_ladspa.so";
-                    label = "speex_noise_suppressor_mono";
-                    control = {
-                      "Suppress Level (dB)" = -15.0;
-                    };
-                  }
-                  # 13. Harmonic generator: tube-like even harmonics for richness.
-                  # Placed after noise suppression so the synthesized harmonics are not
-                  # treated as noise and suppressed — that interaction caused a hollow,
-                  # phasey "hallway" artifact. Magnitudes reduced slightly for the same reason.
-                  {
-                    type = "ladspa";
-                    name = "harmonics";
-                    plugin = "${pkgs.ladspaPlugins}/lib/ladspa/harmonic_gen_1220.so";
-                    label = "harmonicGen";
-                    control = {
-                      "Fundamental magnitude" = 1.0;
-                      "2nd harmonic magnitude" = 0.10;
-                      "3rd harmonic magnitude" = 0.03;
-                      "4th harmonic magnitude" = 0.01;
-                      "5th harmonic magnitude" = 0.0;
-                      "6th harmonic magnitude" = 0.0;
-                      "7th harmonic magnitude" = 0.0;
-                      "8th harmonic magnitude" = 0.0;
-                      "9th harmonic magnitude" = 0.0;
-                      "10th harmonic magnitude" = 0.0;
+                      "Threshold (G)" = 0.84140;
+                      "Gain boost" = 0;
+                      "Lookahead (ms)" = 5.0;
+                      "Automatic level regulation" = 0;
                     };
                   }
                 ];
-                inputs = ["eq_hp:In"];
                 links = [
                   {
-                    output = "eq_hp:Out";
-                    input = "eq_warmth:In";
+                    output = "hp1:Out";
+                    input = "hp2:In";
                   }
                   {
-                    output = "eq_warmth:Out";
-                    input = "eq_box_cut:In";
+                    output = "hp2:Out";
+                    input = "headroom:In";
                   }
                   {
-                    output = "eq_box_cut:Out";
-                    input = "eq_mud_cut:In";
+                    output = "headroom:Out";
+                    input = "denoise:Audio In";
                   }
                   {
-                    output = "eq_mud_cut:Out";
+                    output = "denoise:Audio Out";
+                    input = "expander:Input";
+                  }
+                  {
+                    output = "expander:Output";
+                    input = "warmth:In";
+                  }
+                  {
+                    output = "warmth:Out";
                     input = "compressor:Input";
                   }
                   {
                     output = "compressor:Output";
-                    input = "eq_presence:In";
+                    input = "presence:In";
                   }
                   {
-                    output = "eq_presence:Out";
-                    input = "eq_definition:In";
+                    output = "presence:Out";
+                    input = "air:In";
                   }
                   {
-                    output = "eq_definition:Out";
-                    input = "eq_clarity:In";
+                    output = "air:Out";
+                    input = "deesser:Input";
                   }
                   {
-                    output = "eq_clarity:Out";
-                    input = "eq_air:In";
-                  }
-                  {
-                    output = "eq_air:Out";
-                    input = "maximiser:Input";
-                  }
-                  {
-                    output = "maximiser:Output";
-                    input = "rnnoise:Input";
-                  }
-                  {
-                    output = "rnnoise:Output";
-                    input = "speex:Input";
-                  }
-                  {
-                    output = "speex:Output";
-                    input = "harmonics:Input";
+                    output = "deesser:Output";
+                    input = "limiter:Input";
                   }
                 ];
-                outputs = ["harmonics:Output"];
+                inputs = ["hp1:In"];
+                outputs = ["limiter:Output"];
               };
               "capture.props" = {
                 "node.name" = "capture.sm7b";
@@ -391,6 +399,8 @@ in {
                 "node.dont-fallback" = true;
                 "node.linger" = true;
                 "target.object" = "alsa_input.usb-Focusrite_Scarlett_2i2_4th_Gen_S2AJV133401118-00.HiFi__Mic1__source";
+                # The chain sets the level; no stored volume may scale it (see below).
+                "state.restore-props" = "false";
               };
               "playback.props" = {
                 "node.name" = "SM7B_Processed";
@@ -399,6 +409,11 @@ in {
                 "audio.channels" = 1;
                 "audio.position" = ["FL"];
                 "priority.session" = 2000;
+                # WirePlumber stores a volume per media.name and restores it on every
+                # start. One stored for "SM7B Processed" (0.636, about -3.9 dB, typically
+                # left by an app with automatic gain control) silently made the voice
+                # 4 dB quieter than the chain delivers. The level is the chain's job.
+                "state.restore-props" = "false";
               };
             };
           }
