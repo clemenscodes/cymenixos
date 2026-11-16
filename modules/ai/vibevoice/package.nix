@@ -30,7 +30,6 @@ python3Packages.buildPythonPackage rec {
     librosa
     ml-collections
     absl-py
-    gradio
     av
     aiortc
   ];
@@ -39,6 +38,8 @@ python3Packages.buildPythonPackage rec {
   # nixpkgs ships newer accelerate; our transformers451 satisfies the transformers pin.
   # Relax all version constraints so pythonRuntimeDepsCheckHook passes.
   pythonRelaxDeps = true;
+  # gradio serves only the demo interface, never the inference, and nixpkgs marks it broken.
+  pythonRemoveDeps = ["gradio"];
   nativeBuildInputs = with python3Packages; [pythonRelaxDepsHook];
 
   pythonImportsCheck = ["vibevoice"];
