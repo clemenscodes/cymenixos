@@ -97,6 +97,11 @@ PanelWindow {
         placement: "above"
     }
 
+    KeylightPopup {
+        id: keylightPopup
+        placement: "above"
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.barMargin
@@ -493,7 +498,7 @@ PanelWindow {
             }
 
             tooltipSuppressed: nightPopup.visible
-            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); micSlider.hide(); nightPopup.toggleFor(nightPill, bar) }
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); micSlider.hide(); keylightPopup.hide(); nightPopup.toggleFor(nightPill, bar) }
             onRightClicked: NightLight.toggleWarm()
             onMiddleClicked: NightLight.displayOff()
             onScrolledBy: function(n) { NightLight.setBrightness(NightLight.brightness + n * 5) }
@@ -538,6 +543,40 @@ PanelWindow {
         }
 
         Pill {
+            id: keylightPill
+            Layout.alignment: Qt.AlignVCenter
+            interactive: true
+            visible: Keylight.available
+            tooltipHost: barTooltip
+            tooltipHostWindow: bar
+
+            tooltipText: {
+                let s = Keylight.lights.map(l => {
+                    const title = l.name.charAt(0).toUpperCase() + l.name.slice(1)
+                    if (!l.available) return "Key Light " + title + ": unreachable"
+                    if (!l.on) return "Key Light " + title + ": off"
+                    return "Key Light " + title + ": on, " + l.brightness + "%, " + l.temperature + " K"
+                }).join("\n")
+                s += "\n\nClick: controls  ·  Scroll: brightness of all  ·  Right-click: all on / off"
+                return s
+            }
+
+            tooltipSuppressed: keylightPopup.visible
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); micSlider.hide(); nightPopup.hide(); keylightPopup.toggleFor(keylightPill, bar) }
+            onRightClicked: Keylight.toggle()
+            onScrolledBy: function(n) { Keylight.changeBrightness(Math.round(n * 5)) }
+
+            Text {
+                // fixed-width number like the other pills; the icon shows on / off
+                text: (Keylight.on ? String(Keylight.brightness).padStart(3, " ") + "%" : " off") + (Keylight.on ? " 💡" : " ⚫")
+                color: Theme.textColor
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.bold: true
+            }
+        }
+
+        Pill {
             id: brightnessPill
             Layout.alignment: Qt.AlignVCenter
             interactive: true
@@ -553,7 +592,7 @@ PanelWindow {
             }
 
             tooltipSuppressed: brightSlider.visible
-            onLeftClicked: { barTooltip.hide(); volSlider.hide(); micSlider.hide(); nightPopup.hide(); brightSlider.toggleFor(brightnessPill, bar) }
+            onLeftClicked: { barTooltip.hide(); volSlider.hide(); micSlider.hide(); nightPopup.hide(); keylightPopup.hide(); brightSlider.toggleFor(brightnessPill, bar) }
             onScrolledBy: function(n) { Brightness.setPercent(Brightness.percent + n * 5) }
 
             Text {
@@ -591,7 +630,7 @@ PanelWindow {
             }
 
             tooltipSuppressed: volSlider.visible
-            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); micSlider.hide(); nightPopup.hide(); volSlider.toggleFor(volPill, bar) }
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); micSlider.hide(); nightPopup.hide(); keylightPopup.hide(); volSlider.toggleFor(volPill, bar) }
             onMiddleClicked: { if (volPill.audio) volPill.audio.muted = !volPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
             onScrolledBy: function(n) {
@@ -638,7 +677,7 @@ PanelWindow {
             }
 
             tooltipSuppressed: micSlider.visible
-            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); nightPopup.hide(); micSlider.toggleFor(micPill, bar) }
+            onLeftClicked: { barTooltip.hide(); brightSlider.hide(); volSlider.hide(); nightPopup.hide(); keylightPopup.hide(); micSlider.toggleFor(micPill, bar) }
             onMiddleClicked: { if (micPill.audio) micPill.audio.muted = !micPill.audio.muted }
             onRightClicked: Quickshell.execDetached(["pavucontrol"])
             onScrolledBy: function(n) {

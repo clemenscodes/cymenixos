@@ -4,10 +4,12 @@ singleton Notifs 1.0 Notifs.qml
 singleton Brightness 1.0 Brightness.qml
 singleton NightLight 1.0 NightLight.qml
 singleton Rgb 1.0 Rgb.qml
+singleton Keylight 1.0 Keylight.qml
 Pill 1.0 Pill.qml
 JsonPill 1.0 JsonPill.qml
 SliderPopup 1.0 SliderPopup.qml
 NightLightPopup 1.0 NightLightPopup.qml
+KeylightPopup 1.0 KeylightPopup.qml
 StyledTooltip 1.0 StyledTooltip.qml
 TrayMenu 1.0 TrayMenu.qml
 PowerMenu 1.0 PowerMenu.qml
