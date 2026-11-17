@@ -1,0 +1,89 @@
+diff --git a/lib/sc0710-audio.c b/lib/sc0710-audio.c
+index 08dd0dc..af54933 100644
+--- a/lib/sc0710-audio.c
++++ b/lib/sc0710-audio.c
+@@ -646,6 +646,11 @@ static int sc0710_audio_register_one(struct sc0710_dev *dev, u8 input)
+ 		 card->shortname, dev->name);
+ 	strscpy(card->mixername, card->shortname, sizeof(card->mixername));
+ 
++	/* ALSA derives an unset card id from the last word of shortname, which
++	 * made the id "Pro" for an "Elgato 4K Pro" and broke hw:CARD=sc0710.
++	 * Set it from the driver name, so a second card becomes sc0710_1. */
++	snd_card_set_id(card, card->driver);
++
+ 	err = snd_card_register(card);
+ 	if (err < 0)
+ 		goto error;
+diff --git a/lib/sc0710-dma-chain.c b/lib/sc0710-dma-chain.c
+index 79e7a7c..565780a 100644
+--- a/lib/sc0710-dma-chain.c
++++ b/lib/sc0710-dma-chain.c
+@@ -115,24 +115,14 @@ void sc0710_dma_chain_free(struct sc0710_dma_channel *ch, int nr)
+ 	chain->numAllocations = 0;
+ }
+ 
+-int sc0710_dma_chain_alloc(struct sc0710_dma_channel *ch, int nr, int total_transfer_size)
++static int sc0710_dma_chain_fill(struct sc0710_dma_channel *ch, int nr, int total_transfer_size,
++	int segsize)
+ {
+ 	struct sc0710_dev *dev = ch->dev;
+ 	struct sc0710_dma_descriptor_chain *chain = &ch->chains[nr];
+ 	struct sc0710_dma_descriptor_chain_allocation *dca = &chain->allocations[0];
+ 	int rem = total_transfer_size;
+ 	int size;
+-	int segsize = 4 * 1048576;
+-
+-	/* Zero-copy: split video chains finer. More (smaller) descriptors per
+-	 * chain keep a rewritten chain's ring slots beyond the device's
+-	 * descriptor read-ahead, and shrink the contiguous pieces a client
+-	 * buffer must provide to back a chain. */
+-	if (zero_copy && zc_split && ch->mediatype == CHTYPE_VIDEO) {
+-		u32 split = min_t(u32, zc_split, SC0710_MAX_CHAIN_DESCRIPTORS);
+-
+-		segsize = ALIGN(DIV_ROUND_UP(total_transfer_size, split), 4096);
+-	}
+ 
+ 	chain->enabled = 1;
+ 	chain->total_transfer_size = total_transfer_size;
+@@ -169,3 +159,41 @@ int sc0710_dma_chain_alloc(struct sc0710_dma_channel *ch, int nr, int total_tran
+ 	}
+ 	return 0; /* Success */
+ }
++
++/* Allocate the DMA segments of one chain. A segment is 4 MiB by default,
++ * which dma_alloc_coherent serves as an order 10 block below 4 GiB. After
++ * hours of uptime ZONE_DMA32 rarely holds such a block, the allocation fails
++ * with -ENOMEM and the channel stays unusable until the next resize. A video
++ * chain therefore retries with half the segment size, down to the smallest
++ * size whose segments still fit the SC0710_MAX_CHAIN_DESCRIPTORS descriptors
++ * of a chain, about 508 KiB (order 7) for a 3840x2160 YUYV frame. Audio
++ * chains keep a single segment, which sc0710_dma_dequeue_audio expects.
++ */
++int sc0710_dma_chain_alloc(struct sc0710_dma_channel *ch, int nr, int total_transfer_size)
++{
++	int segsize = 4 * 1048576;
++	int min_segsize = ALIGN(DIV_ROUND_UP(total_transfer_size, SC0710_MAX_CHAIN_DESCRIPTORS), PAGE_SIZE);
++	int ret;
++
++	/* Zero-copy: split video chains finer. More (smaller) descriptors per
++	 * chain keep a rewritten chain's ring slots beyond the device's
++	 * descriptor read-ahead, and shrink the contiguous pieces a client
++	 * buffer must provide to back a chain. */
++	if (zero_copy && zc_split && ch->mediatype == CHTYPE_VIDEO) {
++		u32 split = min_t(u32, zc_split, SC0710_MAX_CHAIN_DESCRIPTORS);
++
++		segsize = ALIGN(DIV_ROUND_UP(total_transfer_size, split), 4096);
++	}
++
++	for (;;) {
++		ret = sc0710_dma_chain_fill(ch, nr, total_transfer_size, segsize);
++		if (ret != -ENOMEM || ch->mediatype != CHTYPE_VIDEO || segsize <= min_segsize)
++			return ret;
++
++		/* Release the partial chain before the smaller attempt. */
++		sc0710_dma_chain_free(ch, nr);
++		segsize = max(ALIGN(segsize / 2, PAGE_SIZE), min_segsize);
++		printk(KERN_INFO "%s: channel %d chain %d retries with %d byte segments\n",
++			ch->dev->name, ch->nr, nr, segsize);
++	}
++}

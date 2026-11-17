@@ -7,14 +7,19 @@
 }:
 stdenv.mkDerivation rec {
   pname = "sc0710";
-  version = "2026.07.29-1";
+  version = "2026.11.13-1";
 
   src = fetchFromGitHub {
     owner = "Nakildias";
     repo = "sc0710";
-    rev = "cbf0ba52b0f749b4f3ea7f79d92f50e1a892f56d";
-    hash = "sha256-xRMCL4HM8wo3LY3mDuUniFo8/9/asx/h6ydFSLckjZE=";
+    rev = "60753c530e26aa5b616d507b8f90872c1bca2870";
+    hash = "sha256-K0aYytTax28qv3vkxIk53M+RPgrpZ25i2yxKaKlSOYU=";
   };
+
+  # A video chain falls back to smaller DMA segments when ZONE_DMA32 holds no
+  # 4 MiB block, instead of leaving the channel unusable until the next resize,
+  # and the sound card keeps the id sc0710, which hw:CARD=sc0710 names.
+  patches = [./sc0710-dma-and-card-id.patch];
 
   nativeBuildInputs = kernel.moduleBuildDependencies ++ [xz];
 
