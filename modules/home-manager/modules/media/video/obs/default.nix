@@ -95,7 +95,8 @@
     id = src.type;
     versioned_id = src.type;
     mixers = tracksMixer src.audioTracks;
-    sync = 0;
+    # OBS stores the sync offset in nanoseconds
+    sync = src.syncOffset * 1000000;
     flags = 0;
     balance = 0.5;
     enabled = true;
@@ -256,6 +257,16 @@
         type = lib.types.listOf (lib.types.attrsOf lib.types.anything);
         default = [];
         description = "Filters as OBS stores them in the scene collection.";
+      };
+      syncOffset = lib.mkOption {
+        type = lib.types.int;
+        default = 0;
+        example = 38;
+        description = ''
+          Sync offset of an audio source in milliseconds, as the advanced audio properties of OBS
+          set it. A positive value delays the sound, e.g. the microphone by the latency of a
+          webcam, so the voice meets the lips.
+        '';
       };
     };
   });
