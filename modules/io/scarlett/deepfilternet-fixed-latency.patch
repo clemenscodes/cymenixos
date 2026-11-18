@@ -1,0 +1,149 @@
+--- a/ladspa/src/lib.rs	2026-11-17 19:51:53.918641489 +0100
++++ b/ladspa/src/lib.rs	2026-11-17 19:55:31.172870997 +0100
+@@ -55,8 +55,11 @@
+     ch: usize,
+     sr: usize,
+     frame_size: usize,
++    // The latency between input and output, fixed at 1 + "Min Processing Buffer" frames
+     proc_delay: usize,
+-    t_proc_change: usize,
++    // Samples the worker still owes: they came late, silence took their place, and they
++    // are dropped as they arrive so the latency stays where it is
++    debt: usize,
+     sleep_duration: Duration,
+     control_hist: DfControlHistory,
+     _h: JoinHandle<()>, // Worker thread handle
+@@ -245,7 +248,7 @@
+             id,
+             frame_size,
+             proc_delay,
+-            t_proc_change: 0,
++            debt: 0,
+             sleep_duration,
+             control_hist: hist,
+             _h: worker_handle,
+@@ -378,8 +381,6 @@
+         }
+     }
+     fn run<'a>(&mut self, sample_count: usize, ports: &[&'a PortConnection<'a>]) {
+-        let t0 = Instant::now();
+-
+         let mut i = 0;
+         let mut inputs = Vec::with_capacity(self.ch);
+         let mut outputs = Vec::with_capacity(self.ch);
+@@ -416,76 +417,53 @@
+             }
+         }
+ 
+-        'outer: loop {
+-            {
+-                let o_q = &mut self.o_rx.lock().unwrap();
+-                if o_q[0].len() >= sample_count {
+-                    for (o_q_ch, o_ch) in o_q.iter_mut().zip(outputs.iter_mut()) {
+-                        for o in o_ch.iter_mut() {
+-                            *o = o_q_ch.pop_front().unwrap();
+-                        }
+-                    }
+-                    break 'outer;
++        // A fixed latency instead of one that grows on every underrun: the realtime thread
++        // never waits for the worker. What the worker has not delivered yet is played as
++        // silence, and the late samples are dropped when they arrive.
++        // The output must hold a whole block even while the worker still holds up to one
++        // frame of input, so a block larger than the buffer raises it (logged below)
++        let frames = 1 + self.control_hist.min_buffer_frames.max(0.) as usize;
++        let floor = (sample_count + 2 * self.frame_size).div_ceil(self.frame_size) * self.frame_size;
++        let target = (self.frame_size * frames).max(floor);
++        if target != self.proc_delay {
++            log::info!(
++                "DF {} | Fixed latency {:.1}ms at blocks of {} samples",
++                self.id,
++                target as f32 * 1000. / self.sr as f32,
++                sample_count
++            );
++        }
++        let o_q = &mut self.o_rx.lock().unwrap();
++        if target > self.proc_delay {
++            for o_q_ch in o_q.iter_mut() {
++                for _ in 0..target - self.proc_delay {
++                    o_q_ch.push_front(0f32)
+                 }
+             }
+-            sleep(self.sleep_duration);
++        } else {
++            self.debt += self.proc_delay - target;
+         }
+-
+-        let td = t0.elapsed();
+-        let t_audio = sample_count as f32 / self.sr as f32;
+-        let rtf = td.as_secs_f32() / t_audio;
+-        if rtf >= 1. {
+-            log::warn!(
+-                "DF {} | Underrun detected (RTF: {:.2}). Processing too slow!",
+-                self.id,
+-                rtf
+-            );
+-            if self.proc_delay >= self.sr {
+-                panic!(
+-                    "DF {} | Processing too slow! Please upgrade your CPU. Try to decrease 'Max DF processing threshold (dB)'.",
+-                    self.id,
+-                );
++        self.proc_delay = target;
++        let dropped = self.debt.min(o_q[0].len());
++        for o_q_ch in o_q.iter_mut() {
++            o_q_ch.drain(..dropped);
++        }
++        self.debt -= dropped;
++        let ready = o_q[0].len().min(sample_count);
++        for (o_q_ch, o_ch) in o_q.iter_mut().zip(outputs.iter_mut()) {
++            for (k, o) in o_ch.iter_mut().enumerate() {
++                *o = if k < ready { o_q_ch.pop_front().unwrap() } else { 0f32 };
+             }
+-            self.proc_delay += self.frame_size;
+-            self.t_proc_change = 0;
+-            log::info!(
+-                "DF {} | Increasing processing latency to {:.1}ms",
++        }
++        if ready < sample_count {
++            self.debt += sample_count - ready;
++            log::warn!(
++                "DF {} | Underrun: {:.1}ms of silence, the latency stays at {:.1}ms",
+                 self.id,
++                (sample_count - ready) as f32 * 1000. / self.sr as f32,
+                 self.proc_delay as f32 * 1000. / self.sr as f32
+             );
+-            for o_ch in self.o_rx.lock().unwrap().iter_mut() {
+-                for _ in 0..self.frame_size {
+-                    o_ch.push_back(0f32)
+-                }
+-            }
+-        } else if self.t_proc_change > 10 * self.sr / self.frame_size
+-            && rtf < 0.5
+-            && self.proc_delay
+-                >= self.frame_size * (1 + self.control_hist.min_buffer_frames as usize)
+-        {
+-            // Reduce delay again
+-            let dropped_samples = {
+-                let o_q = &mut self.o_rx.lock().unwrap();
+-                if o_q[0].len() < self.frame_size {
+-                    false
+-                } else {
+-                    for o_q_ch in o_q.iter_mut().take(self.frame_size) {
+-                        o_q_ch.pop_front().unwrap();
+-                    }
+-                    true
+-                }
+-            };
+-            if dropped_samples {
+-                self.proc_delay -= self.frame_size;
+-                self.t_proc_change = 0;
+-                log::info!(
+-                    "DF {} | Decreasing processing latency to {:.1}ms",
+-                    self.id,
+-                    self.proc_delay as f32 * 1000. / self.sr as f32
+-                );
+-            }
+         }
+-        self.t_proc_change += 1;
+     }
+ }
+ 

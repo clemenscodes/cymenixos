@@ -9,6 +9,14 @@
     if scarlettCfg.useCloudLifter
     then "on"
     else "off";
+  # DeepFilterNet with a fixed latency. Upstream, the plugin adds one block of delay on every
+  # underrun of its worker thread and takes it back only slowly, so the processed voice drifted
+  # from 41 to 144 ms behind the raw input within half an hour and no sync offset in OBS could
+  # hold it. Patched, it never blocks the realtime thread: a late block plays as silence and
+  # the latency stays at 1 + "Min Processing Buffer" frames.
+  deepfilternet = pkgs.deepfilternet.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [./deepfilternet-fixed-latency.patch];
+  });
 in {
   options = {
     modules = {
@@ -129,7 +137,7 @@ in {
       wantedBy = ["default.target"];
       environment.LADSPA_PATH = lib.mkForce (lib.makeSearchPath "lib/ladspa" [
         pkgs.lsp-plugins
-        pkgs.deepfilternet
+        deepfilternet
       ]);
     };
 
@@ -229,10 +237,15 @@ in {
                   {
                     type = "ladspa";
                     name = "denoise";
-                    plugin = "${pkgs.deepfilternet}/lib/ladspa/libdeep_filter_ladspa.so";
+                    plugin = "${deepfilternet}/lib/ladspa/libdeep_filter_ladspa.so";
                     label = "deep_filter_mono";
                     control = {
                       "Attenuation Limit (dB)" = 30.0;
+                      # With the patch, the fixed buffer: 1 + 3 frames of 10 ms. At blocks of
+                      # 512 samples the worker may come 19 ms late before a block plays as
+                      # silence; measured, the voice leaves the plugin 50 ms after it entered,
+                      # under full load of every core too.
+                      "Min Processing Buffer (frames)" = 3.0;
                     };
                   }
                   # 5. Downward expander, 2:1 below -56 dBFS. DeepFilterNet
