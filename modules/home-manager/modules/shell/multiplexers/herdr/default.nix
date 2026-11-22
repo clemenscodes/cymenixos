@@ -111,9 +111,11 @@ in {
             resize_pane_right = "alt+shift+l"
             split_vertical = ["prefix+v", "alt+v"]
             split_horizontal = ["prefix+minus", "alt+x"]
-            new_tab = ["prefix+c", "alt+t"]
-            previous_tab = ["prefix+p", "alt+p"]
-            next_tab = ["prefix+n", "alt+n"]
+            new_tab = ["prefix+c", "alt+enter"]
+            previous_tab = ["prefix+p", "alt+shift+tab"]
+            previous_agent = "alt+shift+a"
+            next_tab = ["prefix+n", "alt+tab"]
+            next_agent = "alt+a"
             zoom = ["prefix+z", "alt+f"]
             close_pane = ["prefix+x", "alt+q"]
             goto = ["prefix+g", "alt+s"]
