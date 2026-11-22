@@ -97,6 +97,8 @@ in {
             # Alt is awkward. prefix+[ is hard to reach on a German layout, so
             # copy mode also gets alt+e.
             [keys]
+            navigate_workspace_up = "k"
+            navigate_workspace_down = "j"
             # Directional focus stops at the edge, cycling wraps around, so
             # Alt+hjkl cycles: with two panes every direction reaches the other.
             cycle_pane_next = ["prefix+tab", "alt+j", "alt+l"]
