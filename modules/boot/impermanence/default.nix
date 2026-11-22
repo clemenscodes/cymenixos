@@ -89,7 +89,9 @@ in {
       tmpfiles = {
         rules = lib.optionals cfg.home-manager.enable [
           "d ${persistPath}/home/ 0777 root root -"
-          "d ${persistPath}/home/${user} 0770 ${user} ${user} -"
+          # impermanence mirrors this mode onto /home/${user}. A group-writable
+          # home makes sshd (StrictModes) ignore ~/.ssh/authorized_keys.
+          "d ${persistPath}/home/${user} 0700 ${user} ${user} -"
         ];
       };
     };
