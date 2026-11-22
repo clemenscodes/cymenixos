@@ -92,13 +92,27 @@ in {
             [update]
             version_check = false
 
-            # Same layout as the tmux module: everyday actions sit directly on
-            # Alt, without a prefix. ctrl+b stays as prefix for phones, where
-            # Alt is awkward. prefix+[ is hard to reach on a German layout, so
-            # copy mode also gets alt+e.
+            # Every prefix binding also sits on Alt with the same key, so ctrl+b
+            # is only needed on phones, where Alt is awkward. Where Alt already
+            # has its own job (pane cycling on hjkl, tabs on tab, close on q,
+            # goto on s, copy mode on e, split down on x, zoom on f), that wins
+            # and the action keeps only its prefix binding. prefix+n/p and
+            # prefix+z are not mirrored on purpose.
             [keys]
             navigate_workspace_up = "k"
             navigate_workspace_down = "j"
+            help = ["prefix+?", "alt+?"]
+            new_workspace = ["prefix+shift+n", "alt+shift+n"]
+            new_worktree = ["prefix+shift+g", "alt+shift+g"]
+            rename_workspace = ["prefix+shift+w", "alt+shift+w"]
+            close_workspace = ["prefix+shift+d", "alt+shift+d"]
+            reload_config = ["prefix+shift+r", "alt+shift+r"]
+            open_notification_target = ["prefix+o", "alt+o"]
+            rename_tab = ["prefix+shift+t", "alt+shift+t"]
+            close_tab = ["prefix+shift+x", "alt+shift+x"]
+            rename_pane = ["prefix+shift+p", "alt+shift+p"]
+            resize_mode = ["prefix+r", "alt+r"]
+            toggle_sidebar = ["prefix+b", "alt+b"]
             workspace_picker = ["prefix+w", "alt+w"]
             switch_tab = ["prefix+1..9", "alt+1..9"]
             # Directional focus stops at the edge, cycling wraps around, so
@@ -110,16 +124,16 @@ in {
             resize_pane_up = "alt+shift+k"
             resize_pane_right = "alt+shift+l"
             split_vertical = ["prefix+v", "alt+v"]
-            split_horizontal = ["prefix+minus", "alt+x"]
-            new_tab = ["prefix+c", "alt+enter"]
+            split_horizontal = ["prefix+minus", "alt+minus", "alt+x"]
+            new_tab = ["prefix+c", "alt+c", "alt+enter"]
             previous_tab = ["prefix+p", "alt+shift+tab"]
             previous_agent = "alt+shift+a"
             next_tab = ["prefix+n", "alt+tab"]
             next_agent = "alt+a"
             zoom = ["prefix+z", "alt+f"]
             close_pane = ["prefix+x", "alt+q"]
-            goto = ["prefix+g", "alt+s"]
-            copy_mode = ["prefix+[", "alt+e"]
+            goto = ["prefix+g", "alt+g", "alt+s"]
+            copy_mode = ["prefix+[", "alt+[", "alt+e"]
           '';
         };
       };
