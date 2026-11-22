@@ -96,6 +96,29 @@ in {
 
             [update]
             version_check = false
+
+            # Same layout as the tmux module: everyday actions sit directly on
+            # Alt, without a prefix. ctrl+b stays as prefix for phones, where
+            # Alt is awkward. prefix+[ is hard to reach on a German layout, so
+            # copy mode also gets alt+e.
+            [keys]
+            focus_pane_left = ["prefix+h", "alt+h"]
+            focus_pane_down = ["prefix+j", "alt+j"]
+            focus_pane_up = ["prefix+k", "alt+k"]
+            focus_pane_right = ["prefix+l", "alt+l"]
+            resize_pane_left = "alt+shift+h"
+            resize_pane_down = "alt+shift+j"
+            resize_pane_up = "alt+shift+k"
+            resize_pane_right = "alt+shift+l"
+            split_vertical = ["prefix+v", "alt+v"]
+            split_horizontal = ["prefix+minus", "alt+x"]
+            new_tab = ["prefix+c", "alt+t"]
+            previous_tab = ["prefix+p", "alt+p"]
+            next_tab = ["prefix+n", "alt+n"]
+            zoom = ["prefix+z", "alt+z"]
+            close_pane = ["prefix+x", "alt+q"]
+            goto = ["prefix+g", "alt+s"]
+            copy_mode = ["prefix+[", "alt+e"]
           '';
         };
       };
