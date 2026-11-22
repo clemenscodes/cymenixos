@@ -100,6 +100,7 @@ in {
             navigate_workspace_up = "k"
             navigate_workspace_down = "j"
             workspace_picker = ["prefix+w", "alt+w"]
+            switch_tab = ["prefix+1..9", "alt+1..9"]
             # Directional focus stops at the edge, cycling wraps around, so
             # Alt+hjkl cycles: with two panes every direction reaches the other.
             cycle_pane_next = ["prefix+tab", "alt+j", "alt+l"]
