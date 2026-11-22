@@ -102,10 +102,10 @@ in {
             # Alt is awkward. prefix+[ is hard to reach on a German layout, so
             # copy mode also gets alt+e.
             [keys]
-            focus_pane_left = ["prefix+h", "alt+h"]
-            focus_pane_down = ["prefix+j", "alt+j"]
-            focus_pane_up = ["prefix+k", "alt+k"]
-            focus_pane_right = ["prefix+l", "alt+l"]
+            # Directional focus stops at the edge, cycling wraps around, so
+            # Alt+hjkl cycles: with two panes every direction reaches the other.
+            cycle_pane_next = ["prefix+tab", "alt+j", "alt+l"]
+            cycle_pane_previous = ["prefix+shift+tab", "alt+k", "alt+h"]
             resize_pane_left = "alt+shift+h"
             resize_pane_down = "alt+shift+j"
             resize_pane_up = "alt+shift+k"
@@ -115,7 +115,7 @@ in {
             new_tab = ["prefix+c", "alt+t"]
             previous_tab = ["prefix+p", "alt+p"]
             next_tab = ["prefix+n", "alt+n"]
-            zoom = ["prefix+z", "alt+z"]
+            zoom = ["prefix+z", "alt+f"]
             close_pane = ["prefix+x", "alt+q"]
             goto = ["prefix+g", "alt+s"]
             copy_mode = ["prefix+[", "alt+e"]
