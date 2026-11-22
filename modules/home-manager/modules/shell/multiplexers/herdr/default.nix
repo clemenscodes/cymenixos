@@ -2,7 +2,11 @@
   pkgs,
   lib,
   ...
-}: {config, ...}: let
+}: {
+  osConfig,
+  config,
+  ...
+}: let
   cfg = config.modules.shell.multiplexers;
   # Rich session list: per session, every pane with its workspace, detected
   # agent and directory (the herdr counterpart of the tmux `tls` alias)
@@ -46,6 +50,16 @@ in {
       }
     ];
     home = {
+      # .config/herdr holds the saved session layout, .local/state/herdr the
+      # saved SSH machines. Without these a reboot forgets both.
+      persistence = lib.mkIf osConfig.modules.boot.enable {
+        "${osConfig.modules.boot.impermanence.persistPath}" = {
+          directories = [
+            ".config/herdr"
+            ".local/state/herdr"
+          ];
+        };
+      };
       packages = [pkgs.herdr herdr-ls];
     };
     programs = {
