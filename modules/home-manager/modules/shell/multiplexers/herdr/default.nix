@@ -46,7 +46,7 @@ in {
     assertions = [
       {
         assertion = !cfg.tmux.enable;
-        message = "modules.shell.multiplexers.herdr and modules.shell.multiplexers.tmux both define the tma/tls aliases and auto-start; enable only one of them";
+        message = "modules.shell.multiplexers.herdr and modules.shell.multiplexers.tmux both define the tma/tls aliases; enable only one of them";
       }
     ];
     home = {
@@ -77,11 +77,6 @@ in {
               herdr
             fi
           }
-
-          # Auto-attach to herdr on terminal start (outside of herdr)
-          if [[ -z "$HERDR_ENV" ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
-            exec herdr
-          fi
         '';
       };
     };
