@@ -85,12 +85,13 @@ in {
           }
 
           # A new graphical terminal attaches the running session. When the
-          # session already runs, it gets a tab of its own in the directory it
-          # opened in, shown only in this window; the other windows keep the
-          # tab they show. Without a running server plain `herdr` starts one.
+          # session already runs, it gets a workspace of its own in the
+          # directory it opened in, like alt+enter, shown only in this window;
+          # the other windows keep what they show. Without a running server
+          # plain `herdr` starts one.
           if [[ -z "$HERDR_PANE_ID" ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
             if herdr status server 2>/dev/null | grep -q '^status: running$'; then
-              HERDR_ATTACH_TAB=$(herdr tab create --cwd "$PWD" --no-focus | ${lib.getExe pkgs.jq} -r '.result.tab.tab_id') exec herdr
+              HERDR_ATTACH_TAB=$(herdr workspace create --cwd "$PWD" --no-focus | ${lib.getExe pkgs.jq} -r '.result.tab.tab_id') exec herdr
             fi
             exec herdr
           fi
