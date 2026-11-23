@@ -86,11 +86,14 @@ in {
 
           # Panes inherit the environment of the herdr server, not of the
           # window they show in. A server started over ssh has no display, so
-          # nothing in its panes reaches the clipboard, pasting images included.
-          # Such a pane takes the display whose socket is there.
+          # nothing in its panes reaches the clipboard, pasting images included,
+          # and its SSH_CONNECTION makes Claude Code refuse images outright.
+          # Such a pane takes the display whose socket is there and drops the
+          # traces of that ssh session.
           if [[ -n "$HERDR_PANE_ID" && -z "$WAYLAND_DISPLAY" ]]; then
             for socket in "$XDG_RUNTIME_DIR"/wayland-<->(N=); do
               export WAYLAND_DISPLAY=$socket:t
+              unset SSH_CONNECTION SSH_CLIENT SSH_TTY
               break
             done
             for socket in /tmp/.X11-unix/X<->(N=); do
