@@ -84,6 +84,21 @@ in {
             fi
           }
 
+          # Panes inherit the environment of the herdr server, not of the
+          # window they show in. A server started over ssh has no display, so
+          # nothing in its panes reaches the clipboard, pasting images included.
+          # Such a pane takes the display whose socket is there.
+          if [[ -n "$HERDR_PANE_ID" && -z "$WAYLAND_DISPLAY" ]]; then
+            for socket in "$XDG_RUNTIME_DIR"/wayland-<->(N=); do
+              export WAYLAND_DISPLAY=$socket:t
+              break
+            done
+            for socket in /tmp/.X11-unix/X<->(N=); do
+              export DISPLAY=:''${socket:t:s/X/}
+              break
+            done
+          fi
+
           # A new graphical terminal attaches the running session. When the
           # session already runs, it gets a workspace of its own in the
           # directory it opened in, like alt+enter, shown only in this window;
