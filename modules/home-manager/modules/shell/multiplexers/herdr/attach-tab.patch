@@ -1,0 +1,48 @@
+diff --git a/src/client/mod.rs b/src/client/mod.rs
+index f55db19..fb3e158 100644
+--- a/src/client/mod.rs
++++ b/src/client/mod.rs
+@@ -2309,6 +2309,7 @@ async fn run_client_loop(
+                     let (effects, outcome, frame) = {
+                         let shell = state.shell.as_mut().expect("checked shell mode");
+                         let mut outcome = shell.tick_selection_autoscroll(now);
++                        outcome.actions.extend(shell.take_attach_tab_focus());
+                         for expired in expired_endpoints {
+                             if !shell.endpoint_is_active(&expired.endpoint_id) {
+                                 continue;
+diff --git a/src/client/shell/actions.rs b/src/client/shell/actions.rs
+index 83819b0..7521936 100644
+--- a/src/client/shell/actions.rs
++++ b/src/client/shell/actions.rs
+@@ -1,6 +1,31 @@
+ use super::*;
+ 
++static ATTACH_TAB_FOCUS_SENT: std::sync::atomic::AtomicBool =
++    std::sync::atomic::AtomicBool::new(false);
++
+ impl ClientShellState {
++    /// Once the first snapshot is in, a client started with `HERDR_ATTACH_TAB`
++    /// asks over its own connection to view that tab. The server applies a
++    /// focus that arrives this way to this client only, so the views of the
++    /// other clients stay where they are.
++    pub(crate) fn take_attach_tab_focus(&mut self) -> Vec<ClientShellAction> {
++        if self.snapshot.is_none()
++            || ATTACH_TAB_FOCUS_SENT.swap(true, std::sync::atomic::Ordering::Relaxed)
++        {
++            return Vec::new();
++        }
++        let Ok(tab_id) = std::env::var("HERDR_ATTACH_TAB") else {
++            return Vec::new();
++        };
++        let mut outcome = ClientShellInput::default();
++        self.push_endpoint_method(
++            crate::api::schema::Method::TabFocus(crate::api::schema::TabTarget { tab_id }),
++            &mut outcome,
++        );
++        outcome.actions
++    }
++
++
+     pub(super) fn record_binding(
+         &mut self,
+         binding: crate::input::KeybindMatch,

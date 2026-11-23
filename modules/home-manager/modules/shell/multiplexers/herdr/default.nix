@@ -8,11 +8,17 @@
   ...
 }: let
   cfg = config.modules.shell.multiplexers;
+  # A client started with HERDR_ATTACH_TAB views that tab, while every other
+  # client keeps its own view. Upstream herdr can only focus a tab for all
+  # clients at once.
+  herdr = pkgs.herdr.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [./attach-tab.patch];
+  });
   # Rich session list: per session, every pane with its workspace, detected
   # agent and directory (the herdr counterpart of the tmux `tls` alias)
   herdr-ls = pkgs.writeShellApplication {
     name = "herdr-ls";
-    runtimeInputs = [pkgs.herdr pkgs.jq];
+    runtimeInputs = [herdr pkgs.jq];
     text = ''
       herdr session list --json | jq -r '.sessions[] | [.name, .running] | @tsv' |
         while IFS=$'\t' read -r name running; do
@@ -60,7 +66,7 @@ in {
           ];
         };
       };
-      packages = [pkgs.herdr herdr-ls];
+      packages = [herdr herdr-ls];
     };
     programs = {
       zsh = {
@@ -77,6 +83,17 @@ in {
               herdr
             fi
           }
+
+          # A new graphical terminal attaches the running session. When the
+          # session already runs, it gets a tab of its own in the directory it
+          # opened in, shown only in this window; the other windows keep the
+          # tab they show. Without a running server plain `herdr` starts one.
+          if [[ -z "$HERDR_PANE_ID" ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
+            if herdr status server 2>/dev/null | grep -q '^status: running$'; then
+              HERDR_ATTACH_TAB=$(herdr tab create --cwd "$PWD" --no-focus | ${lib.getExe pkgs.jq} -r '.result.tab.tab_id') exec herdr
+            fi
+            exec herdr
+          fi
         '';
       };
     };
@@ -91,6 +108,11 @@ in {
 
             [update]
             version_check = false
+
+            # Only the tab bar on top; alt+b brings the sidebar back.
+            [ui]
+            sidebar_start_collapsed = true
+            sidebar_collapsed_mode = "hidden"
 
             # Every prefix binding also sits on Alt with the same key, so ctrl+b
             # is only needed on phones, where Alt is awkward. Where Alt already
