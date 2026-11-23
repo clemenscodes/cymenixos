@@ -124,7 +124,7 @@ in {
             navigate_workspace_up = "k"
             navigate_workspace_down = "j"
             help = ["prefix+?", "alt+?"]
-            new_workspace = ["prefix+shift+n", "alt+shift+n"]
+            new_workspace = ["prefix+shift+n", "alt+shift+n", "alt+enter"]
             new_worktree = ["prefix+shift+g", "alt+shift+g"]
             rename_workspace = ["prefix+shift+w", "alt+shift+w"]
             close_workspace = ["prefix+shift+d", "alt+shift+d"]
@@ -147,7 +147,7 @@ in {
             resize_pane_right = "alt+shift+l"
             split_vertical = ["prefix+v", "alt+v"]
             split_horizontal = ["prefix+minus", "alt+minus", "alt+x"]
-            new_tab = ["prefix+c", "alt+c", "alt+enter"]
+            new_tab = ["prefix+c", "alt+c"]
             previous_tab = ["prefix+p", "alt+shift+tab"]
             previous_agent = "alt+shift+a"
             next_tab = ["prefix+n", "alt+tab"]
