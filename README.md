@@ -60,7 +60,7 @@ A minimal example in a `flake.nix`
 - Display Manager: `sddm`
 - Compositor: `hyprland`
 - App Launcher: `rofi`
-- Status Bar: `waybar`
+- Status Bar: `quickshell`
 - File Browser: `lf`
 - Browser: `firefox`
 - PDF Viewer: `zathura`

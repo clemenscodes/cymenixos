@@ -20,7 +20,6 @@
   useRofi = displayCfg.launcher.rofi.enable;
   useAnyrun = displayCfg.launcher.anyrun.enable;
   useSwaync = displayCfg.notifications.swaync.enable;
-  useWaybar = displayCfg.bar.waybar.enable;
   useQuickshell = displayCfg.bar.quickshell.enable;
   useBtop = config.modules.monitoring.btop.enable;
   useCalcurse = config.modules.organization.calcurse.enable;
@@ -164,7 +163,6 @@ in {
           hl.exec_cmd("polkitagent")
           hl.exec_cmd("${pkgs.awww}/bin/awww-daemon")
           hl.exec_cmd("wallpaper")
-          ${lib.optionalString useWaybar ''hl.exec_cmd("waybar")''}
           ${lib.optionalString (useSwaync && !useQuickshell) ''hl.exec_cmd("swaync")''}
           ${lib.optionalString useSwayidle ''hl.exec_cmd("detectidle")''}
           ${lib.optionalString useSwayAudioIdle ''hl.exec_cmd("sway-audio-idle-inhibit")''}
@@ -274,10 +272,6 @@ in {
         ${lib.optionalString (useKitty && useNcmpcpp) ''hl.bind(mod .. " + M",        hl.dsp.exec_cmd("kitty -1 --title=kitty ncmpcpp"))''}
         ${lib.optionalString (useKitty && useCalcurse) ''hl.bind(mod .. " + ALT + K",    hl.dsp.exec_cmd("kitty -1 --title=kitty calcurse"))''}
         ${lib.optionalString useNewsboat ''hl.bind(mod .. " + SHIFT + N",  hl.dsp.exec_cmd("kitty -1 --title=kitty newsboat"))''}
-        ${lib.optionalString useWaybar ''
-          hl.bind(mod .. " + B",       hl.dsp.exec_cmd("waybar-toggle"))
-          hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("waybar-reload"))
-        ''}
         ${lib.optionalString (useSwaync && !useQuickshell) ''hl.bind(mod .. " + N",        hl.dsp.exec_cmd("swaync-client -t -sw"))''}
         ${lib.optionalString useQuickshell ''
           hl.bind(mod .. " + D",         hl.dsp.exec_cmd("qs -c cymenix ipc call launcher toggle"))

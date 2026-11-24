@@ -238,7 +238,7 @@
                   };
                   bar = {
                     enable = true;
-                    waybar = {
+                    quickshell = {
                       enable = true;
                     };
                   };

@@ -5,7 +5,6 @@
   ...
 }: {...}: {
   imports = [
-    (import ./waybar {inherit inputs pkgs lib;})
     (import ./quickshell {inherit inputs pkgs lib;})
   ];
   options = {
@@ -14,8 +13,8 @@
         bar = {
           enable = lib.mkEnableOption "Enable a cool bar" // {default = false;};
           defaultBar = lib.mkOption {
-            type = lib.types.enum ["waybar" "quickshell"];
-            default = "waybar";
+            type = lib.types.enum ["quickshell"];
+            default = "quickshell";
           };
         };
       };
