@@ -195,15 +195,38 @@
       [ -n "''${HERDR_PANE_ID:-}" ] && [ -n "''${CLAUDE_CONFIG_DIR:-}" ] || exit 0
       command -v herdr >/dev/null || exit 0
       account=$(basename "$CLAUDE_CONFIG_DIR")
+      # A name with usage already there (from herdr-claude-usage, e.g. after
+      # /clear) stays.
       for _ in $(seq 50); do
-        herdr pane report-metadata "$HERDR_PANE_ID" --source cymenixos-claude-account \
-          --agent claude --display-agent "$account" >/dev/null 2>&1 || true
         if herdr pane get "$HERDR_PANE_ID" 2>/dev/null |
-          jq -e --arg account "$account" '.result.pane.display_agent == $account' >/dev/null; then
+          jq -e --arg account "$account" '.result.pane.display_agent // ""
+            | . == $account or startswith($account + " ")' >/dev/null; then
           exit 0
         fi
+        herdr pane report-metadata "$HERDR_PANE_ID" --source cymenixos-claude-account \
+          --agent claude --display-agent "$account" >/dev/null 2>&1 || true
         sleep 0.2
       done
+    '';
+  };
+  # Runs as the status line, which Claude Code hands the same weekly limit
+  # /status shows. It extends the account name in herdr by the share of the
+  # weekly limit used and the hours until it resets, e.g. "claude4 42% 37h".
+  # Prints nothing, so the status line in Claude Code itself stays empty.
+  herdr-claude-usage = pkgs.writeShellApplication {
+    name = "herdr-claude-usage";
+    runtimeInputs = [pkgs.jq pkgs.coreutils];
+    text = ''
+      input=$(cat)
+      [ -n "''${HERDR_PANE_ID:-}" ] && [ -n "''${CLAUDE_CONFIG_DIR:-}" ] || exit 0
+      command -v herdr >/dev/null || exit 0
+      label=$(jq -r --arg account "$(basename "$CLAUDE_CONFIG_DIR")" --argjson now "$(date +%s)" '
+        .rate_limits.seven_day // empty
+        | "\($account) \(.used_percentage | round)% \((.resets_at - $now) / 3600 | ceil)h"
+      ' <<< "$input" 2>/dev/null || true)
+      [ -n "$label" ] || exit 0
+      herdr pane report-metadata "$HERDR_PANE_ID" --source cymenixos-claude-account \
+        --agent claude --display-agent "$label" >/dev/null 2>&1 || true
     '';
   };
   block-shell-footgun = pkgs.writeShellApplication {
@@ -553,6 +576,11 @@
       };
       permissions = {
         defaultMode = "bypassPermissions";
+      };
+      statusLine = {
+        type = "command";
+        command = "${herdr-claude-usage}/bin/herdr-claude-usage";
+        refreshInterval = 60;
       };
       hooks = {
         PreToolUse = [
