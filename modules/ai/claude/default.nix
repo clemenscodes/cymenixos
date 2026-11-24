@@ -183,6 +183,29 @@
   #     loops.
   # Wait on background jobs via the task-notification mechanism
   # (run_in_background), never by polling processes. Fail-closed, exit 2.
+  # herdr names every Claude Code pane plain "claude". This shows the account
+  # instead, the name of the config dir (claude, claude2, ...). herdr only
+  # takes the report once it detects claude in the pane, and right after a
+  # claude exited it drops reports for a while, so it retries until the pane
+  # shows the name.
+  herdr-claude-account = pkgs.writeShellApplication {
+    name = "herdr-claude-account";
+    runtimeInputs = [pkgs.jq pkgs.coreutils];
+    text = ''
+      [ -n "''${HERDR_PANE_ID:-}" ] && [ -n "''${CLAUDE_CONFIG_DIR:-}" ] || exit 0
+      command -v herdr >/dev/null || exit 0
+      account=$(basename "$CLAUDE_CONFIG_DIR")
+      for _ in $(seq 50); do
+        herdr pane report-metadata "$HERDR_PANE_ID" --source cymenixos-claude-account \
+          --agent claude --display-agent "$account" >/dev/null 2>&1 || true
+        if herdr pane get "$HERDR_PANE_ID" 2>/dev/null |
+          jq -e --arg account "$account" '.result.pane.display_agent == $account' >/dev/null; then
+          exit 0
+        fi
+        sleep 0.2
+      done
+    '';
+  };
   block-shell-footgun = pkgs.writeShellApplication {
     name = "block-shell-footgun";
     runtimeInputs = [pkgs.jq pkgs.gnugrep];
@@ -582,6 +605,12 @@
                 type = "command";
                 command = "${peonshBin}/bin/peon";
                 timeout = 10;
+              }
+              {
+                type = "command";
+                command = "${herdr-claude-account}/bin/herdr-claude-account";
+                timeout = 15;
+                async = true;
               }
             ];
           }
