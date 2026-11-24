@@ -56,17 +56,6 @@
         --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
     '';
   };
-  claude-monitor = pkgs.stdenv.mkDerivation {
-    inherit (pkgs.claude-monitor) pname version;
-    dontUnpack = true;
-    nativeBuildInputs = with pkgs; [makeWrapper];
-    installPhase = ''
-      mkdir -p $out/bin
-      makeWrapper ${pkgs.claude-monitor}/bin/claude-monitor $out/bin/claude-monitor \
-        --set CLAUDE_CONFIG_DIR /home/${user}/.config/claude \
-        --set CLAUDE_PEON_DIR /home/${user}/.config/claude/hooks/peon-ping
-    '';
-  };
   peon = inputs.peon-ping.packages.${pkgs.stdenv.hostPlatform.system}.default;
   peonsh = pkgs.stdenv.mkDerivation {
     inherit (peon) pname version;
@@ -1078,7 +1067,6 @@ in {
                 claude
                 codex
                 peonsh
-                claude-monitor
               ]
               ++ lib.mapAttrsToList (_: account: account.claude) accounts
               ++ lib.optionals cfg.claude.desktop.enable (
