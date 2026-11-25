@@ -133,6 +133,15 @@ in {
             sidebar_start_collapsed = true
             sidebar_collapsed_mode = "hidden"
 
+            # A client that sees several machines puts the machine in front of
+            # every agent, and the narrow sidebar cuts the row right after it,
+            # so all agents read the same. The workspace comes first instead.
+            [ui.sidebar.agents]
+            rows = [
+              ["state_icon", "workspace", "tab", "machine"],
+              ["agent"],
+            ]
+
             # Every prefix binding also sits on Alt with the same key, so ctrl+b
             # is only needed on phones, where Alt is awkward. Where Alt already
             # has its own job (pane cycling on hjkl, tabs on tab, close on q,
